@@ -149,6 +149,7 @@ func _on_boss_event(event_data: Dictionary) -> void:
 
 func _process(delta: float) -> void:
 	_update_target_positions(delta)
+	_update_escape_warnings()
 
 ## 目標生成
 func _on_target_spawned(data: Dictionary) -> void:
@@ -534,4 +535,57 @@ func update_target_hp(instance_id: String, hp: int, max_hp: int) -> void:
 	var node = _target_nodes[instance_id]
 	var hp_bar = node.get_node_or_null("HPBar")
 	if hp_bar and max_hp > 0:
-		hp_bar.size.x = 48.0 * (float(hp) / float(max_hp))
+		var new_width = 48.0 * (float(hp) / float(max_hp))
+		hp_bar.size.x = new_width
+		# HP 條顏色依血量變化（高 → 綠，中 → 黃，低 → 紅）
+		var pct = float(hp) / float(max_hp)
+		if pct > 0.6:
+			hp_bar.color = Color(0.2, 0.9, 0.2)
+		elif pct > 0.3:
+			hp_bar.color = Color(1.0, 0.8, 0.1)
+		else:
+			hp_bar.color = Color(1.0, 0.2, 0.2)
+		# 受擊閃爍（HP 條短暫變白再回原色）
+		var orig_color = hp_bar.color
+		var tween = create_tween()
+		tween.tween_property(hp_bar, "color", Color.WHITE, 0.04)
+		tween.tween_property(hp_bar, "color", orig_color, 0.08)
+
+## 目標物接近左邊緣時顯示逃跑警告箭頭
+func _update_escape_warnings() -> void:
+	for instance_id in _target_nodes:
+		var node = _target_nodes[instance_id]
+		if not is_instance_valid(node):
+			continue
+
+		var speed = node.get_meta("speed", 0.0)
+		if speed <= 0:
+			continue  # 靜止目標不需要警告
+
+		var x = node.position.x
+		var warning = node.get_node_or_null("EscapeWarning")
+
+		# 目標物 x < 120 且有速度時顯示警告
+		if x < 120 and x > 0:
+			if warning == null:
+				# 建立警告箭頭
+				warning = Label.new()
+				warning.name = "EscapeWarning"
+				warning.text = "◀!"
+				warning.position = Vector2(-30, -20)
+				warning.add_theme_font_size_override("font_size", 14)
+				warning.modulate = Color(1.0, 0.3, 0.3, 0.0)
+				node.add_child(warning)
+
+			# 透明度依距離邊緣的遠近（越近越明顯）
+			var alpha = clamp((120.0 - x) / 100.0, 0.0, 1.0)
+			warning.modulate.a = alpha
+
+			# 閃爍（最後 60px 快速閃爍）
+			if x < 60:
+				var flash = int(Time.get_ticks_msec() / 150) % 2 == 0
+				warning.modulate.a = alpha if flash else alpha * 0.3
+		else:
+			# 離開警告區域，移除警告
+			if warning != null:
+				warning.queue_free()

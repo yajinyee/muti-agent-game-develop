@@ -2,18 +2,18 @@
 from PIL import Image
 import os
 
-d = "D:/Kiro/client/chiikawa-pixel/assets/sprites/targets"
-print("=== 目標物品質報告 ===\n")
-total_old = 0
-total_new = 0
-for f in sorted(os.listdir(d)):
-    if not f.endswith(".png") or "B001" in f:
-        continue
-    img = Image.open(os.path.join(d, f)).convert("RGBA")
-    non_t = sum(1 for px in img.getdata() if px[3] > 10)
-    pct = non_t * 100 // (img.width * img.height)
-    status = "✅" if non_t > 1500 else ("⚠️" if non_t > 500 else "❌")
-    print(f"  {status} {f}: {img.size}, {non_t}px ({pct}%)")
-    total_new += non_t
+TARGETS_DIR = r"D:\Kiro\client\chiikawa-pixel\assets\sprites\targets"
 
-print(f"\n  平均非透明像素: {total_new // 11}px")
+targets = [f for f in os.listdir(TARGETS_DIR) if f.endswith(".png")]
+targets.sort()
+
+print("=== 目標物品質分析 ===")
+for name in targets:
+    path = os.path.join(TARGETS_DIR, name)
+    img = Image.open(path).convert("RGBA")
+    w, h = img.size
+    total = w * h
+    non_transparent = sum(1 for p in img.getdata() if p[3] > 10)
+    pct = non_transparent / total * 100
+    status = "✅" if pct >= 40 else "⚠️ "
+    print(f"  {status} {name}: {w}x{h}, {non_transparent}/{total} ({pct:.0f}%)")
