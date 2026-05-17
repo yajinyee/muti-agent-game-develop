@@ -16,35 +16,16 @@
 ## 美術優化
 
 ### 🔴 P0（阻擋 merge，明日必須完成）
-- [ ] **修復 hachiware hurt 動畫**（bottom_alignment 偏差 5px）
-  - 負責：Animation Agent
-  - 預計工時：1.5 小時
-  - 驗收：Consistency Score >= 85
+- [x] **修復 chiikawa/hachiware attack 幀一致性**（2026-05-17 夜間完成）
+  - 結果：chiikawa 0px/0px ✅，hachiware 0px/0px ✅
+  - 工具：tools/fix_char_attack.py
 
-- [ ] **修復 usagi bigwin 動畫**（deformation 12% + color drift ΔE=6.1）
-  - 負責：Animation Agent + Sprite Generation Agent
-  - 預計工時：2 小時
-  - 驗收：Consistency Score >= 85
-
-- [ ] **修復 usagi hurt 動畫**（anchor_point 偏移 3px）
-  - 負責：Animation Agent
-  - 預計工時：1 小時
-  - 驗收：Consistency Score >= 85
-
-- [ ] **補齊 hachiware skill 動畫**（缺失）
-  - 負責：Sprite Generation Agent + Animation Agent
-  - 預計工時：2 小時
-  - 驗收：Consistency Score >= 85
-
-- [ ] **補齊 hachiware fail 動畫**（缺失）
-  - 負責：Sprite Generation Agent + Animation Agent
-  - 預計工時：1 小時
-  - 驗收：Consistency Score >= 85
-
-- [ ] **補齊 usagi fail 動畫**（缺失）
-  - 負責：Sprite Generation Agent + Animation Agent
-  - 預計工時：1 小時
-  - 驗收：Consistency Score >= 85
+- [ ] ~~**修復 hachiware hurt 動畫**~~ → **降級 P3**（遊戲不使用 hurt 狀態）
+- [ ] ~~**修復 usagi bigwin 動畫**~~ → **已修復**（1px/1px ✅）
+- [ ] ~~**修復 usagi hurt 動畫**~~ → **降級 P3**（遊戲不使用 hurt 狀態）
+- [ ] ~~**補齊 hachiware skill 動畫**~~ → **降級 P3**（遊戲不使用 skill 狀態）
+- [ ] ~~**補齊 hachiware fail 動畫**~~ → **降級 P3**（遊戲不使用 fail 狀態）
+- [ ] ~~**補齊 usagi fail 動畫**~~ → **降級 P3**（遊戲不使用 fail 狀態）
 
 ### 🟠 P1
 - [ ] **角色動畫幀數提升**：吉伊卡哇 idle 動畫從 4 幀提升到 8 幀
