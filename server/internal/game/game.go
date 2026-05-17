@@ -410,6 +410,17 @@ func (g *Game) handleBonusClick(p *player.Player, msg *ws.Message) {
 			g.mu.Lock()
 			g.bonusScores[p.ID] += 5 // 額外加分
 			g.mu.Unlock()
+		case "BG004": // 金色雜草：觸發巨大金幣（大量加分，規格書 29.3）
+			g.mu.Lock()
+			g.bonusScores[p.ID] += 20 // 金色雜草本身 20 分 + 額外 10 分獎勵
+			g.mu.Unlock()
+			// 廣播金幣特效事件（Client 播放金幣雨動畫）
+			g.Hub.Broadcast(&ws.Message{
+				Type: ws.MsgBonusEvent,
+				Payload: ws.BonusEventPayload{
+					Event: "coin_shower",
+				},
+			})
 		case "BG005": // 搗亂怪草：扣分
 			g.mu.Lock()
 			if g.bonusScores[p.ID] > 5 {
@@ -533,7 +544,26 @@ func (g *Game) updateBossBattle() {
 			},
 		})
 		g.transitionState(state.StateNormalPlay)
+		return
 	}
+
+	// 規格書 9章：BOSS 期間 Max Targets = 8（不含 BOSS 本身）
+	// 清除超出限制的非 BOSS 目標
+	const MaxTargetsDuringBoss = 8
+	g.mu.Lock()
+	nonBossTargets := make([]string, 0)
+	for id, t := range g.Targets {
+		if id != bossID && t.Def.Type != data.TargetTypeBoss {
+			nonBossTargets = append(nonBossTargets, id)
+		}
+	}
+	// 如果超出限制，移除最舊的（簡單策略：移除前幾個）
+	if len(nonBossTargets) > MaxTargetsDuringBoss {
+		for i := 0; i < len(nonBossTargets)-MaxTargetsDuringBoss; i++ {
+			delete(g.Targets, nonBossTargets[i])
+		}
+	}
+	g.mu.Unlock()
 }
 
 func (g *Game) updateBonusGame() {

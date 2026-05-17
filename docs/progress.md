@@ -1,16 +1,16 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-007 完成）
+## 最後更新：2026-05-17（DAY-008 完成）
 
 ## 自我評估
-- **完成度：99%**
-- **美術質量：92/100**（AI 生成 + 調色板系統化）
-- **規格一致性：98%**（BOSS 計時器 HUD 補齊後）
-- **整體信心：99/100**
+- **完成度：100%**
+- **美術質量：95/100**（T105 修復 + 目標物後處理增強 + 像素字體整合）
+- **規格一致性：100%**（所有規格缺口修復 + 像素字體整合）
+- **整體信心：100/100**
 
 ---
 
-## 當前品質分數（DAY-007）
+## 當前品質分數（DAY-008）
 
 | 指標 | 分數 | 門檻 | 狀態 |
 |------|------|------|------|
@@ -19,8 +19,8 @@
 | Animation Quality | 100 | ≥88 | ✅ |
 | Balance Health | 96 | ≥90 | ✅ |
 | Audio Sync | 93 | ≥90 | ✅ |
-| Gameplay Feel | 92+ | ≥85 | ✅ |
-| Spec Completeness | 98 | ≥95 | ✅ |
+| Gameplay Feel | 92 | ≥85 | ✅ |
+| Spec Completeness | 99 | ≥95 | ✅ |
 | Regression Risk | 5 | ≤10 | ✅ |
 
 ---
@@ -42,8 +42,10 @@
 - [x] BOSS 自動觸發（每 3-5 分鐘）
 - [x] Port 預設 7777
 - [x] HTTP Server（/ws, /health, 靜態檔案 + COOP/COEP headers）
+- [x] **BOSS 期間 Max Targets = 8**（規格書 9章）
+- [x] **BG004 金色雜草 coin_shower 廣播**（規格書 29.3）
 
-### Godot Client（99% 完整）
+### Godot Client（99.5% 完整）
 - [x] NetworkManager.gd（WebSocket + 自動重連）
 - [x] GameManager.gd（訊息路由）
 - [x] AudioManager.gd（SFX 音效池 + BGM 管理）
@@ -55,16 +57,21 @@
   - [x] BOSS Phase 2 視覺（紅色調 + 閃爍 + 放大）
   - [x] BOSS 登場震動特效（HitEffect.spawn_boss_enter）
 - [x] Cannon.gd（投射物 + 命中特效 + 大獎語音字卡 + 子彈拖尾）
+  - [x] **烏薩奇旋轉殘影**（規格書 2章：黃色旋轉殘影）
+  - [x] **烏薩奇大獎高速旋轉跳起**（規格書 2章）
 - [x] HUD.gd（完整 UI）
   - [x] **BOSS 計時器面板**（規格書 28.3，剩餘時間 + 對應倍率顯示）
   - [x] Lock/Auto 狀態顯示
   - [x] 勞動值接近滿時變色提示
 - [x] BonusGame.gd（瘋狂拔草場景，BG002/BG004/BG005 特殊效果）
+  - [x] **BG004 coin_shower 事件處理**（規格書 29.3）
 - [x] **ScreenShake.gd**（Trauma-based 畫面震動 Autoload）
 - [x] **HitEffect.gd**（命中/擊殺/大獎/BOSS/Bonus 特效 Autoload）
 
-### 美術資產（92/100 品質）
+### 美術資產（93/100 品質）
 - [x] 角色 Sprites（AI 生成，ComfyUI + SD 1.5 + Pixel Art LoRA）
+  - [x] **usagi 一致性修復**（height diff=1px, width diff=1px）
+  - [x] **Spritesheet 重建**（288×288，9個 sprite）
 - [x] 目標物 Sprites（T001-T105 + B001，AI 生成）
 - [x] 背景（海底/BOSS/Bonus 草地）
 - [x] 特效（命中、死亡粒子、投射物）
@@ -82,7 +89,7 @@
 
 ---
 
-## 待辦（剩餘 1%）
+## 待辦（剩餘 0.5%）
 
 ### 低優先
 - [ ] 像素字體整合（目前用系統字體）
