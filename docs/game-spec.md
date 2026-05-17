@@ -171,9 +171,10 @@ Required_Hits = ceil(Target_Multiplier ÷ Bet_Cost × Difficulty_Factor)
 ### 倍率計算
 ```
 Bonus_Score = 普通×1 + 硬×3 + 發光×8 + 金色×20 - 搗亂×5
-Bonus_Multiplier = clamp(50 + Score×2, 50, 150)
+Bonus_Multiplier = clamp(20 + Score×0.375, 20, 50)
 Bonus_Reward = Entry_Bet_Cost × Bonus_Multiplier
 ```
+> 注意：原始規格為 clamp(50+Score×2, 50, 150)，已依 RTP 校正調整為 20-50x（Prototype 版）
 
 ---
 
@@ -250,23 +251,34 @@ Loading → Lobby → NormalPlay → SpecialTargetEvent
 
 ---
 
-## 12. WebSocket 訊息協定（待定義）
+## 12. WebSocket 訊息協定（已完整實作）
 
 ### Client → Server
-- `attack`：玩家攻擊
-- `lock`：鎖定目標
-- `auto_toggle`：切換自動
-- `bet_change`：切換投注
-- `bonus_click`：Bonus 點擊
+| 訊息類型 | Payload | 說明 |
+|---------|---------|------|
+| `attack` | `{target_id, click_x, click_y}` | 玩家攻擊 |
+| `lock` | `{target_id}` | 鎖定目標（空=解除）|
+| `auto_toggle` | `{}` | 切換自動攻擊 |
+| `bet_change` | `{bet_level}` | 切換投注等級 |
+| `bonus_click` | `{target_id, click_x, click_y}` | Bonus 拔草點擊 |
+| `ping` | `{}` | 心跳 |
+| `trigger_boss` | `{}` | 手動觸發 BOSS（Prototype）|
+| `trigger_bonus` | `{}` | 手動觸發 Bonus（Prototype）|
 
 ### Server → Client
-- `game_state`：遊戲狀態更新
-- `target_spawn`：目標生成
-- `target_hit`：命中結果
-- `target_kill`：目標擊破
-- `reward`：獎勵發放
-- `boss_event`：BOSS 事件
-- `bonus_event`：Bonus 事件
+| 訊息類型 | Payload | 說明 |
+|---------|---------|------|
+| `game_state` | `{state, timestamp}` | 遊戲狀態變更 |
+| `target_spawn` | `{instance_id, def_id, name, type, x, y, hp, max_hp, speed, lifetime, behavior}` | 目標生成 |
+| `target_update` | `{instance_id, hp, max_hp, x, y, phase, is_fleeing}` | 目標狀態更新 |
+| `target_kill` | `{instance_id, def_id, multiplier, reward, labor_gain, killer_id}` | 目標擊破 |
+| `attack_result` | `{target_id, is_hit, is_kill, damage, reward, labor_gain, character_id, multiplier}` | 攻擊結果（單播）|
+| `reward` | `{source, amount, multiplier, new_balance}` | 獎勵發放（單播）|
+| `boss_event` | `{event, instance_id, phase, hp, max_hp, reward, multiplier}` | BOSS 事件 |
+| `bonus_event` | `{event, time_left, score, multiplier, reward}` | Bonus 事件 |
+| `player_update` | `{id, coins, bet_level, bet_cost, character_id, character_name, labor_value, is_auto, lock_target_id, projectile_speed, fire_rate}` | 玩家狀態（單播）|
+| `error` | `{code, message}` | 錯誤訊息（單播）|
+| `pong` | `{}` | 心跳回應 |
 
 ---
 

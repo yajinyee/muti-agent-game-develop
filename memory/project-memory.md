@@ -2,8 +2,8 @@
 
 > 本文件是整個 Multi-Agent Studio 的共享記憶。記錄專案的當前狀態、重要決策、已知問題、技術細節。所有 Agent 都應在開始工作前讀取本文件。
 
-**最後更新**：2026-05-18（DAY-002）  
-**更新者**：Game Director
+**最後更新**：2026-05-19（DAY-003）  
+**更新者**：Game Director / Spec Architect
 
 ---
 
@@ -14,24 +14,12 @@
 | 遊戲名稱 | 吉伊卡哇：像素大討伐 |
 | 遊戲類型 | 捕魚機（Fish Shooting Game）|
 | 開發狀態 | 99% 完成 |
-| 美術質量 | 92/100（DAY-001 修復後）|
-| 規格一致性 | 95% |
-| Multi-Agent Studio | DAY-002 完成，7 個 Skills |
-
----
-
-## 專案基本資訊
-
-| 項目 | 內容 |
-|------|------|
-| 遊戲名稱 | 吉伊卡哇：像素大討伐 |
-| 遊戲類型 | 捕魚機（Fish Shooting Game）|
-| 開發狀態 | 99% 完成 |
-| 美術質量 | 91/100 |
-| 規格一致性 | 95% |
+| 美術質量 | 92/100 |
+| 規格一致性 | **97%**（DAY-003 修復後）|
 | Server 技術 | Go + WebSocket，Port 7777 |
 | Client 技術 | Godot 4.6.2，HTML5 匯出 |
 | 目標平台 | Web（HTML5）|
+| Multi-Agent Studio | DAY-003，9 個 Skills |
 
 ---
 
