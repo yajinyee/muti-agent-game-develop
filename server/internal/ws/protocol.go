@@ -1,0 +1,155 @@
+// Package ws 定義 WebSocket 通訊協定
+package ws
+
+// MessageType 訊息類型
+type MessageType string
+
+// Client → Server
+const (
+	MsgAttack     MessageType = "attack"
+	MsgLock       MessageType = "lock"
+	MsgAutoToggle MessageType = "auto_toggle"
+	MsgBetChange  MessageType = "bet_change"
+	MsgBonusClick MessageType = "bonus_click"
+	MsgPing       MessageType = "ping"
+	// Prototype 展示用
+	MsgTriggerBoss  MessageType = "trigger_boss"
+	MsgTriggerBonus MessageType = "trigger_bonus"
+)
+
+// Server → Client
+const (
+	MsgGameState    MessageType = "game_state"
+	MsgTargetSpawn  MessageType = "target_spawn"
+	MsgTargetUpdate MessageType = "target_update"
+	MsgTargetKill   MessageType = "target_kill"
+	MsgAttackResult MessageType = "attack_result"
+	MsgReward       MessageType = "reward"
+	MsgBossEvent    MessageType = "boss_event"
+	MsgBonusEvent   MessageType = "bonus_event"
+	MsgPlayerUpdate MessageType = "player_update"
+	MsgError        MessageType = "error"
+	MsgPong         MessageType = "pong"
+)
+
+// Message 通用訊息結構
+type Message struct {
+	Type    MessageType `json:"type"`
+	Payload interface{} `json:"payload"`
+}
+
+// ---- Client → Server Payloads ----
+
+// AttackPayload 攻擊請求
+type AttackPayload struct {
+	TargetID string  `json:"target_id"` // 空字串=自由攻擊
+	ClickX   float64 `json:"click_x"`
+	ClickY   float64 `json:"click_y"`
+}
+
+// LockPayload 鎖定目標
+type LockPayload struct {
+	TargetID string `json:"target_id"` // 空字串=解除鎖定
+}
+
+// BetChangePayload 切換投注
+type BetChangePayload struct {
+	BetLevel int `json:"bet_level"`
+}
+
+// BonusClickPayload Bonus 點擊
+type BonusClickPayload struct {
+	TargetID string  `json:"target_id"`
+	ClickX   float64 `json:"click_x"`
+	ClickY   float64 `json:"click_y"`
+}
+
+// ---- Server → Client Payloads ----
+
+// GameStatePayload 遊戲狀態
+type GameStatePayload struct {
+	State     string `json:"state"`
+	Timestamp int64  `json:"timestamp"`
+}
+
+// TargetSpawnPayload 目標生成
+type TargetSpawnPayload struct {
+	InstanceID string  `json:"instance_id"`
+	DefID      string  `json:"def_id"`
+	Name       string  `json:"name"`
+	Type       string  `json:"type"`
+	X          float64 `json:"x"`
+	Y          float64 `json:"y"`
+	HP         int     `json:"hp"`
+	MaxHP      int     `json:"max_hp"`
+	Speed      float64 `json:"speed"`
+	Lifetime   float64 `json:"lifetime"`
+	Behavior   string  `json:"behavior"`
+}
+
+// TargetUpdatePayload 目標狀態更新
+type TargetUpdatePayload struct {
+	InstanceID string  `json:"instance_id"`
+	HP         int     `json:"hp"`
+	MaxHP      int     `json:"max_hp"`
+	X          float64 `json:"x"`
+	Y          float64 `json:"y"`
+	Phase      int     `json:"phase"`      // BOSS 用
+	IsFleeing  bool    `json:"is_fleeing"` // 寶箱怪用
+}
+
+// TargetKillPayload 目標擊破
+type TargetKillPayload struct {
+	InstanceID  string  `json:"instance_id"`
+	DefID       string  `json:"def_id"`
+	Multiplier  float64 `json:"multiplier"`
+	Reward      int     `json:"reward"`
+	LaborGain   int     `json:"labor_gain"`
+	KillerID    string  `json:"killer_id"`
+}
+
+// AttackResultPayload 攻擊結果
+type AttackResultPayload struct {
+	TargetID    string  `json:"target_id"`
+	IsHit       bool    `json:"is_hit"`
+	IsKill      bool    `json:"is_kill"`
+	Damage      int     `json:"damage"`
+	Reward      int     `json:"reward"`
+	LaborGain   int     `json:"labor_gain"`
+	CharacterID string  `json:"character_id"`
+	Multiplier  float64 `json:"multiplier"`
+}
+
+// RewardPayload 獎勵發放
+type RewardPayload struct {
+	Source     string  `json:"source"` // "target", "boss", "bonus"
+	Amount     int     `json:"amount"`
+	Multiplier float64 `json:"multiplier"`
+	NewBalance int     `json:"new_balance"`
+}
+
+// BossEventPayload BOSS 事件
+type BossEventPayload struct {
+	Event      string  `json:"event"` // "warning", "spawn", "phase_change", "kill"
+	InstanceID string  `json:"instance_id"`
+	Phase      int     `json:"phase"`
+	HP         int     `json:"hp"`
+	MaxHP      int     `json:"max_hp"`
+	Reward     int     `json:"reward"`
+	Multiplier float64 `json:"multiplier"`
+}
+
+// BonusEventPayload Bonus 事件
+type BonusEventPayload struct {
+	Event      string  `json:"event"` // "ready", "start", "tick", "end"
+	TimeLeft   float64 `json:"time_left"`
+	Score      int     `json:"score"`
+	Multiplier float64 `json:"multiplier"`
+	Reward     int     `json:"reward"`
+}
+
+// ErrorPayload 錯誤訊息
+type ErrorPayload struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
+}
