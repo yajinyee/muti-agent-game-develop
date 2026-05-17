@@ -23,6 +23,20 @@ import urllib.parse
 COMFYUI_URL = "http://127.0.0.1:8188"
 OUTPUT_DIR = r"D:\Kiro\client\chiikawa-pixel\assets\sprites\ai_generated"
 
+# 固定 seed 表（確保每次重新生成結果一致，來自 skill-comfyui-consistent-spritesheet-2025）
+# seed 由 hash(character + pose) 決定，固定不變
+FIXED_SEEDS = {
+    "chiikawa_idle":    42001,
+    "chiikawa_attack":  42002,
+    "chiikawa_bigwin":  42003,
+    "hachiware_idle":   42011,
+    "hachiware_attack": 42012,
+    "hachiware_bigwin": 42013,
+    "usagi_idle":       42021,
+    "usagi_attack":     42022,
+    "usagi_bigwin":     42023,
+}
+
 # 角色提示詞（洋紅色背景策略，來自 agent-sprite-forge）
 CHARACTER_PROMPTS = {
     "chiikawa": {
@@ -58,7 +72,8 @@ def build_workflow(character, pose, seed=None):
     negative = char_data["negative"]
     
     if seed is None:
-        seed = int(time.time()) % 1000000
+        # 優先使用固定 seed（確保一致性），fallback 到時間戳
+        seed = FIXED_SEEDS.get(f"{character}_{pose}", int(time.time()) % 1000000)
     
     workflow = {
         "1": {
