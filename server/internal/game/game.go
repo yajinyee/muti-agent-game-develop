@@ -38,6 +38,7 @@ type Game struct {
 	lastSpecialEventAt time.Time
 	nextSpecialEventIn float64
 	bossInstanceID     string
+	nextBossAt         time.Time  // BOSS 自動觸發時間（規格書 28.1）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -64,6 +65,8 @@ func NewGame(id string, hub *ws.Hub) *Game {
 		nextSpecialEventIn: 30,
 		bonusScores:        make(map[string]int),
 		bonusEntryBet:      make(map[string]int),
+		// BOSS 自動觸發：遊戲開始後 3-5 分鐘（規格書 28.1）
+		nextBossAt: time.Now().Add(time.Duration(180+rand.Intn(120)) * time.Second),
 		stopCh:             make(chan struct{}),
 	}
 	return g
@@ -486,6 +489,17 @@ func (g *Game) updateNormalPlay() {
 		g.nextSpecialEventIn = 25 + rand.Float64()*15
 		g.mu.Unlock()
 		g.triggerSpecialEvent()
+	} else {
+		g.mu.Unlock()
+	}
+
+	// BOSS 自動觸發（規格書 28.1：每 3-5 分鐘）
+	g.mu.Lock()
+	if now.After(g.nextBossAt) && g.bossInstanceID == "" {
+		g.nextBossAt = now.Add(time.Duration(180+rand.Intn(120)) * time.Second)
+		g.mu.Unlock()
+		log.Printf("[Game] Auto-triggering BOSS")
+		g.triggerBoss()
 	} else {
 		g.mu.Unlock()
 	}
