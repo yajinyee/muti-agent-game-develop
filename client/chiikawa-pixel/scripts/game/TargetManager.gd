@@ -48,6 +48,12 @@ func _on_target_updated(data: Dictionary) -> void:
 	var instance_id = data.get("instance_id", "")
 	update_target_hp(instance_id, data.get("hp", 0), data.get("max_hp", 1))
 
+	# 受擊閃白效果（使用 shader）
+	if _target_nodes.has(instance_id):
+		var node = _target_nodes[instance_id]
+		if is_instance_valid(node):
+			_flash_hit(node)
+
 	# T102 寶箱怪：受擊後加速逃跑（規格書 26.2）
 	if data.get("is_fleeing", false):
 		if _target_nodes.has(instance_id):
@@ -62,6 +68,30 @@ func _on_target_updated(data: Dictionary) -> void:
 				tween.tween_property(node, "modulate", Color.WHITE, 0.06)
 				tween.tween_property(node, "modulate", Color(2.0, 0.5, 0.5, 1.0), 0.06)
 				tween.tween_property(node, "modulate", Color.WHITE, 0.06)
+
+## 受擊閃白（shader 方式，只影響 Sprite2D）
+func _flash_hit(node: Node2D) -> void:
+	# 找到 Sprite2D 子節點
+	for child in node.get_children():
+		if child is Sprite2D:
+			# 嘗試套用 hit_flash shader
+			var shader_path = "res://assets/shaders/hit_flash.gdshader"
+			if ResourceLoader.exists(shader_path):
+				var mat = child.get_meta("hit_flash_mat", null)
+				if mat == null:
+					mat = ShaderMaterial.new()
+					mat.shader = load(shader_path)
+					child.material = mat
+					child.set_meta("hit_flash_mat", mat)
+				# 閃白動畫
+				var tween = create_tween()
+				tween.tween_method(func(v): mat.set_shader_parameter("flash_amount", v), 1.0, 0.0, 0.12)
+			else:
+				# 備用：modulate 閃白
+				var tween = create_tween()
+				tween.tween_property(child, "modulate", Color(3.0, 3.0, 3.0, 1.0), 0.04)
+				tween.tween_property(child, "modulate", Color.WHITE, 0.08)
+			break
 
 ## BOSS 事件處理（Phase 2 視覺變化）
 func _on_boss_event(event_data: Dictionary) -> void:

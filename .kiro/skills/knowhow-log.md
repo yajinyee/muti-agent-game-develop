@@ -638,3 +638,65 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **根本原因：** 魚的形狀是橫向細長橢圓 + 漸隱魚尾，透明邊緣多是正常的
 - **正確評估方式：** 用 bbox 面積利用率（1740/2478 = 70%），不是整個畫布面積
 - **教訓：** 不同形狀的 sprite 不能用同一個「整體面積佔比」標準評估，要看 bbox 利用率
+
+## 67. Godot 4 Inner Class 不支援 extends（重要）
+- **問題：** GDScript 4 的 inner class 語法 `class Foo extends Node2D:` 不被支援
+- **解法：** 把需要繼承的 class 拆成獨立的 `.gd` 腳本，用 `preload` 載入
+- **正確做法：**
+  ```gdscript
+  const BubbleLayerScript = preload("res://scripts/game/BubbleLayer.gd")
+  var layer = BubbleLayerScript.new()
+  ```
+- **教訓：** Godot 4 inner class 只能用於純資料結構，不能繼承 Node 類型
+
+## 68. Godot 4 動態繪圖（_draw + queue_redraw）
+- **用途：** 不需要 Sprite 資產，用程式碼繪製動態效果（氣泡、粒子等）
+- **關鍵 API：**
+  - `_draw()` — 覆寫此方法，在裡面呼叫 `draw_arc`、`draw_circle` 等
+  - `queue_redraw()` — 在 `_process` 中呼叫，觸發下一幀重繪
+  - `draw_arc(pos, radius, from_angle, to_angle, point_count, color, width)` — 畫弧線
+  - `draw_circle(pos, radius, color)` — 畫實心圓
+- **氣泡效果：** 外圈用 `draw_arc`（淡藍白色），高光用 `draw_circle`（白色小點）
+- **教訓：** 動態效果用 `_draw` 比 Sprite 節點更省記憶體，不需要額外 PNG 資產
+
+## 69. chiikawa/hachiware attack 幀一致性修復（2026-05-17 夜間）
+- **問題：** attack 幀（82x85）比 idle（78x78）大，height diff=7px, width diff=4px
+- **根本原因：** AI 生成的 attack 幀（揮棒姿勢）本身就比 idle 大
+- **解法：** 從 idle 幀做水平翻轉 + 亮度提高 + 光暈效果生成 attack
+  - chiikawa：粉紅色光暈（討伐棒）
+  - hachiware：藍色光暈（小八攻擊感）
+- **結果：** 兩者都達到 0px/0px ✅
+- **工具：** `tools/fix_char_attack.py`
+- **教訓：** 水平翻轉不改變 bbox，是保持一致性最安全的方式
+
+## 70. Godot 4 ShaderMaterial 動態套用（受擊閃白）
+- **用途：** 目標物受擊時閃白，比 modulate 更精確（只影響 Sprite，不影響 HP 條）
+- **做法：**
+  ```gdscript
+  var mat = ShaderMaterial.new()
+  mat.shader = load("res://assets/shaders/hit_flash.gdshader")
+  sprite.material = mat
+  # 動畫
+  var tween = create_tween()
+  tween.tween_method(func(v): mat.set_shader_parameter("flash_amount", v), 1.0, 0.0, 0.12)
+  ```
+- **Shader 核心：** `COLOR = mix(original, flash_color, flash_amount)` — 只對非透明像素閃白
+- **快取 ShaderMaterial：** 用 `set_meta("hit_flash_mat", mat)` 避免每次受擊都建立新 material
+- **教訓：** modulate 會影響整個節點樹，shader 只影響單一 Sprite，更精確
+
+## 71. 自動射擊智慧目標選擇評分系統（2026-05-17 夜間）
+- **問題：** 原版只找第一個存活目標，不考慮倍率和位置
+- **評分維度：**
+  1. 倍率 × 2.0（高倍率優先）
+  2. (1 - HPPercent) × 30.0（HP 低的優先，快要擊破）
+  3. X < 400 時加分（快要離開畫面的優先）
+  4. BOSS + 500（BOSS 戰集中火力）
+- **結果：** 自動模式更智慧，優先打高價值目標
+- **教訓：** 評分系統比硬規則更靈活，可以同時考慮多個維度
+
+## 72. 斷線重連 UI 設計（2026-05-17 夜間）
+- **做法：** 在 HUD 的 CanvasLayer 上動態建立 DisconnectOverlay（z_index=100）
+- **連接訊號：** `NetworkManager.disconnected` 和 `NetworkManager.connected`
+- **視覺：** 半透明黑色背景 + 📡 圖示 + 閃爍動畫
+- **重連成功：** 顯示「已重新連線 ✓」（綠色）→ 1 秒後淡出
+- **教訓：** 斷線 UI 要在 CanvasLayer 上，確保在所有遊戲元素上方顯示

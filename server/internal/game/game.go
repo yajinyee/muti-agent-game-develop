@@ -881,7 +881,7 @@ func (g *Game) endBonusGame() {
 	})
 }
 
-// processAutoAttack 處理自動攻擊
+// processAutoAttack 處理自動攻擊（智慧目標選擇）
 func (g *Game) processAutoAttack() {
 	g.mu.RLock()
 	players := make([]*player.Player, 0, len(g.Players))
@@ -903,17 +903,28 @@ func (g *Game) processAutoAttack() {
 			continue
 		}
 
-		// 找最近目標
+		// 智慧目標選擇
 		g.mu.RLock()
 		var bestTarget *target.Target
+
+		// 1. 優先使用鎖定目標（若仍存活）
 		if p.LockTargetID != "" {
-			bestTarget = g.Targets[p.LockTargetID]
+			if t, ok := g.Targets[p.LockTargetID]; ok && t.IsAlive {
+				bestTarget = t
+			}
 		}
+
+		// 2. 若無鎖定目標，用評分系統選最佳目標
 		if bestTarget == nil {
+			bestScore := -1.0
 			for _, t := range g.Targets {
-				if t.IsAlive && t.Def.Type != data.TargetTypeBonus {
+				if !t.IsAlive || t.Def.Type == data.TargetTypeBonus {
+					continue
+				}
+				score := g.scoreTarget(t)
+				if score > bestScore {
+					bestScore = score
 					bestTarget = t
-					break
 				}
 			}
 		}
@@ -931,6 +942,33 @@ func (g *Game) processAutoAttack() {
 			},
 		})
 	}
+}
+
+// scoreTarget 計算目標的自動攻擊優先分數（越高越優先）
+// 評分維度：倍率、HP 殘量、距離畫面左邊緣（快要離開）
+func (g *Game) scoreTarget(t *target.Target) float64 {
+	score := 0.0
+
+	// 1. 倍率加分（高倍率目標優先）
+	// 特殊目標（T101-T105）倍率高，加分多
+	score += t.Multiplier * 2.0
+
+	// 2. HP 殘量加分（HP 越低越優先，快要擊破的目標）
+	// HPPercent 越低，加分越多
+	score += (1.0 - t.HPPercent()) * 30.0
+
+	// 3. 位置加分（X 越小代表越靠近左邊，快要離開畫面）
+	// X 在 0-1280 範圍，X 越小加分越多
+	if t.X < 400 {
+		score += (400.0 - t.X) * 0.1
+	}
+
+	// 4. BOSS 最高優先（確保 BOSS 戰時集中火力）
+	if t.Def.Type == data.TargetTypeBoss {
+		score += 500.0
+	}
+
+	return score
 }
 
 // transitionState 狀態轉換
