@@ -66,6 +66,13 @@ func _on_target_updated(data: Dictionary) -> void:
 ## BOSS 事件處理（Phase 2 視覺變化）
 func _on_boss_event(event_data: Dictionary) -> void:
 	var event = event_data.get("event", "")
+
+	# BOSS 登場：全畫面特效 + 強烈震動
+	if event == "boss_enter":
+		HitEffect.spawn_boss_enter()
+		ScreenShake.add_trauma(0.9)
+		return
+
 	if event != "phase_change":
 		return
 
@@ -89,6 +96,9 @@ func _on_boss_event(event_data: Dictionary) -> void:
 	# 放大 10%（Phase 2 更有威脅感）
 	var tween2 = create_tween()
 	tween2.tween_property(node, "scale", Vector2(2.2, 2.2), 0.3)
+
+	# Phase 2 震動
+	ScreenShake.add_trauma(0.6)
 
 	# 顯示 Phase 2 警告文字
 	var phase_label = Label.new()
@@ -287,8 +297,12 @@ func _play_kill_effect(node: Node2D, data: Dictionary) -> void:
 	if reward > 0:
 		_spawn_reward_text(kill_pos, reward, multiplier)
 
-	# 死亡粒子
-	_spawn_death_particles(kill_pos)
+	# 使用 HitEffect 系統（取代舊的 _spawn_death_particles）
+	HitEffect.spawn_kill(kill_pos, multiplier)
+
+	# 震動（依倍率）
+	var trauma = clamp(0.2 + multiplier * 0.005, 0.2, 0.6)
+	ScreenShake.add_trauma(trauma)
 
 ## T101 擬態型怪物死亡變形（規格書 26.2）
 func _play_mimic_death(node: Node2D, kill_pos: Vector2, reward: int, multiplier: float) -> void:
