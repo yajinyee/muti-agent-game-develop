@@ -19,8 +19,9 @@ const (
 )
 
 var upgrader = websocket.Upgrader{
-	ReadBufferSize:  1024,
-	WriteBufferSize: 1024,
+	ReadBufferSize:  4096,
+	WriteBufferSize: 4096,
+	EnableCompression: true, // permessage-deflate，減少頻寬（skill-go-websocket-scalability）
 	CheckOrigin: func(r *http.Request) bool {
 		return true // Prototype 允許所有來源
 	},
