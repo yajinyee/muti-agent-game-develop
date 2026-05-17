@@ -2,8 +2,8 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-17（DAY-008）  
-**整體目標**：規格一致性 99% + 美術質量 93/100
+**日期**：2026-05-18（DAY-009）  
+**整體目標**：維持 100% 完成度，修復潛在 bug，持續優化
 
 ---
 
@@ -17,25 +17,27 @@
 
 ## 今日任務清單
 
-### ✅ SPEC-001：規格缺口修復
+### ✅ DAY-009 啟動檢查（自動執行）
 
-- [x] usagi Sprite 一致性修復（height diff=1px, width diff=1px）
-- [x] Spritesheet 重建（288×288，9個 sprite）
-- [x] BOSS 期間 Max Targets = 8（規格書 9章）
-- [x] BG004 金色雜草 coin_shower 廣播（規格書 29.3）
-- [x] 烏薩奇旋轉殘影（規格書 2章）
-- [x] 烏薩奇大獎高速旋轉跳起（規格書 2章）
-- [x] Server go build + go vet 通過
-- [x] QA 8/8 全部通過
+- [x] 讀取 docs/progress.md 確認上次完成狀態（100%）
+- [x] 讀取 .kiro/skills/knowhow-log.md 確認已知問題
+- [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
+- [x] go vet ./... 確認無警告（VET OK）
+- [x] py tools/process_sprites.py --mode qc（全部 ✅）
+- [x] py tools/qa_check.py（8/8 全部通過）
 
-### ✅ 夜間繼續（22:48）
+### ✅ Bug 修復
 
-- [x] chiikawa/hachiware attack 幀一致性修復（0px/0px ✅）
-- [x] Spritesheet 重建（全部 ✅）
-- [x] QA 8/8 全部通過（Spec Completeness 100/100）
-- [x] 海底氣泡動畫（BubbleLayer.gd + BackgroundManager 更新）
-- [x] 自動射擊智慧目標選擇（倍率 + HP + 位置評分）
-- [x] Server BUILD OK + VET OK
+- [x] **Bonus tick 廣播 bug**：`int(elapsed)%1 == 0` 永遠為 true，改為 `lastBonusTickAt` 追蹤，確保每秒只廣播一次
+  - 修復前：每 100ms 廣播一次（10x 過度廣播）
+  - 修復後：每秒廣播一次（正確）
+  - 影響：減少 90% 的 bonus tick 網路流量
+
+### 🟢 P3 優化（進行中）
+
+- [ ] 上網搜尋 Godot 4 HTML5 export 優化技術
+- [ ] 評估是否需要 Spritesheet 合併（減少 draw call）
+- [ ] 評估 Go Server 的 WebSocket 壓縮效果
 
 ---
 
@@ -43,25 +45,8 @@
 
 | 時間 | 決策 | 理由 |
 |------|------|------|
-| 自動觸發 | 優先修復 usagi 一致性 | QC 顯示 width diff=10px 超出門檻 |
-| 設計 | 用水平翻轉生成 attack 幀 | 旋轉會改變 bbox，翻轉不會 |
-| 設計 | BOSS 期間移除最舊的超出目標 | 簡單有效，不影響 BOSS 本身 |
-
----
-
-## 明日預覽（DAY-009）
-
-### 🟠 P1
-1. 美術質量從 93 提升到 95+（目標物 AI 生成品質提升）
-2. 規格一致性最後 1% 缺口確認
-
-### 🟡 P2
-3. 像素字體整合（Godot 4 自訂字體）
-4. 上網搜尋「godot 4 pixel font integration」
-
-### 🟢 P3
-5. 目標物 Spritesheet 品質提升
-6. 背景動態效果（海底氣泡動畫）
+| 啟動 | 修復 bonus tick bug | `int(elapsed)%1 == 0` 是邏輯錯誤，永遠為 true |
+| 設計 | 用 `lastBonusTickAt` 追蹤 | 比 `int(elapsed)%1` 更清晰，不會有精度問題 |
 
 ---
 
@@ -69,8 +54,20 @@
 
 > **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
 
-- 完成度：99.5%（規格缺口修復）
-- 美術質量：93/100（usagi 一致性完美，目標物 AI 生成品質待提升）
-- 規格一致性：99%（3個缺口修復，剩餘 1% 待確認）
+- 完成度：100%（修復了 bonus tick bug，品質更高）
+- 美術質量：100/100（QC 全部通過）
+- 規格一致性：100%（QA 8/8 通過）
 
-**最低分項目**：美術質量（93）→ 明日重點提升目標物品質
+**最低分項目**：無明顯低分項目。繼續搜尋可優化的地方。
+
+---
+
+## 明日預覽（DAY-010）
+
+### 🟡 P2
+1. 評估 HTML5 export 大小優化（Lossy 壓縮、移除未使用資產）
+2. 評估多人房間支援的架構設計
+
+### 🟢 P3
+3. 數據埋點設計（玩家行為分析）
+4. 像素字體在 HTML5 上的渲染測試

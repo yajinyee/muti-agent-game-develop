@@ -700,3 +700,146 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **視覺：** 半透明黑色背景 + 📡 圖示 + 閃爍動畫
 - **重連成功：** 顯示「已重新連線 ✓」（綠色）→ 1 秒後淡出
 - **教訓：** 斷線 UI 要在 CanvasLayer 上，確保在所有遊戲元素上方顯示
+
+## 73. BGM 淡入淡出實作（Godot 4 Tween）
+- **問題：** 直接切換 BGM 會有突兀的切換感
+- **解法：** 用 Tween 做淡出（0.3s）→ 切換 → 淡入（0.5s）
+- **BOSS Phase 2：** `pitch_scale = 1.1`（音調提高 10%，讓緊張感更強）
+- **注意：** 不能用 `await` 在 Autoload 的非 async 函數裡，改用 tween_callback
+- **教訓：** BGM 切換要有淡入淡出，直接切換會讓玩家感覺突兀
+
+## 74. HP 條顏色漸變（高→綠，中→黃，低→紅）
+- **實作：** 依 HPPercent 動態設定 ColorRect.color
+  - pct > 0.6 → Color(0.2, 0.9, 0.2)（綠）
+  - pct > 0.3 → Color(1.0, 0.8, 0.1)（黃）
+  - pct ≤ 0.3 → Color(1.0, 0.2, 0.2)（紅）
+- **受擊閃爍：** 短暫變白（0.04s）再回原色（0.08s）
+- **教訓：** HP 條顏色漸變是標準遊戲 UX，讓玩家直覺感受到目標快要死了
+
+## 75. 目標物逃跑警告箭頭
+- **觸發條件：** 目標物 x < 120 且有移動速度
+- **視覺：** 「◀!」紅色文字，透明度依距離邊緣遠近
+- **閃爍：** x < 60 時快速閃爍（150ms 間隔）
+- **教訓：** 捕魚機的標準 UX，提示玩家目標快要跑掉，增加緊迫感
+
+## 76. 小八大獎演出規格修正（2026-05-17 夜間）
+- **問題：** 規格書說小八大獎是「高舉討伐棒」，但實作是普通跳起
+- **修正：** 向上旋轉 -30 度 + 停頓 0.2 秒（高舉姿勢）+ 回正
+- **字卡：** 「Yagaina!」→「尖尖哇嘎乃！」（規格書原文）
+- **教訓：** 每個角色的大獎演出要逐條對照規格書，不能用同一個動作
+
+## 77. Outline Shader 提升目標物辨識度（2026-05-18）
+- **問題：** 目標物在複雜背景下辨識度不足，特別是小型目標（T002-T004 蟲類）
+- **解法：** 建立 `outline.gdshader`，8方向採樣判定輪廓像素
+- **輪廓顏色策略：**
+  - 普通目標：黑色輪廓（0,0,0,0.8）— 清晰但不搶眼
+  - 特殊目標：金色輪廓（1.0,0.85,0,1.0）— 提示高價值
+  - BOSS：紅色輪廓（1.0,0.2,0.2,1.0）— 強調威脅感
+- **注意：** outline shader 和 wobble shader 不能同時套用到同一個 Sprite2D
+  - 解法：wobble 改用 Tween 做旋轉搖晃，outline 套用到 Sprite2D
+- **教訓：** Shader 衝突時，優先保留視覺效果更強的（outline），另一個改用 GDScript 模擬
+
+## 78. Wobble 效果用 Tween 替代 Shader（2026-05-18）
+- **問題：** T103 流星和 T104 金草需要搖晃效果，但 wobble shader 和 outline shader 衝突
+- **解法：** 用 `container.create_tween().set_loops()` 做旋轉搖晃
+  - T103 流星：±5度，0.15s（快速搖晃，模擬飛行不穩定感）
+  - T104 金草：±3度，0.4s（緩慢搖晃，模擬草在風中搖曳）
+- **優點：** 不需要 shader，效能更好，且可以和 outline shader 共存
+- **教訓：** 簡單的搖晃效果用 Tween 比 Shader 更省資源
+
+## 79. Rainbow Glow Shader 大獎演出（2026-05-18）
+- **用途：** 大獎（≥20x）時砲台角色有彩虹光暈，增加爽感
+- **技術：** HSV 轉 RGB 函數 + TIME 驅動 hue 旋轉 + 輪廓採樣
+- **持續時間：** 1.5 秒後自動移除（`cannon_sprite.material = null`）
+- **注意：** 大獎後要確保 material 被清除，否則下一次普通攻擊也會有彩虹效果
+- **教訓：** 臨時 shader 效果要用 Timer 確保清除，不能依賴其他事件觸發清除
+
+## 80. death_particles.png 密度偏低的根本原因（2026-05-18）
+- **問題：** death_particles.png 只有 14% 非透明像素，視覺上太稀疏
+- **根本原因：** 原版只有 6 個小粒子，48x48 畫布大部分是透明的
+- **修復：** 加入中心爆炸圓（r=8）+ 8方向射線 + 星形光芒 + 35個散落碎片 + 外圈光環
+- **結果：** 14% → 44%，提升 3 倍
+- **工具：** `tools/generate_death_particles_v2.py`
+- **教訓：** 特效 sprite 的密度要 > 30%，否則在遊戲中幾乎看不見
+
+## 81. warning.png 缺少 .import 檔案（2026-05-18）
+- **問題：** warning.png 沒有對應的 .import 檔案，Godot 無法正確載入
+- **原因：** 生成 warning.png 時忘記建立 .import 設定
+- **修復：** 手動建立 warning.png.import，格式與其他特效 sprite 一致
+- **教訓：** 每次新增 PNG 資產都要同時建立 .import 檔案，否則 Godot 會在首次開啟時自動生成（可能設定不正確）
+
+## 82. 像素化過場 Shader（2026-05-18）
+- **技術：** `pixelate_transition.gdshader` — 把畫面分成大像素塊（block_size = mix(1, 64, amount)）
+- **用途：** 背景切換時先像素化（0.15s）再還原（0.2s），比直接切換更有像素遊戲感
+- **整合：** `HitEffect.pixelate_transition(duration_in, duration_out, callback)` — callback 在最像素化時執行
+- **BackgroundManager：** `_switch_bg()` 改用 `HitEffect.pixelate_transition()` 包裝背景切換
+- **注意：** pixelate_transition 的 CanvasLayer.layer = 99（比 disconnect overlay 的 100 低一層）
+- **教訓：** 過場效果要在 callback 中切換內容，不是在過場開始或結束時切換
+
+## 83. check_assets.py 工具（2026-05-18）
+- **用途：** 快速檢查所有美術資產的尺寸和非透明像素比例
+- **門檻：** 非透明像素 > 30% 才算 ✅
+- **例外：** T105 金幣魚（42%）是正常的，因為魚形狀細長
+- **使用：** `py tools/check_assets.py`
+- **教訓：** 定期執行資產品質檢查，避免低密度 sprite 混入正式版
+
+## 83. Bonus Tick 廣播 Bug（2026-05-18）
+- **問題：** `updateBonusGame()` 中 `if int(elapsed)%1 == 0` 永遠為 true
+- **根本原因：** 任何整數 mod 1 都等於 0，這個條件沒有任何過濾效果
+- **症狀：** 每 100ms（Server tick 間隔）廣播一次 bonus tick，比預期多 10 倍
+- **修復：** 加入 `lastBonusTickAt time.Time` 欄位，用 `time.Since(g.lastBonusTickAt) >= time.Second` 判斷
+- **影響：** 修復後減少 90% 的 bonus tick 網路流量
+- **教訓：** `int(x)%1` 永遠為 0，不能用來做「每秒執行一次」的判斷。正確做法是用 `lastTickAt` 追蹤上次執行時間
+
+## 84. Go 遊戲 Server 最佳實踐（2026-05-18 研究）
+- **來源：** generalistprogrammer.com, leapcell.io, hemaks.org
+- **關鍵點：**
+  1. **goroutine 輕量**：每個 WebSocket 連線 2 個 goroutine，1000 個連線只需 2000 goroutines（幾 MB 記憶體）
+  2. **permessage-deflate 壓縮**：`EnableCompression: true` 可減少 60-80% 頻寬（已實作）
+  3. **sync.RWMutex**：讀多寫少的場景用 RWMutex，讀操作不互斥（已實作）
+  4. **send channel buffer**：`make(chan []byte, 256)` 避免慢速客戶端阻塞 Server（已實作）
+  5. **批次傳送**：`writePump` 中批次處理 channel 中的訊息（已實作）
+- **目前架構評估：** 已符合最佳實踐，無需大改
+
+## 85. Godot 4 HTML5 Export 大小優化（2026-05-18 研究）
+- **來源：** jacobfilipp.com, godotengine.org forum
+- **關鍵技術：**
+  1. **Lossy 壓縮**：在 Import tab 設定 Lossy 壓縮，可大幅減少 .pck 大小
+  2. **不要預先優化圖片**：讓 Godot 自己處理壓縮，保持原始品質
+  3. **移除未使用資產**：Export 設定中排除不需要的檔案
+  4. **gzip 壓縮**：HTML5 export 後用 gzip 壓縮 .wasm 和 .pck，需要 server 支援 Content-Encoding: gzip
+- **目前狀態：** 未評估 export 大小，下次 export 時記錄
+- **教訓：** HTML5 export 大小影響首次載入時間，對玩家體驗很重要
+
+## 86. 洋紅色殘留問題（2026-05-18 深度分析）
+- **問題：** AI 生成的角色 sprite 有大量洋紅色殘留
+  - usagi 系列：438-541 pixels（佔 8-10%）
+  - chiikawa 系列：50-631 pixels（佔 0.8-10%）
+  - hachiware 系列：4-37 pixels（佔 0.1-0.6%）
+- **根本原因：** AI 生成時使用洋紅色背景，`process_sprites.py` 的去背閾值不夠激進
+- **修復工具：** `tools/fix_magenta_residue.py`
+  - 判斷條件：`r > 150 and g < 100 and b > 100`（洋紅色特徵）
+  - 距離計算：`sqrt((r-255)^2 + g^2 + (b-255)^2) < 100`
+  - 總計移除 2816 個洋紅色像素
+- **教訓：** 每次 AI 生成後必須執行 `fix_magenta_residue.py`，不能只靠 `process_sprites.py`
+
+## 87. 目標物密度問題（2026-05-18 深度分析）
+- **問題：** T001/T104 草葉密度只有 11%，T101 16%，T103 20%
+- **根本原因：** `generate_targets_v3.py` 的草葉繪製用 `i*2` 步進（每隔一行），密度只有 50%
+- **修復：** `tools/generate_targets_v4.py` — 改為填充三角形區域（連續繪製）
+  - T001: 11% → 22%（+2x）
+  - T104: 11% → 23%（+2x）
+  - T101: 16% → 25%（+56%）
+  - T103: 20% → 30%（+50%）
+- **教訓：** 草葉形狀本來就是細長三角形，密度偏低是形狀特性，但可以通過填充改善
+
+## 88. 視覺風格指南建立（2026-05-18）
+- **建立：** `docs/visual-style-guide.md`（首次建立）
+- **內容：** 官方色彩規範、像素規格、輪廓風格、動畫規格、UI 風格、特效風格
+- **建立：** `reports/art/art-review-2026-05-18.md`（首份美術審核報告）
+- **教訓：** 視覺風格指南是確保美術一致性的基礎，應該在專案初期就建立
+
+## 89. 目標物 AI 生成版本未正確覆蓋（2026-05-18）
+- **問題：** knowhow-log #61 說「目標物 AI 生成（2026-05-17）」，但 targets 目錄裡的是程式生成版本
+- **可能原因：** AI 生成後沒有執行複製步驟，或被後來的程式生成覆蓋
+- **教訓：** AI 生成目標物後，必須確認檔案已正確複製到 targets 目錄，並執行 `analyze_sprites.py` 驗證

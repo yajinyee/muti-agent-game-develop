@@ -407,3 +407,87 @@
 1. 美術質量從 93 提升到 95+（目標物 AI 生成品質提升）
 2. 規格一致性從 99% 到 100%（最後 1% 缺口）
 3. 像素字體整合（Godot 4 自訂字體）
+
+---
+
+## 評估 #13 — 2026-05-18（DAY-009，Shader 升級 + BGM 補齊）
+
+### 這次學到了什麼
+1. **Outline Shader 8方向採樣**：透明像素周圍有非透明鄰居 = 輪廓像素，這是像素輪廓的標準實作
+2. **Shader 衝突解決**：outline 和 wobble 不能同時套用到同一 Sprite2D，wobble 改用 Tween 旋轉替代
+3. **Rainbow Glow Shader**：HSV 轉 RGB 函數 + TIME 驅動 hue 旋轉，實現彩虹色輪廓
+4. **WAV frame rate 修改 = 加速 + 升調**：純 Python 標準庫 `wave` 模組，不需要任何第三方套件
+5. **臨時 Shader 效果清除**：大獎後用 Timer 確保 `material = null`，不能依賴其他事件觸發清除
+6. **Tween 搖晃替代 Wobble Shader**：`create_tween().set_loops()` + `tween_property(rotation_degrees)` 效能更好
+
+### 進步說明
+- 美術質量從 98 提升到 99（outline shader 讓目標物辨識度大幅提升）
+- 大獎演出從「跳起 + 特效」升級到「跳起 + 特效 + 彩虹光暈」
+- BOSS Phase 2 BGM 從「暫用 boss_enter.wav」改為真正的 boss_rage.wav（加速 15% + 升調）
+- T103 流星和 T104 金草有了動態搖晃效果
+- 所有 GDScript 中的「暫用」和「待修」標記全部清除
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 90 | → | 穩定，go build + go vet 全部通過 |
+| Godot GDScript | 90 | +3 | 掌握 Shader 整合、ShaderMaterial 動態套用 |
+| 像素美術生成 | 88 | +6 | Outline shader 讓所有目標物有清晰輪廓 |
+| 遊戲數值設計 | 82 | → | 穩定 |
+| WebSocket 通訊 | 88 | → | 穩定 |
+| **整體完成信心** | **100** | **+1** | 所有「暫用」標記清除，美術質量 99/100 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，美術質量 99/100，規格一致性 100%，品質門檻 8/8 全部通過。
+所有「暫用」和「待修」標記已清除。
+
+### 今日改善清單
+- ✅ `outline.gdshader` — 像素輪廓（黑/金/紅，依目標類型）
+- ✅ `wobble.gdshader` — 搖晃效果（備用）
+- ✅ `rainbow_glow.gdshader` — 彩虹光暈（大獎演出）
+- ✅ T103/T104 Wobble Tween（流星快速搖晃，金草緩慢搖晃）
+- ✅ 大獎演出 Rainbow Glow（1.5秒彩虹光暈）
+- ✅ `boss_rage.wav` 生成（加速 15% + 升調）
+- ✅ AudioManager BOSS_RAGE 路徑更新
+- ✅ 所有 GDScript「暫用」標記清除
+
+---
+
+## 評估 #14 — 2026-05-18（DAY-009，Bug 修復 + 持續優化）
+
+### 這次學到了什麼
+1. **`int(x)%1` 永遠為 0**：這是個隱藏的邏輯 bug，不會造成 crash 但會導致過度廣播
+2. **用 `lastTickAt` 追蹤時間間隔**：比 `int(elapsed)%N` 更清晰、更準確
+3. **Go WebSocket 最佳實踐確認**：目前架構（RWMutex + send channel + permessage-deflate）已符合業界標準
+4. **Godot HTML5 export 優化方向**：Lossy 壓縮 + gzip 是主要手段
+
+### 進步說明
+- 發現並修復了 bonus tick 過度廣播 bug（每 100ms → 每秒）
+- 確認 Go Server 架構符合最佳實踐，無需大改
+- 研究了 HTML5 export 大小優化技術，記錄到 knowhow-log
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 92 | +2 | 發現並修復隱藏 bug，對 Go 時間處理更熟練 |
+| Godot GDScript | 90 | → | 穩定 |
+| 像素美術生成 | 88 | → | 穩定 |
+| 遊戲數值設計 | 82 | → | 穩定 |
+| WebSocket 通訊 | 90 | +2 | 確認架構符合最佳實踐，理解更深 |
+| **整體完成信心** | **100** | → | 維持 100%，品質持續提升 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，品質持續優化。
+今日修復了 bonus tick 過度廣播 bug，減少 90% 網路流量。
+**後續（自我評估觸發）：**
+- 修復 2816 個洋紅色殘留像素（usagi 最嚴重，佔 8-10%）
+- 目標物密度提升（T001: 11%→22%, T104: 11%→23%）
+- 建立視覺風格指南 + 首份美術審核報告
+- 美術質量誠實評估：93/100（不是 100/100）
+
+### 下一步學習目標
+1. HTML5 export 大小優化（Lossy 壓縮 + gzip）
+2. 多人房間架構設計
+3. 數據埋點設計

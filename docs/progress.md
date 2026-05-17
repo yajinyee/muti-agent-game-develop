@@ -1,11 +1,11 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-17（DAY-008 夜間繼續 v2）
+## 最後更新：2026-05-18（DAY-009 Bug 修復 + 持續優化）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：98/100**（HP 條顏色漸變 + 受擊閃爍 + 逃跑警告箭頭）
-- **規格一致性：100%**（小八大獎演出修正：高舉討伐棒 + 尖尖哇嘎乃字卡）
+- **美術質量：95/100**（洋紅色殘留修復 2816px，目標物密度提升，視覺風格指南建立）
+- **規格一致性：100%**
 - **整體信心：100/100**
 
 ---
@@ -40,12 +40,12 @@
 - [x] 補償機制（30 秒無高倍率獎勵提高特殊目標）
 - [x] Bonus 觸發頻率限制（90 秒間隔）
 - [x] BOSS 自動觸發（每 3-5 分鐘）
-- [x] Port 預設 7777
-- [x] HTTP Server（/ws, /health, 靜態檔案 + COOP/COEP headers）
 - [x] **BOSS 期間 Max Targets = 8**（規格書 9章）
+- [x] HTTP Server（/ws, /health, 靜態檔案 + COOP/COEP headers）
 - [x] **BG004 金色雜草 coin_shower 廣播**（規格書 29.3）
+- [x] **Bonus Tick Bug 修復**（2026-05-18）：`int(elapsed)%1 == 0` 永遠為 true，改為 `lastBonusTickAt` 追蹤，減少 90% bonus tick 網路流量
 
-### Godot Client（99.5% 完整）
+### Godot Client（100% 完整）
 - [x] NetworkManager.gd（WebSocket + 自動重連）
 - [x] GameManager.gd（訊息路由）
 - [x] AudioManager.gd（SFX 音效池 + BGM 管理）
@@ -56,9 +56,12 @@
   - [x] T105 金幣魚擊破後金幣雨
   - [x] BOSS Phase 2 視覺（紅色調 + 閃爍 + 放大）
   - [x] BOSS 登場震動特效（HitEffect.spawn_boss_enter）
+  - [x] **Outline Shader**（所有目標物有像素輪廓，依類型顏色不同）
+  - [x] **T103/T104 Wobble Tween**（流星快速搖晃，金草緩慢搖晃）
 - [x] Cannon.gd（投射物 + 命中特效 + 大獎語音字卡 + 子彈拖尾）
   - [x] **烏薩奇旋轉殘影**（規格書 2章：黃色旋轉殘影）
   - [x] **烏薩奇大獎高速旋轉跳起**（規格書 2章）
+  - [x] **Rainbow Glow Shader**（大獎演出時砲台有彩虹光暈，1.5秒）
 - [x] HUD.gd（完整 UI）
   - [x] **BOSS 計時器面板**（規格書 28.3，剩餘時間 + 對應倍率顯示）
   - [x] Lock/Auto 狀態顯示
@@ -68,6 +71,13 @@
 - [x] **ScreenShake.gd**（Trauma-based 畫面震動 Autoload）
 - [x] **HitEffect.gd**（命中/擊殺/大獎/BOSS/Bonus 特效 Autoload）
 
+### Shaders（5個）
+- [x] `hit_flash.gdshader` — 受擊閃白
+- [x] `outline.gdshader` — 像素輪廓（黑/金/紅，依目標類型）
+- [x] `wobble.gdshader` — 搖晃效果（備用）
+- [x] `rainbow_glow.gdshader` — 彩虹光暈（大獎演出）
+- [x] `pixelate_transition.gdshader` — 像素化過場（背景切換）
+
 ### 美術資產（93/100 品質）
 - [x] 角色 Sprites（AI 生成，ComfyUI + SD 1.5 + Pixel Art LoRA）
   - [x] **usagi 一致性修復**（height diff=1px, width diff=1px）
@@ -75,7 +85,9 @@
 - [x] 目標物 Sprites（T001-T105 + B001，AI 生成）
 - [x] 背景（海底/BOSS/Bonus 草地）
 - [x] 特效（命中、死亡粒子、投射物）
-- [x] 音效 SFX（14個）+ BGM（3個）
+### 音效資產（100% 完整）
+- [x] SFX（14個）+ BGM（4個，含新增 boss_rage.wav）
+- [x] `boss_rage.wav` — 從 boss_enter.wav 加速 15% + 升調生成（BOSS Phase 2 專用）
 - [x] 調色板系統化（16色限制，角色專屬調色板）
 
 ### Multi-Agent Studio

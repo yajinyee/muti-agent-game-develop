@@ -35,6 +35,7 @@ type Game struct {
 	bossSpawnedAt      time.Time
 	bonusStartedAt     time.Time
 	lastBonusAt        time.Time
+	lastBonusTickAt    time.Time  // Bonus tick 廣播計時（每秒一次）
 	lastSpecialEventAt time.Time
 	nextSpecialEventIn float64
 	bossInstanceID     string
@@ -579,8 +580,16 @@ func (g *Game) updateBonusGame() {
 		return
 	}
 
-	// 廣播剩餘時間（每秒）
-	if int(elapsed)%1 == 0 {
+	// 廣播剩餘時間（每秒一次，避免過度廣播）
+	now := time.Now()
+	g.mu.Lock()
+	shouldTick := now.Sub(g.lastBonusTickAt) >= time.Second
+	if shouldTick {
+		g.lastBonusTickAt = now
+	}
+	g.mu.Unlock()
+
+	if shouldTick {
 		g.Hub.Broadcast(&ws.Message{
 			Type: ws.MsgBonusEvent,
 			Payload: ws.BonusEventPayload{
