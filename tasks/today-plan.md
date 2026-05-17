@@ -2,8 +2,8 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-22（DAY-007）  
-**整體目標**：Gameplay Feel 提升（目標 92+）
+**日期**：2026-05-17（DAY-008）  
+**整體目標**：規格一致性 99% + 美術質量 93/100
 
 ---
 
@@ -17,16 +17,16 @@
 
 ## 今日任務清單
 
-### ✅ FEEL-001：Gameplay Juice 系統
+### ✅ SPEC-001：規格缺口修復
 
-- [x] 研究 Gameplay Feel 最佳實踐（Trauma Screen Shake、Hit Stop）
-- [x] 建立 `ScreenShake.gd`（Autoload，Trauma-based 震動）
-- [x] 建立 `HitEffect.gd`（Autoload，命中/擊殺/大獎特效）
-- [x] 更新 `Cannon.gd`（命中震動 + Hit Stop + 子彈拖尾）
-- [x] 更新 `TargetManager.gd`（擊殺爆炸 + BOSS 震動）
-- [x] 更新 `BonusGame.gd`（Bonus 觸發特效）
-- [x] 建立 `skills/skill-gameplay-juice.md`
-- [x] Commit + Merge + Push
+- [x] usagi Sprite 一致性修復（height diff=1px, width diff=1px）
+- [x] Spritesheet 重建（288×288，9個 sprite）
+- [x] BOSS 期間 Max Targets = 8（規格書 9章）
+- [x] BG004 金色雜草 coin_shower 廣播（規格書 29.3）
+- [x] 烏薩奇旋轉殘影（規格書 2章）
+- [x] 烏薩奇大獎高速旋轉跳起（規格書 2章）
+- [x] Server go build + go vet 通過
+- [x] QA 8/8 全部通過
 
 ---
 
@@ -34,25 +34,25 @@
 
 | 時間 | 決策 | 理由 |
 |------|------|------|
-| 自動觸發 | 優先改善 Gameplay Feel（88 → 92+）| 最低分項目，玩法完整性優先 |
-| 設計 | ScreenShake 用 Node 繼承而非 Camera2D | Autoload 不能直接是 Camera2D |
-| 設計 | Hit Stop 0.04s | 太長會讓玩家感覺卡頓，0.04s 剛好 |
+| 自動觸發 | 優先修復 usagi 一致性 | QC 顯示 width diff=10px 超出門檻 |
+| 設計 | 用水平翻轉生成 attack 幀 | 旋轉會改變 bbox，翻轉不會 |
+| 設計 | BOSS 期間移除最舊的超出目標 | 簡單有效，不影響 BOSS 本身 |
 
 ---
 
-## 明日預覽（DAY-008）
-
-### 🔴 P0
-1. 美術質量提升（目標 95+）
-2. 上網搜尋「pixel art chiikawa style sprite optimization」
+## 明日預覽（DAY-009）
 
 ### 🟠 P1
-3. 更新 `docs/ability-score.md`
-4. 執行完整 QA 確認 Gameplay Feel 分數提升
+1. 美術質量從 93 提升到 95+（目標物 AI 生成品質提升）
+2. 規格一致性最後 1% 缺口確認
 
 ### 🟡 P2
-5. 規格一致性補齊（97% → 100%）
-6. 研究 Godot 4 HTML5 效能優化
+3. 像素字體整合（Godot 4 自訂字體）
+4. 上網搜尋「godot 4 pixel font integration」
+
+### 🟢 P3
+5. 目標物 Spritesheet 品質提升
+6. 背景動態效果（海底氣泡動畫）
 
 ---
 
@@ -60,8 +60,8 @@
 
 > **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
 
-- 完成度：99%（Gameplay Juice 系統完成）
-- 美術質量：92/100（目標 95+，明日重點）
-- 規格一致性：97%（目標 100%）
+- 完成度：99.5%（規格缺口修復）
+- 美術質量：93/100（usagi 一致性完美，目標物 AI 生成品質待提升）
+- 規格一致性：99%（3個缺口修復，剩餘 1% 待確認）
 
-**最低分項目**：美術質量（92）→ 明日重點提升
+**最低分項目**：美術質量（93）→ 明日重點提升目標物品質

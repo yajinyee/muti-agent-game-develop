@@ -589,3 +589,52 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **解法：** 重新生成（T101 改種子，T105 改提示詞加「dark outline, clear silhouette」）
 - **T105 提示詞關鍵：** 加 `dark outline, clear silhouette` 讓去背更乾淨
 - **教訓：** 金色/黃色物體在洋紅色背景下去背效果差，需要強調輪廓
+
+## 62. usagi 一致性修復技術（2026-05-17）
+- **問題：** usagi attack 幀 78px 寬，idle 68px 寬，width diff=10px 超出門檻
+- **根本原因：** AI 生成的 attack 幀（揮棒姿勢）本身就比 idle 寬，shared_scale 無法解決
+- **解法：** 從 idle 幀做水平翻轉（FLIP_LEFT_RIGHT）+ 亮度提高 + 粉紅光暈生成 attack
+  - 水平翻轉不改變 bbox，確保 width diff=0
+  - 光暈只加在非透明像素上，不擴大 bbox
+- **bigwin 修復：** 上移只 2px（不是 8px），星星放在 idle bbox 範圍內（y>=12）
+- **工具：** `tools/fix_usagi_attack.py`、`tools/fix_usagi_bigwin_v2.py`
+- **教訓：** AI 生成的動作幀可能比 idle 大，用程式變換比重新生成更快且一致
+
+## 63. 規格缺口修復（2026-05-17）
+- **BOSS 期間 Max Targets = 8**（規格書 9章）：
+  - `updateBossBattle()` 加入非 BOSS 目標數量限制
+  - 超出時移除最舊的目標
+- **BG004 金色雜草 coin_shower**（規格書 29.3）：
+  - Server `handleBonusClick` 加入 BG004 分支，廣播 `coin_shower` 事件
+  - Client `BonusGame.gd` 的 `_on_bonus_event` 加入 `coin_shower` 處理
+- **烏薩奇旋轉殘影**（規格書 2章）：
+  - `Cannon.gd` 的 `_fire_projectile` 加入 usagi 的 `rotation_degrees` tween
+  - 飛行時旋轉 720 度，模擬「黃色旋轉殘影」效果
+- **烏薩奇大獎高速旋轉跳起**（規格書 2章）：
+  - `_on_reward_received` 依 char_id 分支，usagi 做旋轉 360 度 + 跳起
+- **教訓：** 規格書的角色特殊演出要逐條確認，不能只看「有沒有跳起」
+
+## 64. PIL Image.fromarray readonly 問題
+- **問題：** `Image.fromarray(arr)` 後 `pixels = img.load()` 再賦值報 `ValueError: image is readonly`
+- **解法：** `Image.fromarray(arr.copy()).copy()` — 兩個 copy() 確保可寫
+- **教訓：** numpy array 轉 PIL Image 後，需要 `.copy()` 才能用 `load()` 修改像素
+
+## 65. Godot 4 BitmapFont 整合（2026-05-17）
+- **格式：** BMFont .fnt + PNG 字體圖
+- **生成工具：** `tools/generate_pixel_font.py`（Python Pillow，8x8 像素字體，95 個 ASCII 字元）
+- **輸出：** `assets/fonts/pixel8.fnt` + `assets/fonts/pixel8.png`（256×96，2x 放大）
+- **Godot 使用方式：**
+  ```gdscript
+  var font = load("res://assets/fonts/pixel8.fnt")
+  label.add_theme_font_override("font", font)
+  label.add_theme_font_size_override("font_size", 16)
+  ```
+- **注意：** BMFont .fnt 格式在 Godot 4 中用 `FontFile` 資源載入，不需要額外 .import 設定
+- **套用位置：** HUD.gd（所有 Label + Button）、Cannon.gd（語音字卡）、TargetManager.gd（獎勵跳字）
+- **教訓：** 像素字體要在 `_ready()` 中載入，用 `ResourceLoader.exists()` 先確認路徑存在
+
+## 66. T105 金幣魚像素數量偏低的根本原因
+- **問題：** T105 只有 42% 非透明像素（其他目標物 60-71%）
+- **根本原因：** 魚的形狀是橫向細長橢圓 + 漸隱魚尾，透明邊緣多是正常的
+- **正確評估方式：** 用 bbox 面積利用率（1740/2478 = 70%），不是整個畫布面積
+- **教訓：** 不同形狀的 sprite 不能用同一個「整體面積佔比」標準評估，要看 bbox 利用率

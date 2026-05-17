@@ -27,7 +27,16 @@ var _boss_time_left: float = 0.0
 var _boss_active: bool = false
 var _boss_timer_node: Control = null
 
+# 像素字體（規格書美術要求）
+var _pixel_font: Font = null
+const PIXEL_FONT_PATH = "res://assets/fonts/pixel8.fnt"
+
 func _ready() -> void:
+	# 載入像素字體
+	if ResourceLoader.exists(PIXEL_FONT_PATH):
+		_pixel_font = load(PIXEL_FONT_PATH)
+		_apply_pixel_font()
+
 	GameManager.player_updated.connect(_on_player_updated)
 	GameManager.game_state_changed.connect(_on_game_state_changed)
 	GameManager.reward_received.connect(_on_reward_received)
@@ -44,6 +53,20 @@ func _ready() -> void:
 	reward_popup.visible = false
 	_reward_popup_base_y = reward_popup.position.y
 	_update_ui()
+
+## 套用像素字體到所有 Label
+func _apply_pixel_font() -> void:
+	if not is_instance_valid(_pixel_font):
+		return
+	var labels = [coins_label, bet_label, character_label, labor_label, reward_popup, state_label]
+	for label in labels:
+		if is_instance_valid(label):
+			label.add_theme_font_override("font", _pixel_font)
+	# 按鈕字體
+	var buttons = [auto_button, lock_button, bet_minus_button, bet_plus_button, boss_button, bonus_button]
+	for btn in buttons:
+		if is_instance_valid(btn):
+			btn.add_theme_font_override("font", _pixel_font)
 
 func _on_player_updated(_data: Dictionary) -> void:
 	_update_ui()
@@ -189,6 +212,8 @@ func _start_boss_timer() -> void:
 	title.position = Vector2(10, 5)
 	title.add_theme_font_size_override("font_size", 16)
 	title.modulate = Color(1.0, 0.3, 0.3)
+	if is_instance_valid(_pixel_font):
+		title.add_theme_font_override("font", _pixel_font)
 	panel.add_child(title)
 
 	# 剩餘時間
@@ -198,6 +223,8 @@ func _start_boss_timer() -> void:
 	timer_lbl.position = Vector2(10, 28)
 	timer_lbl.add_theme_font_size_override("font_size", 28)
 	timer_lbl.modulate = Color(1.0, 0.9, 0.2)
+	if is_instance_valid(_pixel_font):
+		timer_lbl.add_theme_font_override("font", _pixel_font)
 	panel.add_child(timer_lbl)
 
 	# 倍率提示
@@ -207,15 +234,19 @@ func _start_boss_timer() -> void:
 	mult_lbl.position = Vector2(200, 28)
 	mult_lbl.add_theme_font_size_override("font_size", 28)
 	mult_lbl.modulate = Color(1.0, 0.5, 0.0)
+	if is_instance_valid(_pixel_font):
+		mult_lbl.add_theme_font_override("font", _pixel_font)
 	panel.add_child(mult_lbl)
 
 	# 倍率說明
 	var hint_lbl = Label.new()
 	hint_lbl.name = "BossHintLabel"
-	hint_lbl.text = "擊殺越快倍率越高！"
+	hint_lbl.text = "Kill faster = higher reward!"
 	hint_lbl.position = Vector2(10, 60)
 	hint_lbl.add_theme_font_size_override("font_size", 12)
 	hint_lbl.modulate = Color(0.8, 0.8, 0.8)
+	if is_instance_valid(_pixel_font):
+		hint_lbl.add_theme_font_override("font", _pixel_font)
 	panel.add_child(hint_lbl)
 
 func _stop_boss_timer() -> void:
