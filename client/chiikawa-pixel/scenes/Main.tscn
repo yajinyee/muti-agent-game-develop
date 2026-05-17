@@ -9,6 +9,9 @@
 
 [node name="Main" type="Node2D"]
 
+[node name="Camera2D" type="Camera2D" parent="."]
+position = Vector2(640, 360)
+
 [node name="Background" type="Sprite2D" parent="."]
 position = Vector2(640, 360)
 script = ExtResource("5")

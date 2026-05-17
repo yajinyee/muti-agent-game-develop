@@ -67,6 +67,10 @@ func _on_bonus_event(event_data: Dictionary) -> void:
 
 func _show_ready() -> void:
 	visible = true
+	# Bonus 觸發全畫面特效
+	HitEffect.spawn_bonus_trigger()
+	ScreenShake.add_trauma(0.4)
+
 	# 顯示 Bonus Ready 提示
 	var ready_label = Label.new()
 	ready_label.text = "🌿 BONUS READY! 🌿"
