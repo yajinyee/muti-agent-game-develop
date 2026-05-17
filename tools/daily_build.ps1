@@ -17,6 +17,10 @@ $ProjectRoot = Split-Path -Parent $ScriptDir
 $Date = Get-Date -Format "yyyy-MM-dd"
 $Timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
+# 確保 Python 輸出 UTF-8（解決中文編碼問題）
+$env:PYTHONUTF8 = "1"
+$env:PYTHONIOENCODING = "utf-8"
+
 # ─── 顏色輸出函數 ────────────────────────────────────────────────────────────
 
 function Write-OK { param($msg) Write-Host "[OK] $msg" -ForegroundColor Green }

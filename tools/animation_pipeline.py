@@ -17,12 +17,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
-try:
-    from PIL import Image
-    import numpy as np
-except ImportError:
-    print("[ERROR] 缺少依賴套件，請執行：pip install Pillow numpy")
-    sys.exit(1)
+from PIL import Image
+import numpy as np
 
 # ─── 常數設定 ───────────────────────────────────────────────────────────────
 
@@ -32,30 +28,20 @@ REPORTS_DIR = PROJECT_ROOT / "reports" / "animation"
 PREVIEW_DIR = REPORTS_DIR / "preview"
 
 CHARACTERS = ["chiikawa", "hachiware", "usagi"]
-ANIMATION_STATES = ["idle", "attack", "hit", "hurt", "bigwin", "skill", "bonus", "fail"]
+ANIMATION_STATES = ["idle", "attack", "bigwin"]  # 對齊 CharacterAnimator.gd 實際支援的狀態
 
 # 各動畫狀態的預期幀數
 EXPECTED_FRAMES = {
-    "idle": (4, 8),
-    "attack": (6, 8),
-    "hit": (4, 4),
-    "hurt": (3, 4),
-    "bigwin": (8, 12),
-    "skill": (8, 8),
-    "bonus": (6, 8),
-    "fail": (4, 4),
+    "idle":   (4, 8),
+    "attack": (3, 6),
+    "bigwin": (4, 8),
 }
 
 # 各動畫狀態的 FPS
 ANIMATION_FPS = {
-    "idle": 8,
-    "attack": 12,
-    "hit": 10,
-    "hurt": 10,
-    "bigwin": 10,
-    "skill": 12,
-    "bonus": 10,
-    "fail": 8,
+    "idle":   4,
+    "attack": 8,
+    "bigwin": 6,
 }
 
 # 一致性檢查容差
