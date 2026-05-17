@@ -43,6 +43,10 @@ func _ready() -> void:
 	GameManager.boss_event.connect(_on_boss_event)
 	GameManager.bonus_event.connect(_on_bonus_event)
 
+	# 斷線/重連提示
+	NetworkManager.disconnected.connect(_on_disconnected)
+	NetworkManager.connected.connect(_on_reconnected)
+
 	auto_button.pressed.connect(_on_auto_pressed)
 	lock_button.pressed.connect(_on_lock_pressed)
 	bet_minus_button.pressed.connect(_on_bet_minus)
@@ -53,6 +57,7 @@ func _ready() -> void:
 	reward_popup.visible = false
 	_reward_popup_base_y = reward_popup.position.y
 	_update_ui()
+	_create_disconnect_overlay()
 
 ## 套用像素字體到所有 Label
 func _apply_pixel_font() -> void:
@@ -346,3 +351,93 @@ func _on_bet_minus() -> void:
 
 func _on_bet_plus() -> void:
 	NetworkManager.send_bet_change(min(10, GameManager.get_bet_level() + 1))
+
+# ── 斷線/重連 UI ──────────────────────────────────────────────
+
+var _disconnect_overlay: Control = null
+var _reconnect_dots_timer: float = 0.0
+var _reconnect_dots: int = 0
+var _is_disconnected: bool = false
+
+func _create_disconnect_overlay() -> void:
+	var overlay = Control.new()
+	overlay.name = "DisconnectOverlay"
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.visible = false
+	overlay.z_index = 100
+	add_child(overlay)
+	_disconnect_overlay = overlay
+
+	# 半透明黑色背景
+	var bg = ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.0, 0.0, 0.0, 0.75)
+	overlay.add_child(bg)
+
+	# 斷線圖示
+	var icon_label = Label.new()
+	icon_label.name = "DisconnectIcon"
+	icon_label.text = "📡"
+	icon_label.position = Vector2(580, 290)
+	icon_label.add_theme_font_size_override("font_size", 48)
+	overlay.add_child(icon_label)
+
+	# 斷線文字
+	var msg_label = Label.new()
+	msg_label.name = "DisconnectMsg"
+	msg_label.text = "連線中斷"
+	msg_label.position = Vector2(540, 355)
+	msg_label.add_theme_font_size_override("font_size", 24)
+	msg_label.modulate = Color(1.0, 0.4, 0.4)
+	if is_instance_valid(_pixel_font):
+		msg_label.add_theme_font_override("font", _pixel_font)
+	overlay.add_child(msg_label)
+
+	# 重連中文字（帶動態點點）
+	var reconnect_label = Label.new()
+	reconnect_label.name = "ReconnectLabel"
+	reconnect_label.text = "重新連線中..."
+	reconnect_label.position = Vector2(520, 390)
+	reconnect_label.add_theme_font_size_override("font_size", 18)
+	reconnect_label.modulate = Color(0.8, 0.8, 0.8)
+	if is_instance_valid(_pixel_font):
+		reconnect_label.add_theme_font_override("font", _pixel_font)
+	overlay.add_child(reconnect_label)
+
+func _on_disconnected() -> void:
+	_is_disconnected = true
+	if is_instance_valid(_disconnect_overlay):
+		_disconnect_overlay.visible = true
+		# 閃爍動畫
+		var tween = create_tween().set_loops()
+		tween.tween_property(_disconnect_overlay, "modulate:a", 0.7, 0.5)
+		tween.tween_property(_disconnect_overlay, "modulate:a", 1.0, 0.5)
+
+func _on_reconnected() -> void:
+	_is_disconnected = false
+	if is_instance_valid(_disconnect_overlay):
+		# 顯示「已重新連線」然後淡出
+		var msg = _disconnect_overlay.get_node_or_null("DisconnectMsg")
+		if msg:
+			msg.text = "已重新連線 ✓"
+			msg.modulate = Color(0.3, 1.0, 0.3)
+		var reconnect = _disconnect_overlay.get_node_or_null("ReconnectLabel")
+		if reconnect:
+			reconnect.visible = false
+
+		var tween = create_tween()
+		tween.tween_interval(1.0)
+		tween.tween_property(_disconnect_overlay, "modulate:a", 0.0, 0.5)
+		tween.tween_callback(func():
+			if is_instance_valid(_disconnect_overlay):
+				_disconnect_overlay.visible = false
+				_disconnect_overlay.modulate.a = 1.0
+				# 重置文字
+				var m = _disconnect_overlay.get_node_or_null("DisconnectMsg")
+				if m:
+					m.text = "連線中斷"
+					m.modulate = Color(1.0, 0.4, 0.4)
+				var r = _disconnect_overlay.get_node_or_null("ReconnectLabel")
+				if r:
+					r.visible = true
+		)

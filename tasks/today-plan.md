@@ -28,6 +28,15 @@
 - [x] Server go build + go vet 通過
 - [x] QA 8/8 全部通過
 
+### ✅ 夜間繼續（22:48）
+
+- [x] chiikawa/hachiware attack 幀一致性修復（0px/0px ✅）
+- [x] Spritesheet 重建（全部 ✅）
+- [x] QA 8/8 全部通過（Spec Completeness 100/100）
+- [x] 海底氣泡動畫（BubbleLayer.gd + BackgroundManager 更新）
+- [x] 自動射擊智慧目標選擇（倍率 + HP + 位置評分）
+- [x] Server BUILD OK + VET OK
+
 ---
 
 ## 今日決策記錄

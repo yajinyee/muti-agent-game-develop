@@ -20,7 +20,7 @@ const CHAR_COLORS = {
 
 const VOICE_TEXTS = {
 	"chiikawa": "YaDa!",
-	"hachiware": "Yagaina!",
+	"hachiware": "尖尖哇嘎乃！",
 	"usagi": "Yaha!"
 }
 
@@ -102,14 +102,21 @@ func _fire_projectile(target_pos: Vector2) -> void:
 		var s := Sprite2D.new()
 		s.texture = load(sprite_path)
 		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		s.scale = Vector2(1.0, 1.0)
+		s.scale = Vector2(1.5, 1.5)  # 放大 1.5x 讓子彈更容易看見（Gravity Ace 原則）
 		proj.add_child(s)
 	else:
+		# 備用：更大的子彈（16×10px），更容易看見
 		var rect := ColorRect.new()
-		rect.size = Vector2(10, 6)
-		rect.position = Vector2(-5, -3)
+		rect.size = Vector2(16, 10)
+		rect.position = Vector2(-8, -5)
 		rect.color = CHAR_COLORS.get(char_id, Color.WHITE)
 		proj.add_child(rect)
+		# 加一個亮核心
+		var core := ColorRect.new()
+		core.size = Vector2(8, 6)
+		core.position = Vector2(-4, -3)
+		core.color = Color.WHITE
+		proj.add_child(core)
 
 	# 計算方向（防止零向量）
 	var diff = target_pos - CANNON_POSITION
@@ -193,9 +200,19 @@ func _on_reward_received(reward: Dictionary) -> void:
 		tween2.parallel().tween_property(self, "rotation_degrees", 360.0, 0.25)
 		tween2.tween_property(self, "position:y", position.y, 0.10)
 		tween2.tween_property(self, "rotation_degrees", 0.0, 0.05)
+	elif char_id == "hachiware":
+		# 小八：高舉討伐棒（規格書 2章）— 向上旋轉 -30 度停頓，再回正
+		tween2.tween_property(self, "position:y", position.y - 20, 0.10)
+		tween2.parallel().tween_property(self, "rotation_degrees", -30.0, 0.10)
+		tween2.tween_interval(0.20)  # 停頓（高舉姿勢）
+		tween2.tween_property(self, "position:y", position.y, 0.12)
+		tween2.parallel().tween_property(self, "rotation_degrees", 0.0, 0.12)
 	else:
-		# 吉伊卡哇/小八：跳起
-		tween2.tween_property(self, "position:y", position.y - 18, 0.12)
+		# 吉伊卡哇：驚慌跳起（規格書 2章）— 快速跳起 + 輕微搖晃
+		tween2.tween_property(self, "position:y", position.y - 18, 0.10)
+		tween2.parallel().tween_property(self, "rotation_degrees", 8.0, 0.05)
+		tween2.tween_property(self, "rotation_degrees", -8.0, 0.05)
+		tween2.tween_property(self, "rotation_degrees", 0.0, 0.05)
 		tween2.tween_property(self, "position:y", position.y, 0.12)
 
 	# 大獎特效 + 強烈震動
@@ -207,9 +224,14 @@ func _on_reward_received(reward: Dictionary) -> void:
 func _show_hit_flash() -> void:
 	if not is_instance_valid(cannon_sprite):
 		return
+	# 砲台閃白
 	var tween = create_tween()
-	tween.tween_property(cannon_sprite, "modulate", Color(2.0, 2.0, 2.0, 1.0), 0.04)
-	tween.tween_property(cannon_sprite, "modulate", Color.WHITE, 0.06)
+	tween.tween_property(cannon_sprite, "modulate", Color(2.5, 2.5, 2.5, 1.0), 0.03)
+	tween.tween_property(cannon_sprite, "modulate", Color.WHITE, 0.08)
+	# 砲台輕微縮放（打擊感）
+	var tween2 = create_tween()
+	tween2.tween_property(cannon_sprite, "scale", Vector2(1.15, 1.15), 0.03)
+	tween2.tween_property(cannon_sprite, "scale", Vector2(1.0, 1.0), 0.08)
 
 func _spawn_hit_effect(pos: Vector2, char_id: String) -> void:
 	# 已由 HitEffect autoload 取代，保留空函式避免舊呼叫出錯
@@ -220,28 +242,29 @@ func _spawn_trail(parent: Node, from: Vector2, to: Vector2, duration: float, col
 	if not is_instance_valid(parent):
 		return
 
-	var steps = int(duration / 0.03)  # 每 30ms 一個殘影
-	steps = clamp(steps, 2, 8)
+	var steps = int(duration / 0.025)  # 每 25ms 一個殘影（更密集）
+	steps = clamp(steps, 3, 10)
 
 	for i in steps:
 		var t = float(i) / float(steps)
 		var trail_pos = from.lerp(to, t)
-		var delay = t * duration * 0.7  # 殘影稍微落後
+		var delay = t * duration * 0.7
 
-		# 用 SceneTreeTimer 延遲生成
 		var timer = get_tree().create_timer(delay)
 		timer.timeout.connect(func():
 			if not is_instance_valid(parent):
 				return
 			var dot = ColorRect.new()
-			dot.size = Vector2(5, 5)
-			dot.position = trail_pos - Vector2(2.5, 2.5)
-			dot.color = Color(color.r, color.g, color.b, 0.5 * (1.0 - t))
+			# 拖尾大小隨位置遞減（頭部大、尾部小）
+			var dot_size = lerp(8.0, 3.0, t)
+			dot.size = Vector2(dot_size, dot_size)
+			dot.position = trail_pos - Vector2(dot_size / 2, dot_size / 2)
+			dot.color = Color(color.r, color.g, color.b, 0.6 * (1.0 - t))
 			dot.z_index = 5
 			parent.add_child(dot)
 
 			var tw = dot.create_tween()
-			tw.tween_property(dot, "modulate:a", 0.0, 0.12)
+			tw.tween_property(dot, "modulate:a", 0.0, 0.10)
 			tw.tween_callback(func():
 				if is_instance_valid(dot):
 					dot.queue_free()
