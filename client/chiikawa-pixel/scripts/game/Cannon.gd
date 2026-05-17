@@ -24,6 +24,10 @@ const VOICE_TEXTS = {
 	"usagi": "Yaha!"
 }
 
+# 像素字體
+const PIXEL_FONT_PATH = "res://assets/fonts/pixel8.fnt"
+var _pixel_font: Font = null
+
 @onready var cannon_sprite: Sprite2D = $CannonSprite
 @onready var attack_label: Label = $AttackLabel
 
@@ -31,6 +35,9 @@ func _ready() -> void:
 	GameManager.attack_result.connect(_on_attack_result)
 	GameManager.reward_received.connect(_on_reward_received)
 	GameManager.player_updated.connect(_on_player_updated)
+	# 載入像素字體
+	if ResourceLoader.exists(PIXEL_FONT_PATH):
+		_pixel_font = load(PIXEL_FONT_PATH)
 
 func _process(_delta: float) -> void:
 	pass
@@ -119,6 +126,9 @@ func _fire_projectile(target_pos: Vector2) -> void:
 	# 飛行動畫（依實際速度計算時間）
 	var tween = create_tween()
 	tween.tween_property(proj, "position", target_pos, flight_time)
+	# 烏薩奇：旋轉殘影效果（規格書 2章：黃色旋轉殘影）
+	if char_id == "usagi":
+		tween.parallel().tween_property(proj, "rotation_degrees", 720.0, flight_time)
 	tween.tween_callback(func():
 		if is_instance_valid(proj):
 			# 命中特效（使用新的 HitEffect 系統）
@@ -161,6 +171,8 @@ func _on_reward_received(reward: Dictionary) -> void:
 	label.position = Vector2(580, 520)
 	label.add_theme_font_size_override("font_size", 32)
 	label.modulate = color
+	if is_instance_valid(_pixel_font):
+		label.add_theme_font_override("font", _pixel_font)
 	parent.add_child(label)
 
 	var tween = create_tween()
@@ -173,10 +185,18 @@ func _on_reward_received(reward: Dictionary) -> void:
 			label.queue_free()
 	)
 
-	# 角色跳起
+	# 角色跳起（規格書 2章：大獎演出）
 	var tween2 = create_tween()
-	tween2.tween_property(self, "position:y", position.y - 18, 0.12)
-	tween2.tween_property(self, "position:y", position.y, 0.12)
+	if char_id == "usagi":
+		# 烏薩奇：高速旋轉跳起（規格書 2章）
+		tween2.tween_property(self, "position:y", position.y - 22, 0.10)
+		tween2.parallel().tween_property(self, "rotation_degrees", 360.0, 0.25)
+		tween2.tween_property(self, "position:y", position.y, 0.10)
+		tween2.tween_property(self, "rotation_degrees", 0.0, 0.05)
+	else:
+		# 吉伊卡哇/小八：跳起
+		tween2.tween_property(self, "position:y", position.y - 18, 0.12)
+		tween2.tween_property(self, "position:y", position.y, 0.12)
 
 	# 大獎特效 + 強烈震動
 	HitEffect.spawn_big_win(Vector2(640, 360), multiplier)

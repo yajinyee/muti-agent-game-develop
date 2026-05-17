@@ -406,6 +406,11 @@ func _spawn_reward_text(pos: Vector2, amount: int, multiplier: float) -> void:
 	label.position = pos
 	label.add_theme_font_size_override("font_size", 16)
 
+	# 套用像素字體
+	var font_path = "res://assets/fonts/pixel8.fnt"
+	if ResourceLoader.exists(font_path):
+		label.add_theme_font_override("font", load(font_path))
+
 	# 依倍率設定顏色（規格書 8.3）
 	if multiplier >= 100:
 		label.modulate = Color(1.0, 0.2, 0.2)
