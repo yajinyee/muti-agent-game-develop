@@ -95,7 +95,7 @@ func _fire_projectile(target_pos: Vector2) -> void:
 		var s := Sprite2D.new()
 		s.texture = load(sprite_path)
 		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		s.scale = Vector2(1.0, 1.0)  # v2 投射物已是 32x16，不需要放大
+		s.scale = Vector2(1.0, 1.0)
 		proj.add_child(s)
 	else:
 		var rect := ColorRect.new()
@@ -111,22 +111,36 @@ func _fire_projectile(target_pos: Vector2) -> void:
 
 	parent.add_child(proj)
 
+	# 拖尾系統：每隔一段時間生成殘影
+	var trail_color = CHAR_COLORS.get(char_id, Color.WHITE)
+	var trail_timer = 0.0
+	var trail_interval = 0.025  # 每 25ms 一個殘影
+
 	# 飛行動畫（依實際速度計算時間）
 	var tween = create_tween()
 	tween.tween_property(proj, "position", target_pos, flight_time)
 	tween.tween_callback(func():
-		# 確認節點還存在才執行
 		if is_instance_valid(proj):
-			_spawn_hit_effect(target_pos, char_id)
+			# 命中特效（使用新的 HitEffect 系統）
+			HitEffect.spawn_hit(target_pos, char_id)
 			proj.queue_free()
 	)
+
+	# 拖尾協程（用 _spawn_trail_step 模擬）
+	_spawn_trail(parent, CANNON_POSITION, target_pos, flight_time, trail_color)
 
 func _on_attack_result(result: Dictionary) -> void:
 	if result.get("is_hit", false):
 		_show_hit_flash()
 		AudioManager.play_sfx(AudioManager.SFX.HIT)
+		# 命中震動（輕微）
+		ScreenShake.add_trauma(0.18)
+		# Hit Stop（增加打擊感）
+		HitEffect.hit_stop(0.04)
 	if result.get("is_kill", false):
 		AudioManager.play_sfx(AudioManager.SFX.KILL)
+		# 擊殺震動（中等）
+		ScreenShake.add_trauma(0.35)
 
 func _on_reward_received(reward: Dictionary) -> void:
 	var multiplier = reward.get("multiplier", 1.0)
@@ -164,6 +178,10 @@ func _on_reward_received(reward: Dictionary) -> void:
 	tween2.tween_property(self, "position:y", position.y - 18, 0.12)
 	tween2.tween_property(self, "position:y", position.y, 0.12)
 
+	# 大獎特效 + 強烈震動
+	HitEffect.spawn_big_win(Vector2(640, 360), multiplier)
+	ScreenShake.add_trauma(0.7)
+
 	AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 
 func _show_hit_flash() -> void:
@@ -174,37 +192,41 @@ func _show_hit_flash() -> void:
 	tween.tween_property(cannon_sprite, "modulate", Color.WHITE, 0.06)
 
 func _spawn_hit_effect(pos: Vector2, char_id: String) -> void:
-	var parent = get_parent()
+	# 已由 HitEffect autoload 取代，保留空函式避免舊呼叫出錯
+	HitEffect.spawn_hit(pos, char_id)
+
+## 子彈拖尾：沿飛行路徑生成漸隱殘影
+func _spawn_trail(parent: Node, from: Vector2, to: Vector2, duration: float, color: Color) -> void:
 	if not is_instance_valid(parent):
 		return
 
-	var path = "res://assets/sprites/effects/hit_" + char_id + ".png"
-	var effect := Node2D.new()
+	var steps = int(duration / 0.03)  # 每 30ms 一個殘影
+	steps = clamp(steps, 2, 8)
 
-	if ResourceLoader.exists(path):
-		var s := Sprite2D.new()
-		s.texture = load(path)
-		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		s.scale = Vector2(1.0, 1.0)  # v2 特效已是 48x48，不需要放大
-		effect.add_child(s)
-	else:
-		# 備用：簡單閃光圓圈
-		var rect := ColorRect.new()
-		rect.size = Vector2(20, 20)
-		rect.position = Vector2(-10, -10)
-		rect.color = CHAR_COLORS.get(char_id, Color.WHITE)
-		effect.add_child(rect)
+	for i in steps:
+		var t = float(i) / float(steps)
+		var trail_pos = from.lerp(to, t)
+		var delay = t * duration * 0.7  # 殘影稍微落後
 
-	effect.position = pos
-	parent.add_child(effect)
+		# 用 SceneTreeTimer 延遲生成
+		var timer = get_tree().create_timer(delay)
+		timer.timeout.connect(func():
+			if not is_instance_valid(parent):
+				return
+			var dot = ColorRect.new()
+			dot.size = Vector2(5, 5)
+			dot.position = trail_pos - Vector2(2.5, 2.5)
+			dot.color = Color(color.r, color.g, color.b, 0.5 * (1.0 - t))
+			dot.z_index = 5
+			parent.add_child(dot)
 
-	var tween = create_tween()
-	tween.tween_property(effect, "scale", Vector2(2.5, 2.5), 0.10)
-	tween.parallel().tween_property(effect, "modulate:a", 0.0, 0.10)
-	tween.tween_callback(func():
-		if is_instance_valid(effect):
-			effect.queue_free()
-	)
+			var tw = dot.create_tween()
+			tw.tween_property(dot, "modulate:a", 0.0, 0.12)
+			tw.tween_callback(func():
+				if is_instance_valid(dot):
+					dot.queue_free()
+			)
+		)
 
 func _on_player_updated(data: Dictionary) -> void:
 	var char_name = GameManager.get_character_name()

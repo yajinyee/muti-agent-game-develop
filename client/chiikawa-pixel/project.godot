@@ -37,3 +37,5 @@ textures/canvas_textures/default_texture_filter=0
 GameManager="*res://scripts/game/GameManager.gd"
 NetworkManager="*res://scripts/network/NetworkManager.gd"
 AudioManager="*res://scripts/game/AudioManager.gd"
+HitEffect="*res://scripts/game/HitEffect.gd"
+ScreenShake="*res://scripts/game/ScreenShake.gd"
