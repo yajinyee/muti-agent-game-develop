@@ -14,7 +14,7 @@
 | 遊戲名稱 | 吉伊卡哇：像素大討伐 |
 | 遊戲類型 | 捕魚機（Fish Shooting Game）|
 | 開發狀態 | 99% 完成 |
-| 美術質量 | 92/100 |
+| 美術質量 | 95/100 |
 | 規格一致性 | **98%**（DAY-007 BOSS 計時器 HUD 補齊）|
 | Server 技術 | Go + WebSocket，Port 7777 |
 | Client 技術 | Godot 4.6.2，HTML5 匯出 |
