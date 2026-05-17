@@ -1,0 +1,943 @@
+// Package game 遊戲主邏輯
+package game
+
+import (
+	"encoding/json"
+	"fmt"
+	"log"
+	"math/rand"
+	"sync"
+	"time"
+
+	"github.com/google/uuid"
+
+	"digital-twin/server/internal/data"
+	"digital-twin/server/internal/game/combat"
+	"digital-twin/server/internal/game/state"
+	"digital-twin/server/internal/game/target"
+	"digital-twin/server/internal/player"
+	"digital-twin/server/internal/ws"
+)
+
+// Game 遊戲實例（單一房間）
+type Game struct {
+	mu sync.RWMutex
+
+	ID          string
+	State       state.GameState
+	Players     map[string]*player.Player
+	Targets     map[string]*target.Target
+	SpawnSys    *target.SpawnSystem
+	Hub         *ws.Hub
+
+	// 計時器
+	lastSpawnAt        time.Time
+	bossSpawnedAt      time.Time
+	bonusStartedAt     time.Time
+	lastBonusAt        time.Time
+	lastSpecialEventAt time.Time
+	nextSpecialEventIn float64
+	bossInstanceID     string
+	nextBossAt         time.Time  // BOSS 自動觸發時間（規格書 28.1）
+
+	// 補償機制
+	lastHighRewardAt time.Time
+	bonusSpecialBonus float64
+
+	// Bonus 狀態
+	bonusScores map[string]int // playerID -> score
+	bonusEntryBet map[string]int // playerID -> entry bet cost
+
+	stopCh chan struct{}
+}
+
+// NewGame 建立新遊戲
+func NewGame(id string, hub *ws.Hub) *Game {
+	g := &Game{
+		ID:                 id,
+		State:              state.StateNormalPlay,
+		Players:            make(map[string]*player.Player),
+		Targets:            make(map[string]*target.Target),
+		SpawnSys:           target.NewSpawnSystem(),
+		Hub:                hub,
+		lastSpawnAt:        time.Now(),
+		lastSpecialEventAt: time.Now(),
+		nextSpecialEventIn: 30,
+		bonusScores:        make(map[string]int),
+		bonusEntryBet:      make(map[string]int),
+		// BOSS 自動觸發：遊戲開始後 3-5 分鐘（規格書 28.1）
+		nextBossAt: time.Now().Add(time.Duration(180+rand.Intn(120)) * time.Second),
+		stopCh:             make(chan struct{}),
+	}
+	return g
+}
+
+// GetState 取得目前遊戲狀態（thread-safe）
+func (g *Game) GetState() string {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	return string(g.State)
+}
+
+// Start 啟動遊戲循環
+func (g *Game) Start() {
+	log.Printf("[Game] %s started", g.ID)
+	go g.gameLoop()
+}
+
+// Stop 停止遊戲
+func (g *Game) Stop() {
+	close(g.stopCh)
+}
+
+// AddPlayer 加入玩家
+func (g *Game) AddPlayer(playerID string) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	if _, exists := g.Players[playerID]; !exists {
+		g.Players[playerID] = player.NewPlayer(playerID, 10000) // 初始 10000 金幣
+		log.Printf("[Game] Player %s joined game %s", playerID, g.ID)
+	}
+}
+
+// RemovePlayer 移除玩家
+func (g *Game) RemovePlayer(playerID string) {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+	delete(g.Players, playerID)
+	log.Printf("[Game] Player %s left game %s", playerID, g.ID)
+}
+
+// HandleMessage 處理玩家訊息
+func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
+	g.mu.Lock()
+	p, ok := g.Players[clientID]
+	g.mu.Unlock()
+
+	if !ok {
+		return
+	}
+
+	switch msg.Type {
+	case ws.MsgAttack:
+		g.handleAttack(p, msg)
+	case ws.MsgLock:
+		g.handleLock(p, msg)
+	case ws.MsgAutoToggle:
+		g.handleAutoToggle(p, msg)
+	case ws.MsgBetChange:
+		g.handleBetChange(p, msg)
+	case ws.MsgBonusClick:
+		g.handleBonusClick(p, msg)
+	case ws.MsgTriggerBoss:
+		g.triggerBoss()
+	case ws.MsgTriggerBonus:
+		g.triggerBonusReady()
+	case ws.MsgPing:
+		g.Hub.Send(clientID, &ws.Message{Type: ws.MsgPong})
+	}
+}
+
+// handleAttack 處理攻擊
+func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
+	// 狀態檢查
+	g.mu.RLock()
+	currentState := g.State
+	g.mu.RUnlock()
+
+	if currentState != state.StateNormalPlay &&
+		currentState != state.StateSpecialTargetEvent &&
+		currentState != state.StateBossBattle {
+		return
+	}
+
+	// 解析 payload
+	var payload ws.AttackPayload
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		return
+	}
+
+	// 扣除投注
+	betCost, ok := p.DeductBet()
+	if !ok {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgError,
+			Payload: ws.ErrorPayload{Code: "insufficient_coins", Message: "金幣不足"},
+		})
+		return
+	}
+
+	// 找目標
+	g.mu.Lock()
+	targetID := payload.TargetID
+	if targetID == "" {
+		targetID = p.LockTargetID
+	}
+	t := g.Targets[targetID]
+	g.mu.Unlock()
+
+	// 處理攻擊
+	req := combat.AttackRequest{
+		PlayerID: p.ID,
+		TargetID: targetID,
+		BetLevel: p.BetLevel,
+		IsAuto:   p.IsAuto,
+		IsLock:   targetID != "",
+		ClickX:   payload.ClickX,
+		ClickY:   payload.ClickY,
+	}
+
+	result := combat.ProcessAttack(req, t)
+	_ = betCost
+
+	// 傳送攻擊結果
+	g.Hub.Send(p.ID, &ws.Message{
+		Type: ws.MsgAttackResult,
+		Payload: ws.AttackResultPayload{
+			TargetID:    result.TargetID,
+			IsHit:       result.IsHit,
+			IsKill:      result.IsKill,
+			Damage:      result.Damage,
+			Reward:      result.Reward,
+			LaborGain:   result.LaborGain,
+			CharacterID: result.CharacterID,
+			Multiplier:  result.Multiplier,
+		},
+	})
+
+	if result.IsKill && t != nil {
+		g.handleKill(p, t, result)
+	} else if result.IsHit && t != nil && t.DefID == "T102" && !t.IsFleeing {
+		// T102 寶箱怪：受擊後加速逃跑（規格書 26.2）
+		t.IsFleeing = true
+		g.Hub.Broadcast(&ws.Message{
+			Type: ws.MsgTargetUpdate,
+			Payload: ws.TargetUpdatePayload{
+				InstanceID: t.InstanceID,
+				HP:         t.HP,
+				MaxHP:      t.MaxHP,
+				IsFleeing:  true,
+			},
+		})
+	}
+
+	// BOSS 階段變化
+	if result.BossPhaseChanged {
+		g.Hub.Broadcast(&ws.Message{
+			Type: ws.MsgBossEvent,
+			Payload: ws.BossEventPayload{
+				Event:      "phase_change",
+				InstanceID: t.InstanceID,
+				Phase:      result.BossPhase,
+				HP:         t.HP,
+				MaxHP:      t.MaxHP,
+			},
+		})
+	}
+
+	// 更新玩家狀態
+	g.sendPlayerUpdate(p)
+}
+
+// handleKill 處理目標擊破
+func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.AttackResult) {
+	g.mu.Lock()
+	delete(g.Targets, t.InstanceID)
+	g.mu.Unlock()
+
+	// 發放獎勵
+	p.AddReward(result.Reward)
+
+	// 累積勞動值
+	bonusTriggered := p.AddLaborValue(result.LaborGain)
+
+	// 廣播擊破事件
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgTargetKill,
+		Payload: ws.TargetKillPayload{
+			InstanceID: t.InstanceID,
+			DefID:      t.DefID,
+			Multiplier: result.Multiplier,
+			Reward:     result.Reward,
+			LaborGain:  result.LaborGain,
+			KillerID:   p.ID,
+		},
+	})
+
+	// 發放獎勵通知
+	g.Hub.Send(p.ID, &ws.Message{
+		Type: ws.MsgReward,
+		Payload: ws.RewardPayload{
+			Source:     "target",
+			Amount:     result.Reward,
+			Multiplier: result.Multiplier,
+			NewBalance: p.Coins,
+		},
+	})
+
+	// 記錄高倍率獎勵時間（補償機制用）
+	if result.Multiplier >= 20 {
+		g.mu.Lock()
+		g.lastHighRewardAt = time.Now()
+		g.bonusSpecialBonus = 0 // 重置補償
+		g.mu.Unlock()
+	}
+
+	// BOSS 擊破
+	if t.Def.Type == data.TargetTypeBoss {
+		g.handleBossKill(p, t, result)
+		return
+	}
+
+	// 觸發 Bonus
+	if bonusTriggered {
+		g.triggerBonusReady()
+	}
+}
+
+// handleBossKill BOSS 擊破
+func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat.AttackResult) {
+	g.mu.Lock()
+	g.bossInstanceID = ""
+	g.mu.Unlock()
+
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgBossEvent,
+		Payload: ws.BossEventPayload{
+			Event:      "kill",
+			InstanceID: t.InstanceID,
+			Reward:     result.Reward,
+			Multiplier: result.Multiplier,
+		},
+	})
+
+	g.transitionState(state.StateBossResult)
+	time.AfterFunc(3*time.Second, func() {
+		g.transitionState(state.StateNormalPlay)
+	})
+}
+
+// handleLock 處理鎖定
+func (g *Game) handleLock(p *player.Player, msg *ws.Message) {
+	var payload ws.LockPayload
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		return
+	}
+	p.SetLock(payload.TargetID)
+	g.sendPlayerUpdate(p)
+}
+
+// handleAutoToggle 切換自動攻擊
+func (g *Game) handleAutoToggle(p *player.Player, msg *ws.Message) {
+	p.SetAuto(!p.IsAuto)
+	g.sendPlayerUpdate(p)
+}
+
+// handleBetChange 切換投注
+func (g *Game) handleBetChange(p *player.Player, msg *ws.Message) {
+	g.mu.RLock()
+	currentState := g.State
+	g.mu.RUnlock()
+
+	// Bonus Game 中不允許切換
+	if currentState == state.StateBonusGame {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgError,
+			Payload: ws.ErrorPayload{Code: "bet_locked", Message: "Bonus Game 中無法切換投注"},
+		})
+		return
+	}
+
+	var payload ws.BetChangePayload
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		log.Printf("[Game] handleBetChange parse error: %v", err)
+		return
+	}
+
+	if !p.SetBetLevel(payload.BetLevel) {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgError,
+			Payload: ws.ErrorPayload{Code: "invalid_bet_level", Message: "無效的投注等級"},
+		})
+		return
+	}
+
+	log.Printf("[Game] Player %s bet changed to LV%d", p.ID, payload.BetLevel)
+	g.sendPlayerUpdate(p)
+}
+
+// handleBonusClick 處理 Bonus 點擊
+func (g *Game) handleBonusClick(p *player.Player, msg *ws.Message) {
+	g.mu.RLock()
+	currentState := g.State
+	g.mu.RUnlock()
+
+	if currentState != state.StateBonusGame {
+		return
+	}
+
+	var payload ws.BonusClickPayload
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		return
+	}
+
+	g.mu.Lock()
+	t := g.Targets[payload.TargetID]
+	if t != nil && t.IsAlive {
+		t.IsAlive = false
+		score := t.Def.HP // HP 欄位存 ClickScore
+		defID := t.DefID
+		delete(g.Targets, payload.TargetID)
+		g.bonusScores[p.ID] += score
+
+		// 廣播 target_kill（讓 Client 播放拔草動畫）
+		g.mu.Unlock()
+		g.Hub.Broadcast(&ws.Message{
+			Type: ws.MsgTargetKill,
+			Payload: ws.TargetKillPayload{
+				InstanceID: payload.TargetID,
+				DefID:      defID,
+				Multiplier: 1,
+				Reward:     score,
+				LaborGain:  score,
+				KillerID:   p.ID,
+			},
+		})
+
+		// 特殊雜草效果
+		switch defID {
+		case "BG003": // 發光雜草：增加倍率（加分）
+			g.mu.Lock()
+			g.bonusScores[p.ID] += 5 // 額外加分
+			g.mu.Unlock()
+		case "BG005": // 搗亂怪草：扣分
+			g.mu.Lock()
+			if g.bonusScores[p.ID] > 5 {
+				g.bonusScores[p.ID] -= 5
+			}
+			g.mu.Unlock()
+		}
+		return
+	}
+	g.mu.Unlock()
+}
+
+// ---- 遊戲循環 ----
+
+func (g *Game) gameLoop() {
+	ticker := time.NewTicker(100 * time.Millisecond) // 10 FPS 伺服器更新
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-g.stopCh:
+			return
+		case <-ticker.C:
+			g.update()
+		}
+	}
+}
+
+func (g *Game) update() {
+	g.mu.Lock()
+	currentState := g.State
+	g.mu.Unlock()
+
+	switch currentState {
+	case state.StateNormalPlay, state.StateSpecialTargetEvent:
+		g.updateNormalPlay()
+	case state.StateBossBattle:
+		g.updateBossBattle()
+	case state.StateBonusGame:
+		g.updateBonusGame()
+	}
+}
+
+func (g *Game) updateNormalPlay() {
+	now := time.Now()
+
+	// 清除過期目標
+	g.mu.Lock()
+	for id, t := range g.Targets {
+		if t.IsExpired() || !t.IsAlive {
+			delete(g.Targets, id)
+		}
+	}
+	targetCount := len(g.Targets)
+	g.mu.Unlock()
+
+	// 生成新目標
+	if now.Sub(g.lastSpawnAt).Seconds() >= data.SpawnInterval &&
+		targetCount < data.MaxTargetsOnScreen {
+		g.spawnTarget()
+		g.mu.Lock()
+		g.lastSpawnAt = now
+		g.mu.Unlock()
+	}
+
+	// 補償機制：30秒無高倍率獎勵，提高特殊目標出現率
+	g.mu.Lock()
+	if now.Sub(g.lastHighRewardAt).Seconds() > 30 {
+		g.bonusSpecialBonus = 0.05
+	}
+	g.mu.Unlock()
+
+	// 每 25-40 秒觸發一次 SpecialTargetEvent（流星等特殊目標）
+	g.mu.Lock()
+	if now.Sub(g.lastSpecialEventAt).Seconds() > g.nextSpecialEventIn {
+		g.lastSpecialEventAt = now
+		g.nextSpecialEventIn = 25 + rand.Float64()*15
+		g.mu.Unlock()
+		g.triggerSpecialEvent()
+	} else {
+		g.mu.Unlock()
+	}
+
+	// BOSS 自動觸發（規格書 28.1：每 3-5 分鐘）
+	g.mu.Lock()
+	if now.After(g.nextBossAt) && g.bossInstanceID == "" {
+		g.nextBossAt = now.Add(time.Duration(180+rand.Intn(120)) * time.Second)
+		g.mu.Unlock()
+		log.Printf("[Game] Auto-triggering BOSS")
+		g.triggerBoss()
+	} else {
+		g.mu.Unlock()
+	}
+
+	// Auto 攻擊
+	g.processAutoAttack()
+}
+
+func (g *Game) updateBossBattle() {
+	g.mu.RLock()
+	bossID := g.bossInstanceID
+	bossSpawnedAt := g.bossSpawnedAt
+	g.mu.RUnlock()
+
+	if bossID == "" {
+		return
+	}
+
+	// BOSS 超時
+	elapsed := time.Since(bossSpawnedAt).Seconds()
+	if elapsed >= data.BossDuration {
+		g.mu.Lock()
+		delete(g.Targets, bossID)
+		g.bossInstanceID = ""
+		g.mu.Unlock()
+
+		g.Hub.Broadcast(&ws.Message{
+			Type: ws.MsgBossEvent,
+			Payload: ws.BossEventPayload{
+				Event: "timeout",
+			},
+		})
+		g.transitionState(state.StateNormalPlay)
+	}
+}
+
+func (g *Game) updateBonusGame() {
+	g.mu.RLock()
+	bonusStart := g.bonusStartedAt
+	g.mu.RUnlock()
+
+	elapsed := time.Since(bonusStart).Seconds()
+	timeLeft := data.BonusDuration - elapsed
+
+	if timeLeft <= 0 {
+		g.endBonusGame()
+		return
+	}
+
+	// 廣播剩餘時間（每秒）
+	if int(elapsed)%1 == 0 {
+		g.Hub.Broadcast(&ws.Message{
+			Type: ws.MsgBonusEvent,
+			Payload: ws.BonusEventPayload{
+				Event:    "tick",
+				TimeLeft: timeLeft,
+			},
+		})
+	}
+}
+
+// spawnTarget 生成目標
+func (g *Game) spawnTarget() {
+	g.mu.RLock()
+	betLevel := 5 // 預設中等，實際應取所有玩家平均
+	for _, p := range g.Players {
+		betLevel = p.BetLevel
+		break
+	}
+	bonusSpecial := g.bonusSpecialBonus
+	g.mu.RUnlock()
+
+	def := g.SpawnSys.PickTargetDef(betLevel, bonusSpecial)
+	instanceID := uuid.New().String()
+
+	// 隨機生成位置（畫面右側進入）
+	x := 1280.0 + rand.Float64()*100
+	y := 100.0 + rand.Float64()*500
+
+	t := target.NewTarget(instanceID, def, x, y)
+
+	g.mu.Lock()
+	g.Targets[instanceID] = t
+	g.mu.Unlock()
+
+	// 廣播生成事件
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgTargetSpawn,
+		Payload: ws.TargetSpawnPayload{
+			InstanceID: instanceID,
+			DefID:      def.ID,
+			Name:       def.Name,
+			Type:       string(def.Type),
+			X:          x,
+			Y:          y,
+			HP:         def.HP,
+			MaxHP:      def.HP,
+			Speed:      def.Speed,
+			Lifetime:   def.Lifetime,
+			Behavior:   def.SpecialBehavior,
+		},
+	})
+}
+
+// triggerSpecialEvent 觸發特殊目標事件（流星、金色雜草等）
+func (g *Game) triggerSpecialEvent() {
+	// 強制生成一個特殊目標
+	specialIDs := []string{"T103", "T104", "T101", "T102", "T105"}
+	defID := specialIDs[rand.Intn(len(specialIDs))]
+	def := data.Targets[defID]
+	if def == nil {
+		return
+	}
+
+	instanceID := uuid.New().String()
+	x := 1280.0 + rand.Float64()*50
+	y := 80.0 + rand.Float64()*500
+	t := target.NewTarget(instanceID, def, x, y)
+
+	g.mu.Lock()
+	g.Targets[instanceID] = t
+	g.mu.Unlock()
+
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgTargetSpawn,
+		Payload: ws.TargetSpawnPayload{
+			InstanceID: instanceID,
+			DefID:      def.ID,
+			Name:       def.Name,
+			Type:       string(def.Type),
+			X:          x,
+			Y:          y,
+			HP:         def.HP,
+			MaxHP:      def.HP,
+			Speed:      def.Speed,
+			Lifetime:   def.Lifetime,
+			Behavior:   def.SpecialBehavior,
+		},
+	})
+}
+
+// triggerBoss 觸發 BOSS
+func (g *Game) triggerBoss() {
+	g.mu.RLock()
+	currentState := g.State
+	g.mu.RUnlock()
+
+	if currentState != state.StateNormalPlay {
+		return
+	}
+
+	// BOSS 警告
+	g.transitionState(state.StateBossWarning)
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgBossEvent,
+		Payload: ws.BossEventPayload{Event: "warning"},
+	})
+
+	time.AfterFunc(3*time.Second, func() {
+		g.spawnBoss()
+	})
+}
+
+func (g *Game) spawnBoss() {
+	def := data.Targets["B001"]
+	instanceID := uuid.New().String()
+	t := target.NewTarget(instanceID, def, 1100, 360)
+
+	g.mu.Lock()
+	g.Targets[instanceID] = t
+	g.bossInstanceID = instanceID
+	g.bossSpawnedAt = time.Now()
+	g.mu.Unlock()
+
+	g.transitionState(state.StateBossBattle)
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgBossEvent,
+		Payload: ws.BossEventPayload{
+			Event:      "spawn",
+			InstanceID: instanceID,
+			HP:         def.HP,
+			MaxHP:      def.HP,
+		},
+	})
+}
+
+// triggerBonusReady 觸發 Bonus Ready
+func (g *Game) triggerBonusReady() {
+	g.mu.RLock()
+	currentState := g.State
+	g.mu.RUnlock()
+
+	if currentState != state.StateNormalPlay {
+		return
+	}
+
+	// 防止 Bonus 觸發過於頻繁（至少間隔 90 秒）
+	g.mu.Lock()
+	if !g.lastBonusAt.IsZero() && time.Since(g.lastBonusAt).Seconds() < 90 {
+		g.mu.Unlock()
+		return
+	}
+	g.lastBonusAt = time.Now()
+	g.mu.Unlock()
+
+	g.transitionState(state.StateBonusReady)
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgBonusEvent,
+		Payload: ws.BonusEventPayload{Event: "ready"},
+	})
+
+	// 3秒後自動進入 Bonus Game
+	time.AfterFunc(3*time.Second, func() {
+		g.startBonusGame()
+	})
+}
+
+func (g *Game) startBonusGame() {
+	g.mu.Lock()
+	g.bonusStartedAt = time.Now()
+	// 記錄所有玩家的進場 Bet
+	for id, p := range g.Players {
+		g.bonusEntryBet[id] = data.GetBetDef(p.BetLevel).BetCost
+		g.bonusScores[id] = 0
+	}
+	// 清除一般目標，生成 Bonus 目標
+	g.Targets = make(map[string]*target.Target)
+	g.mu.Unlock()
+
+	g.transitionState(state.StateBonusGame)
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgBonusEvent,
+		Payload: ws.BonusEventPayload{
+			Event:    "start",
+			TimeLeft: data.BonusDuration,
+		},
+	})
+
+	// 生成 Bonus 目標
+	g.spawnBonusTargets()
+}
+
+func (g *Game) spawnBonusTargets() {
+	for i := 0; i < 20; i++ {
+		def := g.pickBonusTarget()
+		instanceID := uuid.New().String()
+		x := 100.0 + rand.Float64()*1000
+		y := 100.0 + rand.Float64()*500
+
+		// 用 HP 欄位存 ClickScore（Bonus 目標特殊處理）
+		bonusDef := &data.TargetDef{
+			ID:       def.ID,
+			Name:     def.Name,
+			Type:     data.TargetTypeBonus,
+			HP:       def.ClickScore,
+			Lifetime: data.BonusDuration,
+		}
+		t := target.NewTarget(instanceID, bonusDef, x, y)
+
+		g.mu.Lock()
+		g.Targets[instanceID] = t
+		g.mu.Unlock()
+
+		g.Hub.Broadcast(&ws.Message{
+			Type: ws.MsgTargetSpawn,
+			Payload: ws.TargetSpawnPayload{
+				InstanceID: instanceID,
+				DefID:      def.ID,
+				Name:       def.Name,
+				Type:       "bonus",
+				X:          x,
+				Y:          y,
+				HP:         def.ClickScore,
+				MaxHP:      def.ClickScore,
+				Behavior:   def.SpecialEffect,
+			},
+		})
+	}
+}
+
+func (g *Game) pickBonusTarget() *data.BonusTargetDef {
+	total := 0
+	for _, d := range data.BonusTargets {
+		total += d.SpawnWeight
+	}
+	r := rand.Intn(total)
+	cumulative := 0
+	for _, d := range data.BonusTargets {
+		cumulative += d.SpawnWeight
+		if r < cumulative {
+			return d
+		}
+	}
+	return data.BonusTargets[0]
+}
+
+func (g *Game) endBonusGame() {
+	g.mu.Lock()
+	scores := make(map[string]int)
+	entryBets := make(map[string]int)
+	for id, score := range g.bonusScores {
+		scores[id] = score
+	}
+	for id, bet := range g.bonusEntryBet {
+		entryBets[id] = bet
+	}
+	g.Targets = make(map[string]*target.Target)
+	g.mu.Unlock()
+
+	// 計算每個玩家的獎勵
+	for playerID, score := range scores {
+		g.mu.RLock()
+		p := g.Players[playerID]
+		g.mu.RUnlock()
+
+		if p == nil {
+			continue
+		}
+
+		entryBet := entryBets[playerID]
+		reward, multiplier := combat.CalcBonusReward(entryBet, score)
+		p.AddReward(reward)
+		p.ResetLaborValue()
+
+		g.Hub.Send(playerID, &ws.Message{
+			Type: ws.MsgBonusEvent,
+			Payload: ws.BonusEventPayload{
+				Event:      "end",
+				Score:      score,
+				Multiplier: multiplier,
+				Reward:     reward,
+			},
+		})
+
+		g.Hub.Send(playerID, &ws.Message{
+			Type: ws.MsgReward,
+			Payload: ws.RewardPayload{
+				Source:     "bonus",
+				Amount:     reward,
+				Multiplier: multiplier,
+				NewBalance: p.Coins,
+			},
+		})
+	}
+
+	g.transitionState(state.StateBonusResult)
+	time.AfterFunc(3*time.Second, func() {
+		g.transitionState(state.StateNormalPlay)
+	})
+}
+
+// processAutoAttack 處理自動攻擊
+func (g *Game) processAutoAttack() {
+	g.mu.RLock()
+	players := make([]*player.Player, 0, len(g.Players))
+	for _, p := range g.Players {
+		if p.IsAuto {
+			players = append(players, p)
+		}
+	}
+	g.mu.RUnlock()
+
+	for _, p := range players {
+		if !p.CanAttack() {
+			continue
+		}
+
+		bet := p.GetBetDef()
+		interval := 1.0 / bet.FireRate
+		if time.Since(p.LastAttackAt).Seconds() < interval {
+			continue
+		}
+
+		// 找最近目標
+		g.mu.RLock()
+		var bestTarget *target.Target
+		if p.LockTargetID != "" {
+			bestTarget = g.Targets[p.LockTargetID]
+		}
+		if bestTarget == nil {
+			for _, t := range g.Targets {
+				if t.IsAlive && t.Def.Type != data.TargetTypeBonus {
+					bestTarget = t
+					break
+				}
+			}
+		}
+		g.mu.RUnlock()
+
+		if bestTarget == nil {
+			continue
+		}
+
+		// 模擬攻擊
+		g.handleAttack(p, &ws.Message{
+			Type: ws.MsgAttack,
+			Payload: ws.AttackPayload{
+				TargetID: bestTarget.InstanceID,
+			},
+		})
+	}
+}
+
+// transitionState 狀態轉換
+func (g *Game) transitionState(newState state.GameState) {
+	g.mu.Lock()
+	oldState := g.State
+	if !state.CanTransition(oldState, newState) {
+		g.mu.Unlock()
+		log.Printf("[Game] Invalid state transition: %s -> %s", oldState, newState)
+		return
+	}
+	g.State = newState
+	g.mu.Unlock()
+
+	log.Printf("[Game] State: %s -> %s", oldState, newState)
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgGameState,
+		Payload: ws.GameStatePayload{
+			State:     string(newState),
+			Timestamp: time.Now().UnixMilli(),
+		},
+	})
+}
+
+// sendPlayerUpdate 傳送玩家狀態更新
+func (g *Game) sendPlayerUpdate(p *player.Player) {
+	g.Hub.Send(p.ID, &ws.Message{
+		Type:    ws.MsgPlayerUpdate,
+		Payload: p.Snapshot(),
+	})
+}
+
+// remarshal 重新序列化 payload（處理 interface{} 轉具體型別）
+func remarshal(src interface{}, dst interface{}) error {
+	b, err := json.Marshal(src)
+	if err != nil {
+		return fmt.Errorf("marshal: %w", err)
+	}
+	return json.Unmarshal(b, dst)
+}

@@ -1,0 +1,64 @@
+# Go
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+bin/
+vendor/
+
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# TypeScript
+dist/
+*.js.map
+
+# Kiro CLI 暫存
+data/tmp/*.txt
+
+# 環境變數
+.env
+.env.local
+.env.*.local
+
+# IDE
+.vscode/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Godot 快取（不需要 commit）
+client/chiikawa-pixel/.godot/
+
+# Python 快取
+tools/__pycache__/
+*.pyc
+*.pyo
+
+# 大型二進位檔（模型、音頻）
+*.safetensors
+*.ckpt
+*.pth
+*.wav
+*.mp3
+
+# 除錯暫存
+tools/debug_*.png
+tools/thumb_*.png
+tools/sprite_comparison.png
+
+# Server 編譯輸出
+server/bin/
+
+# 參考圖（不需要 commit）
+client/chiikawa-pixel/assets/sprites/reference/
+client/chiikawa-pixel/assets/sprites/ai_generated/

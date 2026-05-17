@@ -1,0 +1,218 @@
+{
+  "version": "1.0.0",
+  "last_updated": "2026-05-17",
+  "maintainer": "Audio Director",
+  "description": "吉伊卡哇：像素大討伐 音效事件對應表",
+  "events": {
+    "attack.chiikawa": {
+      "file": "res://assets/audio/sfx/attack_fire.wav",
+      "bus": "SFX",
+      "volume_db": -4,
+      "sync_event": "attack_frame_2",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "吉伊卡哇攻擊音效（發射子彈）"
+    },
+    "attack.hachiware": {
+      "file": "res://assets/audio/sfx/attack_fire_hachiware.wav",
+      "bus": "SFX",
+      "volume_db": -4,
+      "sync_event": "attack_frame_2",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "小八攻擊音效（發射子彈）"
+    },
+    "attack.usagi": {
+      "file": "res://assets/audio/sfx/attack_fire_usagi.wav",
+      "bus": "SFX",
+      "volume_db": -3,
+      "sync_event": "attack_frame_2",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "烏薩奇攻擊音效（發射子彈，音量略大）"
+    },
+    "hit.normal": {
+      "file": "res://assets/audio/sfx/hit.wav",
+      "bus": "SFX",
+      "volume_db": -6,
+      "sync_event": "hit_detection_frame",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "子彈命中普通目標音效"
+    },
+    "kill.normal": {
+      "file": "res://assets/audio/sfx/kill.wav",
+      "bus": "SFX",
+      "volume_db": -5,
+      "sync_event": "kill_detection_frame",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "擊殺普通目標音效"
+    },
+    "kill.bigwin": {
+      "file": "res://assets/audio/sfx/big_win.wav",
+      "bus": "SFX",
+      "volume_db": -2,
+      "sync_event": "kill_detection_frame",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "擊殺 20x 以上高倍率目標的大獎音效"
+    },
+    "boss.warning": {
+      "file": "res://assets/audio/sfx/boss_warning.wav",
+      "bus": "SFX",
+      "volume_db": -3,
+      "sync_event": "immediate",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "BOSS 即將出現警告音效（BOSS 出現前 5 秒觸發）"
+    },
+    "boss.enter": {
+      "file": "res://assets/audio/bgm/boss_enter.wav",
+      "bus": "BGM",
+      "volume_db": -8,
+      "sync_event": "immediate",
+      "loop": true,
+      "pitch_scale": 1.0,
+      "fade_in": 0.5,
+      "description": "BOSS 登場 BGM（替換主遊戲 BGM）"
+    },
+    "boss.phase2": {
+      "file": "res://assets/audio/bgm/boss_enter.wav",
+      "bus": "BGM",
+      "volume_db": -6,
+      "sync_event": "immediate",
+      "loop": true,
+      "pitch_scale": 1.1,
+      "fade_in": 0.3,
+      "description": "BOSS Phase 2 BGM（HP < 50%，音調提高）"
+    },
+    "bonus.ready": {
+      "file": "res://assets/audio/sfx/bonus_ready.wav",
+      "bus": "SFX",
+      "volume_db": -3,
+      "sync_event": "immediate",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "Bonus 計量條滿，準備進入 Bonus 遊戲"
+    },
+    "bonus.start": {
+      "file": "res://assets/audio/bgm/bonus_game.wav",
+      "bus": "BGM",
+      "volume_db": -10,
+      "sync_event": "immediate",
+      "loop": true,
+      "pitch_scale": 1.0,
+      "fade_in": 0.5,
+      "description": "Bonus 遊戲 BGM（替換主遊戲 BGM）"
+    },
+    "reward.bag": {
+      "file": "res://assets/audio/sfx/reward_bag.wav",
+      "bus": "SFX",
+      "volume_db": -5,
+      "sync_event": "reward_bag_drop_frame_1",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "獎勵袋掉落音效（與掉落動畫第 1 幀同步）"
+    },
+    "ui.click": {
+      "file": "res://assets/audio/sfx/weed_pull.wav",
+      "bus": "UI",
+      "volume_db": -8,
+      "sync_event": "immediate",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "UI 按鈕點擊音效"
+    },
+    "coin.drop": {
+      "file": "res://assets/audio/sfx/coin_drop.wav",
+      "bus": "SFX",
+      "volume_db": -7,
+      "sync_event": "coin_drop_frame_1",
+      "loop": false,
+      "pitch_scale": 1.0,
+      "description": "硬幣掉落音效（與掉落動畫第 1 幀同步）"
+    }
+  },
+  "bgm_layers": {
+    "normal": {
+      "file": "res://assets/audio/bgm/main_game.wav",
+      "volume_db": -12,
+      "fade_in": 1.0,
+      "fade_out": 0.5,
+      "loop": true,
+      "description": "主遊戲一般狀態 BGM"
+    },
+    "fever": {
+      "file": "res://assets/audio/bgm/main_game.wav",
+      "volume_db": -10,
+      "fade_in": 0.3,
+      "fade_out": 0.3,
+      "loop": true,
+      "pitch_scale": 1.05,
+      "description": "Fever 狀態 BGM（音量提高，音調略高）"
+    },
+    "boss": {
+      "file": "res://assets/audio/bgm/boss_enter.wav",
+      "volume_db": -8,
+      "fade_in": 0.5,
+      "fade_out": 1.0,
+      "loop": true,
+      "description": "BOSS 戰 BGM"
+    },
+    "boss_phase2": {
+      "file": "res://assets/audio/bgm/boss_enter.wav",
+      "volume_db": -6,
+      "fade_in": 0.3,
+      "fade_out": 0.5,
+      "loop": true,
+      "pitch_scale": 1.1,
+      "description": "BOSS Phase 2 BGM（更緊張）"
+    },
+    "bonus": {
+      "file": "res://assets/audio/bgm/bonus_game.wav",
+      "volume_db": -10,
+      "fade_in": 0.5,
+      "fade_out": 1.0,
+      "loop": true,
+      "description": "Bonus 遊戲 BGM"
+    },
+    "bigwin_sting": {
+      "file": "res://assets/audio/sfx/big_win.wav",
+      "volume_db": -4,
+      "fade_in": 0.0,
+      "fade_out": 2.0,
+      "loop": false,
+      "description": "大獎演出音效（播放完畢後回到 normal BGM）"
+    },
+    "result_jingle": {
+      "file": "res://assets/audio/sfx/big_win.wav",
+      "volume_db": -8,
+      "fade_in": 0.5,
+      "fade_out": 1.0,
+      "loop": false,
+      "description": "結算畫面音效"
+    }
+  },
+  "audio_buses": {
+    "Master": {
+      "volume_db": 0,
+      "effects": ["Limiter"]
+    },
+    "BGM": {
+      "volume_db": -3,
+      "effects": ["Compressor"],
+      "send": "Master"
+    },
+    "SFX": {
+      "volume_db": 0,
+      "effects": [],
+      "send": "Master"
+    },
+    "UI": {
+      "volume_db": -3,
+      "effects": [],
+      "send": "Master"
+    }
+  }
+}
