@@ -6,8 +6,9 @@
 2. 更清晰的眼睛（4x4 眼白 + 2x2 瞳孔 + 高光）
 3. 更明顯的腮紅
 4. 更完整的身體（手臂可見）
-5. 更好的陰影（3色漸層）
+5. 更好的陰影（3色漸層，左上光源）
 6. 輸出 96x96（2x 放大）
+7. 統一調色板（skill-pixel-art-quality-2026）
 """
 from PIL import Image
 import os
@@ -16,6 +17,39 @@ import math
 OUTPUT_BASE = r"D:\Kiro\client\chiikawa-pixel\assets\sprites"
 SIZE = 48  # 基礎尺寸
 OUT_SIZE = 96  # 輸出尺寸（2x 放大）
+
+# ── 統一調色板（來自 skill-pixel-art-quality-2026.md）────────────────────────
+CHIIKAWA_PALETTE = {
+    "body":      (255, 252, 245),
+    "shadow":    (220, 215, 205),
+    "highlight": (255, 255, 255),
+    "outline":   (45, 25, 10, 255),
+    "blush":     (255, 155, 150, 255),
+    "pink_rod":  (255, 130, 185, 255),
+    "ear_in":    (255, 195, 190, 255),
+    "glow":      (255, 210, 230, 255),
+}
+
+HACHIWARE_PALETTE = {
+    "body":      (248, 248, 248),
+    "shadow":    (210, 210, 215),
+    "highlight": (255, 255, 255),
+    "outline":   (25, 35, 65, 255),
+    "stripe":    (75, 115, 195),
+    "blue_rod":  (95, 145, 235, 255),
+    "ear_in":    (185, 205, 248, 255),
+    "glow":      (175, 205, 255, 255),
+}
+
+USAGI_PALETTE = {
+    "body":      (248, 248, 248),
+    "shadow":    (210, 210, 215),
+    "highlight": (255, 255, 255),
+    "outline":   (55, 35, 55, 255),
+    "ear_pink":  (255, 170, 170, 255),
+    "yellow_rod":(255, 210, 25, 255),
+    "glow":      (255, 240, 135, 255),
+}
 
 def new_img():
     return Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
@@ -340,7 +374,11 @@ def generate_all_v6():
             img = img.resize((OUT_SIZE, OUT_SIZE), Image.NEAREST)
             path = os.path.join(chars_dir, f"{name}_{state}.png")
             img.save(path)
-            print(f"  OK {name}_{state}.png ({OUT_SIZE}x{OUT_SIZE})")
+            # 品質驗證（skill-pixel-art-quality-2026）
+            non_t = sum(1 for px_v in img.getdata() if px_v[3] > 10)
+            pct = non_t * 100 // (OUT_SIZE * OUT_SIZE)
+            status = "✅" if pct >= 40 else "⚠️"
+            print(f"  {status} {name}_{state}.png ({OUT_SIZE}x{OUT_SIZE}, {pct}% 非透明)")
 
 if __name__ == "__main__":
     generate_all_v6()
