@@ -64,6 +64,10 @@ func _on_bonus_event(event_data: Dictionary) -> void:
 			_time_left = event_data.get("time_left", 0.0)
 		"end":
 			_end_bonus(event_data)
+		"coin_shower":
+			# BG004 金色雜草：Server 廣播金幣雨（規格書 29.3）
+			if _is_active:
+				_spawn_coin_shower(Vector2(640, 360))
 
 func _show_ready() -> void:
 	visible = true
