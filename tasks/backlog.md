@@ -15,6 +15,37 @@
 
 ## 美術優化
 
+### 🔴 P0（阻擋 merge，明日必須完成）
+- [ ] **修復 hachiware hurt 動畫**（bottom_alignment 偏差 5px）
+  - 負責：Animation Agent
+  - 預計工時：1.5 小時
+  - 驗收：Consistency Score >= 85
+
+- [ ] **修復 usagi bigwin 動畫**（deformation 12% + color drift ΔE=6.1）
+  - 負責：Animation Agent + Sprite Generation Agent
+  - 預計工時：2 小時
+  - 驗收：Consistency Score >= 85
+
+- [ ] **修復 usagi hurt 動畫**（anchor_point 偏移 3px）
+  - 負責：Animation Agent
+  - 預計工時：1 小時
+  - 驗收：Consistency Score >= 85
+
+- [ ] **補齊 hachiware skill 動畫**（缺失）
+  - 負責：Sprite Generation Agent + Animation Agent
+  - 預計工時：2 小時
+  - 驗收：Consistency Score >= 85
+
+- [ ] **補齊 hachiware fail 動畫**（缺失）
+  - 負責：Sprite Generation Agent + Animation Agent
+  - 預計工時：1 小時
+  - 驗收：Consistency Score >= 85
+
+- [ ] **補齊 usagi fail 動畫**（缺失）
+  - 負責：Sprite Generation Agent + Animation Agent
+  - 預計工時：1 小時
+  - 驗收：Consistency Score >= 85
+
 ### 🟠 P1
 - [ ] **角色動畫幀數提升**：吉伊卡哇 idle 動畫從 4 幀提升到 8 幀
   - 負責：Animation Agent + Sprite Generation Agent
@@ -163,6 +194,13 @@
 - [x] Bonus 遊戲基礎流程
 - [x] BOSS 戰基礎流程（B001）
 - [x] HTML5 匯出設定
+- [x] Multi-Agent Studio Scaffold（Phase 1）
+- [x] Phase 2：規格文件（animation/audio/qa/daily-build spec）
+- [x] Phase 3：Animation Pipeline（animation_pipeline.py）
+- [x] Phase 4：Audio Pipeline（audio-map.json、sfx-list、bgm-layer-plan、sync-table）
+- [x] Phase 5：Daily Build + QA 自動化（daily_build.ps1、qa_check.py）
+- [x] Phase 6：Self-Improvement Loop（skills、failed-attempts）
+- [x] Phase 7：Full Autonomous Studio 整合（nightly report、quality score）
 
 ---
 
@@ -170,11 +208,33 @@
 
 | 優先級 | 數量 | 預計總工時 |
 |-------|------|---------|
-| 🔴 P0 | 0 | - |
-| 🟠 P1 | 5 | ~12 小時 |
+| 🔴 P0 | 6 | ~8.5 小時 |
+| 🟠 P1 | 7 | ~15 小時 |
 | 🟡 P2 | 9 | ~25 小時 |
 | 🟢 P3 | 7 | ~25 小時 |
 | ⚪ 待評估 | 0 | - |
-| **合計** | **21** | **~62 小時** |
+| **合計** | **29** | **~73.5 小時** |
 
-*最後更新：2025-01-01*
+*最後更新：2026-05-17*
+
+---
+
+## Phase 8 以後的計畫
+
+### Phase 8：完整自主每日循環測試
+- [ ] 測試完整的 Agent 協作循環（Game Director → 各 Agent → QA → Nightly Report）
+  - 負責：Game Director + 全體 Agent
+  - 預計工時：8 小時
+  - 驗收：完整循環無人工介入執行一次
+
+### 動畫幀數提升
+- [ ] **chiikawa idle 幀數提升**（4 幀 → 8 幀）
+  - 負責：Animation Agent + Sprite Generation Agent
+  - 預計工時：3 小時
+  - 驗收：Animation Quality >= 90
+
+### BOSS AI 圖生成
+- [ ] **BOSS AI 圖生成完成**（B001 完整動畫集）
+  - 負責：Sprite Generation Agent + Animation Agent
+  - 預計工時：4 小時
+  - 驗收：BOSS 所有動畫狀態完整

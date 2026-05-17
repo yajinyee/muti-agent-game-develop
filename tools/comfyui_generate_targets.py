@@ -40,8 +40,8 @@ TARGET_PROMPTS = {
         "negative": "realistic, 3d, blurry, text, watermark, white background"
     },
     "T102_chest": {
-        "positive": "pixel art treasure chest monster, wooden chest with gold trim, big eyes, sharp teeth, 16-bit retro game sprite, solid magenta background #FF00FF, centered, game enemy",
-        "negative": "realistic, 3d, blurry, text, watermark, white background"
+        "positive": "pixel art treasure chest monster, wooden chest with gold metal trim, large glowing eyes on lid, sharp teeth visible, dark thick outline, 16-bit retro game sprite, solid bright magenta background #FF00FF, centered, clear silhouette, high contrast",
+        "negative": "realistic, 3d, blurry, text, watermark, white background, dark background, gradient, multiple objects"
     },
     "T103_meteor": {
         "positive": "pixel art glowing meteor shooting star, golden core with fire trail, sparkles, 16-bit retro game sprite, solid magenta background #FF00FF, centered",

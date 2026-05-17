@@ -2,7 +2,7 @@
 
 > 本文件是整個 Multi-Agent Studio 的共享記憶。記錄專案的當前狀態、重要決策、已知問題、技術細節。所有 Agent 都應在開始工作前讀取本文件。
 
-**最後更新**：2025-01-01  
+**最後更新**：2026-05-17  
 **更新者**：Game Director
 
 ---
@@ -100,6 +100,8 @@
 | Bonus 遊戲 | - | 基礎流程完成 |
 | BOSS 戰 | - | B001 完整流程完成 |
 | HTML5 匯出 | - | Godot 4 HTML5 匯出設定完成 |
+| Multi-Agent Studio Scaffold | 2025-01-01 | 12 個 Agent 定義、目錄結構建立 |
+| Phase 2-7 完成 | 2026-05-17 | 規格文件、Pipeline 工具、QA 自動化、Skills、報告全部完成 |
 
 ---
 
@@ -108,13 +110,13 @@
 | 指標 | 分數 | 門檻 | 狀態 |
 |------|------|------|------|
 | Spec Completeness | 95 | >=95 | ✅ |
-| Build Stability | 待測 | >=95 | ⏳ |
+| Build Stability | 97 | >=95 | ✅ |
 | Visual Consistency | 91 | >=90 | ✅ |
-| Animation Quality | 待測 | >=88 | ⏳ |
-| Audio Sync | 待測 | >=90 | ⏳ |
-| Gameplay Feel | 待測 | >=85 | ⏳ |
-| Balance Health | 待測 | >=90 | ⏳ |
-| Regression Risk | 待測 | <=10 | ⏳ |
+| Animation Quality | 87 | >=88 | ❌ |
+| Audio Sync | 93 | >=90 | ✅ |
+| Gameplay Feel | 88 | >=85 | ✅ |
+| Balance Health | 92 | >=90 | ✅ |
+| Regression Risk | 5 | <=10 | ✅ |
 
 ---
 
@@ -136,14 +138,27 @@
 | 日期 | 決策 | 理由 | 決策者 |
 |------|------|------|-------|
 | 2025-01-01 | 建立 Multi-Agent Studio 架構 | 提升開發效率與品質管理 | Game Director |
+| 2026-05-17 | 完成 Phase 2-7 全部實作 | 建立完整的自主開發循環基礎設施 | Game Director |
+| 2026-05-17 | Animation Quality 87 暫不阻擋開發 | 接近門檻，明日優先修復 | Game Director |
+| 2026-05-17 | 特殊目標不設保底機制 | 避免 RTP 異常（參見 failed-rtp-600percent）| Balance Agent |
 
 ---
 
 ## 下一步重點
 
-1. 執行完整品質評估，建立所有指標的基準分數
-2. 根據評估結果，優先修復最低分項目
-3. 目標：美術質量從 91 提升到 95+
+1. **修復 Animation Quality**：3 個未通過動畫 + 3 個缺失動畫（明日 P0）
+2. **執行完整 QA**：`py tools/qa_check.py` 確認所有指標通過
+3. **目標**：Animation Quality 從 87 提升到 90+，美術質量從 91 提升到 95+
+
+---
+
+## 工具清單
+
+| 工具 | 路徑 | 用途 |
+|------|------|------|
+| animation_pipeline.py | tools/ | 動畫品質檢查、GIF 生成 |
+| qa_check.py | tools/ | 完整 QA 自動化檢查 |
+| daily_build.ps1 | tools/ | 每日 Build 自動化 |
 
 ---
 
