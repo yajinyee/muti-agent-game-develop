@@ -22,6 +22,11 @@ extends CanvasLayer
 var _reward_popup_base_y: float = 0.0
 var _lock_active: bool = false
 
+# BOSS 計時器（規格書 28.3：顯示剩餘時間與對應倍率）
+var _boss_time_left: float = 0.0
+var _boss_active: bool = false
+var _boss_timer_node: Control = null
+
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
 	GameManager.game_state_changed.connect(_on_game_state_changed)
@@ -145,11 +150,143 @@ func _on_boss_event(event_data: Dictionary) -> void:
 			AudioManager.play_sfx(AudioManager.SFX.BOSS_WARNING)
 		"spawn":
 			AudioManager.play_bgm(AudioManager.BGM.BOSS_ENTER)
+			_start_boss_timer()
 		"phase_change":
 			AudioManager.play_bgm(AudioManager.BGM.BOSS_RAGE)
 		"kill", "timeout":
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			AudioManager.play_bgm(AudioManager.BGM.MAIN_GAME)
+			_stop_boss_timer()
+
+# ── BOSS 計時器 UI（規格書 28.3）──────────────────────────────
+
+func _start_boss_timer() -> void:
+	_boss_time_left = 60.0
+	_boss_active = true
+
+	# 建立 BOSS 計時器面板
+	if is_instance_valid(_boss_timer_node):
+		_boss_timer_node.queue_free()
+
+	var panel = Control.new()
+	panel.name = "BossTimerPanel"
+	panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	panel.position = Vector2(900, 50)
+	panel.size = Vector2(360, 80)
+	add_child(panel)
+	_boss_timer_node = panel
+
+	# 背景
+	var bg = ColorRect.new()
+	bg.size = Vector2(360, 80)
+	bg.color = Color(0.1, 0.0, 0.0, 0.85)
+	panel.add_child(bg)
+
+	# BOSS 標題
+	var title = Label.new()
+	title.name = "BossTitle"
+	title.text = "⚔ BOSS BATTLE"
+	title.position = Vector2(10, 5)
+	title.add_theme_font_size_override("font_size", 16)
+	title.modulate = Color(1.0, 0.3, 0.3)
+	panel.add_child(title)
+
+	# 剩餘時間
+	var timer_lbl = Label.new()
+	timer_lbl.name = "BossTimeLabel"
+	timer_lbl.text = "60.0s"
+	timer_lbl.position = Vector2(10, 28)
+	timer_lbl.add_theme_font_size_override("font_size", 28)
+	timer_lbl.modulate = Color(1.0, 0.9, 0.2)
+	panel.add_child(timer_lbl)
+
+	# 倍率提示
+	var mult_lbl = Label.new()
+	mult_lbl.name = "BossMultLabel"
+	mult_lbl.text = "500x"
+	mult_lbl.position = Vector2(200, 28)
+	mult_lbl.add_theme_font_size_override("font_size", 28)
+	mult_lbl.modulate = Color(1.0, 0.5, 0.0)
+	panel.add_child(mult_lbl)
+
+	# 倍率說明
+	var hint_lbl = Label.new()
+	hint_lbl.name = "BossHintLabel"
+	hint_lbl.text = "擊殺越快倍率越高！"
+	hint_lbl.position = Vector2(10, 60)
+	hint_lbl.add_theme_font_size_override("font_size", 12)
+	hint_lbl.modulate = Color(0.8, 0.8, 0.8)
+	panel.add_child(hint_lbl)
+
+func _stop_boss_timer() -> void:
+	_boss_active = false
+	if is_instance_valid(_boss_timer_node):
+		var tween = create_tween()
+		tween.tween_property(_boss_timer_node, "modulate:a", 0.0, 0.5)
+		tween.tween_callback(func():
+			if is_instance_valid(_boss_timer_node):
+				_boss_timer_node.queue_free()
+				_boss_timer_node = null
+		)
+
+func _get_boss_multiplier_text(time_left: float) -> String:
+	if time_left <= 10:
+		return "100x"
+	elif time_left <= 20:
+		return "150x"
+	elif time_left <= 30:
+		return "200x"
+	elif time_left <= 40:
+		return "300x"
+	elif time_left <= 50:
+		return "400x"
+	else:
+		return "500x"
+
+func _get_boss_multiplier_color(time_left: float) -> Color:
+	if time_left <= 10:
+		return Color(0.6, 0.6, 0.6)  # 灰（最低倍率）
+	elif time_left <= 20:
+		return Color(0.4, 0.8, 1.0)  # 藍
+	elif time_left <= 30:
+		return Color(0.4, 1.0, 0.4)  # 綠
+	elif time_left <= 40:
+		return Color(1.0, 0.9, 0.2)  # 黃
+	elif time_left <= 50:
+		return Color(1.0, 0.5, 0.0)  # 橙
+	else:
+		return Color(1.0, 0.2, 0.2)  # 紅（最高倍率）
+
+func _process(delta: float) -> void:
+	if not _boss_active or not is_instance_valid(_boss_timer_node):
+		return
+
+	_boss_time_left = max(0.0, _boss_time_left - delta)
+
+	var timer_lbl = _boss_timer_node.get_node_or_null("BossTimeLabel")
+	var mult_lbl = _boss_timer_node.get_node_or_null("BossMultLabel")
+
+	if timer_lbl:
+		timer_lbl.text = "%.1fs" % _boss_time_left
+		# 最後 10 秒閃爍警告
+		if _boss_time_left <= 10.0:
+			var flash = int(_boss_time_left * 4) % 2 == 0
+			timer_lbl.modulate = Color.RED if flash else Color.WHITE
+		else:
+			timer_lbl.modulate = Color(1.0, 0.9, 0.2)
+
+	if mult_lbl:
+		var mult_text = _get_boss_multiplier_text(_boss_time_left)
+		var mult_color = _get_boss_multiplier_color(_boss_time_left)
+		mult_lbl.text = mult_text
+		mult_lbl.modulate = mult_color
+
+		# 倍率變化時放大提示
+		if mult_text != mult_lbl.get_meta("last_mult", ""):
+			mult_lbl.set_meta("last_mult", mult_text)
+			var tween = create_tween()
+			tween.tween_property(mult_lbl, "scale", Vector2(1.4, 1.4), 0.1)
+			tween.tween_property(mult_lbl, "scale", Vector2(1.0, 1.0), 0.1)
 
 func _on_bonus_event(event_data: Dictionary) -> void:
 	match event_data.get("event", ""):
