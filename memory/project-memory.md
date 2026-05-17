@@ -2,8 +2,8 @@
 
 > 本文件是整個 Multi-Agent Studio 的共享記憶。記錄專案的當前狀態、重要決策、已知問題、技術細節。所有 Agent 都應在開始工作前讀取本文件。
 
-**最後更新**：2026-05-19（DAY-003）  
-**更新者**：Game Director / Spec Architect
+**最後更新**：2026-05-22（DAY-006）  
+**更新者**：Game Director Agent
 
 ---
 
@@ -19,7 +19,9 @@
 | Server 技術 | Go + WebSocket，Port 7777 |
 | Client 技術 | Godot 4.6.2，HTML5 匯出 |
 | 目標平台 | Web（HTML5）|
-| Multi-Agent Studio | DAY-003，9 個 Skills |
+| Multi-Agent Studio | DAY-006，11 個 Skills |
+| GitHub Labels | 25 個（type/priority/agent/status）|
+| GitHub Wiki | 8 個頁面完整建立 |
 
 ---
 
