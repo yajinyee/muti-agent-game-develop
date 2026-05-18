@@ -1529,3 +1529,18 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **問題：** 變數命名為 `copy` 會遮蔽 Go 內建的 `copy()` 函數，雖然不報錯但是壞習慣
 - **解法：** 改用 `cp` 作為拷貝變數名稱
 - **教訓：** 避免使用 Go 內建函數名稱作為變數名：`copy`, `len`, `cap`, `make`, `new`, `append`, `delete`, `close`, `panic`, `recover`
+
+## 85. B001 BOSS 動畫 Spritesheet 整合技術（DAY-028b）
+- **Spritesheet 格式：** 512x384（4幀×3狀態×128px），Row 0=idle, Row 1=phase2, Row 2=death
+- **AtlasTexture 快取：** 預建立所有 12 個幀的 AtlasTexture，key = "row_col"
+- **動畫切換：** `_process` 中用 timer 按 FPS 切換幀，Phase 2 事件直接改 `_boss_anim_row`
+- **death 動畫：** 4幀 × 8fps = 0.5秒，配合縮放 tween 同步消失
+- **PIL fill_circle None color bug：** 傳入 None 作為 color 參數會 crash，要加 `if color is not None` 檢查
+- **教訓：** BOSS 動畫要有明確的狀態機（idle/phase2/death），不能只靠 modulate 顏色變化
+
+## 86. 程式生成像素角色的光照計算
+- **公式：** `dot = -(nx*lx + ny*ly)`，`light = 0.5 + 0.5 * max(0, dot)`
+- **光源方向：** 固定左上 `(-1, -1)`，歸一化後使用
+- **法線計算：** `nx = dx / max(dist, 0.1)`，避免除以零
+- **顏色計算：** `r_c = min(255, int(base_r * (0.7 + 0.6 * light)))`
+- **教訓：** 0.7 是最暗值（陰影），0.7+0.6=1.3 是最亮值（高光），這個範圍讓立體感明顯

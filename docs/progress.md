@@ -1,12 +1,12 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-028 RedisStore 完整實作）
+## 最後更新：2026-05-19（DAY-028b B001 BOSS 完整動畫集）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：93/100**（眨眼動畫升級：chiikawa 幀5 眼睛深色像素 240→8，97% 減少）
+- **美術質量：95/100**（B001 BOSS 完整動畫集：idle/phase2/death 三種狀態，12幀）
 - **規格一致性：100%**
-- **Gameplay Feel：100/100**（Hit Stop + ScreenShake + Combo + 觀戰模式 + 全套 Juice）
+- **Gameplay Feel：100/100**
 - **整體信心：100/100**
 - **架構成熟度：RedisStore 完整實作，生產環境就緒**
 
@@ -205,6 +205,13 @@
   - GetTopPlayers：ZREVRANGE + 批次 LoadPlayer
   - 4 個 Redis 整合測試（有 REDIS_URL 時執行，無則 Skip）
   - MemoryStore 排序升級：bubble sort → sort.Slice
+- [x] **B001 BOSS 完整動畫集**（DAY-028 自主觸發）：
+  - `tools/generate_boss_sprites.py`：程式生成 idle/phase2/death 三種狀態，12幀
+  - `B001_boss_sheet.png`（512x384，4幀×3狀態×128px）
+  - `B001_boss.png` 更新（64x64 靜態 idle 幀0）
+  - TargetManager.gd：BOSS 動畫幀切換系統（`_update_boss_animation`）
+  - Phase 2 事件：自動切換到 phase2 動畫行
+  - BOSS 死亡：播放 death 動畫後消失（`_play_boss_death`）
 
 ---
 

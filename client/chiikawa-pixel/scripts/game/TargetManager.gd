@@ -20,6 +20,15 @@ const TARGET_SPRITES = {
 	"B001": "res://assets/sprites/targets/B001_boss.png",
 }
 
+# B001 BOSS 動畫 Spritesheet（512x384，4幀×3狀態×128px）
+const BOSS_SHEET_PATH = "res://assets/sprites/targets/B001_boss_sheet.png"
+const BOSS_FRAME_SIZE = 128
+const BOSS_COLS = 4
+# Row 0: idle, Row 1: phase2, Row 2: death
+const BOSS_ROW_IDLE   = 0
+const BOSS_ROW_PHASE2 = 1
+const BOSS_ROW_DEATH  = 2
+
 # Spritesheet 中各目標的 UV 座標（來自 targets_sheet.json，cell_size=64）
 const SHEET_REGIONS = {
 	"T001": Rect2(0, 0, 64, 64),
@@ -59,6 +68,14 @@ var _cached_hit_flash_shader: Shader = null
 var _cached_pixel_font: Font = null
 var _targets_sheet: Texture2D = null    # 目標物 Spritesheet（減少 draw call）
 var _atlas_textures: Dictionary = {}    # def_id -> AtlasTexture（快取裁切結果）
+var _boss_sheet: Texture2D = null       # B001 BOSS 動畫 Spritesheet
+var _boss_atlas_cache: Dictionary = {}  # "row_col" -> AtlasTexture
+
+# BOSS 動畫狀態
+var _boss_anim_timer: float = 0.0
+var _boss_anim_frame: int = 0
+var _boss_anim_row: int = BOSS_ROW_IDLE
+const BOSS_ANIM_FPS: float = 4.0  # idle/phase2 4fps，death 8fps
 
 func _ready() -> void:
 	GameManager.target_spawned.connect(_on_target_spawned)
@@ -81,14 +98,28 @@ func _preload_resources() -> void:
 			atlas.region = SHEET_REGIONS[def_id]
 			_atlas_textures[def_id] = atlas
 
-	# BOSS 單獨載入（96x96，不在 Spritesheet 中）
-	var boss_path = TARGET_SPRITES["B001"]
-	if ResourceLoader.exists(boss_path):
-		_cached_textures[boss_path] = load(boss_path)
+	# BOSS 動畫 Spritesheet 載入
+	if ResourceLoader.exists(BOSS_SHEET_PATH):
+		_boss_sheet = load(BOSS_SHEET_PATH)
+		# 預建立所有 BOSS 幀的 AtlasTexture
+		for row in range(3):
+			for col in range(BOSS_COLS):
+				var atlas = AtlasTexture.new()
+				atlas.atlas = _boss_sheet
+				atlas.region = Rect2(col * BOSS_FRAME_SIZE, row * BOSS_FRAME_SIZE,
+									 BOSS_FRAME_SIZE, BOSS_FRAME_SIZE)
+				_boss_atlas_cache["%d_%d" % [row, col]] = atlas
+	else:
+		# 備用：靜態 B001 PNG
+		var boss_path = TARGET_SPRITES["B001"]
+		if ResourceLoader.exists(boss_path):
+			_cached_textures[boss_path] = load(boss_path)
 
 	# 備用：預載入所有獨立目標 Sprite（Spritesheet 載入失敗時使用）
 	if _targets_sheet == null:
 		for def_id in TARGET_SPRITES:
+			if def_id == "B001":
+				continue  # BOSS 已單獨處理
 			var path = TARGET_SPRITES[def_id]
 			if ResourceLoader.exists(path):
 				_cached_textures[path] = load(path)
@@ -109,8 +140,11 @@ func _preload_resources() -> void:
 
 ## 取得目標 Texture（優先用 AtlasTexture，備用獨立 PNG）
 func _get_target_texture(def_id: String) -> Texture2D:
-	# BOSS 用獨立 PNG
+	# BOSS 用動畫 Spritesheet 的第一幀（idle 幀0）
 	if def_id == "B001":
+		if _boss_atlas_cache.has("0_0"):
+			return _boss_atlas_cache["0_0"]
+		# 備用：靜態 PNG
 		var path = TARGET_SPRITES.get("B001", "")
 		return _cached_textures.get(path, null)
 	# 其他目標優先用 Spritesheet AtlasTexture
@@ -119,6 +153,15 @@ func _get_target_texture(def_id: String) -> Texture2D:
 	# 備用：獨立 PNG
 	var path = TARGET_SPRITES.get(def_id, "")
 	return _get_texture(path)
+
+## 取得 BOSS 動畫幀 AtlasTexture
+func _get_boss_frame(row: int, col: int) -> Texture2D:
+	var key = "%d_%d" % [row, col]
+	if _boss_atlas_cache.has(key):
+		return _boss_atlas_cache[key]
+	# 備用：靜態 PNG
+	var path = TARGET_SPRITES.get("B001", "")
+	return _cached_textures.get(path, null)
 
 ## 取得快取 Texture（避免重複 load）
 func _get_texture(path: String) -> Texture2D:
@@ -222,6 +265,11 @@ func _on_boss_event(event_data: Dictionary) -> void:
 	# Phase 2 震動
 	ScreenShake.add_trauma(0.6)
 
+	# 切換到 Phase 2 動畫行
+	_boss_anim_row = BOSS_ROW_PHASE2
+	_boss_anim_frame = 0
+	_boss_anim_timer = 0.0
+
 	# 顯示 Phase 2 警告文字
 	var phase_label = Label.new()
 	phase_label.text = "PHASE 2!"
@@ -242,6 +290,37 @@ func _on_boss_event(event_data: Dictionary) -> void:
 func _process(delta: float) -> void:
 	_update_target_positions(delta)
 	_update_escape_warnings()
+	_update_boss_animation(delta)
+
+## BOSS 動畫幀更新（每幀切換 AtlasTexture）
+func _update_boss_animation(delta: float) -> void:
+	if _boss_sheet == null:
+		return
+
+	var fps = BOSS_ANIM_FPS
+	if _boss_anim_row == BOSS_ROW_DEATH:
+		fps = 8.0  # death 動畫快一倍
+
+	_boss_anim_timer += delta
+	if _boss_anim_timer >= 1.0 / fps:
+		_boss_anim_timer = 0.0
+		_boss_anim_frame = (_boss_anim_frame + 1) % BOSS_COLS
+
+		# 更新所有 BOSS 節點的 Sprite2D texture
+		for instance_id in _target_nodes:
+			var node = _target_nodes[instance_id]
+			if not is_instance_valid(node):
+				continue
+			if node.get_meta("target_type", "") != "boss":
+				continue
+			var sprite = node.get_node_or_null("Sprite2D") if node.get_child_count() > 0 else null
+			# 找 Sprite2D 子節點
+			for child in node.get_children():
+				if child is Sprite2D:
+					var new_tex = _get_boss_frame(_boss_anim_row, _boss_anim_frame)
+					if new_tex != null:
+						child.texture = new_tex
+					break
 
 ## 目標生成
 func _on_target_spawned(data: Dictionary) -> void:
@@ -457,6 +536,11 @@ func _play_kill_effect(node: Node2D, data: Dictionary) -> void:
 	if def_id == "T105":
 		_spawn_coin_rain(kill_pos)
 
+	# B001 BOSS：播放 death 動畫後消失
+	if def_id == "B001":
+		_play_boss_death(node, kill_pos, reward, multiplier)
+		return
+
 	# 閃白所有子節點
 	for child in node.get_children():
 		if child is Sprite2D or child is ColorRect:
@@ -481,6 +565,39 @@ func _play_kill_effect(node: Node2D, data: Dictionary) -> void:
 	# 震動（依倍率）
 	var trauma = clamp(0.2 + multiplier * 0.005, 0.2, 0.6)
 	ScreenShake.add_trauma(trauma)
+
+## B001 BOSS 死亡動畫（播放 death 幀後消失）
+func _play_boss_death(node: Node2D, kill_pos: Vector2, reward: int, multiplier: float) -> void:
+	if not is_instance_valid(node):
+		return
+
+	# 切換到 death 動畫行
+	_boss_anim_row = BOSS_ROW_DEATH
+	_boss_anim_frame = 0
+	_boss_anim_timer = 0.0
+
+	# 播放 death 動畫（4幀 × 8fps = 0.5秒）
+	var death_duration = float(BOSS_COLS) / 8.0  # 0.5 秒
+
+	# 縮放爆炸動畫（配合 death 幀）
+	var tween = create_tween()
+	tween.tween_property(node, "scale", Vector2(2.5, 2.5), death_duration * 0.3)
+	tween.tween_property(node, "scale", Vector2(0.0, 0.0), death_duration * 0.7)
+	tween.tween_callback(func():
+		if is_instance_valid(node):
+			node.queue_free()
+		# 重置 BOSS 動畫狀態
+		_boss_anim_row = BOSS_ROW_IDLE
+		_boss_anim_frame = 0
+	)
+
+	# 獎勵跳字
+	if reward > 0:
+		_spawn_reward_text(kill_pos, reward, multiplier)
+
+	# BOSS 死亡特效（大爆炸）
+	HitEffect.spawn_kill(kill_pos, multiplier)
+	ScreenShake.add_trauma(1.0)
 
 ## T101 擬態型怪物死亡變形（規格書 26.2）
 func _play_mimic_death(node: Node2D, kill_pos: Vector2, reward: int, multiplier: float) -> void:
