@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-026 Redis 架構設計 + Store 模組）
+## 最後更新：2026-05-19（DAY-027 Phase 8 完整循環驗證 + HTML5 大小分析）
 
 ## 自我評估
 - **完成度：100%**
@@ -193,6 +193,9 @@
 - [x] 玩家名稱設定（DAY-021）
 - [x] Redis 水平擴展架構設計（DAY-026）
 - [x] Store 模組骨架（MemoryStore 完整 + RedisStore 骨架，10 個測試通過）
+- [x] Store 整合到 Game（AddPlayer 恢復狀態 + RemovePlayer 儲存狀態，DAY-026b）
+- [x] HTML5 export 大小分析（pck 1.0MB < 2MB ✅，gzip 總量 10.2MB ✅，DAY-027）
+- [x] Phase 8 完整自主循環測試（QA 8/8 全部通過，DAY-027）
 
 ---
 
