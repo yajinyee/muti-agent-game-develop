@@ -923,6 +923,7 @@ func _toggle_leaderboard() -> void:
 
 var _fps_label: Label = null
 var _fps_update_timer: float = 0.0
+var _perf_panel: Control = null  # 完整效能監控面板
 
 func _update_fps_display() -> void:
 	_fps_update_timer += get_process_delta_time()
@@ -930,26 +931,105 @@ func _update_fps_display() -> void:
 		return
 	_fps_update_timer = 0.0
 
-	if _fps_label == null:
-		_fps_label = Label.new()
-		_fps_label.name = "FPSLabel"
-		_fps_label.position = Vector2(10, 680)
-		_fps_label.add_theme_font_size_override("font_size", 12)
-		_fps_label.modulate = Color(0.5, 1.0, 0.5, 0.8)
-		add_child(_fps_label)
+	# 首次建立完整效能面板
+	if _perf_panel == null:
+		_create_perf_panel()
+
+	if not is_instance_valid(_perf_panel):
+		return
 
 	var fps = Engine.get_frames_per_second()
+	var mem_mb = PerformanceMonitor.snapshot_memory_mb
+	var draw_calls = PerformanceMonitor.snapshot_draw_calls
+	var nodes = PerformanceMonitor.snapshot_nodes
 	var quality = PerformanceMonitor.current_quality
-	var quality_str = ["HIGH", "MEDIUM", "LOW"][quality]
-	_fps_label.text = "FPS: %d | %s" % [fps, quality_str]
+	var quality_str = ["HIGH", "MED", "LOW"][quality]
 
-	# FPS 顏色警告
-	if fps < 30:
-		_fps_label.modulate = Color(1.0, 0.3, 0.3, 0.9)
-	elif fps < 50:
-		_fps_label.modulate = Color(1.0, 0.8, 0.2, 0.8)
-	else:
-		_fps_label.modulate = Color(0.5, 1.0, 0.5, 0.8)
+	# FPS 行
+	var fps_lbl = _perf_panel.get_node_or_null("FPSLine")
+	if fps_lbl:
+		fps_lbl.text = "FPS: %d  [%s]" % [fps, quality_str]
+		if fps < 30:
+			fps_lbl.modulate = Color(1.0, 0.3, 0.3, 0.95)
+		elif fps < 50:
+			fps_lbl.modulate = Color(1.0, 0.8, 0.2, 0.9)
+		else:
+			fps_lbl.modulate = Color(0.4, 1.0, 0.5, 0.85)
+
+	# 記憶體行
+	var mem_lbl = _perf_panel.get_node_or_null("MemLine")
+	if mem_lbl:
+		mem_lbl.text = "MEM: %.1f MB" % mem_mb
+		if mem_mb > 200.0:
+			mem_lbl.modulate = Color(1.0, 0.5, 0.2, 0.9)
+		else:
+			mem_lbl.modulate = Color(0.7, 0.9, 1.0, 0.8)
+
+	# Draw Calls 行
+	var dc_lbl = _perf_panel.get_node_or_null("DCLine")
+	if dc_lbl:
+		dc_lbl.text = "DC: %d  Nodes: %d" % [draw_calls, nodes]
+		if draw_calls > 500:
+			dc_lbl.modulate = Color(1.0, 0.6, 0.2, 0.9)
+		else:
+			dc_lbl.modulate = Color(0.7, 0.9, 1.0, 0.8)
+
+func _create_perf_panel() -> void:
+	var panel = Control.new()
+	panel.name = "PerfPanel"
+	panel.position = Vector2(8, 670)
+	panel.size = Vector2(220, 56)
+	panel.z_index = 200
+	add_child(panel)
+	_perf_panel = panel
+
+	# 半透明背景
+	var bg = ColorRect.new()
+	bg.size = Vector2(220, 56)
+	bg.color = Color(0.0, 0.0, 0.0, 0.55)
+	panel.add_child(bg)
+
+	# 左側綠色邊條（DEBUG 標識）
+	var side = ColorRect.new()
+	side.size = Vector2(3, 56)
+	side.color = Color(0.2, 1.0, 0.4, 0.8)
+	panel.add_child(side)
+
+	# FPS 行
+	var fps_lbl = Label.new()
+	fps_lbl.name = "FPSLine"
+	fps_lbl.position = Vector2(8, 4)
+	fps_lbl.size = Vector2(210, 16)
+	fps_lbl.add_theme_font_size_override("font_size", 12)
+	fps_lbl.text = "FPS: --  [HIGH]"
+	fps_lbl.modulate = Color(0.4, 1.0, 0.5, 0.85)
+	if is_instance_valid(_pixel_font):
+		fps_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(fps_lbl)
+
+	# 記憶體行
+	var mem_lbl = Label.new()
+	mem_lbl.name = "MemLine"
+	mem_lbl.position = Vector2(8, 22)
+	mem_lbl.size = Vector2(210, 16)
+	mem_lbl.add_theme_font_size_override("font_size", 12)
+	mem_lbl.text = "MEM: -- MB"
+	mem_lbl.modulate = Color(0.7, 0.9, 1.0, 0.8)
+	if is_instance_valid(_pixel_font):
+		mem_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(mem_lbl)
+
+	# Draw Calls 行
+	var dc_lbl = Label.new()
+	dc_lbl.name = "DCLine"
+	dc_lbl.position = Vector2(8, 40)
+	dc_lbl.size = Vector2(210, 16)
+	dc_lbl.add_theme_font_size_override("font_size", 12)
+	dc_lbl.text = "DC: --  Nodes: --"
+	dc_lbl.modulate = Color(0.7, 0.9, 1.0, 0.8)
+	if is_instance_valid(_pixel_font):
+		dc_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(dc_lbl)
 
 # ── 成就通知系統 ──────────────────────────────────────────────
 

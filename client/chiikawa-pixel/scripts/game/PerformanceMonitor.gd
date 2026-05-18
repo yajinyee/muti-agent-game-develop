@@ -21,6 +21,13 @@ var _check_timer: float = 0.0
 var _degraded_count: int = 0  # 連續降級次數
 var _upgraded_count: int = 0  # 連續升級次數
 
+# 效能快照（供 HUD 讀取）
+var snapshot_fps: float = 60.0
+var snapshot_memory_mb: float = 0.0
+var snapshot_draw_calls: int = 0
+var snapshot_objects: int = 0
+var snapshot_nodes: int = 0
+
 # 效能門檻
 const FPS_LOW_THRESHOLD = 28.0    # 低於此值降級
 const FPS_HIGH_THRESHOLD = 50.0   # 高於此值升級
@@ -47,6 +54,13 @@ func _process(delta: float) -> void:
 	_fps_samples.push_back(fps)
 	if _fps_samples.size() > SAMPLE_COUNT:
 		_fps_samples.pop_front()
+
+	# 更新效能快照（每幀）
+	snapshot_fps = fps
+	snapshot_memory_mb = Performance.get_monitor(Performance.MEMORY_STATIC) / 1048576.0
+	snapshot_draw_calls = int(Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME))
+	snapshot_objects = int(Performance.get_monitor(Performance.OBJECT_COUNT))
+	snapshot_nodes = int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT))
 
 	# 定期評估
 	_check_timer += delta

@@ -1347,3 +1347,42 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **峰值高度：** 70-140px（比原版 60-120px 更高，視覺更壯觀）
 - **數量：** 18 枚（比原版 15 枚多 20%）
 - **教訓：** 金幣雨要有「重量感」，上升快下落慢是錯的，要上升快下落也快（重力加速）
+
+## 85. Godot 4 ResourceLoader.load_threaded_request 背景載入（2026-05-19）
+- **用途：** 非阻塞背景預載入資產，避免首次使用時卡頓
+- **API：**
+  ```gdscript
+  ResourceLoader.load_threaded_request(path)  # 開始背景載入
+  ResourceLoader.load_threaded_get_status(path)  # 查詢狀態
+  ResourceLoader.load_threaded_get(path)  # 取得已載入資源
+  ```
+- **狀態值：** `THREAD_LOAD_IN_PROGRESS` / `THREAD_LOAD_LOADED` / `THREAD_LOAD_FAILED`
+- **注意：** 在 `_process` 中輪詢狀態，全部完成後停止輪詢（節省 CPU）
+- **教訓：** 大量資產（48個）用背景載入，首次使用時直接從快取取得，無卡頓
+
+## 86. 升級特效設計原則（2026-05-19）
+- **觸發時機：** 勞動值從 <100 跨越到 >=100（邊界偵測，不是每幀檢查）
+- **視覺層次：** 全畫面閃光（最底層）→ 閃光環（中層）→ 粒子（上層）→ 文字（最頂層）
+- **文字動畫：** BACK 彈性（`TRANS_BACK` + `EASE_OUT`）讓文字有彈跳感
+- **顏色策略：** 依角色 ID 選色（chiikawa=粉紅, hachiware=藍, usagi=黃）
+- **教訓：** 升級特效要有「層次感」，不是所有效果同時出現，要有先後順序
+
+## 87. Godot 4 動態 GDScript 節點建立最佳實踐（2026-05-19）
+- **問題：** 動態建立的 Label 在 `_ready()` 之前讀取 `_pixel_font` 可能為 null
+- **解法：** 建立節點後立即檢查 `is_instance_valid(_pixel_font)` 再套用字體
+- **面板建立時機：** 用 `call_deferred()` 延遲到下一幀，確保所有 Autoload 都已初始化
+- **教訓：** 動態建立 UI 節點時，所有資源引用都要做 null check
+
+## 88. 金幣雨像素金幣設計（2026-05-19）
+- **問題：** 原版金幣雨用 ColorRect（純色方塊），視覺太簡陋
+- **升級：** 用 `_draw()` 繪製像素金幣（圓形 + ¥符號 + 高光 + 旋轉）
+- **旋轉拋物線：** 每個金幣有獨立的 `rotation_speed`（±2-5 rad/s），模擬真實拋物線
+- **教訓：** 特效的細節決定品質，金幣要像金幣，不能用純色方塊代替
+
+## 89. Godot 4 Performance API（2026-05-19）
+- **記憶體：** `Performance.get_monitor(Performance.MEMORY_STATIC)` — 靜態記憶體（bytes）
+- **Draw Calls：** `Performance.get_monitor(Performance.RENDER_TOTAL_DRAW_CALLS_IN_FRAME)`
+- **物件數：** `Performance.get_monitor(Performance.OBJECT_COUNT)`
+- **節點數：** `Performance.get_monitor(Performance.OBJECT_NODE_COUNT)`
+- **注意：** 這些值每幀都在變，建議每 0.5 秒更新一次顯示（避免數字跳動太快）
+- **教訓：** 效能監控面板要顯示有意義的指標（記憶體/DC/節點），不只是 FPS

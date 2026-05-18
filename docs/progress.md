@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-018 資產預載入 + 角色升級特效）
+## 最後更新：2026-05-19（DAY-019 效能監控面板升級 + GitHub 上傳）
 
 ## 自我評估
 - **完成度：100%**
@@ -108,6 +108,11 @@
   - 全畫面角色色閃光 + 金色星星粒子（向上扇形噴射）+ 雙層閃光環 + 衝擊波
   - "BONUS READY!" 文字動畫（BACK 彈性彈入 → 停留 → 淡出）
   - HUD.gd 整合：`_last_labor_value` 偵測邊界觸發
+- [x] **效能監控面板升級**（2026-05-19 DAY-019）：
+  - `PerformanceMonitor.gd`：加入 `snapshot_memory_mb` / `snapshot_draw_calls` / `snapshot_nodes` 快照，每幀更新
+  - `HUD.gd`：效能面板從單行升級為三行（FPS+品質 / 記憶體 / Draw Calls+節點數）
+  - 記憶體 > 200MB 橙色警告，Draw Calls > 500 橙色警告
+  - 半透明背景 + 左側綠色邊條（DEBUG 標識）
 
 ### Godot Client（100% 完整）
 - [x] NetworkManager.gd（WebSocket + 自動重連）
