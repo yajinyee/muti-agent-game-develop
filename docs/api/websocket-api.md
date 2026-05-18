@@ -1,7 +1,7 @@
 # WebSocket API 文件
 
-**版本**：v1.3  
-**最後更新**：2026-05-18（DAY-017）  
+**版本**：v1.4  
+**最後更新**：2026-05-19（DAY-019）  
 **協定**：WebSocket + JSON，每訊息獨立 frame  
 **端點**：`ws://[host]:7777/ws`
 
@@ -10,8 +10,11 @@
 ## 連線說明
 
 ```
-ws://localhost:7777/ws
+ws://localhost:7777/ws?player_id=xxx&room_id=room-001
 ```
+
+- `player_id`：玩家 ID（可選，不填時 Server 自動生成 UUID）
+- `room_id`：房間 ID（可選，不填時預設 `room-001`）
 
 連線成功後，Server 會立即廣播當前 `game_state`，Client 應根據狀態初始化 UI。
 
@@ -22,7 +25,27 @@ ws://localhost:7777/ws
 | `/health` | GET | Server 健康檢查，回傳 `{"status":"ok"}` |
 | `/leaderboard` | GET | 取得當前排行榜（JSON） |
 | `/analytics` | GET | 取得房間整體統計（JSON） |
+| `/rooms` | GET | 取得所有房間列表（JSON，DAY-019 新增） |
+| `/stats` | GET | Server 效能統計（goroutine/記憶體/GC） |
 | `/` | GET | 靜態檔案服務（HTML5 遊戲） |
+
+### `/rooms` 回傳格式
+
+```json
+[
+  {
+    "id": "room-001",
+    "name": "初心者房間",
+    "player_count": 3,
+    "max_players": 16,
+    "min_bet_level": 1,
+    "max_bet_level": 4,
+    "theme": "chiikawa",
+    "created_at": "2026-05-19T01:00:00Z",
+    "is_full": false
+  }
+]
+```
 
 ---
 

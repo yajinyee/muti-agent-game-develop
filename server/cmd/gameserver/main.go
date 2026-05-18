@@ -20,6 +20,7 @@ import (
 	"digital-twin/server/internal/analytics"
 	"digital-twin/server/internal/config"
 	"digital-twin/server/internal/game"
+	"digital-twin/server/internal/room"
 	"digital-twin/server/internal/ws"
 )
 
@@ -41,11 +42,14 @@ func main() {
 	// 建立 WebSocket Hub
 	hub := ws.NewHub()
 
+	// 初始化多房間管理器（DAY-019）
+	roomMgr := room.NewManager()
+
 	// 初始化數據埋點（日誌寫入 logs/ 目錄）
 	tracker := analytics.Init("room-001", "./logs")
 	defer tracker.Close()
 
-	// 建立遊戲實例（單一房間 Prototype）
+	// 建立遊戲實例（單一房間 Prototype，多房間架構已就緒）
 	g := game.NewGame("room-001", hub)
 
 	// 設定 WebSocket 事件處理
@@ -88,6 +92,16 @@ func main() {
 		if clientID == "" {
 			clientID = uuid.New().String()
 		}
+		// 支援 room_id 參數（多房間架構，DAY-019）
+		roomID := r.URL.Query().Get("room_id")
+		if roomID == "" {
+			roomID = "room-001"
+		}
+		// 記錄玩家加入的房間（向後相容：room-001 是預設房間）
+		if _, ok := roomMgr.GetRoom(roomID); !ok {
+			roomID = "room-001"
+		}
+		log.Printf("[WS] Player %s connecting to room %s", clientID, roomID)
 		hub.ServeWS(w, r, clientID)
 	})
 
@@ -118,6 +132,16 @@ func main() {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		data := g.GetLeaderboardData()
 		if err := json.NewEncoder(w).Encode(data); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
+	// 房間列表端點（HTTP GET，多房間架構 DAY-019）
+	mux.HandleFunc("/rooms", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		rooms := roomMgr.ListRooms()
+		if err := json.NewEncoder(w).Encode(rooms); err != nil {
 			http.Error(w, "encode error", http.StatusInternalServerError)
 		}
 	})
@@ -189,6 +213,7 @@ func main() {
 	log.Printf("📊 Stats at http://localhost:%s/stats", cfg.Port)
 	log.Printf("🏆 Leaderboard at http://localhost:%s/leaderboard", cfg.Port)
 	log.Printf("📈 Analytics at http://localhost:%s/analytics", cfg.Port)
+	log.Printf("🏠 Rooms at http://localhost:%s/rooms", cfg.Port)
 
 	// Graceful shutdown
 	quit := make(chan os.Signal, 1)
