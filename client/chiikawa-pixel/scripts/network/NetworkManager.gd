@@ -10,10 +10,13 @@ signal connected()
 signal disconnected()
 signal message_received(type: String, payload: Dictionary)
 signal connection_error(error: String)
+signal rooms_fetched(rooms: Array)  # 房間列表取得（DAY-020）
 
 # 設定
 const SERVER_URL_LOCAL = "ws://localhost:7777/ws"
 const SERVER_URL_REMOTE = "ws://220.137.205.22:7777/ws"
+const HTTP_URL_LOCAL = "http://localhost:7777"
+const HTTP_URL_REMOTE = "http://220.137.205.22:7777"
 
 # 自動判斷：Web 平台讀 hostname，桌面版用 localhost
 var SERVER_URL: String:
@@ -23,18 +26,37 @@ var SERVER_URL: String:
 			if host != "localhost" and host != "127.0.0.1" and host != "":
 				return SERVER_URL_REMOTE
 		return SERVER_URL_LOCAL
+
+var HTTP_BASE: String:
+	get:
+		if OS.has_feature("web"):
+			var host = JavaScriptBridge.eval("window.location.hostname")
+			if host != "localhost" and host != "127.0.0.1" and host != "":
+				return HTTP_URL_REMOTE
+		return HTTP_URL_LOCAL
+
 const RECONNECT_DELAY = 3.0
 const PING_INTERVAL = 30.0
 
 var _socket: WebSocketPeer
 var _player_id: String = ""
+var _room_id: String = "room-001"  # 當前房間 ID（DAY-020）
 var _connected: bool = false
 var _reconnect_timer: float = 0.0
 var _ping_timer: float = 0.0
 
+# HTTP 請求（用於查詢房間列表）
+var _http_request: HTTPRequest = null
+
 func _ready() -> void:
 	_player_id = _generate_player_id()
 	_socket = WebSocketPeer.new()
+	# 建立 HTTPRequest 節點（用於查詢房間列表）
+	_http_request = HTTPRequest.new()
+	add_child(_http_request)
+	_http_request.request_completed.connect(_on_rooms_response)
+	# 預設連線到 room-001（向後相容）
+	# 大廳 UI 可以呼叫 connect_to_room() 切換房間
 	connect_to_server()
 
 func _process(delta: float) -> void:
@@ -82,12 +104,49 @@ func _process(delta: float) -> void:
 
 ## 連線到 Server
 func connect_to_server() -> void:
-	var url = SERVER_URL + "?player_id=" + _player_id
+	var url = SERVER_URL + "?player_id=" + _player_id + "&room_id=" + _room_id
 	print("[Network] Connecting to: ", url)
 	var err = _socket.connect_to_url(url)
 	if err != OK:
 		push_error("[Network] Connection failed: " + str(err))
 		emit_signal("connection_error", "Connection failed: " + str(err))
+
+## 設定房間並連線（由大廳呼叫，DAY-020）
+func connect_to_room(room_id: String) -> void:
+	_room_id = room_id
+	connect_to_server()
+
+## 查詢房間列表（HTTP GET /rooms，DAY-020）
+func fetch_rooms() -> void:
+	if not is_instance_valid(_http_request):
+		return
+	var url = HTTP_BASE + "/rooms"
+	print("[Network] Fetching rooms from: ", url)
+	var err = _http_request.request(url)
+	if err != OK:
+		push_error("[Network] HTTP request failed: " + str(err))
+
+## 處理房間列表回應
+func _on_rooms_response(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	if response_code != 200:
+		push_error("[Network] Rooms fetch failed: HTTP " + str(response_code))
+		emit_signal("rooms_fetched", [])
+		return
+	var text = body.get_string_from_utf8()
+	var json = JSON.new()
+	if json.parse(text) != OK:
+		push_error("[Network] Rooms JSON parse error")
+		emit_signal("rooms_fetched", [])
+		return
+	var data = json.get_data()
+	if data is Array:
+		emit_signal("rooms_fetched", data)
+	else:
+		emit_signal("rooms_fetched", [])
+
+## 取得當前房間 ID
+func get_room_id() -> String:
+	return _room_id
 
 ## 傳送訊息
 func send(type: String, payload: Dictionary) -> void:
