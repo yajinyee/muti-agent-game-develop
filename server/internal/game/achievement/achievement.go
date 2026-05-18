@@ -31,6 +31,7 @@ type Achievement struct {
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
 	Icon        string        `json:"icon"` // emoji 圖示
+	Type        string        `json:"type"` // 成就類型：normal/boss/bonus/special
 }
 
 // AchievementUnlock 成就解鎖記錄
@@ -39,6 +40,7 @@ type AchievementUnlock struct {
 	Name        string        `json:"name"`
 	Description string        `json:"description"`
 	Icon        string        `json:"icon"`
+	Type        string        `json:"type"` // 成就類型（傳給 Client 用於 UI 顏色）
 	UnlockedAt  time.Time     `json:"unlocked_at"`
 }
 
@@ -49,72 +51,84 @@ var Definitions = map[AchievementID]*Achievement{
 		Name:        "初次討伐",
 		Description: "首次擊破目標",
 		Icon:        "⚔️",
+		Type:        "normal",
 	},
 	AchKill5: {
 		ID:          AchKill5,
 		Name:        "討伐新手",
 		Description: "累計擊破 5 個目標",
 		Icon:        "🌟",
+		Type:        "normal",
 	},
 	AchKill20: {
 		ID:          AchKill20,
 		Name:        "討伐達人",
 		Description: "累計擊破 20 個目標",
 		Icon:        "💫",
+		Type:        "normal",
 	},
 	AchKill50: {
 		ID:          AchKill50,
 		Name:        "討伐高手",
 		Description: "累計擊破 50 個目標",
 		Icon:        "🏆",
+		Type:        "normal",
 	},
 	AchKill100: {
 		ID:          AchKill100,
 		Name:        "討伐傳說",
 		Description: "累計擊破 100 個目標",
 		Icon:        "👑",
+		Type:        "special",
 	},
 	AchKillSpecial: {
 		ID:          AchKillSpecial,
 		Name:        "特殊目標獵人",
 		Description: "首次擊破特殊目標",
 		Icon:        "✨",
+		Type:        "special",
 	},
 	AchKillBoss: {
 		ID:          AchKillBoss,
 		Name:        "BOSS 終結者",
 		Description: "首次擊敗 BOSS",
 		Icon:        "🔥",
+		Type:        "boss",
 	},
 	AchBigWin: {
 		ID:          AchBigWin,
 		Name:        "大獎得主",
 		Description: "首次獲得 20 倍以上大獎",
 		Icon:        "💰",
+		Type:        "normal",
 	},
 	AchMegaWin: {
 		ID:          AchMegaWin,
 		Name:        "超級大獎",
 		Description: "首次獲得 50 倍以上超大獎",
 		Icon:        "💎",
+		Type:        "special",
 	},
 	AchBonus: {
 		ID:          AchBonus,
 		Name:        "瘋狂拔草",
 		Description: "首次觸發 Bonus 遊戲",
 		Icon:        "🌿",
+		Type:        "bonus",
 	},
 	AchCoins50k: {
 		ID:          AchCoins50k,
 		Name:        "小富翁",
 		Description: "金幣達到 50,000",
 		Icon:        "🪙",
+		Type:        "normal",
 	},
 	AchCoins100k: {
 		ID:          AchCoins100k,
 		Name:        "大富翁",
 		Description: "金幣達到 100,000",
 		Icon:        "💵",
+		Type:        "special",
 	},
 }
 
@@ -146,6 +160,7 @@ func (t *Tracker) TryUnlock(id AchievementID) *AchievementUnlock {
 		Name:        def.Name,
 		Description: def.Description,
 		Icon:        def.Icon,
+		Type:        def.Type,
 		UnlockedAt:  now,
 	}
 }
@@ -169,6 +184,7 @@ func (t *Tracker) UnlockedList() []AchievementUnlock {
 			Name:        def.Name,
 			Description: def.Description,
 			Icon:        def.Icon,
+			Type:        def.Type,
 			UnlockedAt:  unlockedAt,
 		})
 	}

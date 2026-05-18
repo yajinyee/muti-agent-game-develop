@@ -2,8 +2,8 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-19（DAY-028）  
-**整體目標**：RedisStore 完整實作 + 整合測試 + GitHub 上傳
+**日期**：2026-05-19（DAY-029）  
+**整體目標**：部署文件 Redis 更新 + 成就系統 UI 優化 + GitHub 上傳
 
 ---
 
@@ -17,40 +17,40 @@
 
 ## 今日任務清單
 
-### ✅ DAY-028 啟動檢查
+### ✅ DAY-029 啟動檢查
 
-- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-027b 眨眼動畫升級，美術 93/100）
+- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-028b B001 BOSS 完整動畫集，美術 95/100）
 - [x] 讀取 .kiro/skills/knowhow-log.md 確認已知問題
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
-- [x] git log 確認最後 commit（DAY-027b，已 push）
+- [x] go test ./... 確認測試通過（全部 OK）
+- [x] git log 確認最後 commit（DAY-028b，已 push）
+- [x] QA 自動化檢查（8/8 全部通過）
 
-### ✅ RedisStore 完整實作（P1 → 完成）
+### ✅ 部署文件 Redis 更新（P1 → 完成）
 
-- [x] 安裝 `github.com/redis/go-redis/v9@v9.7.3`
-- [x] 實作 `NewRedisStore`：ParseURL + Ping 驗證連線
-- [x] 實作 `SavePlayer`：JSON 序列化 + SET + 7天 TTL
-- [x] 實作 `LoadPlayer`：GET + JSON 反序列化，找不到回傳 nil,nil
-- [x] 實作 `DeletePlayer`：DEL
-- [x] 實作 `UpdateLeaderboard`：ZADD（只更新最高分）+ 30天 TTL
-- [x] 實作 `GetTopPlayers`：ZREVRANGE + 批次 LoadPlayer
-- [x] 修復 MemoryStore 的 `copy` 變數名稱衝突（改為 `cp`）
-- [x] 升級 MemoryStore 排序：bubble sort → `sort.Slice`
+- [x] 更新 `docs/deployment-guide.md`：
+  - 加入 `REDIS_URL` 環境變數說明
+  - 加入 Redis 設定說明（記憶體模式 vs Redis 模式）
+  - 加入 Redis 安裝指南（Ubuntu/Debian + Docker Compose）
+  - 更新 systemd service 範例（加入 REDIS_URL 設定）
+  - 加入降級策略說明
 
-### ✅ Redis 整合測試（P1 → 完成）
+### ✅ 成就系統 UI 優化（P2 → 完成）
 
-- [x] 建立 `redis_integration_test.go`（4 個測試）
-  - TestRedisStoreBasic：CRUD 完整流程
-  - TestRedisStoreLeaderboard：排行榜多玩家
-  - TestRedisStoreLeaderboardHighScoreOnly：只保留最高分
-  - TestRedisStoreIsRedis：IsRedis() 驗證
-- [x] 測試設計：無 REDIS_URL 時自動 Skip（不阻擋 CI）
-- [x] go test ./... 全部通過（10 個 store 測試 + 其他模組）
+- [x] **Server 端**：`achievement.go` 加入 `Type` 欄位
+  - 12 個成就分類：normal/boss/bonus/special
+  - `TryUnlock` 和 `UnlockedList` 都傳遞 `Type`
+- [x] **Client 端**：`HUD.gd` 成就通知面板動畫升級
+  - 加入左側彩色邊條（依類型：金/紅/綠/紫）
+  - 加入彈跳縮放動畫（滑入後 scale 1.0→1.05→1.0）
+  - 淡出改為 `modulate:a` 漸隱（比直接滑出更優雅）
+  - 修復：面板消失後重置 scale 和 modulate
 
 ### ✅ 上傳 GitHub（P1 → 完成）
 
 - [x] git add
-- [x] git commit（DAY-028 RedisStore 完整實作）
+- [x] git commit（DAY-029 成就 UI 優化 + 部署文件 Redis 更新）
 - [x] git push origin main
 
 ---
@@ -60,24 +60,23 @@
 > **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
 
 - 完成度：**100%**
-- 美術質量：**93/100**
+- 美術質量：**95/100**
 - 規格一致性：**100%**
 - 架構成熟度：**RedisStore 完整實作，生產環境就緒**
 
 **今日改善摘要：**
-1. RedisStore 從骨架升級為完整實作（JSON + TTL + Sorted Set 排行榜）
-2. 4 個 Redis 整合測試（有 Redis 時執行，無 Redis 自動 Skip）
-3. MemoryStore 排序升級（sort.Slice 取代 bubble sort）
-4. go.mod 加入 go-redis/v9 依賴
+1. 部署文件加入完整 Redis 設定說明（Docker Compose + systemd + 降級策略）
+2. 成就系統加入 Type 欄位（Server + Client 同步）
+3. 成就通知面板動畫升級（彩色邊條 + 彈跳縮放 + 淡出）
 
 ---
 
-## 明日預覽（DAY-029）
+## 明日預覽（DAY-030）
 
 ### 🟠 P1
-1. **BOSS AI 圖生成**（B001 完整動畫集，ComfyUI）
-2. **chiikawa idle 幀數提升**（4 幀 → 8 幀）
+1. **BOSS AI 圖生成**（B001 完整動畫集，ComfyUI — 需手動啟動）
+2. **Server 部署測試**（Docker Compose 完整流程驗證）
 
 ### 🟢 P3
-1. **成就系統 UI 優化**（通知面板動畫改善）
-2. **Server 部署文件更新**（加入 Redis 設定說明）
+1. **能力評估更新**（docs/ability-score.md）
+2. **Backlog 清理**（標記已完成項目）

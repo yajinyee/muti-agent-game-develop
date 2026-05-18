@@ -1,10 +1,10 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-028b B001 BOSS 完整動畫集）
+## 最後更新：2026-05-19（DAY-029 成就 UI 優化 + 部署文件 Redis 更新）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：95/100**（B001 BOSS 完整動畫集：idle/phase2/death 三種狀態，12幀）
+- **美術質量：95/100**（BOSS 完整動畫集，成就通知面板動畫升級）
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
@@ -212,6 +212,17 @@
   - TargetManager.gd：BOSS 動畫幀切換系統（`_update_boss_animation`）
   - Phase 2 事件：自動切換到 phase2 動畫行
   - BOSS 死亡：播放 death 動畫後消失（`_play_boss_death`）
+- [x] **部署文件 Redis 更新**（DAY-029）：
+  - `docs/deployment-guide.md`：加入 `REDIS_URL` 環境變數說明
+  - 加入 Redis 設定說明（記憶體模式 vs Redis 模式）
+  - 加入 Redis 安裝指南（Ubuntu/Debian + Docker Compose）
+  - 加入降級策略說明
+- [x] **成就系統 UI 優化**（DAY-029）：
+  - `achievement.go`：加入 `Type` 欄位（normal/boss/bonus/special）
+  - `HUD.gd`：成就通知面板動畫升級
+    - 左側彩色邊條（依類型：金/紅/綠/紫）
+    - 彈跳縮放動畫（滑入後 scale 1.0→1.05→1.0）
+    - 淡出改為 `modulate:a` 漸隱
 
 ---
 

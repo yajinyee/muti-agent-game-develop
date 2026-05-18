@@ -53,6 +53,37 @@ DEBUG=true ./bin/gameserver
 | `MAX_PLAYERS` | `10` | 每房間最大玩家數 |
 | `INITIAL_COINS` | `10000` | 玩家初始金幣 |
 | `DEBUG` | `false` | 啟用 pprof 端點 |
+| `REDIS_URL` | `""` | Redis 連線 URL（空字串 = 記憶體模式） |
+
+### Redis 設定說明
+
+Server 支援兩種儲存模式：
+
+**記憶體模式（預設）**
+- 不需要任何額外設定
+- 玩家資料在 Server 重啟後消失
+- 適合本機開發和測試
+
+**Redis 模式（生產環境推薦）**
+- 玩家資料持久化（7 天 TTL）
+- 排行榜資料持久化（30 天 TTL）
+- 支援多 Server 實例水平擴展
+
+```bash
+# 本機 Redis（Docker）
+docker run -d -p 6379:6379 redis:7-alpine
+
+# 啟動 Server 並連接 Redis
+REDIS_URL=redis://localhost:6379 ./bin/gameserver
+
+# Redis with 密碼
+REDIS_URL=redis://:yourpassword@localhost:6379 ./bin/gameserver
+
+# Redis Cloud（如 Upstash）
+REDIS_URL=rediss://default:yourtoken@your-endpoint.upstash.io:6379 ./bin/gameserver
+```
+
+**降級策略**：若 Redis 連線失敗，Server 自動降級為記憶體模式，不影響遊戲運行。
 
 ---
 
@@ -135,7 +166,7 @@ sudo nano /etc/systemd/system/chiikawa.service
 ```ini
 [Unit]
 Description=吉伊卡哇：像素大討伐 Server
-After=network.target
+After=network.target redis.service
 
 [Service]
 Type=simple
@@ -147,6 +178,8 @@ RestartSec=5
 Environment=PORT=7777
 Environment=MAX_PLAYERS=10
 Environment=INITIAL_COINS=10000
+# 啟用 Redis 持久化（可選，空字串 = 記憶體模式）
+# Environment=REDIS_URL=redis://localhost:6379
 
 [Install]
 WantedBy=multi-user.target
@@ -237,4 +270,64 @@ go version  # 需要 1.21+
 
 ---
 
-*最後更新：2026-05-18*
+## Redis 安裝（生產環境）
+
+### Ubuntu/Debian
+```bash
+# 安裝 Redis
+sudo apt update
+sudo apt install redis-server
+
+# 設定密碼（建議）
+sudo nano /etc/redis/redis.conf
+# 找到 # requirepass foobared，改為：
+# requirepass yourpassword
+
+# 啟動 Redis
+sudo systemctl enable redis-server
+sudo systemctl start redis-server
+
+# 確認運行
+redis-cli ping  # 應回傳 PONG
+```
+
+### Docker Compose（推薦）
+```yaml
+# docker-compose.yml
+version: '3.8'
+services:
+  redis:
+    image: redis:7-alpine
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+
+  gameserver:
+    build: ./server
+    restart: always
+    ports:
+      - "7777:7777"
+    environment:
+      - PORT=7777
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - redis
+
+volumes:
+  redis_data:
+```
+
+```bash
+# 啟動所有服務
+docker-compose up -d
+
+# 查看日誌
+docker-compose logs -f gameserver
+```
+
+---
+
+*最後更新：2026-05-19*

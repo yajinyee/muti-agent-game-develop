@@ -1129,24 +1129,46 @@ func _show_next_achievement() -> void:
 	if desc_lbl:
 		desc_lbl.text = data.get("description", "")
 
+	# 依成就類型設定左側彩色邊條顏色
+	var side_bar = _achievement_panel.get_node_or_null("AchSideBar")
+	if not is_instance_valid(side_bar):
+		side_bar = ColorRect.new()
+		side_bar.name = "AchSideBar"
+		side_bar.size = Vector2(4, 80)
+		side_bar.position = Vector2(0, 0)
+		_achievement_panel.add_child(side_bar)
+	var ach_type = data.get("type", "normal")
+	match ach_type:
+		"boss":    side_bar.color = Color(1.0, 0.2, 0.2, 1.0)   # 紅色 — BOSS 相關
+		"bonus":   side_bar.color = Color(0.2, 0.8, 0.2, 1.0)   # 綠色 — Bonus 相關
+		"special": side_bar.color = Color(0.6, 0.2, 1.0, 1.0)   # 紫色 — 特殊成就
+		_:         side_bar.color = Color(1.0, 0.85, 0.1, 1.0)  # 金色 — 一般成就
+
 	# 播放音效（用 bonus_ready 音效）
 	AudioManager.play_sfx(AudioManager.SFX.BONUS_READY)
 
-	# 動畫：從右側滑入 → 停留 3 秒 → 滑出
+	# 動畫：從右側滑入 → 彈跳縮放 → 停留 3 秒 → 淡出滑走
 	_achievement_panel.modulate.a = 1.0
+	_achievement_panel.scale = Vector2(1.0, 1.0)
 	_achievement_panel.position.x = 1300.0  # 畫面外右側
 	_achievement_panel.visible = true
 
-	var tween = create_tween()
-	# 滑入（0.35 秒）
+	var tween = create_tween().set_parallel(false)
+	# 滑入（0.35 秒，BACK 彈性）
 	tween.tween_property(_achievement_panel, "position:x", 900.0, 0.35).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	# 彈跳縮放（0.15 秒，放大 → 回正）
+	var scale_tween = create_tween().set_parallel(true)
+	scale_tween.tween_property(_achievement_panel, "scale", Vector2(1.05, 1.05), 0.08).set_ease(Tween.EASE_OUT)
+	scale_tween.chain().tween_property(_achievement_panel, "scale", Vector2(1.0, 1.0), 0.1).set_ease(Tween.EASE_IN_OUT)
 	# 停留 3 秒
 	tween.tween_interval(3.0)
-	# 滑出（0.3 秒）
-	tween.tween_property(_achievement_panel, "position:x", 1300.0, 0.3).set_ease(Tween.EASE_IN)
+	# 淡出 + 滑出（0.3 秒）
+	tween.tween_property(_achievement_panel, "modulate:a", 0.0, 0.3).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func():
 		if is_instance_valid(_achievement_panel):
 			_achievement_panel.visible = false
+			_achievement_panel.modulate.a = 1.0
+			_achievement_panel.scale = Vector2(1.0, 1.0)
 		# 顯示下一個成就（若佇列不空）
 		_show_next_achievement()
 	)
