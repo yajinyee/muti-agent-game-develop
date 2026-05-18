@@ -1226,7 +1226,30 @@ func _on_lobby_room_selected(room_id: String) -> void:
 		if is_instance_valid(_lobby_overlay):
 			_lobby_overlay.visible = false
 	)
-	# 顯示切換房間提示
+
+	# 觀戰模式：顯示「觀戰中」標籤（DAY-024）
+	if NetworkManager.is_spectator():
+		_show_spectator_badge()
+		var notify_lbl = Label.new()
+		notify_lbl.text = "👁 觀戰 %s 中..." % room_id
+		notify_lbl.position = Vector2(440, 360)
+		notify_lbl.size = Vector2(400, 40)
+		notify_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		notify_lbl.add_theme_font_size_override("font_size", 18)
+		notify_lbl.modulate = Color(0.5, 0.8, 1.0)
+		if is_instance_valid(_pixel_font):
+			notify_lbl.add_theme_font_override("font", _pixel_font)
+		add_child(notify_lbl)
+		var t2 = create_tween()
+		t2.tween_interval(2.0)
+		t2.tween_property(notify_lbl, "modulate:a", 0.0, 0.5)
+		t2.tween_callback(func():
+			if is_instance_valid(notify_lbl):
+				notify_lbl.queue_free()
+		)
+		return
+
+	# 一般加入房間：顯示切換房間提示
 	var notify_lbl = Label.new()
 	notify_lbl.text = "切換到 %s..." % room_id
 	notify_lbl.position = Vector2(440, 360)
@@ -1244,6 +1267,28 @@ func _on_lobby_room_selected(room_id: String) -> void:
 		if is_instance_valid(notify_lbl):
 			notify_lbl.queue_free()
 	)
+
+## 顯示觀戰標籤（DAY-024）：右上角藍色「👁 觀戰中」標籤
+func _show_spectator_badge() -> void:
+	# 避免重複建立
+	if get_node_or_null("SpectatorBadge") != null:
+		return
+	var badge = Label.new()
+	badge.name = "SpectatorBadge"
+	badge.text = "👁 觀戰中"
+	badge.position = Vector2(1050, 8)
+	badge.size = Vector2(180, 24)
+	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	badge.add_theme_font_size_override("font_size", 14)
+	badge.modulate = Color(0.5, 0.8, 1.0)
+	if is_instance_valid(_pixel_font):
+		badge.add_theme_font_override("font", _pixel_font)
+	# 加入 TopBar
+	var top_bar = get_node_or_null("TopBar")
+	if is_instance_valid(top_bar):
+		top_bar.add_child(badge)
+	else:
+		add_child(badge)
 
 # ── 玩家名稱設定（DAY-021）──────────────────────────────────────
 

@@ -1469,3 +1469,18 @@ BONUS_MULT = 20-50x（Prototype 展示版）
   ```
 - **注意：** `send` channel 必須有 buffer（`make(chan []byte, 10)`），否則 `Broadcast` 會 block
 - **教訓：** 測試 Hub 邏輯時，不需要真實 WebSocket，直接操作 clients map 更簡單
+
+## 89. 觀戰模式 Client 端整合（DAY-024）
+- **LobbyManager 觀戰按鈕：**
+  - 每個房間 row 加入「👁 觀戰」按鈕（藍色）
+  - 底部加入「👁 觀戰」快速按鈕（選最多人的房間）
+  - 觀戰按鈕呼叫 `NetworkManager.spectate_room(room_id)`
+- **NetworkManager 觀戰支援：**
+  - `spectate_room(room_id)` — 連線到 `/spectate?room_id=xxx`
+  - `is_spectator()` — 查詢當前是否為觀戰模式
+  - `fetch_spectator_snapshot()` — HTTP GET `/spectate/snapshot`
+  - `spectator_snapshot_received` 訊號
+- **HUD 觀戰標籤：**
+  - `_show_spectator_badge()` — 右上角藍色「👁 觀戰中」標籤
+  - `_on_lobby_room_selected` 依 `is_spectator()` 分支顯示不同提示
+- **教訓：** 觀戰模式的 Client 端只需要：1) 連線到不同端點 2) 顯示視覺標識 3) 禁用攻擊按鈕（Server 端已過濾）

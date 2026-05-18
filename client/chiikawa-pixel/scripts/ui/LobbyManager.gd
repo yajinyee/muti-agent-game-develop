@@ -142,14 +142,20 @@ func _build_ui() -> void:
 	add_child(_status_label)
 
 	# 底部按鈕區
-	_refresh_btn = _make_button("🔄 重新整理", Vector2(340, 610), Vector2(200, 44))
+	_refresh_btn = _make_button("🔄 重新整理", Vector2(240, 610), Vector2(180, 44))
 	_refresh_btn.pressed.connect(_refresh_rooms)
 	add_child(_refresh_btn)
 
-	_quick_join_btn = _make_button("⚡ 快速加入", Vector2(560, 610), Vector2(200, 44))
+	_quick_join_btn = _make_button("⚡ 快速加入", Vector2(440, 610), Vector2(180, 44))
 	_quick_join_btn.pressed.connect(_quick_join)
 	_quick_join_btn.modulate = Color(0.3, 1.0, 0.5)
 	add_child(_quick_join_btn)
+
+	# 觀戰按鈕（DAY-024）
+	var spectate_btn = _make_button("👁 觀戰", Vector2(640, 610), Vector2(180, 44))
+	spectate_btn.pressed.connect(_spectate_room)
+	spectate_btn.modulate = Color(0.5, 0.8, 1.0)
+	add_child(spectate_btn)
 
 	# 版本資訊
 	var ver_lbl = Label.new()
@@ -298,8 +304,8 @@ func _create_room_row(room_data: Dictionary, index: int) -> void:
 	# 加入按鈕（滿員時禁用）
 	var join_btn = Button.new()
 	join_btn.text = "滿員" if is_full else "加入"
-	join_btn.position = Vector2(680, 16)
-	join_btn.size = Vector2(100, 36)
+	join_btn.position = Vector2(580, 16)
+	join_btn.size = Vector2(90, 36)
 	join_btn.add_theme_font_size_override("font_size", 14)
 	join_btn.disabled = is_full
 	if not is_full:
@@ -310,6 +316,18 @@ func _create_room_row(room_data: Dictionary, index: int) -> void:
 	if is_instance_valid(_pixel_font):
 		join_btn.add_theme_font_override("font", _pixel_font)
 	row.add_child(join_btn)
+
+	# 觀戰按鈕（DAY-024）
+	var spectate_btn = Button.new()
+	spectate_btn.text = "👁 觀戰"
+	spectate_btn.position = Vector2(680, 16)
+	spectate_btn.size = Vector2(100, 36)
+	spectate_btn.add_theme_font_size_override("font_size", 13)
+	spectate_btn.modulate = Color(0.5, 0.8, 1.0)
+	spectate_btn.pressed.connect(func(): _spectate_specific_room(room_id))
+	if is_instance_valid(_pixel_font):
+		spectate_btn.add_theme_font_override("font", _pixel_font)
+	row.add_child(spectate_btn)
 
 ## 加入指定房間
 func _join_room(room_id: String) -> void:
@@ -352,3 +370,27 @@ func show_lobby() -> void:
 	var tween = create_tween()
 	tween.tween_property(self, "modulate:a", 1.0, 0.3)
 	_refresh_rooms()
+
+## 觀戰人數最少的房間（底部觀戰按鈕，DAY-024）
+func _spectate_room() -> void:
+	if _rooms.is_empty():
+		_refresh_rooms()
+		return
+	# 找人數最多的房間（觀戰最熱鬧的）
+	var best: Dictionary = {}
+	for r in _rooms:
+		if best.is_empty() or r.get("player_count", 0) > best.get("player_count", 0):
+			best = r
+	if best.is_empty():
+		return
+	_spectate_specific_room(best.get("id", "room-001"))
+
+## 觀戰指定房間（DAY-024）
+func _spectate_specific_room(room_id: String) -> void:
+	print("[Lobby] Spectating room: ", room_id)
+	NetworkManager.spectate_room(room_id)
+	emit_signal("room_selected", room_id)
+	# 淡出大廳 UI
+	var tween = create_tween()
+	tween.tween_property(self, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(func(): visible = false)

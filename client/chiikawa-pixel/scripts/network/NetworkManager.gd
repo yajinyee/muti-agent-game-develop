@@ -11,10 +11,13 @@ signal disconnected()
 signal message_received(type: String, payload: Dictionary)
 signal connection_error(error: String)
 signal rooms_fetched(rooms: Array)  # 房間列表取得（DAY-020）
+signal spectator_snapshot_received(snapshot: Dictionary)  # 觀戰快照（DAY-024）
 
 # 設定
 const SERVER_URL_LOCAL = "ws://localhost:7777/ws"
 const SERVER_URL_REMOTE = "ws://220.137.205.22:7777/ws"
+const SPECTATE_URL_LOCAL = "ws://localhost:7777/spectate"   # 觀戰端點（DAY-024）
+const SPECTATE_URL_REMOTE = "ws://220.137.205.22:7777/spectate"
 const HTTP_URL_LOCAL = "http://localhost:7777"
 const HTTP_URL_REMOTE = "http://220.137.205.22:7777"
 
@@ -26,6 +29,14 @@ var SERVER_URL: String:
 			if host != "localhost" and host != "127.0.0.1" and host != "":
 				return SERVER_URL_REMOTE
 		return SERVER_URL_LOCAL
+
+var SPECTATE_URL: String:
+	get:
+		if OS.has_feature("web"):
+			var host = JavaScriptBridge.eval("window.location.hostname")
+			if host != "localhost" and host != "127.0.0.1" and host != "":
+				return SPECTATE_URL_REMOTE
+		return SPECTATE_URL_LOCAL
 
 var HTTP_BASE: String:
 	get:
@@ -44,9 +55,12 @@ var _room_id: String = "room-001"  # 當前房間 ID（DAY-020）
 var _connected: bool = false
 var _reconnect_timer: float = 0.0
 var _ping_timer: float = 0.0
+var _is_spectator: bool = false  # 是否為觀戰模式（DAY-024）
 
 # HTTP 請求（用於查詢房間列表）
 var _http_request: HTTPRequest = null
+# HTTP 請求（用於查詢觀戰快照）
+var _snapshot_request: HTTPRequest = null
 
 func _ready() -> void:
 	_player_id = _generate_player_id()
@@ -55,6 +69,10 @@ func _ready() -> void:
 	_http_request = HTTPRequest.new()
 	add_child(_http_request)
 	_http_request.request_completed.connect(_on_rooms_response)
+	# 建立 HTTPRequest 節點（用於查詢觀戰快照，DAY-024）
+	_snapshot_request = HTTPRequest.new()
+	add_child(_snapshot_request)
+	_snapshot_request.request_completed.connect(_on_snapshot_response)
 	# 預設連線到 room-001（向後相容）
 	# 大廳 UI 可以呼叫 connect_to_room() 切換房間
 	connect_to_server()
@@ -104,6 +122,7 @@ func _process(delta: float) -> void:
 
 ## 連線到 Server
 func connect_to_server() -> void:
+	_is_spectator = false
 	var url = SERVER_URL + "?player_id=" + _player_id + "&room_id=" + _room_id
 	print("[Network] Connecting to: ", url)
 	var err = _socket.connect_to_url(url)
@@ -115,6 +134,46 @@ func connect_to_server() -> void:
 func connect_to_room(room_id: String) -> void:
 	_room_id = room_id
 	connect_to_server()
+
+## 以觀戰模式連線到指定房間（DAY-024）
+## 觀戰者收到所有廣播，但無法發送遊戲指令
+func spectate_room(room_id: String) -> void:
+	_room_id = room_id
+	_is_spectator = true
+	var url = SPECTATE_URL + "?room_id=" + room_id
+	print("[Network] Spectating room: ", room_id, " at ", url)
+	var err = _socket.connect_to_url(url)
+	if err != OK:
+		push_error("[Network] Spectate connection failed: " + str(err))
+		emit_signal("connection_error", "Spectate connection failed: " + str(err))
+
+## 查詢觀戰快照（HTTP GET /spectate/snapshot，DAY-024）
+func fetch_spectator_snapshot() -> void:
+	if not is_instance_valid(_snapshot_request):
+		return
+	var url = HTTP_BASE + "/spectate/snapshot"
+	print("[Network] Fetching spectator snapshot from: ", url)
+	var err = _snapshot_request.request(url)
+	if err != OK:
+		push_error("[Network] Snapshot request failed: " + str(err))
+
+## 處理觀戰快照回應（DAY-024）
+func _on_snapshot_response(_result: int, response_code: int, _headers: PackedStringArray, body: PackedByteArray) -> void:
+	if response_code != 200:
+		push_error("[Network] Snapshot fetch failed: HTTP " + str(response_code))
+		return
+	var text = body.get_string_from_utf8()
+	var json = JSON.new()
+	if json.parse(text) != OK:
+		push_error("[Network] Snapshot JSON parse error")
+		return
+	var data = json.get_data()
+	if data is Dictionary:
+		emit_signal("spectator_snapshot_received", data)
+
+## 是否為觀戰模式（DAY-024）
+func is_spectator() -> bool:
+	return _is_spectator
 
 ## 查詢房間列表（HTTP GET /rooms，DAY-020）
 func fetch_rooms() -> void:
