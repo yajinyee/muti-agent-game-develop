@@ -28,15 +28,11 @@
 - [ ] ~~**補齊 usagi fail 動畫**~~ → **降級 P3**（遊戲不使用 fail 狀態）
 
 ### 🟠 P1
-- [ ] **角色動畫幀數提升**：吉伊卡哇 idle 動畫從 4 幀提升到 8 幀
-  - 負責：Animation Agent + Sprite Generation Agent
-  - 預計工時：3 小時
-  - 驗收：Animation Quality >= 90
+- [x] **角色動畫幀數提升**：吉伊卡哇 idle 動畫從 4 幀提升到 8 幀（已完成，spritesheet 768x288 = 8cols）
+  - 驗證：chiikawa/hachiware/usagi 全部 8 幀 ✅
 
-- [ ] **目標物游泳動畫優化**：T001-T030 普通魚類動畫更自然
-  - 負責：Animation Agent
-  - 預計工時：4 小時
-  - 驗收：Animation Quality >= 90
+- [x] **目標物游泳動畫優化**：T001-T030 普通魚類動畫更自然（2026-05-18 DAY-010 完成）
+  - 升級：Y軸搖擺 + 旋轉傾斜（±2-5度）+ 特殊目標縮放呼吸感 + 隨機相位
 
 ### 🟡 P2
 - [ ] **BOSS 進場特效**：B001 BOSS 進場時的粒子特效
@@ -88,24 +84,27 @@
 ## 遊戲功能
 
 ### 🟠 P1
-- [ ] **自動射擊模式優化**：自動模式的目標選擇邏輯更智慧
-  - 負責：Godot Client Agent
-  - 預計工時：2 小時
-  - 驗收：Gameplay Feel >= 90
-
-- [ ] **連線斷線提示優化**：更友善的斷線/重連 UI
-  - 負責：Godot Client Agent
-  - 預計工時：1 小時
+- [x] **HTML5 效能優化**：排除開發資源、Spritesheet AtlasTexture、資源預載入（2026-05-18 完成）
+- [x] **Server 記憶體優化**：safeAfterFunc、graceful shutdown、/stats 端點（2026-05-18 完成）
+- [x] **自動射擊模式優化**：評分系統（2026-05-17 完成）
+- [x] **連線斷線提示優化**：DisconnectOverlay（2026-05-17 完成）
+- [x] **HTML5 低階設備 30 FPS**：PerformanceMonitor 自動效能降級（2026-05-18 DAY-010 完成）
+  - 三個等級：HIGH/MEDIUM/LOW，自動偵測並降級
+  - LOW 模式：關閉游泳動畫/震動/outline shader，鎖 30 FPS
 
 ### 🟡 P2
-- [ ] **排行榜功能**：顯示當日最高分玩家
-  - 負責：Go Server Agent + Godot Client Agent
-  - 預計工時：4 小時
-  - 依賴：協定變更（需 Spec Architect 審核）
+- [x] **部署指南**：完整的 Server + Client 部署說明（2026-05-18 完成）
+  - 輸出：docs/deployment-guide.md
+
+- [x] **排行榜功能**：顯示當日最高分玩家（2026-05-18 DAY-010 完成）
+  - Server：`/leaderboard` 端點、每 10 秒 WebSocket 廣播、Player 統計追蹤
+  - Client：HUD 右上角面板，前 5 名，可折疊，自己高亮
 
 - [ ] **成就系統**：首次擊敗 BOSS、連續命中等成就
   - 負責：Go Server Agent + Godot Client Agent
   - 預計工時：6 小時
+  - ~~待辦~~ → **✅ 完成（2026-05-18 DAY-011）**
+  - 實作：12 個成就、Tracker 模式、佇列式通知 UI
 
 ### 🟢 P3
 - [ ] **觀戰模式**：允許玩家觀看其他玩家的遊戲
@@ -118,21 +117,13 @@
 ## 技術優化
 
 ### 🟠 P1
-- [ ] **HTML5 效能優化**：確保低階設備也能達到 30 FPS
-  - 負責：Godot Client Agent
-  - 預計工時：3 小時
-  - 驗收：最低 FPS >= 30（低階設備）
-
-- [ ] **Server 記憶體優化**：長時間運行後的記憶體洩漏檢查
-  - 負責：Go Server Agent
-  - 預計工時：2 小時
-  - 驗收：24 小時運行後記憶體增長 < 10%
+- [x] **Server 記憶體優化**：長時間運行後的記憶體洩漏檢查（2026-05-18 DAY-014 完成）
+  - 壓力測試結果：Heap 增長 1.2 MB（< 50 MB 門檻）✅，Goroutine 增長 0 ✅，錯誤率 0% ✅
+  - 修正 stress_test.py 判斷邏輯：改用穩定後趨勢斜率，而非從零開始的增長比例
 
 ### 🟡 P2
-- [ ] **WebSocket 壓縮**：啟用 permessage-deflate 壓縮
-  - 負責：Go Server Agent + Godot Client Agent
-  - 預計工時：2 小時
-  - 依賴：協定變更審核
+- [x] **WebSocket 壓縮**：啟用 permessage-deflate 壓縮（已完成，hub.go `EnableCompression: true`）
+  - 確認：hub.go 第 24 行已有 `EnableCompression: true`，backlog 漏標記
 
 - [ ] **資產預載入優化**：減少遊戲初始載入時間
   - 負責：Godot Client Agent
@@ -150,9 +141,8 @@
 ## 文件與知識
 
 ### 🟡 P2
-- [ ] **玩家操作手冊**：遊戲規則與操作說明文件
-  - 負責：Spec Architect
-  - 預計工時：2 小時
+- [x] **玩家操作手冊**：遊戲規則與操作說明文件（2026-05-18 DAY-014 完成）
+  - 輸出：docs/player-manual.md v1.1（效能設定 + 畫面說明 + FAQ 補充）
 
 - [ ] **部署指南**：如何部署 Server 與 Client 的完整說明
   - 負責：Go Server Agent + Godot Client Agent

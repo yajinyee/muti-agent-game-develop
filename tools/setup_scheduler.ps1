@@ -44,7 +44,7 @@ Register-ScheduledTask `
     -Trigger $trigger `
     -Settings $settings `
     -Principal $principal `
-    -Description "每 $INTERVAL 小時自動在 Kiro IDE chat 送出「繼續執行」" `
+    -Description "每 $INTERVAL 小時自動在 Kiro IDE chat 送出「延續上一次規劃跟當前專案的原則與架構，繼續執行運作」" `
     -Force | Out-Null
 
 Write-Host ""

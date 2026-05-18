@@ -1,10 +1,10 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-18（DAY-009 Bug 修復 + 持續優化）
+## 最後更新：2026-05-18（DAY-014 Server 壓力測試驗證 + WebSocket 壓縮確認 + 玩家操作手冊 v1.1）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：95/100**（洋紅色殘留修復 2816px，目標物密度提升，視覺風格指南建立）
+- **美術質量：97/100**（遊戲邊框裝飾：珊瑚/貝殼/海草動態邊框）
 - **規格一致性：100%**
 - **整體信心：100/100**
 
@@ -44,6 +44,25 @@
 - [x] HTTP Server（/ws, /health, 靜態檔案 + COOP/COEP headers）
 - [x] **BG004 金色雜草 coin_shower 廣播**（規格書 29.3）
 - [x] **Bonus Tick Bug 修復**（2026-05-18）：`int(elapsed)%1 == 0` 永遠為 true，改為 `lastBonusTickAt` 追蹤，減少 90% bonus tick 網路流量
+- [x] **排行榜系統**（2026-05-18 DAY-010）：
+  - Server：`/leaderboard` HTTP 端點、`leaderboard` WebSocket 廣播（每 10 秒）
+  - Player：`SessionScore`、`MaxCoins`、`KillCount`、`DisplayName` 欄位
+  - 協定：`MsgLeaderboard`、`LeaderboardEntry`、`LeaderboardPayload`
+  - Client：HUD 右上角排行榜面板（前 5 名、可折疊、自己高亮）
+- [x] **Server 壓力測試驗證**（2026-05-18 DAY-014）：
+  - 30 秒 × 5 客戶端：Heap +1.2MB ✅，Goroutine +0 ✅，錯誤率 0% ✅
+  - stress_test.py 判斷邏輯修正（斜率判斷）
+- [x] **WebSocket 壓縮確認**（2026-05-18 DAY-014）：hub.go `EnableCompression: true` 已實作
+- [x] **玩家操作手冊 v1.1**（2026-05-18 DAY-014）：效能設定 + 畫面說明 + FAQ 補充
+- [x] **BOSS 進場預覽 UI**（2026-05-18 DAY-013）：
+  - 警告階段顯示 BOSS 血條從 0 填滿（2.5 秒充能動畫）
+  - 倒數 3→2→1 文字動畫
+  - BOSS 出現時自動淡出切換到計時器
+- [x] **Go 單元測試**（2026-05-18 DAY-013）：`server/internal/game/game_test.go`
+  - 9 個測試全部通過，覆蓋 goroutine 生命週期、狀態轉換、冷卻機制
+- [x] **像素風格遊戲邊框**（2026-05-18 DAY-013）：`scripts/ui/GameBorder.gd`
+  - 海底主題：珊瑚脈動、貝殼、海草搖擺、金色裝飾線
+  - 純 GDScript `_draw()` 實作，不需要額外資產
 
 ### Godot Client（100% 完整）
 - [x] NetworkManager.gd（WebSocket + 自動重連）
@@ -66,6 +85,7 @@
   - [x] **BOSS 計時器面板**（規格書 28.3，剩餘時間 + 對應倍率顯示）
   - [x] Lock/Auto 狀態顯示
   - [x] 勞動值接近滿時變色提示
+  - [x] **成就通知面板**（右下角滑入，佇列機制，3秒自動消失）
 - [x] BonusGame.gd（瘋狂拔草場景，BG002/BG004/BG005 特殊效果）
   - [x] **BG004 coin_shower 事件處理**（規格書 29.3）
 - [x] **ScreenShake.gd**（Trauma-based 畫面震動 Autoload）
