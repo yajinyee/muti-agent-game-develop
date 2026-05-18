@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-025 QA 全滿分）
+## 最後更新：2026-05-19（DAY-026 Redis 架構設計 + Store 模組）
 
 ## 自我評估
 - **完成度：100%**
@@ -191,6 +191,8 @@
 - [x] 數據埋點（Server + Client 完整）
 - [x] 多人房間支援（RoomManager + LobbyManager）
 - [x] 玩家名稱設定（DAY-021）
+- [x] Redis 水平擴展架構設計（DAY-026）
+- [x] Store 模組骨架（MemoryStore 完整 + RedisStore 骨架，10 個測試通過）
 
 ---
 
