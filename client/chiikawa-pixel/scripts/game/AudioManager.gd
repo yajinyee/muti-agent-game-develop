@@ -67,10 +67,16 @@ func play_sfx(sfx: SFX) -> void:
 	for player in _sfx_players:
 		if not player.playing:
 			player.stream = load(path)
+			# coin_drop 音量提升 2 dB（audio-review 建議：-7dB → -5dB）
+			if sfx == SFX.COIN_DROP:
+				player.volume_db = 2.0  # 相對提升 2 dB
+			else:
+				player.volume_db = 0.0
 			player.play()
 			return
 	# 所有播放器都忙，用第一個（覆蓋）
 	_sfx_players[0].stream = load(path)
+	_sfx_players[0].volume_db = 2.0 if sfx == SFX.COIN_DROP else 0.0
 	_sfx_players[0].play()
 
 ## 播放環境音（循環，低音量）
@@ -109,13 +115,20 @@ func play_bgm(bgm: BGM, fade_in: float = 0.5) -> void:
 		tween.tween_callback(func():
 			_bgm_player.stop()
 			_bgm_player.volume_db = _get_bgm_volume(bgm)
-			_bgm_player.pitch_scale = _get_bgm_pitch(bgm)
 			_bgm_player.stream = load(path)
 			_bgm_player.play()
 			# 淡入新 BGM
 			_bgm_player.volume_db = -60.0
 			var tween2 = create_tween()
 			tween2.tween_property(_bgm_player, "volume_db", _get_bgm_volume(bgm), fade_in)
+			# BOSS Phase 2：音調漸變（避免突兀切換）
+			# 從當前音調漸變到目標音調（0.5 秒），比直接跳變更自然
+			var target_pitch = _get_bgm_pitch(bgm)
+			if bgm == BGM.BOSS_RAGE:
+				_bgm_player.pitch_scale = 1.0  # 從正常音調開始
+				tween2.parallel().tween_property(_bgm_player, "pitch_scale", target_pitch, 0.5)
+			else:
+				_bgm_player.pitch_scale = target_pitch
 		)
 	else:
 		_bgm_player.volume_db = -60.0
