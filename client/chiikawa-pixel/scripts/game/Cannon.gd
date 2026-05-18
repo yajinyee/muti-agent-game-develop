@@ -28,6 +28,10 @@ const VOICE_TEXTS = {
 const PIXEL_FONT_PATH = "res://assets/fonts/pixel8.fnt"
 var _pixel_font: Font = null
 
+# 資源快取（避免每次射擊/大獎都重新 load）
+var _cached_proj_textures: Dictionary = {}  # char_id -> Texture2D
+var _cached_rainbow_shader: Shader = null
+
 @onready var cannon_sprite: Sprite2D = $CannonSprite
 @onready var attack_label: Label = $AttackLabel
 
@@ -35,9 +39,18 @@ func _ready() -> void:
 	GameManager.attack_result.connect(_on_attack_result)
 	GameManager.reward_received.connect(_on_reward_received)
 	GameManager.player_updated.connect(_on_player_updated)
-	# 載入像素字體
+	# 預載入資源
 	if ResourceLoader.exists(PIXEL_FONT_PATH):
 		_pixel_font = load(PIXEL_FONT_PATH)
+	# 預載入投射物 texture
+	for char_id in PROJECTILE_SPRITES:
+		var path = PROJECTILE_SPRITES[char_id]
+		if ResourceLoader.exists(path):
+			_cached_proj_textures[char_id] = load(path)
+	# 預載入 rainbow shader
+	var rainbow_path = "res://assets/shaders/rainbow_glow.gdshader"
+	if ResourceLoader.exists(rainbow_path):
+		_cached_rainbow_shader = load(rainbow_path)
 
 func _process(_delta: float) -> void:
 	pass
@@ -96,9 +109,15 @@ func _fire_projectile(target_pos: Vector2) -> void:
 	var proj := Node2D.new()
 	proj.position = CANNON_POSITION
 
-	# 嘗試載入 Sprite，失敗就用 ColorRect
+	# 嘗試載入 Sprite，失敗就用 ColorRect（使用快取 texture）
 	var sprite_path = PROJECTILE_SPRITES.get(char_id, "")
-	if sprite_path != "" and ResourceLoader.exists(sprite_path):
+	if _cached_proj_textures.has(char_id):
+		var s := Sprite2D.new()
+		s.texture = _cached_proj_textures[char_id]
+		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		s.scale = Vector2(1.5, 1.5)  # 放大 1.5x 讓子彈更容易看見（Gravity Ace 原則）
+		proj.add_child(s)
+	elif sprite_path != "" and ResourceLoader.exists(sprite_path):
 		var s := Sprite2D.new()
 		s.texture = load(sprite_path)
 		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
@@ -221,6 +240,20 @@ func _on_reward_received(reward: Dictionary) -> void:
 
 	AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 
+	# 大獎彩虹光暈（套用到砲台 Sprite，持續 1.5 秒後移除）
+	if is_instance_valid(cannon_sprite) and _cached_rainbow_shader != null:
+		var rainbow_mat = ShaderMaterial.new()
+		rainbow_mat.shader = _cached_rainbow_shader
+		rainbow_mat.set_shader_parameter("glow_intensity", 0.9)
+		rainbow_mat.set_shader_parameter("glow_speed", 3.0)
+		cannon_sprite.material = rainbow_mat
+		# 1.5 秒後移除彩虹效果
+		var timer = get_tree().create_timer(1.5)
+		timer.timeout.connect(func():
+			if is_instance_valid(cannon_sprite):
+				cannon_sprite.material = null
+		)
+
 func _show_hit_flash() -> void:
 	if not is_instance_valid(cannon_sprite):
 		return
@@ -237,29 +270,30 @@ func _spawn_hit_effect(pos: Vector2, char_id: String) -> void:
 	# 已由 HitEffect autoload 取代，保留空函式避免舊呼叫出錯
 	HitEffect.spawn_hit(pos, char_id)
 
-## 子彈拖尾：沿飛行路徑生成漸隱殘影
+## 子彈拖尾：沿飛行路徑生成漸隱殘影（用 tween interval，比多個 timer 效能更好）
 func _spawn_trail(parent: Node, from: Vector2, to: Vector2, duration: float, color: Color) -> void:
 	if not is_instance_valid(parent):
 		return
 
-	var steps = int(duration / 0.025)  # 每 25ms 一個殘影（更密集）
-	steps = clamp(steps, 3, 10)
+	var steps = clamp(int(duration / 0.025), 3, 10)
+	var interval = duration * 0.7 / float(steps)
 
+	# 用單一 tween 序列依序生成殘影（避免多個 timer 的 overhead）
+	var seq_tween = create_tween()
 	for i in steps:
 		var t = float(i) / float(steps)
 		var trail_pos = from.lerp(to, t)
-		var delay = t * duration * 0.7
+		var dot_size = lerp(8.0, 3.0, t)
+		var dot_alpha = 0.6 * (1.0 - t)
 
-		var timer = get_tree().create_timer(delay)
-		timer.timeout.connect(func():
+		seq_tween.tween_interval(interval)
+		seq_tween.tween_callback(func():
 			if not is_instance_valid(parent):
 				return
 			var dot = ColorRect.new()
-			# 拖尾大小隨位置遞減（頭部大、尾部小）
-			var dot_size = lerp(8.0, 3.0, t)
 			dot.size = Vector2(dot_size, dot_size)
 			dot.position = trail_pos - Vector2(dot_size / 2, dot_size / 2)
-			dot.color = Color(color.r, color.g, color.b, 0.6 * (1.0 - t))
+			dot.color = Color(color.r, color.g, color.b, dot_alpha)
 			dot.z_index = 5
 			parent.add_child(dot)
 

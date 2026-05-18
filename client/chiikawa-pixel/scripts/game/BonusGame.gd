@@ -20,18 +20,39 @@ var _time_left: float = 15.0
 var _weed_nodes: Dictionary = {}  # instance_id -> Node2D
 var _weed_hp: Dictionary = {}     # instance_id -> remaining_clicks（BG002 需要 2 次）
 
-# 雜草顏色（依類型）
-const WEED_COLORS = {
-	"BG001": Color(0.3, 0.7, 0.2),   # 普通雜草
-	"BG002": Color(0.2, 0.5, 0.1),   # 硬雜草（深綠）
-	"BG003": Color(0.5, 1.0, 0.3),   # 發光雜草（亮綠）
-	"BG004": Color(1.0, 0.85, 0.0),  # 金色雜草
-	"BG005": Color(0.8, 0.2, 0.2),   # 搗亂怪草（紅色）
+# 雜草 Sprite 路徑（像素藝術，替代 ColorRect）
+const WEED_SPRITES = {
+	"BG001": "res://assets/sprites/targets/BG001_weed_normal.png",
+	"BG002": "res://assets/sprites/targets/BG002_weed_hard.png",
+	"BG003": "res://assets/sprites/targets/BG003_weed_glow.png",
+	"BG004": "res://assets/sprites/targets/BG004_weed_gold.png",
+	"BG005": "res://assets/sprites/targets/BG005_weed_evil.png",
 }
+
+# 備用顏色（Sprite 載入失敗時使用）
+const WEED_COLORS = {
+	"BG001": Color(0.3, 0.7, 0.2),
+	"BG002": Color(0.2, 0.5, 0.1),
+	"BG003": Color(0.5, 1.0, 0.3),
+	"BG004": Color(1.0, 0.85, 0.0),
+	"BG005": Color(0.8, 0.2, 0.2),
+}
+
+# 資源快取
+var _cached_weed_textures: Dictionary = {}
+
+func _preload_weed_textures() -> void:
+	for def_id in WEED_SPRITES:
+		var path = WEED_SPRITES[def_id]
+		if ResourceLoader.exists(path):
+			_cached_weed_textures[def_id] = load(path)
 
 func _ready() -> void:
 	visible = false
 	result_panel.visible = false
+
+	# 預載入雜草 Sprite
+	_preload_weed_textures()
 
 	# 連接 GameManager 訊號
 	GameManager.bonus_event.connect(_on_bonus_event)
@@ -74,6 +95,8 @@ func _show_ready() -> void:
 	# Bonus 觸發全畫面特效
 	HitEffect.spawn_bonus_trigger()
 	ScreenShake.add_trauma(0.4)
+	# 播放 Bonus Ready 音效 v2（更有興奮感）
+	AudioManager.play_sfx(AudioManager.SFX.BONUS_READY)
 
 	# 顯示 Bonus Ready 提示
 	var ready_label = Label.new()
@@ -98,6 +121,8 @@ func _start_bonus() -> void:
 	result_panel.visible = false
 	score_label.text = "分數: 0"
 	timer_label.modulate = Color.WHITE
+	# Bonus 開始爆發音效
+	AudioManager.play_sfx(AudioManager.SFX.BONUS_TRIGGER)
 
 	# 切換背景
 	var bonus_bg_path = "res://assets/sprites/backgrounds/bonus_bg.png"
@@ -117,6 +142,8 @@ func _end_bonus(data: Dictionary) -> void:
 
 	# 慶祝動畫
 	_play_celebration()
+	# Bonus 結算音效
+	AudioManager.play_sfx(AudioManager.SFX.BONUS_END)
 
 	# 3秒後隱藏
 	await get_tree().create_timer(3.0).timeout
@@ -151,33 +178,38 @@ func _on_target_spawned(data: Dictionary) -> void:
 	var node = Node2D.new()
 	node.position = Vector2(data.get("x", 0), data.get("y", 0))
 
-	# 雜草 Sprite（用 ColorRect 代替）
-	var rect = ColorRect.new()
-	rect.size = Vector2(24, 32)
-	rect.position = Vector2(-12, -32)
-	rect.color = WEED_COLORS.get(def_id, Color.GREEN)
-	node.add_child(rect)
+	# 優先使用像素 Sprite，備用 ColorRect
+	if _cached_weed_textures.has(def_id):
+		var sprite = Sprite2D.new()
+		sprite.texture = _cached_weed_textures[def_id]
+		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		# 雜草放大 1.5x 讓玩家更容易點擊
+		sprite.scale = Vector2(1.5, 1.5)
+		# Sprite 原點在中心，調整到底部對齊
+		sprite.offset = Vector2(0, -24)
+		node.add_child(sprite)
+	else:
+		# 備用：ColorRect（Sprite 載入失敗時）
+		var rect = ColorRect.new()
+		rect.size = Vector2(24, 32)
+		rect.position = Vector2(-12, -32)
+		rect.color = WEED_COLORS.get(def_id, Color.GREEN)
+		node.add_child(rect)
 
-	# 雜草形狀（三角形葉子）
-	var leaf = ColorRect.new()
-	leaf.size = Vector2(16, 20)
-	leaf.position = Vector2(-8, -48)
-	leaf.color = WEED_COLORS.get(def_id, Color.GREEN) * 1.2
-	node.add_child(leaf)
+		var leaf = ColorRect.new()
+		leaf.size = Vector2(16, 20)
+		leaf.position = Vector2(-8, -48)
+		leaf.color = WEED_COLORS.get(def_id, Color.GREEN) * 1.2
+		node.add_child(leaf)
 
-	# 金色雜草特效
+	# 金色雜草特效（閃光）
 	if def_id == "BG004":
-		rect.color = Color(1.0, 0.85, 0.0)
-		leaf.color = Color(1.0, 0.95, 0.3)
-		# 閃光效果
 		var tween = create_tween().set_loops()
 		tween.tween_property(node, "modulate", Color(1.5, 1.5, 0.5), 0.3)
 		tween.tween_property(node, "modulate", Color.WHITE, 0.3)
 
 	# 發光雜草特效（BG003）— 綠色光暈 + 倍率提升視覺
 	if def_id == "BG003":
-		rect.color = Color(0.4, 1.0, 0.2)
-		leaf.color = Color(0.6, 1.0, 0.3)
 		# 持續發光閃爍
 		var tween_glow = create_tween().set_loops()
 		tween_glow.tween_property(node, "modulate", Color(0.5, 2.0, 0.5, 1.0), 0.25)

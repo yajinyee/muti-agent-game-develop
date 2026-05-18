@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"digital-twin/server/internal/data"
+	"digital-twin/server/internal/game/achievement"
 )
 
 // Player 玩家狀態
@@ -26,10 +27,23 @@ type Player struct {
 	TotalReward int
 	AttackCount int
 	KillCount   int
+
+	// 排行榜
+	SessionScore int // 本局累積獎勵（用於排行榜）
+	MaxCoins     int // 歷史最高金幣
+	DisplayName  string // 顯示名稱（預設為 ID 前 8 碼）
+
+	// 成就系統
+	Achievements *achievement.Tracker
 }
 
 // NewPlayer 建立新玩家
 func NewPlayer(id string, initialCoins int) *Player {
+	// 顯示名稱：取 ID 前 8 碼，若 ID 太短就全用
+	displayName := id
+	if len(id) > 8 {
+		displayName = id[:8]
+	}
 	return &Player{
 		ID:           id,
 		Coins:        initialCoins,
@@ -37,6 +51,9 @@ func NewPlayer(id string, initialCoins int) *Player {
 		LaborValue:   0,
 		IsAuto:       false,
 		SessionStart: time.Now(),
+		MaxCoins:     initialCoins,
+		DisplayName:  displayName,
+		Achievements: achievement.NewTracker(),
 	}
 }
 
@@ -77,12 +94,59 @@ func (p *Player) DeductBet() (int, bool) {
 	return bet.BetCost, true
 }
 
-// AddReward 增加獎勵
-func (p *Player) AddReward(amount int) {
+// AddKill 增加擊破計數，回傳解鎖的成就（可能為 nil）
+func (p *Player) AddKill() []*achievement.AchievementUnlock {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.KillCount++
+	count := p.KillCount
+
+	var unlocks []*achievement.AchievementUnlock
+	// 首殺
+	if count == 1 {
+		if u := p.Achievements.TryUnlock(achievement.AchFirstKill); u != nil {
+			unlocks = append(unlocks, u)
+		}
+	}
+	// 累計擊破里程碑
+	milestones := map[int]achievement.AchievementID{
+		5:   achievement.AchKill5,
+		20:  achievement.AchKill20,
+		50:  achievement.AchKill50,
+		100: achievement.AchKill100,
+	}
+	if id, ok := milestones[count]; ok {
+		if u := p.Achievements.TryUnlock(id); u != nil {
+			unlocks = append(unlocks, u)
+		}
+	}
+	return unlocks
+}
+
+// AddReward 增加獎勵，回傳解鎖的成就（可能為空）
+func (p *Player) AddReward(amount int) []*achievement.AchievementUnlock {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.Coins += amount
 	p.TotalReward += amount
+	p.SessionScore += amount
+	// 更新歷史最高金幣
+	if p.Coins > p.MaxCoins {
+		p.MaxCoins = p.Coins
+	}
+
+	var unlocks []*achievement.AchievementUnlock
+	// 金幣里程碑
+	if p.Coins >= 100000 {
+		if u := p.Achievements.TryUnlock(achievement.AchCoins100k); u != nil {
+			unlocks = append(unlocks, u)
+		}
+	} else if p.Coins >= 50000 {
+		if u := p.Achievements.TryUnlock(achievement.AchCoins50k); u != nil {
+			unlocks = append(unlocks, u)
+		}
+	}
+	return unlocks
 }
 
 // AddLaborValue 增加勞動值，回傳是否觸發 Bonus
@@ -148,6 +212,52 @@ func (p *Player) Snapshot() PlayerSnapshot {
 		ProjectileSpeed: bet.ProjectileSpeed,
 		FireRate:        bet.FireRate,
 	}
+}
+
+// TryUnlockAchievement 嘗試解鎖指定成就（用於外部觸發，如 BOSS 擊殺、Bonus 觸發）
+func (p *Player) TryUnlockAchievement(id achievement.AchievementID) *achievement.AchievementUnlock {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.Achievements.TryUnlock(id)
+}
+
+// TryUnlockBigWin 嘗試解鎖大獎成就（依倍率判斷）
+func (p *Player) TryUnlockBigWin(multiplier float64) []*achievement.AchievementUnlock {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	var unlocks []*achievement.AchievementUnlock
+	if multiplier >= 50 {
+		if u := p.Achievements.TryUnlock(achievement.AchMegaWin); u != nil {
+			unlocks = append(unlocks, u)
+		}
+	}
+	if multiplier >= 20 {
+		if u := p.Achievements.TryUnlock(achievement.AchBigWin); u != nil {
+			unlocks = append(unlocks, u)
+		}
+	}
+	return unlocks
+}
+
+// LeaderboardSnapshot 排行榜快照
+func (p *Player) LeaderboardSnapshot() LeaderboardSnapshot {	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return LeaderboardSnapshot{
+		PlayerID:    p.ID,
+		DisplayName: p.DisplayName,
+		Score:       p.SessionScore,
+		MaxCoins:    p.MaxCoins,
+		KillCount:   p.KillCount,
+	}
+}
+
+// LeaderboardSnapshot 排行榜快照資料
+type LeaderboardSnapshot struct {
+	PlayerID    string
+	DisplayName string
+	Score       int
+	MaxCoins    int
+	KillCount   int
 }
 
 // PlayerSnapshot 玩家狀態快照

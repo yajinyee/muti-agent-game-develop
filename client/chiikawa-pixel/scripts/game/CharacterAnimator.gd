@@ -6,15 +6,16 @@ extends Sprite2D
 
 enum AnimState { IDLE, ATTACK, BIGWIN }
 
-# 動畫設定（對應 generate_animation_frames.py 的 metadata）
+# 動畫設定（對應 upgrade_idle_8frames.py 的 metadata）
+# idle 升級：4幀 → 8幀，fps 4 → 8（更流暢的呼吸感）
 const ANIM_CONFIG = {
-	"idle":   {"row": 0, "frames": 4, "fps": 4.0},
+	"idle":   {"row": 0, "frames": 8, "fps": 8.0},
 	"attack": {"row": 1, "frames": 3, "fps": 8.0},
 	"bigwin": {"row": 2, "frames": 4, "fps": 6.0},
 }
 
 const FRAME_SIZE = 96
-const COLS = 4
+const COLS = 8  # 升級：4 → 8 cols
 
 var _current_char: String = "chiikawa"
 var _current_state: AnimState = AnimState.IDLE

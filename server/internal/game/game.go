@@ -11,7 +11,9 @@ import (
 
 	"github.com/google/uuid"
 
+	"digital-twin/server/internal/analytics"
 	"digital-twin/server/internal/data"
+	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
@@ -40,6 +42,7 @@ type Game struct {
 	nextSpecialEventIn float64
 	bossInstanceID     string
 	nextBossAt         time.Time  // BOSS 自動觸發時間（規格書 28.1）
+	lastLeaderboardAt  time.Time  // 排行榜廣播計時（每 10 秒一次）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -98,6 +101,7 @@ func (g *Game) AddPlayer(playerID string) {
 	if _, exists := g.Players[playerID]; !exists {
 		g.Players[playerID] = player.NewPlayer(playerID, 10000) // 初始 10000 金幣
 		log.Printf("[Game] Player %s joined game %s", playerID, g.ID)
+		// 埋點：玩家加入（由 main.go 的 OnConnect 處理，這裡不重複）
 	}
 }
 
@@ -107,6 +111,7 @@ func (g *Game) RemovePlayer(playerID string) {
 	defer g.mu.Unlock()
 	delete(g.Players, playerID)
 	log.Printf("[Game] Player %s left game %s", playerID, g.ID)
+	// 埋點：玩家離開（由 main.go 的 OnDisconnect 處理，這裡不重複）
 }
 
 // HandleMessage 處理玩家訊息
@@ -191,6 +196,17 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	result := combat.ProcessAttack(req, t)
 	_ = betCost
 
+	// 埋點：攻擊事件
+	if tracker := analytics.Get(); tracker != nil {
+		tracker.Track(analytics.EventAttack, p.ID, map[string]interface{}{
+			"target_id": targetID,
+			"bet_level": p.BetLevel,
+			"bet_cost":  betCost,
+			"is_hit":    result.IsHit,
+			"is_auto":   p.IsAuto,
+		})
+	}
+
 	// 傳送攻擊結果
 	g.Hub.Send(p.ID, &ws.Message{
 		Type: ws.MsgAttackResult,
@@ -247,7 +263,43 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	g.mu.Unlock()
 
 	// 發放獎勵
-	p.AddReward(result.Reward)
+	rewardUnlocks := p.AddReward(result.Reward)
+	killUnlocks := p.AddKill()
+
+	// 埋點：擊破事件
+	if tracker := analytics.Get(); tracker != nil {
+		tracker.Track(analytics.EventKill, p.ID, map[string]interface{}{
+			"def_id":     t.DefID,
+			"target_type": string(t.Def.Type),
+			"multiplier": result.Multiplier,
+			"reward":     result.Reward,
+			"labor_gain": result.LaborGain,
+		})
+		tracker.Track(analytics.EventReward, p.ID, map[string]interface{}{
+			"source":     "target",
+			"amount":     result.Reward,
+			"multiplier": result.Multiplier,
+		})
+	}
+
+	// 成就：特殊目標
+	var specialUnlock *achievement.AchievementUnlock
+	if t.Def.Type == data.TargetTypeSpecial {
+		specialUnlock = p.TryUnlockAchievement(achievement.AchKillSpecial)
+	}
+
+	// 成就：大獎
+	bigWinUnlocks := p.TryUnlockBigWin(result.Multiplier)
+
+	// 傳送所有成就通知
+	allUnlocks := append(rewardUnlocks, killUnlocks...)
+	allUnlocks = append(allUnlocks, bigWinUnlocks...)
+	if specialUnlock != nil {
+		allUnlocks = append(allUnlocks, specialUnlock)
+	}
+	for _, u := range allUnlocks {
+		g.sendAchievement(p.ID, u)
+	}
 
 	// 累積勞動值
 	bonusTriggered := p.AddLaborValue(result.LaborGain)
@@ -292,6 +344,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 
 	// 觸發 Bonus
 	if bonusTriggered {
+		// 成就：首次觸發 Bonus
+		if u := p.TryUnlockAchievement(achievement.AchBonus); u != nil {
+			g.sendAchievement(p.ID, u)
+		}
 		g.triggerBonusReady()
 	}
 }
@@ -301,6 +357,11 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 	g.mu.Lock()
 	g.bossInstanceID = ""
 	g.mu.Unlock()
+
+	// 成就：首次擊敗 BOSS
+	if u := p.TryUnlockAchievement(achievement.AchKillBoss); u != nil {
+		g.sendAchievement(p.ID, u)
+	}
 
 	g.Hub.Broadcast(&ws.Message{
 		Type: ws.MsgBossEvent,
@@ -313,7 +374,7 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 	})
 
 	g.transitionState(state.StateBossResult)
-	time.AfterFunc(3*time.Second, func() {
+	g.safeAfterFunc(3*time.Second, func() {
 		g.transitionState(state.StateNormalPlay)
 	})
 }
@@ -518,6 +579,18 @@ func (g *Game) updateNormalPlay() {
 
 	// Auto 攻擊
 	g.processAutoAttack()
+
+	// 排行榜廣播（每 10 秒）
+	g.mu.Lock()
+	shouldBroadcastLeaderboard := now.Sub(g.lastLeaderboardAt) >= 10*time.Second
+	if shouldBroadcastLeaderboard {
+		g.lastLeaderboardAt = now
+	}
+	g.mu.Unlock()
+
+	if shouldBroadcastLeaderboard {
+		g.broadcastLeaderboard()
+	}
 }
 
 func (g *Game) updateBossBattle() {
@@ -549,19 +622,31 @@ func (g *Game) updateBossBattle() {
 	}
 
 	// 規格書 9章：BOSS 期間 Max Targets = 8（不含 BOSS 本身）
-	// 清除超出限制的非 BOSS 目標
+	// 清除超出限制的非 BOSS 目標（依生成時間排序，移除最舊的）
 	const MaxTargetsDuringBoss = 8
 	g.mu.Lock()
-	nonBossTargets := make([]string, 0)
+	type targetWithTime struct {
+		id        string
+		spawnedAt time.Time
+	}
+	nonBossTargets := make([]targetWithTime, 0)
 	for id, t := range g.Targets {
 		if id != bossID && t.Def.Type != data.TargetTypeBoss {
-			nonBossTargets = append(nonBossTargets, id)
+			nonBossTargets = append(nonBossTargets, targetWithTime{id: id, spawnedAt: t.SpawnedAt})
 		}
 	}
-	// 如果超出限制，移除最舊的（簡單策略：移除前幾個）
 	if len(nonBossTargets) > MaxTargetsDuringBoss {
+		// 依生成時間排序（最舊的在前）
+		for i := 0; i < len(nonBossTargets); i++ {
+			for j := i + 1; j < len(nonBossTargets); j++ {
+				if nonBossTargets[j].spawnedAt.Before(nonBossTargets[i].spawnedAt) {
+					nonBossTargets[i], nonBossTargets[j] = nonBossTargets[j], nonBossTargets[i]
+				}
+			}
+		}
+		// 移除最舊的目標
 		for i := 0; i < len(nonBossTargets)-MaxTargetsDuringBoss; i++ {
-			delete(g.Targets, nonBossTargets[i])
+			delete(g.Targets, nonBossTargets[i].id)
 		}
 	}
 	g.mu.Unlock()
@@ -603,10 +688,17 @@ func (g *Game) updateBonusGame() {
 // spawnTarget 生成目標
 func (g *Game) spawnTarget() {
 	g.mu.RLock()
-	betLevel := 5 // 預設中等，實際應取所有玩家平均
-	for _, p := range g.Players {
-		betLevel = p.BetLevel
-		break
+	// 取所有玩家的平均 bet level（多人時更公平）
+	betLevel := 5 // 預設中等
+	if len(g.Players) > 0 {
+		total := 0
+		for _, p := range g.Players {
+			total += p.BetLevel
+		}
+		betLevel = total / len(g.Players)
+		if betLevel < 1 {
+			betLevel = 1
+		}
 	}
 	bonusSpecial := g.bonusSpecialBonus
 	g.mu.RUnlock()
@@ -697,7 +789,7 @@ func (g *Game) triggerBoss() {
 		Payload: ws.BossEventPayload{Event: "warning"},
 	})
 
-	time.AfterFunc(3*time.Second, func() {
+	g.safeAfterFunc(3*time.Second, func() {
 		g.spawnBoss()
 	})
 }
@@ -723,6 +815,15 @@ func (g *Game) spawnBoss() {
 			MaxHP:      def.HP,
 		},
 	})
+
+	// 埋點：BOSS 生成
+	if tracker := analytics.Get(); tracker != nil {
+		tracker.Track(analytics.EventBossSpawn, "system", map[string]interface{}{
+			"instance_id": instanceID,
+			"boss_def":    "B001",
+			"hp":          def.HP,
+		})
+	}
 }
 
 // triggerBonusReady 觸發 Bonus Ready
@@ -751,7 +852,7 @@ func (g *Game) triggerBonusReady() {
 	})
 
 	// 3秒後自動進入 Bonus Game
-	time.AfterFunc(3*time.Second, func() {
+	g.safeAfterFunc(3*time.Second, func() {
 		g.startBonusGame()
 	})
 }
@@ -776,6 +877,13 @@ func (g *Game) startBonusGame() {
 			TimeLeft: data.BonusDuration,
 		},
 	})
+
+	// 埋點：Bonus 開始
+	if tracker := analytics.Get(); tracker != nil {
+		tracker.Track(analytics.EventBonusStart, "system", map[string]interface{}{
+			"duration": data.BonusDuration,
+		})
+	}
 
 	// 生成 Bonus 目標
 	g.spawnBonusTargets()
@@ -885,7 +993,7 @@ func (g *Game) endBonusGame() {
 	}
 
 	g.transitionState(state.StateBonusResult)
-	time.AfterFunc(3*time.Second, func() {
+	g.safeAfterFunc(3*time.Second, func() {
 		g.transitionState(state.StateNormalPlay)
 	})
 }
@@ -1017,4 +1125,92 @@ func remarshal(src interface{}, dst interface{}) error {
 		return fmt.Errorf("marshal: %w", err)
 	}
 	return json.Unmarshal(b, dst)
+}
+
+// safeAfterFunc 感知 stopCh 的 AfterFunc，避免 Game 停止後 timer 仍執行造成 goroutine 洩漏
+func (g *Game) safeAfterFunc(d time.Duration, f func()) {
+	go func() {
+		select {
+		case <-time.After(d):
+			f()
+		case <-g.stopCh:
+			// Game 已停止，取消 timer
+		}
+	}()
+}
+
+// broadcastLeaderboard 廣播排行榜給所有玩家
+func (g *Game) broadcastLeaderboard() {
+	entries := g.buildLeaderboard()
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgLeaderboard,
+		Payload: ws.LeaderboardPayload{
+			Entries:   entries,
+			Timestamp: time.Now().UnixMilli(),
+		},
+	})
+}
+
+// buildLeaderboard 建立排行榜資料（依 SessionScore 排序，取前 10 名）
+func (g *Game) buildLeaderboard() []ws.LeaderboardEntry {
+	g.mu.RLock()
+	snapshots := make([]player.LeaderboardSnapshot, 0, len(g.Players))
+	for _, p := range g.Players {
+		snapshots = append(snapshots, p.LeaderboardSnapshot())
+	}
+	g.mu.RUnlock()
+
+	// 依 SessionScore 降序排序
+	for i := 0; i < len(snapshots); i++ {
+		for j := i + 1; j < len(snapshots); j++ {
+			if snapshots[j].Score > snapshots[i].Score {
+				snapshots[i], snapshots[j] = snapshots[j], snapshots[i]
+			}
+		}
+	}
+
+	// 取前 10 名
+	maxEntries := 10
+	if len(snapshots) < maxEntries {
+		maxEntries = len(snapshots)
+	}
+
+	entries := make([]ws.LeaderboardEntry, maxEntries)
+	for i := 0; i < maxEntries; i++ {
+		entries[i] = ws.LeaderboardEntry{
+			Rank:        i + 1,
+			PlayerID:    snapshots[i].PlayerID,
+			DisplayName: snapshots[i].DisplayName,
+			Score:       snapshots[i].Score,
+			MaxCoins:    snapshots[i].MaxCoins,
+			KillCount:   snapshots[i].KillCount,
+		}
+	}
+	return entries
+}
+
+// GetLeaderboardData 取得排行榜資料（供 HTTP 端點使用）
+func (g *Game) GetLeaderboardData() ws.LeaderboardPayload {
+	return ws.LeaderboardPayload{
+		Entries:   g.buildLeaderboard(),
+		Timestamp: time.Now().UnixMilli(),
+	}
+}
+
+// sendAchievement 傳送成就解鎖通知給指定玩家
+func (g *Game) sendAchievement(playerID string, u *achievement.AchievementUnlock) {
+	if u == nil {
+		return
+	}
+	log.Printf("[Achievement] Player %s unlocked: %s (%s)", playerID, u.Name, u.ID)
+	g.Hub.Send(playerID, &ws.Message{
+		Type: ws.MsgAchievement,
+		Payload: ws.AchievementPayload{
+			ID:          string(u.ID),
+			Name:        u.Name,
+			Description: u.Description,
+			Icon:        u.Icon,
+			UnlockedAt:  u.UnlockedAt.UnixMilli(),
+		},
+	})
 }

@@ -29,6 +29,9 @@ var _camera: Camera2D = null
 # ── 公開 API ──────────────────────────────────────────
 
 func add_trauma(amount: float) -> void:
+	# 低效能模式下關閉震動
+	if not PerformanceMonitor.is_screen_shake_enabled():
+		return
 	_trauma = clamp(_trauma + amount, 0.0, 1.0)
 
 func set_trauma(amount: float) -> void:

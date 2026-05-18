@@ -4,7 +4,7 @@
 
 extends Node2D
 
-# 目標 Sprite 路徑對應表
+# 目標 Sprite 路徑對應表（備用，Spritesheet 載入失敗時使用）
 const TARGET_SPRITES = {
 	"T001": "res://assets/sprites/targets/T001_grass.png",
 	"T002": "res://assets/sprites/targets/T002_bug_g.png",
@@ -18,6 +18,21 @@ const TARGET_SPRITES = {
 	"T104": "res://assets/sprites/targets/T104_gold_grass.png",
 	"T105": "res://assets/sprites/targets/T105_coin_fish.png",
 	"B001": "res://assets/sprites/targets/B001_boss.png",
+}
+
+# Spritesheet 中各目標的 UV 座標（來自 targets_sheet.json，cell_size=64）
+const SHEET_REGIONS = {
+	"T001": Rect2(0, 0, 64, 64),
+	"T002": Rect2(64, 0, 64, 64),
+	"T003": Rect2(128, 0, 64, 64),
+	"T004": Rect2(192, 0, 64, 64),
+	"T005": Rect2(0, 64, 64, 64),
+	"T006": Rect2(64, 64, 64, 64),
+	"T101": Rect2(128, 64, 64, 64),
+	"T102": Rect2(192, 64, 64, 64),
+	"T103": Rect2(0, 128, 64, 64),
+	"T104": Rect2(64, 128, 64, 64),
+	"T105": Rect2(128, 128, 64, 64),
 }
 
 # 命中特效 Sprite
@@ -37,11 +52,83 @@ const PROJECTILE_SPRITES = {
 # 目標節點字典
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
 
+# ---- 資源快取（避免每次都 load，提升效能）----
+var _cached_textures: Dictionary = {}   # path -> Texture2D
+var _cached_outline_shader: Shader = null
+var _cached_hit_flash_shader: Shader = null
+var _cached_pixel_font: Font = null
+var _targets_sheet: Texture2D = null    # 目標物 Spritesheet（減少 draw call）
+var _atlas_textures: Dictionary = {}    # def_id -> AtlasTexture（快取裁切結果）
+
 func _ready() -> void:
 	GameManager.target_spawned.connect(_on_target_spawned)
 	GameManager.target_updated.connect(_on_target_updated)
 	GameManager.target_killed.connect(_on_target_killed)
 	GameManager.boss_event.connect(_on_boss_event)
+	# 預載入常用資源
+	_preload_resources()
+
+## 預載入常用資源（在 _ready 時一次性載入，避免遊戲中卡頓）
+func _preload_resources() -> void:
+	# 優先載入 Spritesheet（一張圖包含所有目標，減少 draw call）
+	var sheet_path = "res://assets/sprites/sheets/targets_sheet.png"
+	if ResourceLoader.exists(sheet_path):
+		_targets_sheet = load(sheet_path)
+		# 預建立所有 AtlasTexture（裁切快取）
+		for def_id in SHEET_REGIONS:
+			var atlas = AtlasTexture.new()
+			atlas.atlas = _targets_sheet
+			atlas.region = SHEET_REGIONS[def_id]
+			_atlas_textures[def_id] = atlas
+
+	# BOSS 單獨載入（96x96，不在 Spritesheet 中）
+	var boss_path = TARGET_SPRITES["B001"]
+	if ResourceLoader.exists(boss_path):
+		_cached_textures[boss_path] = load(boss_path)
+
+	# 備用：預載入所有獨立目標 Sprite（Spritesheet 載入失敗時使用）
+	if _targets_sheet == null:
+		for def_id in TARGET_SPRITES:
+			var path = TARGET_SPRITES[def_id]
+			if ResourceLoader.exists(path):
+				_cached_textures[path] = load(path)
+
+	# 預載入 shader
+	var outline_path = "res://assets/shaders/outline.gdshader"
+	if ResourceLoader.exists(outline_path):
+		_cached_outline_shader = load(outline_path)
+
+	var hit_flash_path = "res://assets/shaders/hit_flash.gdshader"
+	if ResourceLoader.exists(hit_flash_path):
+		_cached_hit_flash_shader = load(hit_flash_path)
+
+	# 預載入像素字體
+	var font_path = "res://assets/fonts/pixel8.fnt"
+	if ResourceLoader.exists(font_path):
+		_cached_pixel_font = load(font_path)
+
+## 取得目標 Texture（優先用 AtlasTexture，備用獨立 PNG）
+func _get_target_texture(def_id: String) -> Texture2D:
+	# BOSS 用獨立 PNG
+	if def_id == "B001":
+		var path = TARGET_SPRITES.get("B001", "")
+		return _cached_textures.get(path, null)
+	# 其他目標優先用 Spritesheet AtlasTexture
+	if _atlas_textures.has(def_id):
+		return _atlas_textures[def_id]
+	# 備用：獨立 PNG
+	var path = TARGET_SPRITES.get(def_id, "")
+	return _get_texture(path)
+
+## 取得快取 Texture（避免重複 load）
+func _get_texture(path: String) -> Texture2D:
+	if _cached_textures.has(path):
+		return _cached_textures[path]
+	if ResourceLoader.exists(path):
+		var tex = load(path)
+		_cached_textures[path] = tex
+		return tex
+	return null
 
 ## 目標 HP 更新
 func _on_target_updated(data: Dictionary) -> void:
@@ -74,13 +161,11 @@ func _flash_hit(node: Node2D) -> void:
 	# 找到 Sprite2D 子節點
 	for child in node.get_children():
 		if child is Sprite2D:
-			# 嘗試套用 hit_flash shader
-			var shader_path = "res://assets/shaders/hit_flash.gdshader"
-			if ResourceLoader.exists(shader_path):
+			if _cached_hit_flash_shader != null:
 				var mat = child.get_meta("hit_flash_mat", null)
 				if mat == null:
 					mat = ShaderMaterial.new()
-					mat.shader = load(shader_path)
+					mat.shader = _cached_hit_flash_shader
 					child.material = mat
 					child.set_meta("hit_flash_mat", mat)
 				# 閃白動畫
@@ -97,9 +182,16 @@ func _flash_hit(node: Node2D) -> void:
 func _on_boss_event(event_data: Dictionary) -> void:
 	var event = event_data.get("event", "")
 
-	# BOSS 登場：全畫面特效 + 強烈震動
-	if event == "boss_enter":
-		HitEffect.spawn_boss_enter()
+	# BOSS 登場：全畫面特效 + 強烈震動（Server 廣播 "spawn"）
+	if event == "spawn" or event == "boss_enter":
+		# 取得 BOSS 節點的實際位置（如果已生成）
+		var boss_pos = Vector2(1100, 360)  # 預設右側進場位置
+		for id in _target_nodes:
+			var n = _target_nodes[id]
+			if is_instance_valid(n) and n.get_meta("target_type", "") == "boss":
+				boss_pos = n.position
+				break
+		HitEffect.spawn_boss_enter(boss_pos)
 		ScreenShake.add_trauma(0.9)
 		return
 
@@ -157,7 +249,7 @@ func _on_target_spawned(data: Dictionary) -> void:
 	if _target_nodes.has(instance_id):
 		return
 
-	# 建立目標節點（暫用 ColorRect 代替 Sprite）
+	# 建立目標節點（使用像素 Sprite）
 	var node = _create_target_node(data)
 	add_child(node)
 	_target_nodes[instance_id] = node
@@ -185,15 +277,45 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	var def_id = data.get("def_id", "T001")
 	var target_type = data.get("type", "basic")
 
-	# 使用像素 Sprite
+	# 使用像素 Sprite（優先用 Spritesheet AtlasTexture，減少 draw call）
 	var sprite = Sprite2D.new()
-	var sprite_path = TARGET_SPRITES.get(def_id, "")
-	if sprite_path != "" and ResourceLoader.exists(sprite_path):
-		sprite.texture = load(sprite_path)
+	var tex = _get_target_texture(def_id)
+	if tex != null:
+		sprite.texture = tex
 		# 像素完美縮放（關閉濾波）
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+
+		# 套用 outline shader（使用快取 shader，避免重複 load）
+		if _cached_outline_shader != null and PerformanceMonitor.is_outline_shader_enabled():
+			var mat = ShaderMaterial.new()
+			mat.shader = _cached_outline_shader
+			# 依目標類型設定輪廓顏色
+			match target_type:
+				"boss":
+					mat.set_shader_parameter("outline_color", Color(1.0, 0.2, 0.2, 1.0))  # 紅色輪廓
+					mat.set_shader_parameter("outline_width", 2.0)
+				"special":
+					mat.set_shader_parameter("outline_color", Color(1.0, 0.85, 0.0, 1.0))  # 金色輪廓
+					mat.set_shader_parameter("outline_width", 1.5)
+				_:
+					mat.set_shader_parameter("outline_color", Color(0.0, 0.0, 0.0, 0.8))  # 黑色輪廓
+					mat.set_shader_parameter("outline_width", 1.0)
+			sprite.material = mat
+			sprite.set_meta("outline_mat", mat)
+
+		# 特殊目標物加 wobble tween（T103 流星、T104 金草）
+		if def_id in ["T103", "T104"]:
+			var tween = container.create_tween().set_loops()
+			if def_id == "T103":
+				# 流星：快速搖晃
+				tween.tween_property(container, "rotation_degrees", 5.0, 0.15)
+				tween.tween_property(container, "rotation_degrees", -5.0, 0.15)
+			else:
+				# 金草：緩慢搖晃
+				tween.tween_property(container, "rotation_degrees", 3.0, 0.4)
+				tween.tween_property(container, "rotation_degrees", -3.0, 0.4)
 	else:
-		# 備用：ColorRect
+		# 備用：ColorRect（texture 載入失敗時）
 		var rect = ColorRect.new()
 		rect.size = Vector2(32, 32) if target_type != "boss" else Vector2(64, 64)
 		rect.position = -rect.size / 2
@@ -228,6 +350,31 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	container.set_meta("behavior", data.get("behavior", "linear"))
 	container.set_meta("spawn_time", Time.get_ticks_msec())
 	container.set_meta("target_type", target_type)
+
+	# 游泳動畫：輕微上下搖擺 + 旋轉傾斜（讓目標物有生命感）
+	# T103/T104 已有旋轉搖晃，不再加上下搖擺
+	# BOSS 不加（有自己的移動邏輯）
+	if target_type not in ["boss"] and def_id not in ["T103", "T104"] and PerformanceMonitor.is_swim_animation_enabled():
+		var swim_amp = randf_range(3.0, 7.0)   # 搖擺幅度（像素）
+		var swim_dur = randf_range(0.6, 1.2)   # 搖擺週期（秒）
+		var swim_rot = randf_range(2.0, 5.0)   # 旋轉幅度（度）
+		var swim_phase = randf_range(0.0, 1.0) # 隨機相位（避免所有魚同步）
+
+		# Y 軸搖擺（主要游泳動作）
+		var swim_tween = container.create_tween().set_loops()
+		swim_tween.tween_property(sprite, "position:y", swim_amp, swim_dur * (0.5 + swim_phase * 0.1))
+		swim_tween.tween_property(sprite, "position:y", -swim_amp, swim_dur * (0.5 + swim_phase * 0.1))
+
+		# 旋轉傾斜（模擬魚游泳時身體傾斜）
+		var rot_tween = container.create_tween().set_loops()
+		rot_tween.tween_property(container, "rotation_degrees", swim_rot, swim_dur * 0.55)
+		rot_tween.tween_property(container, "rotation_degrees", -swim_rot, swim_dur * 0.55)
+
+		# 縮放呼吸感（特殊目標更明顯）
+		if target_type == "special":
+			var scale_tween = container.create_tween().set_loops()
+			scale_tween.tween_property(sprite, "scale", Vector2(1.05, 0.95), swim_dur * 0.5)
+			scale_tween.tween_property(sprite, "scale", Vector2(0.95, 1.05), swim_dur * 0.5)
 
 	return container
 
@@ -437,10 +584,9 @@ func _spawn_reward_text(pos: Vector2, amount: int, multiplier: float) -> void:
 	label.position = pos
 	label.add_theme_font_size_override("font_size", 16)
 
-	# 套用像素字體
-	var font_path = "res://assets/fonts/pixel8.fnt"
-	if ResourceLoader.exists(font_path):
-		label.add_theme_font_override("font", load(font_path))
+	# 套用像素字體（使用快取，避免重複 load）
+	if _cached_pixel_font != null:
+		label.add_theme_font_override("font", _cached_pixel_font)
 
 	# 依倍率設定顏色（規格書 8.3）
 	if multiplier >= 100:

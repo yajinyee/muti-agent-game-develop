@@ -3,6 +3,8 @@
 
 extends CanvasLayer
 
+const PixelTheme = preload("res://scripts/ui/PixelTheme.gd")
+
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
 @onready var character_label: Label = $TopBar/CharacterLabel
@@ -32,6 +34,46 @@ var _pixel_font: Font = null
 const PIXEL_FONT_PATH = "res://assets/fonts/pixel8.fnt"
 
 func _ready() -> void:
+	# 套用像素風格 Theme（讓所有按鈕和 UI 元素有一致的像素風格）
+	var pixel_theme = PixelTheme.create()
+	# 套用到 TopBar 和 BottomBar 的所有子節點
+	var top_bar = get_node_or_null("TopBar")
+	var bottom_bar = get_node_or_null("BottomBar")
+	if is_instance_valid(top_bar):
+		top_bar.theme = pixel_theme
+		# TopBar 背景（深海藍半透明）
+		var top_bg = ColorRect.new()
+		top_bg.name = "PixelBG"
+		top_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		top_bg.color = Color(0.03, 0.06, 0.18, 0.88)
+		top_bg.z_index = -1
+		top_bar.add_child(top_bg)
+		top_bar.move_child(top_bg, 0)
+		# TopBar 底部邊框線（金色）
+		var top_line = ColorRect.new()
+		top_line.name = "BottomLine"
+		top_line.size = Vector2(1280, 2)
+		top_line.position = Vector2(0, 38)
+		top_line.color = Color(0.90, 0.75, 0.20, 0.60)
+		top_bar.add_child(top_line)
+	if is_instance_valid(bottom_bar):
+		bottom_bar.theme = pixel_theme
+		# BottomBar 背景（深海藍半透明）
+		var bot_bg = ColorRect.new()
+		bot_bg.name = "PixelBG"
+		bot_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		bot_bg.color = Color(0.03, 0.06, 0.18, 0.88)
+		bot_bg.z_index = -1
+		bottom_bar.add_child(bot_bg)
+		bottom_bar.move_child(bot_bg, 0)
+		# BottomBar 頂部邊框線（金色）
+		var bot_line = ColorRect.new()
+		bot_line.name = "TopLine"
+		bot_line.size = Vector2(1280, 2)
+		bot_line.position = Vector2(0, 0)
+		bot_line.color = Color(0.90, 0.75, 0.20, 0.60)
+		bottom_bar.add_child(bot_line)
+
 	# 載入像素字體
 	if ResourceLoader.exists(PIXEL_FONT_PATH):
 		_pixel_font = load(PIXEL_FONT_PATH)
@@ -42,6 +84,8 @@ func _ready() -> void:
 	GameManager.reward_received.connect(_on_reward_received)
 	GameManager.boss_event.connect(_on_boss_event)
 	GameManager.bonus_event.connect(_on_bonus_event)
+	GameManager.leaderboard_updated.connect(_on_leaderboard_updated)
+	GameManager.achievement_unlocked.connect(_on_achievement_unlocked)
 
 	# 斷線/重連提示
 	NetworkManager.disconnected.connect(_on_disconnected)
@@ -54,10 +98,35 @@ func _ready() -> void:
 	boss_button.pressed.connect(NetworkManager.send_trigger_boss)
 	bonus_button.pressed.connect(NetworkManager.send_trigger_bonus)
 
+	# UI 按鈕點擊音效（規格書 audio-map.json：ui.click = weed_pull.wav）
+	for btn in [auto_button, lock_button, bet_minus_button, bet_plus_button, boss_button, bonus_button]:
+		if is_instance_valid(btn):
+			btn.pressed.connect(func(): AudioManager.play_sfx(AudioManager.SFX.WEED_PULL))
+
 	reward_popup.visible = false
 	_reward_popup_base_y = reward_popup.position.y
+
+	# WarningLabel 像素風格（大字、紅色、陰影）
+	var warning_label = get_node_or_null("WarningOverlay/WarningLabel")
+	if is_instance_valid(warning_label):
+		warning_label.add_theme_font_size_override("font_size", 72)
+		warning_label.add_theme_color_override("font_color", Color(1.0, 0.15, 0.15))
+		warning_label.add_theme_color_override("font_shadow_color", Color(0.5, 0.0, 0.0, 0.8))
+		warning_label.add_theme_constant_override("shadow_offset_x", 3)
+		warning_label.add_theme_constant_override("shadow_offset_y", 3)
+		if is_instance_valid(_pixel_font):
+			warning_label.add_theme_font_override("font", _pixel_font)
+
+	# StateLabel 像素風格（右上角狀態顯示）
+	var state_lbl = get_node_or_null("StateLabel")
+	if is_instance_valid(state_lbl):
+		state_lbl.add_theme_font_size_override("font_size", 11)
+		state_lbl.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0, 0.7))
+
 	_update_ui()
 	_create_disconnect_overlay()
+	_create_leaderboard_panel()
+	_create_achievement_queue()
 
 ## 套用像素字體到所有 Label
 func _apply_pixel_font() -> void:
@@ -72,6 +141,8 @@ func _apply_pixel_font() -> void:
 	for btn in buttons:
 		if is_instance_valid(btn):
 			btn.add_theme_font_override("font", _pixel_font)
+
+var _last_labor_value: int = 0  # 追蹤上次勞動值，偵測升滿觸發
 
 func _on_player_updated(_data: Dictionary) -> void:
 	_update_ui()
@@ -95,6 +166,13 @@ func _update_ui() -> void:
 	else:
 		labor_label.text = "💪 %d/100" % labor
 		labor_label.modulate = Color.WHITE
+
+	# 偵測勞動值剛達到 100（觸發升級特效）
+	if labor >= 100 and _last_labor_value < 100:
+		var char_id = GameManager.player_data.get("character_id", "chiikawa")
+		HitEffect.spawn_level_up(Vector2(640, 630), char_id)
+		ScreenShake.add_trauma(0.3)
+	_last_labor_value = labor
 
 	# Auto 按鈕
 	if GameManager.is_auto():
@@ -176,8 +254,10 @@ func _on_boss_event(event_data: Dictionary) -> void:
 		"warning":
 			AudioManager.stop_bgm_briefly()
 			AudioManager.play_sfx(AudioManager.SFX.BOSS_WARNING)
+			_show_boss_incoming_preview()  # BOSS 血條預覽動畫
 		"spawn":
 			AudioManager.play_bgm(AudioManager.BGM.BOSS_ENTER)
+			_hide_boss_incoming_preview()  # 隱藏預覽，顯示正式計時器
 			_start_boss_timer()
 		"phase_change":
 			AudioManager.play_bgm(AudioManager.BGM.BOSS_RAGE)
@@ -185,6 +265,10 @@ func _on_boss_event(event_data: Dictionary) -> void:
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			AudioManager.play_bgm(AudioManager.BGM.MAIN_GAME)
 			_stop_boss_timer()
+			# BOSS 擊殺慶祝特效
+			if event_data.get("event", "") == "kill":
+				HitEffect.spawn_big_win(Vector2(640, 360), 100.0)
+				ScreenShake.add_trauma(0.7)
 
 # ── BOSS 計時器 UI（規格書 28.3）──────────────────────────────
 
@@ -265,6 +349,156 @@ func _stop_boss_timer() -> void:
 				_boss_timer_node = null
 		)
 
+# ── BOSS 進場預覽 UI（警告階段顯示 BOSS 血條從 0 填滿）──────────
+
+var _boss_preview_node: Control = null
+
+## 顯示 BOSS 進場預覽（警告階段 3 秒）
+## 血條從 0 緩慢填滿到 100%，增加期待感
+func _show_boss_incoming_preview() -> void:
+	if is_instance_valid(_boss_preview_node):
+		_boss_preview_node.queue_free()
+
+	var panel = Control.new()
+	panel.name = "BossIncomingPreview"
+	panel.position = Vector2(320, 280)  # 畫面中央偏下
+	panel.size = Vector2(640, 120)
+	panel.z_index = 90
+	panel.modulate.a = 0.0
+	add_child(panel)
+	_boss_preview_node = panel
+
+	# 背景
+	var bg = ColorRect.new()
+	bg.size = Vector2(640, 120)
+	bg.color = Color(0.05, 0.0, 0.0, 0.88)
+	panel.add_child(bg)
+
+	# 頂部紅色邊條（閃爍）
+	var top_bar = ColorRect.new()
+	top_bar.name = "TopBar"
+	top_bar.size = Vector2(640, 4)
+	top_bar.color = Color(1.0, 0.1, 0.1, 1.0)
+	panel.add_child(top_bar)
+
+	# BOSS 名稱
+	var name_lbl = Label.new()
+	name_lbl.name = "BossNameLabel"
+	name_lbl.text = "那個孩子"
+	name_lbl.position = Vector2(20, 12)
+	name_lbl.add_theme_font_size_override("font_size", 22)
+	name_lbl.modulate = Color(1.0, 0.3, 0.3)
+	if is_instance_valid(_pixel_font):
+		name_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(name_lbl)
+
+	# BOSS 副標題
+	var sub_lbl = Label.new()
+	sub_lbl.text = "BOSS  HP: 3000"
+	sub_lbl.position = Vector2(20, 40)
+	sub_lbl.add_theme_font_size_override("font_size", 13)
+	sub_lbl.modulate = Color(0.8, 0.8, 0.8)
+	if is_instance_valid(_pixel_font):
+		sub_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(sub_lbl)
+
+	# HP 條背景
+	var hp_bg = ColorRect.new()
+	hp_bg.size = Vector2(600, 20)
+	hp_bg.position = Vector2(20, 65)
+	hp_bg.color = Color(0.15, 0.0, 0.0, 1.0)
+	panel.add_child(hp_bg)
+
+	# HP 條（從 0 填滿）
+	var hp_bar = ColorRect.new()
+	hp_bar.name = "BossHPBar"
+	hp_bar.size = Vector2(0, 20)  # 初始寬度 0
+	hp_bar.position = Vector2(20, 65)
+	hp_bar.color = Color(0.9, 0.1, 0.1, 1.0)
+	panel.add_child(hp_bar)
+
+	# HP 條高光（頂部亮線）
+	var hp_shine = ColorRect.new()
+	hp_shine.name = "BossHPShine"
+	hp_shine.size = Vector2(0, 4)
+	hp_shine.position = Vector2(20, 65)
+	hp_shine.color = Color(1.0, 0.5, 0.5, 0.6)
+	panel.add_child(hp_shine)
+
+	# 倍率提示
+	var mult_lbl = Label.new()
+	mult_lbl.text = "MAX 500x"
+	mult_lbl.position = Vector2(490, 12)
+	mult_lbl.add_theme_font_size_override("font_size", 18)
+	mult_lbl.modulate = Color(1.0, 0.6, 0.0)
+	if is_instance_valid(_pixel_font):
+		mult_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(mult_lbl)
+
+	# 倒數文字
+	var countdown_lbl = Label.new()
+	countdown_lbl.name = "CountdownLabel"
+	countdown_lbl.text = "3"
+	countdown_lbl.position = Vector2(295, 88)
+	countdown_lbl.add_theme_font_size_override("font_size", 20)
+	countdown_lbl.modulate = Color(1.0, 0.9, 0.2)
+	countdown_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	countdown_lbl.size = Vector2(50, 28)
+	if is_instance_valid(_pixel_font):
+		countdown_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(countdown_lbl)
+
+	# 動畫序列
+	var tween = panel.create_tween()
+
+	# 1. 淡入（0.2 秒）
+	tween.tween_property(panel, "modulate:a", 1.0, 0.2)
+
+	# 2. HP 條從 0 填滿（2.5 秒，模擬 BOSS 充能）
+	tween.parallel().tween_property(hp_bar, "size:x", 600.0, 2.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	tween.parallel().tween_property(hp_shine, "size:x", 600.0, 2.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+
+	# 3. 倒數 3→2→1
+	tween.tween_callback(func():
+		if is_instance_valid(countdown_lbl):
+			countdown_lbl.text = "2"
+			var t2 = countdown_lbl.create_tween()
+			t2.tween_property(countdown_lbl, "scale", Vector2(1.5, 1.5), 0.1)
+			t2.tween_property(countdown_lbl, "scale", Vector2(1.0, 1.0), 0.1)
+	)
+	tween.tween_interval(0.8)
+	tween.tween_callback(func():
+		if is_instance_valid(countdown_lbl):
+			countdown_lbl.text = "1"
+			countdown_lbl.modulate = Color(1.0, 0.4, 0.4)
+			var t3 = countdown_lbl.create_tween()
+			t3.tween_property(countdown_lbl, "scale", Vector2(1.8, 1.8), 0.1)
+			t3.tween_property(countdown_lbl, "scale", Vector2(1.0, 1.0), 0.1)
+	)
+	tween.tween_interval(0.5)
+
+	# 4. HP 條閃爍（充滿後閃爍 3 次）
+	for _i in 3:
+		tween.tween_property(hp_bar, "modulate", Color(2.0, 0.5, 0.5, 1.0), 0.06)
+		tween.tween_property(hp_bar, "modulate", Color.WHITE, 0.06)
+
+	# 頂部邊條閃爍動畫（獨立 tween，持續整個警告期間）
+	var bar_tween = top_bar.create_tween().set_loops()
+	bar_tween.tween_property(top_bar, "modulate:a", 0.3, 0.2)
+	bar_tween.tween_property(top_bar, "modulate:a", 1.0, 0.2)
+
+## 隱藏 BOSS 進場預覽（BOSS 正式出現時）
+func _hide_boss_incoming_preview() -> void:
+	if not is_instance_valid(_boss_preview_node):
+		return
+	var tween = create_tween()
+	tween.tween_property(_boss_preview_node, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(func():
+		if is_instance_valid(_boss_preview_node):
+			_boss_preview_node.queue_free()
+			_boss_preview_node = null
+	)
+
 func _get_boss_multiplier_text(time_left: float) -> String:
 	if time_left <= 10:
 		return "100x"
@@ -323,6 +557,10 @@ func _process(delta: float) -> void:
 			var tween = create_tween()
 			tween.tween_property(mult_lbl, "scale", Vector2(1.4, 1.4), 0.1)
 			tween.tween_property(mult_lbl, "scale", Vector2(1.0, 1.0), 0.1)
+
+	# FPS 顯示（DEBUG 模式）
+	if OS.is_debug_build():
+		_update_fps_display()
 
 func _on_bonus_event(event_data: Dictionary) -> void:
 	match event_data.get("event", ""):
@@ -441,3 +679,392 @@ func _on_reconnected() -> void:
 				if r:
 					r.visible = true
 		)
+
+# ── 排行榜 UI ──────────────────────────────────────────────────
+
+var _leaderboard_panel: Control = null
+var _leaderboard_visible: bool = true
+var _leaderboard_toggle_btn: Button = null
+const MAX_LEADERBOARD_ENTRIES = 5
+
+func _create_leaderboard_panel() -> void:
+	# 排行榜容器（右上角，BOSS 計時器下方，避免重疊）
+	# BOSS 計時器在 x=900, y=50，高度 80px → 排行榜從 y=140 開始
+	var panel = Control.new()
+	panel.name = "LeaderboardPanel"
+	panel.position = Vector2(900, 140)
+	panel.size = Vector2(360, 200)
+	panel.z_index = 10
+	add_child(panel)
+	_leaderboard_panel = panel
+
+	# 背景
+	var bg = ColorRect.new()
+	bg.name = "LeaderboardBG"
+	bg.size = Vector2(360, 200)
+	bg.color = Color(0.0, 0.05, 0.15, 0.82)
+	panel.add_child(bg)
+
+	# 標題列
+	var title_bar = ColorRect.new()
+	title_bar.size = Vector2(360, 28)
+	title_bar.color = Color(0.05, 0.15, 0.4, 0.95)
+	panel.add_child(title_bar)
+
+	var title_lbl = Label.new()
+	title_lbl.name = "LeaderboardTitle"
+	title_lbl.text = "🏆 排行榜"
+	title_lbl.position = Vector2(10, 4)
+	title_lbl.add_theme_font_size_override("font_size", 14)
+	title_lbl.modulate = Color(1.0, 0.9, 0.3)
+	if is_instance_valid(_pixel_font):
+		title_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(title_lbl)
+
+	# 折疊按鈕
+	var toggle_btn = Button.new()
+	toggle_btn.name = "LeaderboardToggle"
+	toggle_btn.text = "▲"
+	toggle_btn.position = Vector2(325, 2)
+	toggle_btn.size = Vector2(30, 24)
+	toggle_btn.add_theme_font_size_override("font_size", 12)
+	toggle_btn.pressed.connect(_toggle_leaderboard)
+	panel.add_child(toggle_btn)
+	_leaderboard_toggle_btn = toggle_btn
+
+	# 排行榜條目容器
+	var entries_container = Control.new()
+	entries_container.name = "EntriesContainer"
+	entries_container.position = Vector2(0, 30)
+	entries_container.size = Vector2(360, 170)
+	panel.add_child(entries_container)
+
+	# 預建 5 個條目（動態更新文字）
+	for i in range(MAX_LEADERBOARD_ENTRIES):
+		_create_leaderboard_row(entries_container, i)
+
+	# 初始顯示「等待玩家...」
+	_show_leaderboard_placeholder()
+
+func _create_leaderboard_row(container: Control, index: int) -> void:
+	var row = Control.new()
+	row.name = "Row%d" % index
+	row.position = Vector2(0, index * 32)
+	row.size = Vector2(360, 30)
+	container.add_child(row)
+
+	# 交替背景色
+	var row_bg = ColorRect.new()
+	row_bg.name = "RowBG"
+	row_bg.size = Vector2(360, 30)
+	if index % 2 == 0:
+		row_bg.color = Color(0.05, 0.1, 0.25, 0.6)
+	else:
+		row_bg.color = Color(0.03, 0.07, 0.18, 0.6)
+	row.add_child(row_bg)
+
+	# 名次標籤
+	var rank_lbl = Label.new()
+	rank_lbl.name = "RankLabel"
+	rank_lbl.position = Vector2(6, 6)
+	rank_lbl.size = Vector2(30, 20)
+	rank_lbl.add_theme_font_size_override("font_size", 13)
+	if is_instance_valid(_pixel_font):
+		rank_lbl.add_theme_font_override("font", _pixel_font)
+	row.add_child(rank_lbl)
+
+	# 玩家名稱
+	var name_lbl = Label.new()
+	name_lbl.name = "NameLabel"
+	name_lbl.position = Vector2(42, 6)
+	name_lbl.size = Vector2(140, 20)
+	name_lbl.add_theme_font_size_override("font_size", 12)
+	name_lbl.clip_text = true
+	if is_instance_valid(_pixel_font):
+		name_lbl.add_theme_font_override("font", _pixel_font)
+	row.add_child(name_lbl)
+
+	# 分數
+	var score_lbl = Label.new()
+	score_lbl.name = "ScoreLabel"
+	score_lbl.position = Vector2(188, 6)
+	score_lbl.size = Vector2(100, 20)
+	score_lbl.add_theme_font_size_override("font_size", 12)
+	score_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	if is_instance_valid(_pixel_font):
+		score_lbl.add_theme_font_override("font", _pixel_font)
+	row.add_child(score_lbl)
+
+	# 擊破數
+	var kill_lbl = Label.new()
+	kill_lbl.name = "KillLabel"
+	kill_lbl.position = Vector2(295, 6)
+	kill_lbl.size = Vector2(60, 20)
+	kill_lbl.add_theme_font_size_override("font_size", 11)
+	kill_lbl.modulate = Color(0.7, 0.9, 0.7)
+	if is_instance_valid(_pixel_font):
+		kill_lbl.add_theme_font_override("font", _pixel_font)
+	row.add_child(kill_lbl)
+
+	row.visible = false
+
+func _show_leaderboard_placeholder() -> void:
+	if not is_instance_valid(_leaderboard_panel):
+		return
+	var container = _leaderboard_panel.get_node_or_null("EntriesContainer")
+	if not container:
+		return
+
+	# 顯示第一行作為佔位符
+	var row = container.get_node_or_null("Row0")
+	if row:
+		row.visible = true
+		var name_lbl = row.get_node_or_null("NameLabel")
+		if name_lbl:
+			name_lbl.text = "等待玩家加入..."
+			name_lbl.modulate = Color(0.6, 0.6, 0.6)
+		var rank_lbl = row.get_node_or_null("RankLabel")
+		if rank_lbl:
+			rank_lbl.text = ""
+		var score_lbl = row.get_node_or_null("ScoreLabel")
+		if score_lbl:
+			score_lbl.text = ""
+		var kill_lbl = row.get_node_or_null("KillLabel")
+		if kill_lbl:
+			kill_lbl.text = ""
+
+func _on_leaderboard_updated(entries: Array) -> void:
+	if not is_instance_valid(_leaderboard_panel):
+		return
+	var container = _leaderboard_panel.get_node_or_null("EntriesContainer")
+	if not container:
+		return
+
+	var my_player_id = GameManager.get_player_id()
+	var count = min(entries.size(), MAX_LEADERBOARD_ENTRIES)
+
+	# 更新各條目
+	for i in range(MAX_LEADERBOARD_ENTRIES):
+		var row = container.get_node_or_null("Row%d" % i)
+		if not row:
+			continue
+
+		if i >= count:
+			row.visible = false
+			continue
+
+		row.visible = true
+		var entry = entries[i]
+		var is_self = entry.get("player_id", "") == my_player_id
+
+		# 名次
+		var rank_lbl = row.get_node_or_null("RankLabel")
+		if rank_lbl:
+			match i:
+				0: rank_lbl.text = "🥇"
+				1: rank_lbl.text = "🥈"
+				2: rank_lbl.text = "🥉"
+				_: rank_lbl.text = "#%d" % (i + 1)
+
+		# 玩家名稱（自己高亮）
+		var name_lbl = row.get_node_or_null("NameLabel")
+		if name_lbl:
+			var display = entry.get("display_name", "???")
+			name_lbl.text = ("▶ " if is_self else "") + display
+			name_lbl.modulate = Color(1.0, 1.0, 0.4) if is_self else Color.WHITE
+
+		# 分數
+		var score_lbl = row.get_node_or_null("ScoreLabel")
+		if score_lbl:
+			var score = entry.get("score", 0)
+			score_lbl.text = "🪙%d" % score
+			score_lbl.modulate = Color(1.0, 0.9, 0.3) if is_self else Color(0.9, 0.9, 0.9)
+
+		# 擊破數
+		var kill_lbl = row.get_node_or_null("KillLabel")
+		if kill_lbl:
+			kill_lbl.text = "×%d" % entry.get("kill_count", 0)
+
+		# 自己的行加邊框高亮
+		var row_bg = row.get_node_or_null("RowBG")
+		if row_bg:
+			if is_self:
+				row_bg.color = Color(0.15, 0.25, 0.05, 0.8)
+			elif i % 2 == 0:
+				row_bg.color = Color(0.05, 0.1, 0.25, 0.6)
+			else:
+				row_bg.color = Color(0.03, 0.07, 0.18, 0.6)
+
+	# 更新面板高度
+	var new_height = 30 + count * 32
+	if is_instance_valid(_leaderboard_panel):
+		var bg = _leaderboard_panel.get_node_or_null("LeaderboardBG")
+		if bg:
+			bg.size.y = new_height
+		_leaderboard_panel.size.y = new_height
+
+func _toggle_leaderboard() -> void:
+	if not is_instance_valid(_leaderboard_panel):
+		return
+	_leaderboard_visible = not _leaderboard_visible
+
+	var container = _leaderboard_panel.get_node_or_null("EntriesContainer")
+	if container:
+		container.visible = _leaderboard_visible
+
+	var bg = _leaderboard_panel.get_node_or_null("LeaderboardBG")
+	if bg:
+		bg.size.y = 200 if _leaderboard_visible else 28
+
+	if is_instance_valid(_leaderboard_toggle_btn):
+		_leaderboard_toggle_btn.text = "▲" if _leaderboard_visible else "▼"
+
+# ── FPS 顯示（DEBUG 模式）──────────────────────────────────────
+
+var _fps_label: Label = null
+var _fps_update_timer: float = 0.0
+
+func _update_fps_display() -> void:
+	_fps_update_timer += get_process_delta_time()
+	if _fps_update_timer < 0.5:
+		return
+	_fps_update_timer = 0.0
+
+	if _fps_label == null:
+		_fps_label = Label.new()
+		_fps_label.name = "FPSLabel"
+		_fps_label.position = Vector2(10, 680)
+		_fps_label.add_theme_font_size_override("font_size", 12)
+		_fps_label.modulate = Color(0.5, 1.0, 0.5, 0.8)
+		add_child(_fps_label)
+
+	var fps = Engine.get_frames_per_second()
+	var quality = PerformanceMonitor.current_quality
+	var quality_str = ["HIGH", "MEDIUM", "LOW"][quality]
+	_fps_label.text = "FPS: %d | %s" % [fps, quality_str]
+
+	# FPS 顏色警告
+	if fps < 30:
+		_fps_label.modulate = Color(1.0, 0.3, 0.3, 0.9)
+	elif fps < 50:
+		_fps_label.modulate = Color(1.0, 0.8, 0.2, 0.8)
+	else:
+		_fps_label.modulate = Color(0.5, 1.0, 0.5, 0.8)
+
+# ── 成就通知系統 ──────────────────────────────────────────────
+
+var _achievement_queue: Array = []   # 待顯示的成就佇列
+var _achievement_showing: bool = false
+var _achievement_panel: Control = null
+
+func _create_achievement_queue() -> void:
+	# 成就通知面板（右下角，初始隱藏）
+	var panel = Control.new()
+	panel.name = "AchievementPanel"
+	panel.position = Vector2(900, 650)  # 右下角
+	panel.size = Vector2(360, 80)
+	panel.z_index = 50
+	panel.visible = false
+	add_child(panel)
+	_achievement_panel = panel
+
+	# 背景（深色半透明，金色邊框感）
+	var bg = ColorRect.new()
+	bg.name = "AchBG"
+	bg.size = Vector2(360, 80)
+	bg.color = Color(0.08, 0.06, 0.02, 0.92)
+	panel.add_child(bg)
+
+	# 金色頂部邊條
+	var top_bar = ColorRect.new()
+	top_bar.size = Vector2(360, 4)
+	top_bar.color = Color(1.0, 0.85, 0.1, 1.0)
+	panel.add_child(top_bar)
+
+	# 成就圖示（大 emoji）
+	var icon_lbl = Label.new()
+	icon_lbl.name = "AchIcon"
+	icon_lbl.text = "🏆"
+	icon_lbl.position = Vector2(8, 18)
+	icon_lbl.add_theme_font_size_override("font_size", 36)
+	panel.add_child(icon_lbl)
+
+	# 「成就解鎖！」標題
+	var title_lbl = Label.new()
+	title_lbl.name = "AchTitle"
+	title_lbl.text = "成就解鎖！"
+	title_lbl.position = Vector2(58, 8)
+	title_lbl.add_theme_font_size_override("font_size", 11)
+	title_lbl.modulate = Color(1.0, 0.85, 0.1)
+	if is_instance_valid(_pixel_font):
+		title_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(title_lbl)
+
+	# 成就名稱
+	var name_lbl = Label.new()
+	name_lbl.name = "AchName"
+	name_lbl.text = ""
+	name_lbl.position = Vector2(58, 26)
+	name_lbl.add_theme_font_size_override("font_size", 16)
+	name_lbl.modulate = Color.WHITE
+	if is_instance_valid(_pixel_font):
+		name_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(name_lbl)
+
+	# 成就描述
+	var desc_lbl = Label.new()
+	desc_lbl.name = "AchDesc"
+	desc_lbl.text = ""
+	desc_lbl.position = Vector2(58, 50)
+	desc_lbl.add_theme_font_size_override("font_size", 11)
+	desc_lbl.modulate = Color(0.8, 0.8, 0.8)
+	if is_instance_valid(_pixel_font):
+		desc_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(desc_lbl)
+
+func _on_achievement_unlocked(achievement_data: Dictionary) -> void:
+	_achievement_queue.append(achievement_data)
+	if not _achievement_showing:
+		_show_next_achievement()
+
+func _show_next_achievement() -> void:
+	if _achievement_queue.is_empty() or not is_instance_valid(_achievement_panel):
+		_achievement_showing = false
+		return
+
+	_achievement_showing = true
+	var data = _achievement_queue.pop_front()
+
+	# 更新面板內容
+	var icon_lbl = _achievement_panel.get_node_or_null("AchIcon")
+	var name_lbl = _achievement_panel.get_node_or_null("AchName")
+	var desc_lbl = _achievement_panel.get_node_or_null("AchDesc")
+
+	if icon_lbl:
+		icon_lbl.text = data.get("icon", "🏆")
+	if name_lbl:
+		name_lbl.text = data.get("name", "")
+	if desc_lbl:
+		desc_lbl.text = data.get("description", "")
+
+	# 播放音效（用 bonus_ready 音效）
+	AudioManager.play_sfx(AudioManager.SFX.BONUS_READY)
+
+	# 動畫：從右側滑入 → 停留 3 秒 → 滑出
+	_achievement_panel.modulate.a = 1.0
+	_achievement_panel.position.x = 1300.0  # 畫面外右側
+	_achievement_panel.visible = true
+
+	var tween = create_tween()
+	# 滑入（0.35 秒）
+	tween.tween_property(_achievement_panel, "position:x", 900.0, 0.35).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	# 停留 3 秒
+	tween.tween_interval(3.0)
+	# 滑出（0.3 秒）
+	tween.tween_property(_achievement_panel, "position:x", 1300.0, 0.3).set_ease(Tween.EASE_IN)
+	tween.tween_callback(func():
+		if is_instance_valid(_achievement_panel):
+			_achievement_panel.visible = false
+		# 顯示下一個成就（若佇列不空）
+		_show_next_achievement()
+	)

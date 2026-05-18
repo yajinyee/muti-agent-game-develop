@@ -28,6 +28,8 @@ const (
 	MsgBossEvent    MessageType = "boss_event"
 	MsgBonusEvent   MessageType = "bonus_event"
 	MsgPlayerUpdate MessageType = "player_update"
+	MsgLeaderboard  MessageType = "leaderboard"
+	MsgAchievement  MessageType = "achievement"
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -152,4 +154,30 @@ type BonusEventPayload struct {
 type ErrorPayload struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
+}
+
+// LeaderboardEntry 排行榜單筆記錄
+type LeaderboardEntry struct {
+	Rank        int    `json:"rank"`
+	PlayerID    string `json:"player_id"`
+	DisplayName string `json:"display_name"`
+	Score       int    `json:"score"`       // 本局累積獎勵
+	MaxCoins    int    `json:"max_coins"`   // 歷史最高金幣
+	KillCount   int    `json:"kill_count"`  // 本局擊破數
+	IsSelf      bool   `json:"is_self"`     // 是否為自己（Client 端標記用）
+}
+
+// LeaderboardPayload 排行榜廣播
+type LeaderboardPayload struct {
+	Entries   []LeaderboardEntry `json:"entries"`
+	Timestamp int64              `json:"timestamp"`
+}
+
+// AchievementPayload 成就解鎖通知
+type AchievementPayload struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	UnlockedAt  int64  `json:"unlocked_at"` // Unix milliseconds
 }

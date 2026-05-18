@@ -15,6 +15,8 @@ signal reward_received(reward: Dictionary)
 signal player_updated(player_data: Dictionary)
 signal boss_event(event_data: Dictionary)
 signal bonus_event(event_data: Dictionary)
+signal leaderboard_updated(entries: Array)
+signal achievement_unlocked(achievement_data: Dictionary)
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -68,6 +70,10 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_boss_event(payload)
 		"bonus_event":
 			_handle_bonus_event(payload)
+		"leaderboard":
+			_handle_leaderboard(payload)
+		"achievement":
+			_handle_achievement(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -111,9 +117,26 @@ func _handle_player_update(payload: Dictionary) -> void:
 
 func _handle_boss_event(payload: Dictionary) -> void:
 	emit_signal("boss_event", payload)
+	# BGM 切換：BOSS Phase 2 時切換到 boss_rage
+	var event = payload.get("event", "")
+	if event == "phase_change" and payload.get("phase", 1) == 2:
+		if AudioManager != null:
+			AudioManager.play_bgm(AudioManager.BGM.BOSS_RAGE)
+	elif event == "kill":
+		# BOSS 擊敗：短暫靜音，等 boss_result 狀態切換回主 BGM
+		if AudioManager != null:
+			AudioManager.stop_bgm_briefly()
 
 func _handle_bonus_event(payload: Dictionary) -> void:
 	emit_signal("bonus_event", payload)
+
+func _handle_leaderboard(payload: Dictionary) -> void:
+	var entries = payload.get("entries", [])
+	emit_signal("leaderboard_updated", entries)
+
+func _handle_achievement(payload: Dictionary) -> void:
+	print("[GameManager] Achievement unlocked: ", payload.get("name", ""))
+	emit_signal("achievement_unlocked", payload)
 
 func _handle_error(payload: Dictionary) -> void:
 	push_warning("[GameManager] Server error: " + str(payload))
@@ -151,3 +174,7 @@ func is_auto() -> bool:
 ## 取得鎖定目標 ID
 func get_lock_target_id() -> String:
 	return player_data.get("lock_target_id", "")
+
+## 取得玩家 ID（用於排行榜標記自己）
+func get_player_id() -> String:
+	return player_data.get("id", "")

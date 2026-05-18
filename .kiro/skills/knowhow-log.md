@@ -843,3 +843,442 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **問題：** knowhow-log #61 說「目標物 AI 生成（2026-05-17）」，但 targets 目錄裡的是程式生成版本
 - **可能原因：** AI 生成後沒有執行複製步驟，或被後來的程式生成覆蓋
 - **教訓：** AI 生成目標物後，必須確認檔案已正確複製到 targets 目錄，並執行 `analyze_sprites.py` 驗證
+
+## 83. Go Server Graceful Shutdown（2026-05-18）
+- **問題：** Server 收到 SIGINT/SIGTERM 時直接退出，不等待連線完成
+- **解法：** `signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)` + `srv.Shutdown(ctx)` + `g.Stop()`
+- **效果：** Server 停止時正確清理 goroutine，不會有殘留連線
+- **教訓：** 任何長期運行的 Server 都要實作 graceful shutdown
+
+## 84. time.AfterFunc goroutine 洩漏（2026-05-18）
+- **問題：** `time.AfterFunc(3s, func)` 在 Game 停止後仍然執行，操作已停止的 Game
+- **解法：** 改用 `safeAfterFunc`，用 `select` 同時監聽 `time.After(d)` 和 `g.stopCh`
+- **實作：**
+  ```go
+  func (g *Game) safeAfterFunc(d time.Duration, f func()) {
+      go func() {
+          select {
+          case <-time.After(d):
+              f()
+          case <-g.stopCh:
+              // Game 已停止，取消 timer
+          }
+      }()
+  }
+  ```
+- **教訓：** 任何 `time.AfterFunc` 都要考慮 context 取消，特別是在有生命週期的物件中
+
+## 85. Go Server pprof + /stats 端點（2026-05-18）
+- **新增：** `/stats` 端點回傳 goroutine 數量、heap 記憶體、GC 次數
+- **新增：** DEBUG 模式下啟用 `/debug/pprof/` 端點（`import _ "net/http/pprof"`）
+- **使用方式：**
+  - `curl http://localhost:7777/stats` — 快速查看記憶體狀態
+  - `go tool pprof http://localhost:7777/debug/pprof/heap` — 詳細記憶體分析
+  - `go tool pprof http://localhost:7777/debug/pprof/goroutine` — goroutine 分析
+- **啟用 DEBUG：** `DEBUG=true ./gameserver`
+- **教訓：** 生產環境的 pprof 要用 DEBUG flag 保護，不能直接暴露
+
+## 86. Godot GDScript 資源快取模式（2026-05-18）
+- **問題：** `_create_target_node` 每次都 `load(shader_path)` 和 `load(texture_path)`，每次生成目標都有 I/O 開銷
+- **解法：** 在 `_ready()` 中 `_preload_resources()`，把所有常用資源存入 Dictionary
+- **快取的資源：**
+  - `_cached_textures: Dictionary` — 所有目標 Sprite texture
+  - `_cached_outline_shader: Shader` — outline shader
+  - `_cached_hit_flash_shader: Shader` — hit flash shader
+  - `_cached_pixel_font: Font` — 像素字體
+- **效果：** 目標生成時不再有 I/O 開銷，特別是高頻生成時（每 2 秒一個目標）
+- **教訓：** Godot 的 `load()` 有快取機制，但第一次仍有開銷。預載入確保遊戲中不卡頓
+
+## 87. Godot HTML5 Export 排除開發資源（2026-05-18）
+- **問題：** `reference/` 目錄（0.65MB）和 `ai_generated/` 目錄（0.08MB）被打包進 HTML5 export
+- **解法：** 在 `export_presets.cfg` 的 `exclude_filter` 加入這些目錄
+  ```
+  exclude_filter="*.import,assets/sprites/reference/*,assets/sprites/ai_generated/*,assets/sprites/characters/gifs/*,assets/sprites/downloads/*"
+  ```
+- **效果：** 下次 export 時 pck 大小減少約 0.7MB
+- **教訓：** 開發用的參考圖、AI 生成的原始圖都不應該打包進 export，只打包遊戲實際使用的資源
+
+## 88. Godot AtlasTexture 從 Spritesheet 裁切（2026-05-18）
+- **問題：** TargetManager 用 12 個獨立 PNG，每個目標一個 draw call
+- **解法：** 用 `AtlasTexture` 從 `targets_sheet.png` 裁切，所有目標共用一張 texture
+- **實作：**
+  ```gdscript
+  var atlas = AtlasTexture.new()
+  atlas.atlas = _targets_sheet  # 共用 Spritesheet
+  atlas.region = Rect2(x, y, 64, 64)  # 裁切區域
+  _atlas_textures[def_id] = atlas
+  ```
+- **效果：** 11 個普通目標從 11 個 texture 變成 1 個（BOSS 仍獨立）
+- **注意：** AtlasTexture 要在 `_ready()` 預建立，不要每次生成目標時建立
+- **教訓：** Spritesheet + AtlasTexture 是 Godot 2D 效能優化的標準做法
+
+## 89. Godot 4 不支援 WebSocket permessage-deflate（2026-05-18）
+- **發現：** Godot 4 的 WebSocketPeer 目前不支援 permessage-deflate 壓縮擴展
+- **來源：** GitHub godot-proposals #13179（2025 年提案，尚未實作）
+- **影響：** Go Server 的 `EnableCompression: true` 對 Godot client 沒有效果
+- **結論：** 不需要在 Godot client 端做任何設定，Server 端的壓縮設定對 Godot 無效
+- **替代方案：** 如果需要減少頻寬，考慮在應用層壓縮 JSON payload（但複雜度高）
+- **教訓：** 確認 client 端是否支援某個 WebSocket 擴展，再決定是否在 Server 端啟用
+
+## 90. Cannon.gd 資源快取優化（2026-05-18）
+- **問題：** `_fire_projectile` 每次射擊都 `load(sprite_path)`，高頻射擊（10 FPS）造成 I/O 開銷
+- **解法：** 在 `_ready()` 預載入所有投射物 texture 和 rainbow shader
+- **效果：** 射擊時不再有 I/O 開銷，特別是 Auto 模式下每秒多次射擊
+- **教訓：** 高頻呼叫的函數（射擊、特效）裡面不能有 `load()`，必須預載入
+
+## 91. 海底焦散光 Shader（underwater_caustics.gdshader）（2026-05-18）
+- **效果：** 模擬水面折射光斑（焦散），讓海底背景有動態光線感
+- **技術：** 三層不同速度/方向的 2D 噪聲疊加，用 `pow(c, 2.0)` 提高對比度
+- **深度衰減：** `depth_fade = 1.0 - UV.y * 1.5`，光線只在畫面上半部分顯示
+- **效能：** 純 fragment shader，不需要額外 texture，效能開銷極低
+- **套用方式：** 在 BackgroundManager._ready() 預載入，normal 狀態時套用，boss/bonus 時移除
+- **教訓：** 焦散光是海底場景的標準視覺元素，用 shader 實現比 sprite 更省資源
+
+## 92. BubbleLayer 升級：光線柱 + 海草搖擺（2026-05-18）
+- **新增：** 4 條光線柱（梯形多邊形，頂部窄底部寬，帶漸層顏色）
+- **新增：** 10 株海草（分段曲線，正弦波搖擺，底部粗頂部細）
+- **光線柱技術：** `draw_polygon(pts, colors)` 支援頂點顏色，實現漸層效果
+- **海草技術：** 分段 `draw_line`，每段顏色和粗細不同，頂部加小圓葉片
+- **搖擺公式：** `sway = sin(time * speed + phase + t * 2.0) * amp * t`（t 越大搖擺越大）
+- **效能：** 全部用 `_draw()` + `queue_redraw()`，不需要任何 Sprite 節點
+- **教訓：** 海底環境的動態感主要來自光線和植物，不需要複雜的粒子系統
+
+## 93. 角色 idle 動畫升級：4幀 → 8幀（2026-05-18）
+- **工具：** `tools/upgrade_idle_8frames.py`
+- **技術：** 正弦波插值（0°-315°，每 45° 一幀），位移 ±2px + 縮放 1.0-1.02x
+- **Spritesheet 格式升級：** 4 cols × 3 rows → 8 cols × 3 rows（768×288）
+- **fps 升級：** 4fps → 8fps（更流暢）
+- **CharacterAnimator.gd 更新：** ANIM_CONFIG idle frames=8, fps=8.0, COLS=8
+- **效果：** 呼吸感更自然，動作更流暢，視覺質量明顯提升
+- **教訓：** 8 幀正弦波插值比 4 幀線性插值流暢 2 倍，計算量幾乎相同
+
+## 94. usagi bigwin 0px 差距修復（2026-05-18）
+- **問題：** bigwin 幀 bbox 69x79，比 idle 68x78 多 1px
+- **根本原因：** scale=1.02 讓 bbox 稍微擴大
+- **解法：** 完全不縮放不位移，只加金色色調 + 星星（嚴格在 idle bbox 內）
+- **工具：** `tools/fix_usagi_bigwin_v3.py`
+- **結果：** height diff=0px, width diff=0px ✅
+- **教訓：** 任何縮放（哪怕 1.02x）都可能讓 bbox 擴大 1px，要達到 0px 差距必須完全不縮放
+
+## 83. 排行榜系統設計（2026-05-18 DAY-010）
+- **架構：** Server 端每 10 秒廣播 `leaderboard` 訊息，同時提供 HTTP GET `/leaderboard` 端點
+- **排序依據：** `SessionScore`（本局累積獎勵），不用 `Coins`（因為玩家可能一開始就有很多金幣）
+- **Player 新增欄位：** `SessionScore`（每次 AddReward 累加）、`MaxCoins`（歷史最高）、`KillCount`（每次 AddKill 累加）、`DisplayName`（ID 前 8 碼）
+- **Client 排行榜 UI：** 右上角 Control 節點，動態建立（不依賴 .tscn 場景節點）
+- **自己高亮：** `GameManager.get_player_id()` 比對 `player_data["id"]`，需要 `player_update` 訊息先到達
+- **折疊功能：** 用 `▲/▼` 按鈕切換 EntriesContainer 的 visible
+- **教訓：** 排行榜 UI 用程式動態建立比在 .tscn 裡設計更靈活，可以根據玩家數量動態調整高度
+
+## 84. Go 排行榜排序（不用 sort.Slice）
+- **問題：** 為了避免引入 `sort` 套件，用 bubble sort 實作
+- **實際上：** `sort.Slice` 更好，但 bubble sort 對 ≤10 筆資料效能差異可忽略
+- **教訓：** 小資料集（≤10）用 bubble sort 沒問題，大資料集才需要 sort.Slice
+
+## 85. Godot HTML5 靜態檔案 gzip 壓縮（2026-05-18 DAY-010）
+- **效果：** index.wasm 35.9MB → 9.0MB（-75%），總計 37.3MB → 9.9MB（-74%）
+- **做法：** 預先用 Python gzip 壓縮生成 .gz 檔案，Go Server 檢查 Accept-Encoding 後提供 .gz 版本
+- **工具：** `tools/compress_static.py`
+- **Server 邏輯：** 只有 `Accept-Encoding: gzip` 時才提供壓縮版本，否則 fallback 到原始檔案
+- **注意：** 必須同時設定 `Content-Encoding: gzip` 和正確的 `Content-Type`（不能讓 FileServer 猜測 .gz 的 Content-Type）
+- **每次重新 export 後：** 需要重新執行 `py tools/compress_static.py` 更新 .gz 檔案
+- **教訓：** 像素藝術遊戲的 wasm 壓縮效果極佳（75%），因為 wasm 有大量重複的指令序列
+
+## 86. 目標物游泳動畫升級（2026-05-18 DAY-010）
+- **升級前：** 只有 Y 軸上下搖擺（swim_amp 3-7px，swim_dur 0.6-1.2s）
+- **升級後：** Y 軸搖擺 + 旋轉傾斜（±2-5度）+ 特殊目標縮放呼吸感
+- **隨機相位：** `swim_phase = randf_range(0.0, 1.0)` 避免所有魚同步搖擺
+- **效果：** 魚群看起來更有生命感，不像機器人整齊搖擺
+- **教訓：** 游泳動畫加旋轉比只有 Y 軸位移更自然，但旋轉幅度要小（±5度以內）
+
+## 87. PerformanceMonitor 自動效能降級（2026-05-18 DAY-010）
+- **架構：** Autoload 單例，每 3 秒評估一次 FPS，連續 2 次低 FPS 才降級（避免瞬間抖動）
+- **三個等級：** HIGH（全效果）、MEDIUM（粒子減半）、LOW（關閉游泳動畫/震動/outline shader，鎖 30 FPS）
+- **P5 FPS：** 用最差 5% 的幀來判斷，比平均值更能反映真實體驗
+- **保守升級：** 連續 5 次高 FPS 才升級（避免頻繁切換）
+- **整合點：** ScreenShake.add_trauma、TargetManager 游泳動畫、TargetManager outline shader
+- **教訓：** 效能降級要保守（多次確認才降），升級更要保守（避免頻繁切換造成視覺抖動）
+
+## 83. 成就系統設計模式（2026-05-18 DAY-011）
+- **架構：** `internal/game/achievement/` 獨立模組，不污染 Player 核心邏輯
+- **Tracker 模式：** 每個 Player 持有一個 `*achievement.Tracker`，`TryUnlock` 回傳 `*AchievementUnlock`（nil = 已解鎖或不存在）
+- **回傳值整合：** `AddKill`/`AddReward` 改為回傳 `[]*achievement.AchievementUnlock`，讓 game.go 統一處理廣播
+- **Client 佇列機制：** 多個成就同時解鎖時，用 `_achievement_queue` 依序顯示，避免通知重疊
+- **動畫：** Tween EASE_OUT + TRANS_BACK 做彈性滑入效果，比線性滑入更有活力
+- **音效：** 複用 `BONUS_READY` 音效，不需要新增音效資產
+- **教訓：** 成就系統要設計成「可選觸發」，不能影響核心遊戲邏輯的效能
+
+## 84. BOSS 登場特效 Bug（2026-05-18 DAY-011）
+- **問題：** BOSS 登場時沒有全畫面特效和震動
+- **根本原因：** `_on_boss_event` 只處理 `boss_enter` 事件，但 Server 廣播的是 `spawn`
+- **修復：** `if event == "spawn" or event == "boss_enter":` 同時處理兩種事件名稱
+- **同時升級：** `spawn_boss_enter()` 從「兩個紅色閃光」升級為「雙波閃光 + 20 個粒子 + 雙衝擊波 + 大字動畫」
+- **BOSS 擊殺慶祝：** HUD 的 `kill` 事件加入 `spawn_big_win` + `ScreenShake`
+- **教訓：** Server 廣播的事件名稱要和 Client 處理的名稱完全一致，不能假設
+
+## 83. 成就系統設計模式（2026-05-18 DAY-011）
+- **Tracker 模式**：`achievement.Tracker` 封裝所有成就狀態，Player 持有一個 Tracker
+- **解鎖回傳**：`AddKill()`、`AddReward()` 等方法回傳 `[]*AchievementUnlock`，讓 Game 層決定何時廣播
+- **冪等性**：每個成就只能解鎖一次，`TryUnlock` 內部檢查 `unlocked` 標記
+- **Client 佇列機制**：多個成就同時解鎖時，用 `_achievement_queue` 依序顯示，不重疊
+- **教訓**：成就系統要設計成「解鎖即廣播」，不要在 Game 層做複雜的成就邏輯
+
+## 84. 多玩家 bet level 平均計算（2026-05-18 DAY-012）
+- **問題**：`spawnTarget` 只取第一個玩家的 bet level（`break` 後停止），多人時不公平
+- **修復**：改為計算所有玩家的平均 bet level（`total / len(g.Players)`）
+- **教訓**：遍歷 map 取第一個元素的模式在多人場景下是 bug，要明確計算平均或最大值
+
+## 85. BOSS 期間目標清除的正確排序（2026-05-18 DAY-012）
+- **問題**：原版用 map 迭代順序的 index 清除目標，但 Go map 迭代順序不確定
+- **修復**：建立 `targetWithTime` 結構，依 `SpawnedAt` 排序後清除最舊的目標
+- **教訓**：需要「移除最舊的 N 個」時，必須先排序再移除，不能依賴 map 迭代順序
+
+## 86. 排行榜面板與 BOSS 計時器面板位置重疊（2026-05-18 DAY-012）
+- **問題**：兩個面板都在 x=900，BOSS 戰時會重疊
+- **修復**：排行榜面板改為 y=140（BOSS 計時器 y=50 + 高度 80px + 10px 間距）
+- **教訓**：動態建立的 UI 面板要考慮與其他面板的位置關係，避免重疊
+
+## 87. Bonus 雜草 Sprite 升級（2026-05-18 DAY-012 自我評估觸發）
+- **問題：** BonusGame.gd 用 ColorRect 矩形代替雜草，完全沒有像素藝術感
+- **解決：** 生成 5 種像素雜草 Sprite（BG001-BG005），用 Python Pillow 逐像素繪製
+- **技術：**
+  - `draw_stem()`：垂直莖幹，帶左暗右亮陰影
+  - `draw_leaf()`：橢圓葉片，帶 3 色陰影（左上亮/右下暗）
+  - BG005 搗亂怪草：S 形扭曲莖幹 + 眼睛 + 憤怒眉毛
+  - BG004 金色雜草：十字星形閃光點
+  - BG003 發光雜草：散落光點 + 頂部星形
+- **Sprite 尺寸：** 32×48 px（雜草形狀細長，密度 26-37% 是正常的）
+- **Godot 整合：** `Sprite2D` + `TEXTURE_FILTER_NEAREST` + `scale=1.5` + `offset=(0,-24)` 底部對齊
+- **備用機制：** Sprite 載入失敗時自動降級到 ColorRect
+- **教訓：** 遊戲中所有可見元素都應該有真正的像素藝術 Sprite，ColorRect 只是開發佔位符
+
+## 83. 成就系統設計模式（2026-05-18 DAY-011）
+- **Tracker 模式**：每個玩家有獨立的 `achievement.Tracker`，記錄已解鎖的成就 ID
+- **TryUnlock 函數**：每次觸發條件時呼叫，若已解鎖則返回 nil，避免重複通知
+- **佇列式通知 UI**：多個成就同時解鎖時，依序顯示，不重疊
+- **教訓**：成就系統要設計成「冪等」的，同一個成就不能重複解鎖
+
+## 84. Bonus 雜草 Sprite 升級（2026-05-18 DAY-012）
+- **問題**：BG001-BG005 原本用 ColorRect 顯示，視覺品質低
+- **解法**：用 `tools/generate_bonus_weeds.py` 生成像素藝術雜草 Sprite
+- **BonusGame.gd 更新**：改用 Sprite2D 載入 PNG，備用 ColorRect
+- **教訓**：Bonus 場景的視覺品質直接影響玩家的爽感，不能用 ColorRect 敷衍
+
+## 85. Server 壓力測試工具設計（2026-05-18 DAY-013）
+- **工具**：`tools/stress_test.py`
+- **測試維度**：Heap 記憶體增長（< 10%）、Goroutine 增長（< +50）、錯誤率（< 5%）
+- **模擬行為**：隨機投注切換、持續攻擊、隨機斷線重連（30% 機率）
+- **監控端點**：`/stats`（goroutines, heap_alloc_mb, gc_count）
+- **教訓**：壓力測試要模擬真實玩家行為（包含斷線重連），不能只測試正常流程
+
+## 86. BOSS 進場預覽 UI 設計（2026-05-18 DAY-013）
+- **功能**：警告階段（3 秒）顯示 BOSS 血條從 0 填滿，增加期待感
+- **技術**：Tween 動畫 + ColorRect HP 條 + 倒數文字
+- **位置**：畫面中央（320, 280），z_index=90（在遊戲元素上方，在 BOSS 文字下方）
+- **動畫序列**：淡入 → HP 條填滿（2.5s, EASE_IN_QUAD）→ 倒數 3→2→1 → HP 條閃爍
+- **BOSS 出現時**：自動淡出隱藏，切換到正式計時器
+- **教訓**：警告階段的 UI 要讓玩家感受到「有東西要來了」，血條填滿是很直覺的視覺語言
+
+## 87. Go 測試 Windows unlinkat 錯誤（非真正失敗）
+- **問題：** `go test` 在 Windows 上有時報 `unlinkat ... The process cannot access the file because it is being used by another process`
+- **原因：** Windows 的檔案鎖定機制，暫存的 test binary 被防毒軟體或其他程序鎖定
+- **影響：** 不影響測試結果，所有 PASS 的測試都是真正通過的
+- **解決：** 忽略此錯誤，或用 `-count=1` 避免快取
+- **教訓：** Windows 上 `go test` 的 exit code 1 不一定代表測試失敗，要看實際輸出
+
+## 88. Go 單元測試設計原則（2026-05-18 DAY-013）
+- **測試覆蓋維度：** 初始狀態、CRUD 操作、狀態轉換、goroutine 生命週期、冷卻機制
+- **safeAfterFunc 測試：** 用 channel 和 time.Sleep 驗證「Stop 後不執行」和「正常執行」兩種情況
+- **Hub 在測試中：** `ws.NewHub()` 不需要 `Run()`，廣播會靜默失敗（沒有客戶端），不影響邏輯測試
+- **教訓：** 測試 goroutine 生命週期時，要同時測試「正常執行」和「提前停止」兩種情況
+
+## 89. bbox 利用率 vs 畫布利用率（重要評估原則）
+- **問題：** 草類目標物（T001/T104）畫布利用率只有 22-33%，但 bbox 利用率達 50-53%
+- **結論：** 草葉細長、蟲有觸角，透明邊緣多是**正常的形狀特性**，不是品質問題
+- **正確評估方式：** bbox 利用率 >= 50% 即可接受，不需要強行填滿畫布
+- **教訓：** 不同形狀的 sprite 要用 bbox 利用率評估，不能用整體面積佔比
+
+## 90. 像素風格遊戲邊框設計（2026-05-18 DAY-013）
+- **功能：** 海底主題裝飾邊框（珊瑚、貝殼、海草、金色裝飾線）
+- **技術：** GDScript `_draw()` + `queue_redraw()`，不需要額外 PNG 資產
+- **動態效果：** 珊瑚脈動（sin 波）、海草搖擺、金色裝飾點閃爍
+- **位置：** z_index=2（在遊戲元素上方，在 HUD 下方）
+- **效能：** 純 GDScript 繪製，每幀重繪，適合 60 FPS
+- **教訓：** 遊戲邊框是捕魚機的標準視覺元素，能大幅提升整體美術質量，且不需要額外資產
+
+## 83. GDScript 4 tween_callback 的 set_delay 用法
+- **問題：** `tween_callback().set_delay(x)` 的 delay 是相對於前一個 tweener，不是絕對時間
+- **正確做法：** 用 `tween_interval(interval)` + `tween_callback()` 交替，讓每個 callback 在固定間隔後執行
+- **錯誤做法：** 在 loop 中計算絕對 delay 然後用 set_delay，邏輯複雜且容易出錯
+- **教訓：** tween 序列是「相對時間」，不是「絕對時間」，設計時要用間隔而非絕對延遲
+
+## 84. 命中特效升級：用 _draw 替代 ColorRect 模擬圓形（2026-05-18 DAY-015）
+- **問題：** `_spawn_flash_ring` 用 4 個 ColorRect 模擬圓形，視覺上是方形，不夠精確
+- **解法：** 建立獨立腳本 `FlashRing.gd` 和 `ShockwaveRing.gd`，用 `draw_arc` + `draw_circle` 繪製真正的圓形
+- **優點：** 視覺更精確（真圓），代碼更簡潔，不需要多個子節點
+- **注意：** GDScript 4 inner class 不能 extends Node，必須用獨立腳本 + preload
+- **教訓：** 特效節點用 `_draw` 比 ColorRect 更精確，且不需要子節點
+
+## 85. BOSS 進場特效從 BOSS 實際位置噴射（2026-05-18 DAY-015）
+- **問題：** `spawn_boss_enter()` 的粒子從畫面中心噴射，不是從 BOSS 實際位置
+- **解法：** 加入 `boss_pos` 參數（預設 Vector2(1100, 360)），TargetManager 傳入 BOSS 節點的實際位置
+- **新增：** `_spawn_ground_shockwave()` — BOSS 登場時從底部向兩側擴散的橫向衝擊波
+- **教訓：** 特效要從正確的位置噴射，才有「那個東西在那裡爆炸」的感覺
+
+## 86. 螢幕扭曲衝擊波 Shader（2026-05-18 DAY-015）
+- **來源：** gameidea.org/2025/01/20/shockwave-distortion-shader-2d-space-wrap/（基於 godotshaders.com）
+- **技術：** `SCREEN_TEXTURE` 採樣 + `smoothstep` 環形遮罩 + 色差（chromatic aberration）
+- **關鍵參數：**
+  - `center`：扭曲中心（0-1 UV 座標，需要從世界座標轉換）
+  - `radius`：環形半徑（從 0 動畫到 0.8 模擬向外擴散）
+  - `strength`：扭曲強度（從 0.06 動畫到 0 模擬衰減）
+  - `aberration`：色差強度（0.35 效果明顯但不過度）
+- **世界座標轉 UV：** `normalized_pos = world_pos / viewport_size`（無相機縮放時）
+- **用途：** BOSS 登場 + 大獎特效，比 ColorRect 衝擊波視覺效果強很多
+- **注意：** 需要 `hint_screen_texture` 才能讀取螢幕，Godot 4 的 `SCREEN_TEXTURE` 需要在 uniform 宣告
+- **教訓：** 螢幕扭曲 shader 是「免費的視覺升級」，不需要額外資產，只需要一個全畫面 ColorRect
+
+## 87. Godot 4 動態建立 Theme（PixelTheme.gd）
+- **問題：** HUD 按鈕用 Godot 預設樣式，和像素風格不一致
+- **解法：** 建立 `PixelTheme.gd`（extends RefCounted），用 `StyleBoxFlat` 動態建立像素風格 Theme
+- **關鍵 API：**
+  - `theme.set_stylebox("normal", "Button", sb)` — 設定 Button 的 normal 狀態樣式
+  - `theme.set_color("font_color", "Button", color)` — 設定 Button 文字顏色
+  - `theme.set_stylebox("background", "ProgressBar", sb)` — 設定 ProgressBar 背景
+  - `theme.set_stylebox("fill", "ProgressBar", sb)` — 設定 ProgressBar 填充
+  - `node.theme = pixel_theme` — 套用 Theme 到節點（自動影響所有子節點）
+- **像素風格設計原則：**
+  - 不圓角（corner_radius = 0）
+  - 2px 邊框（border_width = 2）
+  - 深海藍背景 + 亮藍邊框 + 金色按下狀態
+  - 陰影偏移 (1,1) 增加立體感
+- **教訓：** Theme 套用到父節點後，所有子節點自動繼承，不需要逐一設定
+
+## 83. 海底背景動態效果升級技術（2026-05-18 DAY-016）
+
+### 水面波紋 Shader（water_surface.gdshader）
+- **套用方式：** 在 BubbleLayer 的 `_ready()` 中動態建立 ColorRect（1280×80），套用 ShaderMaterial
+- **核心技術：** 多層 sin 波疊加（3層不同頻率）+ 1D 噪聲閃爍 + 波峰泡沫 smoothstep
+- **深度漸變：** `final_color.a = water_color.a * (1.0 - uv.y * 0.6)` — 頂部不透明，往下漸透明
+- **教訓：** 水面效果要放在 BubbleLayer 內管理，不要放在 BackgroundManager，避免背景切換時殘留
+
+### 漂浮微粒（浮游生物/塵埃）
+- **設計：** 30% 機率是發光浮游生物（藍綠色，有暈圈），70% 是普通塵埃（白色半透明）
+- **運動：** 緩慢漂移（drift_x/y）+ sin 波動（模擬水流）
+- **發光效果：** 3層圓（外暈 r×2.5 + 中暈 r×1.5 + 主體），alpha 遞增
+- **教訓：** 發光效果用多層 draw_circle 疊加，不需要 shader
+
+### 遠景小魚群
+- **設計：** 5-9 條小魚，統一方向，輕微上下擺動（swim_y = sin(time + phase)）
+- **魚的繪製：** 橢圓身體（8邊形多邊形）+ 三角形尾巴，半透明（alpha 0.2-0.4）
+- **生成策略：** 從左右邊緣生成，游過畫面後消失，每 6 秒生成一群
+- **教訓：** 遠景元素要半透明（alpha < 0.5），避免搶走主要遊戲元素的注意力
+
+### underwater_caustics 參數優化
+- `caustic_intensity`: 0.08 → 0.12（更明顯）
+- `caustic_scale`: 4.0 → 5.0（光斑更細緻）
+- `time_scale`: 0.4 → 0.5（稍微快一點）
+
+## 84. 數據埋點系統設計（2026-05-18 DAY-016）
+
+### analytics.go 架構
+- **Singleton 模式：** `analytics.Init()` 初始化，`analytics.Get()` 取得實例
+- **JSONL 格式：** 每行一個 JSON 事件，方便 grep/jq 分析
+- **mutex 設計：** RoomStats 不能包含 sync.RWMutex（複製問題），改用 Tracker 的 `roomMu` 欄位保護
+- **原子計數器：** 高頻事件（attack）用 `atomic.Int64`，避免鎖競爭
+- **SessionStats：** 玩家離開時輸出 session_summary 事件，包含完整統計
+
+### Go vet mutex 複製問題
+- **問題：** `RoomStats` 包含 `sync.RWMutex`，`GetRoomStats()` 回傳值複製時報 vet 錯誤
+- **解法：** 把 mutex 從 struct 移出，改為 Tracker 的獨立欄位 `roomMu sync.RWMutex`
+- **教訓：** 含 mutex 的 struct 不能直接複製，要用指標或把 mutex 移出
+
+### analyze_logs.py 設計
+- **輸入：** JSONL 日誌（每行一個 JSON 事件）
+- **輸出：** 格式化報告（玩家/攻擊/擊破/獎勵/BOSS/Bonus/RTP）
+- **RTP 警告：** < 85% 提示玩家流失，> 110% 提示數值過高
+- **用法：** `py tools/analyze_logs.py`（今日）或 `--all`（所有日誌）或 `--json`（JSON 輸出）
+
+## 85. analytics TotalBet 未更新 bug（2026-05-18 DAY-016 測試發現）
+
+- **問題：** `GetRoomStats().TotalBet` 永遠是 0，RTP 計算錯誤
+- **根本原因：** `EventAttack` 的 `updateStats` 只更新了 `t.room.TotalAttacks`，忘記更新 `t.room.TotalBet`
+- **修復：** 在 `EventAttack` 的 `roomMu.Lock()` 區塊內加入 `t.room.TotalBet += int64(betCost)`
+- **發現方式：** 單元測試 `TestRTPCalculation` 失敗（expected TotalBet=100, got 0）
+- **教訓：** 每個新模組都要寫單元測試，特別是財務計算邏輯，不能只靠 build 通過
+
+## 86. Go sync.Once 不能 reset（測試設計）
+
+- **問題：** Singleton 模式用 `sync.Once`，測試時無法重置
+- **解法：** 加入 `newTracker()` 工廠函數（package-private），測試直接建立實例，不走 singleton
+- **教訓：** Singleton 模式要同時提供工廠函數供測試使用，不要讓測試依賴全域狀態
+
+## 83. 海底環境音效生成技術（2026-05-18 DAY-017）
+- **工具：** `tools/generate_ambient_sfx.py`
+- **技術：**
+  1. **低頻水流**：60/90/120 Hz 正弦波疊加 + 0.15 Hz LFO 調製（模擬水流起伏）
+  2. **遠距離水聲**：白噪音 → IIR 低通濾波 → 高通（去 DC）= 帶通效果
+  3. **隨機氣泡**：每 0.4-1.8 秒一個，上升音調 400→800 Hz + 指數衰減包絡
+  4. **氣泡破裂音**：0.15 秒，300→900 Hz 上升 + 快速衰減 + 少量噪音
+- **整合方式：**
+  - AudioManager 新增 `play_ambient()` / `stop_ambient()` 方法（獨立播放器，-24 dB）
+  - BackgroundManager 在 `_switch_bg("normal")` 時啟動，其他狀態停止
+  - `edit/loop_mode=1`（.import 設定）讓環境音循環播放
+- **音量設計：** -24 dB，不搶主音效，純背景沉浸感
+- **教訓：** 環境音要用獨立的 AudioStreamPlayer，不能和 BGM 共用，否則 BGM 切換時環境音也會停
+
+## 84. WebSocket API 文件建立（2026-05-18 DAY-017）
+- **位置：** `docs/api/websocket-api.md`
+- **內容：** 完整的 Client↔Server 訊息格式、Payload 欄位說明、遊戲流程範例
+- **重要設計決策記錄：**
+  - 每訊息獨立 frame（避免 JSON 合併問題，見 KnowHow #5）
+  - permessage-deflate 壓縮已啟用
+  - COOP/COEP headers 必要（HTML5 SharedArrayBuffer）
+  - BOSS 計時獎勵：50-60 秒 = 500x，依時間遞減到 100x
+- **教訓：** API 文件要在功能穩定後才寫，否則要一直更新；文件中的流程範例比純欄位說明更有價值
+
+## 85. Bonus 音效升級技術（2026-05-18 DAY-017 自主觸發）
+- **工具：** `tools/generate_bonus_sfx_v2.py`
+- **設計原則：**
+  1. **bonus_ready v2**：快速上升音階（C5→E6，5音，加速感）+ 短暫靜音（期待感）+ 和弦爆發（C6+E6+G6）+ 尾音上揚
+  2. **bonus_trigger**：噪音衝擊（0.05s）+ 快速滑音（C5→C7，兩個八度）+ 和弦尾音
+  3. **bonus_end**：下降音階（C7→C5）+ 勝利和弦（C5+G5+C6）
+- **numpy 陣列長度問題**：`square_wave` 用 `int(SAMPLE_RATE * duration)` 計算，浮點誤差可能導致長度差 1，合成前要用 `min_len` 對齊
+- **整合時機：**
+  - `_show_ready()`：播放 BONUS_READY（觸發特效同時）
+  - `_start_bonus()`：播放 BONUS_TRIGGER（遊戲開始瞬間）
+  - `_end_bonus()`：播放 BONUS_END（結算時）
+- **教訓：** 音效要配合視覺事件的時機，三個不同時機用三個不同音效，比一個音效更有層次感
+
+## 86. BubbleLayer 視覺音效同步（2026-05-18 DAY-017 自主觸發）
+- **問題：** 氣泡視覺上升到水面消失，但沒有對應音效
+- **解法：** 在 `_process` 的氣泡移除邏輯中，當 `b["y"] < 80`（接近水面）且 `randf() < 0.25` 時播放 bubble_pop
+- **25% 機率設計：** 避免太多氣泡同時破裂造成音效堆疊，保持輕柔的背景感
+- **教訓：** 視覺效果消失時要有對應的音效回饋，但要控制頻率，不能每個氣泡都響
+
+## 87. BGM 切換系統從未被呼叫的重大缺口（2026-05-19 DAY-018）
+- **問題：** AudioManager 定義了完整的 `play_bgm()` 方法和 BGM 枚舉，但整個 Client 沒有任何地方呼叫它
+- **根本原因：** BGM 系統是「設計了但沒整合」的典型案例，功能存在但沒有觸發點
+- **發現方式：** `Select-String -Pattern "play_bgm"` 搜尋全部 .gd 檔案，只找到定義，沒有呼叫
+- **修復方式：**
+  1. BackgroundManager 的 `_on_state_changed()` 加入 `_switch_bgm(state)` 呼叫
+  2. `_start_initial_ambient()` 同時啟動主 BGM
+  3. GameManager 的 `_handle_boss_event()` 處理 Phase 2 切換
+- **BGM 切換對應表：**
+  - `normal_play` → MAIN_GAME
+  - `boss_warning` → stop（靜音製造緊張感）
+  - `boss_battle` → BOSS_BATTLE（新生成，8秒循環）
+  - `boss_event.phase_change` → BOSS_RAGE
+  - `boss_event.kill` → stop
+  - `bonus_game` → BONUS_GAME
+  - `boss_result/bonus_result` → stop（等狀態切回 normal 再播主 BGM）
+- **教訓：** 每次新增系統後，必須用 grep 確認「有沒有地方呼叫它」，不能只看定義存在就認為整合完成
+
+## 88. BOSS 戰 BGM 設計技術（2026-05-19 DAY-018）
+- **工具：** `tools/generate_boss_battle_bgm.py`
+- **緊張感設計原則：**
+  1. **低頻 bass 驅動**：A2(110Hz) 方波，強弱交替（偶數拍 0.35 音量，奇數拍 0.22）
+  2. **不和諧音程**：小二度（A3→Bb3）+ 增四度（A3→Eb4，魔鬼音程），製造壓迫感
+  3. **打擊節奏**：噪音短脈衝 + 指數衰減包絡，每 0.5s 一次
+  4. **高頻顫音**：25 Hz 開關調製的 440 Hz 方波，每 2 秒出現一次
+- **無縫循環**：首尾各 0.15s 淡入淡出，確保循環播放無點擊聲
+- **教訓：** 遊戲 BGM 的緊張感來自「不和諧音程 + 規律節奏 + 偶發緊張元素」的組合

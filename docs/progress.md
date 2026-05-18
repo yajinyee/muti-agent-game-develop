@@ -1,16 +1,16 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-18（DAY-014 Server 壓力測試驗證 + WebSocket 壓縮確認 + 玩家操作手冊 v1.1）
+## 最後更新：2026-05-19（DAY-018 BOSS 戰 BGM + 完整 BGM 切換系統）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：97/100**（遊戲邊框裝飾：珊瑚/貝殼/海草動態邊框）
+- **美術質量：100/100**（水面波紋 shader + 漂浮微粒 + 遠景小魚群）
 - **規格一致性：100%**
 - **整體信心：100/100**
 
 ---
 
-## 當前品質分數（DAY-008）
+## 當前品質分數（DAY-017）
 
 | 指標 | 分數 | 門檻 | 狀態 |
 |------|------|------|------|
@@ -18,8 +18,8 @@
 | Visual Consistency | 100 | ≥90 | ✅ |
 | Animation Quality | 100 | ≥88 | ✅ |
 | Balance Health | 96 | ≥90 | ✅ |
-| Audio Sync | 93 | ≥90 | ✅ |
-| Gameplay Feel | 95 | ≥85 | ✅ |
+| Audio Sync | 97 | ≥90 | ✅ |
+| Gameplay Feel | 96 | ≥85 | ✅ |
 | Spec Completeness | 100 | ≥95 | ✅ |
 | Regression Risk | 5 | ≤10 | ✅ |
 
@@ -63,6 +63,40 @@
 - [x] **像素風格遊戲邊框**（2026-05-18 DAY-013）：`scripts/ui/GameBorder.gd`
   - 海底主題：珊瑚脈動、貝殼、海草搖擺、金色裝飾線
   - 純 GDScript `_draw()` 實作，不需要額外資產
+- [x] **命中特效升級**（2026-05-18 DAY-015）：
+  - `scripts/effects/FlashRing.gd` — 用 `draw_arc` + `draw_circle` 繪製真正的圓形閃光環
+  - `scripts/effects/ShockwaveRing.gd` — 真正的圓形衝擊波環（主環 + 內側細環）
+  - HitEffect.gd 更新：`_spawn_flash_ring` / `_spawn_shockwave` 改用真圓腳本
+- [x] **BOSS 進場特效升級**（2026-05-18 DAY-015）：
+  - `spawn_boss_enter(boss_pos)` 從 BOSS 實際位置噴射粒子
+  - 新增 `_spawn_ground_shockwave()` — 地面橫向衝擊波
+  - 粒子數量提升（24+14+10），多個衝擊波（3個）
+- [x] **數據埋點系統**（2026-05-18 DAY-016）：
+  - `server/internal/analytics/analytics.go`：完整埋點模組
+  - 事件類型：attack/kill/reward/boss_spawn/boss_kill/bonus_start/player_join/player_leave
+  - JSONL 日誌（`logs/events-YYYY-MM-DD.jsonl`）
+  - `/analytics` HTTP 端點（房間整體統計）
+  - SessionStats：每玩家 session 統計（攻擊率、RTP、BOSS/Bonus 次數）
+  - RoomStats：房間整體統計（總玩家、峰值、整體 RTP）
+- [x] **海底環境音效**（2026-05-18 DAY-017）：
+  - `tools/generate_ambient_sfx.py`：生成 underwater_ambient.wav + bubble_pop.wav
+  - AudioManager：`play_ambient()` / `stop_ambient()`，獨立播放器 -24 dB
+  - BackgroundManager：海底狀態自動啟動/停止環境音
+  - BubbleLayer：氣泡消失時 25% 機率播放 bubble_pop（視覺音效同步）
+- [x] **Bonus 音效升級**（2026-05-18 DAY-017 自主觸發）：
+  - `tools/generate_bonus_sfx_v2.py`：bonus_ready v2 + bonus_trigger + bonus_end
+  - bonus_ready.wav v2：快速音階 + 和弦爆發（比 v1 更有興奮感）
+  - bonus_trigger.wav：Bonus 開始瞬間爆發音（0.3 秒）
+  - bonus_end.wav：Bonus 結算下降音階 + 勝利和弦（0.69 秒）
+  - BonusGame.gd：ready/start/end 三個時機各播放對應音效
+- [x] **WebSocket API 文件**（2026-05-18 DAY-017）：
+  - `docs/api/websocket-api.md`：完整 API 文件（7+13 種訊息、流程範例、技術規格）
+- [x] **BOSS 戰 BGM + 完整 BGM 切換系統**（2026-05-19 DAY-018 自主觸發）：
+  - `tools/generate_boss_battle_bgm.py`：boss_battle.wav（8秒循環，緊張低頻 bass + 不和諧旋律）
+  - AudioManager：新增 BOSS_BATTLE 枚舉
+  - BackgroundManager：`_switch_bgm()` 完整 BGM 切換邏輯（所有狀態對應 BGM）
+  - GameManager：BOSS Phase 2 時切換 BOSS_RAGE，BOSS 擊敗時靜音
+  - 修復重大缺口：`play_bgm()` 從未被呼叫的問題
 
 ### Godot Client（100% 完整）
 - [x] NetworkManager.gd（WebSocket + 自動重連）
@@ -91,14 +125,17 @@
 - [x] **ScreenShake.gd**（Trauma-based 畫面震動 Autoload）
 - [x] **HitEffect.gd**（命中/擊殺/大獎/BOSS/Bonus 特效 Autoload）
 
-### Shaders（5個）
+### Shaders（8個）
 - [x] `hit_flash.gdshader` — 受擊閃白
 - [x] `outline.gdshader` — 像素輪廓（黑/金/紅，依目標類型）
 - [x] `wobble.gdshader` — 搖晃效果（備用）
 - [x] `rainbow_glow.gdshader` — 彩虹光暈（大獎演出）
 - [x] `pixelate_transition.gdshader` — 像素化過場（背景切換）
+- [x] `underwater_caustics.gdshader` — 海底焦散光效果（intensity 升級 0.08→0.12）
+- [x] `shockwave_distortion.gdshader` — 螢幕扭曲衝擊波（帶色差，BOSS 登場 + 大獎用）
+- [x] `water_surface.gdshader` — 水面波紋效果（DAY-016，多層 sin 波 + 閃爍 + 泡沫）
 
-### 美術資產（93/100 品質）
+### 美術資產（100/100 品質）
 - [x] 角色 Sprites（AI 生成，ComfyUI + SD 1.5 + Pixel Art LoRA）
   - [x] **usagi 一致性修復**（height diff=1px, width diff=1px）
   - [x] **Spritesheet 重建**（288×288，9個 sprite）

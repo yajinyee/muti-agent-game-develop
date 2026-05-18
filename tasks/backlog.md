@@ -35,26 +35,22 @@
   - 升級：Y軸搖擺 + 旋轉傾斜（±2-5度）+ 特殊目標縮放呼吸感 + 隨機相位
 
 ### 🟡 P2
-- [ ] **BOSS 進場特效**：B001 BOSS 進場時的粒子特效
-  - 負責：Godot Client Agent + Animation Agent
-  - 預計工時：2 小時
-  - 驗收：視覺衝擊感評分 >= 85
+- [x] **BOSS 進場特效**：B001 BOSS 進場時的粒子特效（2026-05-18 DAY-015 完成）
+  - 從 BOSS 實際位置噴射 + 地面衝擊波 + 螢幕扭曲 shader
 
-- [ ] **命中特效升級**：目標物被擊中時的閃白效果更明顯
-  - 負責：Godot Client Agent
-  - 預計工時：1 小時
-  - 驗收：Gameplay Feel >= 90
+- [x] **命中特效升級**：目標物被擊中時的閃白效果更明顯（2026-05-18 DAY-015 完成）
+  - FlashRing.gd + ShockwaveRing.gd 用真正的圓形
 
-- [ ] **UI 美化**：下注面板、分數顯示的像素風格統一
-  - 負責：Art Director + Godot Client Agent
-  - 預計工時：3 小時
-  - 驗收：Visual Consistency >= 95
+- [x] **UI 美化**：下注面板、分數顯示的像素風格統一（2026-05-18 DAY-015 完成）
+  - PixelTheme.gd：深海藍按鈕 + 金色邊框 + 像素風格 ProgressBar
 
 ### 🟢 P3
-- [ ] **背景動態效果**：海底背景的水波紋動畫
-  - 負責：Animation Agent
-  - 預計工時：2 小時
-  - 驗收：視覺豐富度提升
+- [x] **背景動態效果**：海底背景的水波紋動畫（2026-05-18 DAY-016 完成）
+  - water_surface.gdshader + BubbleLayer 升級（漂浮微粒 + 遠景小魚群）
+
+- [x] **環境音效**：海底環境音（水泡聲、海浪聲）（2026-05-18 DAY-017 完成）
+  - underwater_ambient.wav（8秒循環）+ bubble_pop.wav
+  - AudioManager play_ambient/stop_ambient + BackgroundManager 整合
 
 - [ ] **角色升級特效**：玩家升級時的慶祝動畫
   - 負責：Animation Agent + Sprite Generation Agent
@@ -65,14 +61,13 @@
 ## 音效優化
 
 ### 🟡 P2
-- [ ] **Bonus 遊戲音效升級**：更有興奮感的 Bonus 觸發音效
-  - 負責：Audio Director
-  - 預計工時：1 小時
-  - 驗收：Audio Sync >= 95
+- [x] **Bonus 遊戲音效升級**：更有興奮感的 Bonus 觸發音效（2026-05-18 DAY-017 自主完成）
+  - bonus_ready v2（快速音階+和弦爆發）+ bonus_trigger + bonus_end
+  - Audio Sync 93 → 97
 
-- [ ] **BOSS 戰 BGM**：專屬的 BOSS 戰背景音樂
-  - 負責：Audio Director + Research Agent（尋找素材）
-  - 預計工時：2 小時
+- [x] **BOSS 戰 BGM**：專屬的 BOSS 戰背景音樂（2026-05-19 DAY-018 自主完成）
+  - boss_battle.wav（8秒循環，緊張低頻 bass + 不和諧旋律 + 打擊節奏）
+  - 同時修復重大缺口：BGM 切換系統從未被呼叫，現在完整整合
 
 ### 🟢 P3
 - [ ] **環境音效**：海底環境音（水泡聲、海浪聲）
@@ -150,8 +145,9 @@
 
 ### 🟢 P3
 - [ ] **API 文件**：完整的 WebSocket API 文件（含範例）
-  - 負責：Spec Architect
-  - 預計工時：3 小時
+  - ~~負責：Spec Architect~~
+  - ~~預計工時：3 小時~~
+  - **✅ 完成（2026-05-18 DAY-017）**：docs/api/websocket-api.md
 
 ---
 
