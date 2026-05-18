@@ -102,10 +102,10 @@
   - 實作：12 個成就、Tracker 模式、佇列式通知 UI
 
 ### 🟢 P3
-- [ ] **觀戰模式**：允許玩家觀看其他玩家的遊戲
-  - 負責：Go Server Agent + Godot Client Agent
-  - 預計工時：8 小時
-  - 依賴：多人房間系統
+- [x] **觀戰模式**：允許玩家觀看其他玩家的遊戲（DAY-023/024 完成）
+  - Server：`/spectate` WebSocket 端點、`/spectate/snapshot` HTTP 端點、ClientRole 分離
+  - Client：LobbyManager 觀戰按鈕、NetworkManager spectate_room()、HUD 觀戰標籤
+  - 7 個單元測試全部通過
 
 ---
 
