@@ -530,28 +530,26 @@ func _play_mimic_death(node: Node2D, kill_pos: Vector2, reward: int, multiplier:
 
 ## T105 金幣魚擊破後金幣雨（規格書 26.2）
 func _spawn_coin_rain(origin: Vector2) -> void:
-	# 生成 15 枚金幣從擊破位置散落
-	for i in 15:
-		var coin = ColorRect.new()
-		coin.size = Vector2(10, 10)
-		coin.color = Color(1.0, 0.85, 0.0)  # 金色
+	# 生成 18 枚金幣從擊破位置散落（升級版：用 Node2D + _draw 繪製真實金幣）
+	for i in 18:
+		var coin = _create_pixel_coin()
 		coin.position = origin + Vector2(randf_range(-20, 20), randf_range(-10, 10))
 		add_child(coin)
 
-		# 拋物線軌跡
-		var target_x = origin.x + randf_range(-120, 120)
-		var target_y = origin.y + randf_range(80, 200)
-		var peak_y = origin.y - randf_range(60, 120)
+		# 拋物線軌跡（更自然的弧線）
+		var target_x = origin.x + randf_range(-150, 150)
+		var target_y = origin.y + randf_range(100, 220)
+		var peak_y = origin.y - randf_range(70, 140)
+		var mid_x = origin.x + (target_x - origin.x) * 0.5
 
-		var tween = create_tween()
-		# 上升
-		tween.tween_property(coin, "position", Vector2(
-			origin.x + (target_x - origin.x) * 0.5,
-			peak_y
-		), 0.25)
-		# 下落
-		tween.tween_property(coin, "position", Vector2(target_x, target_y), 0.35)
-		tween.parallel().tween_property(coin, "modulate:a", 0.0, 0.35)
+		var tween = coin.create_tween()
+		# 上升（帶旋轉）
+		tween.tween_property(coin, "position", Vector2(mid_x, peak_y), 0.22).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(coin, "rotation_degrees", randf_range(90, 270), 0.22)
+		# 下落（加速）
+		tween.tween_property(coin, "position", Vector2(target_x, target_y), 0.32).set_ease(Tween.EASE_IN)
+		tween.parallel().tween_property(coin, "rotation_degrees", randf_range(360, 540), 0.32)
+		tween.parallel().tween_property(coin, "modulate:a", 0.0, 0.32)
 		tween.tween_callback(func():
 			if is_instance_valid(coin):
 				coin.queue_free()
@@ -559,6 +557,29 @@ func _spawn_coin_rain(origin: Vector2) -> void:
 
 	# 播放金幣音效
 	AudioManager.play_sfx(AudioManager.SFX.COIN_DROP)
+
+## 建立像素金幣節點（用 _draw 繪製帶高光的金幣）
+func _create_pixel_coin() -> Node2D:
+	var coin = Node2D.new()
+	coin.z_index = 12
+
+	# 用 script 動態繪製金幣
+	var script = GDScript.new()
+	script.source_code = """
+extends Node2D
+func _draw():
+	# 金幣主體（金色圓形）
+	draw_circle(Vector2.ZERO, 6.0, Color(1.0, 0.82, 0.0))
+	# 金幣邊框（深金色）
+	draw_arc(Vector2.ZERO, 6.0, 0.0, TAU, 16, Color(0.75, 0.55, 0.0), 1.5)
+	# 高光（左上角白色小圓）
+	draw_circle(Vector2(-2.0, -2.0), 1.8, Color(1.0, 1.0, 0.9, 0.8))
+	# 中心 ¥ 符號（用小矩形模擬）
+	draw_rect(Rect2(-1.0, -2.5, 2.0, 5.0), Color(0.75, 0.55, 0.0, 0.7))
+	draw_rect(Rect2(-3.0, -0.5, 6.0, 1.0), Color(0.75, 0.55, 0.0, 0.7))
+"""
+	coin.set_script(script)
+	return coin
 
 ## 生成死亡粒子
 func _spawn_death_particles(pos: Vector2) -> void:
