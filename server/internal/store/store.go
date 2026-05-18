@@ -1,13 +1,18 @@
-// Package store 玩家狀態持久化層（DAY-026）
+// Package store 玩家狀態持久化層（DAY-026/028）
 // 支援 Redis 持久化和記憶體降級兩種模式
 // 設計原則：Redis 不可用時自動降級到記憶體模式，不中斷服務
 package store
 
 import (
+	"context"
+	"encoding/json"
 	"fmt"
 	"log"
+	"sort"
 	"sync"
 	"time"
+
+	"github.com/redis/go-redis/v9"
 )
 
 // PlayerState 玩家持久化狀態
@@ -89,8 +94,8 @@ func (m *MemoryStore) SavePlayer(state *PlayerState) error {
 	defer m.mu.Unlock()
 	state.LastSeen = time.Now()
 	// 深拷貝避免外部修改
-	copy := *state
-	m.players[state.PlayerID] = &copy
+	cp := *state
+	m.players[state.PlayerID] = &cp
 	return nil
 }
 
@@ -101,8 +106,8 @@ func (m *MemoryStore) LoadPlayer(playerID string) (*PlayerState, error) {
 	if !ok {
 		return nil, nil // 找不到不是錯誤
 	}
-	copy := *state
-	return &copy, nil
+	cp := *state
+	return &cp, nil
 }
 
 func (m *MemoryStore) DeletePlayer(playerID string) error {
@@ -116,7 +121,6 @@ func (m *MemoryStore) GetTopPlayers(n int) ([]*PlayerState, error) {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 
-	// 簡單排序：找前 N 名
 	type entry struct {
 		playerID string
 		score    int64
@@ -126,13 +130,9 @@ func (m *MemoryStore) GetTopPlayers(n int) ([]*PlayerState, error) {
 		entries = append(entries, entry{pid, score})
 	}
 	// 排序（降序）
-	for i := 0; i < len(entries)-1; i++ {
-		for j := i + 1; j < len(entries); j++ {
-			if entries[j].score > entries[i].score {
-				entries[i], entries[j] = entries[j], entries[i]
-			}
-		}
-	}
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].score > entries[j].score
+	})
 
 	result := make([]*PlayerState, 0, n)
 	for i, e := range entries {
@@ -140,8 +140,8 @@ func (m *MemoryStore) GetTopPlayers(n int) ([]*PlayerState, error) {
 			break
 		}
 		if state, ok := m.players[e.playerID]; ok {
-			copy := *state
-			result = append(result, &copy)
+			cp := *state
+			result = append(result, &cp)
 		}
 	}
 	return result, nil
@@ -165,61 +165,155 @@ func (m *MemoryStore) IsRedis() bool {
 }
 
 // RedisStore Redis 模式（生產環境用）
-// 注意：需要安裝 github.com/redis/go-redis/v9
-// 目前為骨架實作，待 Phase 2 完整實作
+// 使用 github.com/redis/go-redis/v9
+// Key 設計：
+//   player:{id}              → Hash（玩家狀態 JSON）
+//   leaderboard:daily:{date} → Sorted Set（分數排行）
+//   player:{id}:ttl          → 7 天 TTL
 type RedisStore struct {
-	url string
-	// client *redis.Client  ← Phase 2 取消注釋
+	client *redis.Client
+	url    string
 }
 
-// NewRedisStore 建立 Redis Store
-// Phase 2 實作：連線 Redis，驗證連線
-func NewRedisStore(url string) (*RedisStore, error) {
-	// TODO Phase 2：
-	// opt, err := redis.ParseURL(url)
-	// if err != nil {
-	//     return nil, fmt.Errorf("invalid redis URL: %w", err)
-	// }
-	// client := redis.NewClient(opt)
-	// ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	// defer cancel()
-	// if err := client.Ping(ctx).Err(); err != nil {
-	//     return nil, fmt.Errorf("redis ping failed: %w", err)
-	// }
-	// return &RedisStore{url: url, client: client}, nil
+const (
+	playerKeyPrefix    = "player:"
+	leaderboardKeyFmt  = "leaderboard:daily:%s"
+	playerTTL          = 7 * 24 * time.Hour
+	leaderboardTTL     = 30 * 24 * time.Hour
+	redisTimeout       = 3 * time.Second
+)
 
-	// 目前骨架：直接回傳錯誤，讓呼叫者降級到 MemoryStore
-	return nil, fmt.Errorf("redis store not yet implemented (Phase 2), use REDIS_URL='' to use memory store")
+// NewRedisStore 建立 Redis Store，驗證連線
+func NewRedisStore(url string) (*RedisStore, error) {
+	opt, err := redis.ParseURL(url)
+	if err != nil {
+		return nil, fmt.Errorf("invalid redis URL: %w", err)
+	}
+
+	client := redis.NewClient(opt)
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := client.Ping(ctx).Err(); err != nil {
+		client.Close()
+		return nil, fmt.Errorf("redis ping failed: %w", err)
+	}
+
+	return &RedisStore{client: client, url: url}, nil
+}
+
+func (r *RedisStore) playerKey(playerID string) string {
+	return playerKeyPrefix + playerID
+}
+
+func (r *RedisStore) leaderboardKey() string {
+	return fmt.Sprintf(leaderboardKeyFmt, time.Now().Format("2006-01-02"))
 }
 
 func (r *RedisStore) SavePlayer(state *PlayerState) error {
-	// TODO Phase 2：HMSET player:{id} ...
-	return fmt.Errorf("not implemented")
+	state.LastSeen = time.Now()
+	data, err := json.Marshal(state)
+	if err != nil {
+		return fmt.Errorf("marshal player state: %w", err)
+	}
+
+	ctx, cancel := context.WithTimeout(context.Background(), redisTimeout)
+	defer cancel()
+
+	key := r.playerKey(state.PlayerID)
+	pipe := r.client.Pipeline()
+	pipe.Set(ctx, key, data, playerTTL)
+	_, err = pipe.Exec(ctx)
+	if err != nil {
+		return fmt.Errorf("redis save player %s: %w", state.PlayerID, err)
+	}
+	return nil
 }
 
 func (r *RedisStore) LoadPlayer(playerID string) (*PlayerState, error) {
-	// TODO Phase 2：HGETALL player:{id}
-	return nil, fmt.Errorf("not implemented")
+	ctx, cancel := context.WithTimeout(context.Background(), redisTimeout)
+	defer cancel()
+
+	data, err := r.client.Get(ctx, r.playerKey(playerID)).Bytes()
+	if err == redis.Nil {
+		return nil, nil // 找不到不是錯誤
+	}
+	if err != nil {
+		return nil, fmt.Errorf("redis load player %s: %w", playerID, err)
+	}
+
+	var state PlayerState
+	if err := json.Unmarshal(data, &state); err != nil {
+		return nil, fmt.Errorf("unmarshal player state: %w", err)
+	}
+	return &state, nil
 }
 
 func (r *RedisStore) DeletePlayer(playerID string) error {
-	// TODO Phase 2：DEL player:{id}
-	return fmt.Errorf("not implemented")
+	ctx, cancel := context.WithTimeout(context.Background(), redisTimeout)
+	defer cancel()
+
+	if err := r.client.Del(ctx, r.playerKey(playerID)).Err(); err != nil {
+		return fmt.Errorf("redis delete player %s: %w", playerID, err)
+	}
+	return nil
 }
 
 func (r *RedisStore) GetTopPlayers(n int) ([]*PlayerState, error) {
-	// TODO Phase 2：ZREVRANGE leaderboard:daily:{date} 0 n-1 WITHSCORES
-	return nil, fmt.Errorf("not implemented")
+	ctx, cancel := context.WithTimeout(context.Background(), redisTimeout)
+	defer cancel()
+
+	// ZREVRANGE 取前 N 名（分數降序）
+	results, err := r.client.ZRevRangeWithScores(ctx, r.leaderboardKey(), 0, int64(n-1)).Result()
+	if err != nil {
+		return nil, fmt.Errorf("redis get top players: %w", err)
+	}
+
+	players := make([]*PlayerState, 0, len(results))
+	for _, z := range results {
+		playerID := z.Member.(string)
+		state, err := r.LoadPlayer(playerID)
+		if err != nil {
+			log.Printf("[Store] Warning: failed to load player %s from leaderboard: %v", playerID, err)
+			continue
+		}
+		if state == nil {
+			// 排行榜有記錄但玩家資料已過期，建立最小記錄
+			state = &PlayerState{
+				PlayerID:     playerID,
+				SessionScore: int64(z.Score),
+			}
+		}
+		players = append(players, state)
+	}
+	return players, nil
 }
 
 func (r *RedisStore) UpdateLeaderboard(playerID string, score int64) error {
-	// TODO Phase 2：ZADD leaderboard:daily:{date} score playerID
-	return fmt.Errorf("not implemented")
+	ctx, cancel := context.WithTimeout(context.Background(), redisTimeout)
+	defer cancel()
+
+	key := r.leaderboardKey()
+	// ZADD NX GT：只在新分數更高時更新（Redis 6.2+）
+	// 降級方案：先取現有分數，比較後決定是否更新
+	existing, err := r.client.ZScore(ctx, key, playerID).Result()
+	if err != nil && err != redis.Nil {
+		return fmt.Errorf("redis get score: %w", err)
+	}
+
+	if err == redis.Nil || float64(score) > existing {
+		pipe := r.client.Pipeline()
+		pipe.ZAdd(ctx, key, redis.Z{Score: float64(score), Member: playerID})
+		pipe.Expire(ctx, key, leaderboardTTL)
+		if _, err := pipe.Exec(ctx); err != nil {
+			return fmt.Errorf("redis update leaderboard: %w", err)
+		}
+	}
+	return nil
 }
 
 func (r *RedisStore) Close() error {
-	// TODO Phase 2：client.Close()
-	return nil
+	return r.client.Close()
 }
 
 func (r *RedisStore) IsRedis() bool {

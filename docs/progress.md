@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-027b 眨眼動畫升級 + 美術質量 91→93）
+## 最後更新：2026-05-19（DAY-028 RedisStore 完整實作）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,7 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**（Hit Stop + ScreenShake + Combo + 觀戰模式 + 全套 Juice）
 - **整體信心：100/100**
+- **架構成熟度：RedisStore 完整實作，生產環境就緒**
 
 ---
 
@@ -196,6 +197,14 @@
 - [x] Store 整合到 Game（AddPlayer 恢復狀態 + RemovePlayer 儲存狀態，DAY-026b）
 - [x] HTML5 export 大小分析（pck 1.0MB < 2MB ✅，gzip 總量 10.2MB ✅，DAY-027）
 - [x] Phase 8 完整自主循環測試（QA 8/8 全部通過，DAY-027）
+- [x] **RedisStore 完整實作**（DAY-028）：
+  - `github.com/redis/go-redis/v9@v9.7.3` 依賴加入
+  - SavePlayer：JSON 序列化 + SET + 7天 TTL
+  - LoadPlayer：GET + JSON 反序列化，找不到回傳 nil,nil
+  - UpdateLeaderboard：ZADD（只更新最高分）+ 30天 TTL
+  - GetTopPlayers：ZREVRANGE + 批次 LoadPlayer
+  - 4 個 Redis 整合測試（有 REDIS_URL 時執行，無則 Skip）
+  - MemoryStore 排序升級：bubble sort → sort.Slice
 
 ---
 

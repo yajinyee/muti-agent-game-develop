@@ -1514,3 +1514,18 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **工具：** `tools/add_blink_animation.py`
 - **效果：** 美術質量從 91 提升到 93/100（角色更有生命感）
 - **教訓：** 眨眼是讓像素角色「活起來」最有效的技術之一，成本低效果好
+
+## 83. RedisStore 完整實作技術要點（DAY-028）
+- **套件：** `github.com/redis/go-redis/v9`（v9.7.3，支援 Redis 6+）
+- **Key 設計：**
+  - 玩家狀態：`player:{id}` → JSON String，TTL 7天
+  - 排行榜：`leaderboard:daily:{YYYY-MM-DD}` → Sorted Set，TTL 30天
+- **排行榜只保留最高分：** 先 `ZScore` 取現有分數，比較後才 `ZAdd`（Redis 6.2 的 `ZADD GT` 也可以）
+- **整合測試設計：** 無 `REDIS_URL` 環境變數時 `t.Skip()`，不阻擋 CI
+- **go get 的 stderr 誤判：** `go get` 成功但 PowerShell 把 stderr 視為錯誤，exit code=1，實際上套件已安裝
+- **教訓：** Redis 整合測試要能在無 Redis 環境下跳過，不能讓 CI 因為沒有 Redis 就失敗
+
+## 84. Go 內建函數名稱衝突
+- **問題：** 變數命名為 `copy` 會遮蔽 Go 內建的 `copy()` 函數，雖然不報錯但是壞習慣
+- **解法：** 改用 `cp` 作為拷貝變數名稱
+- **教訓：** 避免使用 Go 內建函數名稱作為變數名：`copy`, `len`, `cap`, `make`, `new`, `append`, `delete`, `close`, `panic`, `recover`
