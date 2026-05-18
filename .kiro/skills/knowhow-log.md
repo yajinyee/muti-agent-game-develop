@@ -1319,3 +1319,31 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **文字動畫 BACK 彈性：** `set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)` 讓文字有彈跳感
 - **粒子向上扇形：** `angle = randf_range(-PI * 0.85, -PI * 0.15)` 確保粒子向上噴射
 - **教訓：** 升級特效要讓玩家「感受到」，不只是「看到」，所以要有震動 + 閃光 + 粒子三重組合
+
+## 87. GDScript 動態建立帶 _draw 的 Node2D（2026-05-19）
+- **用途：** 在 TargetManager 等非 Autoload 腳本中動態建立帶自訂繪圖的節點
+- **方法：** 用 `GDScript.new()` + `script.source_code` 動態建立腳本
+  ```gdscript
+  var coin = Node2D.new()
+  var script = GDScript.new()
+  script.source_code = """
+  extends Node2D
+  func _draw():
+      draw_circle(Vector2.ZERO, 6.0, Color(1.0, 0.82, 0.0))
+  """
+  coin.set_script(script)
+  ```
+- **優點：** 不需要額外的 .gd 檔案，適合一次性特效節點
+- **缺點：** source_code 字串中不能有縮排問題，要用 tab 或空格一致
+- **金幣效果：** 主體圓形 + 深金色邊框 + 左上高光 + 中心 ¥ 符號
+- **拋物線旋轉：** 上升時旋轉 90-270 度，下落時繼續旋轉，讓金幣有翻轉感
+- **教訓：** 動態 GDScript 適合特效節點，但複雜邏輯還是要用獨立 .gd 檔案
+
+## 88. 金幣雨拋物線設計原則（2026-05-19）
+- **上升段：** `EASE_OUT`（快速上升，逐漸減速）
+- **下落段：** `EASE_IN`（逐漸加速下落，模擬重力）
+- **旋轉：** 上升 90-270 度，下落繼續 360-540 度（讓金幣一直在旋轉）
+- **散落範圍：** 水平 ±150px，垂直 100-220px（比原版 ±120px 更寬）
+- **峰值高度：** 70-140px（比原版 60-120px 更高，視覺更壯觀）
+- **數量：** 18 枚（比原版 15 枚多 20%）
+- **教訓：** 金幣雨要有「重量感」，上升快下落慢是錯的，要上升快下落也快（重力加速）
