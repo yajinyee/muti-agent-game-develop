@@ -13,8 +13,9 @@ const (
 	MsgBonusClick MessageType = "bonus_click"
 	MsgPing       MessageType = "ping"
 	// Prototype 展示用
-	MsgTriggerBoss  MessageType = "trigger_boss"
-	MsgTriggerBonus MessageType = "trigger_bonus"
+	MsgTriggerBoss     MessageType = "trigger_boss"
+	MsgTriggerBonus    MessageType = "trigger_bonus"
+	MsgSetDisplayName  MessageType = "set_display_name" // 設定顯示名稱（DAY-021）
 )
 
 // Server → Client

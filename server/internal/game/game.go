@@ -139,6 +139,8 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.triggerBoss()
 	case ws.MsgTriggerBonus:
 		g.triggerBonusReady()
+	case ws.MsgSetDisplayName:
+		g.handleSetDisplayName(p, msg)
 	case ws.MsgPing:
 		g.Hub.Send(clientID, &ws.Message{Type: ws.MsgPong})
 	}
@@ -373,6 +375,15 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 		},
 	})
 
+	// 埋點：BOSS 擊敗
+	if tracker := analytics.Get(); tracker != nil {
+		tracker.Track(analytics.EventBossKill, p.ID, map[string]interface{}{
+			"instance_id": t.InstanceID,
+			"reward":      result.Reward,
+			"multiplier":  result.Multiplier,
+		})
+	}
+
 	g.transitionState(state.StateBossResult)
 	g.safeAfterFunc(3*time.Second, func() {
 		g.transitionState(state.StateNormalPlay)
@@ -392,6 +403,12 @@ func (g *Game) handleLock(p *player.Player, msg *ws.Message) {
 // handleAutoToggle 切換自動攻擊
 func (g *Game) handleAutoToggle(p *player.Player, msg *ws.Message) {
 	p.SetAuto(!p.IsAuto)
+	// 埋點：切換自動攻擊
+	if tracker := analytics.Get(); tracker != nil {
+		tracker.Track(analytics.EventAutoToggle, p.ID, map[string]interface{}{
+			"is_auto": p.IsAuto,
+		})
+	}
 	g.sendPlayerUpdate(p)
 }
 
@@ -425,6 +442,13 @@ func (g *Game) handleBetChange(p *player.Player, msg *ws.Message) {
 	}
 
 	log.Printf("[Game] Player %s bet changed to LV%d", p.ID, payload.BetLevel)
+	// 埋點：切換投注
+	if tracker := analytics.Get(); tracker != nil {
+		tracker.Track(analytics.EventBetChange, p.ID, map[string]interface{}{
+			"bet_level": payload.BetLevel,
+			"bet_cost":  data.GetBetDef(payload.BetLevel).BetCost,
+		})
+	}
 	g.sendPlayerUpdate(p)
 }
 
@@ -990,12 +1014,49 @@ func (g *Game) endBonusGame() {
 				NewBalance: p.Coins,
 			},
 		})
+
+		// 埋點：Bonus 結束（每個玩家的獎勵）
+		if tracker := analytics.Get(); tracker != nil {
+			tracker.Track(analytics.EventBonusEnd, playerID, map[string]interface{}{
+				"score":      score,
+				"multiplier": multiplier,
+				"reward":     reward,
+				"entry_bet":  entryBet,
+			})
+			tracker.Track(analytics.EventReward, playerID, map[string]interface{}{
+				"source":     "bonus",
+				"amount":     reward,
+				"multiplier": multiplier,
+			})
+		}
 	}
 
 	g.transitionState(state.StateBonusResult)
 	g.safeAfterFunc(3*time.Second, func() {
 		g.transitionState(state.StateNormalPlay)
 	})
+}
+
+// handleSetDisplayName 設定玩家顯示名稱（DAY-021）
+func (g *Game) handleSetDisplayName(p *player.Player, msg *ws.Message) {
+	var payload struct {
+		DisplayName string `json:"display_name"`
+	}
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		return
+	}
+	name := payload.DisplayName
+	// 限制長度 1-16 字元
+	if len(name) == 0 || len([]rune(name)) > 16 {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgError,
+			Payload: ws.ErrorPayload{Code: "invalid_name", Message: "名稱長度需在 1-16 字元之間"},
+		})
+		return
+	}
+	p.SetDisplayName(name)
+	log.Printf("[Game] Player %s set display name: %s", p.ID, name)
+	g.sendPlayerUpdate(p)
 }
 
 // processAutoAttack 處理自動攻擊（智慧目標選擇）

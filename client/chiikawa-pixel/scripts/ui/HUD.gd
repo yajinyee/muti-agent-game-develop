@@ -1190,6 +1190,19 @@ func _create_lobby_overlay() -> void:
 			switch_btn.add_theme_font_override("font", _pixel_font)
 		top_bar.add_child(switch_btn)
 
+		# 名稱設定按鈕（DAY-021）
+		var name_btn = Button.new()
+		name_btn.name = "SetNameBtn"
+		name_btn.text = "✏"
+		name_btn.position = Vector2(1204, 6)
+		name_btn.size = Vector2(32, 28)
+		name_btn.add_theme_font_size_override("font_size", 16)
+		name_btn.pressed.connect(show_name_dialog)
+		name_btn.tooltip_text = "設定名稱"
+		if is_instance_valid(_pixel_font):
+			name_btn.add_theme_font_override("font", _pixel_font)
+		top_bar.add_child(name_btn)
+
 ## 顯示大廳
 func _show_lobby() -> void:
 	if not is_instance_valid(_lobby_overlay):
@@ -1230,3 +1243,133 @@ func _on_lobby_room_selected(room_id: String) -> void:
 		if is_instance_valid(notify_lbl):
 			notify_lbl.queue_free()
 	)
+
+# ── 玩家名稱設定（DAY-021）──────────────────────────────────────
+
+var _name_dialog: Control = null
+
+## 顯示名稱設定對話框
+func show_name_dialog() -> void:
+	if is_instance_valid(_name_dialog):
+		_name_dialog.queue_free()
+
+	var dialog = Control.new()
+	dialog.name = "NameDialog"
+	dialog.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dialog.z_index = 200
+	add_child(dialog)
+	_name_dialog = dialog
+
+	# 半透明背景（點擊關閉）
+	var bg = ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.0, 0.0, 0.0, 0.6)
+	bg.gui_input.connect(func(event):
+		if event is InputEventMouseButton and event.pressed:
+			if is_instance_valid(_name_dialog):
+				_name_dialog.queue_free()
+				_name_dialog = null
+	)
+	dialog.add_child(bg)
+
+	# 對話框面板（畫面中央）
+	var panel = Control.new()
+	panel.name = "Panel"
+	panel.position = Vector2(390, 300)
+	panel.size = Vector2(500, 160)
+	dialog.add_child(panel)
+
+	# 面板背景
+	var panel_bg = ColorRect.new()
+	panel_bg.size = Vector2(500, 160)
+	panel_bg.color = Color(0.05, 0.08, 0.2, 0.97)
+	panel.add_child(panel_bg)
+
+	# 頂部金色邊條
+	var top_line = ColorRect.new()
+	top_line.size = Vector2(500, 3)
+	top_line.color = Color(0.9, 0.75, 0.2, 0.9)
+	panel.add_child(top_line)
+
+	# 標題
+	var title = Label.new()
+	title.text = "✏ 設定顯示名稱"
+	title.position = Vector2(16, 12)
+	title.add_theme_font_size_override("font_size", 18)
+	title.modulate = Color(1.0, 0.9, 0.3)
+	if is_instance_valid(_pixel_font):
+		title.add_theme_font_override("font", _pixel_font)
+	panel.add_child(title)
+
+	# 說明文字
+	var hint = Label.new()
+	hint.text = "1-16 字元，顯示在排行榜上"
+	hint.position = Vector2(16, 40)
+	hint.add_theme_font_size_override("font_size", 12)
+	hint.modulate = Color(0.7, 0.7, 0.7)
+	if is_instance_valid(_pixel_font):
+		hint.add_theme_font_override("font", _pixel_font)
+	panel.add_child(hint)
+
+	# 輸入框
+	var line_edit = LineEdit.new()
+	line_edit.name = "NameInput"
+	line_edit.position = Vector2(16, 65)
+	line_edit.size = Vector2(360, 36)
+	line_edit.placeholder_text = "輸入名稱..."
+	line_edit.max_length = 16
+	line_edit.text = GameManager.player_data.get("display_name", "")
+	line_edit.add_theme_font_size_override("font_size", 16)
+	if is_instance_valid(_pixel_font):
+		line_edit.add_theme_font_override("font", _pixel_font)
+	panel.add_child(line_edit)
+
+	# 確認按鈕
+	var confirm_btn = Button.new()
+	confirm_btn.name = "ConfirmBtn"
+	confirm_btn.text = "確認"
+	confirm_btn.position = Vector2(390, 65)
+	confirm_btn.size = Vector2(96, 36)
+	confirm_btn.add_theme_font_size_override("font_size", 14)
+	if is_instance_valid(_pixel_font):
+		confirm_btn.add_theme_font_override("font", _pixel_font)
+	confirm_btn.pressed.connect(func():
+		var name_input = panel.get_node_or_null("NameInput")
+		if not name_input:
+			return
+		var new_name = name_input.text.strip_edges()
+		if new_name.length() == 0 or new_name.length() > 16:
+			var err_tween = create_tween().set_loops(3)
+			err_tween.tween_property(name_input, "modulate", Color(1.0, 0.3, 0.3), 0.1)
+			err_tween.tween_property(name_input, "modulate", Color.WHITE, 0.1)
+			return
+		NetworkManager.send_set_display_name(new_name)
+		AudioManager.play_sfx(AudioManager.SFX.WEED_PULL)
+		if is_instance_valid(_name_dialog):
+			_name_dialog.queue_free()
+			_name_dialog = null
+	)
+	panel.add_child(confirm_btn)
+
+	# 取消按鈕
+	var cancel_btn = Button.new()
+	cancel_btn.text = "取消"
+	cancel_btn.position = Vector2(16, 115)
+	cancel_btn.size = Vector2(96, 32)
+	cancel_btn.add_theme_font_size_override("font_size", 13)
+	cancel_btn.modulate = Color(0.7, 0.7, 0.7)
+	if is_instance_valid(_pixel_font):
+		cancel_btn.add_theme_font_override("font", _pixel_font)
+	cancel_btn.pressed.connect(func():
+		if is_instance_valid(_name_dialog):
+			_name_dialog.queue_free()
+			_name_dialog = null
+	)
+	panel.add_child(cancel_btn)
+
+	# 淡入動畫
+	dialog.modulate.a = 0.0
+	var tween = create_tween()
+	tween.tween_property(dialog, "modulate:a", 1.0, 0.15)
+	line_edit.grab_focus()
+	line_edit.select_all()

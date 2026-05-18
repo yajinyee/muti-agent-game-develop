@@ -1404,3 +1404,28 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **快速加入**：找人數最少且未滿的房間，一鍵加入
 - **切換房間**：TopBar 右側「🏠」按鈕，不佔用遊戲空間
 - **教訓：** 大廳 UI 要輕量，不能影響遊戲主流程，overlay 模式最安全
+
+## 83. analytics EventBonusEnd 重複宣告問題（2026-05-19 DAY-021）
+- **問題：** 嘗試新增 `EventBonusEnd` 常數，但它已在 analytics.go 第 30 行存在
+- **根本原因：** 沒有先搜尋現有常數就直接新增，導致 redeclared 編譯錯誤
+- **解決：** 用 grep_search 確認現有常數後，移除重複宣告
+- **教訓：** 新增常數前必須先搜尋確認不存在，特別是在大型 Go 檔案中
+
+## 84. Godot 4 LineEdit.select_all() 用法（2026-05-19 DAY-021）
+- **用途：** 對話框開啟時自動選取輸入框內容，方便玩家直接輸入新名稱
+- **做法：** `line_edit.grab_focus()` 後接 `line_edit.select_all()`
+- **注意：** 必須先 `grab_focus()` 再 `select_all()`，順序不能反
+- **教訓：** 輸入框對話框的標準 UX：開啟時自動聚焦並選取現有內容
+
+## 85. Go analytics 埋點補完清單（2026-05-19 DAY-021）
+- **已補完：** auto_toggle / bet_change / boss_kill / bonus_end
+- **原本缺少的原因：** 這些事件在 handleAutoToggle/handleBetChange/handleBossKill/endBonusGame 中沒有呼叫 tracker
+- **補完方式：** 在每個 handler 函數末尾加入 `tracker.Track(analytics.EventXxx, p.ID, data)`
+- **教訓：** 新增 handler 時要同步加入埋點，不要等到後期補
+
+## 86. set_display_name WebSocket 訊息設計（2026-05-19 DAY-021）
+- **協定：** Client → Server: `{"type": "set_display_name", "payload": {"display_name": "名稱"}}`
+- **Server 驗證：** 長度 1-16 字元，超出回傳 error 訊息
+- **Client UI：** TopBar 加入「✏」按鈕，點擊開啟對話框，輸入後送出
+- **排行榜整合：** 設定後立即反映在下次排行榜廣播中（10 秒週期）
+- **教訓：** 玩家名稱設定是多人遊戲的基本功能，應該在早期就加入

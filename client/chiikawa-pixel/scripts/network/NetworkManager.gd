@@ -192,6 +192,10 @@ func send_trigger_boss() -> void:
 func send_trigger_bonus() -> void:
 	send("trigger_bonus", {})
 
+## 設定顯示名稱（DAY-021）
+func send_set_display_name(display_name: String) -> void:
+	send("set_display_name", {"display_name": display_name})
+
 ## 處理收到的封包
 func _handle_packet(packet: PackedByteArray) -> void:
 	var text = packet.get_string_from_utf8()

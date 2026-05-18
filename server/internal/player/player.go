@@ -193,6 +193,13 @@ func (p *Player) SetAuto(enabled bool) {
 	p.IsAuto = enabled
 }
 
+// SetDisplayName 設定顯示名稱（DAY-021）
+func (p *Player) SetDisplayName(name string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.DisplayName = name
+}
+
 // Snapshot 取得玩家狀態快照（用於傳送給 Client）
 func (p *Player) Snapshot() PlayerSnapshot {
 	p.mu.RLock()
