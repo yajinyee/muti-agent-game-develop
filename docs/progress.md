@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-019 效能監控面板升級 + GitHub 上傳）
+## 最後更新：2026-05-19（DAY-020 大廳 UI + Client 多房間支援）
 
 ## 自我評估
 - **完成度：100%**
@@ -113,6 +113,15 @@
   - `HUD.gd`：效能面板從單行升級為三行（FPS+品質 / 記憶體 / Draw Calls+節點數）
   - 記憶體 > 200MB 橙色警告，Draw Calls > 500 橙色警告
   - 半透明背景 + 左側綠色邊條（DEBUG 標識）
+- [x] **多房間架構 Phase 1**（2026-05-19 DAY-019）：
+  - `server/internal/room/manager.go`：RoomManager（建立/刪除/加入/離開/自動分配）
+  - `server/internal/room/manager_test.go`：8 個單元測試，全部通過
+  - `main.go`：整合 RoomManager，加入 `/rooms` HTTP API，WebSocket 支援 `room_id` 參數
+- [x] **大廳 UI + Client 多房間支援**（2026-05-19 DAY-020）：
+  - `scripts/ui/LobbyManager.gd`：房間列表 UI（查詢/顯示/選擇/快速加入）
+  - `scripts/network/NetworkManager.gd`：加入 `rooms_fetched` 訊號、`fetch_rooms()` / `connect_to_room()` / `get_room_id()` API
+  - `HUD.gd`：TopBar 加入「🏠 切換房間」按鈕，大廳 overlay（z_index=150）
+  - 向後相容：預設連線 room-001，不影響現有遊戲流程
 
 ### Godot Client（100% 完整）
 - [x] NetworkManager.gd（WebSocket + 自動重連）

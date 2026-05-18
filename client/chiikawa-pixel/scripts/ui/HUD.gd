@@ -127,6 +127,7 @@ func _ready() -> void:
 	_create_disconnect_overlay()
 	_create_leaderboard_panel()
 	_create_achievement_queue()
+	_create_lobby_overlay()  # 大廳 UI（DAY-020）
 
 ## 套用像素字體到所有 Label
 func _apply_pixel_font() -> void:
@@ -1147,4 +1148,85 @@ func _show_next_achievement() -> void:
 			_achievement_panel.visible = false
 		# 顯示下一個成就（若佇列不空）
 		_show_next_achievement()
+	)
+
+# ── 大廳 UI（DAY-020）──────────────────────────────────────────
+
+var _lobby_overlay: Control = null
+var _lobby_manager: Control = null
+
+## 建立大廳 overlay（初始隱藏，可由「切換房間」按鈕呼叫）
+func _create_lobby_overlay() -> void:
+	# 建立全螢幕 overlay 容器
+	var overlay = Control.new()
+	overlay.name = "LobbyOverlay"
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.visible = false
+	overlay.z_index = 150
+	add_child(overlay)
+	_lobby_overlay = overlay
+
+	# 建立 LobbyManager UI
+	var lobby_script = load("res://scripts/ui/LobbyManager.gd")
+	if lobby_script:
+		_lobby_manager = lobby_script.new()
+		_lobby_manager.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		overlay.add_child(_lobby_manager)
+		# 連接房間選擇訊號
+		_lobby_manager.room_selected.connect(_on_lobby_room_selected)
+
+	# 在 TopBar 加入「切換房間」按鈕
+	var top_bar = get_node_or_null("TopBar")
+	if is_instance_valid(top_bar):
+		var switch_btn = Button.new()
+		switch_btn.name = "SwitchRoomBtn"
+		switch_btn.text = "🏠"
+		switch_btn.position = Vector2(1240, 6)
+		switch_btn.size = Vector2(32, 28)
+		switch_btn.add_theme_font_size_override("font_size", 16)
+		switch_btn.pressed.connect(_show_lobby)
+		switch_btn.tooltip_text = "切換房間"
+		if is_instance_valid(_pixel_font):
+			switch_btn.add_theme_font_override("font", _pixel_font)
+		top_bar.add_child(switch_btn)
+
+## 顯示大廳
+func _show_lobby() -> void:
+	if not is_instance_valid(_lobby_overlay):
+		return
+	_lobby_overlay.visible = true
+	_lobby_overlay.modulate.a = 0.0
+	var tween = create_tween()
+	tween.tween_property(_lobby_overlay, "modulate:a", 1.0, 0.3)
+	# 觸發房間列表刷新
+	if is_instance_valid(_lobby_manager) and _lobby_manager.has_method("show_lobby"):
+		_lobby_manager.show_lobby()
+
+## 大廳選擇房間後的回調
+func _on_lobby_room_selected(room_id: String) -> void:
+	print("[HUD] Room selected: ", room_id)
+	# 淡出大廳
+	var tween = create_tween()
+	tween.tween_property(_lobby_overlay, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(func():
+		if is_instance_valid(_lobby_overlay):
+			_lobby_overlay.visible = false
+	)
+	# 顯示切換房間提示
+	var notify_lbl = Label.new()
+	notify_lbl.text = "切換到 %s..." % room_id
+	notify_lbl.position = Vector2(440, 360)
+	notify_lbl.size = Vector2(400, 40)
+	notify_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	notify_lbl.add_theme_font_size_override("font_size", 18)
+	notify_lbl.modulate = Color(0.4, 1.0, 0.5)
+	if is_instance_valid(_pixel_font):
+		notify_lbl.add_theme_font_override("font", _pixel_font)
+	add_child(notify_lbl)
+	var t2 = create_tween()
+	t2.tween_interval(1.5)
+	t2.tween_property(notify_lbl, "modulate:a", 0.0, 0.5)
+	t2.tween_callback(func():
+		if is_instance_valid(notify_lbl):
+			notify_lbl.queue_free()
 	)

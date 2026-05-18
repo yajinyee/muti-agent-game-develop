@@ -1386,3 +1386,21 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **節點數：** `Performance.get_monitor(Performance.OBJECT_NODE_COUNT)`
 - **注意：** 這些值每幀都在變，建議每 0.5 秒更新一次顯示（避免數字跳動太快）
 - **教訓：** 效能監控面板要顯示有意義的指標（記憶體/DC/節點），不只是 FPS
+
+## 90. Godot 4 HTTPRequest 節點使用方式（2026-05-19 DAY-020）
+- **用途：** 在 GDScript 中發送 HTTP GET 請求（查詢房間列表等）
+- **建立方式：** `var http = HTTPRequest.new(); add_child(http)`
+- **發送請求：** `http.request("http://localhost:7777/rooms")`
+- **回應處理：** `http.request_completed.connect(_on_response)`
+- **回調簽名：** `func _on_response(result, response_code, headers, body: PackedByteArray)`
+- **解析 JSON：** `body.get_string_from_utf8()` → `JSON.new().parse(text)`
+- **注意：** HTTPRequest 節點必須是場景樹的子節點才能正常工作
+- **教訓：** 不要用 `await`，用訊號回調處理非同步 HTTP 請求
+
+## 91. 大廳 UI 設計原則（2026-05-19 DAY-020）
+- **overlay 模式**：大廳作為 z_index=150 的 overlay，不替換遊戲場景，向後相容
+- **房間列表行**：名稱 + 玩家數進度條 + 投注等級範圍 + 加入按鈕
+- **滿員視覺**：紅色遮罩 + 按鈕禁用 + 玩家數紅色顯示
+- **快速加入**：找人數最少且未滿的房間，一鍵加入
+- **切換房間**：TopBar 右側「🏠」按鈕，不佔用遊戲空間
+- **教訓：** 大廳 UI 要輕量，不能影響遊戲主流程，overlay 模式最安全
