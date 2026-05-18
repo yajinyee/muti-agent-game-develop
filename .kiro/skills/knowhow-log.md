@@ -1445,3 +1445,27 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **驗證方法：** 1) 執行 qa_check.py 2) 讀規格書逐條對照 3) 上網搜尋業界標準
 - **發現：** Combo 系統是業界標準但規格書沒有明確提到，需要主動補充
 - **教訓：** 「規格書 100% 實作」≠「遊戲體驗 100%」，還要考慮業界標準的 game feel
+
+## 87. 觀戰模式（Spectator Mode）設計原則（DAY-023）
+- **核心設計：** 觀戰者是 WebSocket 連線的「只讀角色」，收到所有廣播但不能發送遊戲指令
+- **實作方式：**
+  - `ClientRole` 枚舉：`RolePlayer` / `RoleSpectator`
+  - `readPump` 中過濾觀戰者訊息（只允許 `ping`）
+  - `OnConnect` / `OnDisconnect` 只對 `RolePlayer` 觸發（不影響遊戲邏輯）
+  - `PlayerCount()` 只計算玩家，`SpectatorCount()` 只計算觀戰者
+- **觀戰者初始化：** 連線後 100ms 非同步傳送快照（遊戲狀態 + 所有目標 + 排行榜）
+- **端點設計：**
+  - `ws://host/spectate?room_id=xxx` — 觀戰 WebSocket
+  - `GET /spectate/snapshot` — HTTP 快照（供前端預覽房間）
+- **教訓：** 觀戰模式不需要修改遊戲邏輯，只需在 Hub 層做角色過濾即可
+
+## 88. Go WebSocket Hub 角色分離測試技巧（DAY-023）
+- **問題：** Hub 的 Register/Unregister 需要真實 WebSocket 連線才能測試
+- **解法：** 直接操作 `h.clients` map（加鎖），繞過 WebSocket 升級步驟
+  ```go
+  h.mu.Lock()
+  h.clients["test-id"] = &Client{ID: "test-id", Role: RolePlayer, send: make(chan []byte, 10)}
+  h.mu.Unlock()
+  ```
+- **注意：** `send` channel 必須有 buffer（`make(chan []byte, 10)`），否則 `Broadcast` 會 block
+- **教訓：** 測試 Hub 邏輯時，不需要真實 WebSocket，直接操作 clients map 更簡單

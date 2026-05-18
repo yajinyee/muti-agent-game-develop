@@ -27,6 +27,14 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// ClientRole 客戶端角色
+type ClientRole string
+
+const (
+	RolePlayer    ClientRole = "player"    // 一般玩家（可攻擊、投注）
+	RoleSpectator ClientRole = "spectator" // 觀戰者（只讀，收廣播但不能發遊戲指令）
+)
+
 // Client WebSocket 客戶端
 type Client struct {
 	ID       string
@@ -34,6 +42,7 @@ type Client struct {
 	conn     *websocket.Conn
 	send     chan []byte
 	PlayerID string
+	Role     ClientRole // 客戶端角色（DAY-023）
 }
 
 // Hub 管理所有 WebSocket 連線
@@ -42,8 +51,8 @@ type Hub struct {
 	clients map[string]*Client
 
 	// 訊息處理回調
-	OnMessage func(clientID string, msg *Message)
-	OnConnect func(clientID string)
+	OnMessage    func(clientID string, msg *Message)
+	OnConnect    func(clientID string)
 	OnDisconnect func(clientID string)
 }
 
@@ -60,8 +69,8 @@ func (h *Hub) Register(client *Client) {
 	h.clients[client.ID] = client
 	h.mu.Unlock()
 
-	log.Printf("[WS] Client connected: %s", client.ID)
-	if h.OnConnect != nil {
+	log.Printf("[WS] Client connected: %s (role=%s)", client.ID, client.Role)
+	if h.OnConnect != nil && client.Role == RolePlayer {
 		h.OnConnect(client.ID)
 	}
 }
@@ -75,10 +84,36 @@ func (h *Hub) Unregister(client *Client) {
 	}
 	h.mu.Unlock()
 
-	log.Printf("[WS] Client disconnected: %s", client.ID)
-	if h.OnDisconnect != nil {
+	log.Printf("[WS] Client disconnected: %s (role=%s)", client.ID, client.Role)
+	if h.OnDisconnect != nil && client.Role == RolePlayer {
 		h.OnDisconnect(client.ID)
 	}
+}
+
+// SpectatorCount 目前觀戰者數量
+func (h *Hub) SpectatorCount() int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	count := 0
+	for _, c := range h.clients {
+		if c.Role == RoleSpectator {
+			count++
+		}
+	}
+	return count
+}
+
+// PlayerCount 目前玩家數量（不含觀戰者）
+func (h *Hub) PlayerCount() int {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	count := 0
+	for _, c := range h.clients {
+		if c.Role == RolePlayer {
+			count++
+		}
+	}
+	return count
 }
 
 // Send 傳送訊息給指定客戶端
@@ -124,15 +159,25 @@ func (h *Hub) Broadcast(msg *Message) {
 	}
 }
 
-// ClientCount 目前連線數
+// ClientCount 目前總連線數（玩家 + 觀戰者）
 func (h *Hub) ClientCount() int {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return len(h.clients)
 }
 
-// ServeWS 處理 WebSocket 升級請求
+// ServeWS 處理 WebSocket 升級請求（一般玩家）
 func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, clientID string) {
+	h.serveWSWithRole(w, r, clientID, RolePlayer)
+}
+
+// ServeSpectatorWS 處理觀戰者 WebSocket 升級請求（DAY-023）
+func (h *Hub) ServeSpectatorWS(w http.ResponseWriter, r *http.Request, clientID string) {
+	h.serveWSWithRole(w, r, clientID, RoleSpectator)
+}
+
+// serveWSWithRole 內部：依角色建立 WebSocket 連線
+func (h *Hub) serveWSWithRole(w http.ResponseWriter, r *http.Request, clientID string, role ClientRole) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Printf("[WS] Upgrade error: %v", err)
@@ -145,6 +190,7 @@ func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, clientID string) {
 		conn:     conn,
 		send:     make(chan []byte, 256),
 		PlayerID: clientID,
+		Role:     role,
 	}
 
 	h.Register(client)
@@ -179,6 +225,12 @@ func (c *Client) readPump(h *Hub) {
 		var msg Message
 		if err := json.Unmarshal(rawMsg, &msg); err != nil {
 			log.Printf("[WS] Parse error for %s: %v", c.ID, err)
+			continue
+		}
+
+		// 觀戰者只允許 ping，其他遊戲指令一律忽略（DAY-023）
+		if c.Role == RoleSpectator && msg.Type != MsgPing {
+			log.Printf("[WS] Spectator %s tried to send %s, ignored", c.ID, msg.Type)
 			continue
 		}
 

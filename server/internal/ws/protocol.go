@@ -32,6 +32,7 @@ const (
 	MsgLeaderboard  MessageType = "leaderboard"
 	MsgAchievement  MessageType = "achievement"
 	MsgComboEvent   MessageType = "combo_event"  // 連擊事件（DAY-022）
+	MsgSpectatorJoin MessageType = "spectator_join" // 觀戰者加入通知（DAY-023）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )

@@ -105,11 +105,60 @@ func main() {
 		hub.ServeWS(w, r, clientID)
 	})
 
+	// 觀戰 WebSocket 端點（DAY-023）
+	// 連線方式：ws://host:port/spectate?room_id=room-001
+	// 觀戰者收到所有廣播，但無法發送遊戲指令（attack/bet_change 等）
+	mux.HandleFunc("/spectate", func(w http.ResponseWriter, r *http.Request) {
+		spectatorID := "spectator-" + uuid.New().String()[:8]
+		roomID := r.URL.Query().Get("room_id")
+		if roomID == "" {
+			roomID = "room-001"
+		}
+		if _, ok := roomMgr.GetRoom(roomID); !ok {
+			roomID = "room-001"
+		}
+		log.Printf("[WS] Spectator %s connecting to room %s", spectatorID, roomID)
+		hub.ServeSpectatorWS(w, r, spectatorID)
+
+		// 觀戰者連線後，非同步傳送遊戲快照（讓觀戰者立即看到當前狀態）
+		go func() {
+			time.Sleep(100 * time.Millisecond) // 等待連線建立
+			snapshot := g.GetSpectatorSnapshot()
+			hub.Send(spectatorID, &ws.Message{
+				Type:    ws.MsgGameState,
+				Payload: snapshot,
+			})
+			// 廣播所有現有目標給觀戰者
+			for _, t := range snapshot.Targets {
+				hub.Send(spectatorID, &ws.Message{
+					Type:    ws.MsgTargetSpawn,
+					Payload: t,
+				})
+			}
+			// 傳送排行榜
+			hub.Send(spectatorID, &ws.Message{
+				Type:    ws.MsgLeaderboard,
+				Payload: snapshot.Leaderboard,
+			})
+			log.Printf("[Spectator] %s initialized with %d targets", spectatorID, len(snapshot.Targets))
+		}()
+	})
+
+	// 觀戰快照 HTTP 端點（DAY-023）：供前端顯示房間預覽
+	mux.HandleFunc("/spectate/snapshot", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snapshot := g.GetSpectatorSnapshot()
+		if err := json.NewEncoder(w).Encode(snapshot); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 健康檢查
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"status":"ok","version":"%s","clients":%d}`,
-			version, hub.ClientCount())
+		fmt.Fprintf(w, `{"status":"ok","version":"%s","clients":%d,"spectators":%d}`,
+			version, hub.PlayerCount(), hub.SpectatorCount())
 	})
 
 	// 統計端點（goroutine 數量、記憶體使用）
@@ -117,12 +166,13 @@ func main() {
 		var ms runtime.MemStats
 		runtime.ReadMemStats(&ms)
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"goroutines":%d,"heap_alloc_mb":%.2f,"heap_sys_mb":%.2f,"gc_count":%d,"clients":%d}`,
+		fmt.Fprintf(w, `{"goroutines":%d,"heap_alloc_mb":%.2f,"heap_sys_mb":%.2f,"gc_count":%d,"clients":%d,"spectators":%d}`,
 			runtime.NumGoroutine(),
 			float64(ms.HeapAlloc)/1024/1024,
 			float64(ms.HeapSys)/1024/1024,
 			ms.NumGC,
-			hub.ClientCount(),
+			hub.PlayerCount(),
+			hub.SpectatorCount(),
 		)
 	})
 
@@ -209,6 +259,8 @@ func main() {
 
 	log.Printf("✅ Server ready at http://localhost:%s", cfg.Port)
 	log.Printf("🔌 WebSocket at ws://localhost:%s/ws", cfg.Port)
+	log.Printf("👁️  Spectate at ws://localhost:%s/spectate", cfg.Port)
+	log.Printf("📸 Snapshot at http://localhost:%s/spectate/snapshot", cfg.Port)
 	log.Printf("❤️  Health at http://localhost:%s/health", cfg.Port)
 	log.Printf("📊 Stats at http://localhost:%s/stats", cfg.Port)
 	log.Printf("🏆 Leaderboard at http://localhost:%s/leaderboard", cfg.Port)

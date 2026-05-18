@@ -1276,6 +1276,49 @@ func (g *Game) GetLeaderboardData() ws.LeaderboardPayload {
 	}
 }
 
+// SpectatorSnapshot 觀戰快照（DAY-023）：包含遊戲狀態 + 所有目標 + 排行榜
+type SpectatorSnapshot struct {
+	GameState   string                  `json:"game_state"`
+	Targets     []ws.TargetSpawnPayload `json:"targets"`
+	Leaderboard ws.LeaderboardPayload   `json:"leaderboard"`
+	PlayerCount int                     `json:"player_count"`
+	Timestamp   int64                   `json:"timestamp"`
+}
+
+// GetSpectatorSnapshot 取得觀戰快照（供觀戰者連線時初始化用）
+func (g *Game) GetSpectatorSnapshot() SpectatorSnapshot {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+
+	targets := make([]ws.TargetSpawnPayload, 0, len(g.Targets))
+	for _, t := range g.Targets {
+		if !t.IsAlive {
+			continue
+		}
+		targets = append(targets, ws.TargetSpawnPayload{
+			InstanceID: t.InstanceID,
+			DefID:      t.DefID,
+			Name:       t.Def.Name,
+			Type:       string(t.Def.Type),
+			X:          t.X,
+			Y:          t.Y,
+			HP:         t.HP,
+			MaxHP:      t.MaxHP,
+			Speed:      t.Def.Speed,
+			Lifetime:   t.Def.Lifetime,
+			Behavior:   t.Def.SpecialBehavior,
+		})
+	}
+
+	return SpectatorSnapshot{
+		GameState:   string(g.State),
+		Targets:     targets,
+		Leaderboard: g.GetLeaderboardData(),
+		PlayerCount: len(g.Players),
+		Timestamp:   time.Now().UnixMilli(),
+	}
+}
+
 // sendAchievement 傳送成就解鎖通知給指定玩家
 func (g *Game) sendAchievement(playerID string, u *achievement.AchievementUnlock) {
 	if u == nil {
