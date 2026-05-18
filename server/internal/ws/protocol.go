@@ -31,6 +31,7 @@ const (
 	MsgPlayerUpdate MessageType = "player_update"
 	MsgLeaderboard  MessageType = "leaderboard"
 	MsgAchievement  MessageType = "achievement"
+	MsgComboEvent   MessageType = "combo_event"  // 連擊事件（DAY-022）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -181,4 +182,11 @@ type AchievementPayload struct {
 	Description string `json:"description"`
 	Icon        string `json:"icon"`
 	UnlockedAt  int64  `json:"unlocked_at"` // Unix milliseconds
+}
+
+// ComboEventPayload 連擊事件（DAY-022）
+type ComboEventPayload struct {
+	ComboCount  int     `json:"combo_count"`  // 當前連擊數（2+）
+	LaborBonus  float64 `json:"labor_bonus"`  // 勞動值加成係數（0.1/0.2/0.3）
+	PlayerID    string  `json:"player_id"`    // 觸發連擊的玩家
 }

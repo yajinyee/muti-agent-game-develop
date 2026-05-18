@@ -523,3 +523,94 @@ func _spawn_boss_enter_text() -> void:
 		if is_instance_valid(canvas):
 			canvas.queue_free()
 	)
+
+## 連擊特效（DAY-022）
+## combo_count: 當前連擊數（2+）
+## pos: 顯示位置（通常是砲台位置）
+func spawn_combo(combo_count: int, pos: Vector2 = Vector2(640, 580)) -> void:
+	_ensure_root()
+	if combo_count < 2:
+		return
+
+	# 連擊顏色（依連擊數升級）
+	var combo_color: Color
+	var combo_text: String
+	match combo_count:
+		2:
+			combo_color = Color(0.4, 1.0, 0.4)   # 綠
+			combo_text = "COMBO ×2"
+		3:
+			combo_color = Color(1.0, 0.9, 0.2)   # 黃
+			combo_text = "COMBO ×3"
+		4:
+			combo_color = Color(1.0, 0.5, 0.0)   # 橙
+			combo_text = "COMBO ×4"
+		_:
+			combo_color = Color(1.0, 0.2, 0.8)   # 紫（5+）
+			combo_text = "COMBO ×%d" % combo_count
+
+	# 閃光環（連擊顏色）
+	_spawn_flash_ring(pos, combo_color, 30.0 + combo_count * 5.0, 0.25)
+
+	# 少量粒子
+	_spawn_particles(pos, combo_color, 6 + combo_count, 60.0, 0.35)
+
+	# 連擊文字（從砲台位置向上飄）
+	_spawn_combo_text(combo_text, combo_color, pos, combo_count)
+
+	# 高連擊（4+）加畫面震動
+	if combo_count >= 4:
+		ScreenShake.add_trauma(0.15 + combo_count * 0.03)
+
+## 連擊文字動畫（向上飄出）
+func _spawn_combo_text(text: String, color: Color, pos: Vector2, combo_count: int) -> void:
+	if not is_instance_valid(_scene_root):
+		return
+
+	var canvas = CanvasLayer.new()
+	canvas.layer = 96
+	_scene_root.add_child(canvas)
+
+	# 字體大小依連擊數增大
+	var font_size = 24 + min(combo_count * 4, 20)
+
+	# 陰影
+	var shadow = Label.new()
+	shadow.text = text
+	shadow.position = Vector2(pos.x - 100 + 2, pos.y - 60 + 2)
+	shadow.size = Vector2(200, 40)
+	shadow.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	shadow.add_theme_font_size_override("font_size", font_size)
+	shadow.modulate = Color(0.0, 0.0, 0.0, 0.7)
+	canvas.add_child(shadow)
+
+	# 主文字
+	var label = Label.new()
+	label.text = text
+	label.position = Vector2(pos.x - 100, pos.y - 60)
+	label.size = Vector2(200, 40)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	label.add_theme_font_size_override("font_size", font_size)
+	label.modulate = color
+	canvas.add_child(label)
+
+	# 初始縮放（彈入效果）
+	label.scale = Vector2(0.5, 0.5)
+	shadow.scale = Vector2(0.5, 0.5)
+
+	var tween = canvas.create_tween()
+	# 彈入（0.15 秒）
+	tween.tween_property(label, "scale", Vector2(1.1, 1.1), 0.15).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	tween.parallel().tween_property(shadow, "scale", Vector2(1.1, 1.1), 0.15).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	# 回彈
+	tween.tween_property(label, "scale", Vector2(1.0, 1.0), 0.06)
+	tween.parallel().tween_property(shadow, "scale", Vector2(1.0, 1.0), 0.06)
+	# 向上飄 + 淡出（0.5 秒）
+	tween.tween_property(label, "position:y", pos.y - 120, 0.5).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(shadow, "position:y", pos.y - 118, 0.5).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(label, "modulate:a", 0.0, 0.5)
+	tween.parallel().tween_property(shadow, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(func():
+		if is_instance_valid(canvas):
+			canvas.queue_free()
+	)

@@ -33,6 +33,10 @@ type Player struct {
 	MaxCoins     int // 歷史最高金幣
 	DisplayName  string // 顯示名稱（預設為 ID 前 8 碼）
 
+	// 連擊系統（DAY-022）
+	ComboCount   int       // 當前連擊數
+	LastKillAt   time.Time // 上次擊破時間（用於判斷連擊是否中斷）
+
 	// 成就系統
 	Achievements *achievement.Tracker
 }
@@ -198,6 +202,38 @@ func (p *Player) SetDisplayName(name string) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	p.DisplayName = name
+}
+
+// AddKillCombo 更新連擊計數，回傳當前連擊數和勞動值加成係數（DAY-022）
+// 連擊判定：2 秒內連續擊破
+// 加成：×2=+10%, ×3=+20%, ×4+=+30%
+func (p *Player) AddKillCombo() (comboCount int, laborBonus float64) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	now := time.Now()
+	const comboWindow = 2.0 // 秒
+
+	if !p.LastKillAt.IsZero() && now.Sub(p.LastKillAt).Seconds() <= comboWindow {
+		p.ComboCount++
+	} else {
+		p.ComboCount = 1 // 重置連擊
+	}
+	p.LastKillAt = now
+
+	// 計算勞動值加成
+	switch {
+	case p.ComboCount >= 4:
+		laborBonus = 0.30
+	case p.ComboCount == 3:
+		laborBonus = 0.20
+	case p.ComboCount == 2:
+		laborBonus = 0.10
+	default:
+		laborBonus = 0.0
+	}
+
+	return p.ComboCount, laborBonus
 }
 
 // Snapshot 取得玩家狀態快照（用於傳送給 Client）

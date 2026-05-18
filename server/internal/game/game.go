@@ -264,6 +264,20 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	delete(g.Targets, t.InstanceID)
 	g.mu.Unlock()
 
+	// 連擊系統（DAY-022）：2 秒內連續擊破觸發 Combo
+	comboCount, laborBonus := p.AddKillCombo()
+	if comboCount >= 2 {
+		// 廣播連擊事件（只傳給觸發者，避免干擾其他玩家）
+		g.Hub.Send(p.ID, &ws.Message{
+			Type: ws.MsgComboEvent,
+			Payload: ws.ComboEventPayload{
+				ComboCount: comboCount,
+				LaborBonus: laborBonus,
+				PlayerID:   p.ID,
+			},
+		})
+	}
+
 	// 發放獎勵
 	rewardUnlocks := p.AddReward(result.Reward)
 	killUnlocks := p.AddKill()
@@ -303,8 +317,12 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		g.sendAchievement(p.ID, u)
 	}
 
-	// 累積勞動值
-	bonusTriggered := p.AddLaborValue(result.LaborGain)
+	// 累積勞動值（加入 Combo 加成）
+	laborGain := result.LaborGain
+	if laborBonus > 0 {
+		laborGain = int(float64(laborGain) * (1.0 + laborBonus))
+	}
+	bonusTriggered := p.AddLaborValue(laborGain)
 
 	// 廣播擊破事件
 	g.Hub.Broadcast(&ws.Message{

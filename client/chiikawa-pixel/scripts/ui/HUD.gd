@@ -86,6 +86,7 @@ func _ready() -> void:
 	GameManager.bonus_event.connect(_on_bonus_event)
 	GameManager.leaderboard_updated.connect(_on_leaderboard_updated)
 	GameManager.achievement_unlocked.connect(_on_achievement_unlocked)
+	GameManager.combo_event.connect(_on_combo_event)  # 連擊事件（DAY-022）
 
 	# 斷線/重連提示
 	NetworkManager.disconnected.connect(_on_disconnected)
@@ -1373,3 +1374,15 @@ func show_name_dialog() -> void:
 	tween.tween_property(dialog, "modulate:a", 1.0, 0.15)
 	line_edit.grab_focus()
 	line_edit.select_all()
+
+
+# ── 連擊事件（DAY-022）──────────────────────────────────────────
+
+func _on_combo_event(combo_data: Dictionary) -> void:
+	var combo_count = combo_data.get("combo_count", 1)
+	if combo_count < 2:
+		return
+	# 在砲台位置顯示連擊特效
+	HitEffect.spawn_combo(combo_count, Vector2(640, 580))
+	# 連擊音效（用 kill.wav，短促有力）
+	AudioManager.play_sfx(AudioManager.SFX.KILL)

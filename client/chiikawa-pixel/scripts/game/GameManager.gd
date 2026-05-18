@@ -17,6 +17,7 @@ signal boss_event(event_data: Dictionary)
 signal bonus_event(event_data: Dictionary)
 signal leaderboard_updated(entries: Array)
 signal achievement_unlocked(achievement_data: Dictionary)
+signal combo_event(combo_data: Dictionary)  # 連擊事件（DAY-022）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -80,6 +81,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_leaderboard(payload)
 		"achievement":
 			_handle_achievement(payload)
+		"combo_event":
+			_handle_combo_event(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -143,6 +146,12 @@ func _handle_leaderboard(payload: Dictionary) -> void:
 func _handle_achievement(payload: Dictionary) -> void:
 	print("[GameManager] Achievement unlocked: ", payload.get("name", ""))
 	emit_signal("achievement_unlocked", payload)
+
+func _handle_combo_event(payload: Dictionary) -> void:
+	## 連擊事件（DAY-022）
+	var combo_count = payload.get("combo_count", 1)
+	print("[GameManager] COMBO x%d!" % combo_count)
+	emit_signal("combo_event", payload)
 
 func _handle_error(payload: Dictionary) -> void:
 	push_warning("[GameManager] Server error: " + str(payload))
