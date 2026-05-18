@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-018 BOSS 戰 BGM + 完整 BGM 切換系統）
+## 最後更新：2026-05-19（DAY-018 資產預載入 + 角色升級特效）
 
 ## 自我評估
 - **完成度：100%**
@@ -97,6 +97,17 @@
   - BackgroundManager：`_switch_bgm()` 完整 BGM 切換邏輯（所有狀態對應 BGM）
   - GameManager：BOSS Phase 2 時切換 BOSS_RAGE，BOSS 擊敗時靜音
   - 修復重大缺口：`play_bgm()` 從未被呼叫的問題
+- [x] **資產預載入系統**（2026-05-19 DAY-018）：
+  - `scripts/game/LoadingManager.gd`：Autoload 單例，背景預載入 48 個資產
+  - `ResourceLoader.load_threaded_request()` 非阻塞背景載入
+  - 快取 API：`get_texture()` / `get_audio()` / `get_shader()`
+  - `loading_progress` / `loading_complete` 訊號
+  - GameManager 啟動時自動觸發預載入
+- [x] **角色升級特效**（2026-05-19 DAY-018）：
+  - `HitEffect.spawn_level_up(pos, char_id)`：勞動值滿 100 時觸發
+  - 全畫面角色色閃光 + 金色星星粒子（向上扇形噴射）+ 雙層閃光環 + 衝擊波
+  - "BONUS READY!" 文字動畫（BACK 彈性彈入 → 停留 → 淡出）
+  - HUD.gd 整合：`_last_labor_value` 偵測邊界觸發
 
 ### Godot Client（100% 完整）
 - [x] NetworkManager.gd（WebSocket + 自動重連）

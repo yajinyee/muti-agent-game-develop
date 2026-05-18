@@ -1282,3 +1282,40 @@ BONUS_MULT = 20-50x（Prototype 展示版）
   4. **高頻顫音**：25 Hz 開關調製的 440 Hz 方波，每 2 秒出現一次
 - **無縫循環**：首尾各 0.15s 淡入淡出，確保循環播放無點擊聲
 - **教訓：** 遊戲 BGM 的緊張感來自「不和諧音程 + 規律節奏 + 偶發緊張元素」的組合
+
+## 85. Godot 4 ResourceLoader.load_threaded_request 背景載入（2026-05-19）
+- **用途：** 遊戲啟動時背景預載入資產，避免首次使用時的卡頓（hitching）
+- **API：**
+  ```gdscript
+  # 發起背景載入請求
+  ResourceLoader.load_threaded_request(path)
+  # 輪詢狀態
+  var status = ResourceLoader.load_threaded_get_status(path)
+  # 取得結果（只在 LOADED 狀態時呼叫）
+  var res = ResourceLoader.load_threaded_get(path)
+  ```
+- **狀態值：**
+  - `THREAD_LOAD_IN_PROGRESS`：載入中
+  - `THREAD_LOAD_LOADED`：完成
+  - `THREAD_LOAD_FAILED`：失敗（不要阻塞，直接跳過）
+  - `THREAD_LOAD_INVALID_RESOURCE`：路徑不存在
+- **最佳實踐：**
+  1. 在 Autoload 的 `_ready()` 中用 `call_deferred` 啟動（避免初始化順序問題）
+  2. 在 `_process` 中輪詢狀態，完成後 `set_process(false)` 停止輪詢
+  3. 載入失敗要 `push_warning` 但不要 crash，遊戲繼續運行
+  4. 快取結果到 Dictionary，後續用快取而不是重新 load
+- **效能影響：** 背景載入不阻塞主執行緒，玩家感受不到卡頓
+- **教訓：** 不要在 `_ready()` 中直接 `load()` 大量資產，會造成啟動卡頓
+
+## 86. 升級特效設計原則（2026-05-19）
+- **觸發時機：** 勞動值從 <100 變成 >=100（偵測邊界，不是每幀檢查）
+- **偵測方式：** `_last_labor_value` 追蹤上次值，`if labor >= 100 and _last_labor_value < 100`
+- **特效組合（由弱到強）：**
+  1. 全畫面閃光（角色顏色，低 alpha）— 最先感知到
+  2. 閃光環（角色顏色 + 金色，雙層）— 從砲台位置擴散
+  3. 衝擊波 — 增加衝擊感
+  4. 粒子噴射（向上扇形，帶重力）— 視覺焦點
+  5. 文字動畫（BACK 彈性彈入）— 明確告知玩家
+- **文字動畫 BACK 彈性：** `set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)` 讓文字有彈跳感
+- **粒子向上扇形：** `angle = randf_range(-PI * 0.85, -PI * 0.15)` 確保粒子向上噴射
+- **教訓：** 升級特效要讓玩家「感受到」，不只是「看到」，所以要有震動 + 閃光 + 粒子三重組合

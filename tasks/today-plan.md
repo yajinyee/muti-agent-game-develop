@@ -3,7 +3,7 @@
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
 **日期**：2026-05-19（DAY-018）  
-**整體目標**：BOSS 戰 BGM + 完整 BGM 切換系統修復
+**整體目標**：資產預載入優化 + 角色升級特效 + 持續品質優化
 
 ---
 
@@ -19,43 +19,50 @@
 
 ### ✅ DAY-018 啟動檢查
 
+- [x] 讀取 docs/progress.md 確認上次完成狀態（100%）
+- [x] 讀取 .kiro/skills/knowhow-log.md 確認已知問題
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
-- [x] go test ./... 確認測試通過（19/19 ✅）
+- [x] go test ./... 確認測試通過（全部通過 ✅）
 - [x] py tools/process_sprites.py --mode qc（全部 0px/0px ✅）
+- [x] py tools/qa_check.py（8/8 全部通過 ✅，RTP 95.93%）
 
-### ✅ 重大缺口修復：BGM 切換系統（P2 → 完成）
+### ✅ 確認 BubbleLayer 氣泡音效（DAY-017 已完成）
 
-**發現問題**：`AudioManager.play_bgm()` 從未被任何地方呼叫，BGM 系統完全沒有整合到遊戲狀態切換中。
+- [x] 確認 BubbleLayer.gd 已有 bubble_pop 音效邏輯（第 113-116 行）
+- [x] 確認 bubble_pop.wav 存在（13274 bytes）
+- [x] 確認 bubble_pop.wav.import 存在（494 bytes）
+- **結論**：DAY-017 已完成，無需重複實作
 
-- [x] **生成 boss_battle.wav**（tools/generate_boss_battle_bgm.py）
-  - 8 秒循環，緊張低頻 bass（A2/D3/E3 方波）
-  - 不和諧旋律（小二度 + 增四度，製造壓迫感）
-  - 打擊節奏（噪音短脈衝，每 0.5s）
-  - 高頻顫音（每 2 秒，製造緊張感）
-- [x] **AudioManager 整合**
-  - 新增 BGM.BOSS_BATTLE 枚舉
-  - `_get_bgm_path()` 加入 boss_battle.wav 路徑
-  - `_get_bgm_volume()` 設定 -8.0 dB
-- [x] **BackgroundManager 整合**
-  - 新增 `_switch_bgm(state)` 方法
-  - `_on_state_changed()` 呼叫 `_switch_bgm()`
-  - `_start_initial_ambient()` 同時啟動主 BGM
-  - 完整狀態對應：
-    - `normal_play` / `special_target_event` → MAIN_GAME
-    - `boss_warning` → stop_bgm_briefly（靜音製造緊張感）
-    - `boss_battle` → BOSS_BATTLE（Phase 1 循環）
-    - `boss_result` → stop_bgm_briefly
-    - `bonus_ready` → stop_bgm_briefly
-    - `bonus_game` → BONUS_GAME
-    - `bonus_result` → stop_bgm_briefly
-- [x] **GameManager 整合**
-  - `_handle_boss_event()` 處理 phase_change → 切換 BOSS_RAGE
-  - `_handle_boss_event()` 處理 kill → stop_bgm_briefly
+### ✅ 資產預載入系統（P2 → 完成）
 
-### ✅ 美術資產品質標記修正
+- [x] **建立 LoadingManager.gd**（scripts/game/LoadingManager.gd）
+  - 背景預載入：27 個 Textures + 14 個 Audio + 7 個 Shaders = 48 個資產
+  - `ResourceLoader.load_threaded_request()` 非阻塞背景載入
+  - `get_progress()` / `is_ready()` / `get_texture()` / `get_audio()` / `get_shader()` API
+  - `loading_progress` / `loading_complete` 訊號
+  - 載入完成後自動停止 `_process` 輪詢（節省 CPU）
+- [x] **加入 project.godot Autoload**（LoadingManager）
+- [x] **GameManager._ready() 啟動預載入**（call_deferred 避免初始化順序問題）
 
-- [x] progress.md 美術資產區塊從「93/100 品質」修正為「100/100 品質」
+### ✅ 角色升級特效（P3 → 完成）
+
+- [x] **HitEffect.spawn_level_up(pos, char_id)**
+  - 全畫面角色色閃光（0.35 alpha）
+  - 從砲台位置噴射 16 個金色星星粒子（向上扇形噴射 + 重力下落）
+  - 大閃光環（角色顏色 + 金色，雙層）
+  - 衝擊波
+  - 升級文字動畫（"BONUS READY!" 彈入 → 停留 → 淡出，BACK 彈性）
+  - 副標題「★ ★ ★」金色星星
+- [x] **HUD.gd 整合**
+  - `_last_labor_value` 追蹤上次勞動值
+  - 偵測 labor >= 100 且上次 < 100 時觸發 `HitEffect.spawn_level_up()`
+  - 同時觸發 `ScreenShake.add_trauma(0.3)`
+
+### ✅ KnowHow 更新
+
+- [x] KnowHow #85：Godot 4 ResourceLoader.load_threaded_request 背景載入
+- [x] KnowHow #86：升級特效設計原則
 
 ---
 
@@ -65,21 +72,18 @@
 
 - 完成度：**100%**
 - 美術質量：**100/100**
-- 規格一致性：**100%**（BGM 切換系統修復後）
+- 規格一致性：**100%**
 
 **今日改善摘要：**
-1. 發現並修復重大缺口：BGM 切換系統從未被呼叫
-2. 生成 boss_battle.wav（8秒循環 BOSS 戰 BGM）
-3. 完整整合 BGM 切換到所有遊戲狀態
-4. BOSS Phase 2 自動切換 boss_rage.wav
+1. 資產預載入系統：LoadingManager.gd（48 個資產背景預載入，避免首次使用卡頓）
+2. 角色升級特效：spawn_level_up()（勞動值滿 100 時觸發，金色星星 + 彈入文字 + 閃光環）
+3. HUD 整合：偵測勞動值達到 100 自動觸發升級特效
 
 ---
 
 ## 明日預覽（DAY-019）
 
-### 🟡 P2
-1. 資產預載入優化（載入時間 < 5 秒）
-2. 部署指南更新（加入新音效資產說明）
-
 ### 🟢 P3
-3. 角色升級特效（玩家升級時的慶祝動畫）
+1. 上傳 GitHub（今日完成後執行）
+2. 效能監控面板優化（FPS + 記憶體顯示）
+3. 多人房間架構設計文件（未來功能規劃）

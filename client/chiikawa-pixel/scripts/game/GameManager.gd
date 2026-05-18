@@ -42,6 +42,12 @@ func _ready() -> void:
 	NetworkManager.message_received.connect(_on_message_received)
 	NetworkManager.connected.connect(_on_connected)
 	NetworkManager.disconnected.connect(_on_disconnected)
+	# 啟動資產預載入（背景執行，不阻塞遊戲）
+	call_deferred("_start_preloading")
+
+func _start_preloading() -> void:
+	if LoadingManager != null:
+		LoadingManager.preload_all()
 
 func _on_connected() -> void:
 	print("[GameManager] Connected to server")
