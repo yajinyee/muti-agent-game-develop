@@ -834,6 +834,23 @@ func update_target_hp(instance_id: String, hp: int, max_hp: int) -> void:
 		var tween = create_tween()
 		tween.tween_property(hp_bar, "color", Color.WHITE, 0.04)
 		tween.tween_property(hp_bar, "color", orig_color, 0.08)
+		# 低血量脈動效果（HP < 30%）：啟動或停止脈動 tween
+		var pulse_tween_key = "hp_pulse_tween"
+		if pct <= 0.3:
+			# 若尚未有脈動 tween，建立一個
+			if not node.has_meta(pulse_tween_key):
+				var pulse = create_tween().set_loops()
+				pulse.tween_property(hp_bar, "modulate:a", 0.4, 0.25).set_ease(Tween.EASE_IN_OUT)
+				pulse.tween_property(hp_bar, "modulate:a", 1.0, 0.25).set_ease(Tween.EASE_IN_OUT)
+				node.set_meta(pulse_tween_key, pulse)
+		else:
+			# HP 回到 30% 以上，停止脈動
+			if node.has_meta(pulse_tween_key):
+				var pulse = node.get_meta(pulse_tween_key)
+				if pulse is Tween:
+					pulse.kill()
+				node.remove_meta(pulse_tween_key)
+				hp_bar.modulate.a = 1.0
 
 ## 目標物接近左邊緣時顯示逃跑警告箭頭
 func _update_escape_warnings() -> void:

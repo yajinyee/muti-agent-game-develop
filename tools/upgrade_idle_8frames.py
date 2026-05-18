@@ -180,7 +180,7 @@ def build_spritesheet(char_name):
         "rows": ROWS,
         "animations": {
             "idle":   {"row": 0, "frames": 8, "fps": 8.0},   # 升級：4→8幀，4→8fps
-            "attack": {"row": 1, "frames": 3, "fps": 8.0},
+            "attack": {"row": 1, "frames": 4, "fps": 10.0},  # 升級：3→4幀，8→10fps（完整揮棒動作）
             "bigwin": {"row": 2, "frames": 4, "fps": 6.0},
         }
     }

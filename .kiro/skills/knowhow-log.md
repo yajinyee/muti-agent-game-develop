@@ -1544,3 +1544,28 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **法線計算：** `nx = dx / max(dist, 0.1)`，避免除以零
 - **顏色計算：** `r_c = min(255, int(base_r * (0.7 + 0.6 * light)))`
 - **教訓：** 0.7 是最暗值（陰影），0.7+0.6=1.3 是最亮值（高光），這個範圍讓立體感明顯
+
+## 83. Attack 動畫幀數不一致問題（2026-05-19）
+- **問題：** `upgrade_idle_8frames.py` 生成 4 幀 attack，但 metadata 和 CharacterAnimator.gd 都寫 3 幀
+- **症狀：** 第 4 幀（復位幀）從未被播放，攻擊動畫少一幀
+- **修復：** metadata 改為 `"frames": 4, "fps": 10.0`，CharacterAnimator.gd 同步更新
+- **教訓：** 生成工具的 metadata 和 Godot 的 ANIM_CONFIG 必須保持一致，每次修改都要同步
+
+## 84. HP 條低血量脈動效果（2026-05-19）
+- **技術：** `create_tween().set_loops()` 做 `modulate:a` 0.4↔1.0 脈動（0.25s 間隔）
+- **管理方式：** 用 `node.set_meta("hp_pulse_tween", pulse)` 儲存 tween 引用
+- **停止方式：** `pulse.kill()` + `node.remove_meta()` + 重置 `modulate.a = 1.0`
+- **觸發條件：** HP < 30% 時啟動，HP 回到 30% 以上時停止
+- **教訓：** 用 node meta 儲存 tween 引用，可以在任何時候停止它，比用全域字典更乾淨
+
+## 85. 成就系統 Type 欄位設計（2026-05-19）
+- **設計：** 4 種類型：normal（金色）/ boss（紅色）/ bonus（綠色）/ special（紫色）
+- **Server 端：** `Achievement.Type` 欄位，`TryUnlock` 和 `UnlockedList` 都傳遞
+- **Client 端：** `_show_next_achievement()` 依 type 設定左側彩色邊條
+- **教訓：** 成就類型要在 Server 端定義，Client 只負責顯示，不要在 Client 端硬編碼類型判斷
+
+## 86. 成就通知面板動畫升級（2026-05-19）
+- **改善：** 滑入後加彈跳縮放（scale 1.0→1.05→1.0），淡出改為 modulate:a 漸隱
+- **注意：** 面板消失後必須重置 scale 和 modulate.a，否則下次顯示會有殘留狀態
+- **Tween 並行：** 滑入 tween 用 `set_parallel(false)`，縮放用獨立的 `create_tween().set_parallel(true)`
+- **教訓：** 多個 tween 同時執行時，要用獨立的 tween 物件，不要在同一個 tween 上混用 parallel 和 sequential

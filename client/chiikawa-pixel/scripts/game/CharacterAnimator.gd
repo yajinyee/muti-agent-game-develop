@@ -8,9 +8,10 @@ enum AnimState { IDLE, ATTACK, BIGWIN }
 
 # 動畫設定（對應 upgrade_idle_8frames.py 的 metadata）
 # idle 升級：4幀 → 8幀，fps 4 → 8（更流暢的呼吸感）
+# attack 升級：3幀 → 4幀（完整揮棒動作：準備→揮下→收回→復位），fps 8 → 10
 const ANIM_CONFIG = {
 	"idle":   {"row": 0, "frames": 8, "fps": 8.0},
-	"attack": {"row": 1, "frames": 3, "fps": 8.0},
+	"attack": {"row": 1, "frames": 4, "fps": 10.0},
 	"bigwin": {"row": 2, "frames": 4, "fps": 6.0},
 }
 
