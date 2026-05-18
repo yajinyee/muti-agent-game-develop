@@ -1484,3 +1484,20 @@ BONUS_MULT = 20-50x（Prototype 展示版）
   - `_show_spectator_badge()` — 右上角藍色「👁 觀戰中」標籤
   - `_on_lobby_room_selected` 依 `is_spectator()` 分支顯示不同提示
 - **教訓：** 觀戰模式的 Client 端只需要：1) 連線到不同端點 2) 顯示視覺標識 3) 禁用攻擊按鈕（Server 端已過濾）
+
+## 90. Store 整合到 Game 的正確方式（DAY-026）
+- **問題：** Store 骨架建好了，但沒有接到 Game，玩家金幣仍然不持久化
+- **整合點：**
+  1. `NewGameWithStore(id, hub, store, initialCoins)` — 新建構子，向後相容 `NewGame`
+  2. `AddPlayer`：先從 Store 讀取，有則恢復（coins/maxCoins/killCount/betLevel/displayName）
+  3. `RemovePlayer`：離開時儲存到 Store + 更新排行榜
+  4. `main.go`：`store.New(cfg.RedisURL)` 初始化，graceful shutdown 時 `store.Close()`
+- **型別注意：** `PlayerState.Coins` 是 `int64`，`Player.Coins` 是 `int`，需要 `int(saved.Coins)` 轉換
+- **降級策略：** `REDIS_URL` 為空 → 記憶體模式，Server 重啟後狀態丟失但不中斷服務
+- **教訓：** 設計文件和骨架完成後，要立刻整合到主流程，否則設計只是紙上談兵
+
+## 91. config.go 加入 REDIS_URL 環境變數
+- **做法：** `RedisURL: getEnv("REDIS_URL", "")` — 空字串代表記憶體模式
+- **部署時：** `REDIS_URL=redis://localhost:6379 ./gameserver`
+- **本機開發：** 不設定 REDIS_URL，自動使用記憶體模式
+- **教訓：** 環境變數要有合理的預設值，讓開發者不需要額外設定就能跑起來

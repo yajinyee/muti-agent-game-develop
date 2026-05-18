@@ -21,6 +21,7 @@ import (
 	"digital-twin/server/internal/config"
 	"digital-twin/server/internal/game"
 	"digital-twin/server/internal/room"
+	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
 )
 
@@ -45,12 +46,21 @@ func main() {
 	// 初始化多房間管理器（DAY-019）
 	roomMgr := room.NewManager()
 
+	// 初始化玩家狀態 Store（DAY-026）
+	// REDIS_URL 為空時自動降級到記憶體模式
+	playerStore := store.New(cfg.RedisURL)
+	if playerStore.IsRedis() {
+		log.Printf("💾 Player state: Redis (%s)", cfg.RedisURL)
+	} else {
+		log.Printf("💾 Player state: Memory (set REDIS_URL for persistence)")
+	}
+
 	// 初始化數據埋點（日誌寫入 logs/ 目錄）
 	tracker := analytics.Init("room-001", "./logs")
 	defer tracker.Close()
 
-	// 建立遊戲實例（單一房間 Prototype，多房間架構已就緒）
-	g := game.NewGame("room-001", hub)
+	// 建立遊戲實例（帶 Store 和初始金幣設定，DAY-026）
+	g := game.NewGameWithStore("room-001", hub, playerStore, cfg.InitialCoins)
 
 	// 設定 WebSocket 事件處理
 	hub.OnConnect = func(clientID string) {
@@ -282,6 +292,11 @@ func main() {
 
 	// 停止遊戲循環（清理 goroutine）
 	g.Stop()
+
+	// 關閉 Store（確保玩家狀態已儲存）
+	if err := playerStore.Close(); err != nil {
+		log.Printf("Store close error: %v", err)
+	}
 
 	// 給 HTTP 連線 5 秒完成
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)

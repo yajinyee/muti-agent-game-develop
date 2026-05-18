@@ -18,6 +18,7 @@ import (
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
 	"digital-twin/server/internal/player"
+	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
 )
 
@@ -31,6 +32,8 @@ type Game struct {
 	Targets     map[string]*target.Target
 	SpawnSys    *target.SpawnSystem
 	Hub         *ws.Hub
+	store       store.Store // 玩家狀態持久化（DAY-026）
+	initialCoins int        // 玩家初始金幣（從 config 傳入）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -57,6 +60,11 @@ type Game struct {
 
 // NewGame 建立新遊戲
 func NewGame(id string, hub *ws.Hub) *Game {
+	return NewGameWithStore(id, hub, nil, 10000)
+}
+
+// NewGameWithStore 建立新遊戲（帶 Store 和初始金幣設定）
+func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *Game {
 	g := &Game{
 		ID:                 id,
 		State:              state.StateNormalPlay,
@@ -64,6 +72,8 @@ func NewGame(id string, hub *ws.Hub) *Game {
 		Targets:            make(map[string]*target.Target),
 		SpawnSys:           target.NewSpawnSystem(),
 		Hub:                hub,
+		store:              s,
+		initialCoins:       initialCoins,
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -71,7 +81,7 @@ func NewGame(id string, hub *ws.Hub) *Game {
 		bonusEntryBet:      make(map[string]int),
 		// BOSS 自動觸發：遊戲開始後 3-5 分鐘（規格書 28.1）
 		nextBossAt: time.Now().Add(time.Duration(180+rand.Intn(120)) * time.Second),
-		stopCh:             make(chan struct{}),
+		stopCh:     make(chan struct{}),
 	}
 	return g
 }
@@ -94,24 +104,64 @@ func (g *Game) Stop() {
 	close(g.stopCh)
 }
 
-// AddPlayer 加入玩家
+// AddPlayer 加入玩家（從 Store 恢復狀態，若無則建立新玩家）
 func (g *Game) AddPlayer(playerID string) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
 	if _, exists := g.Players[playerID]; !exists {
-		g.Players[playerID] = player.NewPlayer(playerID, 10000) // 初始 10000 金幣
+		p := player.NewPlayer(playerID, g.initialCoins)
+
+		// 從 Store 恢復玩家狀態（若有）
+		if g.store != nil {
+			if saved, err := g.store.LoadPlayer(playerID); err == nil && saved != nil {
+				p.Coins = int(saved.Coins)
+				p.MaxCoins = int(saved.MaxCoins)
+				p.KillCount = saved.KillCount
+				if saved.BetLevel >= 1 && saved.BetLevel <= 10 {
+					p.BetLevel = saved.BetLevel
+				}
+				if saved.DisplayName != "" {
+					p.DisplayName = saved.DisplayName
+				}
+				log.Printf("[Game] Player %s restored: coins=%d, kills=%d", playerID, p.Coins, p.KillCount)
+			}
+		}
+
+		g.Players[playerID] = p
 		log.Printf("[Game] Player %s joined game %s", playerID, g.ID)
-		// 埋點：玩家加入（由 main.go 的 OnConnect 處理，這裡不重複）
 	}
 }
 
-// RemovePlayer 移除玩家
+// RemovePlayer 移除玩家（儲存狀態到 Store）
 func (g *Game) RemovePlayer(playerID string) {
 	g.mu.Lock()
-	defer g.mu.Unlock()
+	p := g.Players[playerID]
 	delete(g.Players, playerID)
+	g.mu.Unlock()
+
+	// 儲存玩家狀態到 Store（讓下次加入時能恢復）
+	if g.store != nil && p != nil {
+		state := &store.PlayerState{
+			PlayerID:     p.ID,
+			DisplayName:  p.DisplayName,
+			Coins:        int64(p.Coins),
+			Labor:        p.LaborValue,
+			BetLevel:     p.BetLevel,
+			SessionScore: int64(p.SessionScore),
+			MaxCoins:     int64(p.MaxCoins),
+			KillCount:    p.KillCount,
+			RoomID:       g.ID,
+		}
+		if err := g.store.SavePlayer(state); err != nil {
+			log.Printf("[Game] Failed to save player %s: %v", playerID, err)
+		} else {
+			log.Printf("[Game] Player %s saved: coins=%d", playerID, p.Coins)
+		}
+		// 更新排行榜
+		g.store.UpdateLeaderboard(playerID, int64(p.SessionScore))
+	}
+
 	log.Printf("[Game] Player %s left game %s", playerID, g.ID)
-	// 埋點：玩家離開（由 main.go 的 OnDisconnect 處理，這裡不重複）
 }
 
 // HandleMessage 處理玩家訊息
