@@ -90,6 +90,7 @@ type TargetSpawnPayload struct {
 	Speed      float64 `json:"speed"`
 	Lifetime   float64 `json:"lifetime"`
 	Behavior   string  `json:"behavior"`
+	Multiplier float64 `json:"multiplier"` // 目標倍率（Client 顯示用）
 }
 
 // TargetUpdatePayload 目標狀態更新

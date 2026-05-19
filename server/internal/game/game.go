@@ -823,6 +823,7 @@ func (g *Game) spawnTarget() {
 			Speed:      def.Speed,
 			Lifetime:   def.Lifetime,
 			Behavior:   def.SpecialBehavior,
+			Multiplier: t.Multiplier,
 		},
 	})
 }
@@ -860,6 +861,7 @@ func (g *Game) triggerSpecialEvent() {
 			Speed:      def.Speed,
 			Lifetime:   def.Lifetime,
 			Behavior:   def.SpecialBehavior,
+			Multiplier: t.Multiplier,
 		},
 	})
 }
@@ -1357,6 +1359,7 @@ func (g *Game) GetSpectatorSnapshot() SpectatorSnapshot {
 			Speed:      t.Def.Speed,
 			Lifetime:   t.Def.Lifetime,
 			Behavior:   t.Def.SpecialBehavior,
+			Multiplier: t.Multiplier,
 		})
 	}
 

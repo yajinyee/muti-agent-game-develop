@@ -523,6 +523,11 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	container.set_meta("spawn_time", Time.get_ticks_msec())
 	container.set_meta("target_type", target_type)
 
+	# 倍率標籤（捕魚機標準 UX：讓玩家一眼看出目標價值）
+	var multiplier = data.get("multiplier", 0.0)
+	if multiplier > 0.0 and target_type != "boss":
+		_add_multiplier_label(container, multiplier, target_type)
+
 	# 游泳動畫：輕微上下搖擺 + 旋轉傾斜（讓目標物有生命感）
 	# T103/T104 已有旋轉搖晃，不再加上下搖擺
 	# BOSS 不加（有自己的移動邏輯）
@@ -968,3 +973,65 @@ func _update_escape_warnings() -> void:
 			# 離開警告區域，移除警告
 			if warning != null:
 				warning.queue_free()
+
+## 加入倍率標籤（捕魚機標準 UX）
+## 在目標物上方顯示倍率，讓玩家一眼看出目標價值
+func _add_multiplier_label(container: Node2D, multiplier: float, target_type: String) -> void:
+	var label = Label.new()
+	label.name = "MultiplierLabel"
+
+	# 格式化倍率文字
+	if multiplier == int(multiplier):
+		label.text = "%dx" % int(multiplier)
+	else:
+		label.text = "%.0fx" % multiplier
+
+	# 位置：目標物上方
+	label.position = Vector2(-20, -52)
+	label.size = Vector2(40, 16)
+	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+
+	# 字體大小（依倍率大小調整）
+	var font_size: int
+	if multiplier >= 50:
+		font_size = 14
+	elif multiplier >= 20:
+		font_size = 13
+	else:
+		font_size = 11
+	label.add_theme_font_size_override("font_size", font_size)
+
+	# 套用像素字體
+	if _cached_pixel_font != null:
+		label.add_theme_font_override("font", _cached_pixel_font)
+
+	# 顏色（依倍率和類型）
+	var color: Color
+	if target_type == "special":
+		if multiplier >= 50:
+			color = Color(1.0, 0.3, 0.1)   # 橙紅（最高倍率）
+		elif multiplier >= 30:
+			color = Color(1.0, 0.85, 0.0)  # 金色
+		else:
+			color = Color(0.4, 1.0, 0.8)   # 青色
+	else:
+		if multiplier >= 10:
+			color = Color(1.0, 0.9, 0.3)   # 黃色
+		elif multiplier >= 5:
+			color = Color(0.8, 1.0, 0.5)   # 淡綠
+		else:
+			color = Color(0.9, 0.9, 0.9)   # 白灰
+
+	label.modulate = color
+
+	# 文字陰影（增加可讀性）
+	label.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.8))
+	label.add_theme_constant_override("shadow_offset_x", 1)
+	label.add_theme_constant_override("shadow_offset_y", 1)
+
+	container.add_child(label)
+
+	# 輕微上下浮動動畫（讓標籤更有生命感）
+	var float_tween = label.create_tween().set_loops()
+	float_tween.tween_property(label, "position:y", -56.0, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	float_tween.tween_property(label, "position:y", -52.0, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
