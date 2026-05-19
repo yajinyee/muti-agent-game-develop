@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-060 Redis Pub/Sub 水平擴展廣播層）
+## 最後更新：2026-05-20（DAY-061 Redis Pub/Sub 整合到 main.go）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,12 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-061 更新（自主觸發）：** Redis Pub/Sub 整合到 main.go（水平擴展閉環完成）✅
+  - `main.go`：建立 `serverID`（hostname + uuid[:8]）
+  - `main.go`：`NewPubSubBroker()` 建立代理，有 Redis 時啟動，無 Redis 時降級
+  - `main.go`：graceful shutdown 時呼叫 `pubsubBroker.Stop()`
+  - `main.go`：新增 `getHostname()` helper 函數
+  - build/vet/test 全部通過（9 個套件全部 ok）
 - **DAY-060 更新（自主觸發）：** Redis Pub/Sub 水平擴展廣播層 ✅
   - `server/internal/ws/pubsub.go`：PubSubBroker 代理（170 行）
     - `NewPubSubBroker(redisURL, roomID, serverID, hub)` — 建立代理，無 Redis 時回傳 nil

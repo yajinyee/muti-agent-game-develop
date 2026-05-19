@@ -36,7 +36,7 @@
 - **Gameplay Juice**：Screen Shake、Hit Stop、命中特效、子彈拖尾、全畫面閃光、連擊系統
 - **精準 RTP**：蒙地卡羅模擬校正至 95.98%（目標 92–96%）
 - **多房間支援**：RoomManager + LobbyManager，支援多人同時遊玩
-- **Redis 水平擴展**：RedisStore 完整實作，支援 Docker 部署
+- **Redis 水平擴展**：RedisStore 完整實作，Docker 部署就緒，**Redis Pub/Sub 跨 Server 廣播（DAY-061）**
 - **排行榜系統**：即時排行榜，每 10 秒廣播更新
 - **成就系統**：多種成就類型，彩色通知動畫
 - **數據埋點**：完整 Analytics 系統，JSONL 日誌 + HTTP 端點
@@ -238,7 +238,9 @@ powershell -File tools/daily_build.ps1
 | **DAY-057** | **2026-05-20** | **game.go 拆分（jackpot_handler + mission_handler + perf_handler）** |
 | **DAY-058** | **2026-05-20** | **coder/websocket 遷移評估 + HTML5 優化確認 + KnowHow#113-114** |
 | **DAY-059** | **2026-05-20** | **Go WebSocket 高負載優化研究 + Godot HTML5 Lossy 壓縮技巧 + KnowHow#115-116** |
+| **DAY-060** | **2026-05-20** | **Redis Pub/Sub 水平擴展廣播層（PubSubBroker + 4 個單元測試）** |
+| **DAY-061** | **2026-05-20** | **Redis Pub/Sub 整合到 main.go（水平擴展閉環完成）** |
 
 ---
 
-*由 Multi-Agent Game Studio 自主開發維護 · 最後更新：DAY-059（2026-05-20）*
+*由 Multi-Agent Game Studio 自主開發維護 · 最後更新：DAY-061（2026-05-20）*

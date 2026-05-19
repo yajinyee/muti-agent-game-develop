@@ -45,6 +45,17 @@ func main() {
 	// 建立 WebSocket Hub
 	hub := ws.NewHub()
 
+	// 初始化 Redis Pub/Sub 廣播代理（DAY-061，水平擴展）
+	// 有 REDIS_URL 時啟用跨 Server 廣播，無 Redis 時自動降級為純本地廣播
+	serverID := fmt.Sprintf("%s-%s", getHostname(), uuid.New().String()[:8])
+	pubsubBroker := ws.NewPubSubBroker(cfg.RedisURL, "room-001", serverID, hub)
+	if pubsubBroker != nil {
+		pubsubBroker.Start()
+		log.Printf("📡 Redis Pub/Sub enabled (serverID: %s)", serverID)
+	} else {
+		log.Printf("📡 Redis Pub/Sub disabled (single-instance mode, serverID: %s)", serverID)
+	}
+
 	// 初始化多房間管理器（DAY-019）
 	roomMgr := room.NewManager()
 
@@ -655,6 +666,11 @@ func main() {
 	// 停止遊戲循環（清理 goroutine）
 	g.Stop()
 
+	// 停止 Redis Pub/Sub 代理（DAY-061）
+	if pubsubBroker != nil {
+		pubsubBroker.Stop()
+	}
+
 	// 關閉 Store（確保玩家狀態已儲存）
 	if err := playerStore.Close(); err != nil {
 		log.Printf("Store close error: %v", err)
@@ -675,4 +691,14 @@ func isCompressiblePath(path string) bool {
 	return strings.HasSuffix(path, ".wasm") ||
 		strings.HasSuffix(path, ".pck") ||
 		strings.HasSuffix(path, ".js")
+}
+
+// getHostname 取得主機名稱（用於 serverID 生成）
+// 失敗時回傳 "unknown"
+func getHostname() string {
+	hostname, err := os.Hostname()
+	if err != nil {
+		return "unknown"
+	}
+	return hostname
 }
