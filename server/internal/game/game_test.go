@@ -438,3 +438,43 @@ func TestGetState_ThreadSafe(t *testing.T) {
 		t.Error("GetState should complete within timeout")
 	}
 }
+
+// TestGetJackpotSnapshot 確認 Jackpot 快照回傳正確格式（DAY-054）
+func TestGetJackpotSnapshot(t *testing.T) {
+	g := newTestGame(t)
+
+	snap := g.GetJackpotSnapshot()
+
+	// 確認三個等級都存在
+	if _, ok := snap["mini"]; !ok {
+		t.Error("jackpot snapshot should have 'mini' key")
+	}
+	if _, ok := snap["major"]; !ok {
+		t.Error("jackpot snapshot should have 'major' key")
+	}
+	if _, ok := snap["grand"]; !ok {
+		t.Error("jackpot snapshot should have 'grand' key")
+	}
+
+	// 初始值應該 >= 0
+	for level, amount := range snap {
+		if amount < 0 {
+			t.Errorf("jackpot %s amount should be >= 0, got %d", level, amount)
+		}
+	}
+}
+
+// TestGetJackpotDailyStats 確認 Jackpot 每日統計初始值正確（DAY-054）
+func TestGetJackpotDailyStats(t *testing.T) {
+	g := newTestGame(t)
+
+	daily := g.GetJackpotDailyStats()
+
+	// 初始狀態：無中獎記錄
+	if daily.TotalWins < 0 {
+		t.Errorf("daily total wins should be >= 0, got %d", daily.TotalWins)
+	}
+	if daily.TotalPayout < 0 {
+		t.Errorf("daily total payout should be >= 0, got %d", daily.TotalPayout)
+	}
+}
