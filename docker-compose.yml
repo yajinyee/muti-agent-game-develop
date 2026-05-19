@@ -1,0 +1,79 @@
+# docker-compose.yml — 吉伊卡哇：像素大討伐
+# 一鍵啟動 Game Server + Redis
+#
+# 使用方式：
+#   docker-compose up -d          # 背景啟動
+#   docker-compose logs -f        # 查看日誌
+#   docker-compose down           # 停止並移除容器
+#   docker-compose down -v        # 停止並移除容器 + 資料卷
+
+version: '3.8'
+
+services:
+  # ── Redis（玩家資料持久化 + 排行榜）──────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: chiikawa-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: >
+      redis-server
+      --appendonly yes
+      --appendfsync everysec
+      --maxmemory 256mb
+      --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - chiikawa-net
+
+  # ── Game Server ───────────────────────────────────────────────
+  gameserver:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    container_name: chiikawa-gameserver
+    restart: unless-stopped
+    ports:
+      - "7777:7777"
+    environment:
+      - PORT=7777
+      - MAX_PLAYERS=10
+      - INITIAL_COINS=10000
+      - DEBUG=false
+      - REDIS_URL=redis://redis:6379
+      # 時區設定（台灣）
+      - TZ=Asia/Taipei
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:7777/health || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 15s
+      retries: 3
+    networks:
+      - chiikawa-net
+    # 日誌設定（避免日誌無限增長）
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+# ── 資料卷 ────────────────────────────────────────────────────
+volumes:
+  redis_data:
+    driver: local
+
+# ── 網路 ──────────────────────────────────────────────────────
+networks:
+  chiikawa-net:
+    driver: bridge
