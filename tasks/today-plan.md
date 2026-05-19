@@ -50,9 +50,9 @@
 
 ### 🟠 上傳 GitHub（P1）
 
-- [ ] git add（新 handler + nightly reports + knowhow + today-plan + progress）
-- [ ] git commit（DAY-057 game.go 拆分 + Nightly Reports 補齊）
-- [ ] git push origin main
+- [x] git add（新 handler + nightly reports + knowhow + today-plan + progress）
+- [x] git commit（DAY-057 game.go 拆分 + Nightly Reports 補齊）
+- [x] git push origin main（c819711 → f2c78aa..c819711）
 
 ---
 
