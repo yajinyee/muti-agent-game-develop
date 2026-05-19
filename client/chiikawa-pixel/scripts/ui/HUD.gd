@@ -993,6 +993,16 @@ func _update_fps_display() -> void:
 			else:
 				ping_lbl.modulate = Color(0.4, 1.0, 0.5, 0.85) # 綠：低延遲
 
+	# Pool 統計行（DAY-041：BulletPool + TargetPool）
+	var pool_lbl = _perf_panel.get_node_or_null("PoolLine")
+	if pool_lbl:
+		var b_stats = PerformanceMonitor.get_bullet_pool_stats()
+		var t_stats = TargetPool.get_stats()
+		pool_lbl.text = "POOL B:%d/%d T:%d/%d" % [
+			b_stats.get("active", 0), b_stats.get("total", 0),
+			t_stats.get("active", 0), t_stats.get("total", 0)
+		]
+
 func _create_perf_panel() -> void:
 	var panel = Control.new()
 	panel.name = "PerfPanel"
@@ -1061,6 +1071,25 @@ func _create_perf_panel() -> void:
 	if is_instance_valid(_pixel_font):
 		ping_lbl.add_theme_font_override("font", _pixel_font)
 	panel.add_child(ping_lbl)
+
+	# Pool 統計行（DAY-041：BulletPool + TargetPool）
+	var pool_lbl = Label.new()
+	pool_lbl.name = "PoolLine"
+	pool_lbl.position = Vector2(8, 76)
+	pool_lbl.size = Vector2(210, 16)
+	pool_lbl.add_theme_font_size_override("font_size", 11)
+	pool_lbl.text = "POOL: B?/? T?/?"
+	pool_lbl.modulate = Color(0.6, 0.8, 0.6, 0.75)
+	if is_instance_valid(_pixel_font):
+		pool_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(pool_lbl)
+
+	# 面板高度調整（加入 pool 行後從 74 增加到 96）
+	bg.size.y = 96
+	panel.size.y = 96
+	var side_bar = panel.get_node_or_null("ColorRect")  # 左側邊條
+	if is_instance_valid(side_bar):
+		side_bar.size.y = 96
 
 # ── 成就通知系統 ──────────────────────────────────────────────
 
