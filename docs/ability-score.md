@@ -1254,3 +1254,50 @@ GitHub 同步完成（commit `e333f81`）。
 1. 搜尋「Godot 4 HTML5 export optimization 2025」確認最新優化技術
 2. 評估 Server `/health` 端點加入 Jackpot 狀態（讓運維更方便）
 3. 考慮加入 Server 端 graceful shutdown 測試（確保 Redis 連線正確關閉）
+
+---
+
+## 評估 #33 — 2026-05-20（DAY-055~056，觀戰者系統完整實作 + goleak goroutine 洩漏偵測）
+
+### 這次學到了什麼
+1. **Hub 回調擴充模式**（KnowHow #108）：
+   - 依角色分離回調（OnDisconnect vs OnSpectatorDisconnect）
+   - 不改變現有行為，向後相容
+2. **觀戰者離開通知的 UX 設計**（KnowHow #109）：
+   - 只在「最後一位觀戰者離開」時顯示通知
+   - 中間的離開靜默處理，避免打擾玩家
+3. **goleak goroutine 洩漏偵測**（KnowHow #110）：
+   - `go.uber.org/goleak v1.3.0`
+   - 在 `TestMain` 中呼叫 `goleak.VerifyTestMain(m)`
+   - game 套件和 ws 套件都通過，無 goroutine 洩漏
+4. **Grafana dashboard 擴充**：
+   - 從 25 個面板升級到 26 個面板
+   - 加入觀戰者計數 stat 面板（`chiikawa_connected_spectators`）
+
+### 進步說明
+- DAY-055：觀戰者系統完整實作（BroadcastToPlayers + spectator_join/leave 通知 + HUD TopBar 計數）
+- DAY-055b：OnSpectatorDisconnect 回調 + MsgSpectatorLeave 訊息類型
+- DAY-055c：TopBar 觀戰者計數標籤（👁️ N）
+- DAY-055d：Grafana 升級到 26 個面板
+- DAY-056：goleak goroutine 洩漏偵測（game + ws 套件）
+- 所有測試通過（9 個套件全部 ok）
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 99 | +1 | goleak 確認無 goroutine 洩漏，架構更穩固 |
+| Godot GDScript | 99 | → | 穩定 |
+| 像素美術生成 | 100 | → | 穩定 |
+| 遊戲數值設計 | 96 | → | 穩定 |
+| WebSocket 通訊 | 98 | +1 | 觀戰者系統完整，BroadcastToPlayers 精確控制 |
+| **整體完成信心** | **100** | → | 維持 100% |
+
+### 完成遊戲的信心評估
+**100/100** — 觀戰者系統完整，goroutine 洩漏偵測通過，Grafana 26 個面板。
+今日完成：觀戰者系統（加入/離開通知 + TopBar 計數）+ goleak 偵測 + Grafana 升級 + GitHub 上傳。
+
+### 下一步學習目標
+1. 考慮加入 Server 端 graceful shutdown（確保 Redis 連線正確關閉）
+2. 評估 `coder/websocket` 遷移可行性（gorilla/websocket 已 archive）
+3. 搜尋「Godot 4.6 HTML5 export performance improvements」確認最新優化
