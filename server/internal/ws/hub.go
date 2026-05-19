@@ -259,6 +259,34 @@ func (h *Hub) Broadcast(msg *Message) {
 	h.IncrMsgType(msg.Type)
 }
 
+// BroadcastToPlayers 廣播訊息給所有玩家（排除觀戰者，DAY-054d）
+// 用於觀戰者加入通知等只需要玩家知道的事件
+func (h *Hub) BroadcastToPlayers(msg *Message) {
+	data, err := json.Marshal(msg)
+	if err != nil {
+		log.Printf("[WS] BroadcastToPlayers marshal error: %v", err)
+		return
+	}
+
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	for _, client := range h.clients {
+		if client.Role != RolePlayer {
+			continue
+		}
+		select {
+		case client.send <- data:
+			h.MsgSent.Add(1)
+			h.BytesSentRaw.Add(int64(len(data)))
+		default:
+			h.MsgDropped.Add(1)
+			log.Printf("[WS] BroadcastToPlayers buffer full for client %s", client.ID)
+		}
+	}
+	h.IncrMsgType(msg.Type)
+}
+
 // ClientCount 目前總連線數（玩家 + 觀戰者）
 func (h *Hub) ClientCount() int {
 	h.mu.RLock()

@@ -92,6 +92,7 @@ func _ready() -> void:
 	GameManager.achievement_unlocked.connect(_on_achievement_unlocked)
 	GameManager.combo_event.connect(_on_combo_event)  # ???鈭辣嚗AY-022嚗?
 	# jackpot_updated / jackpot_won 撌脩宏??JackpotPanel.gd嚗AY-053嚗?
+	GameManager.spectator_joined.connect(_on_spectator_joined)  # 觀戰者加入（DAY-054d）
 
 	# ?瑞?/???蝷?NetworkManager.disconnected.connect(_on_disconnected)
 	NetworkManager.connected.connect(_on_reconnected)
@@ -1595,3 +1596,17 @@ func _input(event: InputEvent) -> void:
 			if is_instance_valid(_session_stats_node):
 				_session_stats_node.toggle()
 			get_viewport().set_input_as_handled()
+
+# ── 觀戰者加入通知（DAY-054d）──────────────────────────────────────────────
+
+func _on_spectator_joined(spectator_data: Dictionary) -> void:
+	var count = spectator_data.get("spectator_count", 1)
+	# 用成就通知系統顯示觀戰者加入（複用現有 UI）
+	_achievement_queue.append({
+		"icon": "👁️",
+		"name": "有人在觀戰！",
+		"description": "目前 %d 位觀戰者" % count,
+		"type": "special"
+	})
+	if not _achievement_showing:
+		_show_next_achievement()

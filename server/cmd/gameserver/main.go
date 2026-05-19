@@ -165,6 +165,16 @@ func main() {
 				Payload: snapshot.Leaderboard,
 			})
 			log.Printf("[Spectator] %s initialized with %d targets", spectatorID, len(snapshot.Targets))
+
+			// 廣播觀戰者加入通知給所有玩家（DAY-054d）
+			// 讓玩家知道有人在觀戰，增加社交感
+			hub.BroadcastToPlayers(&ws.Message{
+				Type: ws.MsgSpectatorJoin,
+				Payload: map[string]interface{}{
+					"spectator_id":    spectatorID,
+					"spectator_count": hub.SpectatorCount(),
+				},
+			})
 		}()
 	})
 

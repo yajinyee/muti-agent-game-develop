@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-054 /health 端點強化 + Jackpot 狀態整合 + Nightly Reports 補齊）
+## 最後更新：2026-05-20（DAY-055 觀戰者系統完整實作 + BroadcastToPlayers + 測試通過）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,13 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-055 更新（自主觸發）：** 觀戰者系統完整實作 ✅
+  - `hub.go`：新增 `BroadcastToPlayers()` — 只廣播給 RolePlayer，跳過 RoleSpectator
+  - `main.go`：觀戰者連線時廣播 `spectator_join` 給所有玩家（spectator_id + spectator_count）
+  - `GameManager.gd`：新增 `spectator_joined` 訊號 + `_handle_spectator_join()` 處理函數
+  - `HUD.gd`：連接 `spectator_joined` 訊號，用成就通知系統顯示「👁️ 有人在觀戰！」
+  - `hub_test.go`：新增 `TestBroadcastToPlayers`（確認只有 player 收到，spectator 不收）
+  - 所有測試通過（9 個套件全部 ok）
 - **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（25個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報，Client 端效能歷史 Ring Buffer（100筆），Nightly Report 自動化，Progressive Jackpot 系統（Mini/Major/Grand），Jackpot 特效強化，Session 結算強化，Jackpot 池持久化（Redis SetJSON/GetJSON），Jackpot 每日統計，AudioManager 快取優化（消除 HTML5 首次音效延遲），HUD 模組化（JackpotPanel/MissionPanel/SessionStatsPanel 獨立腳本），AudioManager 重構（play_attack_by_character 統一走 play_sfx 路徑），Audio Sync 100/100，/health 端點強化（Jackpot 狀態整合 + json.Marshal 安全序列化）**
 - **DAY-054 更新（自主觸發）：** /health 端點強化 + Nightly Reports 補齊 + 測試 100/100 ✅
   - `main.go`：`/health` 端點加入 Jackpot 狀態（mini/major/grand 池金額 + 今日中獎數 + 今日派彩）

@@ -370,3 +370,28 @@ func TestGetPerfHistoryRingBuffer(t *testing.T) {
 		t.Errorf("expected 100 history entries (ring buffer capacity), got %d", len(history))
 	}
 }
+
+// TestBroadcastToPlayers 確認 BroadcastToPlayers 只傳給玩家，不傳給觀戰者（DAY-054d）
+func TestBroadcastToPlayers(t *testing.T) {
+	h := NewHub()
+
+	player := &Client{ID: "p1", Role: RolePlayer, send: make(chan []byte, 10)}
+	spectator := &Client{ID: "s1", Role: RoleSpectator, send: make(chan []byte, 10)}
+
+	h.mu.Lock()
+	h.clients[player.ID] = player
+	h.clients[spectator.ID] = spectator
+	h.mu.Unlock()
+
+	msg := &Message{Type: MsgSpectatorJoin, Payload: map[string]interface{}{"spectator_count": 1}}
+	h.BroadcastToPlayers(msg)
+
+	// 玩家應該收到訊息
+	if len(player.send) != 1 {
+		t.Errorf("player should receive BroadcastToPlayers message, got %d", len(player.send))
+	}
+	// 觀戰者不應該收到訊息
+	if len(spectator.send) != 0 {
+		t.Errorf("spectator should NOT receive BroadcastToPlayers message, got %d", len(spectator.send))
+	}
+}
