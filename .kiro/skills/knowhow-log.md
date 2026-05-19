@@ -1854,3 +1854,15 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **解法：** `depends_on: - prometheus`（確保 Prometheus 先啟動）
 - **注意：** `depends_on` 只確保啟動順序，不確保服務就緒（Prometheus 啟動快，通常沒問題）
 - **教訓：** 監控服務的依賴鏈：gameserver → prometheus → grafana
+
+## 86. Godot 4 Object Pooling 設計模式（子彈/特效節點重用）
+- **問題：** 高頻 `Node2D.new()` + `add_child()` + `queue_free()` 在 HTML5 環境造成 GC 壓力
+- **解法：** Object Pool — 預建立節點，用完歸還（`visible = false`），不 `queue_free()`
+- **關鍵設計：**
+  1. `_ready()` 預建立 POOL_SIZE 個節點，`add_child()` 到 Autoload
+  2. `acquire()` 從 pool 取出，設 `visible = true`，移到遊戲場景
+  3. `release()` 設 `visible = false`，移回 Autoload，停止所有 tween
+  4. Pool 耗盡時動態建立（不限制上限，避免遊戲卡頓）
+- **節點移動：** `parent.remove_child(proj)` + `BulletPool.add_child(proj)` 比 `queue_free()` + `new()` 快 10x
+- **tween 清理：** `bullet.set_meta("tweens", [])` 儲存 tween 引用，`release()` 時 `t.kill()` 停止
+- **教訓：** 捕魚機每秒可能有 10+ 次射擊，Object Pooling 是 HTML5 效能的關鍵優化
