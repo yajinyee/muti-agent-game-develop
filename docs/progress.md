@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-055b 觀戰者離開通知 + OnSpectatorDisconnect 回調 + MsgSpectatorLeave）
+## 最後更新：2026-05-20（DAY-055c TopBar觀戰者計數 + Grafana 26面板 + 完整觀戰者系統）
 
 ## 自我評估
 - **完成度：100%**

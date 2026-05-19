@@ -1,5 +1,5 @@
 {
-  "title": "吉伊卡哇：像素大討伐 — 監控總覽 (DAY-049)",
+  "title": "吉伊卡哇：像素大討伐 — 監控總覽 (DAY-055)",
   "uid": "chiikawa-overview",
   "version": 1,
   "schemaVersion": 38,
@@ -855,7 +855,9 @@
         "graphMode": "none",
         "orientation": "horizontal",
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
         }
       },
       "fieldConfig": {
@@ -863,9 +865,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "blue", "value": null},
-              {"color": "yellow", "value": 1000},
-              {"color": "red", "value": 5000}
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 1000
+              },
+              {
+                "color": "red",
+                "value": 5000
+              }
             ]
           }
         }
@@ -982,9 +993,18 @@
           "thresholds": {
             "mode": "absolute",
             "steps": [
-              {"color": "red", "value": null},
-              {"color": "yellow", "value": 30},
-              {"color": "green", "value": 55}
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 30
+              },
+              {
+                "color": "green",
+                "value": 55
+              }
             ]
           },
           "unit": "fps"
@@ -1017,7 +1037,51 @@
         "graphMode": "none",
         "orientation": "horizontal",
         "reduceOptions": {
-          "calcs": ["lastNotNull"]
+          "calcs": [
+            "lastNotNull"
+          ]
+        }
+      }
+    },
+    {
+      "id": 26,
+      "title": "當前觀戰者數量",
+      "type": "stat",
+      "gridPos": {
+        "x": 16,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
+      "targets": [
+        {
+          "expr": "chiikawa_connected_spectators",
+          "legendFormat": "Spectators"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              },
+              {
+                "color": "green",
+                "value": 1
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              }
+            ]
+          }
         }
       }
     }
