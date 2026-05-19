@@ -96,6 +96,8 @@ func _ready() -> void:
 	GameManager.target_updated.connect(_on_target_updated)
 	GameManager.target_killed.connect(_on_target_killed)
 	GameManager.boss_event.connect(_on_boss_event)
+	# 初始化 TargetPool（預建立 24 個空殼節點，避免高頻 GC）
+	TargetPool.init_pool(self)
 	# 預載入常用資源
 	_preload_resources()
 
@@ -410,9 +412,10 @@ func _on_target_spawned(data: Dictionary) -> void:
 	if _target_nodes.has(instance_id):
 		return
 
-	# 建立目標節點（使用像素 Sprite）
+	# 建立目標節點（使用 TargetPool 重用節點，避免 GC 壓力）
 	var node = _create_target_node(data)
-	add_child(node)
+	# 注意：TargetPool.acquire() 已在 _create_target_node 內呼叫，
+	# 節點已加入場景（由 TargetPool.init_pool 時加入），不需要再 add_child
 	_target_nodes[instance_id] = node
 
 	# 進場動畫（scale 0 → 1，彈入效果）
@@ -448,10 +451,13 @@ func _on_target_killed(data: Dictionary) -> void:
 	# 再播放特效（節點已從字典移除，不會被 update 干擾）
 	if is_instance_valid(node):
 		_play_kill_effect(node, data)
+	# 注意：_play_kill_effect 內部會在動畫結束後呼叫 TargetPool.release(node)
+	# 對於沒有動畫的情況，直接 release
 
-## 建立目標節點（使用像素 Sprite）
+## 建立目標節點（使用 TargetPool 重用節點，避免 GC 壓力）
 func _create_target_node(data: Dictionary) -> Node2D:
-	var container = Node2D.new()
+	# 從 TargetPool 取出空殼節點（已在場景中，不需要 add_child）
+	var container = TargetPool.acquire()
 	container.position = Vector2(data.get("x", 0), data.get("y", 0))
 	container.name = "Target_" + data.get("instance_id", "")
 
@@ -636,7 +642,7 @@ func _update_target_positions(delta: float) -> void:
 		if _target_nodes.has(id):
 			var node = _target_nodes[id]
 			if is_instance_valid(node):
-				node.queue_free()
+				TargetPool.release(node)  # 歸還到 pool，不 queue_free
 			_target_nodes.erase(id)
 
 ## 擊破特效（規格書 8.2）
@@ -674,8 +680,7 @@ func _play_kill_effect(node: Node2D, data: Dictionary) -> void:
 	tween.tween_property(node, "scale", Vector2(1.5, 1.5), 0.08)
 	tween.tween_property(node, "scale", Vector2(0.0, 0.0), 0.15)
 	tween.tween_callback(func():
-		if is_instance_valid(node):
-			node.queue_free()
+		TargetPool.release(node)  # 歸還到 pool，不 queue_free
 	)
 
 	# 獎勵跳字（用記錄的位置，不依賴 node）
@@ -707,8 +712,7 @@ func _play_boss_death(node: Node2D, kill_pos: Vector2, reward: int, multiplier: 
 	tween.tween_property(node, "scale", Vector2(2.5, 2.5), death_duration * 0.3)
 	tween.tween_property(node, "scale", Vector2(0.0, 0.0), death_duration * 0.7)
 	tween.tween_callback(func():
-		if is_instance_valid(node):
-			node.queue_free()
+		TargetPool.release(node)  # 歸還到 pool
 		# 重置 BOSS 動畫狀態
 		_boss_anim_row = BOSS_ROW_IDLE
 		_boss_anim_frame = 0
@@ -745,8 +749,7 @@ func _play_mimic_death(node: Node2D, kill_pos: Vector2, reward: int, multiplier:
 	tween3.tween_property(node, "scale", Vector2(2.0, 2.0), 0.1)
 	tween3.parallel().tween_property(node, "modulate:a", 0.0, 0.1)
 	tween3.tween_callback(func():
-		if is_instance_valid(node):
-			node.queue_free()
+		TargetPool.release(node)  # 歸還到 pool
 	)
 
 	# 生成「真面目」文字

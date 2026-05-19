@@ -1879,3 +1879,29 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **降級模式：** Pool 未初始化時，回傳普通節點（`pooled=false`），用 `queue_free()` 清理
 - **tween 追蹤：** `register_tween(bullet, tween)` 讓 Pool 在 `release()` 時自動 `kill()` tween
 - **教訓：** Object Pool 的核心是「節點不離開場景樹」，不是「節點在不同父節點間移動」
+
+## 87. TargetPool 設計原則（2026-05-19 DAY-041）
+- **問題：** TargetManager 每次 target_spawn 都建立新節點（含 Sprite2D + HP條 + Label），每次 target_kill 都 queue_free，高頻 GC 壓力
+- **解法：** TargetPool 物件池，預建立 24 個空殼 Node2D，acquire 時重置狀態，release 時隱藏並移到畫面外
+- **關鍵設計：**
+  1. 空殼節點在 `init_pool` 時一次性加入場景，不再 add_child/queue_free
+  2. `acquire()` 清除所有子節點（`child.queue_free()`）和 meta，填入新資料
+  3. `release()` 停止所有 tween，清除子節點，移到 (-9999, -9999)
+  4. 非 pool 管理的節點（`pooled=false`）直接 queue_free（降級模式）
+- **與 BulletPool 的差異：** BulletPool 的子節點固定（只有 Sprite2D），TargetPool 的子節點動態（Sprite2D + HP條 + Label + LockFrame），所以 acquire 時需要清除子節點
+- **教訓：** 物件池的設計要考慮子節點的複雜度，子節點固定的 pool 比子節點動態的 pool 更高效
+
+## 88. GDScript tween 生命週期與 pool 的相容性（2026-05-19 DAY-041）
+- **問題：** pool 節點的 tween 在 release 後可能繼續執行（因為節點沒有 queue_free）
+- **解法：** 在 release 時讀取 `active_tweens` meta，逐一 kill
+- **注意：** 子節點的 tween 在子節點 queue_free 時自動停止，不需要手動 kill
+- **但是：** container 本身的 tween（swim 動畫、rotation 動畫）需要手動 kill
+- **最佳實踐：** 用 `register_tween(node, tween)` 追蹤所有 container 級別的 tween
+- **教訓：** pool 節點的 tween 生命週期要特別注意，不能依賴節點刪除來自動停止
+
+## 89. Prometheus /metrics 加入 active_targets 指標（2026-05-19 DAY-041）
+- **新增方法：** `game.GetActiveTargetCount()` — thread-safe，用 RLock 讀取 `len(g.Targets)`
+- **指標名稱：** `chiikawa_active_targets`（gauge 類型）
+- **Grafana 面板：** 加入 stat 面板（0-14 綠，15-19 黃，20+ 紅）+ timeseries 面板（0-25 範圍）
+- **用途：** 監控目標物生成/消滅的平衡，異常時（如目標物堆積）可以快速發現
+- **教訓：** 遊戲邏輯指標（active_targets、active_players）比系統指標（goroutines、heap）更能反映遊戲健康狀態

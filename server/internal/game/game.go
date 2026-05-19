@@ -96,6 +96,14 @@ func (g *Game) GetState() string {
 	return string(g.State)
 }
 
+// GetActiveTargetCount 取得當前活躍目標物數量（thread-safe）
+// 供 /metrics 端點使用，讓 Grafana 能監控目標物數量
+func (g *Game) GetActiveTargetCount() int {
+	g.mu.RLock()
+	defer g.mu.RUnlock()
+	return len(g.Targets)
+}
+
 // Start 啟動遊戲循環
 func (g *Game) Start() {
 	log.Printf("[Game] %s started", g.ID)

@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-040 Prometheus /metrics 端點 + 監控基礎設施）
+## 最後更新：2026-05-19（DAY-041 TargetPool 物件池 + /metrics active_targets）
 
 ## 自我評估
 - **完成度：100%**
@@ -9,7 +9,7 @@
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
 - **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控**
-- **DAY-040 更新：** `/metrics` Prometheus 端點（15個指標）✅，docker-compose 加入 Prometheus + Grafana ✅，Grafana dashboard 自動 provisioning ✅
+- **DAY-041 更新：** `TargetPool.gd`（24個空殼節點預建立，消除高頻 GC）✅，`TargetManager.gd` 整合 TargetPool ✅，`/metrics` 加入 `chiikawa_active_targets` 指標 ✅，Grafana dashboard 升級到 12 個面板 ✅
 
 ---
 
@@ -273,6 +273,15 @@
   - `mission.go`：`DailyMissions` 加入 `daily_combo_5`（達成 5 連擊，獎勵 1200 金幣，🔥）
   - `game.go`：combo 廣播後加入 `updateMissionProgress(p.ID, mission.MissionCombo, comboCount)`
   - `mission_test.go`：新增 `TestUpdateProgress_Combo` + `TestAllMissionTypesPresent`（10/10 全通過）
+- [x] **TargetPool 物件池**（DAY-041）：
+  - `scripts/game/TargetPool.gd`：24 個空殼節點預建立，acquire/release/release_all/get_stats
+  - `TargetManager.gd`：整合 TargetPool（init_pool + acquire + release 全部替換 add_child/queue_free）
+  - `project.godot`：加入 TargetPool autoload
+  - 效能改善：消除高頻 GC，節點數量穩定（24 個）
+- [x] **Server /metrics active_targets 指標**（DAY-041）：
+  - `game.go`：`GetActiveTargetCount()` 方法（thread-safe，RLock）
+  - `main.go`：`/metrics` 加入 `chiikawa_active_targets` gauge
+  - Grafana dashboard：從 10 個面板升級到 12 個面板（active_targets stat + timeseries）
 
 ---
 

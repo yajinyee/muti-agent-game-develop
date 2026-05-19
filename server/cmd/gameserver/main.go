@@ -338,6 +338,11 @@ func main() {
 		fmt.Fprintf(w, "# HELP chiikawa_ws_messages_dropped_total Total WebSocket messages dropped (buffer full or rate limited)\n")
 		fmt.Fprintf(w, "# TYPE chiikawa_ws_messages_dropped_total counter\n")
 		fmt.Fprintf(w, "chiikawa_ws_messages_dropped_total %d\n\n", hub.MsgDropped.Load())
+
+		// DAY-041：active_targets 指標（讓 Grafana 能監控目標物數量）
+		fmt.Fprintf(w, "# HELP chiikawa_active_targets Current number of active targets on screen\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_active_targets gauge\n")
+		fmt.Fprintf(w, "chiikawa_active_targets %d\n\n", g.GetActiveTargetCount())
 	})
 
 	// pprof 監控端點（Debug 模式下啟用，用於記憶體/goroutine 分析）

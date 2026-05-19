@@ -208,6 +208,52 @@
           }
         }
       }
+    },
+    {
+      "id": 11,
+      "title": "當前活躍目標物數量",
+      "type": "stat",
+      "gridPos": { "x": 18, "y": 20, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "chiikawa_active_targets",
+          "legendFormat": "Active Targets"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 15 },
+              { "color": "red", "value": 20 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 12,
+      "title": "目標物數量時序",
+      "type": "timeseries",
+      "gridPos": { "x": 18, "y": 24, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "chiikawa_active_targets",
+          "legendFormat": "Active Targets"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "min": 0,
+          "max": 25
+        }
+      }
     }
   ]
 }
