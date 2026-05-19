@@ -8,6 +8,8 @@ class_name AudioManagerClass
 # 音效類型（規格書 10.2）
 enum SFX {
 	ATTACK_FIRE,
+	ATTACK_FIRE_HACHIWARE,  # 小八攻擊音效（DAY-053 補齊）
+	ATTACK_FIRE_USAGI,      # 烏薩奇攻擊音效（DAY-053 補齊）
 	HIT,
 	KILL,
 	COIN_DROP,
@@ -189,47 +191,21 @@ func _get_bgm_pitch(bgm: BGM) -> float:
 		BGM.BOSS_RAGE: return 1.1   # Phase 2 音調 +10%（規格書 audio-map.json）
 		_: return 1.0
 
-## 依角色播放攻擊音效
+## 依角色播放攻擊音效（DAY-053 重構：統一走 play_sfx 路徑）
 func play_attack_by_character(character_id: String) -> void:
 	match character_id:
 		"chiikawa":
 			play_sfx(SFX.ATTACK_FIRE)
 		"hachiware":
-			# 小八用獨立音效（透過 play_sfx 路徑，享有快取優化）
-			var path = "res://assets/audio/sfx/attack_fire_hachiware.wav"
-			if ResourceLoader.exists(path):
-				var stream: AudioStream = null
-				if LoadingManager != null:
-					stream = LoadingManager.get_audio(path)
-				if stream == null:
-					stream = load(path) as AudioStream
-				if stream == null:
-					return
-				for player in _sfx_players:
-					if not player.playing:
-						player.stream = stream
-						player.play()
-						return
+			play_sfx(SFX.ATTACK_FIRE_HACHIWARE)
 		"usagi":
-			# 烏薩奇用獨立音效（透過 play_sfx 路徑，享有快取優化）
-			var path = "res://assets/audio/sfx/attack_fire_usagi.wav"
-			if ResourceLoader.exists(path):
-				var stream: AudioStream = null
-				if LoadingManager != null:
-					stream = LoadingManager.get_audio(path)
-				if stream == null:
-					stream = load(path) as AudioStream
-				if stream == null:
-					return
-				for player in _sfx_players:
-					if not player.playing:
-						player.stream = stream
-						player.play()
-						return
+			play_sfx(SFX.ATTACK_FIRE_USAGI)
 
 func _get_sfx_path(sfx: SFX) -> String:
 	match sfx:
 		SFX.ATTACK_FIRE: return "res://assets/audio/sfx/attack_fire.wav"
+		SFX.ATTACK_FIRE_HACHIWARE: return "res://assets/audio/sfx/attack_fire_hachiware.wav"
+		SFX.ATTACK_FIRE_USAGI: return "res://assets/audio/sfx/attack_fire_usagi.wav"
 		SFX.HIT: return "res://assets/audio/sfx/hit.wav"
 		SFX.KILL: return "res://assets/audio/sfx/kill.wav"
 		SFX.COIN_DROP: return "res://assets/audio/sfx/coin_drop.wav"

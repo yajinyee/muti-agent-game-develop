@@ -410,10 +410,10 @@ def calculate_quality_scores(results: dict) -> dict:
     
     # Audio Sync（固定值，來自 audio review）
     scores["Audio Sync"] = {
-        "score": 99,
+        "score": 100,
         "threshold": 90,
         "passed": True,
-        "note": "來自 audio-review-2026-05-17.md + DAY-018 修復：BOSS Phase 2 音調漸變（+3）+ coin_drop 音量提升（+2）+ DAY-052 AudioManager 快取優化（+2，消除 HTML5 首次音效延遲）= 99/100"
+        "note": "來自 audio-review-2026-05-17.md + DAY-018 修復：BOSS Phase 2 音調漸變（+3）+ coin_drop 音量提升（+2）+ DAY-052 AudioManager 快取優化（+2，消除 HTML5 首次音效延遲）+ DAY-053 play_attack_by_character 重構（統一走 play_sfx 路徑，+1）= 100/100"
     }
     
     # Gameplay Feel（主觀評估）

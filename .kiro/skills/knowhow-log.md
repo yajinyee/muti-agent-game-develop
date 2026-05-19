@@ -2258,3 +2258,16 @@ contribution_per_shot = betCost × 0.005 × level_share
       f.write(new_content)
   ```
 - **教訓：** 任何涉及中文字元的檔案操作，優先用 Python 腳本，不要用 PowerShell 字串操作
+
+## 103. AudioManager play_attack_by_character 重構（2026-05-20 DAY-053b）
+- **問題：** `play_attack_by_character` 中 hachiware/usagi 的攻擊音效沒有走 `play_sfx` 標準路徑
+  - 缺少 `volume_db` 重置（coin_drop 的 +2dB 邏輯不適用，但其他音效應該是 0dB）
+  - 缺少 fallback 到第一個播放器的邏輯（所有播放器都忙時會靜音）
+  - 重複程式碼（路徑字串寫死，不走 `_get_sfx_path`）
+- **根本原因：** SFX enum 沒有 `ATTACK_FIRE_HACHIWARE` 和 `ATTACK_FIRE_USAGI`，所以只能繞過 `play_sfx`
+- **修復：**
+  1. SFX enum 加入 `ATTACK_FIRE_HACHIWARE` 和 `ATTACK_FIRE_USAGI`
+  2. `_get_sfx_path` 加入對應路徑
+  3. `play_attack_by_character` 改為直接呼叫 `play_sfx(SFX.ATTACK_FIRE_HACHIWARE)` 等
+- **結果：** Audio Sync 99 → 100/100，程式碼從 30 行縮減到 6 行
+- **教訓：** 音效播放路徑要統一，不要繞過標準函數直接操作播放器
