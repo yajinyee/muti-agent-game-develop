@@ -327,3 +327,75 @@ func _on_player_updated(data: Dictionary) -> void:
 	if is_instance_valid(attack_label):
 		attack_label.text = char_name
 		attack_label.modulate = color
+
+	# 砲台視覺升級（DAY-048）：依投注等級改變砲台外觀
+	var bet_level = data.get("bet_level", 1)
+	_update_cannon_visual(bet_level, color)
+
+## 依投注等級更新砲台視覺（DAY-048）
+## 等級越高，砲台越大、顏色越亮、有特效光暈
+func _update_cannon_visual(bet_level: int, char_color: Color) -> void:
+	if not is_instance_valid(cannon_sprite):
+		return
+
+	# 砲台縮放：LV1=1.0x → LV10=1.5x（線性插值）
+	var scale_factor = 1.0 + (bet_level - 1) * 0.055  # LV10 = 1.495x ≈ 1.5x
+	cannon_sprite.scale = Vector2(scale_factor, scale_factor)
+
+	# 砲台顏色調整：高等級時加入金色光暈
+	if bet_level >= 8:
+		# LV8-10：金色光暈（混合角色色和金色）
+		var gold_mix = (bet_level - 7) / 3.0  # 0.33 → 1.0
+		var glow_color = char_color.lerp(Color(1.0, 0.85, 0.2), gold_mix * 0.4)
+		cannon_sprite.modulate = glow_color
+	elif bet_level >= 5:
+		# LV5-7：輕微亮化
+		var bright = 1.0 + (bet_level - 4) * 0.05
+		cannon_sprite.modulate = Color(bright, bright, bright)
+	else:
+		# LV1-4：正常顏色
+		cannon_sprite.modulate = Color.WHITE
+
+	# 升級特效：顯示等級標籤（短暫閃爍）
+	_show_level_badge(bet_level)
+
+## 顯示砲台等級標籤（短暫閃爍，DAY-048）
+var _level_badge: Label = null
+var _last_shown_level: int = 0
+
+func _show_level_badge(bet_level: int) -> void:
+	# 只在等級變化時顯示
+	if bet_level == _last_shown_level:
+		return
+	_last_shown_level = bet_level
+
+	# 建立或重用等級標籤
+	if not is_instance_valid(_level_badge):
+		_level_badge = Label.new()
+		_level_badge.name = "LevelBadge"
+		_level_badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		_level_badge.add_theme_font_size_override("font_size", 14)
+		if is_instance_valid(_pixel_font):
+			_level_badge.add_theme_font_override("font", _pixel_font)
+		add_child(_level_badge)
+
+	# 等級顏色
+	var badge_color: Color
+	if bet_level >= 8:
+		badge_color = Color(1.0, 0.85, 0.2)  # 金色
+	elif bet_level >= 5:
+		badge_color = Color(0.4, 0.9, 1.0)   # 藍色
+	else:
+		badge_color = Color(0.8, 0.8, 0.8)   # 灰色
+
+	_level_badge.text = "LV%d" % bet_level
+	_level_badge.position = Vector2(-20, -80)
+	_level_badge.modulate = badge_color
+	_level_badge.modulate.a = 0.0
+
+	# 動畫：淡入 → 停留 → 上移淡出
+	var tween = create_tween()
+	tween.tween_property(_level_badge, "modulate:a", 1.0, 0.2)
+	tween.tween_interval(0.8)
+	tween.parallel().tween_property(_level_badge, "position:y", -100.0, 0.4)
+	tween.tween_property(_level_badge, "modulate:a", 0.0, 0.3)

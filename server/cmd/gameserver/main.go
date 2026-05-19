@@ -253,6 +253,22 @@ func main() {
 		}
 	})
 
+	// Jackpot 狀態端點（DAY-048）
+	// GET /jackpot — 回傳三個 Jackpot 池的當前金額
+	mux.HandleFunc("/jackpot", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.GetJackpotSnapshot()
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"mini":      snap["mini"],
+			"major":     snap["major"],
+			"grand":     snap["grand"],
+			"timestamp": time.Now().UnixMilli(),
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// Prometheus metrics 端點（DAY-040）
 	// 格式：Prometheus text format（無外部依賴）
 	// 用途：Grafana / Prometheus 監控，生產環境可視化
