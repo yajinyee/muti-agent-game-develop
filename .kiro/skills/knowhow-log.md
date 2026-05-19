@@ -2305,3 +2305,17 @@ contribution_per_shot = betCost × 0.005 × level_share
   - 風險：高（可能引入新 bug）
   - 優先級：低（等下一個大版本重構時處理）
 - **教訓：** 新專案一律用 `coder/websocket`，現有穩定專案不急著遷移，但要記錄技術債
+
+## 107. Windows git add 失敗的根本原因（2026-05-20 DAY-054c）
+- **問題：** `git add` 報 `error: unable to create temporary file: No such file or directory`
+- **根本原因：** git 在 Windows 上用 `GIT_TMPDIR` 環境變數決定 temp 目錄，不是 `TMPDIR/TMP/TEMP`
+  - `git_add_all.ps1` 設定了 `TMPDIR/TMP/TEMP`，但 git 不讀這些
+  - 正確的環境變數是 `GIT_TMPDIR`
+- **解決方案：**
+  ```powershell
+  $env:GIT_TMPDIR = "d:\Kiro\.git\tmp"  # 或任何有寫入權限的目錄
+  git add "file.md"
+  ```
+- **修復的腳本：** `tools/git_add_all.ps1`、`tools/git_push.ps1`
+- **另一個有效的 TMPDIR：** `C:\Users\yajinyee0306\AppData\Local\Temp`（系統 temp）
+- **教訓：** Windows 上 git 的 temp 目錄設定要用 `GIT_TMPDIR`，不是 POSIX 的 `TMPDIR`

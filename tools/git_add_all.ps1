@@ -1,5 +1,6 @@
 # 逐個 add 檔案，每次失敗後修復權限再重試
 Set-Location "d:\Kiro"
+$env:GIT_TMPDIR = "d:\Kiro\.git\tmp"
 $env:TMPDIR = "d:\Kiro\.git\tmp"
 $env:TMP = "d:\Kiro\.git\tmp"
 $env:TEMP = "d:\Kiro\.git\tmp"
