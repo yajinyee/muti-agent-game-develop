@@ -493,6 +493,17 @@ func main() {
 		fmt.Fprintf(w, "chiikawa_jackpot_pool{level=\"mini\"} %d\n", jackpotSnap["mini"])
 		fmt.Fprintf(w, "chiikawa_jackpot_pool{level=\"major\"} %d\n", jackpotSnap["major"])
 		fmt.Fprintf(w, "chiikawa_jackpot_pool{level=\"grand\"} %d\n\n", jackpotSnap["grand"])
+
+		// Jackpot 每日統計指標（DAY-049b）
+		jackpotDaily := g.GetJackpotDailyStats()
+		fmt.Fprintf(w, "# HELP chiikawa_jackpot_daily_wins Today's jackpot win count by level\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_jackpot_daily_wins counter\n")
+		fmt.Fprintf(w, "chiikawa_jackpot_daily_wins{level=\"mini\"} %d\n", jackpotDaily.MiniCount)
+		fmt.Fprintf(w, "chiikawa_jackpot_daily_wins{level=\"major\"} %d\n", jackpotDaily.MajorCount)
+		fmt.Fprintf(w, "chiikawa_jackpot_daily_wins{level=\"grand\"} %d\n\n", jackpotDaily.GrandCount)
+		fmt.Fprintf(w, "# HELP chiikawa_jackpot_daily_payout Today's total jackpot payout\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_jackpot_daily_payout counter\n")
+		fmt.Fprintf(w, "chiikawa_jackpot_daily_payout %d\n\n", jackpotDaily.TotalPayout)
 	})
 
 	// pprof 監控端點（Debug 模式下啟用，用於記憶體/goroutine 分析）

@@ -1,5 +1,5 @@
 {
-  "title": "吉伊卡哇：像素大討伐 — 監控總覽 (DAY-045)",
+  "title": "吉伊卡哇：像素大討伐 — 監控總覽 (DAY-049)",
   "uid": "chiikawa-overview",
   "version": 1,
   "schemaVersion": 38,
@@ -810,6 +810,124 @@
           "refId": "B"
         }
       ]
+    },
+    {
+      "id": 22,
+      "title": "Jackpot 池當前金額",
+      "type": "stat",
+      "gridPos": {
+        "x": 0,
+        "y": 52,
+        "w": 8,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_jackpot_pool{level=\"mini\"}",
+          "legendFormat": "Mini",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_jackpot_pool{level=\"major\"}",
+          "legendFormat": "Major",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_jackpot_pool{level=\"grand\"}",
+          "legendFormat": "Grand",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"]
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "blue", "value": null},
+              {"color": "yellow", "value": 1000},
+              {"color": "red", "value": 5000}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 23,
+      "title": "今日 Jackpot 發放統計",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 8,
+        "y": 52,
+        "w": 16,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_jackpot_daily_wins{level=\"mini\"}",
+          "legendFormat": "Mini 中獎次數",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_jackpot_daily_wins{level=\"major\"}",
+          "legendFormat": "Major 中獎次數",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_jackpot_daily_wins{level=\"grand\"}",
+          "legendFormat": "Grand 中獎次數",
+          "refId": "C"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_jackpot_daily_payout",
+          "legendFormat": "今日總發放",
+          "refId": "D"
+        }
+      ],
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      }
     }
   ]
 }
