@@ -2394,3 +2394,26 @@ contribution_per_shot = betCost × 0.005 × level_share
   3. gzip 壓縮 wasm + pck — 已實作
 - **結論：** 現有優化已達業界最佳實踐，無需額外改動
 - **教訓：** 定期確認優化措施是否仍然有效，避免「以為有做但其實沒生效」的情況
+
+## 115. Go WebSocket 高負載優化最佳實踐（DAY-059）
+- **來源：** moldstud.com（2025-07-13）、hemaks.org（2025-07-10）、leapcell.io（2025-08-03）
+- **核心建議：**
+  1. **Read/Write Deadline**：`SetReadDeadline(30-60s)` 防止 ghost session，已在 hub.go 實作
+  2. **Ping/Pong 心跳**：Server 主動 ping，已在 hub.go 實作（每 54 秒）
+  3. **Redis pub/sub 水平擴展**：70% 的 Go WebSocket 用戶依賴外部 pub/sub（Datadog 2024）
+  4. **Graceful Shutdown**：SIGTERM 時 drain sockets，可減少 40% 部署時的訊息丟失
+  5. **Goroutine per connection**：Go 的 goroutine 只需幾 KB，t3.medium 可承載 25,000+ 連線
+- **本專案現狀：** 已實作 1/2/4，Redis pub/sub 是未來水平擴展的方向
+- **教訓：** 遊戲 Server 的 WebSocket 優化重點是心跳 + 超時 + graceful shutdown，不是 goroutine pool
+
+## 116. Godot HTML5 Lossy 壓縮 + 自訂 Export Template（DAY-059）
+- **來源：** jacobfilipp.com（2025-06-10）、godotengine.org forum（2025-03-11）
+- **Lossy 壓縮技巧：**
+  - Import tab 使用 Lossy 壓縮（不是 Lossless），可大幅縮小 .pck 大小
+  - 不要預先用外部工具優化圖片，讓 Godot 自己處理（外部優化反而可能讓 Godot 無法再壓縮）
+- **自訂 Export Template（進階）：**
+  - 編譯時加 `disable_3d=yes`、`lto=full`、`optimize=size` 可讓 wasm 從 93MB 縮到 6.4MB
+  - 但需要自行編譯 Godot，成本高，適合正式發布版本
+- **本專案現狀：** 已用 gzip 壓縮（wasm 9.0MB），Lossy 壓縮可進一步縮小 .pck
+- **下次 export 時：** 在 Import tab 確認主要圖片資產使用 Lossy 壓縮
+- **教訓：** HTML5 export 大小優化有兩個層次：1) 資產壓縮（簡單）2) 自訂 template（複雜但效果最好）

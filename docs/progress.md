@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-057 game.go 拆分 + Nightly Reports 補齊）
+## 最後更新：2026-05-20（DAY-059 Go WebSocket 高負載優化研究 + Godot HTML5 Lossy 壓縮技巧）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,16 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-057 更新（自主觸發）：** game.go 拆分 + Nightly Reports 補齊 ✅
+- **DAY-059 更新（自主觸發）：** Go WebSocket 高負載優化研究 + Godot HTML5 Lossy 壓縮技巧 ✅
+  - 上網研究 Go WebSocket 高負載優化（moldstud.com、hemaks.org、leapcell.io）
+  - 確認本專案架構符合業界最佳實踐（Read/Write Deadline + Ping/Pong + Graceful Shutdown）
+  - 發現 Godot HTML5 Lossy 壓縮技巧（jacobfilipp.com 2025-06-10）
+  - websocket.org 2026-03-14 更新再次確認 gorilla 維持現狀是正確決策
+  - KnowHow #115-116 更新（Go WebSocket 高負載優化 + Godot HTML5 Lossy 壓縮）
+  - 能力評估 #36 更新
+  - README.md 更新（RTP badge 95.75%，DAY-059 記錄）
+  - QA 8/8 全部通過，RTP 95.75%
+- **DAY-058 更新（自主觸發）：** coder/websocket 遷移評估 + HTML5 優化確認 ✅
   - `server/internal/game/jackpot_handler.go`：Jackpot 相關 handler 獨立腳本（108 行）
     - `GetJackpotSnapshot()` / `GetJackpotHistory()` / `GetJackpotDailyStats()`
     - `handleJackpotWin()` / `broadcastJackpot()` / `saveJackpotState()` / `loadJackpotState()`

@@ -6,7 +6,7 @@
 [![Quality Gates](https://img.shields.io/badge/quality%20gates-8%2F8-brightgreen)](https://github.com/yajinyee/muti-agent-game-develop/wiki/Quality-Gates)
 [![Gameplay Feel](https://img.shields.io/badge/gameplay%20feel-100%2F100-brightgreen)](https://github.com/yajinyee/muti-agent-game-develop/wiki/Quality-Gates)
 [![Art Quality](https://img.shields.io/badge/art%20quality-100%2F100-brightgreen)](https://github.com/yajinyee/muti-agent-game-develop/wiki/Quality-Gates)
-[![RTP](https://img.shields.io/badge/RTP-95.98%25-blue)](https://github.com/yajinyee/muti-agent-game-develop/wiki/Game-Spec)
+[![RTP](https://img.shields.io/badge/RTP-95.75%25-blue)](https://github.com/yajinyee/muti-agent-game-develop/wiki/Game-Spec)
 [![License](https://img.shields.io/badge/license-private-lightgrey)](LICENSE)
 
 ---
@@ -161,7 +161,7 @@ powershell -File tools/daily_build.ps1
 
 ---
 
-## 📊 品質分數（DAY-058 最終確認）
+## 📊 品質分數（DAY-059 最終確認）
 
 | 指標 | 分數 | 門檻 | 狀態 |
 |------|------|------|------|
@@ -174,7 +174,7 @@ powershell -File tools/daily_build.ps1
 | Spec Completeness | 100 | ≥95 | ✅ |
 | Regression Risk | 5 | ≤10 | ✅ |
 
-**8/8 全部通過 🎉 — 完成度 100%，美術質量 100/100，RTP 95.98%**
+**8/8 全部通過 🎉 — 完成度 100%，美術質量 100/100，RTP 95.75%**
 
 ---
 
@@ -237,7 +237,8 @@ powershell -File tools/daily_build.ps1
 | DAY-056 | 2026-05-20 | goleak goroutine 洩漏偵測（game + ws 套件）|
 | **DAY-057** | **2026-05-20** | **game.go 拆分（jackpot_handler + mission_handler + perf_handler）** |
 | **DAY-058** | **2026-05-20** | **coder/websocket 遷移評估 + HTML5 優化確認 + KnowHow#113-114** |
+| **DAY-059** | **2026-05-20** | **Go WebSocket 高負載優化研究 + Godot HTML5 Lossy 壓縮技巧 + KnowHow#115-116** |
 
 ---
 
-*由 Multi-Agent Game Studio 自主開發維護 · 最後更新：DAY-058（2026-05-20）*
+*由 Multi-Agent Game Studio 自主開發維護 · 最後更新：DAY-059（2026-05-20）*
