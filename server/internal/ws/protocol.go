@@ -254,9 +254,9 @@ type ClientPerfPayload struct {
 
 // JackpotUpdatePayload Jackpot 池更新廣播（每 5 秒）
 type JackpotUpdatePayload struct {
-	Mini  int `json:"mini"`  // Mini Jackpot 當前金額
-	Major int `json:"major"` // Major Jackpot 當前金額
-	Grand int `json:"grand"` // Grand Jackpot 當前金額
+	Mini    int                  `json:"mini"`    // Mini Jackpot 當前金額
+	Major   int                  `json:"major"`   // Major Jackpot 當前金額
+	Grand   int                  `json:"grand"`   // Grand Jackpot 當前金額
 }
 
 // JackpotWinPayload Jackpot 中獎通知

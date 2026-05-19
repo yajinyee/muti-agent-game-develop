@@ -37,7 +37,8 @@ type Game struct {
 	store       store.Store // 玩家狀態持久化（DAY-026）
 	initialCoins int        // 玩家初始金幣（從 config 傳入）
 	missionMgr  *mission.Manager // 每日任務管理器（DAY-037）
-	jackpotMgr  *jackpot.Manager // Progressive Jackpot 管理器（DAY-048）
+	jackpotMgr  *jackpot.Manager  // Progressive Jackpot 管理器（DAY-048）
+	jackpotHist *jackpot.History  // Jackpot 中獎歷史（DAY-048e）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -81,6 +82,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		initialCoins:       initialCoins,
 		missionMgr:         mission.NewManager(),
 		jackpotMgr:         jackpot.NewManager(),
+		jackpotHist:        jackpot.NewHistory(10),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -117,6 +119,11 @@ func (g *Game) GetJackpotSnapshot() map[string]int {
 		"major": snap[jackpot.LevelMajor],
 		"grand": snap[jackpot.LevelGrand],
 	}
+}
+
+// GetJackpotHistory 取得最近 Jackpot 中獎記錄（DAY-048e）
+func (g *Game) GetJackpotHistory(n int) []jackpot.WinRecord {
+	return g.jackpotHist.GetRecent(n)
 }
 
 // Start 啟動遊戲循環
@@ -1649,6 +1656,9 @@ func (g *Game) handleJackpotWin(p *player.Player, win *jackpot.JackpotWin) {
 	if displayName == "" {
 		displayName = p.ID[:8]
 	}
+
+	// 記錄到歷史（DAY-048e）
+	g.jackpotHist.Add(win, displayName)
 
 	// 廣播中獎通知給所有玩家
 	g.Hub.Broadcast(&ws.Message{

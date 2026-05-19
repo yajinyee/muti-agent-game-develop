@@ -2133,7 +2133,6 @@ func _on_jackpot_updated(data: Dictionary) -> void:
 				var tween = create_tween()
 				tween.tween_property(lbl, "modulate:a", 0.6, 0.15)
 				tween.tween_property(lbl, "modulate:a", 1.0, 0.15)
-
 ## Jackpot 中獎！全畫面慶祝特效
 func _on_jackpot_won(data: Dictionary) -> void:
 	var level = data.get("level", "mini")

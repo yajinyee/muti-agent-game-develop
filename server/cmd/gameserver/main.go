@@ -254,15 +254,17 @@ func main() {
 	})
 
 	// Jackpot 狀態端點（DAY-048）
-	// GET /jackpot — 回傳三個 Jackpot 池的當前金額
+	// GET /jackpot — 回傳三個 Jackpot 池的當前金額和最近中獎記錄
 	mux.HandleFunc("/jackpot", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		snap := g.GetJackpotSnapshot()
+		history := g.GetJackpotHistory(5)
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"mini":      snap["mini"],
 			"major":     snap["major"],
 			"grand":     snap["grand"],
+			"history":   history,
 			"timestamp": time.Now().UnixMilli(),
 		}); err != nil {
 			http.Error(w, "encode error", http.StatusInternalServerError)
