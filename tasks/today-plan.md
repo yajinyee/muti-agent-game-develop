@@ -37,7 +37,9 @@
 - [x] 分析 game.go 目前行數（1740 行）
 - [x] 建立 `server/internal/game/jackpot_handler.go`（Jackpot 相關 handler，108 行）
 - [x] 建立 `server/internal/game/mission_handler.go`（Mission 相關 handler，100 行）
-- [x] 確認 go build/vet/test 全部通過（game.go 縮減到 1557 行）
+- [x] 建立 `server/internal/game/perf_handler.go`（Client 效能上報 handler，34 行）
+- [x] 清理 game.go 殘留注釋
+- [x] 確認 go build/vet/test 全部通過（game.go 縮減到 1531 行，-12%）
 
 ### 🟡 KnowHow 更新（P2）
 

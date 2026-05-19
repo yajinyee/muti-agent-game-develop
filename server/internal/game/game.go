@@ -111,8 +111,6 @@ func (g *Game) GetActiveTargetCount() int {
 	return len(g.Targets)
 }
 
-// GetJackpotSnapshot 取得 Jackpot 池快照（thread-safe，DAY-048）
-// 供 /metrics 端點使用，讓 Grafana 能監控 Jackpot 池金額
 // Start 啟動遊戲循環
 func (g *Game) Start() {
 	log.Printf("[Game] %s started", g.ID)
@@ -1528,30 +1526,6 @@ func (g *Game) sendAchievement(playerID string, u *achievement.AchievementUnlock
 
 // ── 每日任務系統（DAY-037）已移至 mission_handler.go ──────────────────────────────────────
 
-// handleClientPerf 處理 Client 端效能數據上報（DAY-045）
-// Client 每 30 秒發送一次，Server 記錄並暴露到 /metrics
-// 同時檢查高延遲玩家並輸出警告 log
-func (g *Game) handleClientPerf(clientID string, msg *ws.Message) {
-	var payload ws.ClientPerfPayload
-	if err := remarshal(msg.Payload, &payload); err != nil {
-		return
-	}
-
-	// 更新 Hub 中的 Client 效能快照
-	g.Hub.UpdateClientPerf(clientID, payload.FPS, payload.MemoryMB, payload.DrawCalls, payload.Quality)
-
-	// 高延遲警告（DAY-045）：Client 端 ping > 200ms 輸出警告 log
-	// 這讓運維人員能識別網路品質差的玩家
-	if payload.PingMs > 200 {
-		log.Printf("[PerfAlert] High latency player %s: ping=%dms fps=%.1f quality=%s",
-			clientID, payload.PingMs, payload.FPS, payload.Quality)
-	}
-
-	// 低 FPS 警告：Client 端 FPS < 20 輸出警告 log
-	if payload.FPS > 0 && payload.FPS < 20 {
-		log.Printf("[PerfAlert] Low FPS player %s: fps=%.1f memory=%.1fMB drawcalls=%d quality=%s",
-			clientID, payload.FPS, payload.MemoryMB, payload.DrawCalls, payload.Quality)
-	}
-}
+// ── 效能上報（DAY-045）已移至 perf_handler.go ──────────────────────────────────────
 
 // ── Jackpot 系統（DAY-048）已移至 jackpot_handler.go ──────────────────────────────────────
