@@ -48,6 +48,13 @@ type Store interface {
 	// UpdateLeaderboard 更新排行榜分數
 	UpdateLeaderboard(playerID string, score int64) error
 
+	// SetJSON 儲存任意 JSON 資料（通用 key-value，DAY-049d）
+	SetJSON(key string, value interface{}, ttl time.Duration) error
+
+	// GetJSON 讀取任意 JSON 資料（通用 key-value，DAY-049d）
+	// 找不到時回傳 ErrNotFound
+	GetJSON(key string, dest interface{}) error
+
 	// Close 關閉連線
 	Close() error
 
@@ -162,6 +169,31 @@ func (m *MemoryStore) Close() error {
 
 func (m *MemoryStore) IsRedis() bool {
 	return false
+}
+
+// SetJSON 記憶體模式：儲存 JSON 資料（DAY-049d）
+func (m *MemoryStore) SetJSON(key string, value interface{}, _ time.Duration) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return fmt.Errorf("SetJSON marshal: %w", err)
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	// 用 players map 的 key 空間儲存（前綴區分）
+	// 注意：這裡借用 players map 儲存任意 JSON，key 不會和 player_id 衝突（因為有前綴）
+	m.players[key] = &PlayerState{PlayerID: key, DisplayName: string(data)}
+	return nil
+}
+
+// GetJSON 記憶體模式：讀取 JSON 資料（DAY-049d）
+func (m *MemoryStore) GetJSON(key string, dest interface{}) error {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	entry, ok := m.players[key]
+	if !ok {
+		return fmt.Errorf("key not found: %s", key)
+	}
+	return json.Unmarshal([]byte(entry.DisplayName), dest)
 }
 
 // RedisStore Redis 模式（生產環境用）
@@ -318,4 +350,26 @@ func (r *RedisStore) Close() error {
 
 func (r *RedisStore) IsRedis() bool {
 	return true
+}
+
+// SetJSON Redis 模式：儲存任意 JSON 資料（DAY-049d）
+func (r *RedisStore) SetJSON(key string, value interface{}, ttl time.Duration) error {
+	data, err := json.Marshal(value)
+	if err != nil {
+		return fmt.Errorf("SetJSON marshal: %w", err)
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), redisTimeout)
+	defer cancel()
+	return r.client.Set(ctx, key, data, ttl).Err()
+}
+
+// GetJSON Redis 模式：讀取任意 JSON 資料（DAY-049d）
+func (r *RedisStore) GetJSON(key string, dest interface{}) error {
+	ctx, cancel := context.WithTimeout(context.Background(), redisTimeout)
+	defer cancel()
+	data, err := r.client.Get(ctx, key).Bytes()
+	if err != nil {
+		return fmt.Errorf("redis get %s: %w", key, err)
+	}
+	return json.Unmarshal(data, dest)
 }

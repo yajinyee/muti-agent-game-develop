@@ -160,3 +160,37 @@ func (m *Manager) ForceWin(level Level, playerID string) *JackpotWin {
 	pool.Current = pool.BaseAmount
 	return win
 }
+
+// PoolState Jackpot 池狀態快照（用於持久化）
+type PoolState struct {
+	Mini  int `json:"mini"`
+	Major int `json:"major"`
+	Grand int `json:"grand"`
+}
+
+// SaveState 取得當前池狀態（用於持久化到 Redis）
+func (m *Manager) SaveState() PoolState {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	return PoolState{
+		Mini:  m.pools[LevelMini].Current,
+		Major: m.pools[LevelMajor].Current,
+		Grand: m.pools[LevelGrand].Current,
+	}
+}
+
+// LoadState 從持久化狀態恢復池金額（Server 重啟後呼叫）
+// 只恢復大於基礎金額的值，防止異常數據
+func (m *Manager) LoadState(state PoolState) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	if state.Mini > m.pools[LevelMini].BaseAmount {
+		m.pools[LevelMini].Current = state.Mini
+	}
+	if state.Major > m.pools[LevelMajor].BaseAmount {
+		m.pools[LevelMajor].Current = state.Major
+	}
+	if state.Grand > m.pools[LevelGrand].BaseAmount {
+		m.pools[LevelGrand].Current = state.Grand
+	}
+}

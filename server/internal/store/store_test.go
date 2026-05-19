@@ -182,3 +182,45 @@ func TestNewStoreRedisFailFallback(t *testing.T) {
 		t.Error("expected memory store when Redis connection fails")
 	}
 }
+
+// TestMemoryStoreSetGetJSON 通用 JSON 儲存測試（DAY-049d）
+func TestMemoryStoreSetGetJSON(t *testing.T) {
+	s := NewMemoryStore()
+
+	type TestData struct {
+		Mini  int `json:"mini"`
+		Major int `json:"major"`
+		Grand int `json:"grand"`
+	}
+
+	// 儲存
+	data := TestData{Mini: 500, Major: 2000, Grand: 10000}
+	if err := s.SetJSON("jackpot_state:room-001", data, time.Hour); err != nil {
+		t.Fatalf("SetJSON failed: %v", err)
+	}
+
+	// 讀取
+	var loaded TestData
+	if err := s.GetJSON("jackpot_state:room-001", &loaded); err != nil {
+		t.Fatalf("GetJSON failed: %v", err)
+	}
+	if loaded.Mini != 500 {
+		t.Errorf("Mini = %d, want 500", loaded.Mini)
+	}
+	if loaded.Major != 2000 {
+		t.Errorf("Major = %d, want 2000", loaded.Major)
+	}
+	if loaded.Grand != 10000 {
+		t.Errorf("Grand = %d, want 10000", loaded.Grand)
+	}
+}
+
+// TestMemoryStoreGetJSONNotFound 找不到 key 時回傳錯誤（DAY-049d）
+func TestMemoryStoreGetJSONNotFound(t *testing.T) {
+	s := NewMemoryStore()
+	var data struct{ Value int }
+	err := s.GetJSON("nonexistent_key", &data)
+	if err == nil {
+		t.Error("Expected error for nonexistent key, got nil")
+	}
+}

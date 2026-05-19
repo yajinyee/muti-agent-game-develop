@@ -48,6 +48,7 @@ type Game struct {
 	lastBonusTickAt    time.Time  // Bonus tick 廣播計時（每秒一次）
 	lastSpecialEventAt time.Time
 	nextSpecialEventIn float64
+	lastJackpotSaveAt  time.Time  // Jackpot 狀態儲存計時（每 30 秒，DAY-049d）
 	bossInstanceID     string
 	nextBossAt         time.Time  // BOSS 自動觸發時間（規格書 28.1）
 	lastLeaderboardAt  time.Time  // 排行榜廣播計時（每 10 秒一次）
@@ -134,6 +135,8 @@ func (g *Game) GetJackpotDailyStats() jackpot.DailyStats {
 // Start 啟動遊戲循環
 func (g *Game) Start() {
 	log.Printf("[Game] %s started", g.ID)
+	// 恢復 Jackpot 池狀態（DAY-049d）
+	g.loadJackpotState()
 	go g.gameLoop()
 }
 
@@ -758,6 +761,11 @@ func (g *Game) updateNormalPlay() {
 	if shouldBroadcastJackpot {
 		g.lastJackpotAt = now
 	}
+	// Jackpot 狀態儲存（每 30 秒，DAY-049d）
+	shouldSaveJackpot := now.Sub(g.lastJackpotSaveAt) >= 30*time.Second
+	if shouldSaveJackpot {
+		g.lastJackpotSaveAt = now
+	}
 	g.mu.Unlock()
 
 	if shouldBroadcastLeaderboard {
@@ -765,6 +773,10 @@ func (g *Game) updateNormalPlay() {
 	}
 	if shouldBroadcastJackpot {
 		g.broadcastJackpot()
+	}
+	// Jackpot 狀態儲存（每 30 秒，非同步，DAY-049d）
+	if shouldSaveJackpot {
+		go g.saveJackpotState()
 	}
 }
 
@@ -1695,4 +1707,34 @@ func (g *Game) broadcastJackpot() {
 			Grand: snap[jackpot.LevelGrand],
 		},
 	})
+}
+
+// saveJackpotState 儲存 Jackpot 池狀態到 Store（DAY-049d）
+// 每 30 秒自動呼叫，確保 Server 重啟後能恢復 Jackpot 池
+func (g *Game) saveJackpotState() {
+	if g.store == nil {
+		return
+	}
+	state := g.jackpotMgr.SaveState()
+	key := "jackpot_state:" + g.ID
+	if err := g.store.SetJSON(key, state, 7*24*time.Hour); err != nil {
+		log.Printf("[Jackpot] Failed to save state: %v", err)
+	}
+}
+
+// loadJackpotState 從 Store 恢復 Jackpot 池狀態（DAY-049d）
+// 在 Game 啟動時呼叫
+func (g *Game) loadJackpotState() {
+	if g.store == nil {
+		return
+	}
+	key := "jackpot_state:" + g.ID
+	var state jackpot.PoolState
+	if err := g.store.GetJSON(key, &state); err != nil {
+		// 找不到或解析失敗，使用預設值（正常情況）
+		return
+	}
+	g.jackpotMgr.LoadState(state)
+	log.Printf("[Jackpot] Restored state: mini=%d major=%d grand=%d",
+		state.Mini, state.Major, state.Grand)
 }

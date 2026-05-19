@@ -2396,9 +2396,11 @@ func _add_jackpot_history_entry(level: String, amount: int, winner_name: String,
 		var timer = get_tree().create_timer(5.0)
 		timer.timeout.connect(func():
 			if is_instance_valid(ticker_lbl) and _jackpot_history.size() > 1:
-				# 輪播顯示歷史記錄
-				var idx = (_jackpot_history.find(ticker_lbl.text) + 1) % _jackpot_history.size()
-				ticker_lbl.text = _jackpot_history[idx]
+				# 輪播顯示歷史記錄（用 meta 追蹤當前索引，避免 text 比對問題）
+				var cur_idx = ticker_lbl.get_meta("ticker_idx", 0)
+				var next_idx = (cur_idx + 1) % _jackpot_history.size()
+				ticker_lbl.set_meta("ticker_idx", next_idx)
+				ticker_lbl.text = _jackpot_history[next_idx]
 				ticker_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 0.6))
 		)
 
