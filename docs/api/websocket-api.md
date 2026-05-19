@@ -1,7 +1,7 @@
 # WebSocket API 文件
 
-**版本**：v1.4  
-**最後更新**：2026-05-19（DAY-019）  
+**版本**：v1.5  
+**最後更新**：2026-05-20（DAY-054）  
 **協定**：WebSocket + JSON，每訊息獨立 frame  
 **端點**：`ws://[host]:7777/ws`
 
@@ -22,12 +22,58 @@ ws://localhost:7777/ws?player_id=xxx&room_id=room-001
 
 | 端點 | 方法 | 說明 |
 |------|------|------|
-| `/health` | GET | Server 健康檢查，回傳 `{"status":"ok"}` |
+| `/health` | GET | Server 健康檢查（含 Jackpot 狀態、任務重置時間、Ping 延遲） |
 | `/leaderboard` | GET | 取得當前排行榜（JSON） |
 | `/analytics` | GET | 取得房間整體統計（JSON） |
+| `/jackpot` | GET | 取得 Jackpot 池狀態、中獎歷史、今日統計（JSON，DAY-048 新增） |
 | `/rooms` | GET | 取得所有房間列表（JSON，DAY-019 新增） |
 | `/stats` | GET | Server 效能統計（goroutine/記憶體/GC） |
+| `/metrics` | GET | Prometheus 格式監控指標（25 個面板） |
 | `/` | GET | 靜態檔案服務（HTML5 遊戲） |
+
+### `/health` 回傳格式（DAY-054 更新）
+
+```json
+{
+  "status": "ok",
+  "version": "1.0.0",
+  "uptime": "2h30m15s",
+  "uptime_sec": 9015,
+  "clients": 3,
+  "max_players": 16,
+  "spectators": 0,
+  "game_state": "normal_play",
+  "mission_reset_at": "2026-05-21T00:00:00+08:00",
+  "mission_reset_in_sec": 52800,
+  "avg_ping_ms": 12.5,
+  "jackpot": {
+    "mini": 1250,
+    "major": 8900,
+    "grand": 45000,
+    "daily_wins": 3,
+    "daily_payout": 12500
+  }
+}
+```
+
+### `/jackpot` 回傳格式
+
+```json
+{
+  "mini": 1250,
+  "major": 8900,
+  "grand": 45000,
+  "history": [
+    {"level": "mini", "amount": 800, "winner_id": "player-001", "won_at": "2026-05-20T10:30:00Z"}
+  ],
+  "daily_stats": {
+    "total_wins": 3,
+    "total_payout": 12500,
+    "wins_by_level": {"mini": 2, "major": 1, "grand": 0}
+  },
+  "timestamp": 1716192000000
+}
+```
 
 ### `/rooms` 回傳格式
 

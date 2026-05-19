@@ -2291,3 +2291,17 @@ contribution_per_shot = betCost × 0.005 × level_share
   - Jackpot 系統：mini/major/grand 池金額 + 今日統計
 - **用途：** 運維人員可以一個端點看到所有關鍵指標，不需要查 Grafana
 - **教訓：** 每次新增重要子系統（Jackpot、任務、排行榜），都要同步更新 `/health` 端點
+
+## 106. gorilla/websocket 已 archived，建議遷移到 coder/websocket（2026-05-20）
+- **來源：** [websocket.org Go WebSocket Guide](https://websocket.org/guides/languages/go/)（更新至 2026-03-14）
+- **現狀：** `gorilla/websocket` 在 2022 年底 archived，bug reports 無人回應，安全補丁依賴社群 fork
+- **替代方案：** `coder/websocket`（原 `nhooyr/websocket`）
+  - 使用 `context.Context` 做取消和超時
+  - 內建並發寫入安全（gorilla 需要手動加鎖）
+  - 積極維護中
+- **遷移評估：**
+  - 本專案 gorilla v1.5.3 目前穩定運作
+  - 遷移需要重寫 hub.go 的 upgrader + readPump + writePump（約 200 行）
+  - 風險：高（可能引入新 bug）
+  - 優先級：低（等下一個大版本重構時處理）
+- **教訓：** 新專案一律用 `coder/websocket`，現有穩定專案不急著遷移，但要記錄技術債
