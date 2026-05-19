@@ -675,27 +675,12 @@ func _spawn_coin_rain(origin: Vector2) -> void:
 	# 播放金幣音效
 	AudioManager.play_sfx(AudioManager.SFX.COIN_DROP)
 
-## 建立像素金幣節點（用 _draw 繪製帶高光的金幣）
-func _create_pixel_coin() -> Node2D:
-	var coin = Node2D.new()
-	coin.z_index = 12
+## 建立像素金幣節點（靜態腳本，效能比動態 GDScript 好）
+const PixelCoinScript = preload("res://scripts/effects/PixelCoin.gd")
 
-	# 用 script 動態繪製金幣
-	var script = GDScript.new()
-	script.source_code = """
-extends Node2D
-func _draw():
-	# 金幣主體（金色圓形）
-	draw_circle(Vector2.ZERO, 6.0, Color(1.0, 0.82, 0.0))
-	# 金幣邊框（深金色）
-	draw_arc(Vector2.ZERO, 6.0, 0.0, TAU, 16, Color(0.75, 0.55, 0.0), 1.5)
-	# 高光（左上角白色小圓）
-	draw_circle(Vector2(-2.0, -2.0), 1.8, Color(1.0, 1.0, 0.9, 0.8))
-	# 中心 ¥ 符號（用小矩形模擬）
-	draw_rect(Rect2(-1.0, -2.5, 2.0, 5.0), Color(0.75, 0.55, 0.0, 0.7))
-	draw_rect(Rect2(-3.0, -0.5, 6.0, 1.0), Color(0.75, 0.55, 0.0, 0.7))
-"""
-	coin.set_script(script)
+func _create_pixel_coin() -> Node2D:
+	var coin = PixelCoinScript.new()
+	coin.z_index = 12
 	return coin
 
 ## 生成死亡粒子

@@ -1569,3 +1569,16 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **注意：** 面板消失後必須重置 scale 和 modulate.a，否則下次顯示會有殘留狀態
 - **Tween 並行：** 滑入 tween 用 `set_parallel(false)`，縮放用獨立的 `create_tween().set_parallel(true)`
 - **教訓：** 多個 tween 同時執行時，要用獨立的 tween 物件，不要在同一個 tween 上混用 parallel 和 sequential
+
+## 83. 動態 GDScript vs 靜態 preload（效能差異）
+- **問題：** `GDScript.new()` + `script.source_code = "..."` + `node.set_script(script)` 每次都重新編譯腳本
+- **影響：** T105 金幣雨生成 18 個金幣，每個都重新編譯一次 GDScript，造成不必要的 CPU 開銷
+- **解法：** 把腳本內容寫成獨立的 `.gd` 檔案，用 `const Script = preload("res://path/to/script.gd")` 預載入
+- **使用方式：** `var node = Script.new()` — 和 `Node2D.new()` 一樣，但有自訂的 `_draw()` 等方法
+- **教訓：** 任何需要重複建立的節點，都應該用靜態腳本 + preload，不要用動態 GDScript
+
+## 84. Go main.go 未使用常數的清理原則
+- **問題：** `defaultPort = "8080"` 定義在 main.go 但從未使用（實際 port 由 config.go 的 `getEnv("PORT", "7777")` 決定）
+- **影響：** 造成混淆，讓讀者以為 server 用 8080，但實際是 7777
+- **解法：** 直接刪除未使用的常數
+- **教訓：** Go 不會對未使用的常數報錯（只有未使用的變數才報錯），需要手動清理
