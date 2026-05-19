@@ -976,24 +976,40 @@ func _update_fps_display() -> void:
 		else:
 			dc_lbl.modulate = Color(0.7, 0.9, 1.0, 0.8)
 
+	# Ping 行（DAY-036）
+	var ping_lbl = _perf_panel.get_node_or_null("PingLine")
+	if ping_lbl:
+		var ping_ms = NetworkManager.get_ping_ms()
+		if ping_ms < 0:
+			ping_lbl.text = "PING: --"
+			ping_lbl.modulate = Color(0.6, 0.6, 0.6, 0.7)
+		else:
+			ping_lbl.text = "PING: %d ms" % ping_ms
+			if ping_ms > 200:
+				ping_lbl.modulate = Color(1.0, 0.3, 0.3, 0.9)  # 紅：高延遲
+			elif ping_ms > 100:
+				ping_lbl.modulate = Color(1.0, 0.8, 0.2, 0.9)  # 黃：中延遲
+			else:
+				ping_lbl.modulate = Color(0.4, 1.0, 0.5, 0.85) # 綠：低延遲
+
 func _create_perf_panel() -> void:
 	var panel = Control.new()
 	panel.name = "PerfPanel"
 	panel.position = Vector2(8, 670)
-	panel.size = Vector2(220, 56)
+	panel.size = Vector2(220, 74)  # 高度從 56 增加到 74（加入 ping 行）
 	panel.z_index = 200
 	add_child(panel)
 	_perf_panel = panel
 
 	# 半透明背景
 	var bg = ColorRect.new()
-	bg.size = Vector2(220, 56)
+	bg.size = Vector2(220, 74)
 	bg.color = Color(0.0, 0.0, 0.0, 0.55)
 	panel.add_child(bg)
 
 	# 左側綠色邊條（DEBUG 標識）
 	var side = ColorRect.new()
-	side.size = Vector2(3, 56)
+	side.size = Vector2(3, 74)
 	side.color = Color(0.2, 1.0, 0.4, 0.8)
 	panel.add_child(side)
 
@@ -1032,6 +1048,18 @@ func _create_perf_panel() -> void:
 	if is_instance_valid(_pixel_font):
 		dc_lbl.add_theme_font_override("font", _pixel_font)
 	panel.add_child(dc_lbl)
+
+	# Ping 行（DAY-036）
+	var ping_lbl = Label.new()
+	ping_lbl.name = "PingLine"
+	ping_lbl.position = Vector2(8, 58)
+	ping_lbl.size = Vector2(210, 16)
+	ping_lbl.add_theme_font_size_override("font_size", 12)
+	ping_lbl.text = "PING: --"
+	ping_lbl.modulate = Color(0.6, 0.6, 0.6, 0.7)
+	if is_instance_valid(_pixel_font):
+		ping_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(ping_lbl)
 
 # ── 成就通知系統 ──────────────────────────────────────────────
 

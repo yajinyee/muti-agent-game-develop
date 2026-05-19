@@ -1727,3 +1727,24 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **解法：** 用 `[System.IO.File]::WriteAllText(path, content, [System.Text.Encoding]::UTF8)` 或直接用 `str_replace` 工具
 - **恢復方式：** `git checkout HEAD~1 -- <file>` 從上一個 commit 恢復
 - **教訓：** 永遠不要用 PowerShell 的 `Set-Content` 修改含中文的程式碼檔案，改用 str_replace 工具
+
+## 83. WebSocket Per-Client Rate Limiting（Token Bucket）（DAY-036）
+- **問題：** 惡意客戶端可以發送大量訊息（如每秒 1000 次攻擊），造成 Server 過載
+- **解法：** Token Bucket 算法，每個 Client 有獨立的 limiter
+  - `tokens` 初始 = burst（60），每秒補充 `refillRate`（30）個
+  - `Allow()` 消耗 1 個 token，token 不足時回傳 false（丟棄訊息）
+  - ping 訊息豁免（避免影響心跳機制）
+- **設定：** 30/s，burst 60（允許短暫爆發，正常遊戲操作不受影響）
+- **實作位置：** `server/internal/ws/hub.go`，`rateLimiter` struct
+- **測試：** `hub_test.go` 新增 3 個 rate limiting 測試
+- **教訓：** Rate limiting 要在 WebSocket 層做，不要在 game logic 層做，這樣更通用
+
+## 84. Godot 4 WebSocket Ping 延遲計算（DAY-036）
+- **問題：** 玩家不知道自己的網路延遲，無法判斷是網路問題還是遊戲問題
+- **解法：** 發送 ping 時記錄 `Time.get_ticks_msec()`，收到 pong 時計算差值
+  - `_ping_sent_at = Time.get_ticks_msec()` — 發送時記錄
+  - `_last_ping_ms = int(Time.get_ticks_msec() - _ping_sent_at)` — 收到 pong 時計算
+  - `get_ping_ms()` — 公開 API，HUD 可以查詢
+- **顯示：** 效能面板第四行，顏色依延遲分級（綠/黃/紅）
+- **注意：** ping 訊息加入 `t` 時間戳欄位，但 Server 端 pong 不需要回傳（只需要回應即可）
+- **教訓：** `Time.get_ticks_msec()` 是毫秒精度，比 `Time.get_unix_time_from_system()` 更適合測量短時間間隔

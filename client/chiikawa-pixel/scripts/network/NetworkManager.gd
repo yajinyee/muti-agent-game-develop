@@ -57,6 +57,10 @@ var _reconnect_timer: float = 0.0
 var _ping_timer: float = 0.0
 var _is_spectator: bool = false  # 是否為觀戰模式（DAY-024）
 
+# Ping 延遲計算（DAY-036）
+var _ping_sent_at: float = 0.0   # 發送 ping 的時間（Time.get_ticks_msec）
+var _last_ping_ms: int = -1       # 最後一次 ping 延遲（ms），-1 表示尚未測量
+
 # HTTP 請求（用於查詢房間列表）
 var _http_request: HTTPRequest = null
 # HTTP 請求（用於查詢觀戰快照）
@@ -96,11 +100,12 @@ func _process(delta: float) -> void:
 				var packet = _socket.get_packet()
 				_handle_packet(packet)
 
-			# Ping
+			# Ping（帶時間戳，用於計算延遲）
 			_ping_timer += delta
 			if _ping_timer >= PING_INTERVAL:
 				_ping_timer = 0.0
-				send("ping", {})
+				_ping_sent_at = Time.get_ticks_msec()
+				send("ping", {"t": int(_ping_sent_at)})
 
 		WebSocketPeer.STATE_CLOSED:
 			if _connected:
@@ -271,6 +276,11 @@ func _handle_packet(packet: PackedByteArray) -> void:
 	var type = data.get("type", "")
 	var payload = data.get("payload", {})
 
+	# 計算 ping 延遲（DAY-036）
+	if type == "pong" and _ping_sent_at > 0:
+		_last_ping_ms = int(Time.get_ticks_msec() - _ping_sent_at)
+		_ping_sent_at = 0.0
+
 	emit_signal("message_received", type, payload)
 
 ## 產生玩家 ID
@@ -284,3 +294,7 @@ func is_connected_to_server() -> bool:
 ## 取得玩家 ID
 func get_player_id() -> String:
 	return _player_id
+
+## 取得最後一次 ping 延遲（ms），-1 表示尚未測量（DAY-036）
+func get_ping_ms() -> int:
+	return _last_ping_ms

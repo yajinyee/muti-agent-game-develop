@@ -29,6 +29,9 @@ const (
 	version = "0.1.0"
 )
 
+// serverStartTime 記錄 Server 啟動時間（用於 /health uptime 計算）
+var serverStartTime = time.Now()
+
 func main() {
 	cfg := config.Load()
 
@@ -166,8 +169,20 @@ func main() {
 	// 健康檢查
 	mux.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
-		fmt.Fprintf(w, `{"status":"ok","version":"%s","clients":%d,"spectators":%d}`,
-			version, hub.PlayerCount(), hub.SpectatorCount())
+		uptimeSec := int(time.Since(serverStartTime).Seconds())
+		uptimeStr := fmt.Sprintf("%dh%dm%ds",
+			uptimeSec/3600,
+			(uptimeSec%3600)/60,
+			uptimeSec%60,
+		)
+		fmt.Fprintf(w, `{"status":"ok","version":"%s","uptime":"%s","uptime_sec":%d,"clients":%d,"spectators":%d,"game_state":"%s"}`,
+			version,
+			uptimeStr,
+			uptimeSec,
+			hub.PlayerCount(),
+			hub.SpectatorCount(),
+			g.GetState(),
+		)
 	})
 
 	// 統計端點（goroutine 數量、記憶體使用）

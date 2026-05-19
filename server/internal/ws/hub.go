@@ -16,6 +16,11 @@ const (
 	pongWait       = 60 * time.Second
 	pingPeriod     = (pongWait * 9) / 10
 	maxMessageSize = 512 * 1024 // 512KB
+
+	// Rate limiting：每個客戶端每秒最多 30 條訊息（token bucket）
+	// 捕魚機正常操作：攻擊 ~10/s，投注切換 ~2/s，ping ~1/s → 30/s 足夠
+	rateLimitPerSecond = 30
+	rateLimitBurst     = 60 // 允許短暫爆發（最多 2 秒的量）
 )
 
 var upgrader = websocket.Upgrader{
@@ -35,6 +40,47 @@ const (
 	RoleSpectator ClientRole = "spectator" // 觀戰者（只讀，收廣播但不能發遊戲指令）
 )
 
+// rateLimiter Token bucket 速率限制器（per-client）
+type rateLimiter struct {
+	tokens    float64
+	maxTokens float64
+	refillRate float64 // tokens per second
+	lastRefill time.Time
+	mu         sync.Mutex
+}
+
+// newRateLimiter 建立速率限制器
+func newRateLimiter(perSecond, burst int) *rateLimiter {
+	return &rateLimiter{
+		tokens:     float64(burst),
+		maxTokens:  float64(burst),
+		refillRate: float64(perSecond),
+		lastRefill: time.Now(),
+	}
+}
+
+// Allow 嘗試消耗一個 token，回傳是否允許
+func (r *rateLimiter) Allow() bool {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	now := time.Now()
+	elapsed := now.Sub(r.lastRefill).Seconds()
+	r.lastRefill = now
+
+	// 補充 token
+	r.tokens += elapsed * r.refillRate
+	if r.tokens > r.maxTokens {
+		r.tokens = r.maxTokens
+	}
+
+	if r.tokens >= 1.0 {
+		r.tokens -= 1.0
+		return true
+	}
+	return false
+}
+
 // Client WebSocket 客戶端
 type Client struct {
 	ID       string
@@ -42,7 +88,8 @@ type Client struct {
 	conn     *websocket.Conn
 	send     chan []byte
 	PlayerID string
-	Role     ClientRole // 客戶端角色（DAY-023）
+	Role     ClientRole   // 客戶端角色（DAY-023）
+	limiter  *rateLimiter // per-client 速率限制（DAY-036）
 }
 
 // Hub 管理所有 WebSocket 連線
@@ -191,6 +238,7 @@ func (h *Hub) serveWSWithRole(w http.ResponseWriter, r *http.Request, clientID s
 		send:     make(chan []byte, 256),
 		PlayerID: clientID,
 		Role:     role,
+		limiter:  newRateLimiter(rateLimitPerSecond, rateLimitBurst),
 	}
 
 	h.Register(client)
@@ -231,6 +279,13 @@ func (c *Client) readPump(h *Hub) {
 		// 觀戰者只允許 ping，其他遊戲指令一律忽略（DAY-023）
 		if c.Role == RoleSpectator && msg.Type != MsgPing {
 			log.Printf("[WS] Spectator %s tried to send %s, ignored", c.ID, msg.Type)
+			continue
+		}
+
+		// Rate limiting：超過速率限制時丟棄訊息（DAY-036）
+		// ping 訊息豁免（避免影響心跳機制）
+		if msg.Type != MsgPing && !c.limiter.Allow() {
+			log.Printf("[WS] Rate limit exceeded for client %s, dropping %s", c.ID, msg.Type)
 			continue
 		}
 

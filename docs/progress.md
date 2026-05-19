@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-035 HighRatio 修復 + 目標位置同步 + 測試套件擴充）
+## 最後更新：2026-05-19（DAY-036 Rate Limiting + Health 強化 + Ping 延遲顯示）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,8 +8,8 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **架構成熟度：RedisStore 完整實作，Docker 部署就緒**
-- **DAY-035 更新：** HighRatio 動態難度修復 ✅，目標位置同步廣播 ✅，target 測試套件 7 個新測試 ✅，go build + go vet + go test 全通過（8個測試套件）✅
+- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護**
+- **DAY-036 更新：** Per-client Rate Limiting（Token Bucket）✅，/health uptime+game_state ✅，Client Ping 延遲顯示 ✅，hub_test 10/10 全通過 ✅
 
 ---
 
@@ -250,6 +250,15 @@
   - 高倍率（30x+）：0.18s 彈入 + 過衝（1.15x→1.0x）+ coin_drop 音效提示
   - BOSS：0.4s 慢速放大（TRANS_ELASTIC，威壓感）
   - 美術質量從 99 提升到 100/100
+- [x] **Server Rate Limiting**（DAY-036）：
+  - `hub.go`：`rateLimiter` struct（Token Bucket，30/s，burst 60）
+  - per-client 獨立 limiter，ping 訊息豁免，防止惡意客戶端洪水攻擊
+  - `hub_test.go`：3 個新測試（10/10 全通過）
+- [x] **Health 端點強化**（DAY-036）：
+  - `/health` 加入 `uptime`、`uptime_sec`、`game_state` 欄位
+- [x] **Client Ping 延遲顯示**（DAY-036）：
+  - `NetworkManager.gd`：ping 延遲計算（`Time.get_ticks_msec()`），`get_ping_ms()` API
+  - `HUD.gd`：效能面板第四行 Ping 顯示（綠/黃/紅顏色分級）
 
 ---
 
