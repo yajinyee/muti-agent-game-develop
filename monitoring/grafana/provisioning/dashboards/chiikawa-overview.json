@@ -1,16 +1,24 @@
 {
-  "title": "吉伊卡哇：像素大討伐 — 監控面板",
+  "title": "吉伊卡哇：像素大討伐 — 監控總覽 (DAY-045)",
   "uid": "chiikawa-overview",
   "version": 1,
   "schemaVersion": 38,
   "refresh": "15s",
-  "time": { "from": "now-1h", "to": "now" },
+  "time": {
+    "from": "now-1h",
+    "to": "now"
+  },
   "panels": [
     {
       "id": 1,
       "title": "當前連線玩家數",
       "type": "stat",
-      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "chiikawa_connected_players",
@@ -26,9 +34,18 @@
         "defaults": {
           "thresholds": {
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 5 },
-              { "color": "red", "value": 9 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 5
+              },
+              {
+                "color": "red",
+                "value": 9
+              }
             ]
           }
         }
@@ -38,14 +55,21 @@
       "id": 2,
       "title": "Server 運行時間",
       "type": "stat",
-      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "gridPos": {
+        "x": 4,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "chiikawa_uptime_seconds",
           "legendFormat": "Uptime"
         }
       ],
-      "options": { "colorMode": "value" },
+      "options": {
+        "colorMode": "value"
+      },
       "fieldConfig": {
         "defaults": {
           "unit": "s"
@@ -56,21 +80,37 @@
       "id": 3,
       "title": "Goroutine 數量",
       "type": "stat",
-      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "gridPos": {
+        "x": 8,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "chiikawa_goroutines",
           "legendFormat": "Goroutines"
         }
       ],
-      "options": { "colorMode": "background" },
+      "options": {
+        "colorMode": "background"
+      },
       "fieldConfig": {
         "defaults": {
           "thresholds": {
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 50 },
-              { "color": "red", "value": 100 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 50
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
             ]
           }
         }
@@ -80,23 +120,42 @@
       "id": 4,
       "title": "整體 RTP",
       "type": "stat",
-      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 4,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "chiikawa_overall_rtp * 100",
           "legendFormat": "RTP %"
         }
       ],
-      "options": { "colorMode": "background" },
+      "options": {
+        "colorMode": "background"
+      },
       "fieldConfig": {
         "defaults": {
           "unit": "percent",
           "thresholds": {
             "steps": [
-              { "color": "red", "value": null },
-              { "color": "yellow", "value": 85 },
-              { "color": "green", "value": 92 },
-              { "color": "orange", "value": 100 }
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 85
+              },
+              {
+                "color": "green",
+                "value": 92
+              },
+              {
+                "color": "orange",
+                "value": 100
+              }
             ]
           }
         }
@@ -106,7 +165,12 @@
       "id": 5,
       "title": "Heap 記憶體使用",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "chiikawa_heap_alloc_bytes / 1024 / 1024",
@@ -118,14 +182,21 @@
         }
       ],
       "fieldConfig": {
-        "defaults": { "unit": "decmbytes" }
+        "defaults": {
+          "unit": "decmbytes"
+        }
       }
     },
     {
       "id": 6,
       "title": "玩家活動",
       "type": "timeseries",
-      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "gridPos": {
+        "x": 12,
+        "y": 4,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "chiikawa_connected_players",
@@ -141,7 +212,12 @@
       "id": 7,
       "title": "攻擊 & 擊殺（累計）",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "rate(chiikawa_total_attacks_fired[1m]) * 60",
@@ -157,7 +233,12 @@
       "id": 8,
       "title": "BOSS & Bonus 事件（累計）",
       "type": "timeseries",
-      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "gridPos": {
+        "x": 12,
+        "y": 12,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "chiikawa_boss_spawns_total",
@@ -173,7 +254,12 @@
       "id": 9,
       "title": "WebSocket 訊息吞吐量",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 },
+      "gridPos": {
+        "x": 0,
+        "y": 20,
+        "w": 12,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "rate(chiikawa_ws_messages_received_total[1m]) * 60",
@@ -189,21 +275,37 @@
       "id": 10,
       "title": "WebSocket 丟棄訊息（累計）",
       "type": "stat",
-      "gridPos": { "x": 12, "y": 20, "w": 6, "h": 8 },
+      "gridPos": {
+        "x": 12,
+        "y": 20,
+        "w": 6,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "chiikawa_ws_messages_dropped_total",
           "legendFormat": "Dropped"
         }
       ],
-      "options": { "colorMode": "background" },
+      "options": {
+        "colorMode": "background"
+      },
       "fieldConfig": {
         "defaults": {
           "thresholds": {
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 10 },
-              { "color": "red", "value": 100 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 10
+              },
+              {
+                "color": "red",
+                "value": 100
+              }
             ]
           }
         }
@@ -213,7 +315,12 @@
       "id": 11,
       "title": "當前活躍目標物數量",
       "type": "stat",
-      "gridPos": { "x": 18, "y": 20, "w": 6, "h": 4 },
+      "gridPos": {
+        "x": 18,
+        "y": 20,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "chiikawa_active_targets",
@@ -229,9 +336,18 @@
         "defaults": {
           "thresholds": {
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 15 },
-              { "color": "red", "value": 20 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 15
+              },
+              {
+                "color": "red",
+                "value": 20
+              }
             ]
           }
         }
@@ -241,7 +357,12 @@
       "id": 12,
       "title": "目標物數量時序",
       "type": "timeseries",
-      "gridPos": { "x": 18, "y": 24, "w": 6, "h": 4 },
+      "gridPos": {
+        "x": 18,
+        "y": 24,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "chiikawa_active_targets",
@@ -259,7 +380,12 @@
       "id": 13,
       "title": "WebSocket 平均訊息大小（壓縮前）",
       "type": "stat",
-      "gridPos": { "x": 0, "y": 28, "w": 6, "h": 4 },
+      "gridPos": {
+        "x": 0,
+        "y": 28,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "chiikawa_ws_avg_message_size_bytes",
@@ -276,9 +402,18 @@
           "unit": "bytes",
           "thresholds": {
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 512 },
-              { "color": "red", "value": 1024 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 512
+              },
+              {
+                "color": "red",
+                "value": 1024
+              }
             ]
           }
         }
@@ -288,7 +423,12 @@
       "id": 14,
       "title": "WebSocket 壓縮節省頻寬（估算）",
       "type": "timeseries",
-      "gridPos": { "x": 6, "y": 28, "w": 18, "h": 4 },
+      "gridPos": {
+        "x": 6,
+        "y": 28,
+        "w": 18,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "rate(chiikawa_ws_bytes_sent_raw_total[1m])",
@@ -312,7 +452,12 @@
       "id": 15,
       "title": "WebSocket 訊息類型分布（發送頻率）",
       "type": "timeseries",
-      "gridPos": { "x": 0, "y": 32, "w": 24, "h": 8 },
+      "gridPos": {
+        "x": 0,
+        "y": 32,
+        "w": 24,
+        "h": 8
+      },
       "targets": [
         {
           "expr": "rate(chiikawa_ws_msg_type_total{type=\"target_spawn\"}[1m]) * 60",
@@ -355,7 +500,12 @@
       "id": 16,
       "title": "WebSocket 平均 Ping 延遲（ms）",
       "type": "stat",
-      "gridPos": { "x": 0, "y": 40, "w": 6, "h": 4 },
+      "gridPos": {
+        "x": 0,
+        "y": 40,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "chiikawa_ws_ping_latency_avg_ms",
@@ -372,9 +522,18 @@
           "unit": "ms",
           "thresholds": {
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 100 },
-              { "color": "red", "value": 300 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 100
+              },
+              {
+                "color": "red",
+                "value": 300
+              }
             ]
           }
         }
@@ -384,7 +543,12 @@
       "id": 17,
       "title": "WebSocket 最大 Ping 延遲（ms）",
       "type": "stat",
-      "gridPos": { "x": 6, "y": 40, "w": 6, "h": 4 },
+      "gridPos": {
+        "x": 6,
+        "y": 40,
+        "w": 6,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "chiikawa_ws_ping_latency_max_ms",
@@ -401,9 +565,18 @@
           "unit": "ms",
           "thresholds": {
             "steps": [
-              { "color": "green", "value": null },
-              { "color": "yellow", "value": 200 },
-              { "color": "red", "value": 500 }
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 200
+              },
+              {
+                "color": "red",
+                "value": 500
+              }
             ]
           }
         }
@@ -413,7 +586,12 @@
       "id": 18,
       "title": "WebSocket Ping 延遲趨勢",
       "type": "timeseries",
-      "gridPos": { "x": 12, "y": 40, "w": 12, "h": 4 },
+      "gridPos": {
+        "x": 12,
+        "y": 40,
+        "w": 12,
+        "h": 4
+      },
       "targets": [
         {
           "expr": "chiikawa_ws_ping_latency_avg_ms",
@@ -432,6 +610,206 @@
           }
         }
       }
+    },
+    {
+      "id": 19,
+      "title": "Client 平均 FPS",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 0,
+        "y": 40
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 30
+              },
+              {
+                "color": "green",
+                "value": 50
+              }
+            ]
+          },
+          "unit": "short",
+          "displayName": "Avg FPS"
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_client_avg_fps",
+          "legendFormat": "平均 FPS",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 20,
+      "title": "Client 記憶體使用（MB）",
+      "type": "stat",
+      "gridPos": {
+        "h": 4,
+        "w": 6,
+        "x": 6,
+        "y": 40
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "yellow",
+                "value": 150
+              },
+              {
+                "color": "red",
+                "value": 250
+              }
+            ]
+          },
+          "unit": "decmbytes",
+          "displayName": "Memory"
+        }
+      },
+      "options": {
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ]
+        },
+        "orientation": "auto",
+        "textMode": "auto",
+        "colorMode": "background",
+        "graphMode": "area"
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg(chiikawa_client_memory_mb)",
+          "legendFormat": "平均記憶體 MB",
+          "refId": "A"
+        }
+      ]
+    },
+    {
+      "id": 21,
+      "title": "Client 端效能趨勢（FPS + 記憶體）",
+      "type": "timeseries",
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 40
+      },
+      "datasource": {
+        "type": "prometheus",
+        "uid": "prometheus"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "lineWidth": 2,
+            "fillOpacity": 10,
+            "showPoints": "never"
+          }
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "記憶體 MB"
+            },
+            "properties": [
+              {
+                "id": "custom.axisPlacement",
+                "value": "right"
+              },
+              {
+                "id": "unit",
+                "value": "decmbytes"
+              }
+            ]
+          }
+        ]
+      },
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_client_avg_fps",
+          "legendFormat": "平均 FPS",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "avg(chiikawa_client_memory_mb)",
+          "legendFormat": "記憶體 MB",
+          "refId": "B"
+        }
+      ]
     }
   ]
 }

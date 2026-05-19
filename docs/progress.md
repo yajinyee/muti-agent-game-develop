@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-044 Ping Latency 統計 + Grafana 18面板 + 測試 13/13）
+## 最後更新：2026-05-19（DAY-045 Client端效能上報 + Server連線品質報告 + Grafana 21面板）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,10 +8,10 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（18個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤**
-- **DAY-043 更新：** `hub.go` 加入 `msgTypeCounts sync.Map` + `IncrMsgType` + `GetMsgTypeCounts` ✅，`/metrics` 加入 `chiikawa_ws_msg_type_total` 指標 ✅，`HitEffect.gd` 強化 5+/7+ 連擊特效（全畫面閃光+衝擊波+螢幕扭曲）✅，Grafana dashboard 升級到 15 個面板 ✅
+- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（21個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報**
 - **DAY-044 更新：** `hub.go` 加入 Ping Latency 追蹤（per-client + 全局 avg/max/count）✅，`/metrics` 加入 3 個 ping 指標 + per-client 延遲 ✅，`/health` 加入 `avg_ping_ms` ✅，Grafana dashboard 升級到 18 個面板 ✅，hub_test.go 新增 3 個測試（13/13 全通過）✅
 - **DAY-044b 更新（自主觸發）：** 發現 QA 工具 RTP 模擬盲點（使用靜態模型，永遠顯示 95.93%）✅，修復 QA 工具改用真實遊戲邏輯 ✅，發現 BOSS HP 固定值導致低 bet 等級永遠打不死 BOSS ✅，`spawnBoss()` 改為動態 HP（依 bet 等級縮放）✅，調整 RTP 數值（BASE_RTP=0.95, LABOR_SCALE=1.2, BONUS_MULT_MAX=30）✅，QA 8/8 全通過，RTP 95.71% ✅
+- **DAY-045 更新：** `protocol.go` 加入 `MsgClientPerf` + `ClientPerfPayload` ✅，`hub.go` 加入 Client 效能快照儲存（UpdateClientPerf + GetClientPerfSnapshots）✅，`game.go` 加入 `handleClientPerf()`（高延遲/低FPS 警告 log）✅，`/metrics` 加入 4 個 Client 端效能指標（fps/memory/draw_calls/avg_fps）✅，`NetworkManager.gd` 加入 `send_perf_report()` ✅，`PerformanceMonitor.gd` 每 30 秒自動上報 ✅，Grafana dashboard 升級到 21 個面板 ✅，QA 8/8 全通過 ✅
 
 ---
 
@@ -306,8 +306,16 @@
   - `main.go`：`/health` 加入 `avg_ping_ms` 欄位
   - `hub_test.go`：新增 3 個測試（13/13 全通過）
   - Grafana dashboard：從 15 個面板升級到 18 個面板（avg ping stat + max ping stat + 延遲趨勢 timeseries）
+- [x] **Client 端效能上報 + Server 連線品質報告**（DAY-045）：
+  - `protocol.go`：加入 `MsgClientPerf` 訊息類型 + `ClientPerfPayload`（fps/memory_mb/draw_calls/node_count/ping_ms/quality）
+  - `hub.go`：Client 加入效能快照欄位（lastPerfFPS/lastPerfMemoryMB/lastPerfDrawCalls/lastPerfQuality/lastPerfAt/perfMu）
+  - `hub.go`：加入 `UpdateClientPerf()`、`ClientPerfSnapshot`、`GetClientPerfSnapshots()` 方法
+  - `game.go`：HandleMessage 加入 `MsgClientPerf` 分支，`handleClientPerf()` 函數（高延遲>200ms + 低FPS<20 警告 log）
+  - `main.go`：`/metrics` 加入 4 個 Client 端效能指標（per-client fps/memory/draw_calls + avg_fps）
+  - `NetworkManager.gd`：加入 `send_perf_report()` 方法
+  - `PerformanceMonitor.gd`：每 30 秒自動呼叫 `_send_perf_report()`，上報 FPS/記憶體/DrawCalls/Ping/Quality
+  - Grafana dashboard：從 18 個面板升級到 21 個面板（Client FPS stat + Client 記憶體 stat + Client 效能趨勢 timeseries）
 - Server：Go + WebSocket，Port 7777
-- Client：Godot 4.6.2（GDScript），HTML5 匯出
 - 通訊協定：WebSocket + JSON，每訊息獨立 frame
 - 擊破判定：混合制（可視HP + 機率擊破 + 保底）
 - 實際 RTP：95.93%（目標 92-96%）✅

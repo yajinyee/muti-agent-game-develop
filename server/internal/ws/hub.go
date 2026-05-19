@@ -96,6 +96,14 @@ type Client struct {
 	lastPingSentAt time.Time  // 最後一次發送 ping 的時間
 	lastPingLatMs  int64      // 最後一次 ping/pong 延遲（毫秒）
 	pingMu         sync.Mutex // 保護 ping 欄位
+
+	// Client 端效能數據（DAY-045）
+	lastPerfFPS       float64   // 最後上報的 FPS
+	lastPerfMemoryMB  float64   // 最後上報的記憶體（MB）
+	lastPerfDrawCalls int       // 最後上報的 Draw Calls
+	lastPerfQuality   string    // 最後上報的效能等級
+	lastPerfAt        time.Time // 最後上報時間
+	perfMu            sync.Mutex
 }
 
 // Hub 管理所有 WebSocket 連線
@@ -297,6 +305,61 @@ func (h *Hub) GetClientPingLatencies() map[string]int64 {
 		c.pingMu.Lock()
 		result[id] = c.lastPingLatMs
 		c.pingMu.Unlock()
+	}
+	return result
+}
+
+// UpdateClientPerf 更新指定客戶端的效能數據（DAY-045）
+// 由 game.go 在收到 client_perf 訊息時呼叫
+func (h *Hub) UpdateClientPerf(clientID string, fps, memMB float64, drawCalls int, quality string) {
+	h.mu.RLock()
+	client, ok := h.clients[clientID]
+	h.mu.RUnlock()
+	if !ok {
+		return
+	}
+	client.perfMu.Lock()
+	client.lastPerfFPS = fps
+	client.lastPerfMemoryMB = memMB
+	client.lastPerfDrawCalls = drawCalls
+	client.lastPerfQuality = quality
+	client.lastPerfAt = time.Now()
+	client.perfMu.Unlock()
+}
+
+// ClientPerfSnapshot 單一客戶端效能快照
+type ClientPerfSnapshot struct {
+	ClientID  string
+	FPS       float64
+	MemoryMB  float64
+	DrawCalls int
+	Quality   string
+	Age       time.Duration // 距離上次上報的時間
+}
+
+// GetClientPerfSnapshots 取得所有客戶端的效能快照（DAY-045）
+// 回傳最近 60 秒內有上報的客戶端，供 /metrics 使用
+func (h *Hub) GetClientPerfSnapshots() []ClientPerfSnapshot {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	now := time.Now()
+	result := make([]ClientPerfSnapshot, 0, len(h.clients))
+	for id, c := range h.clients {
+		if c.Role != RolePlayer {
+			continue
+		}
+		c.perfMu.Lock()
+		if !c.lastPerfAt.IsZero() && now.Sub(c.lastPerfAt) < 60*time.Second {
+			result = append(result, ClientPerfSnapshot{
+				ClientID:  id,
+				FPS:       c.lastPerfFPS,
+				MemoryMB:  c.lastPerfMemoryMB,
+				DrawCalls: c.lastPerfDrawCalls,
+				Quality:   c.lastPerfQuality,
+				Age:       now.Sub(c.lastPerfAt),
+			})
+		}
+		c.perfMu.Unlock()
 	}
 	return result
 }

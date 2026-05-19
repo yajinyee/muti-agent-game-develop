@@ -40,6 +40,10 @@ var _screen_shake_enabled: bool = true
 var _particle_count_scale: float = 1.0
 var _outline_shader_enabled: bool = true
 
+# Server 效能上報（DAY-045）
+const PERF_REPORT_INTERVAL = 30.0  # 每 30 秒上報一次
+var _perf_report_timer: float = 0.0
+
 signal quality_changed(new_level: QualityLevel)
 
 func _ready() -> void:
@@ -67,6 +71,13 @@ func _process(delta: float) -> void:
 	if _check_timer >= CHECK_INTERVAL:
 		_check_timer = 0.0
 		_evaluate_performance()
+
+	# Server 效能上報（DAY-045）
+	# 每 30 秒上報一次，讓 Server 能監控玩家端效能
+	_perf_report_timer += delta
+	if _perf_report_timer >= PERF_REPORT_INTERVAL:
+		_perf_report_timer = 0.0
+		_send_perf_report()
 
 func _evaluate_performance() -> void:
 	if _fps_samples.is_empty():
@@ -190,3 +201,26 @@ func _quality_name_for(level: QualityLevel) -> String:
 		QualityLevel.MEDIUM: return "MEDIUM"
 		QualityLevel.LOW: return "LOW"
 	return "UNKNOWN"
+
+## _send_perf_report — 上報效能數據到 Server（DAY-045）
+## 每 30 秒自動呼叫，讓 Grafana 能看到玩家端效能狀況
+func _send_perf_report() -> void:
+	# 確認 NetworkManager 已連線
+	var nm = get_node_or_null("/root/NetworkManager")
+	if not is_instance_valid(nm):
+		return
+	if not nm.is_connected_to_server():
+		return
+
+	var ping_ms = nm.get_ping_ms()
+	if ping_ms < 0:
+		ping_ms = 0  # 尚未測量時用 0
+
+	nm.send_perf_report(
+		snapshot_fps,
+		snapshot_memory_mb,
+		snapshot_draw_calls,
+		snapshot_nodes,
+		ping_ms,
+		_quality_name()
+	)

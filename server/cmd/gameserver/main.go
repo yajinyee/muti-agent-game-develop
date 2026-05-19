@@ -415,6 +415,55 @@ func main() {
 			}
 			fmt.Fprintf(w, "\n")
 		}
+
+		// Client 端效能數據（DAY-045）
+		// 由 Client 每 30 秒上報，讓 Grafana 能看到玩家端的效能狀況
+		perfSnapshots := hub.GetClientPerfSnapshots()
+		if len(perfSnapshots) > 0 {
+			fmt.Fprintf(w, "# HELP chiikawa_client_fps Client-side frames per second reported by player\n")
+			fmt.Fprintf(w, "# TYPE chiikawa_client_fps gauge\n")
+			for _, snap := range perfSnapshots {
+				shortID := snap.ClientID
+				if len(shortID) > 8 {
+					shortID = shortID[:8]
+				}
+				fmt.Fprintf(w, "chiikawa_client_fps{client=%q,quality=%q} %.1f\n",
+					shortID, snap.Quality, snap.FPS)
+			}
+			fmt.Fprintf(w, "\n")
+
+			fmt.Fprintf(w, "# HELP chiikawa_client_memory_mb Client-side static memory usage in MB\n")
+			fmt.Fprintf(w, "# TYPE chiikawa_client_memory_mb gauge\n")
+			for _, snap := range perfSnapshots {
+				shortID := snap.ClientID
+				if len(shortID) > 8 {
+					shortID = shortID[:8]
+				}
+				fmt.Fprintf(w, "chiikawa_client_memory_mb{client=%q} %.1f\n", shortID, snap.MemoryMB)
+			}
+			fmt.Fprintf(w, "\n")
+
+			fmt.Fprintf(w, "# HELP chiikawa_client_draw_calls Client-side draw calls per frame\n")
+			fmt.Fprintf(w, "# TYPE chiikawa_client_draw_calls gauge\n")
+			for _, snap := range perfSnapshots {
+				shortID := snap.ClientID
+				if len(shortID) > 8 {
+					shortID = shortID[:8]
+				}
+				fmt.Fprintf(w, "chiikawa_client_draw_calls{client=%q} %d\n", shortID, snap.DrawCalls)
+			}
+			fmt.Fprintf(w, "\n")
+
+			// 計算所有 Client 的平均 FPS（供 Grafana 整體趨勢面板）
+			var totalFPS float64
+			for _, snap := range perfSnapshots {
+				totalFPS += snap.FPS
+			}
+			avgClientFPS := totalFPS / float64(len(perfSnapshots))
+			fmt.Fprintf(w, "# HELP chiikawa_client_avg_fps Average FPS across all connected clients\n")
+			fmt.Fprintf(w, "# TYPE chiikawa_client_avg_fps gauge\n")
+			fmt.Fprintf(w, "chiikawa_client_avg_fps %.1f\n\n", avgClientFPS)
+		}
 	})
 
 	// pprof 監控端點（Debug 模式下啟用，用於記憶體/goroutine 分析）

@@ -18,6 +18,7 @@ const (
 	MsgSetDisplayName  MessageType = "set_display_name"  // 設定顯示名稱（DAY-021）
 	MsgClaimMission    MessageType = "claim_mission"     // 領取任務獎勵（DAY-037）
 	MsgGetMissions     MessageType = "get_missions"      // 查詢任務列表（DAY-037）
+	MsgClientPerf      MessageType = "client_perf"       // Client 端效能數據上報（DAY-045）
 )
 
 // Server → Client
@@ -231,4 +232,18 @@ type MissionCompletePayload struct {
 // ClaimMissionPayload 領取任務獎勵請求
 type ClaimMissionPayload struct {
 	MissionID string `json:"mission_id"`
+}
+
+// ---- Client 端效能數據（DAY-045）----
+
+// ClientPerfPayload Client 端效能數據上報
+// Client 每 30 秒發送一次，Server 記錄並暴露到 /metrics
+type ClientPerfPayload struct {
+	FPS        float64 `json:"fps"`         // 當前平均 FPS
+	MemoryMB   float64 `json:"memory_mb"`   // 靜態記憶體使用（MB）
+	DrawCalls  int     `json:"draw_calls"`  // 每幀 Draw Call 數
+	NodeCount  int     `json:"node_count"`  // 場景節點數
+	PingMs     int     `json:"ping_ms"`     // Client 端測量的 ping 延遲（ms）
+	Quality    string  `json:"quality"`     // 效能等級（HIGH/MEDIUM/LOW）
+	Timestamp  int64   `json:"timestamp"`   // Unix ms
 }

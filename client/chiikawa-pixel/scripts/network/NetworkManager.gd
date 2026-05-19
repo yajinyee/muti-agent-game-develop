@@ -260,6 +260,19 @@ func send_trigger_bonus() -> void:
 func send_set_display_name(display_name: String) -> void:
 	send("set_display_name", {"display_name": display_name})
 
+## 上報 Client 端效能數據（DAY-045）
+## 每 30 秒由 PerformanceMonitor 呼叫，讓 Server 能監控玩家端效能
+func send_perf_report(fps: float, memory_mb: float, draw_calls: int, node_count: int, ping_ms: int, quality: String) -> void:
+	send("client_perf", {
+		"fps": fps,
+		"memory_mb": memory_mb,
+		"draw_calls": draw_calls,
+		"node_count": node_count,
+		"ping_ms": ping_ms,
+		"quality": quality,
+		"timestamp": int(Time.get_unix_time_from_system() * 1000)
+	})
+
 ## 處理收到的封包
 func _handle_packet(packet: PackedByteArray) -> void:
 	var text = packet.get_string_from_utf8()
