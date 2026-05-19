@@ -11,10 +11,12 @@ const BG_PATHS = {
 
 const CAUSTICS_SHADER_PATH = "res://assets/shaders/underwater_caustics.gdshader"
 const BubbleLayerScript = preload("res://scripts/game/BubbleLayer.gd")
+const UnderwaterOverlayScript = preload("res://scripts/effects/UnderwaterOverlay.gd")
 
 var _current_bg: String = "normal"
 var _bubble_layer: Node2D = null
 var _caustics_mat: ShaderMaterial = null  # 焦散光效果（海底背景專用）
+var _underwater_overlay: ColorRect = null  # 全螢幕水下色差效果（DAY-030）
 
 func _ready() -> void:
 	position = Vector2(640, 360)
@@ -34,6 +36,12 @@ func _ready() -> void:
 		_caustics_mat.shader = load(CAUSTICS_SHADER_PATH)
 		# 套用到背景（normal 狀態）
 		material = _caustics_mat
+
+	# 建立全螢幕水下色差效果（DAY-030）
+	# 套用在遊戲層上方（z_index=50），讓整個畫面有水下折射感
+	_underwater_overlay = UnderwaterOverlayScript.new()
+	_underwater_overlay.name = "UnderwaterOverlay"
+	get_parent().call_deferred("add_child", _underwater_overlay)
 
 	# 啟動海底環境音（遊戲開始時）
 	call_deferred("_start_initial_ambient")
