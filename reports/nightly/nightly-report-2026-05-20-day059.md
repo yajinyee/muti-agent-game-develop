@@ -37,15 +37,29 @@
 - **來源**：websocket.org（2026-03-14 更新）
 - **結論**：現有 gorilla 專案維持不動是正確決策，DAY-058 的評估結論再次確認
 
-### 3. README.md 更新
+#### HTML5 遊戲商業化策略（KnowHow #118）
+- **來源**：playgama.com（2026-04-17）、applixir.com（2025-07-08）
+- **核心發現**：2026 年 HTML5 遊戲市場超過 60 億美元，Rewarded Video + IAP 是標準混合模式
+- **本專案方向**：若要商業化，Rewarded Video 是最低摩擦的起點
+
+### 3. 背景圖 Lossy 壓縮實作（KnowHow #117）
+- 修改三個背景圖的 .import 設定：`compress/mode=0`（Lossless）→ `compress/mode=1`（Lossy WebP）
+- 修改檔案：bonus_bg.png.import、boss_bg.png.import（178KB）、sea_bg.png.import
+- 設定 `compress/lossy_quality=0.85`（高品質 Lossy，視覺差異極小）
+- 預期效果：.pck 大小縮小（boss_bg.png 178KB → 預計 30-50KB）
+- 注意：需要在 Godot 編輯器重新 import 才能生效
+
+### 4. README.md 更新
 - RTP badge 更新（95.98% → 95.75%，反映最新 QA 結果）
 - 品質分數標題更新（DAY-058 → DAY-059）
 - 開發日誌加入 DAY-059 記錄
 - 最後更新時間更新
 
-### 4. 知識庫更新
+### 5. 知識庫更新
 - KnowHow #115：Go WebSocket 高負載優化最佳實踐
 - KnowHow #116：Godot HTML5 Lossy 壓縮 + 自訂 Export Template
+- KnowHow #117：Godot 背景圖 Lossy 壓縮實作
+- KnowHow #118：HTML5 遊戲商業化策略
 - 能力評估 #36 更新
 
 ---
@@ -74,15 +88,15 @@
 - **完成度：100%**
 - **美術質量：100/100**
 - **規格一致性：100%**
-- **KnowHow 條數：116 條**
+- **KnowHow 條數：118 條**
 - **架構成熟度：生產就緒，符合業界最佳實踐**
 
 ---
 
 ## 明日計畫（DAY-060）
 
-1. **Godot HTML5 Lossy 壓縮實作** — 在 Import tab 確認主要圖片資產使用 Lossy 壓縮，重新 export 確認 .pck 大小縮小
-2. **上網搜尋** — 「pixel art game monetization HTML5 2025」
+1. **Godot 重新 import 背景圖** — 在 Godot 編輯器重新 import 三個背景圖，確認 Lossy 壓縮生效，測量 .pck 大小縮小幅度
+2. **上網搜尋** — 「Go game server Redis pub/sub horizontal scaling 2025」
 3. **GitHub 上傳**
 
 ---

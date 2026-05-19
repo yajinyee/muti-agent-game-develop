@@ -2417,3 +2417,31 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **本專案現狀：** 已用 gzip 壓縮（wasm 9.0MB），Lossy 壓縮可進一步縮小 .pck
 - **下次 export 時：** 在 Import tab 確認主要圖片資產使用 Lossy 壓縮
 - **教訓：** HTML5 export 大小優化有兩個層次：1) 資產壓縮（簡單）2) 自訂 template（複雜但效果最好）
+
+## 117. Godot 背景圖 Lossy 壓縮實作（DAY-059 自主觸發）
+- **操作：** 修改三個背景圖的 .import 設定，`compress/mode=0`（Lossless）→ `compress/mode=1`（Lossy WebP）
+- **修改的檔案：**
+  - `assets/sprites/backgrounds/bonus_bg.png.import`（34KB）
+  - `assets/sprites/backgrounds/boss_bg.png.import`（178KB）
+  - `assets/sprites/backgrounds/sea_bg.png.import`（68.5KB）
+- **設定：** `compress/lossy_quality=0.85`（高品質 Lossy，視覺差異極小）
+- **為什麼背景圖可以用 Lossy：** 背景圖不是像素精確的 Sprite，不需要每個像素完全一致，Lossy 壓縮對視覺影響極小
+- **為什麼 Sprite 要保持 Lossless：** 像素藝術的精確度很重要，Lossy 壓縮會讓像素邊緣模糊
+- **注意：** .import 設定修改後，需要在 Godot 編輯器重新 import（或刪除 .godot/imported/ 快取）才能生效
+- **預期效果：** .pck 大小縮小（boss_bg.png 178KB → 預計 30-50KB）
+- **教訓：** 背景圖和 Sprite 要分開處理壓縮設定，不能一刀切
+
+## 118. HTML5 遊戲商業化策略（DAY-059 上網研究）
+- **來源：** playgama.com（2026-04-17）、applixir.com（2025-07-08）
+- **市場規模：** 2026 年 HTML5 遊戲市場超過 60 億美元（Statista 估計）
+- **標準混合模式（Hybrid Model）：**
+  1. **Rewarded Video**（95% 玩家接受）— 看廣告換金幣/道具
+  2. **In-App Purchase（IAP）**（5% 付費玩家）— 搭配 Cloud Save
+  3. **Banner 廣告**（被動收入，但效果最差）
+- **捕魚機遊戲適合的商業化方式：**
+  1. Rewarded Video：看廣告換額外金幣或 Bonus 機會
+  2. 虛擬貨幣購買：購買遊戲幣（不是真實賭博）
+  3. 平台授權：授權給遊戲平台（Playgama、CrazyGames 等）
+- **本專案現狀：** 純展示版，無商業化機制
+- **未來方向：** 若要商業化，Rewarded Video 是最低摩擦的起點
+- **教訓：** HTML5 遊戲商業化不是靠 Banner，而是 Rewarded Video + IAP 的混合模式

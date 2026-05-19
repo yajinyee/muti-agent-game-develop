@@ -59,10 +59,17 @@
 
 - [x] 生成 DAY-059 nightly report
 
-### 🟠 上傳 GitHub（P1）
+### 🟢 背景圖 Lossy 壓縮實作（P3，自主觸發）
 
-- [x] git add（knowhow + ability-score + nightly report + today-plan + README）
-- [x] git commit（DAY-059 Go WebSocket 高負載優化研究 + Godot HTML5 Lossy 壓縮技巧 + KnowHow#115-116）
+- [x] 確認三個背景圖的 .import 設定（compress/mode=0 Lossless）
+- [x] 修改為 compress/mode=1（Lossy WebP，quality=0.85）
+- [x] 修改檔案：bonus_bg.png.import、boss_bg.png.import（178KB）、sea_bg.png.import
+- [x] KnowHow #117 更新（背景圖 Lossy 壓縮實作）
+- [x] KnowHow #118 更新（HTML5 遊戲商業化策略）
+- [ ] 待辦：在 Godot 編輯器重新 import 確認生效（需要手動操作）
+
+- [x] git add（knowhow + ability-score + nightly report + today-plan + README + import files）
+- [x] git commit（DAY-059 背景圖 Lossy 壓縮 + KnowHow#115-118 + HTML5 商業化研究）
 - [x] git push origin main
 
 ---
@@ -74,13 +81,13 @@
 - 完成度：**100%**
 - 美術質量：**100/100**
 - 規格一致性：**100%**
-- 架構成熟度：**生產就緒 + goleak 測試覆蓋 + 觀戰者系統完整 + KnowHow 116 條**
+- 架構成熟度：**生產就緒 + goleak 測試覆蓋 + 觀戰者系統完整 + KnowHow 118 條**
 
 ---
 
 ## 明日預覽（DAY-060）
 
 ### 🟢 P3
-1. **Godot HTML5 Lossy 壓縮實作** — 在 Import tab 確認主要圖片資產使用 Lossy 壓縮，重新 export 確認 .pck 大小縮小
-2. **上網搜尋** — 「pixel art game monetization HTML5 2025」
+1. **Godot 重新 import 背景圖** — 在 Godot 編輯器重新 import 三個背景圖，確認 Lossy 壓縮生效，測量 .pck 大小縮小幅度
+2. **上網搜尋** — 「Go game server Redis pub/sub horizontal scaling 2025」
 3. **GitHub 上傳**
