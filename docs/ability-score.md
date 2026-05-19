@@ -948,3 +948,40 @@ Store 整合完整，HTML5 export 大小符合目標，QA 8/8 全部通過。
 1. Nightly Report 更新（DAY-038 完成報告）
 2. Client 任務面板確認 combo 任務正確顯示
 3. 搜尋「daily mission system game design best practices」找更多靈感
+
+---
+
+## 評估 #26 — 2026-05-19（DAY-039，Combo 任務 UI 強化 + /health 端點升級）
+
+### 這次學到了什麼
+1. **任務類型視覺差異化**：不同類型的任務要有不同的視覺語言，combo 任務用橙紅色系傳達「緊張感」
+2. **Tween 綁定到 row 節點**：`row.create_tween().set_loops()` 確保 row 刪除時 tween 自動停止，不會有殘留動畫
+3. **health 端點的最佳實踐**：應包含所有關鍵子系統狀態（任務重置時間、連線數、遊戲狀態）
+4. **Godot 4.6.3 RC 2 發布**：修復記憶體 race condition 和 threading deadlock，我們用 4.6.2 不受影響
+5. **Go WebSocket 最佳實踐確認**：Worker Pool 模式適合高負載，我們的單房間架構用 goroutine-per-connection 已足夠
+
+### 進步說明
+- Combo 任務 UI 從「和其他任務一樣」升級為「橙紅色系 + 🔥 脈動動畫」
+- `/health` 端點加入任務重置時間（`mission_reset_at` + `mission_reset_in_sec`）
+- 新增 `GetMissionResetAt()` 方法，封裝 missionMgr 的 ResetAt()
+- 兩個 commit 推送到 GitHub（`09af991` + `f592d95`）
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 97 | +1 | /health 端點設計更完整，GetMissionResetAt 封裝乾淨 |
+| Godot GDScript | 97 | → | 穩定，Combo 任務 UI 視覺差異化 |
+| 像素美術生成 | 95 | → | 穩定 |
+| 遊戲數值設計 | 86 | → | 穩定 |
+| WebSocket 通訊 | 95 | → | 穩定，確認架構符合 2025 最佳實踐 |
+| **整體完成信心** | **100** | → | 維持 100%，品質持續提升 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，品質持續優化。
+今日完成：Combo 任務 UI 視覺強化 + /health 端點升級 + Nightly Report + GitHub 同步（2 commits）。
+
+### 下一步學習目標
+1. 搜尋「pixel art game mission system UI design patterns」找更多靈感
+2. 考慮加入 `/metrics` Prometheus 格式端點（未來功能）
+3. 評估 Godot 4.6.3 正式版發布後的升級計畫
