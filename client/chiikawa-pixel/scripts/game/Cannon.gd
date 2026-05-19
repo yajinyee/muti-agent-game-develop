@@ -105,49 +105,64 @@ func _fire_projectile(target_pos: Vector2) -> void:
 	var dist = CANNON_POSITION.distance_to(target_pos)
 	var flight_time = clamp(dist / proj_speed, 0.05, 0.25)
 
-	# 建立投射物節點
-	var proj := Node2D.new()
+	# 從 BulletPool 取得子彈節點（Object Pooling，避免高頻 new/free）
+	var texture = _cached_proj_textures.get(char_id, null)
+	var proj: Node2D = BulletPool.acquire(char_id, texture)
 	proj.position = CANNON_POSITION
 
-	# 嘗試載入 Sprite，失敗就用 ColorRect（使用快取 texture）
-	var sprite_path = PROJECTILE_SPRITES.get(char_id, "")
-	if _cached_proj_textures.has(char_id):
-		var s := Sprite2D.new()
-		s.texture = _cached_proj_textures[char_id]
-		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		s.scale = Vector2(1.5, 1.5)  # 放大 1.5x 讓子彈更容易看見（Gravity Ace 原則）
-		proj.add_child(s)
-	elif sprite_path != "" and ResourceLoader.exists(sprite_path):
-		var s := Sprite2D.new()
-		s.texture = load(sprite_path)
-		s.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		s.scale = Vector2(1.5, 1.5)  # 放大 1.5x 讓子彈更容易看見（Gravity Ace 原則）
-		proj.add_child(s)
+	# 如果沒有 texture，用 ColorRect 備用（直接操作 Sprite 子節點）
+	var sprite = proj.get_node_or_null("Sprite")
+	if is_instance_valid(sprite):
+		if texture != null:
+			sprite.visible = true
+		else:
+			sprite.visible = false
+			# 確保有備用 ColorRect（只建立一次，之後重用）
+			if not proj.has_node("FallbackRect"):
+				var rect := ColorRect.new()
+				rect.name = "FallbackRect"
+				rect.size = Vector2(16, 10)
+				rect.position = Vector2(-8, -5)
+				rect.color = CHAR_COLORS.get(char_id, Color.WHITE)
+				proj.add_child(rect)
+				var core := ColorRect.new()
+				core.name = "FallbackCore"
+				core.size = Vector2(8, 6)
+				core.position = Vector2(-4, -3)
+				core.color = Color.WHITE
+				proj.add_child(core)
+			var fb = proj.get_node_or_null("FallbackRect")
+			if is_instance_valid(fb):
+				fb.visible = true
+				fb.color = CHAR_COLORS.get(char_id, Color.WHITE)
+			var fc = proj.get_node_or_null("FallbackCore")
+			if is_instance_valid(fc):
+				fc.visible = true
 	else:
 		# 備用：更大的子彈（16×10px），更容易看見
-		var rect := ColorRect.new()
-		rect.size = Vector2(16, 10)
-		rect.position = Vector2(-8, -5)
-		rect.color = CHAR_COLORS.get(char_id, Color.WHITE)
-		proj.add_child(rect)
-		# 加一個亮核心
-		var core := ColorRect.new()
-		core.size = Vector2(8, 6)
-		core.position = Vector2(-4, -3)
-		core.color = Color.WHITE
-		proj.add_child(core)
+		if not proj.has_node("FallbackRect"):
+			var rect := ColorRect.new()
+			rect.name = "FallbackRect"
+			rect.size = Vector2(16, 10)
+			rect.position = Vector2(-8, -5)
+			rect.color = CHAR_COLORS.get(char_id, Color.WHITE)
+			proj.add_child(rect)
+			var core := ColorRect.new()
+			core.name = "FallbackCore"
+			core.size = Vector2(8, 6)
+			core.position = Vector2(-4, -3)
+			core.color = Color.WHITE
+			proj.add_child(core)
 
 	# 計算方向（防止零向量）
 	var diff = target_pos - CANNON_POSITION
 	if diff.length() > 1.0:
 		proj.rotation = diff.angle()
 
-	parent.add_child(proj)
-
-	# 拖尾系統：每隔一段時間生成殘影
-	var trail_color = CHAR_COLORS.get(char_id, Color.WHITE)
-	var trail_timer = 0.0
-	var trail_interval = 0.025  # 每 25ms 一個殘影
+	# 把子彈加到父節點（BulletPool 是 autoload，子彈需要在遊戲場景中顯示）
+	if proj.get_parent() == BulletPool:
+		BulletPool.remove_child(proj)
+		parent.add_child(proj)
 
 	# 飛行動畫（依實際速度計算時間）
 	var tween = create_tween()
@@ -159,11 +174,15 @@ func _fire_projectile(target_pos: Vector2) -> void:
 		if is_instance_valid(proj):
 			# 命中特效（使用新的 HitEffect 系統）
 			HitEffect.spawn_hit(target_pos, char_id)
-			proj.queue_free()
+			# 歸還到 pool（不 queue_free）
+			if is_instance_valid(proj.get_parent()):
+				proj.get_parent().remove_child(proj)
+			BulletPool.add_child(proj)
+			BulletPool.release(proj)
 	)
 
 	# 拖尾協程（用 _spawn_trail_step 模擬）
-	_spawn_trail(parent, CANNON_POSITION, target_pos, flight_time, trail_color)
+	_spawn_trail(parent, CANNON_POSITION, target_pos, flight_time, CHAR_COLORS.get(char_id, Color.WHITE))
 
 func _on_attack_result(result: Dictionary) -> void:
 	if result.get("is_hit", false):

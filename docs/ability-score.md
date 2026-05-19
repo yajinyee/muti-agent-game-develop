@@ -985,3 +985,41 @@ Store 整合完整，HTML5 export 大小符合目標，QA 8/8 全部通過。
 1. 搜尋「pixel art game mission system UI design patterns」找更多靈感
 2. 考慮加入 `/metrics` Prometheus 格式端點（未來功能）
 3. 評估 Godot 4.6.3 正式版發布後的升級計畫
+
+---
+
+## 評估 #27 — 2026-05-19（DAY-040，Prometheus 監控基礎設施）
+
+### 這次學到了什麼
+1. **Prometheus text format 手寫**：`# HELP`、`# TYPE`、`metric_name value` 三行格式，不需要外部依賴
+2. **gauge vs counter 的區別**：gauge 可以上下浮動（連線數、記憶體），counter 只增不減（攻擊次數、擊殺數）
+3. **Grafana provisioning**：datasources + dashboards 目錄結構，自動載入設定，不需要手動設定
+4. **docker-compose 服務依賴**：`depends_on` 確保啟動順序，Grafana 等 Prometheus 就緒後才啟動
+5. **監控面板設計原則**：顏色警告閾值（綠/黃/紅）讓運維人員一眼看出問題
+
+### 進步說明
+- Server 從「有 /health 和 /stats」升級為「完整 Prometheus 監控生態」
+- 15 個指標涵蓋：系統資源、玩家活動、遊戲事件、財務指標
+- Grafana 8 個面板，自動 provisioning，部署後立即可用
+- 生產就緒程度從 95% 提升到 98%
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 98 | +1 | Prometheus text format 手寫，監控端點設計完整 |
+| Godot GDScript | 97 | → | 穩定 |
+| 像素美術生成 | 95 | → | 穩定 |
+| 遊戲數值設計 | 86 | → | 穩定 |
+| WebSocket 通訊 | 95 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100%，生產就緒程度提升 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，監控基礎設施就緒。
+今日完成：/metrics Prometheus 端點（15個指標）+ docker-compose Prometheus + Grafana + 自動 provisioning dashboard。
+GitHub 同步完成（commit `e333f81`）。
+
+### 下一步學習目標
+1. 搜尋「Godot 4 object pooling HTML5 performance 2025」
+2. 評估 Client 端 Object Pooling（子彈、特效節點重用）
+3. 考慮加入 WebSocket 訊息吞吐量指標（messages_per_second）

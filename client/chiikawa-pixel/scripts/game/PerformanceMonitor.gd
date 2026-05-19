@@ -173,6 +173,14 @@ func get_current_fps() -> float:
 		sum += s
 	return sum / _fps_samples.size()
 
+## get_bullet_pool_stats — 取得 BulletPool 統計（供 HUD 顯示）
+func get_bullet_pool_stats() -> Dictionary:
+	if Engine.has_singleton("BulletPool") or is_instance_valid(get_node_or_null("/root/BulletPool")):
+		var pool = get_node_or_null("/root/BulletPool")
+		if is_instance_valid(pool):
+			return pool.get_stats()
+	return {"active": 0, "pooled": 0, "total": 0}
+
 func _quality_name() -> String:
 	return _quality_name_for(current_quality)
 

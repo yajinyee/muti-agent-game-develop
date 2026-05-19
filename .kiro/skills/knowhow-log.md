@@ -1827,3 +1827,30 @@ BONUS_MULT = 20-50x（Prototype 展示版）
   - 完成 Bonus：amount=1（每次完成 +1）✅
   - 獲得金幣：amount=reward（每次獲得的金幣數）✅
   - 連擊：amount=1（每次達成 2+ 連擊 +1）✅（修復後）
+
+## 83. Prometheus text format 手寫（無外部依賴）
+- **格式：** 每個指標三行：`# HELP name description`、`# TYPE name gauge/counter`、`name value`
+- **gauge**：可上下浮動的值（連線數、記憶體、RTP）
+- **counter**：只增不減的累計值（攻擊次數、擊殺數、GC 次數）
+- **Content-Type：** `text/plain; version=0.0.4; charset=utf-8`
+- **優點：** 不需要引入 `prometheus/client_golang`，保持零外部依賴
+- **教訓：** 簡單的監控端點不需要重量級 SDK，手寫 text format 更輕量
+
+## 84. Grafana provisioning 自動設定
+- **目錄結構：**
+  ```
+  monitoring/grafana/provisioning/
+    datasources/prometheus.yml   # 資料來源設定
+    dashboards/dashboard.yml     # dashboard 載入設定
+    dashboards/*.json            # dashboard 定義
+  ```
+- **datasource.yml 關鍵欄位：** `type: prometheus`、`url: http://prometheus:9090`、`isDefault: true`
+- **dashboard.yml 關鍵欄位：** `type: file`、`path: /etc/grafana/provisioning/dashboards`
+- **docker-compose 掛載：** `./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro`
+- **教訓：** provisioning 讓 Grafana 部署後立即可用，不需要手動設定
+
+## 85. docker-compose 服務依賴順序
+- **問題：** Grafana 啟動時 Prometheus 可能還沒就緒
+- **解法：** `depends_on: - prometheus`（確保 Prometheus 先啟動）
+- **注意：** `depends_on` 只確保啟動順序，不確保服務就緒（Prometheus 啟動快，通常沒問題）
+- **教訓：** 監控服務的依賴鏈：gameserver → prometheus → grafana
