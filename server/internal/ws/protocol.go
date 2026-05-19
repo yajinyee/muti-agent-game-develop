@@ -214,9 +214,10 @@ type MissionPayload struct {
 
 // MissionUpdatePayload 任務進度更新廣播
 type MissionUpdatePayload struct {
-	PlayerID  string           `json:"player_id"`
-	Missions  []MissionPayload `json:"missions"`
-	ResetAt   int64            `json:"reset_at"` // Unix ms，下次重置時間
+	PlayerID      string           `json:"player_id"`
+	Missions      []MissionPayload `json:"missions"`
+	ResetAt       int64            `json:"reset_at"`        // Unix ms，下次重置時間（UTC+8 00:00）
+	ResetTimezone string           `json:"reset_timezone"`  // 重置時區說明（"UTC+8"）
 }
 
 // MissionCompletePayload 任務完成通知

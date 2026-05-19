@@ -1594,7 +1594,6 @@ func _on_mission_updated(missions: Array) -> void:
 	_mission_data = missions
 	if is_instance_valid(_mission_panel) and _mission_visible:
 		_refresh_mission_list()
-
 ## 刷新任務列表 UI
 func _refresh_mission_list() -> void:
 	if not is_instance_valid(_mission_panel):
@@ -1611,6 +1610,9 @@ func _refresh_mission_list() -> void:
 	for i in range(_mission_data.size()):
 		var m = _mission_data[i]
 		_create_mission_row(list, m, i)
+
+	# 更新重置倒數（DAY-038）
+	_update_mission_reset_countdown()
 
 ## 建立單一任務條目
 func _create_mission_row(container: Control, mission: Dictionary, index: int) -> void:
@@ -1741,3 +1743,48 @@ func _on_mission_completed(mission_data: Dictionary) -> void:
 	# 刷新任務面板
 	if is_instance_valid(_mission_panel) and _mission_visible:
 		NetworkManager.send("get_missions", {})
+
+## 設定任務重置時間（由 GameManager 呼叫，DAY-038）
+func set_mission_reset_at(reset_at_ms: int) -> void:
+	_mission_reset_at_ms = reset_at_ms
+	_update_mission_reset_countdown()
+
+# ── 任務重置倒數（DAY-038）──────────────────────────────────────
+
+var _mission_reset_at_ms: int = 0  # Server 傳來的重置時間（Unix ms）
+
+## 更新任務重置倒數顯示
+func _update_mission_reset_countdown() -> void:
+	if not is_instance_valid(_mission_panel):
+		return
+
+	# 取得或建立倒數 Label
+	var countdown_lbl = _mission_panel.get_node_or_null("ResetCountdown")
+	if not is_instance_valid(countdown_lbl):
+		countdown_lbl = Label.new()
+		countdown_lbl.name = "ResetCountdown"
+		countdown_lbl.position = Vector2(8, 272)
+		countdown_lbl.size = Vector2(364, 20)
+		countdown_lbl.add_theme_font_size_override("font_size", 11)
+		countdown_lbl.modulate = Color(0.6, 0.7, 0.6)
+		if is_instance_valid(_pixel_font):
+			countdown_lbl.add_theme_font_override("font", _pixel_font)
+		_mission_panel.add_child(countdown_lbl)
+
+		# 擴展面板高度
+		var bg = _mission_panel.get_node_or_null("MissionList")
+		if bg:
+			bg.size.y = 264
+
+	# 計算倒數
+	if _mission_reset_at_ms > 0:
+		var now_ms = int(Time.get_unix_time_from_system() * 1000)
+		var diff_sec = int((_mission_reset_at_ms - now_ms) / 1000)
+		if diff_sec > 0:
+			var hours = diff_sec / 3600
+			var mins = (diff_sec % 3600) / 60
+			countdown_lbl.text = "🕐 重置倒數：%dh %02dm（UTC+8 00:00）" % [hours, mins]
+		else:
+			countdown_lbl.text = "🔄 任務即將重置..."
+	else:
+		countdown_lbl.text = "🕐 重置時間：每日 00:00（UTC+8）"

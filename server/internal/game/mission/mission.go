@@ -114,10 +114,12 @@ func NewManager() *Manager {
 	return m
 }
 
-// nextMidnight 計算下一個午夜時間
+// nextMidnight 計算下一個午夜時間（UTC+8，台灣/亞洲標準時間）
+// 業界標準：每日任務以 UTC+8 00:00 為重置基準，確保所有玩家同步重置
 func nextMidnight() time.Time {
-	now := time.Now()
-	return time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, now.Location())
+	loc := time.FixedZone("UTC+8", 8*60*60)
+	now := time.Now().In(loc)
+	return time.Date(now.Year(), now.Month(), now.Day()+1, 0, 0, 0, 0, loc)
 }
 
 // GetOrInitProgress 取得或初始化玩家進度

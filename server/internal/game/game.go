@@ -1454,9 +1454,10 @@ func (g *Game) sendMissionUpdate(playerID string) {
 	g.Hub.Send(playerID, &ws.Message{
 		Type: ws.MsgMissionUpdate,
 		Payload: ws.MissionUpdatePayload{
-			PlayerID: playerID,
-			Missions: payloads,
-			ResetAt:  g.missionMgr.ResetAt().UnixMilli(),
+			PlayerID:      playerID,
+			Missions:      payloads,
+			ResetAt:       g.missionMgr.ResetAt().UnixMilli(),
+			ResetTimezone: "UTC+8",
 		},
 	})
 }

@@ -1769,3 +1769,12 @@ BONUS_MULT = 20-50x（Prototype 展示版）
   2. `game.go` 的 combo 廣播後加入 `updateMissionProgress(p.ID, mission.MissionCombo, comboCount)`
   3. `mission_test.go` 加入 `TestUpdateProgress_Combo` 和 `TestAllMissionTypesPresent`
 - **教訓：** 新增任務類型時，必須同時確認：① DailyMissions 有對應任務 ② game.go 有觸發邏輯 ③ 測試覆蓋所有類型
+
+## 86. 每日任務重置時區設計（DAY-038）
+- **問題：** `nextMidnight()` 使用 `time.Now().Location()`（Server 本地時間），對多時區玩家不公平
+- **業界標準：** 每日任務以 UTC+8 00:00 為重置基準（台灣/亞洲標準時間）
+  - 參考：Poppo Live、大多數亞洲手遊都用 UTC+8 00:00 重置
+- **修復：** `time.FixedZone("UTC+8", 8*60*60)` 固定時區，不依賴 Server 本地設定
+- **Client 顯示：** 任務面板加入重置倒數（`_update_mission_reset_countdown`），顯示「重置倒數：Xh Xm（UTC+8 00:00）」
+- **協定更新：** `MissionUpdatePayload` 加入 `reset_timezone: "UTC+8"` 欄位
+- **教訓：** 任何涉及「每日重置」的功能，都要明確指定時區，不能依賴 Server 本地時間

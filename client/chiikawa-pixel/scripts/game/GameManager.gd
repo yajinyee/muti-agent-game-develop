@@ -162,7 +162,13 @@ func _handle_combo_event(payload: Dictionary) -> void:
 ## 任務進度更新（DAY-037）
 func _handle_mission_update(payload: Dictionary) -> void:
 	var missions = payload.get("missions", [])
+	var reset_at = payload.get("reset_at", 0)
 	emit_signal("mission_updated", missions)
+	# 傳遞重置時間給 HUD（DAY-038）
+	if reset_at > 0:
+		var hud = get_node_or_null("/root/Main/HUD")
+		if is_instance_valid(hud) and hud.has_method("set_mission_reset_at"):
+			hud.set_mission_reset_at(reset_at)
 
 ## 任務完成通知（DAY-037）
 func _handle_mission_complete(payload: Dictionary) -> void:
