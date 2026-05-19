@@ -35,7 +35,8 @@ const (
 	MsgLeaderboard  MessageType = "leaderboard"
 	MsgAchievement  MessageType = "achievement"
 	MsgComboEvent   MessageType = "combo_event"      // 連擊事件（DAY-022）
-	MsgSpectatorJoin MessageType = "spectator_join"  // 觀戰者加入通知（DAY-023）
+	MsgSpectatorJoin  MessageType = "spectator_join"  // 觀戰者加入通知（DAY-023）
+	MsgSpectatorLeave MessageType = "spectator_leave" // 觀戰者離開通知（DAY-055）
 	MsgMissionUpdate MessageType = "mission_update"  // 任務進度更新（DAY-037）
 	MsgMissionComplete MessageType = "mission_complete" // 任務完成通知（DAY-037）
 	MsgJackpotUpdate   MessageType = "jackpot_update"   // Jackpot 池更新（DAY-048）

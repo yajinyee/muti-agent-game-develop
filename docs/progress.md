@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-055 觀戰者系統完整實作 + BroadcastToPlayers + 測試通過）
+## 最後更新：2026-05-20（DAY-055b 觀戰者離開通知 + OnSpectatorDisconnect 回調 + MsgSpectatorLeave）
 
 ## 自我評估
 - **完成度：100%**

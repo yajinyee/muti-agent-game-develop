@@ -93,6 +93,7 @@ func _ready() -> void:
 	GameManager.combo_event.connect(_on_combo_event)  # ???鈭辣嚗AY-022嚗?
 	# jackpot_updated / jackpot_won 撌脩宏??JackpotPanel.gd嚗AY-053嚗?
 	GameManager.spectator_joined.connect(_on_spectator_joined)  # 觀戰者加入（DAY-054d）
+	GameManager.spectator_left.connect(_on_spectator_left)      # 觀戰者離開（DAY-055）
 
 	# ?瑞?/???蝷?NetworkManager.disconnected.connect(_on_disconnected)
 	NetworkManager.connected.connect(_on_reconnected)
@@ -1607,6 +1608,23 @@ func _on_spectator_joined(spectator_data: Dictionary) -> void:
 		"name": "有人在觀戰！",
 		"description": "目前 %d 位觀戰者" % count,
 		"type": "special"
+	})
+	if not _achievement_showing:
+		_show_next_achievement()
+
+# ── 觀戰者離開通知（DAY-055）──────────────────────────────────────────────
+
+func _on_spectator_left(spectator_data: Dictionary) -> void:
+	var count = spectator_data.get("spectator_count", 0)
+	if count > 0:
+		# 還有觀戰者，靜默更新（不打擾玩家）
+		return
+	# 最後一位觀戰者離開，顯示通知
+	_achievement_queue.append({
+		"icon": "👋",
+		"name": "觀戰者離開了",
+		"description": "目前無觀戰者",
+		"type": "normal"
 	})
 	if not _achievement_showing:
 		_show_next_achievement()

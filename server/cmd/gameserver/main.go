@@ -88,6 +88,19 @@ func main() {
 		})
 	}
 
+	// 觀戰者斷線時廣播通知給玩家（DAY-055）
+	hub.OnSpectatorDisconnect = func(spectatorID string) {
+		remaining := hub.SpectatorCount()
+		log.Printf("[Spectator] %s disconnected, remaining spectators: %d", spectatorID, remaining)
+		hub.BroadcastToPlayers(&ws.Message{
+			Type: ws.MsgSpectatorLeave,
+			Payload: map[string]interface{}{
+				"spectator_id":    spectatorID,
+				"spectator_count": remaining,
+			},
+		})
+	}
+
 	hub.OnMessage = func(clientID string, msg *ws.Message) {
 		g.HandleMessage(clientID, msg)
 	}

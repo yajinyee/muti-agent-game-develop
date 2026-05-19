@@ -395,3 +395,36 @@ func TestBroadcastToPlayers(t *testing.T) {
 		t.Errorf("spectator should NOT receive BroadcastToPlayers message, got %d", len(spectator.send))
 	}
 }
+
+// TestHubOnSpectatorDisconnect 確認觀戰者斷線時觸發 OnSpectatorDisconnect 回調（DAY-055）
+func TestHubOnSpectatorDisconnect(t *testing.T) {
+	h := NewHub()
+
+	spectatorDisconnectCalled := 0
+	playerDisconnectCalled := 0
+
+	h.OnDisconnect = func(clientID string) {
+		playerDisconnectCalled++
+	}
+	h.OnSpectatorDisconnect = func(spectatorID string) {
+		spectatorDisconnectCalled++
+	}
+
+	spectator := &Client{ID: "spectator-dc", Role: RoleSpectator, send: make(chan []byte, 1)}
+	h.Register(spectator)
+	h.Unregister(spectator)
+
+	if spectatorDisconnectCalled != 1 {
+		t.Errorf("OnSpectatorDisconnect should be called once, got %d", spectatorDisconnectCalled)
+	}
+	if playerDisconnectCalled != 0 {
+		t.Errorf("OnDisconnect should NOT be called for spectator, got %d", playerDisconnectCalled)
+	}
+}
+
+// TestMsgSpectatorLeaveExists 確認 MsgSpectatorLeave 訊息類型已定義（DAY-055）
+func TestMsgSpectatorLeaveExists(t *testing.T) {
+	if MsgSpectatorLeave != "spectator_leave" {
+		t.Errorf("expected MsgSpectatorLeave='spectator_leave', got '%s'", MsgSpectatorLeave)
+	}
+}

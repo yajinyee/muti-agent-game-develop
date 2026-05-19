@@ -112,9 +112,10 @@ type Hub struct {
 	clients map[string]*Client
 
 	// 訊息處理回調
-	OnMessage    func(clientID string, msg *Message)
-	OnConnect    func(clientID string)
-	OnDisconnect func(clientID string)
+	OnMessage              func(clientID string, msg *Message)
+	OnConnect              func(clientID string)
+	OnDisconnect           func(clientID string)
+	OnSpectatorDisconnect  func(spectatorID string) // 觀戰者斷線回調（DAY-055）
 
 	// 訊息吞吐量計數器（原子操作，供 /metrics 使用）
 	MsgReceived  atomic.Int64 // 收到的訊息總數
@@ -178,6 +179,9 @@ func (h *Hub) Unregister(client *Client) {
 	log.Printf("[WS] Client disconnected: %s (role=%s)", client.ID, client.Role)
 	if h.OnDisconnect != nil && client.Role == RolePlayer {
 		h.OnDisconnect(client.ID)
+	}
+	if h.OnSpectatorDisconnect != nil && client.Role == RoleSpectator {
+		h.OnSpectatorDisconnect(client.ID)
 	}
 }
 

@@ -2319,3 +2319,16 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **修復的腳本：** `tools/git_add_all.ps1`、`tools/git_push.ps1`
 - **另一個有效的 TMPDIR：** `C:\Users\yajinyee0306\AppData\Local\Temp`（系統 temp）
 - **教訓：** Windows 上 git 的 temp 目錄設定要用 `GIT_TMPDIR`，不是 POSIX 的 `TMPDIR`
+
+## 108. Hub 回調擴充模式（OnSpectatorDisconnect）
+- **場景：** 需要在特定角色（Spectator）斷線時觸發不同邏輯
+- **做法：** 在 Hub struct 加入新的回調欄位（`OnSpectatorDisconnect func(spectatorID string)`）
+- **Unregister 中：** 依 `client.Role` 分支呼叫不同回調
+- **優點：** 不改變現有 OnDisconnect 行為，向後相容
+- **教訓：** Hub 的回調設計要依角色分離，不要在一個回調裡用 if 判斷角色
+
+## 109. 觀戰者離開通知的 UX 設計
+- **問題：** 每次觀戰者離開都通知玩家會很煩
+- **解法：** 只在「最後一位觀戰者離開」時顯示通知，中間的離開靜默處理
+- **判斷：** `spectator_count == 0` 才顯示通知
+- **教訓：** 社交通知要考慮頻率，不是每個事件都需要打擾玩家

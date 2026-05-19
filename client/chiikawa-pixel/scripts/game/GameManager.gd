@@ -23,6 +23,7 @@ signal mission_completed(mission_data: Dictionary)  # 任務完成（DAY-037）
 signal jackpot_updated(jackpot_data: Dictionary)    # Jackpot 池更新（DAY-048）
 signal jackpot_won(win_data: Dictionary)            # Jackpot 中獎（DAY-048）
 signal spectator_joined(spectator_data: Dictionary) # 觀戰者加入通知（DAY-054d）
+signal spectator_left(spectator_data: Dictionary)  # 觀戰者離開通知（DAY-055）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -98,6 +99,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_jackpot_win(payload)
 		"spectator_join":
 			_handle_spectator_join(payload)
+		"spectator_leave":
+			_handle_spectator_leave(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -204,6 +207,12 @@ func _handle_spectator_join(payload: Dictionary) -> void:
 	var count = payload.get("spectator_count", 1)
 	print("[GameManager] Spectator joined! Total spectators: %d" % count)
 	emit_signal("spectator_joined", payload)
+
+## 觀戰者離開通知（DAY-055）
+func _handle_spectator_leave(payload: Dictionary) -> void:
+	var count = payload.get("spectator_count", 0)
+	print("[GameManager] Spectator left! Remaining spectators: %d" % count)
+	emit_signal("spectator_left", payload)
 
 ## 取得目前角色顏色
 func get_character_color() -> Color:
