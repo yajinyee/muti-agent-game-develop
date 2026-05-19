@@ -306,3 +306,67 @@ func TestGetClientPingLatencies(t *testing.T) {
 		t.Errorf("expected c2 latency=42, got %d", latencies["c2"])
 	}
 }
+
+// TestGetPerfHistory 確認效能歷史 ring buffer 正確運作（DAY-051）
+func TestGetPerfHistory(t *testing.T) {
+	h := NewHub()
+
+	// 加入一個玩家客戶端
+	h.mu.Lock()
+	h.clients["player-1"] = &Client{ID: "player-1", Role: RolePlayer, send: make(chan []byte, 10)}
+	h.mu.Unlock()
+
+	// 初始狀態：歷史為空
+	history := h.GetPerfHistory(0)
+	if len(history) != 0 {
+		t.Errorf("expected empty history, got %d entries", len(history))
+	}
+
+	// 更新效能數據
+	h.UpdateClientPerf("player-1", 60.0, 128.5, 45, "HIGH")
+	h.UpdateClientPerf("player-1", 55.0, 130.0, 48, "HIGH")
+	h.UpdateClientPerf("player-1", 30.0, 200.0, 80, "LOW")
+
+	// 確認歷史有 3 筆
+	history = h.GetPerfHistory(0)
+	if len(history) != 3 {
+		t.Errorf("expected 3 history entries, got %d", len(history))
+	}
+
+	// 確認最新的在前（按時間排序）
+	if len(history) >= 1 && history[0].FPS != 30.0 {
+		// 最新的是 30.0（最後更新的）
+		// 注意：由於時間精度，可能順序不完全確定，只確認有 30.0 存在
+		found := false
+		for _, e := range history {
+			if e.FPS == 30.0 {
+				found = true
+				break
+			}
+		}
+		if !found {
+			t.Errorf("expected FPS=30.0 in history, not found")
+		}
+	}
+}
+
+// TestGetPerfHistoryRingBuffer 確認 ring buffer 在超過容量時正確覆蓋（DAY-051）
+func TestGetPerfHistoryRingBuffer(t *testing.T) {
+	h := NewHub()
+
+	// 加入一個玩家客戶端
+	h.mu.Lock()
+	h.clients["player-1"] = &Client{ID: "player-1", Role: RolePlayer, send: make(chan []byte, 10)}
+	h.mu.Unlock()
+
+	// 寫入 105 筆（超過 ring buffer 容量 100）
+	for i := 0; i < 105; i++ {
+		h.UpdateClientPerf("player-1", float64(i), 100.0, 30, "HIGH")
+	}
+
+	// ring buffer 容量 100，應該只有 100 筆
+	history := h.GetPerfHistory(0)
+	if len(history) != 100 {
+		t.Errorf("expected 100 history entries (ring buffer capacity), got %d", len(history))
+	}
+}

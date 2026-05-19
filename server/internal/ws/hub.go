@@ -129,12 +129,28 @@ type Hub struct {
 	pingLatencySum atomic.Int64 // 所有 ping/pong 延遲總和（毫秒）
 	pingLatencyCount atomic.Int64 // ping/pong 樣本數
 	pingLatencyMax   atomic.Int64 // 最大延遲（毫秒）
+
+	// 效能歷史 ring buffer（DAY-051，儲存最近 100 筆 Client 端效能快照）
+	perfHistoryMu  sync.Mutex
+	perfHistory    []PerfHistoryEntry // ring buffer
+	perfHistoryIdx int                // 下一個寫入位置
+}
+
+// PerfHistoryEntry 效能歷史記錄（DAY-051）
+type PerfHistoryEntry struct {
+	ClientID  string
+	FPS       float64
+	MemoryMB  float64
+	DrawCalls int
+	Quality   string
+	RecordedAt time.Time
 }
 
 // NewHub 建立新 Hub
 func NewHub() *Hub {
 	return &Hub{
-		clients: make(map[string]*Client),
+		clients:     make(map[string]*Client),
+		perfHistory: make([]PerfHistoryEntry, 100), // ring buffer 容量 100
 	}
 }
 
@@ -325,6 +341,19 @@ func (h *Hub) UpdateClientPerf(clientID string, fps, memMB float64, drawCalls in
 	client.lastPerfQuality = quality
 	client.lastPerfAt = time.Now()
 	client.perfMu.Unlock()
+
+	// 追加到效能歷史 ring buffer（DAY-051）
+	h.perfHistoryMu.Lock()
+	h.perfHistory[h.perfHistoryIdx] = PerfHistoryEntry{
+		ClientID:   clientID,
+		FPS:        fps,
+		MemoryMB:   memMB,
+		DrawCalls:  drawCalls,
+		Quality:    quality,
+		RecordedAt: time.Now(),
+	}
+	h.perfHistoryIdx = (h.perfHistoryIdx + 1) % len(h.perfHistory)
+	h.perfHistoryMu.Unlock()
 }
 
 // ClientPerfSnapshot 單一客戶端效能快照
@@ -360,6 +389,41 @@ func (h *Hub) GetClientPerfSnapshots() []ClientPerfSnapshot {
 			})
 		}
 		c.perfMu.Unlock()
+	}
+	return result
+}
+
+// GetPerfHistory 取得效能歷史記錄（DAY-051）
+// 回傳最近 N 筆（最多 100 筆），按時間排序（最新在前）
+// sinceSeconds: 只回傳最近 N 秒內的記錄（0 = 全部）
+func (h *Hub) GetPerfHistory(sinceSeconds int) []PerfHistoryEntry {
+	h.perfHistoryMu.Lock()
+	defer h.perfHistoryMu.Unlock()
+
+	cutoff := time.Time{}
+	if sinceSeconds > 0 {
+		cutoff = time.Now().Add(-time.Duration(sinceSeconds) * time.Second)
+	}
+
+	// 從 ring buffer 收集有效記錄（非零時間）
+	result := make([]PerfHistoryEntry, 0, len(h.perfHistory))
+	for _, entry := range h.perfHistory {
+		if entry.RecordedAt.IsZero() {
+			continue
+		}
+		if !cutoff.IsZero() && entry.RecordedAt.Before(cutoff) {
+			continue
+		}
+		result = append(result, entry)
+	}
+
+	// 按時間排序（最新在前）
+	for i := 0; i < len(result)-1; i++ {
+		for j := i + 1; j < len(result); j++ {
+			if result[j].RecordedAt.After(result[i].RecordedAt) {
+				result[i], result[j] = result[j], result[i]
+			}
+		}
 	}
 	return result
 }

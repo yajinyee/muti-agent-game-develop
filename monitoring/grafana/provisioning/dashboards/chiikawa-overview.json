@@ -928,6 +928,98 @@
           "placement": "bottom"
         }
       }
+    },
+    {
+      "id": 24,
+      "title": "Client FPS 歷史趨勢（5分鐘）",
+      "type": "timeseries",
+      "gridPos": {
+        "x": 0,
+        "y": 56,
+        "w": 12,
+        "h": 8
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_client_fps_history_avg",
+          "legendFormat": "平均 FPS",
+          "refId": "A"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_client_fps_history_min",
+          "legendFormat": "最低 FPS",
+          "refId": "B"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_client_fps_history_max",
+          "legendFormat": "最高 FPS",
+          "refId": "C"
+        }
+      ],
+      "options": {
+        "tooltip": {
+          "mode": "multi"
+        },
+        "legend": {
+          "displayMode": "list",
+          "placement": "bottom"
+        }
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 30},
+              {"color": "green", "value": 55}
+            ]
+          },
+          "unit": "fps"
+        }
+      }
+    },
+    {
+      "id": 25,
+      "title": "Client 效能歷史樣本數",
+      "type": "stat",
+      "gridPos": {
+        "x": 12,
+        "y": 56,
+        "w": 6,
+        "h": 4
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "expr": "chiikawa_client_fps_history_samples",
+          "legendFormat": "樣本數",
+          "refId": "A"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "orientation": "horizontal",
+        "reduceOptions": {
+          "calcs": ["lastNotNull"]
+        }
+      }
     }
   ]
 }

@@ -8,13 +8,20 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（23個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報，Nightly Report 自動化，Progressive Jackpot 系統（Mini/Major/Grand），Jackpot 特效強化，Session 結算強化，Jackpot 池持久化（Redis SetJSON/GetJSON），Jackpot 每日統計**
+- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（25個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報，Client 端效能歷史 Ring Buffer（100筆），Nightly Report 自動化，Progressive Jackpot 系統（Mini/Major/Grand），Jackpot 特效強化，Session 結算強化，Jackpot 池持久化（Redis SetJSON/GetJSON），Jackpot 每日統計**
 - **DAY-050 更新（自主觸發）：** 進度確認 + Nightly Reports 補齊 + KnowHow 更新 ✅
   - 確認 HEAD 在 DAY-049d，build/vet/test 全部通過（112/112）
   - 補齊 DAY-048/049/050 的 nightly reports
   - 新增 KnowHow #96-99（HTML5 優化、Go 最佳實踐、Jackpot TTL、Nightly Report 補齊策略）
   - 能力評估 #31 更新
   - GitHub 上傳
+- **DAY-051 更新（自主觸發）：** Client 端效能歷史 Ring Buffer + Grafana 25 面板 ✅
+  - `hub.go`：`PerfHistoryEntry` struct + `perfHistory` ring buffer（100 筆）+ `perfHistoryIdx`
+  - `hub.go`：`UpdateClientPerf` 同時追加到 ring buffer
+  - `hub.go`：`GetPerfHistory(sinceSeconds)` 方法（過濾時間 + 排序）
+  - `main.go`：`/metrics` 加入 4 個效能歷史指標（avg/min/max FPS + 樣本數）
+  - `hub_test.go`：新增 `TestGetPerfHistory` + `TestGetPerfHistoryRingBuffer`（2 個測試通過）
+  - Grafana dashboard：從 23 個面板升級到 25 個面板（FPS 歷史趨勢 timeseries + 樣本數 stat）
 - **DAY-049 更新（自主觸發）：** Jackpot 特效強化 + Session 結算強化 + Jackpot 歷史 Ticker ✅
   - `HUD.gd`：`_show_jackpot_celebration` 強化 — Mini/Major/Grand 各有不同強度的金幣雨特效
     - Grand：3 波金幣雨（20顆/波）+ HitEffect 全畫面特效

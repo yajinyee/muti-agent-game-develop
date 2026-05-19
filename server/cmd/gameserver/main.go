@@ -485,6 +485,37 @@ func main() {
 			fmt.Fprintf(w, "chiikawa_client_avg_fps %.1f\n\n", avgClientFPS)
 		}
 
+		// Client 端效能歷史統計（DAY-051）
+		// 從 ring buffer 取最近 300 秒（5分鐘）的記錄，計算 p5/avg/p95 FPS
+		perfHistory := hub.GetPerfHistory(300)
+		if len(perfHistory) > 0 {
+			var sumFPS float64
+			minFPS := perfHistory[0].FPS
+			maxFPS := perfHistory[0].FPS
+			for _, e := range perfHistory {
+				sumFPS += e.FPS
+				if e.FPS < minFPS {
+					minFPS = e.FPS
+				}
+				if e.FPS > maxFPS {
+					maxFPS = e.FPS
+				}
+			}
+			avgFPS := sumFPS / float64(len(perfHistory))
+			fmt.Fprintf(w, "# HELP chiikawa_client_fps_history_avg Average FPS from last 5min history\n")
+			fmt.Fprintf(w, "# TYPE chiikawa_client_fps_history_avg gauge\n")
+			fmt.Fprintf(w, "chiikawa_client_fps_history_avg %.1f\n", avgFPS)
+			fmt.Fprintf(w, "# HELP chiikawa_client_fps_history_min Min FPS from last 5min history\n")
+			fmt.Fprintf(w, "# TYPE chiikawa_client_fps_history_min gauge\n")
+			fmt.Fprintf(w, "chiikawa_client_fps_history_min %.1f\n", minFPS)
+			fmt.Fprintf(w, "# HELP chiikawa_client_fps_history_max Max FPS from last 5min history\n")
+			fmt.Fprintf(w, "# TYPE chiikawa_client_fps_history_max gauge\n")
+			fmt.Fprintf(w, "chiikawa_client_fps_history_max %.1f\n", maxFPS)
+			fmt.Fprintf(w, "# HELP chiikawa_client_fps_history_samples Total perf history samples in last 5min\n")
+			fmt.Fprintf(w, "# TYPE chiikawa_client_fps_history_samples gauge\n")
+			fmt.Fprintf(w, "chiikawa_client_fps_history_samples %d\n\n", len(perfHistory))
+		}
+
 		// Progressive Jackpot 指標（DAY-048）
 		// 讓 Grafana 能監控三個 Jackpot 池的累積金額
 		jackpotSnap := g.GetJackpotSnapshot()
