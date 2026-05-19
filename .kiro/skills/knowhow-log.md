@@ -1778,3 +1778,24 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **Client 顯示：** 任務面板加入重置倒數（`_update_mission_reset_countdown`），顯示「重置倒數：Xh Xm（UTC+8 00:00）」
 - **協定更新：** `MissionUpdatePayload` 加入 `reset_timezone: "UTC+8"` 欄位
 - **教訓：** 任何涉及「每日重置」的功能，都要明確指定時區，不能依賴 Server 本地時間
+
+## 85. MissionCombo 缺口修復方法（2026-05-19 DAY-038）
+- **問題：** `MissionCombo` 類型定義了但沒有 DailyMission 定義和 game.go 觸發邏輯
+- **發現方式：** 對照所有 `MissionType` 常數，確認每個類型都有 ① DailyMission ② 觸發邏輯 ③ 測試
+- **修復：**
+  1. `mission.go`：加入 `daily_combo_5`（5連擊，獎勵 1200 金幣）
+  2. `game.go`：combo 廣播後加入 `updateMissionProgress(MissionCombo, comboCount)`
+  3. `mission_test.go`：加入 `TestAllMissionTypesPresent`（守門測試）
+- **教訓：** 每次新增 MissionType 後，必須同時確認三件事：DailyMission 定義、game.go 觸發、測試覆蓋
+
+## 86. Combo 任務 UI 視覺差異化（2026-05-19 DAY-039）
+- **問題：** 所有任務行外觀相同，combo 任務（🔥）沒有視覺差異
+- **解法：** 依 `mission_type == "combo"` 分支，加入特殊視覺：
+  1. 橙紅深色背景（`Color(0.18, 0.06, 0.02, 0.85)`）
+  2. 左側橙紅邊條（3px，`Color(1.0, 0.45, 0.1, 0.9)`）
+  3. 🔥 圖示脈動動畫（scale 1.0→1.3→1.0，0.4s 循環）
+  4. 圖示顏色脈動（橙→黃→橙）
+  5. 任務名稱橙色高亮（`Color(1.0, 0.75, 0.3)`）
+  6. 進度條橙紅色（`Color(1.0, 0.45, 0.1)`）
+- **技術：** `row.create_tween().set_loops()` 綁定到 row 節點，row 刪除時自動停止
+- **教訓：** 不同類型的任務要有視覺差異，讓玩家一眼識別特殊任務

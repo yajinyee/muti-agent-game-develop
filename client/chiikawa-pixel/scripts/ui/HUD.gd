@@ -1626,8 +1626,10 @@ func _create_mission_row(container: Control, mission: Dictionary, index: int) ->
 	var current = mission.get("current", 0)
 	var target = mission.get("target", 1)
 	var reward = mission.get("reward", 0)
+	var mission_type = mission.get("type", "")
+	var is_combo = (mission_type == "combo")
 
-	# 背景（完成的任務用深綠色）
+	# 背景（combo 任務用橙紅色，完成的任務用深綠色）
 	var bg = ColorRect.new()
 	bg.size = Vector2(376, 48)
 	bg.position = Vector2(2, 1)
@@ -1635,9 +1637,19 @@ func _create_mission_row(container: Control, mission: Dictionary, index: int) ->
 		bg.color = Color(0.05, 0.15, 0.05, 0.7)
 	elif completed:
 		bg.color = Color(0.05, 0.2, 0.05, 0.85)
+	elif is_combo:
+		bg.color = Color(0.18, 0.06, 0.02, 0.85)  # 橙紅深色背景（連擊感）
 	else:
 		bg.color = Color(0.03, 0.06, 0.18, 0.7)
 	row.add_child(bg)
+
+	# combo 任務：左側橙紅邊條
+	if is_combo and not completed:
+		var side_bar = ColorRect.new()
+		side_bar.size = Vector2(3, 46)
+		side_bar.position = Vector2(2, 1)
+		side_bar.color = Color(1.0, 0.45, 0.1, 0.9)
+		row.add_child(side_bar)
 
 	# 圖示
 	var icon_lbl = Label.new()
@@ -1645,6 +1657,16 @@ func _create_mission_row(container: Control, mission: Dictionary, index: int) ->
 	icon_lbl.position = Vector2(8, 12)
 	icon_lbl.add_theme_font_size_override("font_size", 20)
 	row.add_child(icon_lbl)
+
+	# combo 任務：🔥 圖示脈動動畫（未完成時）
+	if is_combo and not completed:
+		var pulse_tween = row.create_tween().set_loops()
+		pulse_tween.tween_property(icon_lbl, "scale", Vector2(1.3, 1.3), 0.4).set_trans(Tween.TRANS_SINE)
+		pulse_tween.tween_property(icon_lbl, "scale", Vector2(1.0, 1.0), 0.4).set_trans(Tween.TRANS_SINE)
+		# 圖示顏色也跟著脈動（橙→黃→橙）
+		var color_tween = row.create_tween().set_loops()
+		color_tween.tween_property(icon_lbl, "modulate", Color(1.0, 0.8, 0.2), 0.4)
+		color_tween.tween_property(icon_lbl, "modulate", Color(1.0, 0.4, 0.1), 0.4)
 
 	# 任務名稱
 	var name_lbl = Label.new()
@@ -1654,6 +1676,8 @@ func _create_mission_row(container: Control, mission: Dictionary, index: int) ->
 	name_lbl.add_theme_font_size_override("font_size", 13)
 	if completed:
 		name_lbl.modulate = Color(0.5, 1.0, 0.5)
+	elif is_combo:
+		name_lbl.modulate = Color(1.0, 0.75, 0.3)  # 橙色高亮（連擊感）
 	else:
 		name_lbl.modulate = Color.WHITE
 	if is_instance_valid(_pixel_font):
@@ -1678,12 +1702,17 @@ func _create_mission_row(container: Control, mission: Dictionary, index: int) ->
 	bar_bg.color = Color(0.1, 0.1, 0.1, 0.8)
 	row.add_child(bar_bg)
 
-	# 進度條填充
+	# 進度條填充（combo 任務用橙紅漸層）
 	var fill_ratio = float(current) / float(max(target, 1))
 	var bar_fill = ColorRect.new()
 	bar_fill.size = Vector2(160.0 * fill_ratio, 6)
 	bar_fill.position = Vector2(40, 42)
-	bar_fill.color = Color(0.3, 1.0, 0.4) if completed else Color(0.2, 0.6, 1.0)
+	if completed:
+		bar_fill.color = Color(0.3, 1.0, 0.4)
+	elif is_combo:
+		bar_fill.color = Color(1.0, 0.45, 0.1)  # 橙紅色（連擊感）
+	else:
+		bar_fill.color = Color(0.2, 0.6, 1.0)
 	row.add_child(bar_fill)
 
 	# 獎勵文字

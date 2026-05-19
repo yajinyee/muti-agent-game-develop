@@ -1,15 +1,15 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-038 MissionCombo 缺口修復 + 連擊任務）
+## 最後更新：2026-05-19（DAY-039 Combo 任務 UI 視覺強化 + Nightly Report）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：100/100**（目標物有進場動畫，高倍率有音效提示，視覺體驗完整）
-- **規格一致性：100%**（MissionCombo 缺口已修復）
+- **美術質量：100/100**（Combo 任務有橙紅視覺 + 🔥 脈動動畫，任務面板視覺層次更豐富）
+- **規格一致性：100%**（MissionCombo 缺口已修復，UI 視覺強化）
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
 - **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務）**
-- **DAY-038 更新：** MissionCombo 缺口修復 ✅，DailyMissions 6個任務 ✅，mission_test 10/10 全通過 ✅
+- **DAY-039 更新：** Combo 任務 UI 視覺強化 ✅（橙紅背景 + 邊條 + 🔥 脈動 + 橙色進度條），Nightly Report ✅
 
 ---
 
