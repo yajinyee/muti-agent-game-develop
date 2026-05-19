@@ -44,11 +44,11 @@
 - [x] 記錄 #85（MissionCombo 缺口修復方法）
 - [x] 記錄 #86（Combo 任務 UI 視覺差異化）
 
-### ✅ 上傳 GitHub（P1）
+### ✅ 上傳 GitHub（P1 → 完成）
 
-- [ ] git add
-- [ ] git commit（DAY-039 Nightly Report + Combo 任務 UI 強化）
-- [ ] git push origin main
+- [x] git add（5 個檔案）
+- [x] git commit（DAY-039 Combo任務UI視覺強化(橙紅+脈動) + Nightly Report）
+- [x] git push origin main（commit `09af991` 已推送）
 
 ---
 

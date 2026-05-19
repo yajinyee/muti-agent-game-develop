@@ -1799,3 +1799,16 @@ BONUS_MULT = 20-50x（Prototype 展示版）
   6. 進度條橙紅色（`Color(1.0, 0.45, 0.1)`）
 - **技術：** `row.create_tween().set_loops()` 綁定到 row 節點，row 刪除時自動停止
 - **教訓：** 不同類型的任務要有視覺差異，讓玩家一眼識別特殊任務
+
+## 87. /health 端點加入任務重置時間（2026-05-19 DAY-039）
+- **改善：** `/health` 端點加入 `mission_reset_at`（ISO 8601 格式）和 `mission_reset_in_sec`（倒數秒數）
+- **用途：** 運維人員可以直接從 health check 確認任務系統狀態，不需要另外查詢
+- **實作：** `g.GetMissionResetAt()` 新方法，包裝 `missionMgr.ResetAt()`
+- **格式：** `"mission_reset_at":"2026-05-20T00:00:00+08:00","mission_reset_in_sec":3600`
+- **教訓：** health 端點應該包含所有關鍵子系統的狀態，讓一個 curl 就能確認整體健康
+
+## 88. Godot 4.6.3 RC 2 發布（2026-05-17）
+- **狀態：** RC 2 已發布，修復記憶體 race condition、threading deadlock、2D/3D 編輯工具 bug
+- **影響評估：** 我們用 4.6.2，這些修復主要是編輯器和引擎內部問題，不影響 GDScript 邏輯
+- **建議：** 等 4.6.3 正式版發布後再升級，RC 版本不建議用於生產
+- **教訓：** 定期關注 Godot 版本更新，評估是否有影響我們的 bug 修復

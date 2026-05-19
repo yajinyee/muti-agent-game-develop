@@ -187,7 +187,14 @@ func main() {
 			(uptimeSec%3600)/60,
 			uptimeSec%60,
 		)
-		fmt.Fprintf(w, `{"status":"ok","version":"%s","uptime":"%s","uptime_sec":%d,"clients":%d,"max_players":%d,"spectators":%d,"game_state":"%s"}`,
+		// 任務重置時間（UTC+8）
+		missionResetAt := g.GetMissionResetAt()
+		missionResetStr := missionResetAt.Format("2006-01-02T15:04:05Z07:00")
+		missionResetSec := int(time.Until(missionResetAt).Seconds())
+		if missionResetSec < 0 {
+			missionResetSec = 0
+		}
+		fmt.Fprintf(w, `{"status":"ok","version":"%s","uptime":"%s","uptime_sec":%d,"clients":%d,"max_players":%d,"spectators":%d,"game_state":"%s","mission_reset_at":"%s","mission_reset_in_sec":%d}`,
 			version,
 			uptimeStr,
 			uptimeSec,
@@ -195,6 +202,8 @@ func main() {
 			cfg.MaxPlayersPerRoom,
 			hub.SpectatorCount(),
 			g.GetState(),
+			missionResetStr,
+			missionResetSec,
 		)
 	})
 

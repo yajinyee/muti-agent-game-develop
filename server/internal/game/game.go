@@ -1370,6 +1370,11 @@ func (g *Game) GetLeaderboardData() ws.LeaderboardPayload {
 	}
 }
 
+// GetMissionResetAt 取得每日任務下次重置時間（thread-safe）
+func (g *Game) GetMissionResetAt() time.Time {
+	return g.missionMgr.ResetAt()
+}
+
 // SpectatorSnapshot 觀戰快照（DAY-023）：包含遊戲狀態 + 所有目標 + 排行榜
 type SpectatorSnapshot struct {
 	GameState   string                  `json:"game_state"`
