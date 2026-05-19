@@ -212,3 +212,60 @@ func TestDailyMissionsDefinition(t *testing.T) {
 		}
 	}
 }
+
+// TestUpdateProgress_Combo 確認連擊任務進度更新（DAY-038）
+func TestUpdateProgress_Combo(t *testing.T) {
+	m := NewManager()
+	playerID := "player-007"
+	m.GetOrInitProgress(playerID)
+
+	// 達成 3 連擊（未完成，目標 5）
+	completed := m.UpdateProgress(playerID, MissionCombo, 3)
+	if len(completed) != 0 {
+		t.Errorf("should not complete yet (3/5), got %d completed", len(completed))
+	}
+
+	// 確認進度
+	progress := m.GetOrInitProgress(playerID)
+	for _, mission := range DailyMissions {
+		if mission.Type != MissionCombo {
+			continue
+		}
+		prog := progress[mission.ID]
+		if prog.Current != 3 {
+			t.Errorf("expected current=3, got %d", prog.Current)
+		}
+	}
+
+	// 再達成 3 連擊（累積 6，超過目標 5，應完成）
+	completed = m.UpdateProgress(playerID, MissionCombo, 3)
+	if len(completed) == 0 {
+		t.Error("should complete combo mission (6/5)")
+	}
+	if completed[0].Type != MissionCombo {
+		t.Errorf("expected MissionCombo, got %s", completed[0].Type)
+	}
+}
+
+// TestAllMissionTypesPresent 確認所有任務類型都有對應的 DailyMission（DAY-038）
+func TestAllMissionTypesPresent(t *testing.T) {
+	typeSet := make(map[MissionType]bool)
+	for _, m := range DailyMissions {
+		typeSet[m.Type] = true
+	}
+
+	requiredTypes := []MissionType{
+		MissionKillTargets,
+		MissionKillBoss,
+		MissionPlayBonus,
+		MissionEarnCoins,
+		MissionKillHighMult,
+		MissionCombo,
+	}
+
+	for _, mType := range requiredTypes {
+		if !typeSet[mType] {
+			t.Errorf("mission type %s not found in DailyMissions", mType)
+		}
+	}
+}

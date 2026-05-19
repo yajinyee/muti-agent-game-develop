@@ -40,7 +40,7 @@ type PlayerProgress struct {
 	CompletedAt time.Time `json:"completed_at,omitempty"`
 }
 
-// DailyMissions 每日任務集合（每天固定 3 個任務）
+// DailyMissions 每日任務集合（每天固定 6 個任務）
 var DailyMissions = []Mission{
 	{
 		ID:          "daily_kill_10",
@@ -86,6 +86,15 @@ var DailyMissions = []Mission{
 		Target:      3,
 		Reward:      1500,
 		Icon:        "⭐",
+	},
+	{
+		ID:          "daily_combo_5",
+		Type:        MissionCombo,
+		Name:        "連擊達人",
+		Description: "達成 5 連擊",
+		Target:      5,
+		Reward:      1200,
+		Icon:        "🔥",
 	},
 }
 

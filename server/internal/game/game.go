@@ -341,6 +341,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 				PlayerID:   p.ID,
 			},
 		})
+		// 任務進度：連擊達人（DAY-038）
+		go g.updateMissionProgress(p.ID, mission.MissionCombo, comboCount)
 	}
 
 	// 發放獎勵

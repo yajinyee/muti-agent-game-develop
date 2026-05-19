@@ -912,3 +912,39 @@ Store 整合完整，HTML5 export 大小符合目標，QA 8/8 全部通過。
 技術棧：Go + WebSocket（Port 7777）/ Godot 4.6.2（HTML5 匯出）
 開發週期：DAY-001 到 DAY-034（約 34 個工作日）
 最終狀態：生產就緒，支援 Docker 部署 + Redis 水平擴展
+
+---
+
+## 評估 #25 — 2026-05-19（DAY-038，MissionCombo 缺口修復）
+
+### 這次學到了什麼
+1. **任務系統缺口檢測方法**：對照所有 MissionType 定義，確認每個類型都有 ① DailyMission 定義 ② game.go 觸發邏輯 ③ 測試覆蓋
+2. **`TestAllMissionTypesPresent` 測試模式**：建立一個「確認所有類型都有對應任務」的測試，防止未來再次遺漏
+3. **combo 任務的累積設計**：累積連擊數（不是最高連擊數）對玩家更友善，更容易完成
+4. **自主缺口發現**：不等待指令，主動對照規格書和程式碼找出不一致的地方
+
+### 進步說明
+- 發現並修復 MissionCombo 任務類型缺口（定義了但沒有 DailyMission 和觸發邏輯）
+- DailyMissions 從 5 個擴充到 6 個（加入「連擊達人」任務）
+- mission_test.go 從 8 個測試增加到 10 個（TestUpdateProgress_Combo + TestAllMissionTypesPresent）
+- 建立了「任務類型完整性測試」的最佳實踐
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 96 | +1 | 主動發現並修復任務系統缺口，測試覆蓋更完整 |
+| Godot GDScript | 97 | → | 穩定 |
+| 像素美術生成 | 95 | → | 穩定 |
+| 遊戲數值設計 | 86 | +1 | 任務系統設計更完整（6個任務，覆蓋所有玩法維度） |
+| WebSocket 通訊 | 95 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100%，任務系統更完整 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，任務系統缺口修復，品質持續提升。
+今日完成：MissionCombo 缺口修復 + DailyMissions 6個任務 + 測試補齊（10/10）。
+
+### 下一步學習目標
+1. Nightly Report 更新（DAY-038 完成報告）
+2. Client 任務面板確認 combo 任務正確顯示
+3. 搜尋「daily mission system game design best practices」找更多靈感

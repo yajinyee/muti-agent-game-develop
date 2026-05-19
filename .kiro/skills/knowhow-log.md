@@ -1748,3 +1748,24 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **顯示：** 效能面板第四行，顏色依延遲分級（綠/黃/紅）
 - **注意：** ping 訊息加入 `t` 時間戳欄位，但 Server 端 pong 不需要回傳（只需要回應即可）
 - **教訓：** `Time.get_ticks_msec()` 是毫秒精度，比 `Time.get_unix_time_from_system()` 更適合測量短時間間隔
+
+## 83. Server Rate Limiting（Token Bucket）
+- **實作：** `hub.go` 的 `rateLimiter` struct，Token Bucket 算法
+- **設定：** 30/s，burst 60，per-client 獨立 limiter
+- **豁免：** ping 訊息不受速率限制（避免誤判斷線）
+- **教訓：** Rate Limiting 要在 WebSocket 訊息處理層實作，不是在 HTTP 層
+
+## 84. Ping 延遲計算（Godot 4）
+- **方法：** 發送 ping 時記錄 `Time.get_ticks_msec()`，收到 pong 時計算差值
+- **注意：** ping 訊息要帶 `t` 時間戳欄位，Server 原樣回傳，Client 用來計算 RTT
+- **顏色分級：** 綠（< 100ms）/ 黃（100-200ms）/ 紅（> 200ms）
+- **教訓：** 不要用 Server 時間計算 RTT，要用 Client 本地時間
+
+## 85. MissionCombo 任務類型缺口（DAY-038）
+- **問題：** `MissionCombo` 類型定義了，但 `DailyMissions` 中沒有 combo 任務，且 `game.go` 中沒有觸發 combo 任務進度更新
+- **根本原因：** DAY-037 實作任務系統時，combo 任務類型定義了但忘記加入 DailyMissions 和觸發邏輯
+- **修復：**
+  1. `DailyMissions` 加入 `daily_combo_5`（達成 5 連擊，獎勵 1200 金幣）
+  2. `game.go` 的 combo 廣播後加入 `updateMissionProgress(p.ID, mission.MissionCombo, comboCount)`
+  3. `mission_test.go` 加入 `TestUpdateProgress_Combo` 和 `TestAllMissionTypesPresent`
+- **教訓：** 新增任務類型時，必須同時確認：① DailyMissions 有對應任務 ② game.go 有觸發邏輯 ③ 測試覆蓋所有類型

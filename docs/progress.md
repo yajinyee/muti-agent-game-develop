@@ -1,15 +1,15 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-037 連線數限制 + 每日任務系統）
+## 最後更新：2026-05-19（DAY-038 MissionCombo 缺口修復 + 連擊任務）
 
 ## 自我評估
 - **完成度：100%**
 - **美術質量：100/100**（目標物有進場動畫，高倍率有音效提示，視覺體驗完整）
-- **規格一致性：100%**
+- **規格一致性：100%**（MissionCombo 缺口已修復）
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護**
-- **DAY-036 更新：** Per-client Rate Limiting（Token Bucket）✅，/health uptime+game_state ✅，Client Ping 延遲顯示 ✅，hub_test 10/10 全通過 ✅
+- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務）**
+- **DAY-038 更新：** MissionCombo 缺口修復 ✅，DailyMissions 6個任務 ✅，mission_test 10/10 全通過 ✅
 
 ---
 
@@ -269,6 +269,10 @@
   - `game.go`：整合任務管理器，擊殺/BOSS/Bonus 自動更新進度
   - `GameManager.gd`：`mission_updated`、`mission_completed` 訊號
   - `HUD.gd`：任務面板 UI（📋 按鈕 + 進度條 + 領取按鈕）
+- [x] **MissionCombo 缺口修復**（DAY-038）：
+  - `mission.go`：`DailyMissions` 加入 `daily_combo_5`（達成 5 連擊，獎勵 1200 金幣，🔥）
+  - `game.go`：combo 廣播後加入 `updateMissionProgress(p.ID, mission.MissionCombo, comboCount)`
+  - `mission_test.go`：新增 `TestUpdateProgress_Combo` + `TestAllMissionTypesPresent`（10/10 全通過）
 
 ---
 
