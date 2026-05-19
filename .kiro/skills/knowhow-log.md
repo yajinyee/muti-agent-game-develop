@@ -2365,3 +2365,32 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **效果：** game.go 從 1740 行縮減到 1557 行（-10.5%）
 - **注意：** Go 同一 package 的多個 .go 檔案共享所有 struct 欄位和函數，不需要額外 import
 - **教訓：** 拆分時不要改函數簽名，只是搬移，確保零風險
+
+## 113. coder/websocket vs gorilla/websocket 遷移評估（DAY-058）
+- **來源：** websocket.org/guides/languages/go/（2026-05-20）
+- **現狀：** 我們使用 `gorilla/websocket v1.5.3`，gorilla 已於 2022 年底 archived
+- **coder/websocket（原 nhooyr/websocket）優點：**
+  1. 使用 `context.Context`，取消和超時符合 Go 慣例
+  2. 內部處理並發寫入，消除一整類 bug
+  3. 積極維護中
+- **遷移成本評估：**
+  - API 差異大：`Upgrader.Upgrade()` → `websocket.Accept()`，`Conn.WriteMessage()` → `wsjson.Write()`
+  - 我們的 hub.go 深度依賴 gorilla API（Upgrader、WriteMessage、ReadMessage、SetPongHandler）
+  - 估計需要修改 hub.go 全部 ~400 行，風險高
+  - 所有 9 個測試套件需要重新驗證
+- **結論：** 維持現狀（gorilla v1.5.3）
+  - gorilla 雖然 archived，但代碼穩定，無已知安全漏洞
+  - 遷移成本 > 收益（遊戲已完成，不是新專案）
+  - 若未來有安全漏洞，再評估遷移
+- **教訓：** archived 不等於不安全，對於已完成的專案，穩定性優先於使用最新庫
+
+## 114. Godot HTML5 gzip 壓縮現狀確認（DAY-058）
+- **現狀：** `tools/compress_static.py` 已在 DAY-010 實作，wasm -75%（35.9MB → 9.0MB）
+- **Go Server 支援：** `main.go` 已有 `Accept-Encoding: gzip` 檢查，提供 .gz 版本
+- **每次 export 後需執行：** `py tools/compress_static.py` 更新 .gz 檔案
+- **2025 最新建議（jacobfilipp.com）：**
+  1. 不要預先優化圖片，讓 Godot 自己處理 Lossy 壓縮
+  2. 排除開發資源（reference/、ai_generated/）— 已在 export_presets.cfg 設定
+  3. gzip 壓縮 wasm + pck — 已實作
+- **結論：** 現有優化已達業界最佳實踐，無需額外改動
+- **教訓：** 定期確認優化措施是否仍然有效，避免「以為有做但其實沒生效」的情況

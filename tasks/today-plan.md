@@ -2,8 +2,8 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-20（DAY-057）  
-**整體目標**：補齊 Nightly Reports（DAY-054/055/056）+ game.go 拆分（jackpot_handler / mission_handler）+ KnowHow 更新 + GitHub 上傳
+**日期**：2026-05-20（DAY-058）  
+**整體目標**：coder/websocket 遷移評估 + HTML5 優化確認 + 上網研究 + KnowHow 更新 + GitHub 上傳
 
 ---
 
@@ -17,44 +17,49 @@
 
 ## 今日任務清單
 
-### ✅ DAY-057 啟動檢查
+### ✅ DAY-058 啟動檢查
 
-- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-056，goleak goroutine 洩漏偵測）
-- [x] 讀取 .kiro/skills/knowhow-log.md 確認已知問題（最後 #110）
+- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-057b，game.go 拆分）
+- [x] 讀取 .kiro/skills/knowhow-log.md 確認已知問題（最後 #112）
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
-- [x] go test ./... 確認測試通過（全部 OK）
-- [x] QA 全部通過（8/8，Audio Sync 100/100）
+- [x] go test ./... 確認測試通過（9/9 套件全部 OK）
+- [x] QA 全部通過（8/8，RTP 96.12%）
 
-### 🟠 補齊 Nightly Reports（P1）
+### 🟠 coder/websocket 遷移評估（P1）
 
-- [x] 補齊 DAY-054 nightly report
-- [x] 補齊 DAY-055 nightly report
-- [x] 補齊 DAY-056 nightly report
+- [x] 上網搜尋 coder/websocket vs gorilla/websocket 最新資訊
+- [x] 評估遷移成本（API 差異、hub.go 修改範圍）
+- [x] 結論：維持 gorilla v1.5.3（archived ≠ 不安全，遷移成本高）
+- [x] KnowHow #113 更新
 
-### 🟠 game.go 拆分（P1）
+### 🟠 Godot HTML5 gzip 優化確認（P1）
 
-- [x] 分析 game.go 目前行數（1740 行）
-- [x] 建立 `server/internal/game/jackpot_handler.go`（Jackpot 相關 handler，108 行）
-- [x] 建立 `server/internal/game/mission_handler.go`（Mission 相關 handler，100 行）
-- [x] 建立 `server/internal/game/perf_handler.go`（Client 效能上報 handler，34 行）
-- [x] 清理 game.go 殘留注釋
-- [x] 確認 go build/vet/test 全部通過（game.go 縮減到 1531 行，-12%）
+- [x] 確認 compress_static.py 存在且有效
+- [x] 確認 Go Server 支援 Accept-Encoding: gzip
+- [x] 確認 export_presets.cfg 已排除開發資源
+- [x] 結論：現有優化已達業界最佳實踐
+- [x] KnowHow #114 更新
 
-### 🟡 KnowHow 更新（P2）
+### 🟡 上網研究（P2）
 
-- [x] KnowHow #111：coder/websocket vs gorilla/websocket 遷移評估
-- [x] KnowHow #112：game.go 大型檔案拆分策略（Go）
+- [x] 搜尋「pixel art fish game UI best practices 2025」
+- [x] 搜尋「Godot 4 HTML5 export optimization gzip 2025」
+- [x] 搜尋「coder/websocket nhooyr migration gorilla 2025」
 
-### 🟡 能力評估 #34（P2）
+### 🟡 能力評估 #35（P2）
 
 - [x] 更新 docs/ability-score.md
 
+### 🟡 Nightly Report（P2）
+
+- [x] 生成 DAY-058 nightly report
+
 ### 🟠 上傳 GitHub（P1）
 
-- [x] git add（新 handler + nightly reports + knowhow + today-plan + progress）
-- [x] git commit（DAY-057 game.go 拆分 + Nightly Reports 補齊）
-- [x] git push origin main（c819711 → f2c78aa..c819711）
+- [ ] git add（knowhow + ability-score + nightly report + today-plan）
+- [ ] git commit（DAY-058 coder/websocket 評估 + HTML5 優化確認 + KnowHow#113-114）
+- [ ] git push origin main
 
 ---
 
@@ -69,9 +74,9 @@
 
 ---
 
-## 明日預覽（DAY-058）
+## 明日預覽（DAY-059）
 
 ### 🟢 P3
-1. **coder/websocket 遷移評估** — gorilla/websocket 已 archived，評估遷移成本
-2. **Godot HTML5 export 壓縮優化** — 確認 gzip 壓縮設定
-3. **上網搜尋** — 「pixel art fish game UI 2025 best practices」
+1. **README.md 更新** — 確認 badge 和品質分數與最新 QA 結果一致
+2. **上網搜尋** — 「Godot 4 WebSocket game optimization 2025」
+3. **GitHub 上傳**
