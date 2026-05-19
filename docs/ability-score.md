@@ -1023,3 +1023,39 @@ GitHub 同步完成（commit `e333f81`）。
 1. 搜尋「Godot 4 object pooling HTML5 performance 2025」
 2. 評估 Client 端 Object Pooling（子彈、特效節點重用）
 3. 考慮加入 WebSocket 訊息吞吐量指標（messages_per_second）
+
+## 評估 #28 — 2026-05-19（DAY-041，TargetPool 物件池 + /metrics active_targets）
+
+### 這次學到了什麼
+1. **TargetPool vs BulletPool 的差異**：BulletPool 子節點固定（Sprite2D），TargetPool 子節點動態（Sprite2D + HP條 + Label），acquire 時需要清除子節點
+2. **`remove_child` + `queue_free` 的正確順序**：先 `remove_child` 立即從樹中移除，再 `queue_free` 延遲釋放記憶體，確保同一幀內 acquire 兩次不會看到舊子節點
+3. **pool 節點的 tween 生命週期**：container 級別的 tween 需要手動 kill（用 `active_tweens` meta 追蹤），子節點的 tween 在子節點 queue_free 時自動停止
+4. **`GetActiveTargetCount()` 的 RLock 設計**：讀取 `len(g.Targets)` 用 RLock（讀鎖），不影響遊戲邏輯的寫鎖效能
+5. **Prometheus gauge 指標的監控價值**：`active_targets` 比 `goroutines` 更能反映遊戲健康狀態，異常時（目標物堆積）可以快速發現
+
+### 進步說明
+- TargetPool 物件池建立，消除高頻 GC 壓力（最多 20 個目標 × 每次建立/刪除 → 重用）
+- HUD 效能面板加入 Pool 統計行（B:active/total T:active/total）
+- Server /metrics 加入 `chiikawa_active_targets` 指標
+- Grafana dashboard 從 10 個面板升級到 12 個面板
+- 兩個 commit 推送到 GitHub（`2572096` + `12efcf8`）
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 98 | → | 穩定，GetActiveTargetCount 設計乾淨 |
+| Godot GDScript | 98 | +1 | 掌握 TargetPool 設計，remove_child + queue_free 正確順序 |
+| 像素美術生成 | 95 | → | 穩定 |
+| 遊戲數值設計 | 86 | → | 穩定 |
+| WebSocket 通訊 | 95 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100%，效能架構更完整 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，效能架構持續優化。
+今日完成：TargetPool 物件池 + HUD Pool 統計 + /metrics active_targets + Grafana 12 面板 + GitHub 同步（2 commits）。
+
+### 下一步學習目標
+1. 搜尋「Godot 4 MultiMesh 2D batching optimization」找同類型目標物合批渲染方案
+2. 評估 Server 端 WebSocket 訊息批次統計（壓縮率指標）
+3. 考慮加入 TargetPool 的 `get_stats()` 到 Prometheus /metrics 端點

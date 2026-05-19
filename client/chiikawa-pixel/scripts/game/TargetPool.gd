@@ -73,7 +73,9 @@ func acquire() -> Node2D:
 	node.z_index = 5
 
 	# 清除所有子節點（上次使用留下的 Sprite、HP條、Label 等）
+	# 注意：queue_free 是延遲執行，用 remove_child + queue_free 確保立即從樹中移除
 	for child in node.get_children():
+		node.remove_child(child)
 		child.queue_free()
 
 	# 清除所有 meta（上次使用留下的資料）
@@ -107,7 +109,9 @@ func release(node: Node2D) -> void:
 			t.kill()
 
 	# 清除所有子節點（Sprite2D、HP條、Label、LockFrame 等）
+	# 用 remove_child + queue_free 確保立即從樹中移除（不等到下一幀）
 	for child in node.get_children():
+		node.remove_child(child)
 		child.queue_free()
 
 	# 重置視覺狀態
