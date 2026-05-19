@@ -20,6 +20,15 @@
   - `HUD.gd`：Session Stats 面板升級（4行→6行）：加入「Bonus 次數」+「淨收益」
   - `HUD.gd`：Session Stats 加入 ESC 快捷鍵（`_input` 處理）
   - `HUD.gd`：淨收益顯示顏色分級（綠=盈利/紅=虧損/灰=持平）
+- **DAY-049b 更新（自主觸發）：** Jackpot 每日統計 ✅
+  - `history.go`：加入 `DailyStats` struct + `GetDailyStats()` 方法（從歷史記錄篩選今日）
+  - `game.go`：加入 `GetJackpotDailyStats()` 方法
+  - `main.go`：`/jackpot` 端點加入 `daily_stats` 欄位
+  - `main.go`：`/metrics` 加入 `chiikawa_jackpot_daily_wins{level}` + `chiikawa_jackpot_daily_payout` 指標
+  - `history_test.go`：新增 `TestHistory_GetDailyStats`（13/13 全通過）
+- **DAY-049c 更新（自主觸發）：** Grafana 升級到 23 個面板 ✅
+  - `chiikawa-overview.json`：加入 Panel 22（Jackpot 池當前金額 stat）+ Panel 23（今日 Jackpot 發放統計 timeseries）
+  - Dashboard 標題更新為 DAY-049
 - **DAY-048 更新（自主觸發）：** Progressive Jackpot 系統 ✅
   - `server/internal/game/jackpot/jackpot.go`：三等級 Jackpot 管理器（Mini/Major/Grand）
   - 每次攻擊抽取 0.5% 進入 Jackpot 池（Mini 60% / Major 30% / Grand 10%）

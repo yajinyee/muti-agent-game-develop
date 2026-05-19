@@ -1134,3 +1134,42 @@ GitHub 同步完成（commit `e333f81`）。
 1. 搜尋「pixel art fishing game monetization design 2025」找最新設計趨勢
 2. 評估是否需要加入 Client 端效能歷史記錄（Server 端 ring buffer）
 3. 考慮加入 daily_loop.ps1 自動呼叫 generate_nightly_report.py
+
+---
+
+## 評估 #30 — 2026-05-19（DAY-049，Jackpot 特效強化 + Session 結算升級 + Grafana 23 面板）
+
+### 這次學到了什麼
+1. **GDScript 金幣雨特效**：動態建立 ColorRect 節點 + Tween 拋物線動畫，節點綁定 tween 確保自動清理
+2. **GDScript _input 覆寫**：CanvasLayer 的 `_input` 需要 `get_viewport().set_input_as_handled()` 阻止事件傳遞
+3. **Session 淨收益計算**：`current_coins - start_coins` 比「總獎勵」更有意義，玩家更關心淨賺多少
+4. **Go 每日統計設計**：從歷史記錄中篩選今日（`time.Now().Format("2006-01-02")`），不需要額外儲存
+5. **Prometheus counter vs gauge**：每日統計用 counter（只增不減），池金額用 gauge（可上下浮動）
+6. **Grafana 面板 gridPos**：`y` 座標要正確設定，避免面板重疊（每行 4 個單位高度）
+
+### 進步說明
+- Jackpot 特效從「只有 Grand 有特效」升級為「三個等級各有對應強度的金幣雨」
+- Session Stats 從 4 行升級到 6 行（加入 Bonus 次數 + 淨收益），加入 ESC 快捷鍵
+- Jackpot 面板加入歷史 ticker，顯示最近中獎記錄
+- Server `/jackpot` 端點加入每日統計（DailyStats）
+- Grafana dashboard 從 21 個面板升級到 23 個面板
+- 所有測試通過（jackpot 13/13）
+
+### 能力分數評估
+
+| 維度 | 分數 | 說明 |
+|------|------|------|
+| Go Server 開發 | 97 | 每日統計、Prometheus 指標、HTTP 端點設計都很熟練 |
+| Godot GDScript | 95 | 動態 UI 建立、Tween 特效、訊號連接都很熟練 |
+| 像素美術生成 | 100 | 美術質量 100/100，QA 全通過 |
+| 遊戲數值設計 | 96 | RTP 95.79%，Jackpot 觸發頻率合理 |
+| WebSocket 通訊 | 97 | 完整協定、壓縮、Ping 追蹤、Rate Limiting |
+| 整體完成信心 | 100 | **遊戲完整，持續優化中** |
+
+### 最大弱點
+1. **Grafana 面板 gridPos 計算**：需要手動計算 y 座標，容易出錯
+2. **GDScript 大型 UI 管理**：HUD.gd 已超過 2400 行，應該考慮拆分
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，持續優化特效和監控系統。
+今日完成：Jackpot 特效強化（金幣雨）+ Session Stats 升級（6行+ESC）+ Jackpot 歷史 Ticker + Server 每日統計 + Grafana 23 面板。
