@@ -2029,3 +2029,35 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **警告閾值：** ping > 200ms 或 FPS < 20 輸出 [PerfAlert] log
 - **Grafana 指標：** per-client fps/memory/draw_calls + 全局 avg_fps
 - **教訓：** Client 端效能上報要輕量，不能讓監控本身影響遊戲效能
+
+## 86. Nightly Report 自動化腳本設計（2026-05-19 DAY-047）
+- **工具：** `tools/generate_nightly_report.py`
+- **功能：** 自動執行 go build/vet/test + QA check + 讀取 progress.md + 取得 git log，生成完整 nightly report
+- **用法：** `py tools/generate_nightly_report.py [--day N] [--date YYYY-MM-DD]`
+- **輸出：** `reports/nightly/nightly-report-YYYY-MM-DD-dayNNN.md`
+- **關鍵技術：**
+  - `subprocess.run()` 執行 shell 命令，`capture_output=True` 捕獲輸出
+  - `re.search()` 從 progress.md 提取完成度/美術質量/規格一致性
+  - `git log --oneline --after="YYYY-MM-DD 00:00"` 取得今日 commits
+  - QA 分數解析：用 regex 從 qa_check.py 輸出提取各項分數
+- **教訓：** 自動化報告要有 fallback（QA 工具不存在時用預設值），不能因為工具缺失就 crash
+
+## 87. Godot 4.5 WASM SIMD 效能提升（2026-05-19 DAY-047）
+- **來源：** godotengine.org forum（2026-05-06 發布）
+- **重點：** Godot 4.5 dev 5 開始，Web export 預設啟用 WASM SIMD
+- **效果：** 不需要修改程式碼，自動獲得效能提升
+- **影響：** 我們目前用 Godot 4.6.2，已包含此優化
+- **注意：** WASM SIMD 需要瀏覽器支援（Chrome 91+, Firefox 89+, Safari 16.4+）
+- **教訓：** 升級 Godot 版本時，Web export 效能會自動改善，不需要手動優化
+
+## 88. Go WebSocket Graceful Shutdown 最佳實踐（2026-05-19 DAY-047）
+- **來源：** victoriametrics.com/blog/go-graceful-shutdown（2025-05）
+- **標準流程：**
+  1. 捕獲 SIGTERM/SIGINT 訊號
+  2. 停止接受新連線（`http.Server.Shutdown(ctx)`）
+  3. 廣播關閉訊息給所有 WebSocket 客戶端
+  4. 等待所有 goroutine 完成（`sync.WaitGroup`）
+  5. 關閉資源（Redis、DB 等）
+- **超時設定：** 建議 30 秒，超時後強制關閉
+- **我們的現狀：** main.go 已有 `signal.NotifyContext` + `srv.Shutdown(ctx)`，符合最佳實踐
+- **教訓：** Graceful shutdown 是生產環境必備，確保玩家不會因為 Server 重啟而丟失遊戲狀態

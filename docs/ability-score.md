@@ -1097,3 +1097,40 @@ GitHub 同步完成（commit `e333f81`）。
 1. Nightly Report 自動化腳本
 2. 搜尋「pixel art fishing game monetization design 2025」
 3. 評估是否需要加入 Client 端效能歷史記錄（Server 端 ring buffer）
+
+---
+
+## 評估 #29 — 2026-05-19（DAY-047，Nightly Report 自動化 + KnowHow 更新）
+
+### 這次學到了什麼
+1. **Nightly Report 自動化設計**：`subprocess.run()` 執行 shell 命令，`re.search()` 解析輸出，整合 go build/vet/test + QA check + git log + progress.md
+2. **QA 分數解析技術**：用 regex 從 qa_check.py 的文字輸出提取各項分數，不需要修改 QA 工具
+3. **Godot 4.5 WASM SIMD**：Web export 預設啟用 WASM SIMD，不需要修改程式碼自動獲得效能提升（我們用 4.6.2 已包含）
+4. **Go Graceful Shutdown 確認**：我們的 main.go 已有 `signal.NotifyContext` + `srv.Shutdown(ctx)`，符合 2025 年最佳實踐
+5. **自動化工具的 fallback 設計**：QA 工具不存在時用預設值，不能因為工具缺失就 crash
+
+### 進步說明
+- 建立了完整的 Nightly Report 自動化腳本（`tools/generate_nightly_report.py`）
+- 不再需要手動生成報告，每次執行自動整合所有狀態
+- 記錄了 3 條新 KnowHow（86/87/88）
+- 確認 Go Server 架構符合 2025 年最佳實踐（Graceful Shutdown）
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 98 | → | 穩定，Graceful Shutdown 確認符合最佳實踐 |
+| Godot GDScript | 98 | → | 穩定 |
+| 像素美術生成 | 95 | → | 穩定 |
+| 遊戲數值設計 | 86 | → | 穩定 |
+| WebSocket 通訊 | 97 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100%，自動化程度提升 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，自動化工具鏈更完整。
+今日完成：Nightly Report 自動化腳本 + KnowHow 86-88 + 能力評估 #29 + GitHub 上傳。
+
+### 下一步學習目標
+1. 搜尋「pixel art fishing game monetization design 2025」找最新設計趨勢
+2. 評估是否需要加入 Client 端效能歷史記錄（Server 端 ring buffer）
+3. 考慮加入 daily_loop.ps1 自動呼叫 generate_nightly_report.py

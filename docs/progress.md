@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-045 Client端效能上報 + Server連線品質報告 + Grafana 21面板）
+## 最後更新：2026-05-19（DAY-047 Nightly Report 自動化 + KnowHow 86-88 + GitHub 上傳）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,9 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（21個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報**
+- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（21個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報，Nightly Report 自動化**
+- **DAY-046 更新：** Session Stats 面板（本局統計+60秒自動彈出）✅，PlayerSnapshot 加入 session_score/kill_count ✅，QA 工具 RTP 模擬修正（sessions=10000）✅，Godot 自訂 Debugger 監控器 ✅
+- **DAY-047 更新：** `tools/generate_nightly_report.py` 自動化腳本 ✅（go build/vet/test + QA check + git log + progress.md 整合），KnowHow 86-88 更新 ✅，能力評估 #29 ✅，GitHub 上傳 ✅
 - **DAY-044 更新：** `hub.go` 加入 Ping Latency 追蹤（per-client + 全局 avg/max/count）✅，`/metrics` 加入 3 個 ping 指標 + per-client 延遲 ✅，`/health` 加入 `avg_ping_ms` ✅，Grafana dashboard 升級到 18 個面板 ✅，hub_test.go 新增 3 個測試（13/13 全通過）✅
 - **DAY-044b 更新（自主觸發）：** 發現 QA 工具 RTP 模擬盲點（使用靜態模型，永遠顯示 95.93%）✅，修復 QA 工具改用真實遊戲邏輯 ✅，發現 BOSS HP 固定值導致低 bet 等級永遠打不死 BOSS ✅，`spawnBoss()` 改為動態 HP（依 bet 等級縮放）✅，調整 RTP 數值（BASE_RTP=0.95, LABOR_SCALE=1.2, BONUS_MULT_MAX=30）✅，QA 8/8 全通過，RTP 95.71% ✅
 - **DAY-045 更新：** `protocol.go` 加入 `MsgClientPerf` + `ClientPerfPayload` ✅，`hub.go` 加入 Client 效能快照儲存（UpdateClientPerf + GetClientPerfSnapshots）✅，`game.go` 加入 `handleClientPerf()`（高延遲/低FPS 警告 log）✅，`/metrics` 加入 4 個 Client 端效能指標（fps/memory/draw_calls/avg_fps）✅，`NetworkManager.gd` 加入 `send_perf_report()` ✅，`PerformanceMonitor.gd` 每 30 秒自動上報 ✅，Grafana dashboard 升級到 21 個面板 ✅，QA 8/8 全通過 ✅
