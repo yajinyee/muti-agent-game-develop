@@ -57,9 +57,9 @@
 
 ### 🟠 上傳 GitHub（P1）
 
-- [ ] git add（knowhow + ability-score + nightly report + today-plan）
-- [ ] git commit（DAY-058 coder/websocket 評估 + HTML5 優化確認 + KnowHow#113-114）
-- [ ] git push origin main
+- [x] git add（knowhow + ability-score + nightly report + today-plan）
+- [x] git commit（DAY-058 coder/websocket 評估 + HTML5 優化確認 + KnowHow#113-114）
+- [x] git push origin main（0267fe2 → adf6153）
 
 ---
 
