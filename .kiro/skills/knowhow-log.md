@@ -1628,3 +1628,21 @@ BONUS_MULT = 20-50x（Prototype 展示版）
   這在視覺上是合理的（整個畫面都在水下），但 UI 文字可能變色
 - **最終決定：** layer=49（HUD 之上），讓整個畫面包含 UI 都有水下感
   如果 UI 可讀性受影響，可以降低 effect_alpha 或改為 layer=0
+
+## 85. 目標物游泳動畫技術（2 幀 spritesheet）
+- **技術：** sin 波位移模擬魚身彎曲
+  - 幀0：`dx = int(2.0 * sin(y/h * π))` 向右位移（向上彎曲）
+  - 幀1：`dx = -int(2.0 * sin(y/h * π))` 向左位移（向下彎曲）
+- **輸出格式：** 128x64（2幀橫排），AtlasTexture 切割
+- **Godot 整合：** 全局計時器 4fps，所有目標物共用同一幀計時器
+  - 優點：所有目標物同步游泳，視覺上更整齊
+  - 缺點：沒有隨機相位（可以用 `_swim_anim_frame ^ (instance_id.hash() % 2)` 加入隨機）
+- **效能：** 全局計時器比每個目標物獨立計時器省 CPU
+- **教訓：** 2 幀動畫已足夠表達游泳感，不需要 4 幀
+
+## 86. git GIT_TMPDIR 問題（Windows）
+- **問題：** `git add` 報 `unable to create temporary file: No such file or directory`
+- **根本原因：** `.git/tmp` 目錄被 Norton 防毒軟體佔用（`_norton_` 子目錄）
+- **解決：** 每次 git 操作前設定 `$env:GIT_TMPDIR = "C:\Users\...\AppData\Local\Temp"`
+- **永久解決：** `git config core.tmpdir "C:/Users/.../AppData/Local/Temp"`
+- **教訓：** Windows 上 Norton 防毒可能干擾 git 的臨時檔案操作
