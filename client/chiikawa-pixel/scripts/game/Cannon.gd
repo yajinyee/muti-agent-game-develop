@@ -51,9 +51,17 @@ func _ready() -> void:
 	var rainbow_path = "res://assets/shaders/rainbow_glow.gdshader"
 	if ResourceLoader.exists(rainbow_path):
 		_cached_rainbow_shader = load(rainbow_path)
+	# 初始化 BulletPool（子彈節點加入遊戲場景）
+	# 用 call_deferred 確保父節點已完全就緒
+	call_deferred("_init_bullet_pool")
 
 func _process(_delta: float) -> void:
 	pass
+
+func _init_bullet_pool() -> void:
+	var parent = get_parent()
+	if is_instance_valid(parent):
+		BulletPool.init_pool(parent)
 
 func _input(event: InputEvent) -> void:
 	if not (event is InputEventMouseButton):
@@ -98,54 +106,33 @@ func _fire_projectile(target_pos: Vector2) -> void:
 	var char_id = GameManager.player_data.get("character_id", "chiikawa")
 
 	# 依投注等級取得投射物速度（規格書 6章）
-	var bet_level = GameManager.get_bet_level()
 	var proj_speed = GameManager.player_data.get("projectile_speed", 700.0)
 	if proj_speed <= 0:
 		proj_speed = 700.0
 	var dist = CANNON_POSITION.distance_to(target_pos)
 	var flight_time = clamp(dist / proj_speed, 0.05, 0.25)
 
-	# 從 BulletPool 取得子彈節點（Object Pooling，避免高頻 new/free）
+	# 從 BulletPool 取得子彈節點（Object Pooling）
+	# 子彈永遠在遊戲場景中，Pool 只管理可用清單
 	var texture = _cached_proj_textures.get(char_id, null)
 	var proj: Node2D = BulletPool.acquire(char_id, texture)
+
+	# 如果是降級節點（Pool 未初始化），加入場景
+	if not proj.get_meta("pooled", false):
+		parent.add_child(proj)
+
 	proj.position = CANNON_POSITION
 
-	# 如果沒有 texture，用 ColorRect 備用（直接操作 Sprite 子節點）
+	# 如果沒有 texture，顯示備用 ColorRect
 	var sprite = proj.get_node_or_null("Sprite")
-	if is_instance_valid(sprite):
-		if texture != null:
-			sprite.visible = true
-		else:
-			sprite.visible = false
-			# 確保有備用 ColorRect（只建立一次，之後重用）
-			if not proj.has_node("FallbackRect"):
-				var rect := ColorRect.new()
-				rect.name = "FallbackRect"
-				rect.size = Vector2(16, 10)
-				rect.position = Vector2(-8, -5)
-				rect.color = CHAR_COLORS.get(char_id, Color.WHITE)
-				proj.add_child(rect)
-				var core := ColorRect.new()
-				core.name = "FallbackCore"
-				core.size = Vector2(8, 6)
-				core.position = Vector2(-4, -3)
-				core.color = Color.WHITE
-				proj.add_child(core)
-			var fb = proj.get_node_or_null("FallbackRect")
-			if is_instance_valid(fb):
-				fb.visible = true
-				fb.color = CHAR_COLORS.get(char_id, Color.WHITE)
-			var fc = proj.get_node_or_null("FallbackCore")
-			if is_instance_valid(fc):
-				fc.visible = true
-	else:
-		# 備用：更大的子彈（16×10px），更容易看見
+	if is_instance_valid(sprite) and texture == null:
+		sprite.visible = false
+		# 確保有備用 ColorRect（只建立一次，之後重用）
 		if not proj.has_node("FallbackRect"):
 			var rect := ColorRect.new()
 			rect.name = "FallbackRect"
 			rect.size = Vector2(16, 10)
 			rect.position = Vector2(-8, -5)
-			rect.color = CHAR_COLORS.get(char_id, Color.WHITE)
 			proj.add_child(rect)
 			var core := ColorRect.new()
 			core.name = "FallbackCore"
@@ -153,35 +140,45 @@ func _fire_projectile(target_pos: Vector2) -> void:
 			core.position = Vector2(-4, -3)
 			core.color = Color.WHITE
 			proj.add_child(core)
+		var fb = proj.get_node_or_null("FallbackRect")
+		if is_instance_valid(fb):
+			fb.visible = true
+			fb.color = CHAR_COLORS.get(char_id, Color.WHITE)
+		var fc = proj.get_node_or_null("FallbackCore")
+		if is_instance_valid(fc):
+			fc.visible = true
+	elif is_instance_valid(sprite):
+		# 隱藏備用 ColorRect（如果存在）
+		var fb = proj.get_node_or_null("FallbackRect")
+		if is_instance_valid(fb):
+			fb.visible = false
+		var fc = proj.get_node_or_null("FallbackCore")
+		if is_instance_valid(fc):
+			fc.visible = false
 
 	# 計算方向（防止零向量）
 	var diff = target_pos - CANNON_POSITION
 	if diff.length() > 1.0:
 		proj.rotation = diff.angle()
 
-	# 把子彈加到父節點（BulletPool 是 autoload，子彈需要在遊戲場景中顯示）
-	if proj.get_parent() == BulletPool:
-		BulletPool.remove_child(proj)
-		parent.add_child(proj)
-
-	# 飛行動畫（依實際速度計算時間）
+	# 飛行動畫
 	var tween = create_tween()
+	BulletPool.register_tween(proj, tween)
 	tween.tween_property(proj, "position", target_pos, flight_time)
-	# 烏薩奇：旋轉殘影效果（規格書 2章：黃色旋轉殘影）
+	# 烏薩奇：旋轉殘影效果（規格書 2章）
 	if char_id == "usagi":
 		tween.parallel().tween_property(proj, "rotation_degrees", 720.0, flight_time)
 	tween.tween_callback(func():
 		if is_instance_valid(proj):
-			# 命中特效（使用新的 HitEffect 系統）
 			HitEffect.spawn_hit(target_pos, char_id)
 			# 歸還到 pool（不 queue_free）
-			if is_instance_valid(proj.get_parent()):
-				proj.get_parent().remove_child(proj)
-			BulletPool.add_child(proj)
-			BulletPool.release(proj)
+			if proj.get_meta("pooled", false):
+				BulletPool.release(proj)
+			else:
+				proj.queue_free()
 	)
 
-	# 拖尾協程（用 _spawn_trail_step 模擬）
+	# 拖尾效果
 	_spawn_trail(parent, CANNON_POSITION, target_pos, flight_time, CHAR_COLORS.get(char_id, Color.WHITE))
 
 func _on_attack_result(result: Dictionary) -> void:

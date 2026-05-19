@@ -1866,3 +1866,16 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **節點移動：** `parent.remove_child(proj)` + `BulletPool.add_child(proj)` 比 `queue_free()` + `new()` 快 10x
 - **tween 清理：** `bullet.set_meta("tweens", [])` 儲存 tween 引用，`release()` 時 `t.kill()` 停止
 - **教訓：** 捕魚機每秒可能有 10+ 次射擊，Object Pooling 是 HTML5 效能的關鍵優化
+
+## 87. Godot 4 Object Pool 正確架構（避免 reparent 問題）
+- **錯誤做法：** 子彈在 Autoload 和遊戲場景之間 `remove_child` + `add_child` 移動
+  - 問題：`reparent()` 在 Godot 4 有已知的 scale/position 異常（forum.godotengine.org 2025）
+  - 問題：tween callback 執行時節點父節點已改變，導致 crash
+- **正確做法：** 子彈永遠在遊戲場景中，Pool 只管理「可用清單」
+  1. `init_pool(parent)` — 在遊戲場景 `_ready()` 後呼叫，子彈加入遊戲場景
+  2. `acquire()` — 從可用清單取出，設 `visible=true`，移到畫面外的位置
+  3. `release()` — 設 `visible=false`，位置移到 `(-9999, -9999)`，歸還清單
+  4. Pool 只是 Dictionary，不持有節點的父子關係
+- **降級模式：** Pool 未初始化時，回傳普通節點（`pooled=false`），用 `queue_free()` 清理
+- **tween 追蹤：** `register_tween(bullet, tween)` 讓 Pool 在 `release()` 時自動 `kill()` tween
+- **教訓：** Object Pool 的核心是「節點不離開場景樹」，不是「節點在不同父節點間移動」
