@@ -2,8 +2,8 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-20（DAY-059）  
-**整體目標**：Go WebSocket 高負載優化研究 + Godot HTML5 Lossy 壓縮技巧 + README 更新 + KnowHow#115-116 + GitHub 上傳
+**日期**：2026-05-20（DAY-060）  
+**整體目標**：Redis Pub/Sub 水平擴展廣播層 + Godot 4.6.3 版本追蹤 + KnowHow#119-120 + GitHub 上傳
 
 ---
 
@@ -17,60 +17,46 @@
 
 ## 今日任務清單
 
-### ✅ DAY-059 啟動檢查
+### ✅ DAY-060 啟動檢查
 
-- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-058，coder/websocket 評估）
-- [x] 讀取 .kiro/skills/knowhow-log.md 確認已知問題（最後 #114）
+- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-059，背景圖 Lossy 壓縮）
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
 - [x] go test ./... 確認測試通過（9/9 套件全部 OK）
-- [x] QA 全部通過（8/8，RTP 95.75%）
+- [x] QA 全部通過（8/8，RTP 96.09%）
 
-### 🟠 上網研究（P1）
+### 🟠 Redis Pub/Sub 水平擴展廣播層（P1）
 
-- [x] 搜尋「Go WebSocket game server performance optimization 2025 goroutine pool」
-  - 結論：goroutine per connection 是正確模式，t3.medium 可承載 25,000+ 連線
-  - 重點：Read/Write Deadline + Ping/Pong + Graceful Shutdown（本專案已實作）
-  - KnowHow #115 更新
-- [x] 搜尋「Godot 4 HTML5 export size optimization 2025 pck compression」
-  - 結論：Lossy 壓縮 + 自訂 Export Template（disable_3d + lto=full）
-  - 本專案已用 gzip，下次 export 可考慮 Lossy 壓縮進一步縮小 .pck
-  - KnowHow #116 更新
-- [x] 搜尋「coder/websocket vs gorilla 2025 migration」
-  - 結論：websocket.org 2026-03-14 更新確認：現有 gorilla 專案維持不動
+- [x] 研究 Redis pub/sub 水平擴展模式（oneuptime.com 2026-03-31）
+- [x] 建立 `server/internal/ws/pubsub.go`（PubSubBroker，170 行）
+  - `NewPubSubBroker()` — 建立代理，無 Redis 時回傳 nil（降級）
+  - `Start()` / `Stop()` — 啟動/停止訂閱 goroutine
+  - `Publish(msg)` — 發布訊息到 Redis channel
+  - `subscribeLoop()` — 訂閱 Redis channel，serverID 過濾避免無限循環
+  - `Hub.localBroadcast()` — 只廣播給本地客戶端
+  - `Hub.BroadcastWithPubSub()` — 可選升級路徑
+- [x] 建立 `server/internal/ws/pubsub_test.go`（4 個單元測試全部通過）
+- [x] go build ./... + go test ./... 全部通過
+- [x] KnowHow #119 更新
 
-### 🟠 README.md 更新（P1）
+### 🟡 上網研究（P2）
 
-- [x] RTP badge 更新（95.98% → 95.75%，反映最新 QA 結果）
-- [x] 品質分數標題更新（DAY-058 → DAY-059）
-- [x] 開發日誌加入 DAY-059 記錄
-- [x] 最後更新時間更新
+- [x] 搜尋「Godot 4.6 latest version release 2025 2026」
+  - 結論：Godot 4.6.3 RC 2 已於 2026-05-12 發布，4.7 beta 進行中
+  - 本專案用 4.6.2，等 4.6.3 正式版後評估升級
+  - KnowHow #120 更新
 
-### 🟡 KnowHow 更新（P2）
-
-- [x] KnowHow #115：Go WebSocket 高負載優化最佳實踐
-- [x] KnowHow #116：Godot HTML5 Lossy 壓縮 + 自訂 Export Template
-
-### 🟡 能力評估 #36（P2）
+### 🟡 能力評估 #37（P2）
 
 - [x] 更新 docs/ability-score.md
 
 ### 🟡 Nightly Report（P2）
 
-- [x] 生成 DAY-059 nightly report
+- [x] 生成 DAY-060 nightly report
 
-### 🟢 背景圖 Lossy 壓縮實作（P3，自主觸發）
+### 🟠 上傳 GitHub（P1）
 
-- [x] 確認三個背景圖的 .import 設定（compress/mode=0 Lossless）
-- [x] 修改為 compress/mode=1（Lossy WebP，quality=0.85）
-- [x] 修改檔案：bonus_bg.png.import、boss_bg.png.import（178KB）、sea_bg.png.import
-- [x] KnowHow #117 更新（背景圖 Lossy 壓縮實作）
-- [x] KnowHow #118 更新（HTML5 遊戲商業化策略）
-- [ ] 待辦：在 Godot 編輯器重新 import 確認生效（需要手動操作）
-
-- [x] git add（knowhow + ability-score + nightly report + today-plan + README + import files）
-- [x] git commit（DAY-059 背景圖 Lossy 壓縮 + KnowHow#115-118 + HTML5 商業化研究）
-- [x] git push origin main
+- [x] git add + git commit + git push
 
 ---
 
@@ -81,13 +67,13 @@
 - 完成度：**100%**
 - 美術質量：**100/100**
 - 規格一致性：**100%**
-- 架構成熟度：**生產就緒 + goleak 測試覆蓋 + 觀戰者系統完整 + KnowHow 118 條**
+- 架構成熟度：**生產就緒 + Redis pub/sub 水平擴展就緒 + KnowHow 120 條**
 
 ---
 
-## 明日預覽（DAY-060）
+## 明日預覽（DAY-061）
 
 ### 🟢 P3
-1. **Godot 重新 import 背景圖** — 在 Godot 編輯器重新 import 三個背景圖，確認 Lossy 壓縮生效，測量 .pck 大小縮小幅度
-2. **上網搜尋** — 「Go game server Redis pub/sub horizontal scaling 2025」
+1. **Redis pub/sub 整合到 main.go** — 在 GameRoom 中使用 BroadcastWithPubSub，完成水平擴展閉環
+2. **上網搜尋** — 「Godot 4.6.3 stable release notes」
 3. **GitHub 上傳**

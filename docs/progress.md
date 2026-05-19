@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-059 Go WebSocket 高負載優化研究 + Godot HTML5 Lossy 壓縮技巧）
+## 最後更新：2026-05-20（DAY-060 Redis Pub/Sub 水平擴展廣播層）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,18 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-060 更新（自主觸發）：** Redis Pub/Sub 水平擴展廣播層 ✅
+  - `server/internal/ws/pubsub.go`：PubSubBroker 代理（170 行）
+    - `NewPubSubBroker(redisURL, roomID, serverID, hub)` — 建立代理，無 Redis 時回傳 nil
+    - `Start()` / `Stop()` — 啟動/停止訂閱 goroutine
+    - `Publish(msg)` — 發布訊息到 Redis channel
+    - `subscribeLoop()` — 訂閱 Redis channel，收到訊息後呼叫 `hub.localBroadcast()`
+    - `Hub.localBroadcast(msg)` — 只廣播給本地客戶端（不 publish 到 Redis）
+    - `Hub.BroadcastWithPubSub(msg, broker)` — 本地廣播 + Redis publish（可選升級路徑）
+  - `server/internal/ws/pubsub_test.go`：4 個單元測試全部通過
+  - KnowHow #119-120 更新（Redis pub/sub + Godot 4.6.3 RC 2）
+  - 能力評估 #37 更新
+  - 所有測試通過（9 個套件全部 ok）
 - **DAY-059 更新（自主觸發）：** Go WebSocket 高負載優化研究 + Godot HTML5 Lossy 壓縮技巧 ✅
   - 上網研究 Go WebSocket 高負載優化（moldstud.com、hemaks.org、leapcell.io）
   - 確認本專案架構符合業界最佳實踐（Read/Write Deadline + Ping/Pong + Graceful Shutdown）

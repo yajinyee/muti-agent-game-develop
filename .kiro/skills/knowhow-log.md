@@ -2445,3 +2445,22 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **本專案現狀：** 純展示版，無商業化機制
 - **未來方向：** 若要商業化，Rewarded Video 是最低摩擦的起點
 - **教訓：** HTML5 遊戲商業化不是靠 Banner，而是 Rewarded Video + IAP 的混合模式
+
+## 119. Redis Pub/Sub 水平擴展廣播層（DAY-060）
+- **問題：** 多個 Server 實例時，Server A 的 Hub.Broadcast() 無法到達 Server B 的客戶端
+- **解法：** `server/internal/ws/pubsub.go` — PubSubBroker 代理
+  - `Hub.BroadcastWithPubSub(msg, broker)` — 本地廣播 + Redis publish
+  - `subscribeLoop()` — 訂閱 Redis channel，收到訊息後呼叫 `hub.localBroadcast()`
+  - `serverID` 過濾 — 避免收到自己發的訊息（無限循環）
+- **Channel 命名：** `game:broadcast:{roomID}`（每個 Room 獨立 channel）
+- **降級機制：** `redisURL` 為空時 `NewPubSubBroker()` 回傳 nil，`BroadcastWithPubSub()` 自動降級為純本地廣播
+- **測試：** 4 個單元測試（無 Redis 降級 + 無效 URL + nil broker 廣播 + 本地廣播）
+- **整合方式：** 現有 `Hub.Broadcast()` 不需要修改，新增 `BroadcastWithPubSub()` 作為可選升級路徑
+- **教訓：** 水平擴展功能要設計成可選的（opt-in），不能破壞現有的單機模式
+
+## 120. Godot 4.6.3 RC 2 發布（DAY-060 上網研究）
+- **發現：** Godot 4.6.3 RC 2 已於 2026-05-12 發布，4.7 beta 也在進行中
+- **本專案現狀：** 使用 Godot 4.6.2，可以考慮升級到 4.6.3 正式版
+- **升級時機：** 等 4.6.3 正式版發布後評估升級（RC 版本不建議用於生產）
+- **4.6.3 重點：** 穩定性修復，無重大 API 變更
+- **教訓：** 定期追蹤 Godot 版本，維護版本（x.y.z）可以安全升級，功能版本（x.y）需要評估
