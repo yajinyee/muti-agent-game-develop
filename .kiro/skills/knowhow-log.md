@@ -1692,3 +1692,17 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **正確路徑：** `go run ./cmd/gameserver/main.go`（不是 `go run main.go`）
 - **原因：** main.go 在 `cmd/gameserver/` 子目錄，不在 server/ 根目錄
 - **教訓：** 文件中的啟動指令要和實際目錄結構一致
+
+## 83. HighRatio 欄位定義但未使用的 Bug（2026-05-19 DAY-035）
+- **問題：** `SpawnWeights` 定義了 `HighRatio` 欄位（LV1-3: 1%, LV4-7: 3%, LV8-10: 5%），但 `PickTargetDef` 只用了 Basic/Special 兩個 pool，HighRatio 完全沒有效果
+- **根本原因：** 規格書定義三段動態難度（基礎/特殊/高倍率），但實作時只做了兩段
+- **修復：** 加入 `getHighValuePool()`（T104 金色雜草 + T105 金幣魚），在 `PickTargetDef` 中依 HighRatio 決定是否選高倍率目標
+- **驗證：** 10000 次模擬，LV10 高倍率比例 ~5%（±2%），LV1 ~1%（<3%）
+- **教訓：** 定義了欄位就要確認有被使用，靜態分析工具（go vet）不會抓到邏輯上的「定義但未使用」
+
+## 84. 多人遊戲目標位置同步設計（2026-05-19 DAY-035）
+- **問題：** Server 只在目標生成時廣播位置，之後 Client 自行計算移動。多人遊戲時各玩家看到的目標位置可能不同步（Client 計算誤差累積）
+- **解法：** 每 2 秒廣播一次所有移動中目標（speed > 0）的當前位置，讓 Client 定期校正
+- **優化：** 靜止目標（speed=0，如 T001 雜草、T104 金草）不廣播，節省頻寬
+- **實作：** `broadcastTargetPositions()` 在 `updateNormalPlay()` 中每 2 秒觸發一次
+- **教訓：** Client-side 預測 + Server-side 定期校正是多人遊戲的標準做法（類似 Valve 的 Source Engine 架構）

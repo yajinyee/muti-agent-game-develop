@@ -196,7 +196,10 @@ func GetSpawnWeights(betLevel int) SpawnWeights {
 	}
 }
 
-// PickTargetDef 依權重隨機選擇目標定義
+// PickTargetDef 依權重隨機選擇目標定義（規格書 27.3 三段動態難度）
+// BasicRatio：基礎目標（T001-T006）
+// SpecialRatio：一般特殊目標（T101-T103）
+// HighRatio：高倍率特殊目標（T104 金色雜草 30x, T105 金幣魚 50x）
 func (s *SpawnSystem) PickTargetDef(betLevel int, bonusSpecialRatio float64) *data.TargetDef {
 	weights := GetSpawnWeights(betLevel)
 	weights.SpecialRatio += bonusSpecialRatio
@@ -204,6 +207,17 @@ func (s *SpawnSystem) PickTargetDef(betLevel int, bonusSpecialRatio float64) *da
 	r := s.rng.Float64()
 	if r < weights.BasicRatio {
 		return s.pickFromPool(getBasicPool())
+	}
+	// 在 Special 範圍內，依 HighRatio 決定是否選高倍率目標
+	specialRange := weights.SpecialRatio + weights.HighRatio
+	if specialRange > 0 {
+		highThreshold := weights.BasicRatio + weights.HighRatio
+		if r < highThreshold {
+			highPool := getHighValuePool()
+			if len(highPool) > 0 {
+				return s.pickFromPool(highPool)
+			}
+		}
 	}
 	return s.pickFromPool(getSpecialPool())
 }
@@ -237,10 +251,25 @@ func getBasicPool() []*data.TargetDef {
 	return pool
 }
 
+// getSpecialPool 一般特殊目標（T101-T103，不含高倍率 T104/T105）
 func getSpecialPool() []*data.TargetDef {
 	pool := make([]*data.TargetDef, 0)
+	highValueIDs := map[string]bool{"T104": true, "T105": true}
 	for _, d := range data.Targets {
-		if d.Type == data.TargetTypeSpecial {
+		if d.Type == data.TargetTypeSpecial && !highValueIDs[d.ID] {
+			pool = append(pool, d)
+		}
+	}
+	return pool
+}
+
+// getHighValuePool 高倍率特殊目標（T104 金色雜草 30x, T105 金幣魚 50x）
+// 規格書 27.3：LV8-10 玩家有 5% 機率遇到這類目標
+func getHighValuePool() []*data.TargetDef {
+	pool := make([]*data.TargetDef, 0)
+	highValueIDs := map[string]bool{"T104": true, "T105": true}
+	for _, d := range data.Targets {
+		if d.Type == data.TargetTypeSpecial && highValueIDs[d.ID] {
 			pool = append(pool, d)
 		}
 	}

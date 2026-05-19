@@ -46,6 +46,7 @@ type Game struct {
 	bossInstanceID     string
 	nextBossAt         time.Time  // BOSS 自動觸發時間（規格書 28.1）
 	lastLeaderboardAt  time.Time  // 排行榜廣播計時（每 10 秒一次）
+	lastPositionSyncAt time.Time  // 目標位置同步廣播計時（每 2 秒一次，多人同步用）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -682,6 +683,18 @@ func (g *Game) updateNormalPlay() {
 
 	if shouldBroadcastLeaderboard {
 		g.broadcastLeaderboard()
+	}
+
+	// 目標位置同步廣播（每 2 秒，確保多人遊戲目標位置同步）
+	g.mu.Lock()
+	shouldSyncPositions := now.Sub(g.lastPositionSyncAt) >= 2*time.Second
+	if shouldSyncPositions {
+		g.lastPositionSyncAt = now
+	}
+	g.mu.Unlock()
+
+	if shouldSyncPositions {
+		g.broadcastTargetPositions()
 	}
 }
 
@@ -1388,4 +1401,35 @@ func (g *Game) sendAchievement(playerID string, u *achievement.AchievementUnlock
 			UnlockedAt:  u.UnlockedAt.UnixMilli(),
 		},
 	})
+}
+
+// broadcastTargetPositions 廣播所有目標的當前位置（每 2 秒一次）
+// 用途：確保多人遊戲中各玩家看到的目標位置一致（Client 自行計算移動，Server 定期校正）
+// 只廣播移動中的目標（speed > 0），靜止目標不需要同步
+func (g *Game) broadcastTargetPositions() {
+	g.mu.RLock()
+	movingTargets := make([]ws.TargetUpdatePayload, 0)
+	for _, t := range g.Targets {
+		if !t.IsAlive || t.Def.Speed == 0 {
+			continue // 靜止目標不需要位置同步
+		}
+		movingTargets = append(movingTargets, ws.TargetUpdatePayload{
+			InstanceID: t.InstanceID,
+			HP:         t.HP,
+			MaxHP:      t.MaxHP,
+			X:          t.X,
+			Y:          t.Y,
+			Phase:      t.Phase,
+			IsFleeing:  t.IsFleeing,
+		})
+	}
+	g.mu.RUnlock()
+
+	// 只有有移動目標時才廣播（避免空廣播浪費頻寬）
+	for _, payload := range movingTargets {
+		g.Hub.Broadcast(&ws.Message{
+			Type:    ws.MsgTargetUpdate,
+			Payload: payload,
+		})
+	}
 }
