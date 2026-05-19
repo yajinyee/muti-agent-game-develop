@@ -60,6 +60,16 @@ func _ready() -> void:
 		top_line.position = Vector2(0, 38)
 		top_line.color = Color(0.90, 0.75, 0.20, 0.60)
 		top_bar.add_child(top_line)
+		# 觀戰者計數標籤（DAY-055）
+		var spectator_lbl = Label.new()
+		spectator_lbl.name = "SpectatorCountLabel"
+		spectator_lbl.text = ""
+		spectator_lbl.position = Vector2(1180, 8)
+		spectator_lbl.size = Vector2(90, 24)
+		spectator_lbl.add_theme_font_size_override("font_size", 12)
+		spectator_lbl.modulate = Color(0.7, 0.85, 1.0, 0.8)
+		spectator_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		top_bar.add_child(spectator_lbl)
 	if is_instance_valid(bottom_bar):
 		bottom_bar.theme = pixel_theme
 		# BottomBar ?嚗楛瘚瑁???嚗?
@@ -1602,6 +1612,8 @@ func _input(event: InputEvent) -> void:
 
 func _on_spectator_joined(spectator_data: Dictionary) -> void:
 	var count = spectator_data.get("spectator_count", 1)
+	# 更新 TopBar 觀戰者計數
+	_update_spectator_count_label(count)
 	# 用成就通知系統顯示觀戰者加入（複用現有 UI）
 	_achievement_queue.append({
 		"icon": "👁️",
@@ -1616,6 +1628,8 @@ func _on_spectator_joined(spectator_data: Dictionary) -> void:
 
 func _on_spectator_left(spectator_data: Dictionary) -> void:
 	var count = spectator_data.get("spectator_count", 0)
+	# 更新 TopBar 觀戰者計數
+	_update_spectator_count_label(count)
 	if count > 0:
 		# 還有觀戰者，靜默更新（不打擾玩家）
 		return
@@ -1628,3 +1642,17 @@ func _on_spectator_left(spectator_data: Dictionary) -> void:
 	})
 	if not _achievement_showing:
 		_show_next_achievement()
+
+## 更新 TopBar 觀戰者計數標籤（DAY-055）
+func _update_spectator_count_label(count: int) -> void:
+	var top_bar = get_node_or_null("TopBar")
+	if not is_instance_valid(top_bar):
+		return
+	var lbl = top_bar.get_node_or_null("SpectatorCountLabel")
+	if not is_instance_valid(lbl):
+		return
+	if count > 0:
+		lbl.text = "👁️ %d" % count
+		lbl.modulate = Color(0.7, 0.85, 1.0, 0.9)
+	else:
+		lbl.text = ""
