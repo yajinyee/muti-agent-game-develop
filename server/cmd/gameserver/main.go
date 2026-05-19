@@ -464,6 +464,15 @@ func main() {
 			fmt.Fprintf(w, "# TYPE chiikawa_client_avg_fps gauge\n")
 			fmt.Fprintf(w, "chiikawa_client_avg_fps %.1f\n\n", avgClientFPS)
 		}
+
+		// Progressive Jackpot 指標（DAY-048）
+		// 讓 Grafana 能監控三個 Jackpot 池的累積金額
+		jackpotSnap := g.GetJackpotSnapshot()
+		fmt.Fprintf(w, "# HELP chiikawa_jackpot_pool Current jackpot pool amount by level\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_jackpot_pool gauge\n")
+		fmt.Fprintf(w, "chiikawa_jackpot_pool{level=\"mini\"} %d\n", jackpotSnap["mini"])
+		fmt.Fprintf(w, "chiikawa_jackpot_pool{level=\"major\"} %d\n", jackpotSnap["major"])
+		fmt.Fprintf(w, "chiikawa_jackpot_pool{level=\"grand\"} %d\n\n", jackpotSnap["grand"])
 	})
 
 	// pprof 監控端點（Debug 模式下啟用，用於記憶體/goroutine 分析）

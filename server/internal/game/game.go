@@ -108,6 +108,17 @@ func (g *Game) GetActiveTargetCount() int {
 	return len(g.Targets)
 }
 
+// GetJackpotSnapshot 取得 Jackpot 池快照（thread-safe，DAY-048）
+// 供 /metrics 端點使用，讓 Grafana 能監控 Jackpot 池金額
+func (g *Game) GetJackpotSnapshot() map[string]int {
+	snap := g.jackpotMgr.GetSnapshot()
+	return map[string]int{
+		"mini":  snap[jackpot.LevelMini],
+		"major": snap[jackpot.LevelMajor],
+		"grand": snap[jackpot.LevelGrand],
+	}
+}
+
 // Start 啟動遊戲循環
 func (g *Game) Start() {
 	log.Printf("[Game] %s started", g.ID)
