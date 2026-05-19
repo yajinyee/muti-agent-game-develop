@@ -1875,6 +1875,7 @@ func _setup_session_stats() -> void:
 	GameManager.reward_received.connect(_on_session_reward)
 	GameManager.combo_event.connect(_on_session_combo)
 	GameManager.boss_event.connect(_on_session_boss)
+	GameManager.bonus_event.connect(_on_session_bonus_event)  # DAY-049：Bonus 次數追蹤
 	# 記錄開始金幣
 	_session_start_coins = GameManager.get_coins()
 	# 建立「📊 本局」按鈕（TopBar）
@@ -1985,26 +1986,28 @@ func _create_session_stats_panel() -> void:
 	sep.color = Color(0.90, 0.75, 0.20, 0.40)
 	panel.add_child(sep)
 
-	# 統計行（4行）
+	# 統計行（6行：加入 Bonus 次數 + 淨收益，DAY-049）
 	var stats_data = [
-		["KillsRow", "⚔️ 擊殺", "0"],
-		["ComboRow", "🔥 最高連擊", "0"],
-		["RewardRow", "🪙 總獎勵", "0"],
-		["BossRow", "👹 BOSS 擊殺", "0"],
+		["KillsRow",   "⚔️ 擊殺",    "0"],
+		["ComboRow",   "🔥 最高連擊", "0"],
+		["RewardRow",  "🪙 總獎勵",   "0"],
+		["BossRow",    "👹 BOSS 擊殺","0"],
+		["BonusRow",   "🌿 Bonus 次數","0"],
+		["ProfitRow",  "📈 淨收益",   "0"],
 	]
 	for i in range(stats_data.size()):
 		var row = Control.new()
 		row.name = stats_data[i][0]
-		row.position = Vector2(8, 40 + i * 28)
-		row.size = Vector2(204, 26)
+		row.position = Vector2(8, 40 + i * 26)
+		row.size = Vector2(204, 24)
 		panel.add_child(row)
 
 		var key_lbl = Label.new()
 		key_lbl.name = "Key"
 		key_lbl.text = stats_data[i][1]
-		key_lbl.position = Vector2(0, 4)
+		key_lbl.position = Vector2(0, 3)
 		key_lbl.size = Vector2(130, 20)
-		key_lbl.add_theme_font_size_override("font_size", 12)
+		key_lbl.add_theme_font_size_override("font_size", 11)
 		key_lbl.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
 		if is_instance_valid(_pixel_font):
 			key_lbl.add_theme_font_override("font", _pixel_font)
@@ -2013,14 +2016,37 @@ func _create_session_stats_panel() -> void:
 		var val_lbl = Label.new()
 		val_lbl.name = "Value"
 		val_lbl.text = stats_data[i][2]
-		val_lbl.position = Vector2(130, 4)
+		val_lbl.position = Vector2(130, 3)
 		val_lbl.size = Vector2(74, 20)
 		val_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
-		val_lbl.add_theme_font_size_override("font_size", 13)
+		val_lbl.add_theme_font_size_override("font_size", 12)
 		val_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.5))
 		if is_instance_valid(_pixel_font):
 			val_lbl.add_theme_font_override("font", _pixel_font)
 		row.add_child(val_lbl)
+
+	# 面板高度調整（6行 × 26px + 40px header = 196px）
+	var bg_node = panel.get_node_or_null("ColorRect")
+	if not is_instance_valid(bg_node):
+		# 找到背景節點
+		for child in panel.get_children():
+			if child is ColorRect and child.name != "ColorRect":
+				bg_node = child
+				break
+	panel.size.y = 200
+
+	# ESC 提示（底部）
+	var esc_hint = Label.new()
+	esc_hint.name = "EscHint"
+	esc_hint.text = "[ESC] 關閉"
+	esc_hint.position = Vector2(8, 182)
+	esc_hint.size = Vector2(204, 14)
+	esc_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	esc_hint.add_theme_font_size_override("font_size", 9)
+	esc_hint.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5, 0.6))
+	if is_instance_valid(_pixel_font):
+		esc_hint.add_theme_font_override("font", _pixel_font)
+	panel.add_child(esc_hint)
 
 func _refresh_session_stats() -> void:
 	if not is_instance_valid(_session_stats_panel):
@@ -2030,12 +2056,16 @@ func _refresh_session_stats() -> void:
 	var player_data = GameManager.player_data
 	var kills = player_data.get("kill_count", _session_kills)
 	var reward = player_data.get("session_score", _session_total_reward)
+	var current_coins = GameManager.get_coins()
+	var net_profit = current_coins - _session_start_coins
 
 	var rows = {
-		"KillsRow": str(kills),
-		"ComboRow": ("×%d" % _session_max_combo) if _session_max_combo > 0 else "—",
+		"KillsRow":  str(kills),
+		"ComboRow":  ("×%d" % _session_max_combo) if _session_max_combo > 0 else "—",
 		"RewardRow": ("🪙%d" % reward) if reward > 0 else "0",
-		"BossRow": str(_session_boss_kills),
+		"BossRow":   str(_session_boss_kills),
+		"BonusRow":  str(_session_bonus_count),
+		"ProfitRow": ("%+d" % net_profit),
 	}
 	for row_name in rows:
 		var row = _session_stats_panel.get_node_or_null(row_name)
@@ -2043,11 +2073,20 @@ func _refresh_session_stats() -> void:
 			var val_lbl = row.get_node_or_null("Value")
 			if is_instance_valid(val_lbl):
 				val_lbl.text = rows[row_name]
-				# 高分時金色高亮
+				# 顏色高亮
 				if row_name == "ComboRow" and _session_max_combo >= 5:
 					val_lbl.add_theme_color_override("font_color", Color(1.0, 0.7, 0.1))
 				elif row_name == "BossRow" and _session_boss_kills > 0:
 					val_lbl.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+				elif row_name == "BonusRow" and _session_bonus_count > 0:
+					val_lbl.add_theme_color_override("font_color", Color(0.4, 1.0, 0.5))
+				elif row_name == "ProfitRow":
+					if net_profit > 0:
+						val_lbl.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4))  # 綠：盈利
+					elif net_profit < 0:
+						val_lbl.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))  # 紅：虧損
+					else:
+						val_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))  # 灰：持平
 
 # ============================================================
 # Progressive Jackpot 面板（DAY-048）
@@ -2117,6 +2156,31 @@ func _create_jackpot_panel() -> void:
 			amount_lbl.add_theme_font_override("font", _pixel_font)
 		container.add_child(amount_lbl)
 		_jackpot_labels[lvl["key"]] = amount_lbl
+
+	# Jackpot 歷史 ticker（DAY-049）— 顯示最近中獎記錄
+	var ticker_bg = ColorRect.new()
+	ticker_bg.name = "TickerBG"
+	ticker_bg.position = Vector2(0, 36)
+	ticker_bg.size = Vector2(640, 18)
+	ticker_bg.color = Color(0.02, 0.01, 0.08, 0.75)
+	panel.add_child(ticker_bg)
+
+	var ticker_lbl = Label.new()
+	ticker_lbl.name = "TickerLabel"
+	ticker_lbl.text = "✨ 等待 Jackpot 中獎..."
+	ticker_lbl.position = Vector2(8, 38)
+	ticker_lbl.size = Vector2(624, 16)
+	ticker_lbl.add_theme_font_size_override("font_size", 10)
+	ticker_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8, 0.7))
+	if is_instance_valid(_pixel_font):
+		ticker_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(ticker_lbl)
+
+	# 面板高度擴展（加入 ticker 後從 36 增加到 54）
+	var bg_node = panel.get_node_or_null("JackpotBG")
+	if is_instance_valid(bg_node):
+		bg_node.size.y = 54
+	panel.size.y = 54
 
 ## Jackpot 池更新（每 5 秒收到一次）
 func _on_jackpot_updated(data: Dictionary) -> void:
@@ -2237,6 +2301,126 @@ func _show_jackpot_celebration(level: String, amount: int, winner_name: String, 
 		var trauma = {"mini": 0.4, "major": 0.6, "grand": 0.9}.get(level, 0.4)
 		ScreenShake.add_trauma(trauma)
 
-	# 觸發 HitEffect 大獎特效（Grand 才觸發全畫面特效）
-	if level == "grand" and HitEffect != null:
-		HitEffect.spawn_big_win(Vector2(640, 360), 100.0)
+	# 觸發 HitEffect 大獎特效（依等級強度不同）
+	if HitEffect != null:
+		match level:
+			"grand":
+				HitEffect.spawn_big_win(Vector2(640, 360), 100.0)
+				# Grand：全畫面金幣雨（多波）
+				for i in 3:
+					var delay_t = get_tree().create_timer(i * 0.4)
+					delay_t.timeout.connect(func():
+						_spawn_jackpot_coin_rain(level_color, 20)
+					)
+			"major":
+				HitEffect.spawn_big_win(Vector2(640, 360), 50.0)
+				# Major：兩波金幣雨
+				_spawn_jackpot_coin_rain(level_color, 14)
+				var delay_t = get_tree().create_timer(0.5)
+				delay_t.timeout.connect(func():
+					_spawn_jackpot_coin_rain(level_color, 10)
+				)
+			"mini":
+				# Mini：一波金幣雨
+				_spawn_jackpot_coin_rain(level_color, 8)
+
+	# 記錄到 Jackpot 歷史 ticker（DAY-049）
+	_add_jackpot_history_entry(level, amount, winner_name, is_self)
+
+## 生成 Jackpot 金幣雨特效（DAY-049）
+## count: 金幣數量，color: 金幣顏色
+func _spawn_jackpot_coin_rain(color: Color, count: int) -> void:
+	var rng = RandomNumberGenerator.new()
+	rng.randomize()
+	for i in count:
+		var coin = ColorRect.new()
+		coin.size = Vector2(8, 8)
+		coin.color = color
+		coin.position = Vector2(rng.randf_range(100, 1180), -20)
+		coin.z_index = 190
+		add_child(coin)
+
+		var target_y = rng.randf_range(200, 700)
+		var target_x = coin.position.x + rng.randf_range(-80, 80)
+		var duration = rng.randf_range(0.6, 1.2)
+
+		var tween = coin.create_tween()
+		tween.tween_property(coin, "position", Vector2(target_x, target_y), duration).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tween.parallel().tween_property(coin, "rotation", rng.randf_range(-PI, PI), duration)
+		tween.tween_property(coin, "modulate:a", 0.0, 0.3)
+		tween.tween_callback(coin.queue_free)
+
+# ============================================================
+# Jackpot 歷史 Ticker（DAY-049）
+# 顯示最近中獎記錄，滾動顯示在 Jackpot 面板下方
+# ============================================================
+
+var _jackpot_history: Array = []  # 最近 5 筆中獎記錄
+const MAX_JACKPOT_HISTORY = 5
+
+## 加入一筆 Jackpot 中獎記錄並更新 ticker
+func _add_jackpot_history_entry(level: String, amount: int, winner_name: String, is_self: bool) -> void:
+	var level_icons = {"mini": "💙", "major": "💛", "grand": "❤️"}
+	var icon = level_icons.get(level, "✨")
+	var name_display = "YOU" if is_self else winner_name
+	var entry_text = "%s %s: %s 🪙%d" % [icon, level.to_upper(), name_display, amount]
+
+	_jackpot_history.insert(0, entry_text)
+	if _jackpot_history.size() > MAX_JACKPOT_HISTORY:
+		_jackpot_history.resize(MAX_JACKPOT_HISTORY)
+
+	# 更新 ticker 顯示
+	if not is_instance_valid(_jackpot_panel):
+		return
+	var ticker_lbl = _jackpot_panel.get_node_or_null("TickerLabel")
+	if not is_instance_valid(ticker_lbl):
+		return
+
+	# 顯示最新一筆（帶閃爍動畫）
+	ticker_lbl.text = entry_text
+	if is_self:
+		ticker_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.3, 1.0))
+	else:
+		var level_colors = {"mini": Color(0.6, 0.9, 1.0), "major": Color(1.0, 0.8, 0.2), "grand": Color(1.0, 0.4, 0.4)}
+		ticker_lbl.add_theme_color_override("font_color", level_colors.get(level, Color.WHITE))
+
+	# 閃爍動畫（新記錄出現時）
+	var tween = create_tween()
+	tween.tween_property(ticker_lbl, "modulate:a", 0.3, 0.1)
+	tween.tween_property(ticker_lbl, "modulate:a", 1.0, 0.1)
+	tween.tween_property(ticker_lbl, "modulate:a", 0.3, 0.1)
+	tween.tween_property(ticker_lbl, "modulate:a", 1.0, 0.1)
+
+	# 5 秒後切換到下一筆（如果有的話）
+	if _jackpot_history.size() > 1:
+		var timer = get_tree().create_timer(5.0)
+		timer.timeout.connect(func():
+			if is_instance_valid(ticker_lbl) and _jackpot_history.size() > 1:
+				# 輪播顯示歷史記錄
+				var idx = (_jackpot_history.find(ticker_lbl.text) + 1) % _jackpot_history.size()
+				ticker_lbl.text = _jackpot_history[idx]
+				ticker_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7, 0.6))
+		)
+
+# ============================================================
+# Session Stats 強化（DAY-049）
+# 加入 ESC 快捷鍵、Bonus 次數、淨收益計算
+# ============================================================
+
+var _session_bonus_count: int = 0  # 本局 Bonus 次數
+
+## 覆寫 _input 處理 ESC 快捷鍵（DAY-049）
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_ESCAPE:
+			_toggle_session_stats()
+			get_viewport().set_input_as_handled()
+
+## 連接 Bonus 事件（在 _setup_session_stats 中呼叫）
+func _setup_session_bonus_tracking() -> void:
+	GameManager.bonus_event.connect(_on_session_bonus_event)
+
+func _on_session_bonus_event(bonus_data: Dictionary) -> void:
+	var event = bonus_data.get("event", "")
+	if event == "end":
+		_session_bonus_count += 1

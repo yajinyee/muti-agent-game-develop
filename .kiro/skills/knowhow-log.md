@@ -2131,3 +2131,22 @@ contribution_per_shot = betCost × 0.005 × level_share
 ```
 - LV5 betCost=50，Mini share=60%：每 shot 貢獻 1.5 → 需要 (500-100)/1.5 = 267 shots 達到門檻
 - 達到門檻後每 500 shots 觸發一次 → 總計約 767 shots ≈ 4.3 分鐘 ✅
+
+## 90. Jackpot 金幣雨特效實作（DAY-049）
+- **技術：** 動態建立 ColorRect 節點，用 Tween 做拋物線落下動畫
+- **關鍵：** `coin.create_tween()` 綁定到節點，節點 queue_free 後 tween 自動停止
+- **顏色：** 依 Jackpot 等級使用對應顏色（Mini=藍/Major=金/Grand=紅）
+- **數量分級：** Grand 3波×20顆，Major 2波×14+10顆，Mini 1波×8顆
+- **教訓：** 特效強度要和獎勵等級成正比，讓玩家直覺感受到「這次贏很多」
+
+## 91. GDScript _input 覆寫注意事項（DAY-049）
+- **問題：** CanvasLayer 的 `_input` 需要呼叫 `get_viewport().set_input_as_handled()` 才能阻止事件傳遞
+- **用途：** ESC 快捷鍵開關 Session Stats 面板
+- **注意：** 如果有多個節點都監聽 ESC，要確認優先級（z_index 高的先處理）
+- **教訓：** UI 快捷鍵要在 CanvasLayer 層處理，不要在 Node2D 層
+
+## 92. Session Stats 淨收益計算（DAY-049）
+- **公式：** `net_profit = current_coins - _session_start_coins`
+- **更新時機：** 每次 `_refresh_session_stats()` 呼叫時重新計算
+- **顏色分級：** 正數=綠色（盈利），負數=紅色（虧損），零=灰色（持平）
+- **教訓：** 淨收益比「總獎勵」更有意義，玩家更關心「我賺了多少」而不是「我贏了多少」

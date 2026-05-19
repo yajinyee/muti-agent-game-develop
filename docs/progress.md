@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-048 Progressive Jackpot 系統 + GitHub 上傳）
+## 最後更新：2026-05-19（DAY-049 Jackpot特效強化 + Session結算強化 + Jackpot歷史Ticker）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,18 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（21個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報，Nightly Report 自動化，Progressive Jackpot 系統（Mini/Major/Grand）**
+- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（21個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報，Nightly Report 自動化，Progressive Jackpot 系統（Mini/Major/Grand），Jackpot 特效強化，Session 結算強化**
+- **DAY-049 更新（自主觸發）：** Jackpot 特效強化 + Session 結算強化 + Jackpot 歷史 Ticker ✅
+  - `HUD.gd`：`_show_jackpot_celebration` 強化 — Mini/Major/Grand 各有不同強度的金幣雨特效
+    - Grand：3 波金幣雨（20顆/波）+ HitEffect 全畫面特效
+    - Major：2 波金幣雨（14+10顆）+ HitEffect 中等特效
+    - Mini：1 波金幣雨（8顆）
+  - `HUD.gd`：`_spawn_jackpot_coin_rain()` — 新函數，生成彩色金幣從頂部落下的特效
+  - `HUD.gd`：Jackpot 面板加入歷史 ticker（底部 18px 條，顯示最近中獎記錄）
+  - `HUD.gd`：`_add_jackpot_history_entry()` — 新函數，記錄並顯示中獎歷史
+  - `HUD.gd`：Session Stats 面板升級（4行→6行）：加入「Bonus 次數」+「淨收益」
+  - `HUD.gd`：Session Stats 加入 ESC 快捷鍵（`_input` 處理）
+  - `HUD.gd`：淨收益顯示顏色分級（綠=盈利/紅=虧損/灰=持平）
 - **DAY-048 更新（自主觸發）：** Progressive Jackpot 系統 ✅
   - `server/internal/game/jackpot/jackpot.go`：三等級 Jackpot 管理器（Mini/Major/Grand）
   - 每次攻擊抽取 0.5% 進入 Jackpot 池（Mini 60% / Major 30% / Grand 10%）
