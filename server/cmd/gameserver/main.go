@@ -326,6 +326,18 @@ func main() {
 		fmt.Fprintf(w, "# HELP chiikawa_bonus_games_total Total bonus game events since server start\n")
 		fmt.Fprintf(w, "# TYPE chiikawa_bonus_games_total counter\n")
 		fmt.Fprintf(w, "chiikawa_bonus_games_total %d\n\n", analyticsStats.BonusCount)
+
+		fmt.Fprintf(w, "# HELP chiikawa_ws_messages_received_total Total WebSocket messages received from clients\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_ws_messages_received_total counter\n")
+		fmt.Fprintf(w, "chiikawa_ws_messages_received_total %d\n\n", hub.MsgReceived.Load())
+
+		fmt.Fprintf(w, "# HELP chiikawa_ws_messages_sent_total Total WebSocket messages sent to clients\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_ws_messages_sent_total counter\n")
+		fmt.Fprintf(w, "chiikawa_ws_messages_sent_total %d\n\n", hub.MsgSent.Load())
+
+		fmt.Fprintf(w, "# HELP chiikawa_ws_messages_dropped_total Total WebSocket messages dropped (buffer full or rate limited)\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_ws_messages_dropped_total counter\n")
+		fmt.Fprintf(w, "chiikawa_ws_messages_dropped_total %d\n\n", hub.MsgDropped.Load())
 	})
 
 	// pprof 監控端點（Debug 模式下啟用，用於記憶體/goroutine 分析）

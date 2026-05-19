@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -101,6 +102,11 @@ type Hub struct {
 	OnMessage    func(clientID string, msg *Message)
 	OnConnect    func(clientID string)
 	OnDisconnect func(clientID string)
+
+	// 訊息吞吐量計數器（原子操作，供 /metrics 使用）
+	MsgReceived atomic.Int64 // 收到的訊息總數
+	MsgSent     atomic.Int64 // 發送的訊息總數
+	MsgDropped  atomic.Int64 // 丟棄的訊息總數（buffer full + rate limit）
 }
 
 // NewHub 建立新 Hub
@@ -180,7 +186,9 @@ func (h *Hub) Send(clientID string, msg *Message) error {
 
 	select {
 	case client.send <- data:
+		h.MsgSent.Add(1)
 	default:
+		h.MsgDropped.Add(1)
 		log.Printf("[WS] Send buffer full for client %s, dropping message", clientID)
 	}
 	return nil
@@ -200,7 +208,9 @@ func (h *Hub) Broadcast(msg *Message) {
 	for _, client := range h.clients {
 		select {
 		case client.send <- data:
+			h.MsgSent.Add(1)
 		default:
+			h.MsgDropped.Add(1)
 			log.Printf("[WS] Broadcast buffer full for client %s", client.ID)
 		}
 	}
@@ -286,9 +296,11 @@ func (c *Client) readPump(h *Hub) {
 		// ping 訊息豁免（避免影響心跳機制）
 		if msg.Type != MsgPing && !c.limiter.Allow() {
 			log.Printf("[WS] Rate limit exceeded for client %s, dropping %s", c.ID, msg.Type)
+			h.MsgDropped.Add(1)
 			continue
 		}
 
+		h.MsgReceived.Add(1)
 		if h.OnMessage != nil {
 			h.OnMessage(c.ID, &msg)
 		}

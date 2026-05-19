@@ -168,6 +168,46 @@
           "legendFormat": "Bonus Games"
         }
       ]
+    },
+    {
+      "id": 9,
+      "title": "WebSocket 訊息吞吐量",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 20, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(chiikawa_ws_messages_received_total[1m]) * 60",
+          "legendFormat": "Received/min"
+        },
+        {
+          "expr": "rate(chiikawa_ws_messages_sent_total[1m]) * 60",
+          "legendFormat": "Sent/min"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "title": "WebSocket 丟棄訊息（累計）",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 20, "w": 6, "h": 8 },
+      "targets": [
+        {
+          "expr": "chiikawa_ws_messages_dropped_total",
+          "legendFormat": "Dropped"
+        }
+      ],
+      "options": { "colorMode": "background" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 10 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        }
+      }
     }
   ]
 }
