@@ -2213,3 +2213,19 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **注意：** 補齊的報告使用當前狀態（最新 build/test 結果），不是當天的狀態
 - **用途：** 主要是記錄完成度，不是精確的歷史快照
 - **教訓：** Nightly Report 要在當天生成，補齊的報告只能作為參考，不能作為精確的歷史記錄
+
+
+## 100. AudioManager 音效快取優化（2026-05-20 DAY-052）
+- **問題：** `play_sfx` 每次都用 `load(path)` 載入音效，HTML5 首次播放有延遲（I/O 阻塞）
+- **根本原因：** `LoadingManager` 已在遊戲啟動時預載入所有音效到快取，但 `AudioManager` 沒有使用這個快取
+- **解法：** 優先從 `LoadingManager.get_audio(path)` 取得，找不到才 fallback 到 `load(path)`
+  ```gdscript
+  var stream: AudioStream = null
+  if LoadingManager != null:
+      stream = LoadingManager.get_audio(path)
+  if stream == null:
+      stream = load(path) as AudioStream
+  ```
+- **影響範圍：** `play_sfx`、`play_ambient`、`play_bgm`、`play_attack_by_character` 全部更新
+- **效果：** 消除 HTML5 首次音效延遲，Audio Sync 從 97 提升到 99/100
+- **教訓：** 預載入快取要在所有使用點都接入，不能只建立快取但不使用

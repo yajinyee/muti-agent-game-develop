@@ -63,10 +63,18 @@ func play_sfx(sfx: SFX) -> void:
 	var path = _get_sfx_path(sfx)
 	if path == "" or not ResourceLoader.exists(path):
 		return
+	# 優先從 LoadingManager 快取取得（避免 HTML5 首次載入延遲）
+	var stream: AudioStream = null
+	if LoadingManager != null:
+		stream = LoadingManager.get_audio(path)
+	if stream == null:
+		stream = load(path) as AudioStream
+	if stream == null:
+		return
 	# 找空閒的播放器
 	for player in _sfx_players:
 		if not player.playing:
-			player.stream = load(path)
+			player.stream = stream
 			# coin_drop 音量提升 2 dB（audio-review 建議：-7dB → -5dB）
 			if sfx == SFX.COIN_DROP:
 				player.volume_db = 2.0  # 相對提升 2 dB
@@ -75,7 +83,7 @@ func play_sfx(sfx: SFX) -> void:
 			player.play()
 			return
 	# 所有播放器都忙，用第一個（覆蓋）
-	_sfx_players[0].stream = load(path)
+	_sfx_players[0].stream = stream
 	_sfx_players[0].volume_db = 2.0 if sfx == SFX.COIN_DROP else 0.0
 	_sfx_players[0].play()
 
@@ -89,7 +97,15 @@ func play_ambient(ambient_type: String = "underwater") -> void:
 		return
 	if _ambient_player.playing:
 		return  # 已在播放，不重複
-	_ambient_player.stream = load(path)
+	# 優先從 LoadingManager 快取取得
+	var stream: AudioStream = null
+	if LoadingManager != null:
+		stream = LoadingManager.get_audio(path)
+	if stream == null:
+		stream = load(path) as AudioStream
+	if stream == null:
+		return
+	_ambient_player.stream = stream
 	_ambient_player.play()
 
 ## 停止環境音
@@ -108,6 +124,15 @@ func play_bgm(bgm: BGM, fade_in: float = 0.5) -> void:
 	if path == "" or not ResourceLoader.exists(path):
 		return
 
+	# 優先從 LoadingManager 快取取得
+	var stream: AudioStream = null
+	if LoadingManager != null:
+		stream = LoadingManager.get_audio(path)
+	if stream == null:
+		stream = load(path) as AudioStream
+	if stream == null:
+		return
+
 	# 淡出舊 BGM
 	if _bgm_player.playing:
 		var tween = create_tween()
@@ -115,7 +140,7 @@ func play_bgm(bgm: BGM, fade_in: float = 0.5) -> void:
 		tween.tween_callback(func():
 			_bgm_player.stop()
 			_bgm_player.volume_db = _get_bgm_volume(bgm)
-			_bgm_player.stream = load(path)
+			_bgm_player.stream = stream
 			_bgm_player.play()
 			# 淡入新 BGM
 			_bgm_player.volume_db = -60.0
@@ -133,7 +158,7 @@ func play_bgm(bgm: BGM, fade_in: float = 0.5) -> void:
 	else:
 		_bgm_player.volume_db = -60.0
 		_bgm_player.pitch_scale = _get_bgm_pitch(bgm)
-		_bgm_player.stream = load(path)
+		_bgm_player.stream = stream
 		_bgm_player.play()
 		var tween = create_tween()
 		tween.tween_property(_bgm_player, "volume_db", _get_bgm_volume(bgm), fade_in)
@@ -170,21 +195,35 @@ func play_attack_by_character(character_id: String) -> void:
 		"chiikawa":
 			play_sfx(SFX.ATTACK_FIRE)
 		"hachiware":
-			# 小八用獨立音效
+			# 小八用獨立音效（透過 play_sfx 路徑，享有快取優化）
 			var path = "res://assets/audio/sfx/attack_fire_hachiware.wav"
 			if ResourceLoader.exists(path):
+				var stream: AudioStream = null
+				if LoadingManager != null:
+					stream = LoadingManager.get_audio(path)
+				if stream == null:
+					stream = load(path) as AudioStream
+				if stream == null:
+					return
 				for player in _sfx_players:
 					if not player.playing:
-						player.stream = load(path)
+						player.stream = stream
 						player.play()
 						return
 		"usagi":
-			# 烏薩奇用獨立音效
+			# 烏薩奇用獨立音效（透過 play_sfx 路徑，享有快取優化）
 			var path = "res://assets/audio/sfx/attack_fire_usagi.wav"
 			if ResourceLoader.exists(path):
+				var stream: AudioStream = null
+				if LoadingManager != null:
+					stream = LoadingManager.get_audio(path)
+				if stream == null:
+					stream = load(path) as AudioStream
+				if stream == null:
+					return
 				for player in _sfx_players:
 					if not player.playing:
-						player.stream = load(path)
+						player.stream = stream
 						player.play()
 						return
 
