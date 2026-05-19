@@ -1173,3 +1173,40 @@ GitHub 同步完成（commit `e333f81`）。
 ### 完成遊戲的信心評估
 **100/100** — 遊戲功能完整，持續優化特效和監控系統。
 今日完成：Jackpot 特效強化（金幣雨）+ Session Stats 升級（6行+ESC）+ Jackpot 歷史 Ticker + Server 每日統計 + Grafana 23 面板。
+
+---
+
+## 評估 #31 — 2026-05-20（DAY-050，進度確認 + Nightly Reports 補齊 + KnowHow 更新）
+
+### 這次學到了什麼
+1. **Nightly Report 補齊策略**：`generate_nightly_report.py --day N` 可補齊任意天的報告，但補齊的報告使用當前狀態，不是歷史快照
+2. **Go 遊戲 Server 2025 最佳實踐確認**：goroutine-per-connection + channel 通訊 + graceful shutdown 符合業界標準
+3. **Godot HTML5 Build 大小優化**：Lossy 壓縮 + LTO + disable_3d 是三大優化手段，目前 gzip 9.2MB 已達可接受範圍
+4. **Jackpot 池 TTL 設計**：TTL 是遊戲設計決策，Prototype 用永久（TTL=0），正式版建議 7 天
+5. **測試數量增長**：從 97 個測試增長到 112 個（+15），反映 DAY-048/049 新增的 Jackpot 和 Store 測試
+
+### 進步說明
+- 確認 HEAD 在 DAY-049d（最新），build/vet/test 全部通過（112/112）
+- 補齊 DAY-048/049/050 的 nightly reports
+- 新增 KnowHow #96-99（HTML5 優化、Go 最佳實踐、Jackpot TTL、Nightly Report 補齊策略）
+- 上網確認 Go 遊戲 Server 架構符合 2025 年最佳實踐
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 98 | → | 穩定，架構符合 2025 年最佳實踐確認 |
+| Godot GDScript | 98 | → | 穩定 |
+| 像素美術生成 | 100 | → | 穩定，美術質量 100/100 |
+| 遊戲數值設計 | 96 | → | 穩定，Jackpot 系統完整 |
+| WebSocket 通訊 | 97 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100%，持續優化中 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，測試 112/112 全通過，QA 8/8 全通過。
+今日完成：進度確認 + Nightly Reports 補齊（DAY-048/049/050）+ KnowHow #96-99 + 能力評估 #31 + GitHub 上傳。
+
+### 下一步學習目標
+1. 評估 HUD.gd 拆分（已超過 2400 行，考慮拆出 JackpotPanel.gd / SessionStatsPanel.gd）
+2. 搜尋「Godot 4 large GDScript refactoring best practices」
+3. 考慮加入 Client 端效能歷史記錄（Server 端 ring buffer 儲存最近 100 筆）

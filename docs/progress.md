@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-049 Jackpot特效強化 + Session結算強化 + Jackpot歷史Ticker）
+## 最後更新：2026-05-20（DAY-050 進度確認 + Nightly Reports 補齊 + KnowHow 更新 + GitHub 上傳）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,13 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（21個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報，Nightly Report 自動化，Progressive Jackpot 系統（Mini/Major/Grand），Jackpot 特效強化，Session 結算強化**
+- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（23個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報，Nightly Report 自動化，Progressive Jackpot 系統（Mini/Major/Grand），Jackpot 特效強化，Session 結算強化，Jackpot 池持久化（Redis SetJSON/GetJSON），Jackpot 每日統計**
+- **DAY-050 更新（自主觸發）：** 進度確認 + Nightly Reports 補齊 + KnowHow 更新 ✅
+  - 確認 HEAD 在 DAY-049d，build/vet/test 全部通過（112/112）
+  - 補齊 DAY-048/049/050 的 nightly reports
+  - 新增 KnowHow #96-99（HTML5 優化、Go 最佳實踐、Jackpot TTL、Nightly Report 補齊策略）
+  - 能力評估 #31 更新
+  - GitHub 上傳
 - **DAY-049 更新（自主觸發）：** Jackpot 特效強化 + Session 結算強化 + Jackpot 歷史 Ticker ✅
   - `HUD.gd`：`_show_jackpot_celebration` 強化 — Mini/Major/Grand 各有不同強度的金幣雨特效
     - Grand：3 波金幣雨（20顆/波）+ HitEffect 全畫面特效

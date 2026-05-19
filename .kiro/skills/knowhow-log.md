@@ -2174,3 +2174,42 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **解法：** 用 `ticker_lbl.set_meta("ticker_idx", idx)` 追蹤當前索引
 - **優點：** meta 跟著節點走，不需要額外的 class 變數
 - **教訓：** 需要在節點上追蹤狀態時，用 `set_meta`/`get_meta` 比額外變數更乾淨
+
+
+## 96. Godot 4 HTML5 Build 大小優化技術（2026-05-20 DAY-050）
+- **來源：** jacobfilipp.com/godot + godotengine.org forum
+- **最有效的方法：**
+  1. **Lossy 壓縮**：Import 設定改為 Lossy（PNG → WebP），可減少 30-50% 資產大小
+  2. **LTO（Link Time Optimization）**：`lto="full"` 在 export_presets.cfg，減少 wasm 大小
+  3. **disable_3d**：純 2D 遊戲加入 `disable_3d="yes"` 可減少 wasm 大小
+  4. **optimize="size"**：編譯優化目標改為大小而非速度
+- **目前狀態：** wasm 36.8MB（gzip 9.2MB），已達到可接受範圍
+- **進一步優化：** 考慮用 Godot 自訂 export template（需要編譯 Godot）
+- **教訓：** HTML5 export 大小優化是漸進式的，先用 gzip 壓縮（最簡單），再考慮 Lossy 壓縮
+
+## 97. Go 遊戲 Server 2025 最佳實踐確認（2026-05-20 DAY-050）
+- **來源：** generalistprogrammer.com/tutorials/go-game-development-complete-server-side-guide-2025
+- **確認的最佳實踐：**
+  1. **單一二進位部署**：Go 編譯成靜態連結的單一 binary，無依賴地獄
+  2. **goroutine-per-connection**：適合中小規模（< 10000 連線），我們的架構正確
+  3. **channel 通訊**：避免共享記憶體，用 channel 傳遞訊息，我們的 Hub 設計正確
+  4. **graceful shutdown**：`signal.NotifyContext` + `context.WithTimeout`，已實作
+- **我們的架構評分：** 符合 2025 年業界標準，無需大改
+- **教訓：** 定期確認架構符合業界標準，避免技術債積累
+
+## 98. Progressive Jackpot 持久化的 Redis TTL 設計（2026-05-20 DAY-050）
+- **問題：** Jackpot 池狀態應該持久多久？
+- **設計決策：**
+  - TTL = 0（永久）：Jackpot 池永遠不過期，但 Redis 記憶體會增長
+  - TTL = 24h：每天重置，符合「每日 Jackpot」的設計
+  - TTL = 7d：一週重置，讓 Grand Jackpot 有機會累積到足夠大
+- **目前實作：** TTL = 0（永久），適合 Prototype 展示
+- **正式版建議：** TTL = 7d，讓 Grand Jackpot 每週重置一次
+- **教訓：** Jackpot 池的 TTL 是遊戲設計決策，不只是技術決策，要和遊戲設計師確認
+
+## 99. Nightly Report 自動化腳本補齊策略（2026-05-20 DAY-050）
+- **問題：** DAY-048/049 的工作沒有對應的 nightly report
+- **解法：** `generate_nightly_report.py --day N` 可以補齊任意天的報告
+- **注意：** 補齊的報告使用當前狀態（最新 build/test 結果），不是當天的狀態
+- **用途：** 主要是記錄完成度，不是精確的歷史快照
+- **教訓：** Nightly Report 要在當天生成，補齊的報告只能作為參考，不能作為精確的歷史記錄
