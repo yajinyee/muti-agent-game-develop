@@ -1905,3 +1905,11 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **Grafana 面板：** 加入 stat 面板（0-14 綠，15-19 黃，20+ 紅）+ timeseries 面板（0-25 範圍）
 - **用途：** 監控目標物生成/消滅的平衡，異常時（如目標物堆積）可以快速發現
 - **教訓：** 遊戲邏輯指標（active_targets、active_players）比系統指標（goroutines、heap）更能反映遊戲健康狀態
+
+## 90. TargetPool tween 追蹤缺口修復（2026-05-19 DAY-041d）
+- **問題：** swim_tween 和 rot_tween 用 `container.create_tween().set_loops()` 建立，但沒有用 `TargetPool.register_tween()` 追蹤
+- **症狀：** `TargetPool.release(node)` 時，這些 tween 不會被 kill，繼續消耗 CPU（雖然節點已隱藏）
+- **修復：** 在每個 `container.create_tween().set_loops()` 後加入 `TargetPool.register_tween(container, tween)`
+- **不需要修復的 tween：** `glow.create_tween()` 綁定到子節點，子節點 queue_free 時自動停止
+- **規則：** container 級別的 tween（`container.create_tween()`）必須用 `register_tween` 追蹤；子節點的 tween（`child.create_tween()`）不需要
+- **教訓：** pool 節點的 tween 生命週期管理是物件池設計的核心挑戰，必須區分「container tween」和「child tween」

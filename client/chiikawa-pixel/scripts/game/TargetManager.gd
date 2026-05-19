@@ -512,6 +512,7 @@ func _create_target_node(data: Dictionary) -> Node2D:
 				# 金草：緩慢搖晃
 				tween.tween_property(container, "rotation_degrees", 3.0, 0.4)
 				tween.tween_property(container, "rotation_degrees", -3.0, 0.4)
+			TargetPool.register_tween(container, tween)  # 追蹤 tween，release 時自動 kill
 	else:
 		# 備用：ColorRect（texture 載入失敗時）
 		var rect = ColorRect.new()
@@ -572,17 +573,20 @@ func _create_target_node(data: Dictionary) -> Node2D:
 		var swim_tween = container.create_tween().set_loops()
 		swim_tween.tween_property(sprite, "position:y", swim_amp, swim_dur * (0.5 + swim_phase * 0.1))
 		swim_tween.tween_property(sprite, "position:y", -swim_amp, swim_dur * (0.5 + swim_phase * 0.1))
+		TargetPool.register_tween(container, swim_tween)  # 追蹤 tween，release 時自動 kill
 
 		# 旋轉傾斜（模擬魚游泳時身體傾斜）
 		var rot_tween = container.create_tween().set_loops()
 		rot_tween.tween_property(container, "rotation_degrees", swim_rot, swim_dur * 0.55)
 		rot_tween.tween_property(container, "rotation_degrees", -swim_rot, swim_dur * 0.55)
+		TargetPool.register_tween(container, rot_tween)  # 追蹤 tween
 
 		# 縮放呼吸感（特殊目標更明顯）
 		if target_type == "special":
 			var scale_tween = container.create_tween().set_loops()
 			scale_tween.tween_property(sprite, "scale", Vector2(1.05, 0.95), swim_dur * 0.5)
 			scale_tween.tween_property(sprite, "scale", Vector2(0.95, 1.05), swim_dur * 0.5)
+			TargetPool.register_tween(container, scale_tween)  # 追蹤 tween
 
 	return container
 
