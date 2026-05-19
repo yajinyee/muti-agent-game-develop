@@ -415,6 +415,26 @@ func _on_target_spawned(data: Dictionary) -> void:
 	add_child(node)
 	_target_nodes[instance_id] = node
 
+	# 進場動畫（scale 0 → 1，彈入效果）
+	# 讓目標物出現更有存在感，而不是突然冒出來
+	var target_type = data.get("type", "basic")
+	var multiplier = data.get("multiplier", 0.0)
+	node.scale = Vector2.ZERO
+	var spawn_tween = node.create_tween()
+
+	if target_type == "boss":
+		# BOSS：慢速放大（0.4s），更有威壓感
+		spawn_tween.tween_property(node, "scale", Vector2(1.0, 1.0), 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
+	elif multiplier >= 30.0:
+		# 高倍率特殊目標（30x+）：彈入 + 輕微過衝（1.15x → 1.0x）
+		spawn_tween.tween_property(node, "scale", Vector2(1.15, 1.15), 0.18).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+		spawn_tween.tween_property(node, "scale", Vector2(1.0, 1.0), 0.08)
+		# 高倍率目標進場音效（coin_drop 短促提示，讓玩家注意到高價值目標出現）
+		AudioManager.play_sfx(AudioManager.SFX.COIN_DROP)
+	else:
+		# 普通目標：快速彈入（0.12s）
+		spawn_tween.tween_property(node, "scale", Vector2(1.0, 1.0), 0.12).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
 ## 目標擊破
 func _on_target_killed(data: Dictionary) -> void:
 	var instance_id = data.get("instance_id", "")

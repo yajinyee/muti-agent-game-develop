@@ -1660,3 +1660,13 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **實作：** 目標物上方 Label，顏色依倍率分級（白灰/淡綠/黃/金/橙紅）
 - **Server 端：** TargetSpawnPayload 加入 Multiplier 欄位，Client 直接使用
 - **教訓：** 遊戲 UX 設計要讓玩家「零學習成本」，資訊要直接呈現在畫面上
+
+## 85. 目標物進場動畫（scale 0 → 1 彈入）
+- **問題：** 目標物直接出現，沒有進場感，視覺上突兀
+- **解法：** `node.scale = Vector2.ZERO` + `tween_property scale → 1.0`
+- **分級設計：**
+  - 普通目標：0.12s 快速彈入（TRANS_BACK）
+  - 高倍率（30x+）：0.18s 彈入 + 過衝（1.15x → 1.0x）+ coin_drop 音效
+  - BOSS：0.4s 慢速放大（TRANS_ELASTIC，更有威壓感）
+- **注意：** 進場動畫期間目標物 scale=0，不影響點擊判定（點擊判定用 position.distance_to）
+- **教訓：** 進場動畫是「存在感」的關鍵，讓玩家感受到目標物「出現了」而不是「突然在那裡」
