@@ -15,7 +15,9 @@ const (
 	// Prototype 展示用
 	MsgTriggerBoss     MessageType = "trigger_boss"
 	MsgTriggerBonus    MessageType = "trigger_bonus"
-	MsgSetDisplayName  MessageType = "set_display_name" // 設定顯示名稱（DAY-021）
+	MsgSetDisplayName  MessageType = "set_display_name"  // 設定顯示名稱（DAY-021）
+	MsgClaimMission    MessageType = "claim_mission"     // 領取任務獎勵（DAY-037）
+	MsgGetMissions     MessageType = "get_missions"      // 查詢任務列表（DAY-037）
 )
 
 // Server → Client
@@ -31,8 +33,10 @@ const (
 	MsgPlayerUpdate MessageType = "player_update"
 	MsgLeaderboard  MessageType = "leaderboard"
 	MsgAchievement  MessageType = "achievement"
-	MsgComboEvent   MessageType = "combo_event"  // 連擊事件（DAY-022）
-	MsgSpectatorJoin MessageType = "spectator_join" // 觀戰者加入通知（DAY-023）
+	MsgComboEvent   MessageType = "combo_event"      // 連擊事件（DAY-022）
+	MsgSpectatorJoin MessageType = "spectator_join"  // 觀戰者加入通知（DAY-023）
+	MsgMissionUpdate MessageType = "mission_update"  // 任務進度更新（DAY-037）
+	MsgMissionComplete MessageType = "mission_complete" // 任務完成通知（DAY-037）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -191,4 +195,39 @@ type ComboEventPayload struct {
 	ComboCount  int     `json:"combo_count"`  // 當前連擊數（2+）
 	LaborBonus  float64 `json:"labor_bonus"`  // 勞動值加成係數（0.1/0.2/0.3）
 	PlayerID    string  `json:"player_id"`    // 觸發連擊的玩家
+}
+
+// ---- 任務系統 Payloads（DAY-037）----
+
+// MissionPayload 單一任務狀態
+type MissionPayload struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	Target      int    `json:"target"`
+	Current     int    `json:"current"`
+	Completed   bool   `json:"completed"`
+	RewardClaimed bool `json:"reward_claimed"`
+	Reward      int    `json:"reward"`
+}
+
+// MissionUpdatePayload 任務進度更新廣播
+type MissionUpdatePayload struct {
+	PlayerID  string           `json:"player_id"`
+	Missions  []MissionPayload `json:"missions"`
+	ResetAt   int64            `json:"reset_at"` // Unix ms，下次重置時間
+}
+
+// MissionCompletePayload 任務完成通知
+type MissionCompletePayload struct {
+	MissionID   string `json:"mission_id"`
+	Name        string `json:"name"`
+	Icon        string `json:"icon"`
+	Reward      int    `json:"reward"`
+}
+
+// ClaimMissionPayload 領取任務獎勵請求
+type ClaimMissionPayload struct {
+	MissionID string `json:"mission_id"`
 }

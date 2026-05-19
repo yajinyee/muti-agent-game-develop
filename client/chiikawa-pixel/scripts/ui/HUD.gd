@@ -129,6 +129,7 @@ func _ready() -> void:
 	_create_leaderboard_panel()
 	_create_achievement_queue()
 	_create_lobby_overlay()  # 大廳 UI（DAY-020）
+	_ready_missions()         # 每日任務系統（DAY-037）
 
 ## 套用像素字體到所有 Label
 func _apply_pixel_font() -> void:
@@ -1481,3 +1482,262 @@ func _on_combo_event(combo_data: Dictionary) -> void:
 	HitEffect.spawn_combo(combo_count, Vector2(640, 580))
 	# 連擊音效（用 kill.wav，短促有力）
 	AudioManager.play_sfx(AudioManager.SFX.KILL)
+
+# ── 每日任務面板（DAY-037）──────────────────────────────────────
+
+var _mission_panel: Control = null
+var _mission_visible: bool = false
+var _mission_data: Array = []
+
+func _ready_missions() -> void:
+	# 連接任務訊號
+	GameManager.mission_updated.connect(_on_mission_updated)
+	GameManager.mission_completed.connect(_on_mission_completed)
+	# 建立任務按鈕（TopBar 右側）
+	_create_mission_button()
+
+## 建立任務按鈕（TopBar 右側，點擊展開任務面板）
+func _create_mission_button() -> void:
+	var top_bar = get_node_or_null("TopBar")
+	if not is_instance_valid(top_bar):
+		return
+	var btn = Button.new()
+	btn.name = "MissionButton"
+	btn.text = "📋 任務"
+	btn.position = Vector2(750, 4)
+	btn.size = Vector2(80, 32)
+	btn.add_theme_font_size_override("font_size", 12)
+	if is_instance_valid(_pixel_font):
+		btn.add_theme_font_override("font", _pixel_font)
+	btn.pressed.connect(_toggle_mission_panel)
+	top_bar.add_child(btn)
+
+## 切換任務面板顯示
+func _toggle_mission_panel() -> void:
+	if is_instance_valid(_mission_panel):
+		_mission_visible = not _mission_visible
+		_mission_panel.visible = _mission_visible
+		if _mission_visible:
+			# 刷新任務列表
+			NetworkManager.send("get_missions", {})
+	else:
+		_create_mission_panel()
+		_mission_visible = true
+		NetworkManager.send("get_missions", {})
+
+## 建立任務面板
+func _create_mission_panel() -> void:
+	var panel = Control.new()
+	panel.name = "MissionPanel"
+	panel.position = Vector2(640, 50)
+	panel.size = Vector2(380, 300)
+	panel.z_index = 80
+	add_child(panel)
+	_mission_panel = panel
+
+	# 背景
+	var bg = ColorRect.new()
+	bg.size = Vector2(380, 300)
+	bg.color = Color(0.02, 0.05, 0.15, 0.92)
+	panel.add_child(bg)
+
+	# 頂部邊框
+	var top_line = ColorRect.new()
+	top_line.size = Vector2(380, 3)
+	top_line.color = Color(0.9, 0.75, 0.2, 0.8)
+	panel.add_child(top_line)
+
+	# 標題
+	var title = Label.new()
+	title.name = "MissionTitle"
+	title.text = "📋 今日任務"
+	title.position = Vector2(12, 8)
+	title.add_theme_font_size_override("font_size", 16)
+	title.modulate = Color(1.0, 0.9, 0.3)
+	if is_instance_valid(_pixel_font):
+		title.add_theme_font_override("font", _pixel_font)
+	panel.add_child(title)
+
+	# 關閉按鈕
+	var close_btn = Button.new()
+	close_btn.text = "✕"
+	close_btn.position = Vector2(348, 4)
+	close_btn.size = Vector2(28, 24)
+	close_btn.add_theme_font_size_override("font_size", 12)
+	close_btn.pressed.connect(func():
+		_mission_visible = false
+		if is_instance_valid(_mission_panel):
+			_mission_panel.visible = false
+	)
+	panel.add_child(close_btn)
+
+	# 任務列表容器
+	var list = Control.new()
+	list.name = "MissionList"
+	list.position = Vector2(0, 36)
+	list.size = Vector2(380, 264)
+	panel.add_child(list)
+
+	# 初始顯示「載入中...」
+	var loading = Label.new()
+	loading.name = "LoadingLabel"
+	loading.text = "載入任務中..."
+	loading.position = Vector2(120, 100)
+	loading.add_theme_font_size_override("font_size", 14)
+	loading.modulate = Color(0.6, 0.6, 0.6)
+	if is_instance_valid(_pixel_font):
+		loading.add_theme_font_override("font", _pixel_font)
+	list.add_child(loading)
+
+## 任務進度更新
+func _on_mission_updated(missions: Array) -> void:
+	_mission_data = missions
+	if is_instance_valid(_mission_panel) and _mission_visible:
+		_refresh_mission_list()
+
+## 刷新任務列表 UI
+func _refresh_mission_list() -> void:
+	if not is_instance_valid(_mission_panel):
+		return
+	var list = _mission_panel.get_node_or_null("MissionList")
+	if not list:
+		return
+
+	# 清除舊內容
+	for child in list.get_children():
+		child.queue_free()
+
+	# 建立任務條目
+	for i in range(_mission_data.size()):
+		var m = _mission_data[i]
+		_create_mission_row(list, m, i)
+
+## 建立單一任務條目
+func _create_mission_row(container: Control, mission: Dictionary, index: int) -> void:
+	var row = Control.new()
+	row.position = Vector2(0, index * 52)
+	row.size = Vector2(380, 50)
+	container.add_child(row)
+
+	var completed = mission.get("completed", false)
+	var reward_claimed = mission.get("reward_claimed", false)
+	var current = mission.get("current", 0)
+	var target = mission.get("target", 1)
+	var reward = mission.get("reward", 0)
+
+	# 背景（完成的任務用深綠色）
+	var bg = ColorRect.new()
+	bg.size = Vector2(376, 48)
+	bg.position = Vector2(2, 1)
+	if completed and reward_claimed:
+		bg.color = Color(0.05, 0.15, 0.05, 0.7)
+	elif completed:
+		bg.color = Color(0.05, 0.2, 0.05, 0.85)
+	else:
+		bg.color = Color(0.03, 0.06, 0.18, 0.7)
+	row.add_child(bg)
+
+	# 圖示
+	var icon_lbl = Label.new()
+	icon_lbl.text = mission.get("icon", "📋")
+	icon_lbl.position = Vector2(8, 12)
+	icon_lbl.add_theme_font_size_override("font_size", 20)
+	row.add_child(icon_lbl)
+
+	# 任務名稱
+	var name_lbl = Label.new()
+	name_lbl.text = mission.get("name", "")
+	name_lbl.position = Vector2(40, 4)
+	name_lbl.size = Vector2(200, 20)
+	name_lbl.add_theme_font_size_override("font_size", 13)
+	if completed:
+		name_lbl.modulate = Color(0.5, 1.0, 0.5)
+	else:
+		name_lbl.modulate = Color.WHITE
+	if is_instance_valid(_pixel_font):
+		name_lbl.add_theme_font_override("font", _pixel_font)
+	row.add_child(name_lbl)
+
+	# 進度文字
+	var progress_lbl = Label.new()
+	progress_lbl.text = "%d / %d" % [current, target]
+	progress_lbl.position = Vector2(40, 26)
+	progress_lbl.size = Vector2(120, 16)
+	progress_lbl.add_theme_font_size_override("font_size", 11)
+	progress_lbl.modulate = Color(0.7, 0.9, 0.7) if completed else Color(0.7, 0.7, 0.7)
+	if is_instance_valid(_pixel_font):
+		progress_lbl.add_theme_font_override("font", _pixel_font)
+	row.add_child(progress_lbl)
+
+	# 進度條背景
+	var bar_bg = ColorRect.new()
+	bar_bg.size = Vector2(160, 6)
+	bar_bg.position = Vector2(40, 42)
+	bar_bg.color = Color(0.1, 0.1, 0.1, 0.8)
+	row.add_child(bar_bg)
+
+	# 進度條填充
+	var fill_ratio = float(current) / float(max(target, 1))
+	var bar_fill = ColorRect.new()
+	bar_fill.size = Vector2(160.0 * fill_ratio, 6)
+	bar_fill.position = Vector2(40, 42)
+	bar_fill.color = Color(0.3, 1.0, 0.4) if completed else Color(0.2, 0.6, 1.0)
+	row.add_child(bar_fill)
+
+	# 獎勵文字
+	var reward_lbl = Label.new()
+	reward_lbl.text = "🪙%d" % reward
+	reward_lbl.position = Vector2(248, 4)
+	reward_lbl.size = Vector2(80, 20)
+	reward_lbl.add_theme_font_size_override("font_size", 12)
+	reward_lbl.modulate = Color(1.0, 0.9, 0.3)
+	if is_instance_valid(_pixel_font):
+		reward_lbl.add_theme_font_override("font", _pixel_font)
+	row.add_child(reward_lbl)
+
+	# 領取按鈕（完成但未領取時顯示）
+	if completed and not reward_claimed:
+		var claim_btn = Button.new()
+		claim_btn.text = "領取"
+		claim_btn.position = Vector2(300, 12)
+		claim_btn.size = Vector2(68, 28)
+		claim_btn.add_theme_font_size_override("font_size", 12)
+		claim_btn.modulate = Color(0.3, 1.0, 0.4)
+		if is_instance_valid(_pixel_font):
+			claim_btn.add_theme_font_override("font", _pixel_font)
+		var mission_id = mission.get("id", "")
+		claim_btn.pressed.connect(func():
+			NetworkManager.send("claim_mission", {"mission_id": mission_id})
+			AudioManager.play_sfx(AudioManager.SFX.COIN_DROP)
+		)
+		row.add_child(claim_btn)
+	elif reward_claimed:
+		var done_lbl = Label.new()
+		done_lbl.text = "✓ 已領取"
+		done_lbl.position = Vector2(296, 16)
+		done_lbl.size = Vector2(76, 20)
+		done_lbl.add_theme_font_size_override("font_size", 11)
+		done_lbl.modulate = Color(0.5, 0.8, 0.5)
+		if is_instance_valid(_pixel_font):
+			done_lbl.add_theme_font_override("font", _pixel_font)
+		row.add_child(done_lbl)
+
+## 任務完成通知（成就通知風格）
+func _on_mission_completed(mission_data: Dictionary) -> void:
+	var name = mission_data.get("name", "任務完成")
+	var icon = mission_data.get("icon", "📋")
+	var reward = mission_data.get("reward", 0)
+
+	# 加入成就通知佇列（複用成就通知系統）
+	_achievement_queue.append({
+		"name": "%s %s" % [icon, name],
+		"description": "完成！獎勵 🪙%d" % reward,
+		"icon": icon,
+		"type": "special"
+	})
+	if not _achievement_showing:
+		_show_next_achievement()
+
+	# 刷新任務面板
+	if is_instance_valid(_mission_panel) and _mission_visible:
+		NetworkManager.send("get_missions", {})

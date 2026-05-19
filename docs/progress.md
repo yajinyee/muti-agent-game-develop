@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-036 Rate Limiting + Health 強化 + Ping 延遲顯示）
+## 最後更新：2026-05-19（DAY-037 連線數限制 + 每日任務系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -259,6 +259,16 @@
 - [x] **Client Ping 延遲顯示**（DAY-036）：
   - `NetworkManager.gd`：ping 延遲計算（`Time.get_ticks_msec()`），`get_ping_ms()` API
   - `HUD.gd`：效能面板第四行 Ping 顯示（綠/黃/紅顏色分級）
+- [x] **Server 連線數硬限制**（DAY-037）：
+  - `main.go`：`/ws` 端點加入 `MaxPlayersPerRoom` 檢查，超過時回傳 503
+  - `/health` 端點加入 `max_players` 欄位
+- [x] **每日任務系統**（DAY-037）：
+  - `server/internal/game/mission/mission.go`：任務定義（5種）、進度追蹤、獎勵領取
+  - `mission_test.go`：8 個單元測試全通過
+  - `protocol.go`：`MsgMissionUpdate`、`MsgMissionComplete`、`MsgGetMissions`、`MsgClaimMission`
+  - `game.go`：整合任務管理器，擊殺/BOSS/Bonus 自動更新進度
+  - `GameManager.gd`：`mission_updated`、`mission_completed` 訊號
+  - `HUD.gd`：任務面板 UI（📋 按鈕 + 進度條 + 領取按鈕）
 
 ---
 

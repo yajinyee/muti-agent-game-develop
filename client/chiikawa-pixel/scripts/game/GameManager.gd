@@ -18,6 +18,8 @@ signal bonus_event(event_data: Dictionary)
 signal leaderboard_updated(entries: Array)
 signal achievement_unlocked(achievement_data: Dictionary)
 signal combo_event(combo_data: Dictionary)  # 連擊事件（DAY-022）
+signal mission_updated(missions: Array)     # 任務進度更新（DAY-037）
+signal mission_completed(mission_data: Dictionary)  # 任務完成（DAY-037）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -83,6 +85,10 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_achievement(payload)
 		"combo_event":
 			_handle_combo_event(payload)
+		"mission_update":
+			_handle_mission_update(payload)
+		"mission_complete":
+			_handle_mission_complete(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -152,6 +158,16 @@ func _handle_combo_event(payload: Dictionary) -> void:
 	var combo_count = payload.get("combo_count", 1)
 	print("[GameManager] COMBO x%d!" % combo_count)
 	emit_signal("combo_event", payload)
+
+## 任務進度更新（DAY-037）
+func _handle_mission_update(payload: Dictionary) -> void:
+	var missions = payload.get("missions", [])
+	emit_signal("mission_updated", missions)
+
+## 任務完成通知（DAY-037）
+func _handle_mission_complete(payload: Dictionary) -> void:
+	print("[GameManager] Mission completed: ", payload.get("name", ""))
+	emit_signal("mission_completed", payload)
 
 func _handle_error(payload: Dictionary) -> void:
 	push_warning("[GameManager] Server error: " + str(payload))

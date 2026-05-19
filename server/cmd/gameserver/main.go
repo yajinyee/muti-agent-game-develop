@@ -113,7 +113,19 @@ func main() {
 		if _, ok := roomMgr.GetRoom(roomID); !ok {
 			roomID = "room-001"
 		}
-		log.Printf("[WS] Player %s connecting to room %s", clientID, roomID)
+
+		// 連線數硬限制（DAY-037）：超過 MaxPlayersPerRoom 時拒絕連線
+		// 使用 hub.PlayerCount() 而非 roomMgr，因為目前單房間架構
+		if hub.PlayerCount() >= cfg.MaxPlayersPerRoom {
+			log.Printf("[WS] Room %s full (%d/%d), rejecting player %s",
+				roomID, hub.PlayerCount(), cfg.MaxPlayersPerRoom, clientID)
+			http.Error(w, `{"error":"room_full","message":"Room is full, please try again later"}`,
+				http.StatusServiceUnavailable)
+			return
+		}
+
+		log.Printf("[WS] Player %s connecting to room %s (%d/%d)",
+			clientID, roomID, hub.PlayerCount()+1, cfg.MaxPlayersPerRoom)
 		hub.ServeWS(w, r, clientID)
 	})
 
@@ -175,11 +187,12 @@ func main() {
 			(uptimeSec%3600)/60,
 			uptimeSec%60,
 		)
-		fmt.Fprintf(w, `{"status":"ok","version":"%s","uptime":"%s","uptime_sec":%d,"clients":%d,"spectators":%d,"game_state":"%s"}`,
+		fmt.Fprintf(w, `{"status":"ok","version":"%s","uptime":"%s","uptime_sec":%d,"clients":%d,"max_players":%d,"spectators":%d,"game_state":"%s"}`,
 			version,
 			uptimeStr,
 			uptimeSec,
 			hub.PlayerCount(),
+			cfg.MaxPlayersPerRoom,
 			hub.SpectatorCount(),
 			g.GetState(),
 		)
