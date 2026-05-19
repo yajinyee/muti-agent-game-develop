@@ -74,3 +74,39 @@ func (h *History) Count() int {
 	defer h.mu.RUnlock()
 	return len(h.records)
 }
+
+// DailyStats 每日 Jackpot 統計
+type DailyStats struct {
+	Date        string `json:"date"`         // YYYY-MM-DD
+	MiniCount   int    `json:"mini_count"`   // Mini 中獎次數
+	MajorCount  int    `json:"major_count"`  // Major 中獎次數
+	GrandCount  int    `json:"grand_count"`  // Grand 中獎次數
+	TotalPayout int    `json:"total_payout"` // 今日總發放金額
+	TotalWins   int    `json:"total_wins"`   // 今日總中獎次數
+}
+
+// GetDailyStats 計算今日統計（從歷史記錄中篩選今日）
+func (h *History) GetDailyStats() DailyStats {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+
+	today := time.Now().Format("2006-01-02")
+	stats := DailyStats{Date: today}
+
+	for _, r := range h.records {
+		if r.WonAt.Format("2006-01-02") != today {
+			continue
+		}
+		stats.TotalPayout += r.Amount
+		stats.TotalWins++
+		switch r.Level {
+		case LevelMini:
+			stats.MiniCount++
+		case LevelMajor:
+			stats.MajorCount++
+		case LevelGrand:
+			stats.GrandCount++
+		}
+	}
+	return stats
+}

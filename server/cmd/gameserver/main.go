@@ -260,12 +260,14 @@ func main() {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		snap := g.GetJackpotSnapshot()
 		history := g.GetJackpotHistory(5)
+		daily := g.GetJackpotDailyStats()
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{
-			"mini":      snap["mini"],
-			"major":     snap["major"],
-			"grand":     snap["grand"],
-			"history":   history,
-			"timestamp": time.Now().UnixMilli(),
+			"mini":        snap["mini"],
+			"major":       snap["major"],
+			"grand":       snap["grand"],
+			"history":     history,
+			"daily_stats": daily,
+			"timestamp":   time.Now().UnixMilli(),
 		}); err != nil {
 			http.Error(w, "encode error", http.StatusInternalServerError)
 		}

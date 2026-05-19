@@ -78,3 +78,46 @@ func TestHistory_Empty(t *testing.T) {
 		t.Errorf("Expected 0 records, got %d", len(records))
 	}
 }
+
+func TestHistory_GetDailyStats(t *testing.T) {
+	h := NewHistory(20)
+
+	// 加入今日的中獎記錄
+	wins := []struct {
+		level  Level
+		amount int
+	}{
+		{LevelMini, 500},
+		{LevelMini, 600},
+		{LevelMajor, 2000},
+		{LevelGrand, 10000},
+	}
+	for _, w := range wins {
+		win := &JackpotWin{
+			Level:    w.level,
+			Amount:   w.amount,
+			WinnerID: "player1",
+			WonAt:    time.Now(),
+		}
+		h.Add(win, "Player")
+	}
+
+	stats := h.GetDailyStats()
+
+	if stats.TotalWins != 4 {
+		t.Errorf("TotalWins = %d, want 4", stats.TotalWins)
+	}
+	if stats.MiniCount != 2 {
+		t.Errorf("MiniCount = %d, want 2", stats.MiniCount)
+	}
+	if stats.MajorCount != 1 {
+		t.Errorf("MajorCount = %d, want 1", stats.MajorCount)
+	}
+	if stats.GrandCount != 1 {
+		t.Errorf("GrandCount = %d, want 1", stats.GrandCount)
+	}
+	expectedPayout := 500 + 600 + 2000 + 10000
+	if stats.TotalPayout != expectedPayout {
+		t.Errorf("TotalPayout = %d, want %d", stats.TotalPayout, expectedPayout)
+	}
+}

@@ -126,6 +126,11 @@ func (g *Game) GetJackpotHistory(n int) []jackpot.WinRecord {
 	return g.jackpotHist.GetRecent(n)
 }
 
+// GetJackpotDailyStats 取得今日 Jackpot 統計（DAY-049）
+func (g *Game) GetJackpotDailyStats() jackpot.DailyStats {
+	return g.jackpotHist.GetDailyStats()
+}
+
 // Start 啟動遊戲循環
 func (g *Game) Start() {
 	log.Printf("[Game] %s started", g.ID)
