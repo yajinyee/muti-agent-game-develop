@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://main"]
+[gd_scene load_steps=9 format=3 uid="uid://main"]
 
 [ext_resource type="Script" path="res://scripts/game/TargetManager.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/game/Cannon.gd" id="2"]
@@ -7,6 +7,7 @@
 [ext_resource type="Script" path="res://scripts/game/BackgroundManager.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/game/CharacterAnimator.gd" id="6"]
 [ext_resource type="Script" path="res://scripts/ui/GameBorder.gd" id="7"]
+[ext_resource type="Script" path="res://scripts/effects/UnderwaterOverlay.gd" id="8"]
 
 [node name="Main" type="Node2D"]
 
@@ -42,6 +43,12 @@ instance = ExtResource("4")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("3")
+
+[node name="UnderwaterLayer" type="CanvasLayer" parent="."]
+layer = 49
+
+[node name="UnderwaterOverlay" type="ColorRect" parent="UnderwaterLayer"]
+script = ExtResource("8")
 
 [node name="GameBorder" type="Node2D" parent="."]
 z_index = 2

@@ -54,6 +54,13 @@ void fragment() {
 	// 底部加藍色霧氣
 	color.rgb = mix(color.rgb, vec3(0.05, 0.12, 0.28), fog * 0.4);
 
-	// 輸出（透明，只影響顏色）
-	COLOR = vec4(color.rgb, 0.0);  // alpha=0 讓 ColorRect 本身透明，只用 shader 修改螢幕
+	// 原始螢幕顏色（無效果）
+	vec4 original = texture(SCREEN_TEXTURE, uv);
+
+	// 依 effect_alpha 混合：0=原始畫面，1=完整水下效果
+	vec3 final_color = mix(original.rgb, color.rgb, effect_alpha);
+
+	// 輸出（不透明，用修改後的螢幕顏色替換畫面）
+	// alpha=1.0 讓 ColorRect 完全覆蓋螢幕，顯示 shader 處理後的顏色
+	COLOR = vec4(final_color, 1.0);
 }

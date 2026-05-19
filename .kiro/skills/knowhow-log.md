@@ -1600,3 +1600,31 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **mouse_filter：** 設定 `MOUSE_FILTER_IGNORE` 確保不攔截玩家的滑鼠點擊
 - **z_index：** 設定適當的 z_index（50）讓效果在遊戲元素上方但在 HUD 下方
 - **教訓：** 全螢幕後處理 ColorRect 必須設定 `mouse_filter = MOUSE_FILTER_IGNORE`，否則會攔截所有點擊
+
+## 83. Godot 4 全螢幕後處理 Shader 正確實作（重要）
+- **問題：** `COLOR = vec4(color.rgb, 0.0)` 讓 ColorRect alpha=0，shader 完全不顯示
+- **根本原因：** canvas_item shader 的 COLOR.a 控制 ColorRect 本身的透明度，alpha=0 = 完全透明 = 看不見
+- **正確做法：**
+  1. `COLOR = vec4(final_color, 1.0)` — alpha=1.0 讓 ColorRect 完全不透明
+  2. 用 `SCREEN_TEXTURE` 採樣原始螢幕顏色
+  3. 用 `mix(original.rgb, modified.rgb, effect_alpha)` 控制效果強度
+  4. `effect_alpha=0` → 輸出原始顏色（等同透明），`effect_alpha=1` → 完整效果
+- **場景結構：** 獨立 CanvasLayer（layer=49）+ ColorRect + shader
+  - layer=49 確保在遊戲元素（layer=0）之上，在 HUD（layer=1）之下
+  - 注意：Godot CanvasLayer layer 值越大越在上方，HUD 預設 layer=1
+  - 實際上 layer=49 > layer=1，所以 UnderwaterOverlay 在 HUD 之上
+  - 若要在 HUD 之下，應使用 layer=-1 或 layer=0
+- **mouse_filter = MOUSE_FILTER_IGNORE** — 確保不攔截玩家點擊
+- **教訓：** 全螢幕後處理 shader 必須用 alpha=1.0 + SCREEN_TEXTURE 採樣，不能用 alpha=0
+
+## 84. UnderwaterOverlay CanvasLayer 層級設計
+- **問題：** layer=49 實際上在 HUD（layer=1）之上，會遮蓋 UI
+- **正確設計：** 後處理效果應在遊戲畫面之上、HUD 之下
+  - 遊戲元素（Node2D）：layer=0（預設）
+  - 後處理效果（UnderwaterOverlay）：layer=0 或負數，但在 Node2D 之上
+  - HUD：layer=1（預設 CanvasLayer）
+- **實際解法：** 由於 SCREEN_TEXTURE 採樣的是整個螢幕（包含 HUD），
+  後處理效果放在 HUD 之上（layer=49）反而會讓 HUD 也受到水下效果影響
+  這在視覺上是合理的（整個畫面都在水下），但 UI 文字可能變色
+- **最終決定：** layer=49（HUD 之上），讓整個畫面包含 UI 都有水下感
+  如果 UI 可讀性受影響，可以降低 effect_alpha 或改為 layer=0

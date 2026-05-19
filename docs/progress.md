@@ -1,10 +1,10 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-029 成就 UI 優化 + 部署文件 Redis 更新）
+## 最後更新：2026-05-19（DAY-031 UnderwaterOverlay 修復 + 場景整合）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：95/100**（BOSS 完整動畫集，成就通知面板動畫升級）
+- **美術質量：96/100**（UnderwaterOverlay shader 正確實作，海底沉浸感真正生效）
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
@@ -223,6 +223,11 @@
     - 左側彩色邊條（依類型：金/紅/綠/紫）
     - 彈跳縮放動畫（滑入後 scale 1.0→1.05→1.0）
     - 淡出改為 `modulate:a` 漸隱
+- [x] **UnderwaterOverlay 修復 + 場景整合**（DAY-031）：
+  - `underwater_overlay.gdshader`：修復 `COLOR = vec4(color.rgb, 0.0)` → `vec4(final_color, 1.0)`
+  - 加入 `mix(original.rgb, modified.rgb, effect_alpha)` 讓 effect_alpha 真正控制效果強度
+  - `Main.tscn`：加入 `UnderwaterLayer`（CanvasLayer layer=49）+ `UnderwaterOverlay` ColorRect
+  - `UnderwaterOverlay.gd`：修正初始 effect_alpha=0.0，移除錯誤的 z_index 設定
 
 ---
 
