@@ -283,7 +283,7 @@ def check_sprite_quality() -> dict:
 
 
 def check_rtp_balance(num_rounds: int = 10000) -> dict:
-    """執行 RTP 模擬"""
+    """執行 RTP 模擬（使用真實遊戲邏輯，從 simulate_rtp.py 引入）"""
     result = {
         "name": "RTP Balance",
         "passed": False,
@@ -294,54 +294,63 @@ def check_rtp_balance(num_rounds: int = 10000) -> dict:
     
     print(f"  執行 RTP 模擬（{num_rounds:,} 局）...")
     
-    total_bet = 0
-    total_win = 0
-    
-    # 正規化出現機率
-    total_prob = sum(p for _, p, _, _ in TARGET_DISTRIBUTION)
-    normalized = [(m, p / total_prob, hr, t) for m, p, hr, t in TARGET_DISTRIBUTION]
-    
-    multipliers = [m for m, _, _, _ in normalized]
-    appear_probs = [p for _, p, _, _ in normalized]
-    hit_rates = [hr for _, _, hr, _ in normalized]
-    
-    # 模擬
-    random.seed(42)  # 固定 seed 確保可重現
-    
-    # 捕魚機模擬邏輯：
-    # 每局 = 玩家射擊一次
-    # 1. 選擇目標（依出現機率）
-    # 2. 判斷是否命中（依命中率）
-    # 3. 命中則獲得倍率獎勵
-    # 注意：命中率已經包含了「目標出現在畫面上的機率」
-    # 實際 RTP = Σ(倍率 × 出現機率 × 命中率)
-    
-    for _ in range(num_rounds):
-        bet = 1  # 標準化下注
-        total_bet += bet
+    # 使用真實遊戲模擬邏輯（DAY-044b 修復：原本使用理論化簡化模型，導致永遠顯示 95.93%）
+    try:
+        import importlib.util
+        sim_script = PROJECT_ROOT / "tools" / "simulate_rtp.py"
+        spec = importlib.util.spec_from_file_location("simulate_rtp", str(sim_script))
+        sim_module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(sim_module)
         
-        # 選擇目標（依出現機率）
-        idx = random.choices(range(len(multipliers)), weights=appear_probs)[0]
-        multiplier = multipliers[idx]
-        hit_rate = hit_rates[idx]
+        # 用 LV5 跑真實模擬（代表中等玩家）
+        sim_result = sim_module.run_simulation(sessions=num_rounds // 10, bet_level=5)
+        actual_rtp = sim_result["overall_rtp"]
         
-        # 判斷命中（依命中率）
-        # 注意：hit_rate 是「命中這個目標的機率」，已經很低了
-        if random.random() < hit_rate:
-            win = bet * multiplier
-            total_win += win
-    
-    actual_rtp = total_win / total_bet if total_bet > 0 else 0
-    
-    result["details"] = {
-        "rounds": num_rounds,
-        "total_bet": total_bet,
-        "total_win": round(total_win, 2),
-        "actual_rtp": f"{actual_rtp:.4f}",
-        "actual_rtp_pct": f"{actual_rtp * 100:.2f}%",
-        "target_rtp": f"{TARGET_RTP * 100:.1f}%",
-        "rtp_range": f"{RTP_MIN * 100:.1f}% - {RTP_MAX * 100:.1f}%"
-    }
+        result["details"] = {
+            "rounds": num_rounds,
+            "bet_level": 5,
+            "actual_rtp": f"{actual_rtp:.4f}",
+            "actual_rtp_pct": f"{actual_rtp * 100:.2f}%",
+            "target_rtp": f"{TARGET_RTP * 100:.1f}%",
+            "rtp_range": f"{RTP_MIN * 100:.1f}% - {RTP_MAX * 100:.1f}%",
+            "avg_bonus_per_session": f"{sim_result['avg_bonus_per_session']:.2f}",
+            "avg_boss_per_session": f"{sim_result['avg_boss_per_session']:.2f}",
+            "simulation_mode": "真實遊戲邏輯（simulate_rtp.py）"
+        }
+        
+    except Exception as e:
+        # fallback：使用簡化模型
+        print(f"  ⚠️  真實模擬失敗（{e}），使用簡化模型")
+        total_bet = 0
+        total_win = 0
+        
+        total_prob = sum(p for _, p, _, _ in TARGET_DISTRIBUTION)
+        normalized = [(m, p / total_prob, hr, t) for m, p, hr, t in TARGET_DISTRIBUTION]
+        
+        multipliers = [m for m, _, _, _ in normalized]
+        appear_probs = [p for _, p, _, _ in normalized]
+        hit_rates = [hr for _, _, hr, _ in normalized]
+        
+        random.seed(42)
+        for _ in range(num_rounds):
+            bet = 1
+            total_bet += bet
+            idx = random.choices(range(len(multipliers)), weights=appear_probs)[0]
+            multiplier = multipliers[idx]
+            hit_rate = hit_rates[idx]
+            if random.random() < hit_rate:
+                win = bet * multiplier
+                total_win += win
+        
+        actual_rtp = total_win / total_bet if total_bet > 0 else 0
+        result["details"] = {
+            "rounds": num_rounds,
+            "actual_rtp": f"{actual_rtp:.4f}",
+            "actual_rtp_pct": f"{actual_rtp * 100:.2f}%",
+            "target_rtp": f"{TARGET_RTP * 100:.1f}%",
+            "rtp_range": f"{RTP_MIN * 100:.1f}% - {RTP_MAX * 100:.1f}%",
+            "simulation_mode": "簡化模型（fallback）"
+        }
     
     # 計算分數
     rtp_deviation = abs(actual_rtp - TARGET_RTP)

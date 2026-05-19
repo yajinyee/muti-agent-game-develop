@@ -932,7 +932,49 @@ func (g *Game) triggerBoss() {
 func (g *Game) spawnBoss() {
 	def := data.Targets["B001"]
 	instanceID := uuid.New().String()
-	t := target.NewTarget(instanceID, def, 1100, 360)
+
+	// BOSS HP 依玩家平均 bet 等級縮放（DAY-044b）
+	// 設計原則：玩家在 60 秒內有 ~50% 機率打死 BOSS
+	// 期望攻擊次數 = fire_rate × 60 × 玩家數
+	// BOSS HP = 期望攻擊次數 × bet_cost × 0.5
+	g.mu.RLock()
+	avgBetLevel := 5
+	playerCount := len(g.Players)
+	if playerCount > 0 {
+		total := 0
+		for _, p := range g.Players {
+			total += p.BetLevel
+		}
+		avgBetLevel = total / playerCount
+		if avgBetLevel < 1 {
+			avgBetLevel = 1
+		}
+	}
+	g.mu.RUnlock()
+
+	betDef := data.GetBetDef(avgBetLevel)
+	// 單人：fire_rate × 60 × bet_cost × 0.5
+	// 多人：每個玩家都在打，HP 乘以玩家數（但有上限避免太難）
+	effectivePlayers := playerCount
+	if effectivePlayers < 1 {
+		effectivePlayers = 1
+	}
+	if effectivePlayers > 4 {
+		effectivePlayers = 4 // 最多 4 人效果，避免 HP 過高
+	}
+	bossHP := int(betDef.FireRate * 60 * float64(betDef.BetCost) * 0.5 * float64(effectivePlayers))
+	if bossHP < 100 {
+		bossHP = 100 // 最低 100 HP
+	}
+	if bossHP > 10000 {
+		bossHP = 10000 // 最高 10000 HP
+	}
+
+	// 建立動態 HP 的 BOSS def（不修改原始 def）
+	bossDef := *def
+	bossDef.HP = bossHP
+
+	t := target.NewTarget(instanceID, &bossDef, 1100, 360)
 
 	g.mu.Lock()
 	g.Targets[instanceID] = t
@@ -940,14 +982,16 @@ func (g *Game) spawnBoss() {
 	g.bossSpawnedAt = time.Now()
 	g.mu.Unlock()
 
+	log.Printf("[Game] BOSS spawned: HP=%d (avgBetLV=%d, players=%d)", bossHP, avgBetLevel, playerCount)
+
 	g.transitionState(state.StateBossBattle)
 	g.Hub.Broadcast(&ws.Message{
 		Type: ws.MsgBossEvent,
 		Payload: ws.BossEventPayload{
 			Event:      "spawn",
 			InstanceID: instanceID,
-			HP:         def.HP,
-			MaxHP:      def.HP,
+			HP:         bossHP,
+			MaxHP:      bossHP,
 		},
 	})
 
@@ -956,7 +1000,8 @@ func (g *Game) spawnBoss() {
 		tracker.Track(analytics.EventBossSpawn, "system", map[string]interface{}{
 			"instance_id": instanceID,
 			"boss_def":    "B001",
-			"hp":          def.HP,
+			"hp":          bossHP,
+			"avg_bet_lv":  avgBetLevel,
 		})
 	}
 }

@@ -11,6 +11,7 @@
 - **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（18個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤**
 - **DAY-043 更新：** `hub.go` 加入 `msgTypeCounts sync.Map` + `IncrMsgType` + `GetMsgTypeCounts` ✅，`/metrics` 加入 `chiikawa_ws_msg_type_total` 指標 ✅，`HitEffect.gd` 強化 5+/7+ 連擊特效（全畫面閃光+衝擊波+螢幕扭曲）✅，Grafana dashboard 升級到 15 個面板 ✅
 - **DAY-044 更新：** `hub.go` 加入 Ping Latency 追蹤（per-client + 全局 avg/max/count）✅，`/metrics` 加入 3 個 ping 指標 + per-client 延遲 ✅，`/health` 加入 `avg_ping_ms` ✅，Grafana dashboard 升級到 18 個面板 ✅，hub_test.go 新增 3 個測試（13/13 全通過）✅
+- **DAY-044b 更新（自主觸發）：** 發現 QA 工具 RTP 模擬盲點（使用靜態模型，永遠顯示 95.93%）✅，修復 QA 工具改用真實遊戲邏輯 ✅，發現 BOSS HP 固定值導致低 bet 等級永遠打不死 BOSS ✅，`spawnBoss()` 改為動態 HP（依 bet 等級縮放）✅，調整 RTP 數值（BASE_RTP=0.95, LABOR_SCALE=1.2, BONUS_MULT_MAX=30）✅，QA 8/8 全通過，RTP 95.71% ✅
 
 ---
 

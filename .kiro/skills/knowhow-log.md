@@ -1975,3 +1975,26 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **面板佈局：** 每行 24 格，stat 用 4-6 格，timeseries 用 12-24 格
 - **單位設定：** `"unit": "ms"` 讓 Grafana 自動格式化（顯示 42ms 而非 42）
 - **教訓：** 監控面板要從「運維視角」設計，不是「開發視角」，優先顯示「有沒有問題」而非「技術細節」
+
+## 85. QA 工具 RTP 模擬盲點（DAY-044b 重大發現）
+- **問題：** QA 工具的 `check_rtp_balance()` 使用「理論化簡化模型」（手動設定命中率），永遠顯示 95.93%，不反映真實遊戲邏輯
+- **根本原因：** `TARGET_DISTRIBUTION` 中的 `hit_rate` 是預設為 94% 結果的靜態值，不是真正跑遊戲邏輯
+- **真實情況：** 用 `simulate_rtp.py`（真實遊戲邏輯）模擬，LV1-LV5 的 RTP 只有 80-82%，遠低於目標
+- **修復：** QA 工具改為 import `simulate_rtp.py` 執行真實模擬，fallback 才用簡化模型
+- **教訓：** QA 工具的模擬邏輯必須和真實遊戲邏輯一致，否則是假的品質保證
+
+## 86. BOSS HP 固定值導致低 bet 等級永遠打不死 BOSS（DAY-044b）
+- **問題：** BOSS HP 固定 3000，LV5 的 bet_cost=10，fire_rate=2.3/s，需要 300 次攻擊（130 秒）才能打死，但 BOSS 只有 60 秒
+- **根本原因：** BOSS HP 設計時沒有考慮不同 bet 等級的攻擊力差異
+- **修復：** `spawnBoss()` 動態計算 BOSS HP：`fire_rate × 60 × bet_cost × 0.5 × effectivePlayers`
+- **效果：** LV5 BOSS HP ≈ 69（2.3 × 60 × 10 × 0.5），玩家有 50% 機率在 60 秒內打死
+- **教訓：** 任何依賴玩家攻擊力的設計（BOSS HP、保底機制）都必須依 bet 等級縮放
+
+## 87. RTP 調整最終數值（DAY-044b）
+- `BASE_RTP = 0.95`（基礎目標擊破機率係數）
+- `LABOR_SCALE = 1.2`（勞動值增益，控制 Bonus 觸發頻率）
+- `BONUS_MULT_MAX = 30.0`（Bonus 獎勵倍率上限）
+- `BONUS_MULT_MIN = 15.0`（Bonus 獎勵倍率下限）
+- BOSS 獎勵係數：`0.06`（降低避免高 bet 等級 RTP 超標）
+- 結果：LV1-LV7 RTP 95-96%，LV10 RTP 92-93%（高 bet 等級 BOSS 觸發多，獎勵係數低）
+- 業界標準：96.3-96.4%（Fish Boom），我們 95.71% 接近標準

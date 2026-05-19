@@ -44,7 +44,7 @@ class BetDef:
     labor_modifier: float = 1.0
 
 # 勞動值已調整（× 0.3 係數，讓 Bonus 觸發頻率降低）
-LABOR_SCALE = 0.8   # 調整這個值控制 Bonus 頻率（目標：每局 1-2 次）
+LABOR_SCALE = 1.2   # DAY-044b 調整：0.8→1.2，讓低 bet 等級 Bonus 觸發更頻繁（目標：每局 0.5-1.5 次）
 
 TARGETS = [
     TargetDef("T001", "像素雜草",    2,  2,  3,  180, 1,  16.0, "basic"),
@@ -75,7 +75,7 @@ BET_LEVELS = [
     BetDef(10, 100, 3.0, "usagi",    0.98, 0.95),
 ]
 
-BASE_RTP = 0.92   # 基礎目標 RTP
+BASE_RTP = 0.95   # 基礎目標 RTP（DAY-044b 調整：0.92→0.95，讓低 bet 等級 RTP 達到 88%+）
 TARGET_RTP = 0.94  # 目標 RTP
 LABOR_MAX = 100
 BONUS_DURATION = 15.0
@@ -85,8 +85,8 @@ BOSS_INTERVAL_MIN = 180.0
 BOSS_INTERVAL_MAX = 300.0
 
 # Bonus 獎勵倍率上限（降低避免 RTP 爆炸）
-BONUS_MULT_MAX = 50.0   # Prototype 展示版：給玩家更好體驗
-BONUS_MULT_MIN = 20.0
+BONUS_MULT_MAX = 30.0   # DAY-044b 最終調整：35→30，讓 LV5 RTP 落在 94-96% 範圍
+BONUS_MULT_MIN = 15.0   # DAY-044b 調整：20→15，讓低 bet 等級 Bonus 更有吸引力
 
 # ---- 核心函數 ----
 
@@ -186,7 +186,12 @@ def simulate_session(bet_level: int = 5, duration_seconds: float = 300.0) -> Dic
         # BOSS 觸發
         if not boss_active and time_elapsed >= boss_timer:
             boss_active = True
-            boss_hp = 3000
+            # BOSS HP 依 bet 等級縮放（DAY-044b 修復：LV5 以下永遠打不死 BOSS 的問題）
+            # 設計原則：玩家在 BOSS 60 秒內有 50% 機率打死 BOSS
+            # 期望攻擊次數 = fire_rate × 60 = bet.fire_rate × 60
+            # BOSS HP = 期望攻擊次數 × bet_cost × 0.5（50% 機率打死）
+            boss_hp = int(bet.fire_rate * 60 * bet.bet_cost * 0.5)
+            boss_hp = max(boss_hp, 50)  # 最低 50 HP
             boss_start_time = time_elapsed
             boss_timer = time_elapsed + random.uniform(BOSS_INTERVAL_MIN, BOSS_INTERVAL_MAX)
 
@@ -206,7 +211,7 @@ def simulate_session(bet_level: int = 5, duration_seconds: float = 300.0) -> Dic
                 elif remaining <= 50: mult = 400
                 else: mult = 500
                 # BOSS 獎勵佔 RTP 15%，用係數控制
-                boss_reward = int(bet.bet_cost * mult * 0.08)  # 降低係數
+                boss_reward = int(bet.bet_cost * mult * 0.06)  # DAY-044b 調整：0.08→0.06，降低 BOSS 獎勵避免高 bet 等級 RTP 超標
                 total_reward += boss_reward
                 labor = min(LABOR_MAX, labor + int(30 * LABOR_SCALE))
                 last_high_reward = time_elapsed
