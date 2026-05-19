@@ -20,6 +20,14 @@ const TARGET_SPRITES = {
 	"B001": "res://assets/sprites/targets/B001_boss.png",
 }
 
+# 游泳動畫 Spritesheet（2幀橫排，128x64）
+# 幀0：向上彎曲，幀1：向下彎曲，4fps 交替
+const SWIM_SHEET_TARGETS = [
+	"T001", "T002", "T003", "T004", "T005", "T006",
+	"T101", "T102", "T103", "T104", "T105"
+]
+const SWIM_ANIM_FPS: float = 4.0  # 每 0.25 秒切換一幀
+
 # B001 BOSS 動畫 Spritesheet（512x384，4幀×3狀態×128px）
 const BOSS_SHEET_PATH = "res://assets/sprites/targets/B001_boss_sheet.png"
 const BOSS_FRAME_SIZE = 128
@@ -76,6 +84,12 @@ var _boss_anim_timer: float = 0.0
 var _boss_anim_frame: int = 0
 var _boss_anim_row: int = BOSS_ROW_IDLE
 const BOSS_ANIM_FPS: float = 4.0  # idle/phase2 4fps，death 8fps
+
+# 游泳動畫狀態（全局計時器，所有目標物共用）
+var _swim_anim_timer: float = 0.0
+var _swim_anim_frame: int = 0  # 0 或 1
+# 游泳動畫 AtlasTexture 快取：def_id -> [frame0_atlas, frame1_atlas]
+var _swim_atlas_cache: Dictionary = {}
 
 func _ready() -> void:
 	GameManager.target_spawned.connect(_on_target_spawned)
@@ -137,6 +151,43 @@ func _preload_resources() -> void:
 	var font_path = "res://assets/fonts/pixel8.fnt"
 	if ResourceLoader.exists(font_path):
 		_cached_pixel_font = load(font_path)
+
+	# 預載入游泳動畫 Spritesheet（2幀橫排，128x64）
+	for def_id in SWIM_SHEET_TARGETS:
+		var swim_path = "res://assets/sprites/targets/%s_swim.png" % def_id.to_lower()
+		# 注意：路徑要和實際檔名一致
+		var actual_path = _get_swim_sheet_path(def_id)
+		if ResourceLoader.exists(actual_path):
+			var swim_tex = load(actual_path)
+			# 建立兩幀的 AtlasTexture
+			var frame0 = AtlasTexture.new()
+			frame0.atlas = swim_tex
+			frame0.region = Rect2(0, 0, 64, 64)
+			var frame1 = AtlasTexture.new()
+			frame1.atlas = swim_tex
+			frame1.region = Rect2(64, 0, 64, 64)
+			_swim_atlas_cache[def_id] = [frame0, frame1]
+
+## 取得游泳動畫 Spritesheet 路徑
+func _get_swim_sheet_path(def_id: String) -> String:
+	# 路徑格式：T001_grass_swim.png
+	var name_map = {
+		"T001": "T001_grass",
+		"T002": "T002_bug_g",
+		"T003": "T003_bug_r",
+		"T004": "T004_bug_b",
+		"T005": "T005_pudding",
+		"T006": "T006_mushroom",
+		"T101": "T101_mimic",
+		"T102": "T102_chest",
+		"T103": "T103_meteor",
+		"T104": "T104_gold_grass",
+		"T105": "T105_coin_fish",
+	}
+	var base_name = name_map.get(def_id, "")
+	if base_name == "":
+		return ""
+	return "res://assets/sprites/targets/%s_swim.png" % base_name
 
 ## 取得目標 Texture（優先用 AtlasTexture，備用獨立 PNG）
 func _get_target_texture(def_id: String) -> Texture2D:
@@ -291,6 +342,37 @@ func _process(delta: float) -> void:
 	_update_target_positions(delta)
 	_update_escape_warnings()
 	_update_boss_animation(delta)
+	_update_swim_animation(delta)
+
+## 游泳動畫幀更新（全局計時器，所有目標物共用同一幀）
+func _update_swim_animation(delta: float) -> void:
+	if _swim_atlas_cache.is_empty():
+		return
+
+	_swim_anim_timer += delta
+	if _swim_anim_timer < 1.0 / SWIM_ANIM_FPS:
+		return
+
+	_swim_anim_timer = 0.0
+	_swim_anim_frame = 1 - _swim_anim_frame  # 在 0 和 1 之間切換
+
+	# 更新所有有游泳動畫的目標物
+	for instance_id in _target_nodes:
+		var node = _target_nodes[instance_id]
+		if not is_instance_valid(node):
+			continue
+
+		var def_id = node.get_meta("def_id", "")
+		if not _swim_atlas_cache.has(def_id):
+			continue
+
+		# 找 Sprite2D 子節點並更新 texture
+		for child in node.get_children():
+			if child is Sprite2D:
+				var frames = _swim_atlas_cache[def_id]
+				if frames.size() > _swim_anim_frame:
+					child.texture = frames[_swim_anim_frame]
+				break
 
 ## BOSS 動畫幀更新（每幀切換 AtlasTexture）
 func _update_boss_animation(delta: float) -> void:
@@ -356,9 +438,20 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	var def_id = data.get("def_id", "T001")
 	var target_type = data.get("type", "basic")
 
-	# 使用像素 Sprite（優先用 Spritesheet AtlasTexture，減少 draw call）
+	# 使用像素 Sprite（優先用游泳動畫幀0，其次 Spritesheet AtlasTexture，減少 draw call）
 	var sprite = Sprite2D.new()
-	var tex = _get_target_texture(def_id)
+	var tex: Texture2D = null
+
+	# 優先使用游泳動畫 spritesheet 的幀0（有動畫效果）
+	if _swim_atlas_cache.has(def_id):
+		var frames = _swim_atlas_cache[def_id]
+		if frames.size() > 0:
+			tex = frames[0]
+
+	# 備用：靜態 Spritesheet 或獨立 PNG
+	if tex == null:
+		tex = _get_target_texture(def_id)
+
 	if tex != null:
 		sprite.texture = tex
 		# 像素完美縮放（關閉濾波）
