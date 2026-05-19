@@ -323,3 +323,118 @@ func TestScoreTarget_LowHPHigherPriority(t *testing.T) {
 		t.Errorf("Low HP target score (%f) should be higher than full HP target score (%f)", lowScore, fullScore)
 	}
 }
+
+// TestGetMissionResetAt 確認任務重置時間正確（DAY-039）
+func TestGetMissionResetAt(t *testing.T) {
+	g := newTestGame(t)
+
+	resetAt := g.GetMissionResetAt()
+	if resetAt.IsZero() {
+		t.Error("mission reset time should not be zero")
+	}
+
+	// 重置時間應該在未來（今天午夜之後）
+	if resetAt.Before(time.Now()) {
+		t.Errorf("mission reset time should be in the future, got %v", resetAt)
+	}
+}
+
+// TestGetLeaderboardData 確認排行榜資料正確
+func TestGetLeaderboardData(t *testing.T) {
+	g := newTestGame(t)
+
+	data := g.GetLeaderboardData()
+	if data.Timestamp <= 0 {
+		t.Error("leaderboard timestamp should be > 0")
+	}
+	// 無玩家時排行榜應為空
+	if data.Entries == nil {
+		t.Error("leaderboard entries should not be nil")
+	}
+}
+
+// TestGetLeaderboardData_WithPlayers 確認有玩家時排行榜正確
+func TestGetLeaderboardData_WithPlayers(t *testing.T) {
+	g := newTestGame(t)
+
+	// 加入玩家並設定分數
+	g.AddPlayer("p1")
+	g.AddPlayer("p2")
+	g.mu.Lock()
+	g.Players["p1"].SessionScore = 1000
+	g.Players["p1"].DisplayName = "Alice"
+	g.Players["p2"].SessionScore = 500
+	g.Players["p2"].DisplayName = "Bob"
+	g.mu.Unlock()
+
+	data := g.GetLeaderboardData()
+	if len(data.Entries) != 2 {
+		t.Errorf("expected 2 entries, got %d", len(data.Entries))
+	}
+
+	// 第一名應該是 Alice（分數最高）
+	if len(data.Entries) > 0 && data.Entries[0].Score != 1000 {
+		t.Errorf("expected top score=1000, got %d", data.Entries[0].Score)
+	}
+}
+
+// TestAddPlayer_InitialCoins 確認玩家初始金幣正確
+func TestAddPlayer_InitialCoins(t *testing.T) {
+	hub := ws.NewHub()
+	g := NewGameWithStore("test", hub, nil, 5000) // 自訂初始金幣
+
+	g.AddPlayer("p1")
+	g.mu.RLock()
+	p := g.Players["p1"]
+	g.mu.RUnlock()
+
+	if p.Coins != 5000 {
+		t.Errorf("expected initial coins=5000, got %d", p.Coins)
+	}
+}
+
+// TestSpawnBoss 確認 BOSS 生成正確
+func TestSpawnBoss(t *testing.T) {
+	g := newTestGame(t)
+	g.AddPlayer("p1")
+
+	// 生成 BOSS
+	g.spawnBoss()
+
+	g.mu.RLock()
+	bossCount := 0
+	for _, tgt := range g.Targets {
+		if tgt.DefID == "B001" {
+			bossCount++
+		}
+	}
+	g.mu.RUnlock()
+
+	if bossCount != 1 {
+		t.Errorf("expected 1 BOSS, got %d", bossCount)
+	}
+}
+
+// TestGetState_ThreadSafe 確認 GetState 在並發下安全
+func TestGetState_ThreadSafe(t *testing.T) {
+	g := newTestGame(t)
+
+	done := make(chan struct{})
+	go func() {
+		for i := 0; i < 100; i++ {
+			g.GetState()
+		}
+		close(done)
+	}()
+
+	for i := 0; i < 100; i++ {
+		g.transitionState("normal_play")
+	}
+
+	select {
+	case <-done:
+		// 正常完成
+	case <-time.After(2 * time.Second):
+		t.Error("GetState should complete within timeout")
+	}
+}
