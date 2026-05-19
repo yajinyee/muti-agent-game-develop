@@ -1582,3 +1582,21 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **影響：** 造成混淆，讓讀者以為 server 用 8080，但實際是 7777
 - **解法：** 直接刪除未使用的常數
 - **教訓：** Go 不會對未使用的常數報錯（只有未使用的變數才報錯），需要手動清理
+
+## 85. 全螢幕水下色差效果（Godot 4 canvas_item shader）
+- **技術：** `shader_type canvas_item` + `hint_screen_texture` 讀取螢幕內容
+- **色差（Chromatic Aberration）：** 紅通道向左偏移 `uv + vec2(-ca, 0.0)`，藍通道向右偏移 `uv + vec2(ca, 0.0)`，模擬水下折射
+- **水波扭曲：** `sin(uv.y * freq + TIME)` 讓畫面有輕微水波感，強度要非常小（0.0015）否則影響遊玩
+- **藍色調：** 降低 R 通道（`color.r *= 0.992`），提升 B 通道（`color.b += 0.02`），模擬水下光線過濾
+- **深度霧氣：** `uv.y * depth_fog` 讓畫面底部略暗，模擬水深增加
+- **整合方式：** 建立 `UnderwaterOverlay.gd` 腳本，在 `BackgroundManager._ready()` 中動態建立並加入場景
+- **狀態切換：** 監聽 `GameManager.game_state_changed`，BOSS/Bonus 狀態時淡出效果，normal 狀態時淡入
+- **alpha=0 輸出：** `COLOR = vec4(color.rgb, 0.0)` — alpha 設為 0 讓 ColorRect 本身透明，只用 shader 修改螢幕顏色
+- **教訓：** 全螢幕後處理效果要用 `hint_screen_texture`，不能用普通 texture；強度要保守，不能影響遊玩體驗
+
+## 86. 動態建立 ColorRect 並套用 canvas_item shader 的正確方式
+- **問題：** `ColorRect` 的 `color` 屬性和 shader 的 `COLOR` 輸出會互相影響
+- **解法：** 設定 `color = Color(0, 0, 0, 0)`（完全透明），讓 shader 完全控制輸出
+- **mouse_filter：** 設定 `MOUSE_FILTER_IGNORE` 確保不攔截玩家的滑鼠點擊
+- **z_index：** 設定適當的 z_index（50）讓效果在遊戲元素上方但在 HUD 下方
+- **教訓：** 全螢幕後處理 ColorRect 必須設定 `mouse_filter = MOUSE_FILTER_IGNORE`，否則會攔截所有點擊
