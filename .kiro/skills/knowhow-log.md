@@ -2341,3 +2341,27 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **結果：** game 套件和 ws 套件都通過，無 goroutine 洩漏
 - **教訓：** 每個有 goroutine 的套件都應該加入 goleak，特別是 WebSocket 相關代碼
 - **安裝：** `go get go.uber.org/goleak@latest`
+
+## 111. coder/websocket vs gorilla/websocket 遷移評估（DAY-057）
+- **現況：** `gorilla/websocket` 在 2022 年底已 archived（不再維護）
+- **替代方案：** `coder/websocket`（原 `nhooyr/websocket`）— 使用 `context.Context`，並發寫入安全，積極維護
+- **遷移成本評估：**
+  - API 差異：gorilla 用 `conn.WriteMessage()`，coder 用 `conn.Write(ctx, ...)`
+  - 並發寫入：gorilla 需要自己加 mutex，coder 內建安全
+  - 壓縮：兩者都支援 permessage-deflate
+  - 測試：需要重寫 hub_test.go 的 mock
+- **建議：** 現有 gorilla 代碼穩定運作，遷移風險 > 收益。記錄為技術債，下次大重構時處理
+- **來源：** [websocket.org Go guide](https://websocket.org/guides/languages/go/)（2026-03-14 更新）
+- **教訓：** archived 不等於 broken，但新專案應選 coder/websocket
+
+## 112. Go 大型檔案拆分策略（DAY-057）
+- **觸發條件：** 單一 .go 檔案超過 1500 行，且有明顯的功能邊界
+- **拆分原則：**
+  1. 同一個 package，不需要改 import 路徑
+  2. 按功能邊界拆分（jackpot_handler.go / mission_handler.go）
+  3. 新檔案的 package 宣告要一致（`package game`）
+  4. 原檔案留下注釋說明函數已移到哪個檔案
+  5. 拆分後立即執行 `go build ./...` + `go test ./...` 確認
+- **效果：** game.go 從 1740 行縮減到 1557 行（-10.5%）
+- **注意：** Go 同一 package 的多個 .go 檔案共享所有 struct 欄位和函數，不需要額外 import
+- **教訓：** 拆分時不要改函數簽名，只是搬移，確保零風險

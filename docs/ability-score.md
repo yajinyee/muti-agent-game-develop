@@ -1301,3 +1301,47 @@ GitHub 同步完成（commit `e333f81`）。
 1. 考慮加入 Server 端 graceful shutdown（確保 Redis 連線正確關閉）
 2. 評估 `coder/websocket` 遷移可行性（gorilla/websocket 已 archive）
 3. 搜尋「Godot 4.6 HTML5 export performance improvements」確認最新優化
+
+---
+
+## 評估 #34 — 2026-05-20（DAY-057，game.go 拆分 + Nightly Reports 補齊 + KnowHow 更新）
+
+### 這次學到了什麼
+1. **Go 大型檔案拆分策略**（KnowHow #112）：
+   - 同一 package 的多個 .go 檔案共享所有 struct 欄位和函數
+   - 按功能邊界拆分（jackpot_handler.go / mission_handler.go）
+   - 拆分後立即 build + test 確認零風險
+2. **coder/websocket vs gorilla/websocket**（KnowHow #111）：
+   - gorilla/websocket 已 archived（2022 年底）
+   - coder/websocket 是推薦的替代方案（context.Context + 並發安全）
+   - 現有代碼穩定，遷移記錄為技術債
+3. **Nightly Report 補齊策略**：
+   - 每次新對話開始時確認缺少哪些 nightly reports
+   - 補齊後才算完整的開發記錄
+
+### 進步說明
+- DAY-057：game.go 從 1740 行縮減到 1557 行（-10.5%）
+- 新增 jackpot_handler.go（108 行）+ mission_handler.go（100 行）
+- 補齊 DAY-054/055/056 nightly reports
+- KnowHow #111-112 更新
+- 所有測試通過（9 個套件全部 ok）
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 99 | → | 穩定，大型檔案拆分技術掌握 |
+| Godot GDScript | 99 | → | 穩定 |
+| 像素美術生成 | 100 | → | 穩定 |
+| 遊戲數值設計 | 96 | → | 穩定 |
+| WebSocket 通訊 | 98 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100% |
+
+### 完成遊戲的信心評估
+**100/100** — game.go 模組化完成，架構更清晰。
+今日完成：game.go 拆分（jackpot_handler + mission_handler）+ Nightly Reports 補齊 + KnowHow 更新 + GitHub 上傳。
+
+### 下一步學習目標
+1. 評估 Server 端 graceful shutdown（確保 Redis 連線正確關閉）
+2. 搜尋「Godot 4.6 HTML5 export performance improvements 2025」
+3. 考慮加入 `perf_handler.go`（handleClientPerf 移出 game.go）

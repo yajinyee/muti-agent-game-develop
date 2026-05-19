@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-056 goleak goroutine洩漏偵測 + 全套件測試通過）
+## 最後更新：2026-05-20（DAY-057 game.go 拆分 + Nightly Reports 補齊）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,17 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-055 更新（自主觸發）：** 觀戰者系統完整實作 ✅
+- **DAY-057 更新（自主觸發）：** game.go 拆分 + Nightly Reports 補齊 ✅
+  - `server/internal/game/jackpot_handler.go`：Jackpot 相關 handler 獨立腳本（108 行）
+    - `GetJackpotSnapshot()` / `GetJackpotHistory()` / `GetJackpotDailyStats()`
+    - `handleJackpotWin()` / `broadcastJackpot()` / `saveJackpotState()` / `loadJackpotState()`
+  - `server/internal/game/mission_handler.go`：Mission 相關 handler 獨立腳本（100 行）
+    - `sendMissionUpdate()` / `updateMissionProgress()` / `handleClaimMission()`
+  - `game.go`：從 1740 行縮減到 1557 行（-10.5%）
+  - 補齊 DAY-054/055/056 nightly reports
+  - KnowHow #111-112 更新（coder/websocket 評估 + Go 大型檔案拆分策略）
+  - 能力評估 #34 更新
+  - 所有測試通過（9 個套件全部 ok）
   - `hub.go`：新增 `BroadcastToPlayers()` — 只廣播給 RolePlayer，跳過 RoleSpectator
   - `main.go`：觀戰者連線時廣播 `spectator_join` 給所有玩家（spectator_id + spectator_count）
   - `GameManager.gd`：新增 `spectator_joined` 訊號 + `_handle_spectator_join()` 處理函數
