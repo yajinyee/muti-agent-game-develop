@@ -194,7 +194,7 @@ func main() {
 		if missionResetSec < 0 {
 			missionResetSec = 0
 		}
-		fmt.Fprintf(w, `{"status":"ok","version":"%s","uptime":"%s","uptime_sec":%d,"clients":%d,"max_players":%d,"spectators":%d,"game_state":"%s","mission_reset_at":"%s","mission_reset_in_sec":%d}`,
+		fmt.Fprintf(w, `{"status":"ok","version":"%s","uptime":"%s","uptime_sec":%d,"clients":%d,"max_players":%d,"spectators":%d,"game_state":"%s","mission_reset_at":"%s","mission_reset_in_sec":%d,"avg_ping_ms":%.1f}`,
 			version,
 			uptimeStr,
 			uptimeSec,
@@ -204,6 +204,7 @@ func main() {
 			g.GetState(),
 			missionResetStr,
 			missionResetSec,
+			func() float64 { avg, _, _ := hub.GetPingStats(); return avg }(),
 		)
 	})
 
@@ -380,6 +381,40 @@ func main() {
 		fmt.Fprintf(w, "# HELP chiikawa_active_targets Current number of active targets on screen\n")
 		fmt.Fprintf(w, "# TYPE chiikawa_active_targets gauge\n")
 		fmt.Fprintf(w, "chiikawa_active_targets %d\n\n", g.GetActiveTargetCount())
+
+		// Ping latency 統計（DAY-044）
+		// 追蹤 Server 發送 ping 到收到 pong 的往返延遲
+		avgPingMs, maxPingMs, pingCount := hub.GetPingStats()
+		fmt.Fprintf(w, "# HELP chiikawa_ws_ping_latency_avg_ms Average WebSocket ping/pong round-trip latency in milliseconds\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_ws_ping_latency_avg_ms gauge\n")
+		fmt.Fprintf(w, "chiikawa_ws_ping_latency_avg_ms %.2f\n\n", avgPingMs)
+
+		fmt.Fprintf(w, "# HELP chiikawa_ws_ping_latency_max_ms Maximum WebSocket ping/pong round-trip latency in milliseconds\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_ws_ping_latency_max_ms gauge\n")
+		fmt.Fprintf(w, "chiikawa_ws_ping_latency_max_ms %d\n\n", maxPingMs)
+
+		fmt.Fprintf(w, "# HELP chiikawa_ws_ping_samples_total Total number of ping/pong latency samples collected\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_ws_ping_samples_total counter\n")
+		fmt.Fprintf(w, "chiikawa_ws_ping_samples_total %d\n\n", pingCount)
+
+		// Per-client ping latency（DAY-044）
+		clientLatencies := hub.GetClientPingLatencies()
+		if len(clientLatencies) > 0 {
+			fmt.Fprintf(w, "# HELP chiikawa_ws_client_ping_ms Latest ping/pong latency per client in milliseconds\n")
+			fmt.Fprintf(w, "# TYPE chiikawa_ws_client_ping_ms gauge\n")
+			for clientID, latMs := range clientLatencies {
+				// 只顯示有效延遲（> 0 表示已收到至少一次 pong）
+				if latMs > 0 {
+					// 截短 clientID 避免 label 過長
+					shortID := clientID
+					if len(shortID) > 8 {
+						shortID = shortID[:8]
+					}
+					fmt.Fprintf(w, "chiikawa_ws_client_ping_ms{client=%q} %d\n", shortID, latMs)
+				}
+			}
+			fmt.Fprintf(w, "\n")
+		}
 	})
 
 	// pprof 監控端點（Debug 模式下啟用，用於記憶體/goroutine 分析）

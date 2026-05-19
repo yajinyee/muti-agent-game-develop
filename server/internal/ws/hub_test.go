@@ -230,3 +230,79 @@ func TestRateLimiterGameDefaults(t *testing.T) {
 		t.Error("expected rate limit to reject after burst exhausted")
 	}
 }
+
+// ── Ping Latency 測試（DAY-044）──────────────────────────────
+
+// TestRecordPingLatency 確認 ping latency 統計正確累積
+func TestRecordPingLatency(t *testing.T) {
+	h := NewHub()
+
+	// 初始狀態：無樣本
+	avg, max, count := h.GetPingStats()
+	if count != 0 {
+		t.Errorf("expected count=0, got %d", count)
+	}
+	if avg != 0 {
+		t.Errorf("expected avg=0, got %f", avg)
+	}
+	if max != 0 {
+		t.Errorf("expected max=0, got %d", max)
+	}
+
+	// 記錄三次延遲：10ms, 20ms, 30ms
+	h.RecordPingLatency(10)
+	h.RecordPingLatency(20)
+	h.RecordPingLatency(30)
+
+	avg, max, count = h.GetPingStats()
+	if count != 3 {
+		t.Errorf("expected count=3, got %d", count)
+	}
+	if avg != 20.0 {
+		t.Errorf("expected avg=20.0, got %f", avg)
+	}
+	if max != 30 {
+		t.Errorf("expected max=30, got %d", max)
+	}
+}
+
+// TestRecordPingLatencyMax 確認最大值追蹤正確
+func TestRecordPingLatencyMax(t *testing.T) {
+	h := NewHub()
+
+	// 亂序記錄，確認最大值正確
+	h.RecordPingLatency(50)
+	h.RecordPingLatency(100)
+	h.RecordPingLatency(25)
+	h.RecordPingLatency(200)
+	h.RecordPingLatency(75)
+
+	_, max, count := h.GetPingStats()
+	if count != 5 {
+		t.Errorf("expected count=5, got %d", count)
+	}
+	if max != 200 {
+		t.Errorf("expected max=200, got %d", max)
+	}
+}
+
+// TestGetClientPingLatencies 確認 per-client 延遲查詢
+func TestGetClientPingLatencies(t *testing.T) {
+	h := NewHub()
+
+	// 加入兩個客戶端，設定不同的 ping 延遲
+	c1 := &Client{ID: "c1", Role: RolePlayer, send: make(chan []byte, 1), lastPingLatMs: 15}
+	c2 := &Client{ID: "c2", Role: RolePlayer, send: make(chan []byte, 1), lastPingLatMs: 42}
+	h.mu.Lock()
+	h.clients["c1"] = c1
+	h.clients["c2"] = c2
+	h.mu.Unlock()
+
+	latencies := h.GetClientPingLatencies()
+	if latencies["c1"] != 15 {
+		t.Errorf("expected c1 latency=15, got %d", latencies["c1"])
+	}
+	if latencies["c2"] != 42 {
+		t.Errorf("expected c2 latency=42, got %d", latencies["c2"])
+	}
+}

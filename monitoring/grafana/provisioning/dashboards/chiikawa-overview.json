@@ -350,6 +350,88 @@
           }
         }
       }
+    },
+    {
+      "id": 16,
+      "title": "WebSocket 平均 Ping 延遲（ms）",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 40, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "chiikawa_ws_ping_latency_avg_ms",
+          "legendFormat": "Avg Ping"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 100 },
+              { "color": "red", "value": 300 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 17,
+      "title": "WebSocket 最大 Ping 延遲（ms）",
+      "type": "stat",
+      "gridPos": { "x": 6, "y": 40, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "chiikawa_ws_ping_latency_max_ms",
+          "legendFormat": "Max Ping"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 200 },
+              { "color": "red", "value": 500 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 18,
+      "title": "WebSocket Ping 延遲趨勢",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 40, "w": 12, "h": 4 },
+      "targets": [
+        {
+          "expr": "chiikawa_ws_ping_latency_avg_ms",
+          "legendFormat": "平均延遲 (ms)"
+        },
+        {
+          "expr": "chiikawa_ws_ping_latency_max_ms",
+          "legendFormat": "最大延遲 (ms)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "custom": {
+            "fillOpacity": 10
+          }
+        }
+      }
     }
   ]
 }

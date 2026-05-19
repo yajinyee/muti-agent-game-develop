@@ -91,6 +91,11 @@ type Client struct {
 	PlayerID string
 	Role     ClientRole   // 客戶端角色（DAY-023）
 	limiter  *rateLimiter // per-client 速率限制（DAY-036）
+
+	// Ping latency 追蹤（DAY-044）
+	lastPingSentAt time.Time  // 最後一次發送 ping 的時間
+	lastPingLatMs  int64      // 最後一次 ping/pong 延遲（毫秒）
+	pingMu         sync.Mutex // 保護 ping 欄位
 }
 
 // Hub 管理所有 WebSocket 連線
@@ -111,6 +116,11 @@ type Hub struct {
 
 	// 訊息類型計數器（DAY-043，供 /metrics 顯示各類型訊息頻率）
 	msgTypeCounts sync.Map // MessageType -> *atomic.Int64
+
+	// Ping latency 統計（DAY-044，供 /metrics 顯示連線品質）
+	pingLatencySum atomic.Int64 // 所有 ping/pong 延遲總和（毫秒）
+	pingLatencyCount atomic.Int64 // ping/pong 樣本數
+	pingLatencyMax   atomic.Int64 // 最大延遲（毫秒）
 }
 
 // NewHub 建立新 Hub
@@ -249,6 +259,48 @@ func (h *Hub) GetMsgTypeCounts() map[string]int64 {
 	return result
 }
 
+// RecordPingLatency 記錄一次 ping/pong 延遲（DAY-044）
+// 由 writePump 在收到 pong 時呼叫
+func (h *Hub) RecordPingLatency(latencyMs int64) {
+	h.pingLatencySum.Add(latencyMs)
+	h.pingLatencyCount.Add(1)
+	// 更新最大值（CAS loop）
+	for {
+		cur := h.pingLatencyMax.Load()
+		if latencyMs <= cur {
+			break
+		}
+		if h.pingLatencyMax.CompareAndSwap(cur, latencyMs) {
+			break
+		}
+	}
+}
+
+// GetPingStats 取得 ping latency 統計（DAY-044）
+// 回傳 (avgMs, maxMs, sampleCount)
+func (h *Hub) GetPingStats() (avgMs float64, maxMs int64, count int64) {
+	count = h.pingLatencyCount.Load()
+	maxMs = h.pingLatencyMax.Load()
+	if count > 0 {
+		avgMs = float64(h.pingLatencySum.Load()) / float64(count)
+	}
+	return
+}
+
+// GetClientPingLatencies 取得所有客戶端的最新 ping 延遲（DAY-044）
+// 回傳 map[clientID]latencyMs，供 /metrics 顯示 per-client 延遲
+func (h *Hub) GetClientPingLatencies() map[string]int64 {
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	result := make(map[string]int64, len(h.clients))
+	for id, c := range h.clients {
+		c.pingMu.Lock()
+		result[id] = c.lastPingLatMs
+		c.pingMu.Unlock()
+	}
+	return result
+}
+
 // ServeWS 處理 WebSocket 升級請求（一般玩家）
 func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, clientID string) {
 	h.serveWSWithRole(w, r, clientID, RolePlayer)
@@ -294,6 +346,16 @@ func (c *Client) readPump(h *Hub) {
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error {
 		c.conn.SetReadDeadline(time.Now().Add(pongWait))
+		// 計算 ping/pong 延遲（DAY-044）
+		c.pingMu.Lock()
+		if !c.lastPingSentAt.IsZero() {
+			latencyMs := time.Since(c.lastPingSentAt).Milliseconds()
+			c.lastPingLatMs = latencyMs
+			c.pingMu.Unlock()
+			c.Hub.RecordPingLatency(latencyMs)
+		} else {
+			c.pingMu.Unlock()
+		}
 		return nil
 	})
 
@@ -376,6 +438,10 @@ func (c *Client) writePump() {
 
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+			// 記錄 ping 發送時間（DAY-044，用於計算 pong 延遲）
+			c.pingMu.Lock()
+			c.lastPingSentAt = time.Now()
+			c.pingMu.Unlock()
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}

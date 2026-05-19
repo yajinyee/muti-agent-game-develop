@@ -1960,3 +1960,18 @@ BONUS_MULT = 20-50x（Prototype 展示版）
   - 7+ 連擊：加螢幕扭曲 + 第二閃光環（最強烈）
 - **設計原則：** 視覺強度要和連擊難度成正比，7+ 連擊是非常罕見的成就，值得最強烈的反饋
 - **教訓：** 遊戲 juice 的核心是「反饋強度 = 玩家成就感」，不能讓所有連擊看起來一樣
+
+## 83. WebSocket Ping/Pong Latency 追蹤（DAY-044）
+- **技術：** 在 `writePump` 發送 ping 前記錄 `time.Now()`，在 `readPump` 的 `SetPongHandler` 中計算 `time.Since(lastPingSentAt).Milliseconds()`
+- **注意：** `lastPingSentAt` 需要 mutex 保護（`pingMu`），因為 writePump 和 readPump 在不同 goroutine
+- **CAS 更新最大值：** 用 `CompareAndSwap` loop 更新 `pingLatencyMax`，避免 mutex 開銷
+- **per-client 延遲：** 每個 Client 儲存 `lastPingLatMs`，`GetClientPingLatencies()` 遍歷所有 client 取得快照
+- **Prometheus 格式：** `chiikawa_ws_client_ping_ms{client="abc12345"} 42`，clientID 截短到 8 字元避免 label 過長
+- **教訓：** ping/pong 延遲是 WebSocket 連線品質的最直接指標，應該是監控的標配
+
+## 84. Grafana 面板設計原則（DAY-044 總結）
+- **stat 面板：** 適合顯示當前值（連線數、延遲、RTP），加顏色警告閾值讓運維一眼看出問題
+- **timeseries 面板：** 適合顯示趨勢（延遲變化、訊息頻率），`fillOpacity: 10` 讓曲線下方有淡色填充
+- **面板佈局：** 每行 24 格，stat 用 4-6 格，timeseries 用 12-24 格
+- **單位設定：** `"unit": "ms"` 讓 Grafana 自動格式化（顯示 42ms 而非 42）
+- **教訓：** 監控面板要從「運維視角」設計，不是「開發視角」，優先顯示「有沒有問題」而非「技術細節」

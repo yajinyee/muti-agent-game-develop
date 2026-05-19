@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-043 訊息類型統計 + Combo 5+連擊視覺強化 + Grafana 15面板）
+## 最後更新：2026-05-19（DAY-044 Ping Latency 統計 + Grafana 18面板 + 測試 13/13）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,8 +8,9 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（15個面板），TargetPool 物件池，可見性剔除，訊息類型統計**
+- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（18個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤**
 - **DAY-043 更新：** `hub.go` 加入 `msgTypeCounts sync.Map` + `IncrMsgType` + `GetMsgTypeCounts` ✅，`/metrics` 加入 `chiikawa_ws_msg_type_total` 指標 ✅，`HitEffect.gd` 強化 5+/7+ 連擊特效（全畫面閃光+衝擊波+螢幕扭曲）✅，Grafana dashboard 升級到 15 個面板 ✅
+- **DAY-044 更新：** `hub.go` 加入 Ping Latency 追蹤（per-client + 全局 avg/max/count）✅，`/metrics` 加入 3 個 ping 指標 + per-client 延遲 ✅，`/health` 加入 `avg_ping_ms` ✅，Grafana dashboard 升級到 18 個面板 ✅，hub_test.go 新增 3 個測試（13/13 全通過）✅
 
 ---
 
@@ -296,6 +297,14 @@
 - [x] **Combo 5+/7+ 連擊視覺強化**（DAY-043）：
   - `HitEffect.gd`：5+ 連擊加全畫面閃光 + 衝擊波，7+ 連擊加螢幕扭曲 + 第二閃光環
   - Gameplay Feel 提升：高連擊有更強烈的視覺反饋，讓玩家感受到「這次連擊很厲害」
+- [x] **Server Ping Latency 統計**（DAY-044）：
+  - `hub.go`：Client 加入 `lastPingSentAt`/`lastPingLatMs`/`pingMu`，writePump 記錄 ping 時間，pong handler 計算延遲
+  - `hub.go`：Hub 加入 `pingLatencySum`/`pingLatencyCount`/`pingLatencyMax` 原子計數器
+  - `hub.go`：`RecordPingLatency()`、`GetPingStats()`、`GetClientPingLatencies()` 方法
+  - `main.go`：`/metrics` 加入 `chiikawa_ws_ping_latency_avg_ms`、`chiikawa_ws_ping_latency_max_ms`、`chiikawa_ws_ping_samples_total`、`chiikawa_ws_client_ping_ms{client="..."}` 指標
+  - `main.go`：`/health` 加入 `avg_ping_ms` 欄位
+  - `hub_test.go`：新增 3 個測試（13/13 全通過）
+  - Grafana dashboard：從 15 個面板升級到 18 個面板（avg ping stat + max ping stat + 延遲趨勢 timeseries）
 - Server：Go + WebSocket，Port 7777
 - Client：Godot 4.6.2（GDScript），HTML5 匯出
 - 通訊協定：WebSocket + JSON，每訊息獨立 frame
