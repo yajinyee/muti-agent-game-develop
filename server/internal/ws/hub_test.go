@@ -3,7 +3,14 @@ package ws
 
 import (
 	"testing"
+
+	"go.uber.org/goleak"
 )
+
+// TestMain 使用 goleak 偵測 goroutine 洩漏（DAY-056）
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m)
+}
 
 // TestClientRole 確認 ClientRole 常數定義正確
 func TestClientRole(t *testing.T) {

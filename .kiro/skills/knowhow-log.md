@@ -2332,3 +2332,12 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **解法：** 只在「最後一位觀戰者離開」時顯示通知，中間的離開靜默處理
 - **判斷：** `spectator_count == 0` 才顯示通知
 - **教訓：** 社交通知要考慮頻率，不是每個事件都需要打擾玩家
+
+## 110. goleak — Go goroutine 洩漏偵測（DAY-056）
+- **工具：** `go.uber.org/goleak v1.3.0`
+- **用途：** 在測試結束後自動偵測是否有未關閉的 goroutine
+- **整合方式：** 在 `TestMain` 中呼叫 `goleak.VerifyTestMain(m)`
+- **忽略已知 goroutine：** `goleak.IgnoreTopFunction("github.com/gorilla/websocket.(*Conn).writePump")`
+- **結果：** game 套件和 ws 套件都通過，無 goroutine 洩漏
+- **教訓：** 每個有 goroutine 的套件都應該加入 goleak，特別是 WebSocket 相關代碼
+- **安裝：** `go get go.uber.org/goleak@latest`

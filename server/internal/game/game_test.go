@@ -8,7 +8,17 @@ import (
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/target"
 	"digital-twin/server/internal/ws"
+	"go.uber.org/goleak"
 )
+
+// TestMain 使用 goleak 偵測 goroutine 洩漏（DAY-056）
+func TestMain(m *testing.M) {
+	goleak.VerifyTestMain(m,
+		// 忽略 gorilla/websocket 內部的已知 goroutine（技術債，KnowHow #106）
+		goleak.IgnoreTopFunction("github.com/gorilla/websocket.(*Conn).writePump"),
+		goleak.IgnoreTopFunction("github.com/gorilla/websocket.(*Conn).readPump"),
+	)
+}
 
 // ── 輔助函數 ──────────────────────────────────────────
 
