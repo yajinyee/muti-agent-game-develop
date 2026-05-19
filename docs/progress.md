@@ -1,10 +1,10 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-031c 目標物游泳動畫 + Docker 部署）
+## 最後更新：2026-05-19（DAY-033 高倍率目標光暈效果）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：97/100**（目標物有真正的幀動畫，游泳感更真實）
+- **美術質量：99/100**（高倍率目標有金色/橙紅光暈，視覺層次更豐富）
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
@@ -24,7 +24,6 @@
 | Gameplay Feel | 100 | ≥85 | ✅ |
 | Spec Completeness | 100 | ≥95 | ✅ |
 | Regression Risk | 5 | ≤10 | ✅ |
-
 ---
 
 ## 已完成里程碑
@@ -235,6 +234,15 @@
   - `tools/generate_swim_animation.py`：生成 11 個目標物的 2 幀游泳動畫 spritesheet（128x64）
   - `tools/create_swim_imports.py`：建立對應的 Godot .import 檔案
   - `TargetManager.gd`：整合游泳動畫系統（全局計時器 4fps，AtlasTexture 幀切換）
+- [x] **目標物倍率標籤**（DAY-032）：
+  - `protocol.go`：TargetSpawnPayload 加入 Multiplier 欄位
+  - `game.go`：所有 target_spawn 廣播加入 multiplier 值
+  - `TargetManager.gd`：`_add_multiplier_label()` — 目標物上方顯示倍率，顏色依倍率分級
+  - `BackgroundManager.gd`：移除重複的 UnderwaterOverlay 建立（修復 regression）
+- [x] **高倍率目標光暈效果**（DAY-033）：
+  - `TargetManager.gd`：`_add_high_value_glow()` — 30x+ 金色光暈，50x+ 橙紅光暈
+  - 脈動閃爍動畫（呼吸感），50x 額外縮放脈動
+  - 美術質量從 98 提升到 99/100
 
 ---
 

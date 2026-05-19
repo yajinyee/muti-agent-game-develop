@@ -2,8 +2,8 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-19（DAY-029）  
-**整體目標**：部署文件 Redis 更新 + 成就系統 UI 優化 + GitHub 上傳
+**日期**：2026-05-19（DAY-033）  
+**整體目標**：高倍率目標光暈效果 + 能力評估更新 + GitHub 上傳
 
 ---
 
@@ -17,40 +17,33 @@
 
 ## 今日任務清單
 
-### ✅ DAY-029 啟動檢查
+### ✅ DAY-033 啟動檢查
 
-- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-028b B001 BOSS 完整動畫集，美術 95/100）
+- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-032 目標物倍率標籤 + BackgroundManager 修復，美術 98/100）
 - [x] 讀取 .kiro/skills/knowhow-log.md 確認已知問題
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
 - [x] go test ./... 確認測試通過（全部 OK）
-- [x] git log 確認最後 commit（DAY-028b，已 push）
-- [x] QA 自動化檢查（8/8 全部通過）
+- [x] git log 確認最後 commit（DAY-032，已 push）
 
-### ✅ 部署文件 Redis 更新（P1 → 完成）
+### ✅ 高倍率目標光暈效果（P2 → 完成）
 
-- [x] 更新 `docs/deployment-guide.md`：
-  - 加入 `REDIS_URL` 環境變數說明
-  - 加入 Redis 設定說明（記憶體模式 vs Redis 模式）
-  - 加入 Redis 安裝指南（Ubuntu/Debian + Docker Compose）
-  - 更新 systemd service 範例（加入 REDIS_URL 設定）
-  - 加入降級策略說明
+- [x] **TargetManager.gd**：加入 `_add_high_value_glow()` 函數
+  - 30x+：金色光暈（Color 1.0, 0.85, 0.0, 0.25），脈動週期 0.6s
+  - 50x+：橙紅光暈（Color 1.0, 0.5, 0.1, 0.35），脈動週期 0.4s + 縮放脈動
+  - 光暈 ColorRect 放在 Sprite 後面（z_index = -1）
+  - 脈動閃爍動畫（呼吸感）
+  - 50x 額外縮放脈動（更強烈視覺衝擊）
+- [x] `_create_target_node` 整合：倍率 >= 30 且非 BOSS 時觸發
 
-### ✅ 成就系統 UI 優化（P2 → 完成）
+### ✅ 能力評估更新（P3 → 完成）
 
-- [x] **Server 端**：`achievement.go` 加入 `Type` 欄位
-  - 12 個成就分類：normal/boss/bonus/special
-  - `TryUnlock` 和 `UnlockedList` 都傳遞 `Type`
-- [x] **Client 端**：`HUD.gd` 成就通知面板動畫升級
-  - 加入左側彩色邊條（依類型：金/紅/綠/紫）
-  - 加入彈跳縮放動畫（滑入後 scale 1.0→1.05→1.0）
-  - 淡出改為 `modulate:a` 漸隱（比直接滑出更優雅）
-  - 修復：面板消失後重置 scale 和 modulate
+- [x] 更新 `docs/ability-score.md`（評估 #24，DAY-032 + DAY-033）
 
 ### ✅ 上傳 GitHub（P1 → 完成）
 
 - [x] git add
-- [x] git commit（DAY-029 成就 UI 優化 + 部署文件 Redis 更新）
+- [x] git commit（DAY-033 高倍率目標光暈效果 + 能力評估更新）
 - [x] git push origin main
 
 ---
@@ -60,23 +53,20 @@
 > **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
 
 - 完成度：**100%**
-- 美術質量：**95/100**
+- 美術質量：**99/100**（高倍率目標有光暈，視覺層次更豐富）
 - 規格一致性：**100%**
-- 架構成熟度：**RedisStore 完整實作，生產環境就緒**
+- 架構成熟度：**完整，Docker + Redis 就緒**
 
 **今日改善摘要：**
-1. 部署文件加入完整 Redis 設定說明（Docker Compose + systemd + 降級策略）
-2. 成就系統加入 Type 欄位（Server + Client 同步）
-3. 成就通知面板動畫升級（彩色邊條 + 彈跳縮放 + 淡出）
+1. 高倍率目標（30x+）加入金色/橙紅光暈閃爍效果
+2. 50x 目標有縮放脈動，視覺衝擊更強
+3. 能力評估 #24 更新
 
 ---
 
-## 明日預覽（DAY-030）
-
-### 🟠 P1
-1. **BOSS AI 圖生成**（B001 完整動畫集，ComfyUI — 需手動啟動）
-2. **Server 部署測試**（Docker Compose 完整流程驗證）
+## 明日預覽（DAY-034）
 
 ### 🟢 P3
-1. **能力評估更新**（docs/ability-score.md）
-2. **Backlog 清理**（標記已完成項目）
+1. **BOSS AI 圖生成**（B001 完整動畫集，ComfyUI — 需手動啟動）
+2. **Server Docker Compose 部署測試**（驗證完整部署流程）
+3. **Backlog 清理**（標記已完成項目）

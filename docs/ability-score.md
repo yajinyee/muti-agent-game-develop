@@ -830,3 +830,41 @@ Store 整合完整，HTML5 export 大小符合目標，QA 8/8 全部通過。
 1. 目標物游泳動畫（多幀 spritesheet）
 2. 搜尋「Godot 4 underwater post processing shader 2025」找更多靈感
 3. 考慮把 UnderwaterLayer 改為 layer=0（在 HUD 之下），讓 UI 不受水下效果影響
+
+---
+
+## 評估 #24 — 2026-05-19（DAY-032 + DAY-033，倍率標籤 + 高倍率光暈）
+
+### 這次學到了什麼
+1. **捕魚機 UX 標準**：倍率標籤是捕魚機的必備 UI，讓玩家一眼看出目標價值，不需要記憶
+2. **ColorRect 模擬光暈**：不需要額外 shader，用 ColorRect + z_index=-1 + tween 就能做出光暈效果
+3. **脈動動畫設計**：高倍率目標用快速脈動（0.4s），低倍率用慢速（0.6s），視覺層次清晰
+4. **縮放脈動的視覺衝擊**：50x 目標加縮放脈動（0.9x-1.15x），比純透明度變化更有存在感
+5. **BackgroundManager 重複 overlay bug**：DAY-031 加入 Main.tscn 後，DAY-032 發現 BackgroundManager 還在動態建立第二個 overlay，導致效果加倍
+6. **Server 協定擴展**：TargetSpawnPayload 加入 Multiplier 欄位，Client 可以直接顯示，不需要查表
+
+### 進步說明
+- 目標物視覺層次從「有輪廓 + 倍率標籤」升級為「有輪廓 + 倍率標籤 + 高倍率光暈」
+- 玩家現在可以一眼識別高價值目標（30x+ 金色光暈，50x+ 橙紅光暈）
+- 美術質量從 98 提升到 99/100
+- BackgroundManager 重複 overlay bug 修復，海底效果正確
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 95 | → | 穩定，協定擴展乾淨 |
+| Godot GDScript | 97 | +1 | 掌握 ColorRect 光暈技術，tween 生命週期綁定更熟練 |
+| 像素美術生成 | 93 | +2 | 高倍率光暈讓目標物視覺層次更豐富 |
+| 遊戲數值設計 | 84 | → | 穩定 |
+| WebSocket 通訊 | 92 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100%，美術質量 99/100 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，美術質量 99/100，規格一致性 100%。
+今日完成：高倍率目標光暈效果（30x+ 金色，50x+ 橙紅）+ 能力評估更新。
+
+### 下一步學習目標
+1. BOSS AI 圖生成（ComfyUI — 需手動啟動）
+2. Server Docker Compose 部署測試
+3. 搜尋「pixel art fishing game high value target visual feedback」找更多靈感

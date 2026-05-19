@@ -1646,3 +1646,17 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **解決：** 每次 git 操作前設定 `$env:GIT_TMPDIR = "C:\Users\...\AppData\Local\Temp"`
 - **永久解決：** `git config core.tmpdir "C:/Users/.../AppData/Local/Temp"`
 - **教訓：** Windows 上 Norton 防毒可能干擾 git 的臨時檔案操作
+
+## 83. ColorRect 模擬光暈效果（不需要 shader）
+- **用途：** 高倍率目標物的金色/橙紅光暈閃爍
+- **技術：** ColorRect + z_index=-1 + tween 脈動
+- **關鍵：** `container.move_child(glow, 0)` 確保光暈在最底層（Sprite 後面）
+- **脈動設計：** 50x 用 0.4s 快速脈動 + 縮放（0.9x-1.15x），30x 用 0.6s 慢速脈動
+- **優點：** 比 shader 更省資源，不會和 outline shader 衝突
+- **教訓：** 簡單的光暈效果用 ColorRect 就夠了，不要過度工程化
+
+## 84. 捕魚機 UX 標準：倍率標籤是必備元素
+- **原則：** 玩家不應該需要記憶每個目標的倍率，要直接顯示在目標物上
+- **實作：** 目標物上方 Label，顏色依倍率分級（白灰/淡綠/黃/金/橙紅）
+- **Server 端：** TargetSpawnPayload 加入 Multiplier 欄位，Client 直接使用
+- **教訓：** 遊戲 UX 設計要讓玩家「零學習成本」，資訊要直接呈現在畫面上

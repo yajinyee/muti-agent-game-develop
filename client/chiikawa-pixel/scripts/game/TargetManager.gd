@@ -528,6 +528,11 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier > 0.0 and target_type != "boss":
 		_add_multiplier_label(container, multiplier, target_type)
 
+	# 高倍率目標光暈效果（30x+ 有金色光暈閃爍，50x 有更強烈的橙紅光暈）
+	# 讓玩家一眼識別高價值目標，增加遊戲爽感
+	if multiplier >= 30.0 and target_type != "boss":
+		_add_high_value_glow(container, multiplier)
+
 	# 游泳動畫：輕微上下搖擺 + 旋轉傾斜（讓目標物有生命感）
 	# T103/T104 已有旋轉搖晃，不再加上下搖擺
 	# BOSS 不加（有自己的移動邏輯）
@@ -1035,3 +1040,43 @@ func _add_multiplier_label(container: Node2D, multiplier: float, target_type: St
 	var float_tween = label.create_tween().set_loops()
 	float_tween.tween_property(label, "position:y", -56.0, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
 	float_tween.tween_property(label, "position:y", -52.0, 0.8).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+## 高倍率目標光暈效果（30x+ 金色光暈，50x 橙紅光暈）
+## 用 ColorRect 模擬光暈，不需要額外 shader
+func _add_high_value_glow(container: Node2D, multiplier: float) -> void:
+	# 光暈顏色和強度依倍率決定
+	var glow_color: Color
+	var glow_size: float
+	var pulse_speed: float
+
+	if multiplier >= 50.0:
+		# 50x：橙紅光暈，強烈閃爍（T105 金幣魚、T103 流星最高倍率）
+		glow_color = Color(1.0, 0.5, 0.1, 0.35)
+		glow_size = 52.0
+		pulse_speed = 0.4
+	elif multiplier >= 30.0:
+		# 30x：金色光暈，中等閃爍（T104 金草、T102 寶箱怪）
+		glow_color = Color(1.0, 0.85, 0.0, 0.25)
+		glow_size = 44.0
+		pulse_speed = 0.6
+
+	# 建立光暈 ColorRect（圓形用大正方形 + 透明度模擬）
+	var glow = ColorRect.new()
+	glow.name = "HighValueGlow"
+	glow.size = Vector2(glow_size, glow_size)
+	glow.position = Vector2(-glow_size / 2.0, -glow_size / 2.0)
+	glow.color = glow_color
+	glow.z_index = -1  # 在 Sprite 後面
+	container.add_child(glow)
+	container.move_child(glow, 0)  # 移到最底層
+
+	# 脈動閃爍動畫（讓光暈有呼吸感）
+	var glow_tween = glow.create_tween().set_loops()
+	glow_tween.tween_property(glow, "modulate:a", 0.3, pulse_speed).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	glow_tween.tween_property(glow, "modulate:a", 1.0, pulse_speed).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+	# 50x 額外：縮放脈動（更強烈的視覺衝擊）
+	if multiplier >= 50.0:
+		var scale_tween = glow.create_tween().set_loops()
+		scale_tween.tween_property(glow, "scale", Vector2(1.15, 1.15), pulse_speed * 0.8).set_ease(Tween.EASE_IN_OUT)
+		scale_tween.tween_property(glow, "scale", Vector2(0.9, 0.9), pulse_speed * 0.8).set_ease(Tween.EASE_IN_OUT)
