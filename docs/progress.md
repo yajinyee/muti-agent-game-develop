@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-052 AudioManager 快取優化 + Audio Sync 99/100）
+## 最後更新：2026-05-20（DAY-053 HUD.gd 大型腳本拆分 + 三個獨立面板腳本）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（25個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報，Client 端效能歷史 Ring Buffer（100筆），Nightly Report 自動化，Progressive Jackpot 系統（Mini/Major/Grand），Jackpot 特效強化，Session 結算強化，Jackpot 池持久化（Redis SetJSON/GetJSON），Jackpot 每日統計，AudioManager 快取優化（消除 HTML5 首次音效延遲）**
+- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（25個面板），TargetPool 物件池，可見性剔除，訊息類型統計，Ping Latency 追蹤，Client 端效能上報，Client 端效能歷史 Ring Buffer（100筆），Nightly Report 自動化，Progressive Jackpot 系統（Mini/Major/Grand），Jackpot 特效強化，Session 結算強化，Jackpot 池持久化（Redis SetJSON/GetJSON），Jackpot 每日統計，AudioManager 快取優化（消除 HTML5 首次音效延遲），HUD 模組化（JackpotPanel/MissionPanel/SessionStatsPanel 獨立腳本）**
+- **DAY-053 更新（自主觸發）：** HUD.gd 大型腳本拆分 ✅
+  - `scripts/ui/JackpotPanel.gd`：Progressive Jackpot 面板獨立腳本（~250 行）
+    - `setup(font)` 初始化，自己連接 `jackpot_updated` / `jackpot_won` 訊號
+    - 全畫面慶祝 overlay 掛在 CanvasLayer 父節點上
+    - 金幣雨特效、歷史 ticker 輪播
+  - `scripts/ui/MissionPanel.gd`：每日任務面板獨立腳本（~250 行）
+    - `setup(font)` + `create_button(top_bar)` 初始化
+    - `mission_completed_notify` 訊號通知 HUD 顯示成就通知
+    - 任務列表、進度條、領取按鈕、重置倒數
+  - `scripts/ui/SessionStatsPanel.gd`：Session 統計面板獨立腳本（~200 行）
+    - `setup(font)` + `create_button(top_bar)` 初始化
+    - `toggle()` / `show_popup()` API
+    - 自己的 `_process` 處理 60 秒自動彈出
+  - `HUD.gd`：從 2428 行縮減到 1598 行（減少 34%）
+    - 加入 `preload` 三個面板腳本
+    - `_init_mission_panel()` / `_init_session_stats()` / `_init_jackpot_panel()` 初始化
+    - ESC 快捷鍵改為呼叫 `_session_stats_node.toggle()`
+  - KnowHow #101-102 更新（GDScript 拆分策略 + PowerShell 中文亂碼）
 - **DAY-050 更新（自主觸發）：** 進度確認 + Nightly Reports 補齊 + KnowHow 更新 ✅
   - 確認 HEAD 在 DAY-049d，build/vet/test 全部通過（112/112）
   - 補齊 DAY-048/049/050 的 nightly reports

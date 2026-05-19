@@ -2229,3 +2229,32 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **影響範圍：** `play_sfx`、`play_ambient`、`play_bgm`、`play_attack_by_character` 全部更新
 - **效果：** 消除 HTML5 首次音效延遲，Audio Sync 從 97 提升到 99/100
 - **教訓：** 預載入快取要在所有使用點都接入，不能只建立快取但不使用
+
+## 101. GDScript 大型腳本拆分策略（2026-05-20 DAY-053）
+- **問題：** HUD.gd 超過 2400 行，難以維護，每次修改都要在大量程式碼中尋找
+- **解決方案：** 把獨立的 UI 面板拆成獨立的 `.gd` 腳本（JackpotPanel / MissionPanel / SessionStatsPanel）
+- **拆分原則：**
+  1. 每個面板有自己的 `setup(font)` 初始化函數
+  2. 面板自己連接 GameManager 訊號（不依賴 HUD）
+  3. 需要跨面板通訊時用 `signal`（如 `mission_completed_notify`）
+  4. HUD 只持有面板引用（`_mission_panel_node`），不直接操作面板內部
+- **注意事項：**
+  - 面板腳本用 `extends Control`，不是 `extends CanvasLayer`
+  - 全畫面 overlay（如 Jackpot 慶祝）要掛在 `get_parent()`（CanvasLayer）上，不是面板自身
+  - `_ready()` 在 `add_child()` 後才執行，所以 `setup()` 要在 `add_child()` 之後呼叫
+- **結果：** HUD.gd 從 2428 行縮減到 1598 行（減少 34%），三個面板各自獨立維護
+- **教訓：** 超過 1500 行的 GDScript 就應該考慮拆分，按功能模組分離是最好的方式
+
+## 102. PowerShell str_replace 中文亂碼問題（2026-05-20 DAY-053）
+- **問題：** 用 `str_replace` 工具替換含中文的字串時，因為 Windows 編碼問題導致找不到字串
+- **根本原因：** PowerShell 讀取 UTF-8 檔案時，中文字元可能被轉換成亂碼，導致比對失敗
+- **解決方案：** 改用 Python 腳本做字串替換（`open(path, "r", encoding="utf-8")`）
+- **Python 替換模板：**
+  ```python
+  with open(path, "r", encoding="utf-8") as f:
+      content = f.read()
+  new_content = content.replace(old_str, new_str)
+  with open(path, "w", encoding="utf-8") as f:
+      f.write(new_content)
+  ```
+- **教訓：** 任何涉及中文字元的檔案操作，優先用 Python 腳本，不要用 PowerShell 字串操作
