@@ -38,6 +38,8 @@ const (
 	MsgSpectatorJoin MessageType = "spectator_join"  // 觀戰者加入通知（DAY-023）
 	MsgMissionUpdate MessageType = "mission_update"  // 任務進度更新（DAY-037）
 	MsgMissionComplete MessageType = "mission_complete" // 任務完成通知（DAY-037）
+	MsgJackpotUpdate   MessageType = "jackpot_update"   // Jackpot 池更新（DAY-048）
+	MsgJackpotWin      MessageType = "jackpot_win"      // Jackpot 中獎通知（DAY-048）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -246,4 +248,22 @@ type ClientPerfPayload struct {
 	PingMs     int     `json:"ping_ms"`     // Client 端測量的 ping 延遲（ms）
 	Quality    string  `json:"quality"`     // 效能等級（HIGH/MEDIUM/LOW）
 	Timestamp  int64   `json:"timestamp"`   // Unix ms
+}
+
+// ---- Progressive Jackpot（DAY-048）----
+
+// JackpotUpdatePayload Jackpot 池更新廣播（每 5 秒）
+type JackpotUpdatePayload struct {
+	Mini  int `json:"mini"`  // Mini Jackpot 當前金額
+	Major int `json:"major"` // Major Jackpot 當前金額
+	Grand int `json:"grand"` // Grand Jackpot 當前金額
+}
+
+// JackpotWinPayload Jackpot 中獎通知
+type JackpotWinPayload struct {
+	Level       string `json:"level"`        // "mini" / "major" / "grand"
+	Amount      int    `json:"amount"`       // 中獎金額
+	WinnerID    string `json:"winner_id"`    // 中獎玩家 ID
+	WinnerName  string `json:"winner_name"`  // 中獎玩家顯示名稱
+	NewBalance  int    `json:"new_balance"`  // 中獎後餘額（只對中獎玩家有意義）
 }

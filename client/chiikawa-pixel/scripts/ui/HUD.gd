@@ -87,9 +87,10 @@ func _ready() -> void:
 	GameManager.leaderboard_updated.connect(_on_leaderboard_updated)
 	GameManager.achievement_unlocked.connect(_on_achievement_unlocked)
 	GameManager.combo_event.connect(_on_combo_event)  # 連擊事件（DAY-022）
+	GameManager.jackpot_updated.connect(_on_jackpot_updated)  # Jackpot 更新（DAY-048）
+	GameManager.jackpot_won.connect(_on_jackpot_won)          # Jackpot 中獎（DAY-048）
 
-	# 斷線/重連提示
-	NetworkManager.disconnected.connect(_on_disconnected)
+	# 斷線/重連提示	NetworkManager.disconnected.connect(_on_disconnected)
 	NetworkManager.connected.connect(_on_reconnected)
 
 	auto_button.pressed.connect(_on_auto_pressed)
@@ -131,6 +132,7 @@ func _ready() -> void:
 	_create_lobby_overlay()  # 大廳 UI（DAY-020）
 	_ready_missions()         # 每日任務系統（DAY-037）
 	_setup_session_stats()    # Session Stats 面板（DAY-046）
+	_create_jackpot_panel()   # Progressive Jackpot 面板（DAY-048）
 
 ## 套用像素字體到所有 Label
 func _apply_pixel_font() -> void:
@@ -2046,3 +2048,196 @@ func _refresh_session_stats() -> void:
 					val_lbl.add_theme_color_override("font_color", Color(1.0, 0.7, 0.1))
 				elif row_name == "BossRow" and _session_boss_kills > 0:
 					val_lbl.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
+
+# ============================================================
+# Progressive Jackpot 面板（DAY-048）
+# 顯示三個等級的 Jackpot 累積金額，中獎時全畫面慶祝特效
+# ============================================================
+
+var _jackpot_panel: Control = null
+var _jackpot_labels: Dictionary = {}  # level -> Label
+
+## 建立 Jackpot 面板（畫面頂部中央）
+func _create_jackpot_panel() -> void:
+	var panel = Control.new()
+	panel.name = "JackpotPanel"
+	panel.position = Vector2(320, 42)  # TopBar 下方，畫面中央
+	panel.size = Vector2(640, 36)
+	panel.z_index = 10
+	add_child(panel)
+	_jackpot_panel = panel
+
+	# 背景（深色半透明，帶金色邊框）
+	var bg = ColorRect.new()
+	bg.name = "JackpotBG"
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.05, 0.03, 0.12, 0.85)
+	panel.add_child(bg)
+
+	# 金色頂部邊框
+	var top_line = ColorRect.new()
+	top_line.size = Vector2(640, 2)
+	top_line.position = Vector2(0, 0)
+	top_line.color = Color(0.90, 0.75, 0.20, 0.80)
+	panel.add_child(top_line)
+
+	# 三個 Jackpot 等級（Mini / Major / Grand）
+	var levels = [
+		{"key": "mini",  "label": "MINI",  "color": Color(0.6, 0.9, 1.0), "x": 20},
+		{"key": "major", "label": "MAJOR", "color": Color(1.0, 0.8, 0.2), "x": 220},
+		{"key": "grand", "label": "GRAND", "color": Color(1.0, 0.3, 0.3), "x": 420},
+	]
+
+	for lvl in levels:
+		var container = Control.new()
+		container.position = Vector2(lvl["x"], 2)
+		container.size = Vector2(200, 32)
+		panel.add_child(container)
+
+		# 等級標籤
+		var title = Label.new()
+		title.text = lvl["label"]
+		title.position = Vector2(0, 2)
+		title.size = Vector2(80, 14)
+		title.add_theme_font_size_override("font_size", 10)
+		title.add_theme_color_override("font_color", lvl["color"])
+		if is_instance_valid(_pixel_font):
+			title.add_theme_font_override("font", _pixel_font)
+		container.add_child(title)
+
+		# 金額標籤
+		var amount_lbl = Label.new()
+		amount_lbl.name = "Amount_" + lvl["key"]
+		amount_lbl.text = "---"
+		amount_lbl.position = Vector2(0, 16)
+		amount_lbl.size = Vector2(180, 16)
+		amount_lbl.add_theme_font_size_override("font_size", 13)
+		amount_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.7))
+		if is_instance_valid(_pixel_font):
+			amount_lbl.add_theme_font_override("font", _pixel_font)
+		container.add_child(amount_lbl)
+		_jackpot_labels[lvl["key"]] = amount_lbl
+
+## Jackpot 池更新（每 5 秒收到一次）
+func _on_jackpot_updated(data: Dictionary) -> void:
+	if not is_instance_valid(_jackpot_panel):
+		return
+	var levels = ["mini", "major", "grand"]
+	for lvl in levels:
+		var lbl = _jackpot_labels.get(lvl)
+		if is_instance_valid(lbl):
+			var amount = data.get(lvl, 0)
+			lbl.text = "🪙%d" % amount
+			# 脈動動畫（金額越大越明顯）
+			if amount > 0:
+				var tween = create_tween()
+				tween.tween_property(lbl, "modulate:a", 0.6, 0.15)
+				tween.tween_property(lbl, "modulate:a", 1.0, 0.15)
+
+## Jackpot 中獎！全畫面慶祝特效
+func _on_jackpot_won(data: Dictionary) -> void:
+	var level = data.get("level", "mini")
+	var amount = data.get("amount", 0)
+	var winner_name = data.get("winner_name", "")
+	var is_self = data.get("winner_id", "") == NetworkManager.get_player_id()
+
+	# 播放大獎音效
+	if AudioManager != null:
+		AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+
+	# 全畫面慶祝 overlay
+	_show_jackpot_celebration(level, amount, winner_name, is_self)
+
+## 顯示 Jackpot 慶祝畫面
+func _show_jackpot_celebration(level: String, amount: int, winner_name: String, is_self: bool) -> void:
+	# 建立全畫面 overlay
+	var overlay = Control.new()
+	overlay.name = "JackpotCelebration"
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.z_index = 200
+	add_child(overlay)
+
+	# 半透明黑色背景
+	var bg = ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.0, 0.0, 0.0, 0.0)
+	overlay.add_child(bg)
+
+	# 等級顏色
+	var level_colors = {
+		"mini":  Color(0.6, 0.9, 1.0),
+		"major": Color(1.0, 0.8, 0.2),
+		"grand": Color(1.0, 0.3, 0.3),
+	}
+	var level_color = level_colors.get(level, Color.WHITE)
+	var level_name = level.to_upper()
+
+	# 主標題
+	var title = Label.new()
+	title.text = "✨ %s JACKPOT ✨" % level_name
+	title.position = Vector2(0, 200)
+	title.size = Vector2(1280, 80)
+	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title.add_theme_font_size_override("font_size", 56)
+	title.add_theme_color_override("font_color", level_color)
+	title.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.9))
+	title.add_theme_constant_override("shadow_offset_x", 4)
+	title.add_theme_constant_override("shadow_offset_y", 4)
+	if is_instance_valid(_pixel_font):
+		title.add_theme_font_override("font", _pixel_font)
+	overlay.add_child(title)
+
+	# 金額
+	var amount_lbl = Label.new()
+	amount_lbl.text = "🪙 %d" % amount
+	amount_lbl.position = Vector2(0, 290)
+	amount_lbl.size = Vector2(1280, 60)
+	amount_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	amount_lbl.add_theme_font_size_override("font_size", 44)
+	amount_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.5))
+	if is_instance_valid(_pixel_font):
+		amount_lbl.add_theme_font_override("font", _pixel_font)
+	overlay.add_child(amount_lbl)
+
+	# 中獎者名稱
+	var winner_text = ("🎉 YOU WIN!" if is_self else "🎉 %s WINS!" % winner_name)
+	var winner_lbl = Label.new()
+	winner_lbl.text = winner_text
+	winner_lbl.position = Vector2(0, 360)
+	winner_lbl.size = Vector2(1280, 40)
+	winner_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	winner_lbl.add_theme_font_size_override("font_size", 28)
+	winner_lbl.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
+	if is_instance_valid(_pixel_font):
+		winner_lbl.add_theme_font_override("font", _pixel_font)
+	overlay.add_child(winner_lbl)
+
+	# 動畫：背景淡入 → 標題彈入 → 停留 → 淡出
+	var tween = create_tween()
+	# 背景淡入
+	tween.tween_property(bg, "color", Color(0.0, 0.0, 0.0, 0.75), 0.3)
+	# 標題從下方彈入
+	title.position.y = 400
+	title.modulate.a = 0.0
+	tween.tween_property(title, "position:y", 200.0, 0.4).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.parallel().tween_property(title, "modulate:a", 1.0, 0.3)
+	# 金額彈入
+	amount_lbl.modulate.a = 0.0
+	tween.tween_property(amount_lbl, "modulate:a", 1.0, 0.3)
+	# 中獎者名稱
+	winner_lbl.modulate.a = 0.0
+	tween.tween_property(winner_lbl, "modulate:a", 1.0, 0.3)
+	# 停留 3 秒
+	tween.tween_interval(3.0)
+	# 淡出
+	tween.tween_property(overlay, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(overlay.queue_free)
+
+	# 螢幕震動（Grand 最強）
+	if ScreenShake != null:
+		var trauma = {"mini": 0.4, "major": 0.6, "grand": 0.9}.get(level, 0.4)
+		ScreenShake.add_trauma(trauma)
+
+	# 觸發 HitEffect 大獎特效（Grand 才觸發全畫面特效）
+	if level == "grand" and HitEffect != null:
+		HitEffect.spawn_big_win(Vector2(640, 360), 100.0)

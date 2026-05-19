@@ -15,6 +15,7 @@ import (
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/combat"
+	"digital-twin/server/internal/game/jackpot"
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
@@ -36,6 +37,7 @@ type Game struct {
 	store       store.Store // 玩家狀態持久化（DAY-026）
 	initialCoins int        // 玩家初始金幣（從 config 傳入）
 	missionMgr  *mission.Manager // 每日任務管理器（DAY-037）
+	jackpotMgr  *jackpot.Manager // Progressive Jackpot 管理器（DAY-048）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -48,6 +50,7 @@ type Game struct {
 	bossInstanceID     string
 	nextBossAt         time.Time  // BOSS 自動觸發時間（規格書 28.1）
 	lastLeaderboardAt  time.Time  // 排行榜廣播計時（每 10 秒一次）
+	lastJackpotAt      time.Time  // Jackpot 廣播計時（每 5 秒一次，DAY-048）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -77,6 +80,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		store:              s,
 		initialCoins:       initialCoins,
 		missionMgr:         mission.NewManager(),
+		jackpotMgr:         jackpot.NewManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -272,7 +276,11 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	}
 
 	result := combat.ProcessAttack(req, t)
-	_ = betCost
+
+	// Progressive Jackpot 貢獻（DAY-048）：每次攻擊抽取 0.5% 進入 Jackpot 池
+	if jackpotWin := g.jackpotMgr.Contribute(betCost, p.ID); jackpotWin != nil {
+		g.handleJackpotWin(p, jackpotWin)
+	}
 
 	// 埋點：攻擊事件
 	if tracker := analytics.Get(); tracker != nil {
@@ -722,10 +730,18 @@ func (g *Game) updateNormalPlay() {
 	if shouldBroadcastLeaderboard {
 		g.lastLeaderboardAt = now
 	}
+	// Jackpot 廣播（每 5 秒，DAY-048）
+	shouldBroadcastJackpot := now.Sub(g.lastJackpotAt) >= 5*time.Second
+	if shouldBroadcastJackpot {
+		g.lastJackpotAt = now
+	}
 	g.mu.Unlock()
 
 	if shouldBroadcastLeaderboard {
 		g.broadcastLeaderboard()
+	}
+	if shouldBroadcastJackpot {
+		g.broadcastJackpot()
 	}
 }
 
@@ -1610,4 +1626,47 @@ func (g *Game) handleClientPerf(clientID string, msg *ws.Message) {
 		log.Printf("[PerfAlert] Low FPS player %s: fps=%.1f memory=%.1fMB drawcalls=%d quality=%s",
 			clientID, payload.FPS, payload.MemoryMB, payload.DrawCalls, payload.Quality)
 	}
+}
+
+// handleJackpotWin 處理 Jackpot 中獎（DAY-048）
+func (g *Game) handleJackpotWin(p *player.Player, win *jackpot.JackpotWin) {
+	// 發放獎勵給中獎玩家
+	p.AddReward(win.Amount)
+
+	// 取得顯示名稱
+	displayName := p.DisplayName
+	if displayName == "" {
+		displayName = p.ID[:8]
+	}
+
+	// 廣播中獎通知給所有玩家
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgJackpotWin,
+		Payload: ws.JackpotWinPayload{
+			Level:      string(win.Level),
+			Amount:     win.Amount,
+			WinnerID:   p.ID,
+			WinnerName: displayName,
+			NewBalance: p.Coins,
+		},
+	})
+
+	// 更新中獎玩家的狀態
+	g.sendPlayerUpdate(p)
+
+	log.Printf("[Jackpot] %s won %s jackpot: %d coins (player: %s)",
+		p.ID, win.Level, win.Amount, displayName)
+}
+
+// broadcastJackpot 廣播 Jackpot 池當前金額（每 5 秒，DAY-048）
+func (g *Game) broadcastJackpot() {
+	snap := g.jackpotMgr.GetSnapshot()
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgJackpotUpdate,
+		Payload: ws.JackpotUpdatePayload{
+			Mini:  snap[jackpot.LevelMini],
+			Major: snap[jackpot.LevelMajor],
+			Grand: snap[jackpot.LevelGrand],
+		},
+	})
 }

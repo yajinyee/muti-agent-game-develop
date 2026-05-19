@@ -2075,3 +2075,34 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **Jitter 的作用：** ±0.5 秒隨機抖動，讓多個客戶端的重連時間錯開，避免同時衝擊 Server
 - **來源：** oneuptime.com/blog/post/2026-01-27-websocket-reconnection（2026-01）
 - **教訓：** 生產環境的重連邏輯必須用 exponential backoff，固定延遲是反模式
+
+## 90. Progressive Jackpot 系統設計（2026-05-19 DAY-048）
+
+### 業界標準設計
+- **三個等級**：Mini（500x）/ Major（2000x）/ Grand（10000x）
+- **貢獻機制**：每次攻擊抽取 0.5% 進入 Jackpot 池（Mini 60% / Major 30% / Grand 10%）
+- **觸發機率**：達到門檻後，Mini 1/200，Major 1/1000，Grand 1/5000
+- **重置**：中獎後重置到基礎金額（不歸零，保持玩家期待感）
+
+### 整數截斷問題
+- **問題**：`int(float64(1) * 0.1) = 0`，小額 bet 時 Grand 池不增加
+- **解法**：最小貢獻設為 3（確保三個池子各至少 +1），各份額最少 1
+- **教訓**：整數除法/乘法要考慮截斷，特別是比例分配時
+
+### Go 架構設計
+- **獨立模組**：`jackpot/jackpot.go`，不污染 game.go 核心邏輯
+- **sync.RWMutex**：讀多寫少，GetSnapshot 用 RLock，Contribute 用 Lock
+- **ForceWin**：測試用強制觸發，不走機率判斷
+- **rand.New(rand.NewSource(time.Now().UnixNano()))**：每個 Manager 有獨立的 RNG，避免全局 rand 競爭
+
+### Client 端 UI 設計
+- **位置**：TopBar 下方（y=42），畫面中央（x=320），寬 640px
+- **三個等級**：Mini 藍色 / Major 金色 / Grand 紅色
+- **脈動動畫**：每次更新時 alpha 0.6→1.0，讓玩家注意到數字在增加
+- **中獎慶祝**：全畫面 overlay，背景淡入 + 標題彈入 + 停留 3 秒 + 淡出
+- **Grand 中獎**：額外觸發 HitEffect.spawn_big_win + ScreenShake 0.9
+
+### 留存率影響
+- 業界研究：Progressive Jackpot 可提升玩家留存率 30%+（kent.edu 研究）
+- 關鍵心理：「下一次可能就是我」的期待感，讓玩家持續投入
+- 設計原則：Grand Jackpot 要夠大（10000x），讓玩家覺得「值得等」

@@ -20,6 +20,8 @@ signal achievement_unlocked(achievement_data: Dictionary)
 signal combo_event(combo_data: Dictionary)  # 連擊事件（DAY-022）
 signal mission_updated(missions: Array)     # 任務進度更新（DAY-037）
 signal mission_completed(mission_data: Dictionary)  # 任務完成（DAY-037）
+signal jackpot_updated(jackpot_data: Dictionary)    # Jackpot 池更新（DAY-048）
+signal jackpot_won(win_data: Dictionary)            # Jackpot 中獎（DAY-048）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -89,6 +91,10 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_mission_update(payload)
 		"mission_complete":
 			_handle_mission_complete(payload)
+		"jackpot_update":
+			_handle_jackpot_update(payload)
+		"jackpot_win":
+			_handle_jackpot_win(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -177,6 +183,18 @@ func _handle_mission_complete(payload: Dictionary) -> void:
 
 func _handle_error(payload: Dictionary) -> void:
 	push_warning("[GameManager] Server error: " + str(payload))
+
+## Jackpot 池更新（DAY-048）
+func _handle_jackpot_update(payload: Dictionary) -> void:
+	emit_signal("jackpot_updated", payload)
+
+## Jackpot 中獎通知（DAY-048）
+func _handle_jackpot_win(payload: Dictionary) -> void:
+	var level = payload.get("level", "mini")
+	var amount = payload.get("amount", 0)
+	var winner_name = payload.get("winner_name", "")
+	print("[GameManager] JACKPOT WIN! Level=%s Amount=%d Winner=%s" % [level, amount, winner_name])
+	emit_signal("jackpot_won", payload)
 
 ## 取得目前角色顏色
 func get_character_color() -> Color:
