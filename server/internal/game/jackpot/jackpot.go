@@ -51,24 +51,24 @@ func NewManager() *Manager {
 		pools: map[Level]*Pool{
 			LevelMini: {
 				Level:       LevelMini,
-				Current:     500,   // 起始 500x
+				Current:     100,   // 起始 100x（需要累積到 500x 才能觸發）
 				Threshold:   500,   // 門檻 500x
-				TriggerOdds: 200,   // 1/200 機率
-				BaseAmount:  500,
+				TriggerOdds: 500,   // 1/500 機率（達到門檻後，平均 500 次攻擊觸發一次）
+				BaseAmount:  100,   // 重置後回到 100x
 			},
 			LevelMajor: {
 				Level:       LevelMajor,
-				Current:     2000,  // 起始 2000x
+				Current:     500,   // 起始 500x
 				Threshold:   2000,  // 門檻 2000x
-				TriggerOdds: 1000,  // 1/1000 機率
-				BaseAmount:  2000,
+				TriggerOdds: 2000,  // 1/2000 機率
+				BaseAmount:  500,
 			},
 			LevelGrand: {
 				Level:       LevelGrand,
-				Current:     10000, // 起始 10000x
+				Current:     2000,  // 起始 2000x
 				Threshold:   10000, // 門檻 10000x
-				TriggerOdds: 5000,  // 1/5000 機率
-				BaseAmount:  10000,
+				TriggerOdds: 8000,  // 1/8000 機率（非常稀有）
+				BaseAmount:  2000,
 			},
 		},
 		rng: rand.New(rand.NewSource(time.Now().UnixNano())),

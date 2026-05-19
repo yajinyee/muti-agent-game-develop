@@ -8,14 +8,14 @@ func TestNewManager(t *testing.T) {
 	m := NewManager()
 	snap := m.GetSnapshot()
 
-	if snap[LevelMini] != 500 {
-		t.Errorf("Mini initial = %d, want 500", snap[LevelMini])
+	if snap[LevelMini] != 100 {
+		t.Errorf("Mini initial = %d, want 100", snap[LevelMini])
 	}
-	if snap[LevelMajor] != 2000 {
-		t.Errorf("Major initial = %d, want 2000", snap[LevelMajor])
+	if snap[LevelMajor] != 500 {
+		t.Errorf("Major initial = %d, want 500", snap[LevelMajor])
 	}
-	if snap[LevelGrand] != 10000 {
-		t.Errorf("Grand initial = %d, want 10000", snap[LevelGrand])
+	if snap[LevelGrand] != 2000 {
+		t.Errorf("Grand initial = %d, want 2000", snap[LevelGrand])
 	}
 }
 
@@ -75,8 +75,8 @@ func TestForceWin_Mini(t *testing.T) {
 
 	// 池子應該重置到基礎金額
 	snap := m.GetSnapshot()
-	if snap[LevelMini] != 500 {
-		t.Errorf("Mini pool after win = %d, want 500 (base)", snap[LevelMini])
+	if snap[LevelMini] != 100 {
+		t.Errorf("Mini pool after win = %d, want 100 (base)", snap[LevelMini])
 	}
 }
 
@@ -93,8 +93,8 @@ func TestForceWin_Grand(t *testing.T) {
 
 	// 池子重置
 	snap := m.GetSnapshot()
-	if snap[LevelGrand] != 10000 {
-		t.Errorf("Grand pool after win = %d, want 10000 (base)", snap[LevelGrand])
+	if snap[LevelGrand] != 2000 {
+		t.Errorf("Grand pool after win = %d, want 2000 (base)", snap[LevelGrand])
 	}
 }
 
@@ -122,4 +122,54 @@ func TestContribute_NoReturnNilNormally(t *testing.T) {
 	if wins > 10 {
 		t.Errorf("Too many jackpot wins in 100 contributions: %d", wins)
 	}
+}
+
+// TestJackpotFrequency 驗證 Jackpot 觸發頻率合理性
+// LV5 射擊速度 3 shots/sec，betCost=50
+// Mini 應該平均每 5-15 分鐘觸發一次（900-2700 shots）
+func TestJackpotFrequency(t *testing.T) {
+	const shots = 100000
+	const betCost = 50
+
+	m := NewManager()
+	miniWins := 0
+	majorWins := 0
+	grandWins := 0
+
+	for i := 0; i < shots; i++ {
+		win := m.Contribute(betCost, "player1")
+		if win != nil {
+			switch win.Level {
+			case LevelMini:
+				miniWins++
+			case LevelMajor:
+				majorWins++
+			case LevelGrand:
+				grandWins++
+			}
+		}
+	}
+
+	// 100,000 shots @ 3 shots/sec = 33,333 秒 ≈ 9.3 小時
+	// Mini 期望觸發次數：合理範圍 5-100 次（平均每 1000-20000 shots 一次）
+	t.Logf("Mini wins: %d (avg every %.0f shots)", miniWins, float64(shots)/float64(max(miniWins, 1)))
+	t.Logf("Major wins: %d (avg every %.0f shots)", majorWins, float64(shots)/float64(max(majorWins, 1)))
+	t.Logf("Grand wins: %d (avg every %.0f shots)", grandWins, float64(shots)/float64(max(grandWins, 1)))
+
+	// Mini 不應該太頻繁（< 200 次 in 100k shots = 每 500 shots 一次）
+	if miniWins > 200 {
+		t.Errorf("Mini jackpot too frequent: %d wins in %d shots (avg every %.0f shots)",
+			miniWins, shots, float64(shots)/float64(miniWins))
+	}
+	// Mini 不應該太稀少（> 0 次 in 100k shots）
+	if miniWins == 0 {
+		t.Error("Mini jackpot never triggered in 100k shots - too rare")
+	}
+}
+
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
 }

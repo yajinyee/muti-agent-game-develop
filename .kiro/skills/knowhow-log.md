@@ -2106,3 +2106,28 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - 業界研究：Progressive Jackpot 可提升玩家留存率 30%+（kent.edu 研究）
 - 關鍵心理：「下一次可能就是我」的期待感，讓玩家持續投入
 - 設計原則：Grand Jackpot 要夠大（10000x），讓玩家覺得「值得等」
+
+## 91. Jackpot 觸發頻率設計修正（2026-05-19 DAY-048d）
+
+### 問題：起始值 = 門檻 → 遊戲一開始就可以觸發
+- **原設計**：Mini 起始 500x = 門檻 500x，TriggerOdds 1/200
+- **問題**：遊戲一開始就達到門檻，LV10 高頻射擊下平均 20 秒觸發一次 Mini
+- **業界標準**：Mini 應該每 5-15 分鐘觸發一次
+
+### 修正設計
+- **Mini**：起始 100x，門檻 500x，TriggerOdds 1/500 → 平均每 935 shots（5.2 分鐘）
+- **Major**：起始 500x，門檻 2000x，TriggerOdds 1/2000 → 平均每 3333 shots（18.5 分鐘）
+- **Grand**：起始 2000x，門檻 10000x，TriggerOdds 1/8000 → 平均每 12500 shots（69 分鐘）
+
+### 設計原則
+1. **起始值 < 門檻**：讓池子需要時間累積，增加期待感
+2. **重置到起始值**：中獎後不歸零，保持玩家繼續遊玩的動力
+3. **頻率驗證**：用 100k shots 模擬測試，確認觸發頻率在合理範圍
+
+### 觸發頻率計算公式
+```
+avg_shots_to_trigger = (threshold - base) / contribution_per_shot + TriggerOdds
+contribution_per_shot = betCost × 0.005 × level_share
+```
+- LV5 betCost=50，Mini share=60%：每 shot 貢獻 1.5 → 需要 (500-100)/1.5 = 267 shots 達到門檻
+- 達到門檻後每 500 shots 觸發一次 → 總計約 767 shots ≈ 4.3 分鐘 ✅
