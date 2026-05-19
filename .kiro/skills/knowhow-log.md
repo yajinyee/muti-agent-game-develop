@@ -2271,3 +2271,23 @@ contribution_per_shot = betCost × 0.005 × level_share
   3. `play_attack_by_character` 改為直接呼叫 `play_sfx(SFX.ATTACK_FIRE_HACHIWARE)` 等
 - **結果：** Audio Sync 99 → 100/100，程式碼從 30 行縮減到 6 行
 - **教訓：** 音效播放路徑要統一，不要繞過標準函數直接操作播放器
+
+## 104. Go HTTP 端點 JSON 序列化最佳實踐（2026-05-20 DAY-054）
+- **問題：** `fmt.Fprintf(w, `{"key":"%s",...}`, value)` 手動拼接 JSON 有注入風險
+  - 如果 `value` 包含 `"` 或 `\`，會破壞 JSON 結構
+  - 格式字串難以維護，欄位多時容易出錯
+- **正確做法：** 使用 `json.NewEncoder(w).Encode(map[string]interface{}{...})`
+  - 自動處理特殊字元轉義
+  - 結構清晰，易於新增欄位
+  - 可以回傳錯誤（`if err := json.NewEncoder(w).Encode(resp); err != nil { ... }`）
+- **教訓：** HTTP 端點的 JSON 回應一律用 `json.NewEncoder` 或 `json.Marshal`，不要手動拼接字串
+
+## 105. /health 端點設計原則（2026-05-20 DAY-054）
+- **最佳實踐：** `/health` 端點應包含所有關鍵子系統的狀態
+  - 基礎：status / version / uptime
+  - 連線：clients / max_players / spectators / avg_ping_ms
+  - 遊戲狀態：game_state
+  - 任務系統：mission_reset_at / mission_reset_in_sec
+  - Jackpot 系統：mini/major/grand 池金額 + 今日統計
+- **用途：** 運維人員可以一個端點看到所有關鍵指標，不需要查 Grafana
+- **教訓：** 每次新增重要子系統（Jackpot、任務、排行榜），都要同步更新 `/health` 端點

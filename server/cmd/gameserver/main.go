@@ -194,18 +194,35 @@ func main() {
 		if missionResetSec < 0 {
 			missionResetSec = 0
 		}
-		fmt.Fprintf(w, `{"status":"ok","version":"%s","uptime":"%s","uptime_sec":%d,"clients":%d,"max_players":%d,"spectators":%d,"game_state":"%s","mission_reset_at":"%s","mission_reset_in_sec":%d,"avg_ping_ms":%.1f}`,
-			version,
-			uptimeStr,
-			uptimeSec,
-			hub.PlayerCount(),
-			cfg.MaxPlayersPerRoom,
-			hub.SpectatorCount(),
-			g.GetState(),
-			missionResetStr,
-			missionResetSec,
-			func() float64 { avg, _, _ := hub.GetPingStats(); return avg }(),
-		)
+		avgPing, _, _ := hub.GetPingStats()
+
+		// Jackpot 池狀態（DAY-054）
+		jackpotSnap := g.GetJackpotSnapshot()
+		jackpotDaily := g.GetJackpotDailyStats()
+
+		resp := map[string]interface{}{
+			"status":               "ok",
+			"version":              version,
+			"uptime":               uptimeStr,
+			"uptime_sec":           uptimeSec,
+			"clients":              hub.PlayerCount(),
+			"max_players":          cfg.MaxPlayersPerRoom,
+			"spectators":           hub.SpectatorCount(),
+			"game_state":           g.GetState(),
+			"mission_reset_at":     missionResetStr,
+			"mission_reset_in_sec": missionResetSec,
+			"avg_ping_ms":          avgPing,
+			"jackpot": map[string]interface{}{
+				"mini":        jackpotSnap["mini"],
+				"major":       jackpotSnap["major"],
+				"grand":       jackpotSnap["grand"],
+				"daily_wins":  jackpotDaily.TotalWins,
+				"daily_payout": jackpotDaily.TotalPayout,
+			},
+		}
+		if err := json.NewEncoder(w).Encode(resp); err != nil {
+			http.Error(w, "internal error", http.StatusInternalServerError)
+		}
 	})
 
 	// 統計端點（goroutine 數量、記憶體使用）

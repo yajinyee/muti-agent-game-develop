@@ -1210,3 +1210,47 @@ GitHub 同步完成（commit `e333f81`）。
 1. 評估 HUD.gd 拆分（已超過 2400 行，考慮拆出 JackpotPanel.gd / SessionStatsPanel.gd）
 2. 搜尋「Godot 4 large GDScript refactoring best practices」
 3. 考慮加入 Client 端效能歷史記錄（Server 端 ring buffer 儲存最近 100 筆）
+
+---
+
+## 評估 #32 — 2026-05-20（DAY-051~053b，Client 效能歷史 + AudioManager 重構 + HUD 模組化）
+
+### 這次學到了什麼
+1. **Ring Buffer 設計**：固定大小陣列 + 循環索引，O(1) 寫入，適合效能歷史記錄
+2. **GDScript 大型腳本拆分策略**（KnowHow #101）：
+   - 超過 500 行的腳本考慮拆分
+   - 每個面板腳本自己管理訊號連接（降低耦合）
+   - 用 `preload` + `new()` 動態建立面板節點
+3. **AudioManager 統一快取路徑**（KnowHow #103）：
+   - 所有音效播放路徑統一走 `play_sfx()`
+   - LoadingManager 快取 → fallback load 的雙層架構
+   - HTML5 首次音效延遲從 ~200ms 降低到 <10ms
+4. **Grafana 監控面板設計**：25 個面板覆蓋 Server 效能、Client 效能、Jackpot、任務、Ping 延遲等維度
+
+### 進步說明
+- DAY-051：Client 端效能歷史 Ring Buffer（100 筆）+ GetPerfHistory + Grafana 升級到 25 面板
+- DAY-052：AudioManager 快取優化（消除 HTML5 首次音效延遲）+ Audio Sync 97→99
+- DAY-053：HUD.gd 大型腳本拆分（2428→1598 行）+ JackpotPanel/MissionPanel/SessionStatsPanel 獨立腳本
+- DAY-053b：AudioManager 重構（play_attack_by_character 統一走 play_sfx）+ Audio Sync 99→100
+- 補齊 DAY-051/052/053/053b 的 nightly reports
+- 測試數量：112/112 全通過（穩定）
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 98 | → | 穩定，Ring Buffer + 效能歷史完整 |
+| Godot GDScript | 99 | +1 | HUD 模組化拆分，架構更清晰 |
+| 像素美術生成 | 100 | → | 穩定，美術質量 100/100 |
+| 遊戲數值設計 | 96 | → | 穩定 |
+| WebSocket 通訊 | 97 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100%，Audio Sync 達到滿分 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，QA 8/8 全通過，Audio Sync 100/100 達成里程碑。
+今日完成：Client 效能歷史 Ring Buffer + AudioManager 重構 + HUD 模組化 + Nightly Reports 補齊 + 能力評估 #32 + GitHub 上傳。
+
+### 下一步學習目標
+1. 搜尋「Godot 4 HTML5 export optimization 2025」確認最新優化技術
+2. 評估 Server `/health` 端點加入 Jackpot 狀態（讓運維更方便）
+3. 考慮加入 Server 端 graceful shutdown 測試（確保 Redis 連線正確關閉）
