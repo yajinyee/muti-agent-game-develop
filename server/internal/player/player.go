@@ -254,6 +254,10 @@ func (p *Player) Snapshot() PlayerSnapshot {
 		LockTargetID:    p.LockTargetID,
 		ProjectileSpeed: bet.ProjectileSpeed,
 		FireRate:        bet.FireRate,
+		// Session 統計（DAY-046）
+		SessionScore:    p.SessionScore,
+		KillCount:       p.KillCount,
+		DisplayName:     p.DisplayName,
 	}
 }
 
@@ -316,4 +320,8 @@ type PlayerSnapshot struct {
 	LockTargetID    string  `json:"lock_target_id"`
 	ProjectileSpeed float64 `json:"projectile_speed"`
 	FireRate        float64 `json:"fire_rate"`
+	// Session 統計（DAY-046，供 Client 端 Session Stats 面板顯示）
+	SessionScore    int     `json:"session_score"`
+	KillCount       int     `json:"kill_count"`
+	DisplayName     string  `json:"display_name"`
 }

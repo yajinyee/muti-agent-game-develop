@@ -130,6 +130,7 @@ func _ready() -> void:
 	_create_achievement_queue()
 	_create_lobby_overlay()  # 大廳 UI（DAY-020）
 	_ready_missions()         # 每日任務系統（DAY-037）
+	_setup_session_stats()    # Session Stats 面板（DAY-046）
 
 ## 套用像素字體到所有 Label
 func _apply_pixel_font() -> void:
@@ -531,6 +532,9 @@ func _get_boss_multiplier_color(time_left: float) -> Color:
 		return Color(1.0, 0.2, 0.2)  # 紅（最高倍率）
 
 func _process(delta: float) -> void:
+	# Session Stats 自動彈出計時（DAY-046）
+	_process_session_stats(delta)
+
 	if not _boss_active or not is_instance_valid(_boss_timer_node):
 		return
 
@@ -1846,3 +1850,199 @@ func _update_mission_reset_countdown() -> void:
 			countdown_lbl.text = "🔄 任務即將重置..."
 	else:
 		countdown_lbl.text = "🕐 重置時間：每日 00:00（UTC+8）"
+
+
+# ── Session Stats 面板（DAY-046，短回饋循環留存機制）──────────────────────────
+# 顯示本局統計：擊殺數、最高連擊、總獎勵、BOSS 擊殺
+# 每 60 秒自動彈出一次（variable reinforcement），讓玩家感受到進度
+
+var _session_stats_panel: Control = null
+var _session_stats_visible: bool = false
+var _session_auto_popup_timer: float = 0.0
+const SESSION_AUTO_POPUP_INTERVAL = 60.0  # 每 60 秒自動彈出一次
+
+# 本局統計數據（由 GameManager 訊號更新）
+var _session_kills: int = 0
+var _session_max_combo: int = 0
+var _session_total_reward: int = 0
+var _session_boss_kills: int = 0
+var _session_start_coins: int = 0  # 本局開始時的金幣數
+
+func _setup_session_stats() -> void:
+	# 連接訊號
+	GameManager.reward_received.connect(_on_session_reward)
+	GameManager.combo_event.connect(_on_session_combo)
+	GameManager.boss_event.connect(_on_session_boss)
+	# 記錄開始金幣
+	_session_start_coins = GameManager.get_coins()
+	# 建立「📊 本局」按鈕（TopBar）
+	var top_bar = get_node_or_null("TopBar")
+	if not is_instance_valid(top_bar):
+		return
+	var btn = Button.new()
+	btn.name = "SessionStatsButton"
+	btn.text = "📊 本局"
+	btn.position = Vector2(840, 4)
+	btn.size = Vector2(80, 32)
+	btn.add_theme_font_size_override("font_size", 12)
+	if is_instance_valid(_pixel_font):
+		btn.add_theme_font_override("font", _pixel_font)
+	btn.pressed.connect(_toggle_session_stats)
+	top_bar.add_child(btn)
+
+func _process_session_stats(delta: float) -> void:
+	# 每 60 秒自動彈出一次（short feedback loop）
+	_session_auto_popup_timer += delta
+	if _session_auto_popup_timer >= SESSION_AUTO_POPUP_INTERVAL:
+		_session_auto_popup_timer = 0.0
+		# 只在正常遊戲狀態下彈出（不在 BOSS/Bonus 中打擾玩家）
+		var state = GameManager.current_state
+		if state == "normal_play" or state == "special_target_event":
+			_show_session_stats_popup()
+
+func _on_session_reward(reward: Dictionary) -> void:
+	_session_total_reward += reward.get("amount", 0)
+
+func _on_session_combo(combo_data: Dictionary) -> void:
+	var count = combo_data.get("combo_count", 0)
+	if count > _session_max_combo:
+		_session_max_combo = count
+
+func _on_session_boss(boss_data: Dictionary) -> void:
+	var event = boss_data.get("event", "")
+	if event == "kill":
+		_session_boss_kills += 1
+
+func _toggle_session_stats() -> void:
+	if is_instance_valid(_session_stats_panel):
+		_session_stats_visible = not _session_stats_visible
+		_session_stats_panel.visible = _session_stats_visible
+		if _session_stats_visible:
+			_refresh_session_stats()
+	else:
+		_show_session_stats_popup()
+
+func _show_session_stats_popup() -> void:
+	if not is_instance_valid(_session_stats_panel):
+		_create_session_stats_panel()
+	_session_stats_visible = true
+	_session_stats_panel.visible = true
+	_refresh_session_stats()
+	# 3 秒後自動收起（不打擾遊戲）
+	var t = get_tree().create_timer(3.0)
+	t.timeout.connect(func():
+		if is_instance_valid(_session_stats_panel):
+			_session_stats_panel.visible = false
+			_session_stats_visible = false
+	)
+
+func _create_session_stats_panel() -> void:
+	var panel = Control.new()
+	panel.name = "SessionStatsPanel"
+	panel.position = Vector2(1050, 50)
+	panel.size = Vector2(220, 160)
+	panel.z_index = 120
+	add_child(panel)
+	_session_stats_panel = panel
+
+	# 背景
+	var bg = ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.02, 0.05, 0.15, 0.92)
+	panel.add_child(bg)
+
+	# 邊框（金色）
+	for border_data in [
+		[Vector2(0, 0), Vector2(220, 2)],    # 上
+		[Vector2(0, 158), Vector2(220, 2)],  # 下
+		[Vector2(0, 0), Vector2(2, 160)],    # 左
+		[Vector2(218, 0), Vector2(2, 160)],  # 右
+	]:
+		var border = ColorRect.new()
+		border.position = border_data[0]
+		border.size = border_data[1]
+		border.color = Color(0.90, 0.75, 0.20, 0.80)
+		panel.add_child(border)
+
+	# 標題
+	var title = Label.new()
+	title.name = "Title"
+	title.text = "📊 本局統計"
+	title.position = Vector2(10, 8)
+	title.size = Vector2(200, 24)
+	title.add_theme_font_size_override("font_size", 14)
+	title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+	if is_instance_valid(_pixel_font):
+		title.add_theme_font_override("font", _pixel_font)
+	panel.add_child(title)
+
+	# 分隔線
+	var sep = ColorRect.new()
+	sep.position = Vector2(8, 34)
+	sep.size = Vector2(204, 1)
+	sep.color = Color(0.90, 0.75, 0.20, 0.40)
+	panel.add_child(sep)
+
+	# 統計行（4行）
+	var stats_data = [
+		["KillsRow", "⚔️ 擊殺", "0"],
+		["ComboRow", "🔥 最高連擊", "0"],
+		["RewardRow", "🪙 總獎勵", "0"],
+		["BossRow", "👹 BOSS 擊殺", "0"],
+	]
+	for i in range(stats_data.size()):
+		var row = Control.new()
+		row.name = stats_data[i][0]
+		row.position = Vector2(8, 40 + i * 28)
+		row.size = Vector2(204, 26)
+		panel.add_child(row)
+
+		var key_lbl = Label.new()
+		key_lbl.name = "Key"
+		key_lbl.text = stats_data[i][1]
+		key_lbl.position = Vector2(0, 4)
+		key_lbl.size = Vector2(130, 20)
+		key_lbl.add_theme_font_size_override("font_size", 12)
+		key_lbl.add_theme_color_override("font_color", Color(0.7, 0.85, 1.0))
+		if is_instance_valid(_pixel_font):
+			key_lbl.add_theme_font_override("font", _pixel_font)
+		row.add_child(key_lbl)
+
+		var val_lbl = Label.new()
+		val_lbl.name = "Value"
+		val_lbl.text = stats_data[i][2]
+		val_lbl.position = Vector2(130, 4)
+		val_lbl.size = Vector2(74, 20)
+		val_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		val_lbl.add_theme_font_size_override("font_size", 13)
+		val_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.5))
+		if is_instance_valid(_pixel_font):
+			val_lbl.add_theme_font_override("font", _pixel_font)
+		row.add_child(val_lbl)
+
+func _refresh_session_stats() -> void:
+	if not is_instance_valid(_session_stats_panel):
+		return
+
+	# 從 GameManager 取得最新數據
+	var player_data = GameManager.player_data
+	var kills = player_data.get("kill_count", _session_kills)
+	var reward = player_data.get("session_score", _session_total_reward)
+
+	var rows = {
+		"KillsRow": str(kills),
+		"ComboRow": ("×%d" % _session_max_combo) if _session_max_combo > 0 else "—",
+		"RewardRow": ("🪙%d" % reward) if reward > 0 else "0",
+		"BossRow": str(_session_boss_kills),
+	}
+	for row_name in rows:
+		var row = _session_stats_panel.get_node_or_null(row_name)
+		if is_instance_valid(row):
+			var val_lbl = row.get_node_or_null("Value")
+			if is_instance_valid(val_lbl):
+				val_lbl.text = rows[row_name]
+				# 高分時金色高亮
+				if row_name == "ComboRow" and _session_max_combo >= 5:
+					val_lbl.add_theme_color_override("font_color", Color(1.0, 0.7, 0.1))
+				elif row_name == "BossRow" and _session_boss_kills > 0:
+					val_lbl.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
