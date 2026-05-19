@@ -2061,3 +2061,17 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **超時設定：** 建議 30 秒，超時後強制關閉
 - **我們的現狀：** main.go 已有 `signal.NotifyContext` + `srv.Shutdown(ctx)`，符合最佳實踐
 - **教訓：** Graceful shutdown 是生產環境必備，確保玩家不會因為 Server 重啟而丟失遊戲狀態
+
+## 89. WebSocket Exponential Backoff 重連（2026-05-19 DAY-047b）
+- **問題：** 固定 3 秒重連延遲在 Server 重啟時造成所有客戶端同時重連（thundering herd）
+- **解法：** Exponential Backoff + Jitter
+  ```gdscript
+  # 延遲序列：1s → 2s → 4s → 8s → 16s → 30s（上限）
+  var base_delay = minf(RECONNECT_DELAY_MIN * pow(2.0, _reconnect_attempt - 1), RECONNECT_DELAY_MAX)
+  _reconnect_delay = base_delay + randf_range(-RECONNECT_JITTER, RECONNECT_JITTER)
+  _reconnect_delay = maxf(_reconnect_delay, RECONNECT_DELAY_MIN)
+  ```
+- **連線成功後重置：** `_reconnect_attempt = 0`，`_reconnect_delay = RECONNECT_DELAY_MIN`
+- **Jitter 的作用：** ±0.5 秒隨機抖動，讓多個客戶端的重連時間錯開，避免同時衝擊 Server
+- **來源：** oneuptime.com/blog/post/2026-01-27-websocket-reconnection（2026-01）
+- **教訓：** 生產環境的重連邏輯必須用 exponential backoff，固定延遲是反模式

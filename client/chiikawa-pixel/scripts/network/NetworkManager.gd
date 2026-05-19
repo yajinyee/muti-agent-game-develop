@@ -46,7 +46,9 @@ var HTTP_BASE: String:
 				return HTTP_URL_REMOTE
 		return HTTP_URL_LOCAL
 
-const RECONNECT_DELAY = 3.0
+const RECONNECT_DELAY_MIN = 1.0   # 最短重連延遲（秒）
+const RECONNECT_DELAY_MAX = 30.0  # 最長重連延遲（秒，exponential backoff 上限）
+const RECONNECT_JITTER = 0.5      # 隨機抖動範圍（±0.5秒，防止 thundering herd）
 const PING_INTERVAL = 30.0
 
 var _socket: WebSocketPeer
@@ -54,6 +56,8 @@ var _player_id: String = ""
 var _room_id: String = "room-001"  # 當前房間 ID（DAY-020）
 var _connected: bool = false
 var _reconnect_timer: float = 0.0
+var _reconnect_attempt: int = 0    # 重連嘗試次數（用於 exponential backoff）
+var _reconnect_delay: float = 1.0  # 當前重連延遲（動態計算）
 var _ping_timer: float = 0.0
 var _is_spectator: bool = false  # 是否為觀戰模式（DAY-024）
 
@@ -92,6 +96,8 @@ func _process(delta: float) -> void:
 		WebSocketPeer.STATE_OPEN:
 			if not _connected:
 				_connected = true
+				_reconnect_attempt = 0   # 重置 backoff 計數器
+				_reconnect_delay = RECONNECT_DELAY_MIN
 				print("[Network] Connected to server")
 				emit_signal("connected")
 
@@ -113,10 +119,16 @@ func _process(delta: float) -> void:
 				print("[Network] Disconnected from server")
 				emit_signal("disconnected")
 
-			# 自動重連
+			# 自動重連（Exponential Backoff + Jitter，防止 thundering herd）
 			_reconnect_timer += delta
-			if _reconnect_timer >= RECONNECT_DELAY:
+			if _reconnect_timer >= _reconnect_delay:
 				_reconnect_timer = 0.0
+				_reconnect_attempt += 1
+				# 計算下次延遲：min(base * 2^attempt, max) + jitter
+				var base_delay = minf(RECONNECT_DELAY_MIN * pow(2.0, _reconnect_attempt - 1), RECONNECT_DELAY_MAX)
+				_reconnect_delay = base_delay + randf_range(-RECONNECT_JITTER, RECONNECT_JITTER)
+				_reconnect_delay = maxf(_reconnect_delay, RECONNECT_DELAY_MIN)
+				print("[Network] Reconnecting (attempt %d, next delay %.1fs)..." % [_reconnect_attempt, _reconnect_delay])
 				connect_to_server()
 
 		WebSocketPeer.STATE_CONNECTING:
