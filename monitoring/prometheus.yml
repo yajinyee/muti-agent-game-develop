@@ -1,0 +1,23 @@
+# prometheus.yml — 吉伊卡哇：像素大討伐 監控設定
+# Prometheus 每 15 秒從 Game Server /metrics 端點抓取指標
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    project: 'chiikawa-pixel'
+    env: 'production'
+
+scrape_configs:
+  # Game Server 指標
+  - job_name: 'chiikawa-gameserver'
+    static_configs:
+      - targets: ['gameserver:7777']
+    metrics_path: '/metrics'
+    scrape_interval: 15s
+    scrape_timeout: 10s
+
+  # Prometheus 自身指標
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']

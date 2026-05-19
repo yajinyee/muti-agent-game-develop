@@ -252,6 +252,82 @@ func main() {
 		}
 	})
 
+	// Prometheus metrics 端點（DAY-040）
+	// 格式：Prometheus text format（無外部依賴）
+	// 用途：Grafana / Prometheus 監控，生產環境可視化
+	mux.HandleFunc("/metrics", func(w http.ResponseWriter, r *http.Request) {
+		var ms runtime.MemStats
+		runtime.ReadMemStats(&ms)
+
+		uptimeSec := time.Since(serverStartTime).Seconds()
+		analyticsStats := tracker.GetRoomStats()
+
+		w.Header().Set("Content-Type", "text/plain; version=0.0.4; charset=utf-8")
+		fmt.Fprintf(w, "# HELP chiikawa_uptime_seconds Server uptime in seconds\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_uptime_seconds gauge\n")
+		fmt.Fprintf(w, "chiikawa_uptime_seconds %.2f\n\n", uptimeSec)
+
+		fmt.Fprintf(w, "# HELP chiikawa_connected_players Current number of connected players\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_connected_players gauge\n")
+		fmt.Fprintf(w, "chiikawa_connected_players %d\n\n", hub.PlayerCount())
+
+		fmt.Fprintf(w, "# HELP chiikawa_connected_spectators Current number of connected spectators\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_connected_spectators gauge\n")
+		fmt.Fprintf(w, "chiikawa_connected_spectators %d\n\n", hub.SpectatorCount())
+
+		fmt.Fprintf(w, "# HELP chiikawa_max_players Maximum allowed players per room\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_max_players gauge\n")
+		fmt.Fprintf(w, "chiikawa_max_players %d\n\n", cfg.MaxPlayersPerRoom)
+
+		fmt.Fprintf(w, "# HELP chiikawa_goroutines Current number of goroutines\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_goroutines gauge\n")
+		fmt.Fprintf(w, "chiikawa_goroutines %d\n\n", runtime.NumGoroutine())
+
+		fmt.Fprintf(w, "# HELP chiikawa_heap_alloc_bytes Current heap allocation in bytes\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_heap_alloc_bytes gauge\n")
+		fmt.Fprintf(w, "chiikawa_heap_alloc_bytes %d\n\n", ms.HeapAlloc)
+
+		fmt.Fprintf(w, "# HELP chiikawa_heap_sys_bytes Total heap memory obtained from OS in bytes\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_heap_sys_bytes gauge\n")
+		fmt.Fprintf(w, "chiikawa_heap_sys_bytes %d\n\n", ms.HeapSys)
+
+		fmt.Fprintf(w, "# HELP chiikawa_gc_total Total number of GC cycles\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_gc_total counter\n")
+		fmt.Fprintf(w, "chiikawa_gc_total %d\n\n", ms.NumGC)
+
+		fmt.Fprintf(w, "# HELP chiikawa_total_players_joined Total players who joined since server start\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_total_players_joined counter\n")
+		fmt.Fprintf(w, "chiikawa_total_players_joined %d\n\n", analyticsStats.TotalPlayers)
+
+		fmt.Fprintf(w, "# HELP chiikawa_peak_concurrent_players Peak concurrent players since server start\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_peak_concurrent_players gauge\n")
+		fmt.Fprintf(w, "chiikawa_peak_concurrent_players %d\n\n", analyticsStats.PeakPlayers)
+
+		fmt.Fprintf(w, "# HELP chiikawa_total_attacks_fired Total attack events since server start\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_total_attacks_fired counter\n")
+		fmt.Fprintf(w, "chiikawa_total_attacks_fired %d\n\n", analyticsStats.TotalAttacks)
+
+		fmt.Fprintf(w, "# HELP chiikawa_total_kills Total kill events since server start\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_total_kills counter\n")
+		fmt.Fprintf(w, "chiikawa_total_kills %d\n\n", analyticsStats.TotalKills)
+
+		fmt.Fprintf(w, "# HELP chiikawa_total_coins_rewarded Total coins rewarded since server start\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_total_coins_rewarded counter\n")
+		fmt.Fprintf(w, "chiikawa_total_coins_rewarded %d\n\n", analyticsStats.TotalReward)
+
+		fmt.Fprintf(w, "# HELP chiikawa_overall_rtp Overall RTP (Return to Player) ratio\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_overall_rtp gauge\n")
+		fmt.Fprintf(w, "chiikawa_overall_rtp %.4f\n\n", analyticsStats.OverallRTP)
+
+		fmt.Fprintf(w, "# HELP chiikawa_boss_spawns_total Total boss spawn events since server start\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_boss_spawns_total counter\n")
+		fmt.Fprintf(w, "chiikawa_boss_spawns_total %d\n\n", analyticsStats.BossSpawnCount)
+
+		fmt.Fprintf(w, "# HELP chiikawa_bonus_games_total Total bonus game events since server start\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_bonus_games_total counter\n")
+		fmt.Fprintf(w, "chiikawa_bonus_games_total %d\n\n", analyticsStats.BonusCount)
+	})
+
 	// pprof 監控端點（Debug 模式下啟用，用於記憶體/goroutine 分析）
 	if cfg.DebugMode {
 		mux.HandleFunc("/debug/pprof/", http.DefaultServeMux.ServeHTTP)
@@ -312,6 +388,7 @@ func main() {
 	log.Printf("🏆 Leaderboard at http://localhost:%s/leaderboard", cfg.Port)
 	log.Printf("📈 Analytics at http://localhost:%s/analytics", cfg.Port)
 	log.Printf("🏠 Rooms at http://localhost:%s/rooms", cfg.Port)
+	log.Printf("📉 Metrics at http://localhost:%s/metrics", cfg.Port)
 
 	// Graceful shutdown
 	quit := make(chan os.Signal, 1)

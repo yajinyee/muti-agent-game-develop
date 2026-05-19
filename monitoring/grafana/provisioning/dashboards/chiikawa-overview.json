@@ -1,0 +1,173 @@
+{
+  "title": "吉伊卡哇：像素大討伐 — 監控面板",
+  "uid": "chiikawa-overview",
+  "version": 1,
+  "schemaVersion": 38,
+  "refresh": "15s",
+  "time": { "from": "now-1h", "to": "now" },
+  "panels": [
+    {
+      "id": 1,
+      "title": "當前連線玩家數",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "chiikawa_connected_players",
+          "legendFormat": "Players"
+        }
+      ],
+      "options": {
+        "colorMode": "background",
+        "graphMode": "area",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 5 },
+              { "color": "red", "value": 9 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 2,
+      "title": "Server 運行時間",
+      "type": "stat",
+      "gridPos": { "x": 4, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "chiikawa_uptime_seconds",
+          "legendFormat": "Uptime"
+        }
+      ],
+      "options": { "colorMode": "value" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "s"
+        }
+      }
+    },
+    {
+      "id": 3,
+      "title": "Goroutine 數量",
+      "type": "stat",
+      "gridPos": { "x": 8, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "chiikawa_goroutines",
+          "legendFormat": "Goroutines"
+        }
+      ],
+      "options": { "colorMode": "background" },
+      "fieldConfig": {
+        "defaults": {
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 50 },
+              { "color": "red", "value": 100 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 4,
+      "title": "整體 RTP",
+      "type": "stat",
+      "gridPos": { "x": 12, "y": 0, "w": 4, "h": 4 },
+      "targets": [
+        {
+          "expr": "chiikawa_overall_rtp * 100",
+          "legendFormat": "RTP %"
+        }
+      ],
+      "options": { "colorMode": "background" },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              { "color": "red", "value": null },
+              { "color": "yellow", "value": 85 },
+              { "color": "green", "value": 92 },
+              { "color": "orange", "value": 100 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 5,
+      "title": "Heap 記憶體使用",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "chiikawa_heap_alloc_bytes / 1024 / 1024",
+          "legendFormat": "Heap Alloc (MB)"
+        },
+        {
+          "expr": "chiikawa_heap_sys_bytes / 1024 / 1024",
+          "legendFormat": "Heap Sys (MB)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": { "unit": "decmbytes" }
+      }
+    },
+    {
+      "id": 6,
+      "title": "玩家活動",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 4, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "chiikawa_connected_players",
+          "legendFormat": "Connected Players"
+        },
+        {
+          "expr": "chiikawa_peak_concurrent_players",
+          "legendFormat": "Peak Players"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "title": "攻擊 & 擊殺（累計）",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(chiikawa_total_attacks_fired[1m]) * 60",
+          "legendFormat": "Attacks/min"
+        },
+        {
+          "expr": "rate(chiikawa_total_kills[1m]) * 60",
+          "legendFormat": "Kills/min"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "title": "BOSS & Bonus 事件（累計）",
+      "type": "timeseries",
+      "gridPos": { "x": 12, "y": 12, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "chiikawa_boss_spawns_total",
+          "legendFormat": "Boss Spawns"
+        },
+        {
+          "expr": "chiikawa_bonus_games_total",
+          "legendFormat": "Bonus Games"
+        }
+      ]
+    }
+  ]
+}

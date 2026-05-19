@@ -1,0 +1,13 @@
+# Grafana dashboard provisioning — 自動載入 dashboard
+apiVersion: 1
+
+providers:
+  - name: 'chiikawa'
+    orgId: 1
+    folder: 'Chiikawa'
+    type: file
+    disableDeletion: false
+    updateIntervalSeconds: 30
+    allowUiUpdates: true
+    options:
+      path: /etc/grafana/provisioning/dashboards
