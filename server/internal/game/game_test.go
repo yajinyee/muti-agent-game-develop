@@ -5,6 +5,8 @@ import (
 	"testing"
 	"time"
 
+	"digital-twin/server/internal/data"
+	"digital-twin/server/internal/game/target"
 	"digital-twin/server/internal/ws"
 )
 
@@ -267,5 +269,57 @@ func TestScoreTarget(t *testing.T) {
 	// 分數應該 >= 0
 	if target_score < 0 {
 		t.Errorf("target score should be >= 0, got %f", target_score)
+	}
+}
+
+// TestScoreTarget_BossHighestPriority 確認 BOSS 評分最高
+func TestScoreTarget_BossHighestPriority(t *testing.T) {
+	g := newTestGame(t)
+
+	// 生成普通目標
+	g.spawnTarget()
+
+	// 生成 BOSS
+	g.spawnBoss()
+
+	g.mu.RLock()
+	var bossScore, normalScore float64
+	for _, tgt := range g.Targets {
+		score := g.scoreTarget(tgt)
+		if tgt.Def.Type == data.TargetTypeBoss {
+			bossScore = score
+		} else {
+			normalScore = score
+		}
+	}
+	g.mu.RUnlock()
+
+	if bossScore <= normalScore {
+		t.Errorf("BOSS score (%f) should be higher than normal target score (%f)", bossScore, normalScore)
+	}
+}
+
+// TestScoreTarget_LowHPHigherPriority 確認低 HP 目標評分更高
+func TestScoreTarget_LowHPHigherPriority(t *testing.T) {
+	g := newTestGame(t)
+
+	// 建立兩個相同的目標，一個 HP 高一個 HP 低
+	def := data.Targets["T001"]
+	tgtFull := target.NewTarget("full-hp", def, 1000, 300)
+	tgtLow := target.NewTarget("low-hp", def, 1000, 300)
+	tgtLow.HP = 1 // 幾乎死了
+
+	g.mu.Lock()
+	g.Targets["full-hp"] = tgtFull
+	g.Targets["low-hp"] = tgtLow
+	g.mu.Unlock()
+
+	g.mu.RLock()
+	fullScore := g.scoreTarget(tgtFull)
+	lowScore := g.scoreTarget(tgtLow)
+	g.mu.RUnlock()
+
+	if lowScore <= fullScore {
+		t.Errorf("Low HP target score (%f) should be higher than full HP target score (%f)", lowScore, fullScore)
 	}
 }

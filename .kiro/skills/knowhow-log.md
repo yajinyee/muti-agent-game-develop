@@ -1706,3 +1706,24 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **優化：** 靜止目標（speed=0，如 T001 雜草、T104 金草）不廣播，節省頻寬
 - **實作：** `broadcastTargetPositions()` 在 `updateNormalPlay()` 中每 2 秒觸發一次
 - **教訓：** Client-side 預測 + Server-side 定期校正是多人遊戲的標準做法（類似 Valve 的 Source Engine 架構）
+
+## 85. Server 目標位置不追蹤的架構決策（2026-05-19 DAY-035b）
+- **問題：** 嘗試加入 `broadcastTargetPositions()` 廣播目標位置，但 Server 的 `t.X/t.Y` 從不更新（生成後固定），廣播的是錯誤的靜態位置
+- **根本原因：** 捕魚機的標準架構是 Client-side 移動（Client 自行計算目標位置），Server 只負責擊破判定。Server 不需要追蹤目標的即時位置
+- **正確架構：** 多人同步靠「相同的 target_spawn 事件 + 相同的移動算法」，不是位置廣播
+- **修正：** 移除 `broadcastTargetPositions()`，移除 `lastPositionSyncAt` 欄位
+- **教訓：** 加入功能前要先確認架構假設是否正確，不要盲目加入「看起來有用」的功能
+
+## 86. scoreTarget X 位置判斷永遠不觸發（2026-05-19 DAY-035b）
+- **問題：** `scoreTarget()` 有 `if t.X < 400` 的判斷，但目標從右側 1280+ 生成，Server 不追蹤移動，所以 `t.X` 永遠是 1280+，這個判斷永遠不觸發
+- **修正：** 改用「存活時間比例」（`elapsed / Lifetime`）來判斷目標快要消失
+  - 存活 > 80% Lifetime：+40 分（快要消失，最高優先）
+  - 存活 > 50% Lifetime：+15 分（過半存活時間）
+- **教訓：** 評分系統的每個維度都要確認數據來源是否正確，不能用永遠不變的靜態值做動態判斷
+
+## 87. PowerShell Set-Content 破壞 UTF-8 編碼（2026-05-19 DAY-035b）
+- **問題：** 用 PowerShell `Set-Content` 寫入含中文的 Go 檔案，導致 UTF-8 編碼損壞，`go build` 報 `illegal UTF-8 encoding`
+- **原因：** PowerShell 的 `Set-Content` 預設用系統編碼（Windows-1252 或 UTF-16），不是 UTF-8
+- **解法：** 用 `[System.IO.File]::WriteAllText(path, content, [System.Text.Encoding]::UTF8)` 或直接用 `str_replace` 工具
+- **恢復方式：** `git checkout HEAD~1 -- <file>` 從上一個 commit 恢復
+- **教訓：** 永遠不要用 PowerShell 的 `Set-Content` 修改含中文的程式碼檔案，改用 str_replace 工具

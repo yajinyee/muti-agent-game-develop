@@ -46,7 +46,6 @@ type Game struct {
 	bossInstanceID     string
 	nextBossAt         time.Time  // BOSS 自動觸發時間（規格書 28.1）
 	lastLeaderboardAt  time.Time  // 排行榜廣播計時（每 10 秒一次）
-	lastPositionSyncAt time.Time  // 目標位置同步廣播計時（每 2 秒一次，多人同步用）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -684,18 +683,6 @@ func (g *Game) updateNormalPlay() {
 	if shouldBroadcastLeaderboard {
 		g.broadcastLeaderboard()
 	}
-
-	// 目標位置同步廣播（每 2 秒，確保多人遊戲目標位置同步）
-	g.mu.Lock()
-	shouldSyncPositions := now.Sub(g.lastPositionSyncAt) >= 2*time.Second
-	if shouldSyncPositions {
-		g.lastPositionSyncAt = now
-	}
-	g.mu.Unlock()
-
-	if shouldSyncPositions {
-		g.broadcastTargetPositions()
-	}
 }
 
 func (g *Game) updateBossBattle() {
@@ -1206,22 +1193,26 @@ func (g *Game) processAutoAttack() {
 }
 
 // scoreTarget 計算目標的自動攻擊優先分數（越高越優先）
-// 評分維度：倍率、HP 殘量、距離畫面左邊緣（快要離開）
+// 評分維度：倍率、HP 殘量、目標存活時間（存活越久代表快要消失）
 func (g *Game) scoreTarget(t *target.Target) float64 {
 	score := 0.0
 
 	// 1. 倍率加分（高倍率目標優先）
-	// 特殊目標（T101-T105）倍率高，加分多
 	score += t.Multiplier * 2.0
 
 	// 2. HP 殘量加分（HP 越低越優先，快要擊破的目標）
-	// HPPercent 越低，加分越多
 	score += (1.0 - t.HPPercent()) * 30.0
 
-	// 3. 位置加分（X 越小代表越靠近左邊，快要離開畫面）
-	// X 在 0-1280 範圍，X 越小加分越多
-	if t.X < 400 {
-		score += (400.0 - t.X) * 0.1
+	// 3. 存活時間加分（存活越久代表快要超時消失，優先打掉）
+	// 存活超過 50% Lifetime 開始加分，超過 80% 大幅加分
+	elapsed := time.Since(t.SpawnedAt).Seconds()
+	if t.Def.Lifetime > 0 {
+		lifeRatio := elapsed / t.Def.Lifetime
+		if lifeRatio > 0.8 {
+			score += 40.0 // 快要消失，最高優先
+		} else if lifeRatio > 0.5 {
+			score += 15.0 // 過半存活時間
+		}
 	}
 
 	// 4. BOSS 最高優先（確保 BOSS 戰時集中火力）
@@ -1401,35 +1392,4 @@ func (g *Game) sendAchievement(playerID string, u *achievement.AchievementUnlock
 			UnlockedAt:  u.UnlockedAt.UnixMilli(),
 		},
 	})
-}
-
-// broadcastTargetPositions 廣播所有目標的當前位置（每 2 秒一次）
-// 用途：確保多人遊戲中各玩家看到的目標位置一致（Client 自行計算移動，Server 定期校正）
-// 只廣播移動中的目標（speed > 0），靜止目標不需要同步
-func (g *Game) broadcastTargetPositions() {
-	g.mu.RLock()
-	movingTargets := make([]ws.TargetUpdatePayload, 0)
-	for _, t := range g.Targets {
-		if !t.IsAlive || t.Def.Speed == 0 {
-			continue // 靜止目標不需要位置同步
-		}
-		movingTargets = append(movingTargets, ws.TargetUpdatePayload{
-			InstanceID: t.InstanceID,
-			HP:         t.HP,
-			MaxHP:      t.MaxHP,
-			X:          t.X,
-			Y:          t.Y,
-			Phase:      t.Phase,
-			IsFleeing:  t.IsFleeing,
-		})
-	}
-	g.mu.RUnlock()
-
-	// 只有有移動目標時才廣播（避免空廣播浪費頻寬）
-	for _, payload := range movingTargets {
-		g.Hub.Broadcast(&ws.Message{
-			Type:    ws.MsgTargetUpdate,
-			Payload: payload,
-		})
-	}
 }
