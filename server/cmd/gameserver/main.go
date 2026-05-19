@@ -339,6 +339,31 @@ func main() {
 		fmt.Fprintf(w, "# TYPE chiikawa_ws_messages_dropped_total counter\n")
 		fmt.Fprintf(w, "chiikawa_ws_messages_dropped_total %d\n\n", hub.MsgDropped.Load())
 
+		// WebSocket 壓縮統計（DAY-042）
+		// gorilla/websocket 的 permessage-deflate 在 wire 層壓縮，無法直接取得壓縮後大小
+		// 用原始位元組數 + 估算壓縮率（JSON 文字通常壓縮到 30-40%）來計算估算值
+		bytesSentRaw := hub.BytesSentRaw.Load()
+		msgSent := hub.MsgSent.Load()
+		var avgMsgSizeBytes float64
+		if msgSent > 0 {
+			avgMsgSizeBytes = float64(bytesSentRaw) / float64(msgSent)
+		}
+		// permessage-deflate 對 JSON 的典型壓縮率：35%（壓縮後約為原始的 35%）
+		// 估算節省的頻寬 = 原始大小 × (1 - 0.35) = 原始大小 × 0.65
+		estimatedBytesSaved := int64(float64(bytesSentRaw) * 0.65)
+
+		fmt.Fprintf(w, "# HELP chiikawa_ws_bytes_sent_raw_total Total raw (pre-compression) bytes sent via WebSocket\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_ws_bytes_sent_raw_total counter\n")
+		fmt.Fprintf(w, "chiikawa_ws_bytes_sent_raw_total %d\n\n", bytesSentRaw)
+
+		fmt.Fprintf(w, "# HELP chiikawa_ws_avg_message_size_bytes Average WebSocket message size in bytes (pre-compression)\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_ws_avg_message_size_bytes gauge\n")
+		fmt.Fprintf(w, "chiikawa_ws_avg_message_size_bytes %.2f\n\n", avgMsgSizeBytes)
+
+		fmt.Fprintf(w, "# HELP chiikawa_ws_estimated_bytes_saved_total Estimated bytes saved by permessage-deflate compression (65%% compression ratio assumed)\n")
+		fmt.Fprintf(w, "# TYPE chiikawa_ws_estimated_bytes_saved_total counter\n")
+		fmt.Fprintf(w, "chiikawa_ws_estimated_bytes_saved_total %d\n\n", estimatedBytesSaved)
+
 		// DAY-041：active_targets 指標（讓 Grafana 能監控目標物數量）
 		fmt.Fprintf(w, "# HELP chiikawa_active_targets Current number of active targets on screen\n")
 		fmt.Fprintf(w, "# TYPE chiikawa_active_targets gauge\n")

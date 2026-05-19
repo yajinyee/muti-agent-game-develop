@@ -104,9 +104,10 @@ type Hub struct {
 	OnDisconnect func(clientID string)
 
 	// 訊息吞吐量計數器（原子操作，供 /metrics 使用）
-	MsgReceived atomic.Int64 // 收到的訊息總數
-	MsgSent     atomic.Int64 // 發送的訊息總數
-	MsgDropped  atomic.Int64 // 丟棄的訊息總數（buffer full + rate limit）
+	MsgReceived  atomic.Int64 // 收到的訊息總數
+	MsgSent      atomic.Int64 // 發送的訊息總數
+	MsgDropped   atomic.Int64 // 丟棄的訊息總數（buffer full + rate limit）
+	BytesSentRaw atomic.Int64 // 發送的原始位元組數（壓縮前，用於估算壓縮率）
 }
 
 // NewHub 建立新 Hub
@@ -187,6 +188,7 @@ func (h *Hub) Send(clientID string, msg *Message) error {
 	select {
 	case client.send <- data:
 		h.MsgSent.Add(1)
+		h.BytesSentRaw.Add(int64(len(data)))
 	default:
 		h.MsgDropped.Add(1)
 		log.Printf("[WS] Send buffer full for client %s, dropping message", clientID)
@@ -209,6 +211,7 @@ func (h *Hub) Broadcast(msg *Message) {
 		select {
 		case client.send <- data:
 			h.MsgSent.Add(1)
+			h.BytesSentRaw.Add(int64(len(data)))
 		default:
 			h.MsgDropped.Add(1)
 			log.Printf("[WS] Broadcast buffer full for client %s", client.ID)

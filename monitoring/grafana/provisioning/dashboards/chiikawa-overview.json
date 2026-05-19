@@ -254,6 +254,59 @@
           "max": 25
         }
       }
+    },
+    {
+      "id": 13,
+      "title": "WebSocket 平均訊息大小（壓縮前）",
+      "type": "stat",
+      "gridPos": { "x": 0, "y": 28, "w": 6, "h": 4 },
+      "targets": [
+        {
+          "expr": "chiikawa_ws_avg_message_size_bytes",
+          "legendFormat": "Avg Msg Size"
+        }
+      ],
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "textMode": "auto"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "bytes",
+          "thresholds": {
+            "steps": [
+              { "color": "green", "value": null },
+              { "color": "yellow", "value": 512 },
+              { "color": "red", "value": 1024 }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "id": 14,
+      "title": "WebSocket 壓縮節省頻寬（估算）",
+      "type": "timeseries",
+      "gridPos": { "x": 6, "y": 28, "w": 18, "h": 4 },
+      "targets": [
+        {
+          "expr": "rate(chiikawa_ws_bytes_sent_raw_total[1m])",
+          "legendFormat": "Raw Bytes/s (pre-compression)"
+        },
+        {
+          "expr": "rate(chiikawa_ws_bytes_sent_raw_total[1m]) * 0.35",
+          "legendFormat": "Est. Wire Bytes/s (post-compression)"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "unit": "Bps",
+          "custom": {
+            "fillOpacity": 10
+          }
+        }
+      }
     }
   ]
 }

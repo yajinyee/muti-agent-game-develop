@@ -640,6 +640,14 @@ func _update_target_positions(delta: float) -> void:
 		# 離開畫面標記移除
 		if node.position.x < -150 or node.position.x > 1450:
 			to_remove.append(instance_id)
+		else:
+			# 可見性剔除：畫面外的目標物設 visible=false，減少 draw call
+			# 畫面範圍：x 0~1280，y 0~720（加 64px 緩衝避免閃爍）
+			var in_screen = (node.position.x > -64 and node.position.x < 1344 and
+							 node.position.y > -64 and node.position.y < 784)
+			if node.visible != in_screen:
+				node.visible = in_screen
+			to_remove.append(instance_id)
 
 	# 統一移除
 	for id in to_remove:

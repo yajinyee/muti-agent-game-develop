@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-19（DAY-041 TargetPool 物件池 + /metrics active_targets）
+## 最後更新：2026-05-19（DAY-042 WebSocket壓縮統計 + Client可見性剔除 + Grafana 14面板）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,8 +8,8 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控**
-- **DAY-041 更新：** `TargetPool.gd`（24個空殼節點預建立，消除高頻 GC）✅，`TargetManager.gd` 整合 TargetPool ✅，`/metrics` 加入 `chiikawa_active_targets` 指標 ✅，Grafana dashboard 升級到 12 個面板 ✅
+- **架構成熟度：RedisStore 完整實作，Docker 部署就緒，Rate Limiting 防護，完整任務系統（6個任務），Prometheus 監控（14個面板），TargetPool 物件池，可見性剔除**
+- **DAY-042 更新：** `hub.go` 加入 `BytesSentRaw` 計數器 ✅，`/metrics` 加入 3 個壓縮統計指標 ✅，`TargetManager.gd` 加入可見性剔除（64px 緩衝）✅，Grafana dashboard 升級到 14 個面板 ✅
 
 ---
 
@@ -282,10 +282,13 @@
   - `game.go`：`GetActiveTargetCount()` 方法（thread-safe，RLock）
   - `main.go`：`/metrics` 加入 `chiikawa_active_targets` gauge
   - Grafana dashboard：從 10 個面板升級到 12 個面板（active_targets stat + timeseries）
-
----
-
-## 技術決策記錄
+- [x] **WebSocket 壓縮統計**（DAY-042）：
+  - `hub.go`：加入 `BytesSentRaw atomic.Int64` 計數器（Send + Broadcast 都追蹤）
+  - `main.go`：`/metrics` 加入 3 個壓縮統計指標（raw bytes、avg msg size、estimated saved）
+  - Grafana dashboard：從 12 個面板升級到 14 個面板（avg msg size stat + 壓縮節省 timeseries）
+- [x] **Client 可見性剔除**（DAY-042）：
+  - `TargetManager.gd`：`_update_target_positions` 加入可見性剔除（64px 緩衝，畫面外 visible=false）
+  - 效能改善：畫面外目標物不渲染，減少 draw call
 - Server：Go + WebSocket，Port 7777
 - Client：Godot 4.6.2（GDScript），HTML5 匯出
 - 通訊協定：WebSocket + JSON，每訊息獨立 frame

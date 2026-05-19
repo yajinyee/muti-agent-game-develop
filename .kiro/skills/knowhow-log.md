@@ -1913,3 +1913,25 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **不需要修復的 tween：** `glow.create_tween()` 綁定到子節點，子節點 queue_free 時自動停止
 - **規則：** container 級別的 tween（`container.create_tween()`）必須用 `register_tween` 追蹤；子節點的 tween（`child.create_tween()`）不需要
 - **教訓：** pool 節點的 tween 生命週期管理是物件池設計的核心挑戰，必須區分「container tween」和「child tween」
+
+## 90. WebSocket 壓縮統計的正確方式（2026-05-19 DAY-042）
+- **問題：** gorilla/websocket 的 permessage-deflate 在 wire 層壓縮，無法直接取得壓縮後大小
+- **解法：** 用 `atomic.Int64` 追蹤原始位元組數（`BytesSentRaw`），在 `/metrics` 端點計算估算值
+- **估算公式：** JSON 文字的 permessage-deflate 壓縮率約 35%（壓縮後約為原始的 35%）
+- **指標：** `chiikawa_ws_bytes_sent_raw_total`、`chiikawa_ws_avg_message_size_bytes`、`chiikawa_ws_estimated_bytes_saved_total`
+- **Grafana 面板：** 原始 Bytes/s vs 估算 Wire Bytes/s（×0.35），直觀顯示壓縮節省的頻寬
+- **教訓：** 無法直接量測的指標，用估算值 + 明確標注「estimated」，比完全不顯示更有價值
+
+## 91. Godot 4 可見性剔除（Visibility Culling）（2026-05-19 DAY-042）
+- **問題：** 目標物在畫面外（x < -64 或 x > 1344）時仍然渲染，浪費 draw call
+- **解法：** 在 `_update_target_positions` 中，依位置動態設定 `node.visible`
+  ```gdscript
+  var in_screen = (node.position.x > -64 and node.position.x < 1344 and
+                   node.position.y > -64 and node.position.y < 784)
+  if node.visible != in_screen:
+      node.visible = in_screen
+  ```
+- **緩衝區：** 64px 緩衝避免目標物在邊緣閃爍（進出畫面時不會瞬間消失）
+- **移除條件不變：** x < -150 或 x > 1450 才真正移除（比可見性剔除更寬鬆）
+- **效能提升：** 畫面外的目標物不渲染，減少 draw call（特別是 BOSS 戰有 8 個目標時）
+- **教訓：** 可見性剔除是 2D 遊戲的標準優化，Godot 的 `visible=false` 完全跳過渲染
