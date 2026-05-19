@@ -168,72 +168,26 @@ $memoryContent = $memoryContent -replace "\*\*最後更新\*\*：[\d-]+", $newDa
 Set-Content "memory/project-memory.md" $memoryContent -Encoding UTF8
 Log "[Game Director] ✅ Memory 更新完成"
 
-# ── Step 8：輸出 Nightly Report ───────────────────────────────────────────────
+# ── Step 8：輸出 Nightly Report（使用自動化腳本）────────────────────────────
 
-Log "[Game Director] 輸出 Nightly Report..."
+Log "[Game Director] 輸出 Nightly Report（generate_nightly_report.py）..."
 
 $passCount = ($scores.Values | Where-Object { $_ -ge 88 }).Count
 $totalCount = $scores.Count
 
-$nightlyReport = @"
-# Nightly Report — $Date（DAY-$Day）
+# 使用 DAY-047 新增的自動化腳本，整合 go build/vet/test + QA + git log + progress.md
+$dayNum = [int]$Day
+$reportOutput = py tools/generate_nightly_report.py --day $dayNum --date $Date 2>&1
+$reportOutput | ForEach-Object { Log "  Report: $_" }
 
-**撰寫者**：Game Director（自動生成）  
-**Branch**：$integrationBranch
-
----
-
-## 品質分數
-
-| 指標 | 分數 | 狀態 |
-|------|------|------|
-$(
-    $scores.GetEnumerator() | ForEach-Object {
-        $icon = if ($_.Value -ge 88) { "✅" } else { "❌" }
-        "| $($_.Key) | $($_.Value) | $icon |"
-    } | Out-String
-)
-
-**通過率：$passCount/$totalCount**
-
----
-
-## Build 狀態
-
-- go build：✅ 通過
-- go vet：✅ 通過
-
----
-
-## 今日執行的 Agent
-
-- Game Director：讀取 memory，決策，Merge
-- QA Playtest Agent：完整 QA 檢查
-- Go Server Agent：Build 確認
-- Skill Librarian：Skills 索引更新
-
----
-
-## 明日建議
-
-$(
-    $lowScores = $scores.GetEnumerator() | Where-Object { $_.Value -lt 90 } | Sort-Object Value
-    if ($lowScores) {
-        "### 需要改善的項目（分數 < 90）"
-        $lowScores | ForEach-Object { "- $($_.Key): $($_.Value)/100" }
-    } else {
-        "所有指標 >= 90，繼續維持品質。"
-    }
-)
-
----
-
-*自動生成時間：$(Get-Date -Format "yyyy-MM-dd HH:mm:ss")*
-"@
-
-$reportPath = "reports/nightly/nightly-report-$Date-day$Day.md"
-Set-Content $reportPath $nightlyReport -Encoding UTF8
-Log "[Game Director] ✅ Nightly Report: $reportPath"
+# 從輸出提取報告路徑
+$reportPath = $reportOutput | Where-Object { $_ -match "reports/nightly/" } | Select-Object -Last 1
+if ($reportPath) {
+    $reportPath = $reportPath -replace ".*報告路徑：", "" -replace ".*：", ""
+    Log "[Game Director] ✅ Nightly Report: $reportPath"
+} else {
+    Log "[Game Director] ✅ Nightly Report 生成完成"
+}
 
 # ── Step 9：Commit + Merge + Push ─────────────────────────────────────────────
 

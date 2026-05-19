@@ -56,6 +56,11 @@ tools/debug_*.png
 tools/thumb_*.png
 tools/sprite_comparison.png
 
+# 自動化 log（不需要 commit）
+tools/auto_continue.log
+tools/*.log
+reports/nightly/daily-loop-*.log
+
 # Server 編譯輸出
 server/bin/
 
