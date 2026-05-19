@@ -108,6 +108,9 @@ type Hub struct {
 	MsgSent      atomic.Int64 // 發送的訊息總數
 	MsgDropped   atomic.Int64 // 丟棄的訊息總數（buffer full + rate limit）
 	BytesSentRaw atomic.Int64 // 發送的原始位元組數（壓縮前，用於估算壓縮率）
+
+	// 訊息類型計數器（DAY-043，供 /metrics 顯示各類型訊息頻率）
+	msgTypeCounts sync.Map // MessageType -> *atomic.Int64
 }
 
 // NewHub 建立新 Hub
@@ -189,6 +192,7 @@ func (h *Hub) Send(clientID string, msg *Message) error {
 	case client.send <- data:
 		h.MsgSent.Add(1)
 		h.BytesSentRaw.Add(int64(len(data)))
+		h.IncrMsgType(msg.Type)
 	default:
 		h.MsgDropped.Add(1)
 		log.Printf("[WS] Send buffer full for client %s, dropping message", clientID)
@@ -217,6 +221,8 @@ func (h *Hub) Broadcast(msg *Message) {
 			log.Printf("[WS] Broadcast buffer full for client %s", client.ID)
 		}
 	}
+	// 廣播訊息類型計數（每次廣播算一次，不管有幾個 client）
+	h.IncrMsgType(msg.Type)
 }
 
 // ClientCount 目前總連線數（玩家 + 觀戰者）
@@ -224,6 +230,23 @@ func (h *Hub) ClientCount() int {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return len(h.clients)
+}
+
+// IncrMsgType 增加指定訊息類型的計數（DAY-043）
+func (h *Hub) IncrMsgType(msgType MessageType) {
+	val, _ := h.msgTypeCounts.LoadOrStore(msgType, &atomic.Int64{})
+	val.(*atomic.Int64).Add(1)
+}
+
+// GetMsgTypeCounts 取得所有訊息類型的計數（DAY-043）
+// 回傳 map[string]int64，供 /metrics 端點使用
+func (h *Hub) GetMsgTypeCounts() map[string]int64 {
+	result := make(map[string]int64)
+	h.msgTypeCounts.Range(func(key, value interface{}) bool {
+		result[string(key.(MessageType))] = value.(*atomic.Int64).Load()
+		return true
+	})
+	return result
 }
 
 // ServeWS 處理 WebSocket 升級請求（一般玩家）

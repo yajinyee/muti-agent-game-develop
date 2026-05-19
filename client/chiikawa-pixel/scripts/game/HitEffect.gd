@@ -549,10 +549,10 @@ func spawn_combo(combo_count: int, pos: Vector2 = Vector2(640, 580)) -> void:
 			combo_color = Color(1.0, 0.2, 0.8)   # 紫（5+）
 			combo_text = "COMBO ×%d" % combo_count
 
-	# 閃光環（連擊顏色）
+	# 閃光環（連擊顏色，依連擊數增大）
 	_spawn_flash_ring(pos, combo_color, 30.0 + combo_count * 5.0, 0.25)
 
-	# 少量粒子
+	# 粒子（依連擊數增多）
 	_spawn_particles(pos, combo_color, 6 + combo_count, 60.0, 0.35)
 
 	# 連擊文字（從砲台位置向上飄）
@@ -561,6 +561,20 @@ func spawn_combo(combo_count: int, pos: Vector2 = Vector2(640, 580)) -> void:
 	# 高連擊（4+）加畫面震動
 	if combo_count >= 4:
 		ScreenShake.add_trauma(0.15 + combo_count * 0.03)
+
+	# 高連擊（5+）加全畫面閃光（DAY-043 強化）
+	# 讓玩家感受到「這次連擊很厲害」的視覺衝擊
+	if combo_count >= 5:
+		_spawn_screen_flash(Color(combo_color.r, combo_color.g, combo_color.b, 0.25), 0.05, 0.25)
+		# 額外衝擊波（從砲台位置向外擴散）
+		_spawn_shockwave(pos, combo_color, 1.5 + combo_count * 0.1)
+
+	# 超高連擊（7+）加螢幕扭曲（DAY-043 強化）
+	# 7+ 連擊是非常罕見的成就，值得最強烈的視覺反饋
+	if combo_count >= 7:
+		spawn_screen_shockwave(pos, 0.3)
+		# 第二個閃光環（白色，更大）
+		_spawn_flash_ring(pos, Color.WHITE, 55.0 + combo_count * 3.0, 0.3)
 
 ## 連擊文字動畫（向上飄出）
 func _spawn_combo_text(text: String, color: Color, pos: Vector2, combo_count: int) -> void:

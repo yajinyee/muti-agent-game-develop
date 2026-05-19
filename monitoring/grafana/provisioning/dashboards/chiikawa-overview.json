@@ -307,6 +307,49 @@
           }
         }
       }
+    },
+    {
+      "id": 15,
+      "title": "WebSocket 訊息類型分布（發送頻率）",
+      "type": "timeseries",
+      "gridPos": { "x": 0, "y": 32, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "rate(chiikawa_ws_msg_type_total{type=\"target_spawn\"}[1m]) * 60",
+          "legendFormat": "target_spawn/min"
+        },
+        {
+          "expr": "rate(chiikawa_ws_msg_type_total{type=\"target_kill\"}[1m]) * 60",
+          "legendFormat": "target_kill/min"
+        },
+        {
+          "expr": "rate(chiikawa_ws_msg_type_total{type=\"attack_result\"}[1m]) * 60",
+          "legendFormat": "attack_result/min"
+        },
+        {
+          "expr": "rate(chiikawa_ws_msg_type_total{type=\"player_update\"}[1m]) * 60",
+          "legendFormat": "player_update/min"
+        },
+        {
+          "expr": "rate(chiikawa_ws_msg_type_total{type=\"leaderboard\"}[1m]) * 60",
+          "legendFormat": "leaderboard/min"
+        },
+        {
+          "expr": "rate(chiikawa_ws_msg_type_total{type=\"boss_event\"}[1m]) * 60",
+          "legendFormat": "boss_event/min"
+        },
+        {
+          "expr": "rate(chiikawa_ws_msg_type_total{type=\"bonus_event\"}[1m]) * 60",
+          "legendFormat": "bonus_event/min"
+        }
+      ],
+      "fieldConfig": {
+        "defaults": {
+          "custom": {
+            "fillOpacity": 5
+          }
+        }
+      }
     }
   ]
 }

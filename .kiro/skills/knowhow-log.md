@@ -1935,3 +1935,28 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - **移除條件不變：** x < -150 或 x > 1450 才真正移除（比可見性剔除更寬鬆）
 - **效能提升：** 畫面外的目標物不渲染，減少 draw call（特別是 BOSS 戰有 8 個目標時）
 - **教訓：** 可見性剔除是 2D 遊戲的標準優化，Godot 的 `visible=false` 完全跳過渲染
+
+## 92. WebSocket 訊息類型統計（sync.Map + atomic.Int64）（2026-05-19 DAY-043）
+- **需求：** 追蹤每種訊息類型的發送次數，讓 Grafana 能顯示訊息類型分布
+- **設計：** `sync.Map` 儲存 `MessageType -> *atomic.Int64`，`LoadOrStore` 確保 thread-safe 初始化
+  ```go
+  func (h *Hub) IncrMsgType(msgType MessageType) {
+      val, _ := h.msgTypeCounts.LoadOrStore(msgType, &atomic.Int64{})
+      val.(*atomic.Int64).Add(1)
+  }
+  ```
+- **Prometheus 格式：** `chiikawa_ws_msg_type_total{type="target_spawn"} 1234`（帶 label）
+- **Broadcast vs Send 的計數策略：**
+  - `Send`：每次成功發送 +1（per-client）
+  - `Broadcast`：每次廣播 +1（不管有幾個 client，避免 N 倍計數）
+- **教訓：** `sync.Map` 的 `LoadOrStore` 是 thread-safe 的懶初始化，比預先建立所有 key 更靈活
+
+## 93. Combo 連擊視覺強化設計原則（2026-05-19 DAY-043）
+- **問題：** 5+ 連擊和 2 連擊的視覺反饋差異不夠大，玩家感受不到「這次連擊很厲害」
+- **強化策略（分級）：**
+  - 2-3 連擊：閃光環 + 粒子 + 文字（輕量）
+  - 4 連擊：加畫面震動（中等）
+  - 5+ 連擊：加全畫面閃光 + 衝擊波（強烈）
+  - 7+ 連擊：加螢幕扭曲 + 第二閃光環（最強烈）
+- **設計原則：** 視覺強度要和連擊難度成正比，7+ 連擊是非常罕見的成就，值得最強烈的反饋
+- **教訓：** 遊戲 juice 的核心是「反饋強度 = 玩家成就感」，不能讓所有連擊看起來一樣

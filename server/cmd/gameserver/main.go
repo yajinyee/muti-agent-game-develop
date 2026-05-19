@@ -364,6 +364,18 @@ func main() {
 		fmt.Fprintf(w, "# TYPE chiikawa_ws_estimated_bytes_saved_total counter\n")
 		fmt.Fprintf(w, "chiikawa_ws_estimated_bytes_saved_total %d\n\n", estimatedBytesSaved)
 
+		// WebSocket 訊息類型分布（DAY-043）
+		// 讓 Grafana 能看到各類型訊息的頻率，識別高頻訊息類型
+		msgTypeCounts := hub.GetMsgTypeCounts()
+		if len(msgTypeCounts) > 0 {
+			fmt.Fprintf(w, "# HELP chiikawa_ws_msg_type_total Total WebSocket messages sent by type\n")
+			fmt.Fprintf(w, "# TYPE chiikawa_ws_msg_type_total counter\n")
+			for msgType, count := range msgTypeCounts {
+				fmt.Fprintf(w, "chiikawa_ws_msg_type_total{type=%q} %d\n", msgType, count)
+			}
+			fmt.Fprintf(w, "\n")
+		}
+
 		// DAY-041：active_targets 指標（讓 Grafana 能監控目標物數量）
 		fmt.Fprintf(w, "# HELP chiikawa_active_targets Current number of active targets on screen\n")
 		fmt.Fprintf(w, "# TYPE chiikawa_active_targets gauge\n")
