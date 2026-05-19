@@ -52,6 +52,15 @@ func _ready() -> void:
 	_fps_samples.fill(60.0)
 	print("[PerfMon] Performance monitor started")
 
+	# 加入 Godot Debugger 自訂監控器（DAY-045，只在 debug build 有效）
+	# 讓開發時可以在 Debugger → Monitor 面板看到遊戲自訂指標
+	if OS.is_debug_build():
+		Performance.add_custom_monitor("game/fps_avg", get_current_fps)
+		Performance.add_custom_monitor("game/memory_mb", func(): return snapshot_memory_mb)
+		Performance.add_custom_monitor("game/draw_calls", func(): return float(snapshot_draw_calls))
+		Performance.add_custom_monitor("game/node_count", func(): return float(snapshot_nodes))
+		print("[PerfMon] Custom monitors registered in Debugger")
+
 func _process(delta: float) -> void:
 	# 收集 FPS 樣本
 	var fps = Engine.get_frames_per_second()

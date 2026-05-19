@@ -1059,3 +1059,41 @@ GitHub 同步完成（commit `e333f81`）。
 1. 搜尋「Godot 4 MultiMesh 2D batching optimization」找同類型目標物合批渲染方案
 2. 評估 Server 端 WebSocket 訊息批次統計（壓縮率指標）
 3. 考慮加入 TargetPool 的 `get_stats()` 到 Prometheus /metrics 端點
+
+---
+
+## 評估 #28 — 2026-05-19（DAY-045，Client 端效能上報 + Server 連線品質報告）
+
+### 這次學到了什麼
+1. **Client 端效能上報設計**：30 秒一次，輕量（200 bytes/次），不影響遊戲效能
+2. **Server 端效能快照儲存**：只保留最新快照（不是歷史記錄），60 秒內有上報才顯示
+3. **Godot 4 自訂效能監控器**：`Performance.add_custom_monitor()` 讓自訂指標出現在 Debugger 面板
+4. **高延遲/低FPS 警告 log**：`[PerfAlert]` 前綴讓運維人員能快速 grep 識別問題玩家
+5. **Grafana 雙軸 timeseries**：FPS 和記憶體用不同 Y 軸，讓兩個量級不同的指標都清晰可見
+6. **Go WebSocket 2025 最佳實踐確認**：我們的架構（goroutine-per-connection + permessage-deflate）已符合業界標準
+
+### 進步說明
+- 監控系統從「Server 端指標」升級為「Server + Client 端全面監控」
+- Grafana 面板從 18 升級到 21 個
+- 加入 Godot Debugger 自訂監控器（開發時更方便）
+- 記錄了 3 條新 KnowHow（83/84/85）
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 98 | → | 穩定，Client 效能上報整合乾淨 |
+| Godot GDScript | 98 | +1 | 掌握 Performance.add_custom_monitor()，自訂 Debugger 監控器 |
+| 像素美術生成 | 95 | → | 穩定 |
+| 遊戲數值設計 | 86 | → | 穩定 |
+| WebSocket 通訊 | 97 | +2 | Client 端效能上報協定設計完整，雙向監控 |
+| **整體完成信心** | **100** | → | 維持 100%，監控系統更完整 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，監控系統升級到 Server + Client 雙端。
+今日完成：Client 端效能上報 + Server 連線品質報告 + Grafana 21 面板 + GitHub 同步。
+
+### 下一步學習目標
+1. Nightly Report 自動化腳本
+2. 搜尋「pixel art fishing game monetization design 2025」
+3. 評估是否需要加入 Client 端效能歷史記錄（Server 端 ring buffer）

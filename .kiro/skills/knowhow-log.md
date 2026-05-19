@@ -1998,3 +1998,34 @@ BONUS_MULT = 20-50x（Prototype 展示版）
 - BOSS 獎勵係數：`0.06`（降低避免高 bet 等級 RTP 超標）
 - 結果：LV1-LV7 RTP 95-96%，LV10 RTP 92-93%（高 bet 等級 BOSS 觸發多，獎勵係數低）
 - 業界標準：96.3-96.4%（Fish Boom），我們 95.71% 接近標準
+
+## 83. Godot 4 自訂效能監控器（Performance.add_custom_monitor）
+- **來源：** shaggydev.com/2025/09/25/godot-custom-monitoring/
+- **功能：** `Performance.add_custom_monitor("category/metric_name", callable)` 讓自訂指標出現在 Godot Debugger 的 Monitor 面板
+- **用途：** 可以把 TargetPool 的 active/pooled 數量、BulletPool 統計等加入 Debugger 面板，方便開發時監控
+- **語法：**
+  ```gdscript
+  func _ready():
+      Performance.add_custom_monitor("game/active_targets", _get_active_targets)
+  
+  func _get_active_targets() -> int:
+      return TargetPool.get_stats().active
+  ```
+- **注意：** 只在 debug build 有效，release build 自動忽略
+- **教訓：** 比 HUD 顯示更輕量，適合開發時監控，不影響玩家體驗
+
+## 84. Go WebSocket 高負載優化（2025 最佳實踐）
+- **來源：** hemaks.org/posts/optimizing-websocket-in-high-load-go-applications-a-practitioners-guide/
+- **Worker Pool 模式：** 適合 1000+ 並發連線，我們的單房間架構（< 50 玩家）用 goroutine-per-connection 已足夠
+- **記憶體優化：** `sync.Pool` 重用 byte slice，避免 GC 壓力（我們已有 BulletPool/TargetPool）
+- **壓縮取捨：** permessage-deflate 對 JSON 壓縮率 60-70%，但 CPU 開銷 ~5%，小訊息（< 100 bytes）不值得壓縮
+- **監控重點：** goroutine 數量、heap alloc、message queue depth（我們的 /metrics 已涵蓋）
+- **教訓：** 我們的架構已符合 2025 最佳實踐，不需要大改，繼續優化監控和可觀測性即可
+
+## 85. Client 端效能上報設計原則（DAY-045 實作總結）
+- **上報頻率：** 30 秒一次，避免增加 WebSocket 流量（每次上報約 200 bytes）
+- **上報時機：** 在 PerformanceMonitor._process() 中計時，不需要額外 Timer 節點
+- **Server 端儲存：** 只保留最新快照（不是歷史記錄），60 秒內有上報才顯示
+- **警告閾值：** ping > 200ms 或 FPS < 20 輸出 [PerfAlert] log
+- **Grafana 指標：** per-client fps/memory/draw_calls + 全局 avg_fps
+- **教訓：** Client 端效能上報要輕量，不能讓監控本身影響遊戲效能
