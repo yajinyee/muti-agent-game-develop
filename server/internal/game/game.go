@@ -342,7 +342,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			},
 		})
 		// 任務進度：連擊達人（DAY-038）
-		go g.updateMissionProgress(p.ID, mission.MissionCombo, comboCount)
+		// 每次達成 2+ 連擊，累積 +1（不是 +comboCount，避免連擊串讓任務太快完成）
+		go g.updateMissionProgress(p.ID, mission.MissionCombo, 1)
 	}
 
 	// 發放獎勵

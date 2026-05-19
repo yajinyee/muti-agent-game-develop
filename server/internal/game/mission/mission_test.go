@@ -214,15 +214,18 @@ func TestDailyMissionsDefinition(t *testing.T) {
 }
 
 // TestUpdateProgress_Combo 確認連擊任務進度更新（DAY-038）
+// 注意：game.go 每次 combo 傳入 amount=1（不是 comboCount），避免連擊串讓任務太快完成
 func TestUpdateProgress_Combo(t *testing.T) {
 	m := NewManager()
 	playerID := "player-007"
 	m.GetOrInitProgress(playerID)
 
-	// 達成 3 連擊（未完成，目標 5）
-	completed := m.UpdateProgress(playerID, MissionCombo, 3)
-	if len(completed) != 0 {
-		t.Errorf("should not complete yet (3/5), got %d completed", len(completed))
+	// 模擬 4 次 combo 事件（每次 +1，未完成，目標 5）
+	for i := 0; i < 4; i++ {
+		completed := m.UpdateProgress(playerID, MissionCombo, 1)
+		if len(completed) != 0 {
+			t.Errorf("should not complete yet (%d/5), got %d completed", i+1, len(completed))
+		}
 	}
 
 	// 確認進度
@@ -232,15 +235,15 @@ func TestUpdateProgress_Combo(t *testing.T) {
 			continue
 		}
 		prog := progress[mission.ID]
-		if prog.Current != 3 {
-			t.Errorf("expected current=3, got %d", prog.Current)
+		if prog.Current != 4 {
+			t.Errorf("expected current=4, got %d", prog.Current)
 		}
 	}
 
-	// 再達成 3 連擊（累積 6，超過目標 5，應完成）
-	completed = m.UpdateProgress(playerID, MissionCombo, 3)
+	// 第 5 次 combo 事件（累積 5，達到目標，應完成）
+	completed := m.UpdateProgress(playerID, MissionCombo, 1)
 	if len(completed) == 0 {
-		t.Error("should complete combo mission (6/5)")
+		t.Error("should complete combo mission (5/5)")
 	}
 	if completed[0].Type != MissionCombo {
 		t.Errorf("expected MissionCombo, got %s", completed[0].Type)
