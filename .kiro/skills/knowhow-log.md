@@ -2150,3 +2150,27 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **更新時機：** 每次 `_refresh_session_stats()` 呼叫時重新計算
 - **顏色分級：** 正數=綠色（盈利），負數=紅色（虧損），零=灰色（持平）
 - **教訓：** 淨收益比「總獎勵」更有意義，玩家更關心「我賺了多少」而不是「我贏了多少」
+
+## 93. Store 通用 key-value 設計（DAY-049d）
+- **問題：** Store 介面只有 Player 相關方法，無法儲存 Jackpot 等其他狀態
+- **解法：** 加入 `SetJSON(key, value, ttl)` + `GetJSON(key, dest)` 通用方法
+- **MemoryStore 實作：** 借用 `players` map，用 key 作為 PlayerID，JSON 字串存在 DisplayName 欄位
+  - 這是一個 hack，但避免了新增 map 欄位的複雜性
+  - 生產環境用 Redis，MemoryStore 只用於測試和開發
+- **RedisStore 實作：** 直接用 Redis SET/GET + JSON 序列化，最乾淨
+- **nil store 防護：** `saveJackpotState`/`loadJackpotState` 都要先檢查 `g.store == nil`
+- **教訓：** 測試用的 `NewGame`（不帶 store）和生產用的 `NewGameWithStore` 行為不同，要做 nil 防護
+
+## 94. Jackpot 池持久化設計（DAY-049d）
+- **問題：** Server 重啟後 Jackpot 池歸零，玩家體驗差
+- **解法：** 每 30 秒儲存一次，重啟時恢復
+- **儲存 key：** `jackpot_state:{room_id}`（支援多房間）
+- **TTL：** 7 天（防止過期資料影響新遊戲）
+- **LoadState 防護：** 只恢復大於 BaseAmount 的值，防止異常數據（如 0 或負數）
+- **教訓：** 持久化要有防護機制，不能盲目恢復任何值
+
+## 95. GDScript meta 追蹤狀態（DAY-049d）
+- **問題：** Jackpot ticker 輪播用 `_jackpot_history.find(ticker_lbl.text)` 找索引，但 text 可能不在 history 中（被修改過）
+- **解法：** 用 `ticker_lbl.set_meta("ticker_idx", idx)` 追蹤當前索引
+- **優點：** meta 跟著節點走，不需要額外的 class 變數
+- **教訓：** 需要在節點上追蹤狀態時，用 `set_meta`/`get_meta` 比額外變數更乾淨

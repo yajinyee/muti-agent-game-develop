@@ -26,9 +26,14 @@
   - `main.go`：`/jackpot` 端點加入 `daily_stats` 欄位
   - `main.go`：`/metrics` 加入 `chiikawa_jackpot_daily_wins{level}` + `chiikawa_jackpot_daily_payout` 指標
   - `history_test.go`：新增 `TestHistory_GetDailyStats`（13/13 全通過）
-- **DAY-049c 更新（自主觸發）：** Grafana 升級到 23 個面板 ✅
-  - `chiikawa-overview.json`：加入 Panel 22（Jackpot 池當前金額 stat）+ Panel 23（今日 Jackpot 發放統計 timeseries）
-  - Dashboard 標題更新為 DAY-049
+- **DAY-049d 更新（自主觸發）：** Jackpot 池持久化 + Ticker Bug 修復 ✅
+  - `jackpot.go`：加入 `PoolState` struct + `SaveState()` / `LoadState()` 方法
+  - `store.go`：Store 介面加入 `SetJSON(key, value, ttl)` + `GetJSON(key, dest)` 通用 key-value 方法
+  - `MemoryStore`：實作 `SetJSON`/`GetJSON`（借用 players map 儲存）
+  - `RedisStore`：實作 `SetJSON`/`GetJSON`（Redis SET/GET + JSON 序列化）
+  - `game.go`：`Start()` 呼叫 `loadJackpotState()`，每 30 秒呼叫 `saveJackpotState()`
+  - `store_test.go`：新增 `TestMemoryStoreSetGetJSON` + `TestMemoryStoreGetJSONNotFound`（10/10 全通過）
+  - `HUD.gd`：Jackpot ticker 輪播 bug 修復（改用 `set_meta("ticker_idx")` 追蹤索引）
 - **DAY-048 更新（自主觸發）：** Progressive Jackpot 系統 ✅
   - `server/internal/game/jackpot/jackpot.go`：三等級 Jackpot 管理器（Mini/Major/Grand）
   - 每次攻擊抽取 0.5% 進入 Jackpot 池（Mini 60% / Major 30% / Grand 10%）
