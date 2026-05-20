@@ -2949,3 +2949,20 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **解法：** 在 `player` 套件提供 thread-safe 的 getter/setter 方法
 - **模式：** `GetXxx()` 用 `mu.RLock()`，`SetXxx()` 用 `mu.Lock()`
 - **教訓：** 跨套件存取 struct 欄位時，一律用方法封裝，不要直接存取 unexported 欄位
+
+## 136. 每日錦標賽系統設計要點（DAY-093）
+- **核心設計：** 在現有週賽（Tournament）基礎上加入每日賽（DailyTournament），共用 Entry/RankEntry/PointSource 結構
+- **時間計算：** `currentDayRange(t)` — UTC+8 當天 00:00 到 23:59:59，用 `time.FixedZone("UTC+8", 8*3600)`
+- **重置機制：** `checkAndReset()` 在每次 `AddPoints()` 時自動檢查，無需額外 goroutine
+- **歷史保留：** 每日賽保留最近 7 天，週賽保留最近 4 週
+- **獎勵差異：** 每日賽 5000/2000/1000（較小），週賽 50000/25000/10000（較大），讓玩家每天都有動力但週賽更有吸引力
+- **Client Tab 設計：** 預設顯示「今日賽」（更即時的競爭感），可切換到「週賽」
+- **業界依據：** Infingame（2026-05-19）確認 Tournament 是 2026 年 iGaming 最熱門留存機制
+- **教訓：** 複用現有結構（Entry/RankEntry）比重新設計更快，只需要新增 DailyTournament 包裝器
+
+## 137. Go 多管理器共用結構的設計模式
+- **問題：** DailyTournament 和 Tournament 有相同的 Entry/RankEntry 結構
+- **解法：** 在同一個 package 中定義共用結構，兩個管理器都使用
+- **優點：** 減少重複代碼，測試更容易，協定 Payload 可以共用 TournamentRankEntry
+- **注意：** 兩個管理器各自有獨立的 mutex，不會互相干擾
+- **教訓：** 同一 package 內的結構共用是 Go 的最佳實踐，不需要額外的 interface 抽象
