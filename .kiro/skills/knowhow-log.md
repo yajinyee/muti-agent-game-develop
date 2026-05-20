@@ -2778,3 +2778,21 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **問題：** handler 中比較 `GetStatus() != "active"` 會編譯錯誤（型別不符）
 - **解法：** import dailyboss 套件，使用 `dailyboss.BossStatusActive` 常數比較
 - **教訓：** 自定義型別（type BossStatus string）不能直接和字串字面量比較，要用套件常數
+
+## 128. VIP 等級系統設計原則（2026-05-20 DAY-078）
+- **累積消費不重置**：VIP 等級依累積消費金幣解鎖，不像賽季積分會重置，讓玩家有長期目標
+- **金幣返還機制**：每次攻擊後自動計算返還（cashback），不需要玩家手動領取，降低摩擦
+- **週獎勵設計**：7 天冷卻，讓玩家每週都有理由登入，提升週留存率
+- **等級顏色策略**：青銅→白銀→黃金→白金→鑽石，顏色從暖色到冷色，視覺上有明顯升級感
+- **教訓**：VIP 系統的核心是「讓玩家感受到消費有回報」，返還率和週獎勵是最直接的回報
+
+## 129. Go time.After vs time.Now().Before 的差異（2026-05-20 DAY-079）
+- **問題**：`ActiveEvent.IsActive()` 用 `now.After(e.StartAt)` 判斷，但 `StartAt = time.Now()` 時，`now.After(StartAt)` 是 false（嚴格大於）
+- **修復**：改用 `!now.Before(e.StartAt)`（大於等於），確保剛建立的活動立即生效
+- **教訓**：時間比較要注意邊界條件，`After` 是嚴格大於，`!Before` 是大於等於
+
+## 130. 限時活動系統設計原則（2026-05-20 DAY-079）
+- **輪換設計**：活動和無活動期交替，讓玩家感受到「有活動」和「沒活動」的對比，增加活動的稀缺感
+- **效果即時套用**：活動效果在 Server 端計算（finalReward = reward × eventRewardMult），不依賴 Client 端計算，確保公平性
+- **廣播策略**：每 30 秒廣播一次活動狀態（包含剩餘時間），Client 端用 end_at 自己計算倒數，減少 Server 廣播頻率
+- **教訓**：限時活動的「稀缺感」比「永久加成」更能刺激玩家行動，30 分鐘是合適的活動時長
