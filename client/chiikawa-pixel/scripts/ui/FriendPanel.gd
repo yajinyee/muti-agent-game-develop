@@ -243,24 +243,66 @@ func _update_pending_badge() -> void:
 	else:
 		_pending_badge.visible = false
 
-## 顯示加好友對話框（簡單版：輸入玩家 ID）
+## 顯示加好友對話框（輸入玩家 ID）
 func _show_add_friend_dialog() -> void:
-	# 建立簡單輸入提示
+	# 建立輸入框
+	var dialog_bg := ColorRect.new()
+	dialog_bg.position = Vector2(-PANEL_WIDTH + 32, 28 + PANEL_HEIGHT + 4)
+	dialog_bg.size = Vector2(PANEL_WIDTH, 50)
+	dialog_bg.color = Color(0.08, 0.05, 0.2, 0.95)
+	dialog_bg.name = "AddFriendDialog"
+	add_child(dialog_bg)
+
 	var hint := Label.new()
-	hint.text = "請在聊天輸入對方的玩家 ID\n（功能開發中）"
-	hint.position = Vector2(8, -40)
+	hint.position = Vector2(4, 4)
+	hint.text = "輸入玩家 ID（前8碼）："
 	hint.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
 	if _pixel_font:
 		hint.add_theme_font_override("font", _pixel_font)
-		hint.add_theme_font_size_override("font_size", 10)
-	add_child(hint)
+		hint.add_theme_font_size_override("font_size", 9)
+	dialog_bg.add_child(hint)
 
+	var line_edit := LineEdit.new()
+	line_edit.position = Vector2(4, 18)
+	line_edit.size = Vector2(PANEL_WIDTH - 60, 22)
+	line_edit.placeholder_text = "玩家 ID..."
+	line_edit.max_length = 36
+	if _pixel_font:
+		line_edit.add_theme_font_override("font", _pixel_font)
+		line_edit.add_theme_font_size_override("font_size", 10)
+	dialog_bg.add_child(line_edit)
+
+	var confirm_btn := Button.new()
+	confirm_btn.position = Vector2(PANEL_WIDTH - 54, 18)
+	confirm_btn.size = Vector2(50, 22)
+	confirm_btn.text = "發送"
+	if _pixel_font:
+		confirm_btn.add_theme_font_override("font", _pixel_font)
+		confirm_btn.add_theme_font_size_override("font_size", 9)
+	dialog_bg.add_child(confirm_btn)
+
+	# 確認發送
+	var send_fn = func():
+		var target_id = line_edit.text.strip_edges()
+		if target_id.length() >= 4:
+			NetworkManager.send_message({
+				"type": "send_friend_request",
+				"payload": {"target_id": target_id}
+			})
+			emit_signal("friend_request_sent", target_id)
+			_show_notification("好友請求已發送！", Color(0.4, 0.9, 0.4))
+		if is_instance_valid(dialog_bg):
+			dialog_bg.queue_free()
+
+	confirm_btn.pressed.connect(send_fn)
+	line_edit.text_submitted.connect(func(_t): send_fn.call())
+
+	# 5 秒後自動關閉
 	var tween = create_tween()
-	tween.tween_interval(2.0)
-	tween.tween_property(hint, "modulate:a", 0.0, 0.5)
+	tween.tween_interval(5.0)
 	tween.tween_callback(func():
-		if is_instance_valid(hint):
-			hint.queue_free()
+		if is_instance_valid(dialog_bg):
+			dialog_bg.queue_free()
 	)
 
 ## 顯示好友請求通知

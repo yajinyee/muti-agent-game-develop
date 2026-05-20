@@ -85,6 +85,27 @@ func update(entries: Array, my_player_id: String) -> void:
 			else:
 				title_lbl.text = ""
 
+		# 加好友按鈕（DAY-073）：非自己的玩家才顯示
+		var add_friend_btn = row.get_node_or_null("AddFriendBtn")
+		if add_friend_btn:
+			var entry_player_id: String = entry.get("player_id", "")
+			if not is_self and entry_player_id != "":
+				add_friend_btn.visible = true
+				# 清除舊的連接，重新連接
+				if add_friend_btn.pressed.get_connections().size() > 0:
+					for conn in add_friend_btn.pressed.get_connections():
+						add_friend_btn.pressed.disconnect(conn["callable"])
+				add_friend_btn.pressed.connect(func():
+					NetworkManager.send_message({
+						"type": "send_friend_request",
+						"payload": {"target_id": entry_player_id}
+					})
+					add_friend_btn.text = "✓"
+					add_friend_btn.disabled = true
+				)
+			else:
+				add_friend_btn.visible = false
+
 		# 自己的行背景高亮
 		var row_bg = row.get_node_or_null("RowBG")
 		if row_bg:
@@ -275,5 +296,19 @@ func _create_row(container: Control, index: int) -> void:
 	if is_instance_valid(_pixel_font):
 		title_lbl.add_theme_font_override("font", _pixel_font)
 	row.add_child(title_lbl)
+
+	# 加好友按鈕（DAY-073）
+	var add_friend_btn = Button.new()
+	add_friend_btn.name = "AddFriendBtn"
+	add_friend_btn.text = "➕"
+	add_friend_btn.position = Vector2(330, 8)
+	add_friend_btn.size = Vector2(24, 22)
+	add_friend_btn.flat = true
+	add_friend_btn.tooltip_text = "加好友"
+	add_friend_btn.visible = false  # 預設隱藏，update() 時依條件顯示
+	if is_instance_valid(_pixel_font):
+		add_friend_btn.add_theme_font_override("font", _pixel_font)
+		add_friend_btn.add_theme_font_size_override("font_size", 11)
+	row.add_child(add_friend_btn)
 
 	row.visible = false
