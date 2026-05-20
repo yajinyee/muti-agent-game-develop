@@ -250,3 +250,25 @@ func (m *Manager) AddCharge(playerID string, wtype WeaponType) {
 		m.setChargesLocked(s, wtype, charges+1)
 	}
 }
+
+// LoadState 從持久化資料恢復特殊武器充能數（DAY-100）
+func (m *Manager) LoadState(playerID string, bomb int, laser int, freeze int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.states[playerID] = &PlayerWeaponState{
+		BombCharges:   clampCharges(bomb, 3),
+		LaserCharges:  clampCharges(laser, 3),
+		FreezeCharges: clampCharges(freeze, 3),
+	}
+}
+
+// clampCharges 限制充能數在 0-max 範圍內
+func clampCharges(v, max int) int {
+	if v < 0 {
+		return 0
+	}
+	if v > max {
+		return max
+	}
+	return v
+}

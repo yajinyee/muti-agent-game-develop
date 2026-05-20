@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-100 成就與稱號持久化）
+## 最後更新：2026-05-21（DAY-100 完整持久化擴充：成就/稱號/任務/特殊武器）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,13 +8,15 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-100 更新（自主觸發）：** 成就與稱號持久化（Achievement & Title Persistence）✅
-  - `server/internal/store/filestore.go`：`FullPlayerState` 新增 `Achievements`/`UnlockedTitles`/`ActiveTitle` 欄位；新增 `AchievementState`/`TitleState` 結構
-  - `server/internal/game/achievement/achievement.go`：新增 `LoadUnlocked()` 方法（從持久化資料恢復已解鎖成就）
-  - `server/internal/game/achievement/title.go`：新增 `LoadState()` 方法（從持久化資料恢復稱號列表和當前稱號）
-  - `server/internal/game/persistence_handler.go`：`saveFullPlayerState()` 加入成就/稱號儲存；`restoreFullPlayerState()` 加入成就/稱號恢復
-  - 持久化範圍擴充：成就（12種，含解鎖時間）+ 稱號（12種，含當前顯示稱號）
-  - Server 重啟後玩家的成就進度和稱號完整保留
+- **DAY-100 更新（自主觸發）：** 完整持久化擴充（Achievement/Title/Mission/SpecialWeapon Persistence）✅
+  - `server/internal/store/filestore.go`：`FullPlayerState` 新增成就/稱號/任務進度/特殊武器充能欄位；新增 `AchievementState`/`TitleState`/`MissionProgState` 結構
+  - `server/internal/game/achievement/achievement.go`：新增 `LoadUnlocked()` 方法
+  - `server/internal/game/achievement/title.go`：新增 `LoadState()` 方法
+  - `server/internal/game/mission/mission.go`：新增 `GetPlayerProgressData()`/`LoadPlayerProgress()` 方法（跨日自動重置）
+  - `server/internal/game/specialweapon/specialweapon.go`：新增 `LoadState()` 方法（含充能數上限保護）
+  - `server/internal/game/persistence_handler.go`：整合所有新系統的儲存/恢復邏輯
+  - 持久化範圍最終版：基礎/VIP/賽季/圖鑑/統計/成就/稱號/每日任務進度/特殊武器充能
+  - 任務進度跨日保護：儲存時記錄日期，恢復時比對今日日期，跨日自動重置
   - build/vet 全部通過
 
 - **DAY-099 更新（自主觸發）：** 定期自動儲存 + Graceful Shutdown（Auto-Save & Graceful Shutdown）✅

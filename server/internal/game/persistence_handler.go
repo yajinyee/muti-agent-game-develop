@@ -9,6 +9,7 @@ import (
 
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/codex"
+	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 )
@@ -115,6 +116,35 @@ func (g *Game) saveFullPlayerState(p *player.Player) {
 			full.UnlockedTitles = append(full.UnlockedTitles, store.TitleState{ID: string(t.ID)})
 		}
 		full.ActiveTitle = string(p.Titles.GetActiveTitle().ID)
+	}
+
+	// 每日任務進度（DAY-100）
+	if g.missionMgr != nil {
+		progList := g.missionMgr.GetPlayerProgressData(p.ID)
+		if len(progList) > 0 {
+			// 記錄任務日期（UTC+8）
+			loc := time.FixedZone("UTC+8", 8*60*60)
+			full.MissionDate = time.Now().In(loc).Format("2006-01-02")
+			full.MissionProgress = make([]store.MissionProgState, 0, len(progList))
+			for _, prog := range progList {
+				full.MissionProgress = append(full.MissionProgress, store.MissionProgState{
+					MissionID:     prog.MissionID,
+					Current:       prog.Current,
+					Target:        prog.Target,
+					Completed:     prog.Completed,
+					RewardClaimed: prog.RewardClaimed,
+					CompletedAt:   prog.CompletedAt,
+				})
+			}
+		}
+	}
+
+	// 特殊武器充能數（DAY-100）
+	if g.SpecialWeapon != nil {
+		snap := g.SpecialWeapon.GetSnapshot(p.ID)
+		full.SpecialWeaponBomb = snap.BombCharges
+		full.SpecialWeaponLaser = snap.LaserCharges
+		full.SpecialWeaponFreeze = snap.FreezeCharges
 	}
 
 	// 玩家統計（DAY-096）
@@ -268,6 +298,32 @@ func (g *Game) restoreFullPlayerState(p *player.Player) {
 			titleIDs = append(titleIDs, achievement.TitleID(t.ID))
 		}
 		p.Titles.LoadState(titleIDs, achievement.TitleID(full.ActiveTitle))
+	}
+
+	// 恢復每日任務進度（DAY-100）
+	// 只在同一天的任務週期內有效
+	if g.missionMgr != nil && len(full.MissionProgress) > 0 && full.MissionDate != "" {
+		loc := time.FixedZone("UTC+8", 8*60*60)
+		today := time.Now().In(loc).Format("2006-01-02")
+		if full.MissionDate == today {
+			progList := make([]*mission.PlayerProgress, 0, len(full.MissionProgress))
+			for _, mp := range full.MissionProgress {
+				progList = append(progList, &mission.PlayerProgress{
+					MissionID:     mp.MissionID,
+					Current:       mp.Current,
+					Target:        mp.Target,
+					Completed:     mp.Completed,
+					RewardClaimed: mp.RewardClaimed,
+					CompletedAt:   mp.CompletedAt,
+				})
+			}
+			g.missionMgr.LoadPlayerProgress(p.ID, progList)
+		}
+	}
+
+	// 恢復特殊武器充能數（DAY-100）
+	if g.SpecialWeapon != nil && (full.SpecialWeaponBomb > 0 || full.SpecialWeaponLaser > 0 || full.SpecialWeaponFreeze > 0) {
+		g.SpecialWeapon.LoadState(p.ID, full.SpecialWeaponBomb, full.SpecialWeaponLaser, full.SpecialWeaponFreeze)
 	}
 
 	// 恢復玩家統計（DAY-096）

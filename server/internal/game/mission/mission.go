@@ -256,3 +256,50 @@ func (m *Manager) AllCompleted(playerID string) bool {
 	}
 	return true
 }
+
+// GetPlayerProgressData 取得玩家任務進度原始資料（用於持久化，DAY-100）
+func (m *Manager) GetPlayerProgressData(playerID string) []*PlayerProgress {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	playerProgress, ok := m.progress[playerID]
+	if !ok {
+		return nil
+	}
+
+	result := make([]*PlayerProgress, 0, len(playerProgress))
+	for _, prog := range playerProgress {
+		cp := *prog
+		result = append(result, &cp)
+	}
+	return result
+}
+
+// LoadPlayerProgress 從持久化資料恢復玩家任務進度（DAY-100）
+// 只在當天的任務週期內有效（跨日自動重置）
+func (m *Manager) LoadPlayerProgress(playerID string, progList []*PlayerProgress) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// 確保玩家進度 map 存在
+	if _, ok := m.progress[playerID]; !ok {
+		m.progress[playerID] = make(map[string]*PlayerProgress)
+		// 先初始化所有任務
+		for _, mission := range DailyMissions {
+			m.progress[playerID][mission.ID] = &PlayerProgress{
+				MissionID: mission.ID,
+				Current:   0,
+				Target:    mission.Target,
+				Completed: false,
+			}
+		}
+	}
+
+	// 覆蓋已儲存的進度
+	for _, prog := range progList {
+		if _, ok := m.progress[playerID][prog.MissionID]; ok {
+			cp := *prog
+			m.progress[playerID][prog.MissionID] = &cp
+		}
+	}
+}

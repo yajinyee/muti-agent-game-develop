@@ -59,6 +59,15 @@ type FullPlayerState struct {
 	UnlockedTitles []TitleState     `json:"unlocked_titles"`
 	ActiveTitle    string           `json:"active_title"`
 
+	// 每日任務進度（DAY-100）
+	MissionDate     string             `json:"mission_date"`
+	MissionProgress []MissionProgState `json:"mission_progress"`
+
+	// 特殊武器充能數（DAY-100）
+	SpecialWeaponBomb   int `json:"special_weapon_bomb"`
+	SpecialWeaponLaser  int `json:"special_weapon_laser"`
+	SpecialWeaponFreeze int `json:"special_weapon_freeze"`
+
 	// 玩家統計（DAY-096）
 	StatsTotalSessions   int     `json:"stats_total_sessions"`
 	StatsTotalPlayTime   int64   `json:"stats_total_play_time"`
@@ -103,6 +112,16 @@ type AchievementState struct {
 // TitleState 稱號持久化狀態
 type TitleState struct {
 	ID string `json:"id"`
+}
+
+// MissionProgState 任務進度持久化狀態
+type MissionProgState struct {
+	MissionID     string    `json:"mission_id"`
+	Current       int       `json:"current"`
+	Target        int       `json:"target"`
+	Completed     bool      `json:"completed"`
+	RewardClaimed bool      `json:"reward_claimed"`
+	CompletedAt   time.Time `json:"completed_at,omitempty"`
 }
 
 // FileStore JSON 檔案持久化 Store（DAY-098）
