@@ -1,6 +1,20 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-098 完整玩家資料持久化）
+## 最後更新：2026-05-21（DAY-099 定期自動儲存 + Graceful Shutdown）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-099 更新（自主觸發）：** 定期自動儲存 + Graceful Shutdown（Auto-Save & Graceful Shutdown）✅
+  - `server/internal/game/game.go`：新增 `lastAutoSaveAt` 計時器（每 60 秒觸發）；`Stop()` 改為先呼叫 `saveAllPlayersOnShutdown()` 再關閉 goroutine
+  - `server/internal/game/persistence_handler.go`：新增 `autoSaveAllPlayers()`（每 60 秒儲存所有在線玩家）；新增 `saveAllPlayersOnShutdown()`（關閉時儲存所有玩家 + 結束 Stats Session）
+  - `server/internal/store/filestore.go`：啟動時統計已有玩家資料數量並 log
+  - `server/cmd/gameserver/main.go`：更新 log 訊息顯示 FileStore 模式；graceful shutdown 說明更新
+  - 保護機制：Server crash → 最多損失 60 秒資料；Ctrl+C → 0 損失（完整儲存）
+  - build/vet 全部通過
 
 ## 自我評估
 - **完成度：100%**

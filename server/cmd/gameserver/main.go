@@ -65,7 +65,7 @@ func main() {
 	if playerStore.IsRedis() {
 		log.Printf("💾 Player state: Redis (%s)", cfg.RedisURL)
 	} else {
-		log.Printf("💾 Player state: Memory (set REDIS_URL for persistence)")
+		log.Printf("💾 Player state: FileStore (JSON, auto-save every 60s)")
 	}
 
 	// 初始化數據埋點（日誌寫入 logs/ 目錄）
@@ -1049,7 +1049,7 @@ func main() {
 	<-quit
 	log.Println("🛑 Shutting down server...")
 
-	// 停止遊戲循環（清理 goroutine）
+	// 停止遊戲循環（儲存所有玩家資料 + 清理 goroutine，DAY-099）
 	g.Stop()
 
 	// 停止 Redis Pub/Sub 代理（DAY-061）

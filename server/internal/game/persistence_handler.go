@@ -252,3 +252,58 @@ func (g *Game) restoreFullPlayerState(p *player.Player) {
 	log.Printf("[Persist] Player %s restored: coins=%d, vip=%d, season=%d, codex=%d entries",
 		p.ID, full.Coins, full.VIPLevel, full.SeasonPoints, len(full.CodexEntries))
 }
+
+// autoSaveAllPlayers 定期自動儲存所有在線玩家資料（DAY-099）
+// 每 60 秒由 gameLoop 觸發，確保 Server crash 時最多損失 60 秒資料
+func (g *Game) autoSaveAllPlayers() {
+	if g.store == nil {
+		return
+	}
+
+	g.mu.RLock()
+	players := make([]*player.Player, 0, len(g.Players))
+	for _, p := range g.Players {
+		players = append(players, p)
+	}
+	g.mu.RUnlock()
+
+	if len(players) == 0 {
+		return
+	}
+
+	saved := 0
+	for _, p := range players {
+		g.saveFullPlayerState(p)
+		saved++
+	}
+
+	if saved > 0 {
+		log.Printf("[AutoSave] Saved %d players", saved)
+	}
+}
+
+// saveAllPlayersOnShutdown 關閉時儲存所有玩家資料（DAY-099）
+// 在 Stop() 時呼叫，確保 graceful shutdown 不丟失資料
+func (g *Game) saveAllPlayersOnShutdown() {
+	if g.store == nil {
+		return
+	}
+
+	g.mu.RLock()
+	players := make([]*player.Player, 0, len(g.Players))
+	for _, p := range g.Players {
+		players = append(players, p)
+	}
+	g.mu.RUnlock()
+
+	for _, p := range players {
+		// 結束統計 Session
+		if p.Stats != nil {
+			p.Stats.RecordSessionScore(p.SessionScore)
+			p.Stats.EndSession()
+		}
+		g.saveFullPlayerState(p)
+	}
+
+	log.Printf("[Shutdown] Saved %d players on shutdown", len(players))
+}

@@ -96,6 +96,7 @@ type Game struct {
 	lastDailyBossAt    time.Time  // 每日 BOSS 廣播計時（每 30 秒一次，DAY-077）
 	lastEventAt        time.Time  // 限時活動廣播計時（每 30 秒一次，DAY-079）
 	lastWeatherAt      time.Time  // 天氣廣播計時（每 30 秒一次，DAY-087）
+	lastAutoSaveAt     time.Time  // 玩家資料定期自動儲存計時（每 60 秒，DAY-099）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -183,8 +184,9 @@ func (g *Game) Start() {
 	go g.gameLoop()
 }
 
-// Stop 停止遊戲
+// Stop 停止遊戲（graceful shutdown，儲存所有玩家資料，DAY-099）
 func (g *Game) Stop() {
+	g.saveAllPlayersOnShutdown()
 	close(g.stopCh)
 }
 
@@ -984,6 +986,11 @@ func (g *Game) updateNormalPlay() {
 	if shouldBroadcastWeather {
 		g.lastWeatherAt = now
 	}
+	// 玩家資料定期自動儲存（每 60 秒，DAY-099）
+	shouldAutoSave := now.Sub(g.lastAutoSaveAt) >= 60*time.Second
+	if shouldAutoSave {
+		g.lastAutoSaveAt = now
+	}
 	g.mu.Unlock()
 
 	if shouldBroadcastLeaderboard {
@@ -1019,6 +1026,10 @@ func (g *Game) updateNormalPlay() {
 	// 天氣 Tick + 廣播（每 30 秒，DAY-087）
 	if shouldBroadcastWeather {
 		go g.tickAndBroadcastWeather()
+	}
+	// 玩家資料定期自動儲存（每 60 秒，DAY-099）
+	if shouldAutoSave {
+		go g.autoSaveAllPlayers()
 	}
 }
 

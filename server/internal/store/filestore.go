@@ -111,7 +111,18 @@ func NewFileStore(dataDir string) (*FileStore, error) {
 		cache:       make(map[string]*FullPlayerState),
 		leaderboard: make(map[string]int64),
 	}
-	log.Printf("[FileStore] Initialized at %s", playersDir)
+
+	// 統計已有的玩家資料數量
+	entries, err := os.ReadDir(playersDir)
+	playerCount := 0
+	if err == nil {
+		for _, e := range entries {
+			if !e.IsDir() && filepath.Ext(e.Name()) == ".json" {
+				playerCount++
+			}
+		}
+	}
+	log.Printf("[FileStore] Initialized at %s (%d existing players)", playersDir, playerCount)
 	return fs, nil
 }
 
