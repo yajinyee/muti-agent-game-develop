@@ -192,6 +192,7 @@ func _ready() -> void:
 	_init_daily_spin_panel()     # 每日簽到轉盤面板（DAY-092）
 	_init_shop_panel()           # 商店面板（DAY-094）
 	_init_player_stats_panel()   # 玩家統計面板（DAY-096）
+	_init_announcement_panel()   # 全服公告面板（DAY-097）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2003,3 +2004,15 @@ func _on_stats_btn_pressed() -> void:
 			_player_stats_panel_node.visible = false
 		else:
 			_player_stats_panel_node.show_panel()
+
+# ---- 全服公告系統（DAY-097）----
+const AnnouncementPanelScript = preload("res://scripts/ui/AnnouncementPanel.gd")
+
+func _init_announcement_panel() -> void:
+	var panel = AnnouncementPanelScript.new()
+	panel.name = "AnnouncementPanel"
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 80
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	panel.setup(_pixel_font)

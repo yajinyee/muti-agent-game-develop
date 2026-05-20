@@ -24,6 +24,7 @@ signal jackpot_updated(jackpot_data: Dictionary)    # Jackpot 池更新（DAY-04
 signal jackpot_won(win_data: Dictionary)            # Jackpot 中獎（DAY-048）
 signal jackpot_animation(anim_data: Dictionary)     # Jackpot 觸發動畫（DAY-095）
 signal player_stats_updated(stats_data: Dictionary) # 玩家統計更新（DAY-096）
+signal announcement_received(ann_data: Dictionary)  # 全服公告（DAY-097）
 signal spectator_joined(spectator_data: Dictionary) # 觀戰者加入通知（DAY-054d）
 signal daily_bonus_received(bonus_data: Dictionary) # 每日登入獎勵（DAY-065）
 signal spectator_left(spectator_data: Dictionary)  # 觀戰者離開通知（DAY-055）
@@ -154,6 +155,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_jackpot_animation(payload)
 		"player_stats_update":
 			_handle_player_stats_update(payload)
+		"announcement":
+			_handle_announcement(payload)
 		"daily_bonus":
 			_handle_daily_bonus(payload)
 		"spectator_join":
@@ -371,6 +374,10 @@ func _handle_jackpot_animation(payload: Dictionary) -> void:
 ## 玩家統計更新（DAY-096）
 func _handle_player_stats_update(payload: Dictionary) -> void:
 	emit_signal("player_stats_updated", payload)
+
+## 全服公告（DAY-097）
+func _handle_announcement(payload: Dictionary) -> void:
+	emit_signal("announcement_received", payload)
 
 ## 觀戰者加入通知（DAY-054d）
 func _handle_spectator_join(payload: Dictionary) -> void:

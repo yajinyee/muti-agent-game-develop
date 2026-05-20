@@ -63,5 +63,7 @@ func (g *Game) tickAndBroadcastWeather() {
 		log.Printf("[Weather] changed to %s (%s) — reward×%.1f, speed×%.1f",
 			snap.Name, snap.Icon, snap.RewardMult, snap.SpeedMult)
 		g.broadcastWeatherUpdate(true)
+		// 全服公告：天氣變化（DAY-097）
+		g.announceWeatherChange(snap.Name)
 	}
 }

@@ -38,6 +38,8 @@ func (g *Game) triggerBoss() {
 		Type: ws.MsgBossEvent,
 		Payload: ws.BossEventPayload{Event: "warning"},
 	})
+	// 全服公告：BOSS 即將出現（DAY-097）
+	g.announceBossWarning()
 
 	g.safeAfterFunc(3*time.Second, func() {
 		g.spawnBoss()
@@ -229,6 +231,8 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 	g.notifyChallengeBoss(p)
 	// 玩家統計：記錄 BOSS 擊殺（DAY-096）
 	g.notifyStatsBossKill(p)
+	// 全服公告：BOSS 擊殺（DAY-097）
+	g.announceBossKill(p.DisplayName, "BOSS", result.Reward)
 
 	g.transitionState(state.StateBossResult)
 	g.safeAfterFunc(3*time.Second, func() {

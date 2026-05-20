@@ -32,6 +32,8 @@ func (g *Game) tickAndBroadcastEvent() {
 	if changed {
 		if snap.IsActive {
 			log.Printf("[Event] New event started: %s (%s)", snap.Name, snap.Type)
+			// 全服公告：限時活動開始（DAY-097）
+			g.announceEventStart(snap.Name)
 		} else {
 			log.Printf("[Event] Event ended, no active event")
 		}

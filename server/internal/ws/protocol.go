@@ -104,6 +104,8 @@ const (
 	// 玩家統計系統（DAY-096）
 	MsgGetPlayerStats  MessageType = "get_player_stats"  // 查詢個人統計（Client→Server）
 	MsgPlayerStatsUpdate MessageType = "player_stats_update" // 個人統計更新（Server→Client）
+	// 全服公告系統（DAY-097）
+	MsgAnnouncement MessageType = "announcement" // 全服公告廣播（Server→Client）
 	MsgSkinUpdate        MessageType = "skin_update"        // 砲台外觀更新（DAY-071）
 	MsgSeasonUpdate      MessageType = "season_update"      // 賽季通行證更新（DAY-072）
 	MsgSeasonLevelUp     MessageType = "season_level_up"    // 賽季等級升級通知（DAY-072）
@@ -1389,4 +1391,21 @@ type PlayerStatsPayload struct {
 	RTP                float64 `json:"rtp"`
 	FirstPlayAtMs      int64   `json:"first_play_at_ms"`
 	LastPlayAtMs       int64   `json:"last_play_at_ms"`
+}
+
+// ---- 全服公告系統（DAY-097）----
+
+// AnnouncementPayload 全服公告廣播（Server → Client）
+type AnnouncementPayload struct {
+	ID         string `json:"id"`
+	EventType  string `json:"event_type"`  // "jackpot_win" / "big_win" / "boss_kill" 等
+	Priority   int    `json:"priority"`    // 1=低 2=普通 3=高 4=最高
+	Title      string `json:"title"`       // 公告標題
+	Message    string `json:"message"`     // 公告內容
+	PlayerName string `json:"player_name"` // 相關玩家名稱
+	Amount     int    `json:"amount"`      // 相關金額
+	Icon       string `json:"icon"`        // 顯示圖示
+	Color      string `json:"color"`       // 顯示顏色（hex）
+	Duration   int    `json:"duration"`    // 顯示時長（毫秒）
+	CreatedAtMs int64 `json:"created_at_ms"`
 }

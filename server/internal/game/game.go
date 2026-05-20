@@ -29,6 +29,7 @@ import (
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/season"
 	"digital-twin/server/internal/game/shop"
+	"digital-twin/server/internal/game/announce"
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
 	"digital-twin/server/internal/game/tournament"
@@ -74,6 +75,7 @@ type Game struct {
 	MysteryBox    *mysterybox.Manager    // 神秘寶箱管理器（DAY-090）
 	DailySpin     *dailyspin.Manager     // 每日簽到轉盤管理器（DAY-092）
 	Shop          *shop.Manager          // 商店管理器（DAY-094）
+	Announce      *announce.Manager      // 全服公告管理器（DAY-097）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -143,6 +145,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		MysteryBox:         mysterybox.New(),
 		DailySpin:          dailyspin.NewManager(),
 		Shop:               shop.New(),
+		Announce:           announce.NewManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -271,6 +274,8 @@ func (g *Game) AddPlayer(playerID string) {
 				}
 				// 發送個人統計（DAY-096）
 				g.sendPlayerStats(pp)
+				// 全服公告：玩家加入（DAY-097）
+				g.announcePlayerJoin(pp.DisplayName)
 			}
 		}()
 	}
@@ -287,6 +292,10 @@ func (g *Game) RemovePlayer(playerID string) {
 	if p != nil && p.Stats != nil {
 		p.Stats.RecordSessionScore(p.SessionScore)
 		p.Stats.EndSession()
+	}
+	// 全服公告：玩家離開（DAY-097）
+	if p != nil {
+		g.announcePlayerLeave(p.DisplayName)
 	}
 
 	// 儲存玩家狀態到 Store（讓下次加入時能恢復）
@@ -813,6 +822,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	go g.notifyMysteryBoxKill(p, t.X, t.Y, isBoss)
 	// 玩家統計：記錄擊破（DAY-096）
 	g.notifyStatsKill(p, result.Multiplier, finalReward)
+	// 全服公告：大獎（DAY-097，≥20x 才公告）
+	if result.Multiplier >= 20 {
+		g.announceBigWin(p.DisplayName, result.Multiplier, finalReward)
+	}
 }
 
 // handleLock 處理鎖定

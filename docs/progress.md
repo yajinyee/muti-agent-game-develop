@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-096 玩家統計面板）
+## 最後更新：2026-05-20（DAY-097 全服公告系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-096 更新（自主觸發）：** 玩家統計面板（Player Stats Dashboard）✅
+- **DAY-097 更新（自主觸發）：** 全服公告系統（Server Announcement System）✅
+  - `server/internal/game/announce/announce.go`：公告管理器（12種事件類型：Jackpot/BigWin/MegaWin/BossKill/StreakRecord/PlayerJoin/PlayerLeave/WeatherChange/EventStart/DailyReset/BossWarning/GrandJackpot，4個優先級，自動生成標題/訊息/圖示/顏色/時長）
+  - `server/internal/game/announce/announce_test.go`：11 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：新增 `MsgAnnouncement` + `AnnouncementPayload`
+  - `server/internal/game/announce_handler.go`：`broadcastAnnouncement()`/`announceJackpotWin()`/`announceBigWin()`/`announceBossKill()`/`announceStreakRecord()`/`announcePlayerJoin()`/`announcePlayerLeave()`/`announceWeatherChange()`/`announceEventStart()`/`announceBossWarning()`
+  - `server/internal/game/game.go`：Game struct 加入 `Announce *announce.Manager`；AddPlayer 加入 `announcePlayerJoin()`；RemovePlayer 加入 `announcePlayerLeave()`；handleKill 加入 `announceBigWin()`（≥20x）
+  - `server/internal/game/boss_handler.go`：triggerBoss 加入 `announceBossWarning()`；handleBossKill 加入 `announceBossKill()`
+  - `server/internal/game/jackpot_handler.go`：handleJackpotWin 加入 `announceJackpotWin()`
+  - `server/internal/game/streak_handler.go`：notifyStreakKill 加入 `announceStreakRecord()`（≥20連擊）
+  - `server/internal/game/weather_handler.go`：tickAndBroadcastWeather 加入 `announceWeatherChange()`
+  - `server/internal/game/event_handler.go`：tickAndBroadcastEvent 加入 `announceEventStart()`
+  - `client/chiikawa-pixel/scripts/ui/AnnouncementPanel.gd`：公告面板（右下角滑入動畫，依優先級排隊，Grand Jackpot 金色閃光，佇列管理最多5個）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`announcement_received` 訊號 + `_handle_announcement()` handler
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 AnnouncementPanel（`_init_announcement_panel()`，全畫面覆蓋，z_index=80）
+  - 觸發條件：Jackpot 中獎（所有等級）/ 大獎≥20x / BOSS 警告+擊殺 / 連擊≥20 / 玩家加入/離開 / 天氣變化 / 限時活動開始
+  - 優先級：Grand Jackpot(4) > BOSS/Jackpot(3) > BigWin/天氣(2) > 玩家加入(1)
+  - build/vet/test 全部通過（11/11 announce 測試）
+  - **業界依據：** nsoft.com 確認全服公告是 iGaming 社交感設計核心；Sony 2026-05-08 專利確認遊戲精彩時刻廣播是 2026 年最新趨勢
+
+
   - `server/internal/game/stats/stats.go`：玩家統計管理器（TotalSessions/TotalPlayTime/TotalShots/TotalKills/TotalBet/TotalReward/TotalBonuses/TotalBossKills/BestMultiplier/BestStreak/BestSessionScore/BestBonusReward/MaxCoins/JackpotWins×4/TotalJackpotPayout/HitRate/RTP/FirstPlayAt/LastPlayAt）
   - `server/internal/game/stats/stats_test.go`：10 個單元測試全部通過
   - `server/internal/ws/protocol.go`：新增 `MsgGetPlayerStats`/`MsgPlayerStatsUpdate` + `PlayerStatsPayload`
