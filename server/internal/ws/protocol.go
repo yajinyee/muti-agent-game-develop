@@ -101,6 +101,9 @@ const (
 	MsgShopUpdate   MessageType = "shop_update"    // 商店狀態更新（Server→Client）
 	MsgShopPurchased MessageType = "shop_purchased" // 購買成功通知（Server→Client）
 	MsgShopError    MessageType = "shop_error"     // 購買失敗通知（Server→Client）
+	// 玩家統計系統（DAY-096）
+	MsgGetPlayerStats  MessageType = "get_player_stats"  // 查詢個人統計（Client→Server）
+	MsgPlayerStatsUpdate MessageType = "player_stats_update" // 個人統計更新（Server→Client）
 	MsgSkinUpdate        MessageType = "skin_update"        // 砲台外觀更新（DAY-071）
 	MsgSeasonUpdate      MessageType = "season_update"      // 賽季通行證更新（DAY-072）
 	MsgSeasonLevelUp     MessageType = "season_level_up"    // 賽季等級升級通知（DAY-072）
@@ -1357,4 +1360,33 @@ type ShopPurchasedPayload struct {
 type ShopErrorPayload struct {
 	ItemID string `json:"item_id"`
 	Reason string `json:"reason"` // "item_not_found" / "insufficient_coins" / "daily_limit_reached" / "out_of_stock"
+}
+
+// ---- 玩家統計系統（DAY-096）----
+
+// PlayerStatsPayload 玩家個人統計（Server → Client）
+type PlayerStatsPayload struct {
+	TotalSessions      int     `json:"total_sessions"`
+	TotalPlayTimeSec   int64   `json:"total_play_time_sec"`
+	TotalShots         int     `json:"total_shots"`
+	TotalKills         int     `json:"total_kills"`
+	TotalBet           int     `json:"total_bet"`
+	TotalReward        int     `json:"total_reward"`
+	TotalBonuses       int     `json:"total_bonuses"`
+	TotalBossKills     int     `json:"total_boss_kills"`
+	BestMultiplier     float64 `json:"best_multiplier"`
+	BestStreak         int     `json:"best_streak"`
+	BestSessionScore   int     `json:"best_session_score"`
+	BestBonusReward    int     `json:"best_bonus_reward"`
+	MaxCoins           int     `json:"max_coins"`
+	JackpotWins        int     `json:"jackpot_wins"`
+	JackpotMiniWins    int     `json:"jackpot_mini_wins"`
+	JackpotMinorWins   int     `json:"jackpot_minor_wins"`
+	JackpotMajorWins   int     `json:"jackpot_major_wins"`
+	JackpotGrandWins   int     `json:"jackpot_grand_wins"`
+	TotalJackpotPayout int     `json:"total_jackpot_payout"`
+	HitRate            float64 `json:"hit_rate"`
+	RTP                float64 `json:"rtp"`
+	FirstPlayAtMs      int64   `json:"first_play_at_ms"`
+	LastPlayAtMs       int64   `json:"last_play_at_ms"`
 }

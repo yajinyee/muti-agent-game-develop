@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-095 四層累進 Jackpot 升級）
+## 最後更新：2026-05-20（DAY-096 玩家統計面板）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,27 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-095 更新（自主觸發）：** 四層累進 Jackpot 系統升級（4-Tier Progressive Jackpot）✅
+- **DAY-096 更新（自主觸發）：** 玩家統計面板（Player Stats Dashboard）✅
+  - `server/internal/game/stats/stats.go`：玩家統計管理器（TotalSessions/TotalPlayTime/TotalShots/TotalKills/TotalBet/TotalReward/TotalBonuses/TotalBossKills/BestMultiplier/BestStreak/BestSessionScore/BestBonusReward/MaxCoins/JackpotWins×4/TotalJackpotPayout/HitRate/RTP/FirstPlayAt/LastPlayAt）
+  - `server/internal/game/stats/stats_test.go`：10 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：新增 `MsgGetPlayerStats`/`MsgPlayerStatsUpdate` + `PlayerStatsPayload`
+  - `server/internal/game/stats_handler.go`：`handleGetPlayerStats()`/`sendPlayerStats()`/`notifyStatsKill()`/`notifyStatsShot()`/`notifyStatsBonus()`/`notifyStatsBossKill()`/`notifyStatsJackpot()`/`notifyStatsStreak()`
+  - `server/internal/player/player.go`：新增 `Stats *stats.PlayerStats` 欄位 + 初始化
+  - `server/internal/game/game.go`：AddPlayer 啟動 Stats Session + 發送統計；RemovePlayer 結束 Session；HandleMessage 加入 `MsgGetPlayerStats`；handleAttack 加入 `notifyStatsShot()`；handleKill 加入 `notifyStatsKill()`
+  - `server/internal/game/bonus_handler.go`：endBonusGame 加入 `notifyStatsBonus()`
+  - `server/internal/game/boss_handler.go`：handleBossKill 加入 `notifyStatsBossKill()`
+  - `server/internal/game/jackpot_handler.go`：handleJackpotWin 加入 `notifyStatsJackpot()`
+  - `server/internal/game/streak_handler.go`：notifyStreakKill 加入 `notifyStatsStreak()`
+  - `client/chiikawa-pixel/scripts/ui/PlayerStatsPanel.gd`：統計面板（遊戲概況/金幣統計/最佳記錄/特殊事件/Jackpot統計，ScrollContainer，RTP 顏色標示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`player_stats_updated` 訊號 + `_handle_player_stats_update()` handler
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：`send_get_player_stats()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 PlayerStatsPanel（`_init_player_stats_panel()`，統計按鈕 x=1370）
+  - 統計追蹤：每次射擊/擊破/Bonus/BOSS/Jackpot/連擊都自動更新
+  - Session 管理：AddPlayer 時 StartSession，RemovePlayer 時 EndSession + RecordSessionScore
+  - build/vet/test 全部通過（10/10 stats 測試）
+  - **業界依據：** BGaming Players Hub（2026）確認玩家統計面板是 2026 年 iGaming 最新趨勢；appaca.ai 確認「match history logs, win rate calculations, per-player stat breakdowns」是有效遊戲 dashboard 的核心功能
+
+
   - `server/internal/game/jackpot/jackpot.go`：升級為四層（Mini/Minor/Major/Grand），新增 `LevelMinor`，調整各層門檻/機率/分配比例，新增 `GetLevelInfo()` 回傳名稱/顏色/圖示
   - `server/internal/game/jackpot/history.go`：加入 `MinorCount` 統計，`WinRecord` 新增 `LevelName`/`LevelColor`/`LevelIcon` 欄位
   - `server/internal/game/jackpot/jackpot_test.go`：升級為四層測試（15 個測試全部通過），新增 `TestForceWin_Minor`/`TestSaveLoadState_FourLevels`/`TestGetLevelInfo`

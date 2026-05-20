@@ -265,6 +265,12 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendDailyTournamentUpdate(pp.ID)
 				// 發送商店狀態（DAY-094）
 				g.sendShopUpdate(pp)
+				// 啟動統計 Session（DAY-096）
+				if pp.Stats != nil {
+					pp.Stats.StartSession()
+				}
+				// 發送個人統計（DAY-096）
+				g.sendPlayerStats(pp)
 			}
 		}()
 	}
@@ -276,6 +282,12 @@ func (g *Game) RemovePlayer(playerID string) {
 	p := g.Players[playerID]
 	delete(g.Players, playerID)
 	g.mu.Unlock()
+
+	// 結束統計 Session（DAY-096）
+	if p != nil && p.Stats != nil {
+		p.Stats.RecordSessionScore(p.SessionScore)
+		p.Stats.EndSession()
+	}
 
 	// 儲存玩家狀態到 Store（讓下次加入時能恢復）
 	if g.store != nil && p != nil {
@@ -463,6 +475,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleGetShop(p)
 	case ws.MsgBuyShopItem:
 		g.handleBuyShopItem(p, msg)
+	// 玩家統計系統（DAY-096）
+	case ws.MsgGetPlayerStats:
+		g.handleGetPlayerStats(p)
 	}
 }
 
@@ -494,6 +509,8 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 		})
 		return
 	}
+	// 玩家統計：記錄射擊（DAY-096）
+	g.notifyStatsShot(p, betCost)
 
 	// 找目標
 	g.mu.Lock()
@@ -794,6 +811,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 神秘寶箱：擊破後嘗試掉落（DAY-090）
 	isBoss := t.DefID == "B001"
 	go g.notifyMysteryBoxKill(p, t.X, t.Y, isBoss)
+	// 玩家統計：記錄擊破（DAY-096）
+	g.notifyStatsKill(p, result.Multiplier, finalReward)
 }
 
 // handleLock 處理鎖定

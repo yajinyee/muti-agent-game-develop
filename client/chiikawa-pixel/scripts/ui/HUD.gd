@@ -191,6 +191,7 @@ func _ready() -> void:
 	_init_room_select_panel()    # 房間難度選擇面板（DAY-091）
 	_init_daily_spin_panel()     # 每日簽到轉盤面板（DAY-092）
 	_init_shop_panel()           # 商店面板（DAY-094）
+	_init_player_stats_panel()   # 玩家統計面板（DAY-096）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1968,3 +1969,37 @@ func _init_shop_panel() -> void:
 func _on_shop_btn_pressed() -> void:
 	if is_instance_valid(_shop_panel_node):
 		_shop_panel_node._on_toggle_pressed()
+
+# ---- 玩家統計面板（DAY-096）----
+const PlayerStatsPanelScript = preload("res://scripts/ui/PlayerStatsPanel.gd")
+var _player_stats_panel_node = null
+
+func _init_player_stats_panel() -> void:
+	var panel = PlayerStatsPanelScript.new()
+	panel.name = "PlayerStatsPanel"
+	panel.position = Vector2(440, 60)
+	panel.z_index = 50
+	panel.visible = false
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_player_stats_panel_node = panel
+
+	# 統計按鈕（TopBar，x=1370）
+	var stats_btn := Button.new()
+	stats_btn.name = "StatsBtn"
+	stats_btn.text = "📊 統計"
+	stats_btn.position = Vector2(1370, 4)
+	stats_btn.size = Vector2(72, 30)
+	stats_btn.add_theme_color_override("font_color", Color(0.5, 1.0, 0.8))
+	stats_btn.add_theme_font_size_override("font_size", 12)
+	if is_instance_valid(_pixel_font):
+		stats_btn.add_theme_font_override("font", _pixel_font)
+	stats_btn.pressed.connect(_on_stats_btn_pressed)
+	add_child(stats_btn)
+
+func _on_stats_btn_pressed() -> void:
+	if is_instance_valid(_player_stats_panel_node):
+		if _player_stats_panel_node.visible:
+			_player_stats_panel_node.visible = false
+		else:
+			_player_stats_panel_node.show_panel()

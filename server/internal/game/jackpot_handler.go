@@ -87,6 +87,8 @@ func (g *Game) handleJackpotWin(p *player.Player, win *jackpot.JackpotWin) {
 
 	// 隱藏挑戰：Jackpot 中獎（DAY-085）
 	g.notifyChallengeJackpot(p.ID)
+	// 玩家統計：記錄 Jackpot 中獎（DAY-096）
+	g.notifyStatsJackpot(p, string(win.Level), win.Amount)
 
 	log.Printf("[Jackpot] %s won %s jackpot: %d coins (player: %s, grand=%v)",
 		p.ID, win.Level, win.Amount, displayName, isGrand)

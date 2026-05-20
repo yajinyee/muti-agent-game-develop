@@ -384,3 +384,7 @@ func send_get_shop() -> void:
 ## 購買商品（DAY-094）
 func send_buy_shop_item(item_id: String) -> void:
 	send("buy_shop_item", {"item_id": item_id})
+
+## 查詢個人統計（DAY-096）
+func send_get_player_stats() -> void:
+	send("get_player_stats", {})

@@ -169,6 +169,8 @@ func (g *Game) endBonusGame() {
 		reward, multiplier := combat.CalcBonusReward(entryBet, score)
 		p.AddReward(reward)
 		p.ResetLaborValue()
+		// 玩家統計：記錄 Bonus（DAY-096）
+		g.notifyStatsBonus(p, reward)
 
 		g.Hub.Send(playerID, &ws.Message{
 			Type: ws.MsgBonusEvent,

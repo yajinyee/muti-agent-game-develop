@@ -8,6 +8,7 @@ import (
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/codex"
+	"digital-twin/server/internal/game/stats"
 	"digital-twin/server/internal/game/streak"
 )
 
@@ -65,6 +66,9 @@ type Player struct {
 
 	// 房間難度系統（DAY-091）
 	RoomDifficulty string // 當前所在房間難度（"beginner"/"intermediate"/"advanced"/"vip"）
+
+	// 玩家統計系統（DAY-096）
+	Stats *stats.PlayerStats
 }
 
 // NewPlayer 建立新玩家
@@ -91,6 +95,7 @@ func NewPlayer(id string, initialCoins int) *Player {
 		Codex:        codex.NewManager(),
 		Streak:       streak.NewManager(),
 		RoomDifficulty: "beginner", // 預設初級房間
+		Stats:        stats.NewPlayerStats(),
 	}
 }
 
