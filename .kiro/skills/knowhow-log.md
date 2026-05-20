@@ -2993,3 +2993,28 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **原因：** Windows Defender 對動態生成的 .exe 有誤報，特別是 Go 的測試執行檔
 - **解法：** 在 Windows Defender 排除清單加入 Go 的 temp 目錄（`%TEMP%\go-build*`）
 - **教訓：** 這不是程式錯誤，build/vet 通過即可，測試誤報不影響功能
+
+## 83. 好友關係持久化設計（DAY-101）
+- **問題：** 好友關係存在記憶體，Server 重啟後消失
+- **解法：** 獨立的 `data/friends/<playerID>.json` 檔案，原子寫入
+- **觸發時機：** 接受好友請求、移除好友、玩家離線、Server 關閉
+- **恢復時機：** 玩家上線時 `restoreFriendState()`
+- **教訓：** 好友關係是全局狀態（不屬於單一玩家），要獨立持久化，不能放在 FullPlayerState 裡
+
+## 84. 離線禮物暫存設計（DAY-101）
+- **問題：** 好友離線時送禮物，金幣無法即時發放
+- **解法：** 用 KV store 暫存 `pending_gift:<playerID>` → `[]int`（金幣列表）
+- **發放時機：** 玩家上線時 `deliverPendingGifts()` 自動發放並清除
+- **教訓：** 離線事件要用 KV store 暫存，不要丟棄
+
+## 85. 1v1 挑戰系統設計（DAY-102）
+- **核心機制：** 雙方各出賭注，3分鐘比分數，勝者獲得全部
+- **分數來源：** 擊破目標的獎勵金幣（反映玩家實際表現）
+- **離線保護：** 玩家離線視為棄賽，對方自動勝
+- **結算計時器：** Server 每 5 秒 `CheckAndFinish()`，Client 本地倒數
+- **教訓：** PvP 系統要有離線保護機制，否則玩家可以靠斷線逃避輸局
+
+## 86. git tempdir 設定（Windows）
+- **問題：** `git add` 報 `unable to create temporary file: No such file or directory`
+- **解法：** `git config core.tempdir "d:/Kiro/.git/tmp"` + 建立目錄
+- **教訓：** Windows 上 git 的 temp 目錄可能不存在，需要手動設定
