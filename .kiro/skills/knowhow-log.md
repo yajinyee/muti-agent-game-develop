@@ -2750,3 +2750,17 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **解決：** 在 PowerShell 中設定 `$env:TEMP = "D:\Kiro\.git\tmp"` + `$env:TMP = "D:\Kiro\.git\tmp"`
 - **永久解決：** `git config core.tmpdir "D:/Kiro/.git/tmp"`（注意用正斜線）
 - **教訓：** Windows 開發環境的 git 操作要確保 TEMP 目錄路徑沒有問題，建議用專案內的 .git/tmp
+
+## 128. 公會戰（Guild War）系統設計（2026-05-20）
+- **業界依據：** accio.com（2025-10-11）確認「Clan wars」是 2025-2026 年捕魚機標配社交競爭功能
+- **週期設計：** UTC+8 週一 00:00 開始，週日 23:59:59 結算（用 ISOWeek 計算週 ID）
+- **積分設計：** 普通目標 1 分，10x+ 2 分，20x+ 3 分，50x+ 5 分，BOSS 50 分，Bonus 20 分
+- **結算獎勵：** 前三名每人 10000/5000/2000 金幣（在結算時自動發放）
+- **EnsureGuildRegistered：** 每次加分前先確保公會已登記，避免未登記公會的積分丟失
+- **CheckAndSettle：** 每分鐘呼叫一次，到期後自動結算並開始新一週
+- **教訓：** 公會戰的週期管理要用 ISOWeek，不要用自己計算的週數，避免跨年問題
+
+## 129. Go 套件間的 type assertion 替代方案（2026-05-20）
+- **問題：** guildwar_handler.go 需要使用 guildwar.WarResult，但不想在 handler 中 import guildwar 套件
+- **解法：** 直接呼叫 `g.GuildWar.GetLastResult()` 取得結果，不需要 type assertion
+- **教訓：** 當需要跨套件使用型別時，優先考慮在管理器上加 getter 方法，而不是 type assertion

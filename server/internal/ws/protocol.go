@@ -38,6 +38,8 @@ const (
 	MsgGetGuildInfo  MessageType = "get_guild_info" // 查詢公會資訊
 	MsgGetGuildList  MessageType = "get_guild_list" // 查詢公會列表
 	MsgGuildChat     MessageType = "guild_chat"     // 公會聊天（DAY-075）
+	// 公會戰系統（DAY-076）
+	MsgGetGuildWarStatus MessageType = "get_guild_war_status" // 查詢公會戰狀態
 )
 
 // Server → Client
@@ -75,6 +77,9 @@ const (
 	MsgGuildTaskComplete MessageType = "guild_task_complete" // 公會任務完成通知
 	MsgGuildError        MessageType = "guild_error"        // 公會操作錯誤
 	MsgGuildMessage      MessageType = "guild_message"      // 公會聊天訊息（DAY-075）
+	// 公會戰系統（DAY-076）
+	MsgGuildWarUpdate    MessageType = "guild_war_update"    // 公會戰排名更新
+	MsgGuildWarResult    MessageType = "guild_war_result"    // 公會戰結算通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -648,4 +653,50 @@ type GuildMessagePayload struct {
 	Role        string `json:"role"`    // "leader" / "officer" / "member"
 	Message     string `json:"message"`
 	Timestamp   int64  `json:"timestamp"` // Unix ms
+}
+
+// ---- 公會戰系統（DAY-076）----
+
+// GuildWarScoreEntry 公會戰積分條目（用於排名顯示）
+type GuildWarScoreEntry struct {
+	Rank        int    `json:"rank"`
+	GuildID     string `json:"guild_id"`
+	GuildName   string `json:"guild_name"`
+	GuildIcon   string `json:"guild_icon"`
+	MemberCount int    `json:"member_count"`
+	Score       int    `json:"score"`
+	KillScore   int    `json:"kill_score"`
+	BossScore   int    `json:"boss_score"`
+	BonusScore  int    `json:"bonus_score"`
+	IsMyGuild   bool   `json:"is_my_guild"` // 是否為玩家所在公會
+}
+
+// GuildWarUpdatePayload 公會戰排名更新（Server → Client）
+type GuildWarUpdatePayload struct {
+	WeekID      string               `json:"week_id"`
+	Status      string               `json:"status"`       // "active" / "settling" / "idle"
+	EndAt       int64                `json:"end_at"`       // Unix timestamp（結束時間）
+	Rankings    []GuildWarScoreEntry `json:"rankings"`
+	MyGuildRank int                  `json:"my_guild_rank"` // 0 = 不在公會
+	MyGuildScore int                 `json:"my_guild_score"`
+	TotalGuilds int                  `json:"total_guilds"`
+}
+
+// GuildWarResultEntry 公會戰結算條目
+type GuildWarResultEntry struct {
+	Rank        int    `json:"rank"`
+	GuildID     string `json:"guild_id"`
+	GuildName   string `json:"guild_name"`
+	GuildIcon   string `json:"guild_icon"`
+	Score       int    `json:"score"`
+	Reward      int    `json:"reward"` // 每人獎勵金幣
+}
+
+// GuildWarResultPayload 公會戰結算通知（Server → Client）
+type GuildWarResultPayload struct {
+	WeekID      string                `json:"week_id"`
+	Rankings    []GuildWarResultEntry `json:"rankings"`
+	MyRank      int                   `json:"my_rank"`    // 0 = 不在公會
+	MyReward    int                   `json:"my_reward"`  // 本次獲得獎勵
+	NextWarAt   int64                 `json:"next_war_at"` // 下週開始時間
 }

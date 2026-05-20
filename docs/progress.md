@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-075 公會聊天室 + /guilds HTTP 端點）
+## 最後更新：2026-05-20（DAY-076 公會戰系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-075 更新（自主觸發）：** 公會聊天室（Guild Chat）+ /guilds HTTP 端點 ✅
+- **DAY-076 更新（自主觸發）：** 公會戰系統（Guild War）✅
+  - `server/internal/game/guildwar/guildwar.go`：公會戰管理器（週一開始/週日結算，積分排名，前三名獎勵 10000/5000/2000）
+  - `server/internal/game/guildwar/guildwar_test.go`：11 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgGetGuildWarStatus`（Client→Server）+ `MsgGuildWarUpdate`/`MsgGuildWarResult`（Server→Client）+ `GuildWarScoreEntry`/`GuildWarUpdatePayload`/`GuildWarResultEntry`/`GuildWarResultPayload`
+  - `server/internal/game/game.go`：`GuildWar *guildwar.Manager` 欄位 + 整合初始化 + `lastGuildWarAt` 計時器 + `MsgGetGuildWarStatus` handler + 每 60 秒廣播
+  - `server/internal/game/guildwar_handler.go`：`broadcastGuildWar()`/`sendGuildWarUpdate()`/`sendGuildWarResult()`/`handleGetGuildWarStatus()`/`notifyGuildWarKill()`/`notifyGuildWarBoss()`/`notifyGuildWarBonus()`
+  - `server/internal/game/game.go`：`handleKill` 加入 `notifyGuildWarKill()`
+  - `server/internal/game/boss_handler.go`：BOSS 擊殺加入 `notifyGuildWarBoss()`
+  - `server/internal/game/bonus_handler.go`：Bonus 完成加入 `notifyGuildWarBonus()`
+  - `server/cmd/gameserver/main.go`：`/guild-war` HTTP 端點（GET，回傳當前排名）
+  - `client/chiikawa-pixel/scripts/ui/GuildWarPanel.gd`：公會戰面板（排名列表/倒數計時/結算結果/獎勵顯示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`guild_war_updated`/`guild_war_result` 訊號 + handler + `request_guild_war_status()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 GuildWarPanel（`_init_guild_war_panel()`，位置 x=1348）
+  - 積分規則：普通目標 1 分，10x+ 2 分，20x+ 3 分，50x+ 5 分，BOSS 50 分，Bonus 20 分
+  - 結算獎勵：第 1 名 10000 金幣/人，第 2 名 5000 金幣/人，第 3 名 2000 金幣/人
+  - build/vet/test 全部通過（11/11 guildwar 測試）
+  - **業界依據：** accio.com（2025-10-11）確認「Clan wars」是 2025-2026 年捕魚機標配社交競爭功能
   - `server/internal/ws/protocol.go`：`MsgGuildChat`（Client→Server）+ `MsgGuildMessage`（Server→Client）+ `GuildChatPayload`/`GuildMessagePayload`
   - `server/internal/game/guild_handler.go`：`handleGuildChat()` — 廣播給所有在線公會成員，100字限制，職位標記
   - `server/internal/game/game.go`：`MsgGuildChat` handler 分支

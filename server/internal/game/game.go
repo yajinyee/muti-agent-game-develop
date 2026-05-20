@@ -17,6 +17,7 @@ import (
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/friend"
 	"digital-twin/server/internal/game/guild"
+	"digital-twin/server/internal/game/guildwar"
 	"digital-twin/server/internal/game/jackpot"
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/season"
@@ -47,6 +48,7 @@ type Game struct {
 	Season      *season.Manager     // 賽季通行證管理器（DAY-072）
 	Friends     *friend.Manager     // 好友系統管理器（DAY-073）
 	Guild       *guild.Manager      // 公會系統管理器（DAY-074）
+	GuildWar    *guildwar.Manager   // 公會戰管理器（DAY-076）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -62,6 +64,7 @@ type Game struct {
 	lastLeaderboardAt  time.Time  // 排行榜廣播計時（每 10 秒一次）
 	lastJackpotAt      time.Time  // Jackpot 廣播計時（每 5 秒一次，DAY-048）
 	lastTournamentAt   time.Time  // 週賽排名廣播計時（每 30 秒一次，DAY-066）
+	lastGuildWarAt     time.Time  // 公會戰廣播計時（每 60 秒一次，DAY-076）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -97,6 +100,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Season:             season.New(),
 		Friends:            friend.New(),
 		Guild:              guild.New(),
+		GuildWar:           guildwar.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -329,6 +333,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleGetGuildList(p, msg)
 	case ws.MsgGuildChat:
 		g.handleGuildChat(p, msg)
+	// 公會戰系統（DAY-076）
+	case ws.MsgGetGuildWarStatus:
+		g.handleGetGuildWarStatus(p)
 	}
 }
 
@@ -614,6 +621,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		completedTasks := g.Guild.UpdateTaskProgress(p.ID, guild.TaskKillTargets, 1)
 		g.notifyGuildTaskComplete(guildID, completedTasks)
 	}
+	// 公會戰積分：擊殺（DAY-076）
+	go g.notifyGuildWarKill(p.ID, int(result.Multiplier))
 }
 
 // handleLock 處理鎖定
@@ -785,6 +794,11 @@ func (g *Game) updateNormalPlay() {
 	if shouldBroadcastTournament {
 		g.lastTournamentAt = now
 	}
+	// 公會戰廣播（每 60 秒，DAY-076）
+	shouldBroadcastGuildWar := now.Sub(g.lastGuildWarAt) >= 60*time.Second
+	if shouldBroadcastGuildWar {
+		g.lastGuildWarAt = now
+	}
 	g.mu.Unlock()
 
 	if shouldBroadcastLeaderboard {
@@ -800,6 +814,10 @@ func (g *Game) updateNormalPlay() {
 	// 週賽排名廣播（每 30 秒，DAY-066）
 	if shouldBroadcastTournament {
 		go g.broadcastTournament()
+	}
+	// 公會戰廣播（每 60 秒，DAY-076）
+	if shouldBroadcastGuildWar {
+		go g.broadcastGuildWar()
 	}
 }
 

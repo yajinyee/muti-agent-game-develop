@@ -222,6 +222,8 @@ func (g *Game) endBonusGame() {
 			completedTasks := g.Guild.UpdateTaskProgress(playerID, guild.TaskEarnCoins, reward)
 			g.notifyGuildTaskComplete(guildID, completedTasks)
 		}
+		// 公會戰積分：Bonus 完成（DAY-076）
+		go g.notifyGuildWarBonus(playerID)
 	}
 
 	g.transitionState(state.StateBonusResult)

@@ -16,6 +16,7 @@ const SkinPanelScript = preload("res://scripts/ui/SkinPanel.gd")
 const SeasonPanelScript = preload("res://scripts/ui/SeasonPanel.gd")
 const FriendPanelScript = preload("res://scripts/ui/FriendPanel.gd")
 const GuildPanelScript = preload("res://scripts/ui/GuildPanel.gd")
+const GuildWarPanelScript = preload("res://scripts/ui/GuildWarPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -164,6 +165,7 @@ func _ready() -> void:
 	_init_season_panel()      # 賽季通行證面板（DAY-072）
 	_init_friend_panel()      # 好友系統面板（DAY-073）
 	_init_guild_panel()       # 公會系統面板（DAY-074）
+	_init_guild_war_panel()   # 公會戰面板（DAY-076）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1642,3 +1644,16 @@ func _init_guild_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_guild_panel_node = panel
+
+## ── 公會戰面板（DAY-076）──────────────────────────────────────────────────────
+var _guild_war_panel_node = null
+
+## 初始化公會戰面板（DAY-076）
+## 位置：GuildPanel 右側（GuildPanel 在 x=1312，GuildWarPanel 在 x=1348）
+func _init_guild_war_panel() -> void:
+	var panel = GuildWarPanelScript.new()
+	panel.position = Vector2(1348, 4)
+	panel.z_index = 10
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_guild_war_panel_node = panel

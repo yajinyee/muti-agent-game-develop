@@ -221,6 +221,8 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 		completedTasks := g.Guild.UpdateTaskProgress(p.ID, guild.TaskKillBoss, 1)
 		g.notifyGuildTaskComplete(guildID, completedTasks)
 	}
+	// 公會戰積分：BOSS 擊殺（DAY-076）
+	go g.notifyGuildWarBoss(p.ID)
 
 	g.transitionState(state.StateBossResult)
 	g.safeAfterFunc(3*time.Second, func() {

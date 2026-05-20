@@ -404,6 +404,50 @@ func main() {
 		}
 	})
 
+	// GET /guild-war — 取得公會戰當前排名（DAY-076）
+	mux.HandleFunc("/guild-war", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		status, weekID, startAt, endAt := g.GuildWar.GetStatus()
+		rankings := g.GuildWar.GetRankings()
+		type RankEntry struct {
+			Rank        int    `json:"rank"`
+			GuildID     string `json:"guild_id"`
+			GuildName   string `json:"guild_name"`
+			GuildIcon   string `json:"guild_icon"`
+			MemberCount int    `json:"member_count"`
+			Score       int    `json:"score"`
+			KillScore   int    `json:"kill_score"`
+			BossScore   int    `json:"boss_score"`
+			BonusScore  int    `json:"bonus_score"`
+		}
+		entries := make([]RankEntry, 0, len(rankings))
+		for i, r := range rankings {
+			entries = append(entries, RankEntry{
+				Rank:        i + 1,
+				GuildID:     r.GuildID,
+				GuildName:   r.GuildName,
+				GuildIcon:   r.GuildIcon,
+				MemberCount: r.MemberCount,
+				Score:       r.Score,
+				KillScore:   r.KillScore,
+				BossScore:   r.BossScore,
+				BonusScore:  r.BonusScore,
+			})
+		}
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"week_id":       weekID,
+			"status":        string(status),
+			"start_at":      startAt.UnixMilli(),
+			"end_at":        endAt.UnixMilli(),
+			"rankings":      entries,
+			"total_guilds":  g.GuildWar.GetParticipatingGuildCount(),
+			"timestamp":     time.Now().UnixMilli(),
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 玩家個人資料端點（DAY-069）
 	// GET /profile?player_id=xxx — 取得指定玩家的個人資料
 	// GET /profiles — 取得所有在線玩家的個人資料摘要

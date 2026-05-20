@@ -36,6 +36,8 @@ signal friend_updated(update_data: Dictionary)         # 好友狀態更新（DA
 signal guild_updated(guild_data: Dictionary)           # 公會資訊更新（DAY-074）
 signal guild_task_complete(task_data: Dictionary)      # 公會任務完成（DAY-074）
 signal guild_message_received(msg_data: Dictionary)    # 公會聊天訊息（DAY-075）
+signal guild_war_updated(war_data: Dictionary)         # 公會戰排名更新（DAY-076）
+signal guild_war_result(result_data: Dictionary)       # 公會戰結算通知（DAY-076）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -141,6 +143,10 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_guild_error(payload)
 		"guild_message":
 			_handle_guild_message(payload)
+		"guild_war_update":
+			_handle_guild_war_update(payload)
+		"guild_war_result":
+			_handle_guild_war_result(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -328,6 +334,18 @@ func _handle_guild_error(payload: Dictionary) -> void:
 ## 處理公會聊天訊息（DAY-075）
 func _handle_guild_message(payload: Dictionary) -> void:
 	emit_signal("guild_message_received", payload)
+
+## 處理公會戰排名更新（DAY-076）
+func _handle_guild_war_update(payload: Dictionary) -> void:
+	emit_signal("guild_war_updated", payload)
+
+## 處理公會戰結算通知（DAY-076）
+func _handle_guild_war_result(payload: Dictionary) -> void:
+	emit_signal("guild_war_result", payload)
+
+## 請求公會戰狀態（DAY-076）
+func request_guild_war_status() -> void:
+	NetworkManager.send_message("get_guild_war_status", {})
 
 ## 取得顯示名稱
 func get_display_name() -> String:
