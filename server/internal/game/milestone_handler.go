@@ -100,6 +100,8 @@ func (g *Game) checkAndGrantLoginMilestone(p *player.Player, newStreak int) {
 			break
 		}
 	}
+	// 動態牆：登入里程碑（DAY-112）
+	go g.notifyFeedMilestone(p, milestone.Days, milestone.Name)
 }
 
 // handleGetLoginProgress 處理查詢登入進度請求（DAY-107）

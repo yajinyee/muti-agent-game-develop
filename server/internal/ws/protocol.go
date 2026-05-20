@@ -75,6 +75,8 @@ const (
 	MsgDeclineChallenge     MessageType = "decline_challenge"      // 拒絕挑戰
 	// 私訊系統（DAY-103）
 	MsgSendDM    MessageType = "send_dm"    // 發送私訊
+	// 成就動態牆系統（DAY-112）
+	MsgGetActivityFeed   MessageType = "get_activity_feed"   // 查詢最近動態（Client→Server）
 )
 
 // Server → Client
@@ -121,6 +123,9 @@ const (
 	MsgPlayerStatsUpdate MessageType = "player_stats_update" // 個人統計更新（Server→Client）
 	// 全服公告系統（DAY-097）
 	MsgAnnouncement MessageType = "announcement" // 全服公告廣播（Server→Client）
+	// 成就動態牆系統（DAY-112）
+	MsgActivityFeedEvent  MessageType = "activity_feed_event"  // 新動態事件廣播（Server→Client）
+	MsgActivityFeedHistory MessageType = "activity_feed_history" // 歷史動態回應（Server→Client）
 	MsgSkinUpdate        MessageType = "skin_update"        // 砲台外觀更新（DAY-071）
 	MsgSeasonUpdate      MessageType = "season_update"      // 賽季通行證更新（DAY-072）
 	MsgSeasonLevelUp     MessageType = "season_level_up"    // 賽季等級升級通知（DAY-072）
@@ -1780,4 +1785,27 @@ type RecommendationPayload struct {
 type RecommendationsPayload struct {
 	Recommendations []RecommendationPayload `json:"recommendations"`
 	GeneratedAt     int64                   `json:"generated_at_ms"`
+}
+
+// ---- 成就動態牆系統（DAY-112）----
+
+// ActivityFeedEventPayload 動態牆事件廣播（Server → Client）
+// 當有重要事件發生時廣播給所有玩家
+type ActivityFeedEventPayload struct {
+	ID          string `json:"id"`           // 唯一事件 ID
+	EventType   string `json:"event_type"`   // "achievement"/"title"/"jackpot"/"boss_kill"/"mega_win"/"streak_record"/"hall_of_fame"/"season_level"/"milestone"
+	PlayerID    string `json:"player_id"`    // 玩家 ID
+	DisplayName string `json:"display_name"` // 玩家顯示名稱
+	Icon        string `json:"icon"`         // 事件圖示（emoji）
+	Title       string `json:"title"`        // 事件標題（如「Player1 解鎖成就」）
+	Detail      string `json:"detail"`       // 事件詳情（如「討伐傳說」）
+	Rarity      string `json:"rarity"`       // "common"/"uncommon"/"rare"/"epic"/"legendary"
+	Timestamp   int64  `json:"timestamp"`    // Unix ms
+}
+
+// ActivityFeedHistoryPayload 歷史動態回應（Server → Client）
+// 玩家上線時或主動查詢時發送最近 10 條
+type ActivityFeedHistoryPayload struct {
+	Events []ActivityFeedEventPayload `json:"events"`
+	Total  int                        `json:"total"` // 總事件數（最多 50）
 }

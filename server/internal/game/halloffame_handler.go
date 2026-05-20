@@ -220,6 +220,10 @@ func (g *Game) broadcastHallOfFameNewRecord(
 
 	log.Printf("[HallOfFame] NEW RECORD %s %s: %.2f by %s",
 		halloffame.RecordTypeIcon(rt), halloffame.RecordTypeLabel(rt), value, p.DisplayName)
+
+	// 動態牆：名人堂新記錄（DAY-112）
+	recordLabel := halloffame.RecordTypeIcon(rt) + " " + halloffame.RecordTypeLabel(rt) + ": " + desc
+	go g.notifyFeedHallOfFame(p, string(rt), recordLabel)
 }
 
 // buildHallOfFamePayload 將名人堂快照轉換為 Payload

@@ -31,6 +31,8 @@ signal spectator_left(spectator_data: Dictionary)  # 觀戰者離開通知（DAY
 signal tournament_updated(tournament_data: Dictionary) # 週賽排名更新（DAY-066）
 signal daily_tournament_updated(tournament_data: Dictionary) # 每日賽排名更新（DAY-093）
 signal multi_format_updated(tournament_data: Dictionary)    # 多格式賽排名更新（DAY-111）
+signal activity_feed_event(event_data: Dictionary)          # 動態牆新事件（DAY-112）
+signal activity_feed_history(history_data: Dictionary)      # 動態牆歷史（DAY-112）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -199,6 +201,11 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 		# 多格式賽排名更新（DAY-111）
 		"multi_format_update":
 			_handle_multi_format_update(payload)
+		# 動態牆事件（DAY-112）
+		"activity_feed_event":
+			emit_signal("activity_feed_event", payload)
+		"activity_feed_history":
+			emit_signal("activity_feed_history", payload)
 		"title_unlocked":
 			_handle_title_unlocked(payload)
 		"skin_update":

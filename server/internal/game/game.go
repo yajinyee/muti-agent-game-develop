@@ -13,6 +13,7 @@ import (
 
 	"digital-twin/server/internal/analytics"
 	"digital-twin/server/internal/data"
+	"digital-twin/server/internal/game/activityfeed"
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/chain"
 	"digital-twin/server/internal/game/challenge"
@@ -87,6 +88,7 @@ type Game struct {
 	AntiCheat     *anticheat.Manager     // 異常行為偵測管理器（DAY-105）
 	Festival      *festival.Manager      // 賽季節日活動管理器（DAY-109）
 	HallOfFame    *halloffame.Manager    // 全服名人堂管理器（DAY-110）
+	ActivityFeed  *activityfeed.Manager  // 成就動態牆管理器（DAY-112）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -165,6 +167,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		AntiCheat:          anticheat.New(),
 		Festival:           festival.New(),
 		HallOfFame:         halloffame.New(),
+		ActivityFeed:       activityfeed.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -277,6 +280,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendDailyTournamentUpdate(pp.ID)
 				// 發送多格式賽狀態（DAY-111）
 				g.sendMultiFormatUpdate(pp.ID)
+				// 發送成就動態牆歷史（DAY-112）
+				g.sendActivityFeedHistory(pp.ID)
 				// 發送商店狀態（DAY-094）
 				g.sendShopUpdate(pp)
 				// 啟動統計 Session（DAY-096）
@@ -527,6 +532,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 智慧推薦系統（DAY-110）
 	case ws.MsgGetRecommendations:
 		g.handleGetRecommendations(p)
+	// 成就動態牆系統（DAY-112）
+	case ws.MsgGetActivityFeed:
+		g.handleGetActivityFeed(p)
 	}
 }
 
@@ -894,6 +902,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 全服公告：大獎（DAY-097，≥20x 才公告）
 	if result.Multiplier >= 20 {
 		g.announceBigWin(p.DisplayName, result.Multiplier, finalReward)
+	}
+	// 動態牆：超大獎（DAY-112，≥50x 才廣播）
+	if result.Multiplier >= 50 {
+		go g.notifyFeedMegaWin(p, result.Multiplier, finalReward)
 	}
 	// 好友挑戰：更新分數（DAY-102）
 	g.notifyChallengeKillScore(p, finalReward)
@@ -1829,6 +1841,13 @@ func (g *Game) sendAchievement(playerID string, u *achievement.AchievementUnlock
 			UnlockedAt:  u.UnlockedAt.UnixMilli(),
 		},
 	})
+	// 動態牆廣播（DAY-112）
+	g.mu.RLock()
+	p, pok := g.Players[playerID]
+	g.mu.RUnlock()
+	if pok {
+		g.notifyFeedAchievement(p, u.Name, u.Icon, u.Type)
+	}
 }
 
 // sendAchievements 批次傳送成就解鎖通知，並檢查稱號解鎖（DAY-068）
@@ -1857,6 +1876,8 @@ func (g *Game) sendAchievements(playerID string, unlocks []*achievement.Achievem
 						Description: titleDef.Description,
 					},
 				})
+				// 動態牆：稱號獲得（DAY-112）
+				g.notifyFeedTitle(p, titleDef.Name, titleDef.Icon, titleDef.Priority)
 			}
 		}
 	}

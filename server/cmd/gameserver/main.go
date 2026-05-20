@@ -386,6 +386,20 @@ func main() {
 		}
 	})
 
+	// 成就動態牆端點（DAY-112）
+	// GET /activity-feed — 取得最近 20 條動態事件
+	mux.HandleFunc("/activity-feed", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		events := g.ActivityFeed.GetRecent(20)
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"events": events,
+			"total":  len(events),
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 商店端點（DAY-094）
 	// GET /shop — 取得商店快照
 	mux.HandleFunc("/shop", func(w http.ResponseWriter, r *http.Request) {

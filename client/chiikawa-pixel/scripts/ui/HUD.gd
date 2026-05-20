@@ -194,6 +194,7 @@ func _ready() -> void:
 	_init_shop_panel()           # 商店面板（DAY-094）
 	_init_player_stats_panel()   # 玩家統計面板（DAY-096）
 	_init_announcement_panel()   # 全服公告面板（DAY-097）
+	_init_activity_feed_panel()  # 成就動態牆面板（DAY-112）
 	_init_player_card_panel()    # 玩家名片面板（DAY-106）
 	_init_login_milestone_panel() # 登入里程碑面板（DAY-107）
 	_init_player_journey_panel()  # 玩家旅程儀表板（DAY-108）
@@ -2060,6 +2061,15 @@ func _init_announcement_panel() -> void:
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(panel)
 	panel.setup(_pixel_font)
+
+# ---- 成就動態牆系統（DAY-112）----
+const ActivityFeedPanelScript = preload("res://scripts/ui/ActivityFeedPanel.gd")
+
+func _init_activity_feed_panel() -> void:
+	var panel = ActivityFeedPanelScript.new()
+	panel.name = "ActivityFeedPanel"
+	panel.z_index = 78  # 在公告面板下方，不遮擋重要通知
+	add_child(panel)
 
 ## 玩家名片面板（DAY-106）
 var _player_card_panel_node = null

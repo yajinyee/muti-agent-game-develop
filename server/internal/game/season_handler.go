@@ -143,4 +143,9 @@ func (g *Game) checkSeasonLevelNotify(p *player.Player, newLevels []int) {
 	// 發送賽季更新（讓 Client 知道有新等級可領取）
 	g.sendSeasonUpdate(p)
 	log.Printf("[Season] 玩家 %s 有 %d 個新等級可領取: %v", p.ID, len(newLevels), newLevels)
+	// 動態牆：賽季升級（DAY-112，只廣播最高等級）
+	if len(newLevels) > 0 {
+		maxLevel := newLevels[len(newLevels)-1]
+		go g.notifyFeedSeasonLevel(p, maxLevel)
+	}
 }

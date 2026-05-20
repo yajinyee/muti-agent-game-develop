@@ -99,6 +99,8 @@ func (g *Game) handleJackpotWin(p *player.Player, win *jackpot.JackpotWin) {
 	go g.notifyFestivalJackpot(p)
 	// 名人堂：Jackpot 記錄（DAY-110）
 	go g.notifyHallOfFameJackpot(p, string(win.Level), win.Amount)
+	// 動態牆：Jackpot 中獎（DAY-112）
+	go g.notifyFeedJackpot(p, levelName, levelIcon, win.Amount)
 
 	log.Printf("[Jackpot] %s won %s jackpot: %d coins (player: %s, grand=%v)",
 		p.ID, win.Level, win.Amount, displayName, isGrand)
