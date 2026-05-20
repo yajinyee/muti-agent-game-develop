@@ -39,6 +39,11 @@ type Player struct {
 
 	// 成就系統
 	Achievements *achievement.Tracker
+
+	// 每日登入獎勵（DAY-065）
+	LoginStreak    int    // 連續登入天數
+	MaxLoginStreak int    // 歷史最高連續天數
+	LastLoginDate  string // 最後登入日期（UTC+8，格式 "2006-01-02"）
 }
 
 // NewPlayer 建立新玩家

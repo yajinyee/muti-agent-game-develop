@@ -105,6 +105,7 @@ func _ready() -> void:
 	# jackpot_updated / jackpot_won 撌脩宏??JackpotPanel.gd嚗AY-053嚗?
 	GameManager.spectator_joined.connect(_on_spectator_joined)  # 觀戰者加入（DAY-054d）
 	GameManager.spectator_left.connect(_on_spectator_left)      # 觀戰者離開（DAY-055）
+	GameManager.daily_bonus_received.connect(_on_daily_bonus_received)  # 每日登入獎勵（DAY-065）
 
 	# ?瑞?/???蝷?NetworkManager.disconnected.connect(_on_disconnected)
 	NetworkManager.connected.connect(_on_reconnected)
@@ -1417,3 +1418,113 @@ func _update_spectator_count_label(count: int) -> void:
 		lbl.modulate = Color(0.7, 0.85, 1.0, 0.9)
 	else:
 		lbl.text = ""
+
+# ── 每日登入獎勵彈窗（DAY-065）──────────────────────────────────────────────
+
+func _on_daily_bonus_received(bonus_data: Dictionary) -> void:
+	var streak = bonus_data.get("streak", 1)
+	var reward = bonus_data.get("reward", 0)
+	var max_streak = bonus_data.get("max_streak", streak)
+	_show_daily_bonus_popup(streak, reward, max_streak)
+
+## 顯示每日登入獎勵彈窗
+func _show_daily_bonus_popup(streak: int, reward: int, max_streak: int) -> void:
+	# 建立彈窗容器（CanvasLayer 確保在最上層）
+	var canvas = CanvasLayer.new()
+	canvas.layer = 200
+	add_child(canvas)
+
+	# 半透明背景遮罩
+	var overlay = ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.6)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	canvas.add_child(overlay)
+
+	# 彈窗主體
+	var panel = PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.custom_minimum_size = Vector2(380, 280)
+	panel.position = Vector2(-190, -140)
+	canvas.add_child(panel)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 12)
+	panel.add_child(vbox)
+
+	# 標題
+	var title_lbl = Label.new()
+	title_lbl.text = "🌟 每日登入獎勵"
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.add_theme_font_size_override("font_size", 22)
+	title_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
+	vbox.add_child(title_lbl)
+
+	# 連續天數
+	var streak_lbl = Label.new()
+	var streak_text = "連續登入 %d 天" % streak
+	if streak >= 7:
+		streak_text += " 🔥"
+	streak_lbl.text = streak_text
+	streak_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	streak_lbl.add_theme_font_size_override("font_size", 16)
+	streak_lbl.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
+	vbox.add_child(streak_lbl)
+
+	# 獎勵金額（大字）
+	var reward_lbl = Label.new()
+	reward_lbl.text = "🪙 +%d 金幣" % reward
+	reward_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	reward_lbl.add_theme_font_size_override("font_size", 32)
+	reward_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.4))
+	vbox.add_child(reward_lbl)
+
+	# 7天獎勵預覽條
+	var preview_lbl = Label.new()
+	preview_lbl.text = "7天獎勵：500 → 800 → 1200 → 1800 → 2500 → 3500 → 5000"
+	preview_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	preview_lbl.add_theme_font_size_override("font_size", 11)
+	preview_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	preview_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(preview_lbl)
+
+	# 最高連續天數
+	if max_streak > 1:
+		var max_lbl = Label.new()
+		max_lbl.text = "最高連續：%d 天" % max_streak
+		max_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		max_lbl.add_theme_font_size_override("font_size", 12)
+		max_lbl.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
+		vbox.add_child(max_lbl)
+
+	# 確認按鈕
+	var btn = Button.new()
+	btn.text = "太棒了！"
+	btn.custom_minimum_size = Vector2(160, 40)
+	btn.add_theme_font_size_override("font_size", 16)
+	var btn_container = CenterContainer.new()
+	btn_container.add_child(btn)
+	vbox.add_child(btn_container)
+
+	# 彈入動畫
+	panel.scale = Vector2(0.5, 0.5)
+	panel.modulate.a = 0.0
+	var tween = panel.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(panel, "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(panel, "modulate:a", 1.0, 0.2)
+
+	# 按鈕關閉
+	btn.pressed.connect(func():
+		var close_tween = panel.create_tween()
+		close_tween.set_parallel(true)
+		close_tween.tween_property(panel, "scale", Vector2(0.8, 0.8), 0.15)
+		close_tween.tween_property(panel, "modulate:a", 0.0, 0.15)
+		close_tween.tween_callback(canvas.queue_free).set_delay(0.15)
+	)
+
+	# 5 秒後自動關閉
+	get_tree().create_timer(5.0).timeout.connect(func():
+		if is_instance_valid(canvas):
+			canvas.queue_free()
+	)

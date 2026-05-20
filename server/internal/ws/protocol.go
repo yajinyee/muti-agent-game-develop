@@ -41,6 +41,7 @@ const (
 	MsgMissionComplete MessageType = "mission_complete" // 任務完成通知（DAY-037）
 	MsgJackpotUpdate   MessageType = "jackpot_update"   // Jackpot 池更新（DAY-048）
 	MsgJackpotWin      MessageType = "jackpot_win"      // Jackpot 中獎通知（DAY-048）
+	MsgDailyBonus      MessageType = "daily_bonus"      // 每日登入獎勵（DAY-065）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -267,4 +268,16 @@ type JackpotWinPayload struct {
 	WinnerID    string `json:"winner_id"`    // 中獎玩家 ID
 	WinnerName  string `json:"winner_name"`  // 中獎玩家顯示名稱
 	NewBalance  int    `json:"new_balance"`  // 中獎後餘額（只對中獎玩家有意義）
+}
+
+// ---- 每日登入獎勵（DAY-065）----
+
+// DailyBonusPayload 每日登入獎勵通知
+// Server 在玩家加入時檢查是否是新的一天，計算連續天數，發放獎勵
+type DailyBonusPayload struct {
+	Streak      int    `json:"streak"`       // 連續登入天數（1=首次/重置，2=連續2天...）
+	Reward      int    `json:"reward"`       // 本次獎勵金幣數
+	NewBalance  int    `json:"new_balance"`  // 領取後餘額
+	IsNewStreak bool   `json:"is_new_streak"` // 是否是今天第一次登入（false=今天已領過）
+	MaxStreak   int    `json:"max_streak"`   // 最高連續天數（用於顯示里程碑）
 }

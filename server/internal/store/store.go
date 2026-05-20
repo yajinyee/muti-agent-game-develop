@@ -27,6 +27,10 @@ type PlayerState struct {
 	KillCount   int       `json:"kill_count"`
 	RoomID      string    `json:"room_id"`
 	LastSeen    time.Time `json:"last_seen"`
+	// 每日登入獎勵（DAY-065）
+	LastLoginDate string `json:"last_login_date"` // "2026-05-20"（UTC+8）
+	LoginStreak   int    `json:"login_streak"`    // 連續登入天數
+	MaxLoginStreak int   `json:"max_login_streak"` // 歷史最高連續天數
 }
 
 // Store 玩家狀態儲存介面

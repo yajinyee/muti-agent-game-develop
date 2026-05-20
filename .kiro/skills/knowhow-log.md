@@ -2580,3 +2580,19 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **Session RPM 是關鍵指標：** 不是 CPM，而是每個 session 的廣告收入
 - **本專案適用：** 虛擬貨幣系統已完整，可直接接入 Rewarded Video SDK（如 Google AdMob）
 - **來源：** playgama.com 2026-04-17、applixir.com 2026-05-05
+
+## 128. 每日登入獎勵系統設計（DAY-065）
+- **業界依據：** actionnetwork.com 2026-05-09 確認「Daily Login Rewards」是捕魚機標配功能，提升玩家留存率
+- **設計原則：**
+  1. 7 天循環：500 → 800 → 1200 → 1800 → 2500 → 3500 → 5000 金幣
+  2. 連續登入天數越多，獎勵越豐厚（第 7 天最高 5000 金幣）
+  3. 中斷後重置到第 1 天（但保留 MaxLoginStreak 歷史記錄）
+  4. 今天已領過不重複發放（`lastLoginDate == today` 判斷）
+  5. 時區固定 UTC+8（台灣/亞洲標準）
+- **技術實作：**
+  - `dailybonus.CheckAndCalc(lastLoginDate, currentStreak)` → (reward, newStreak, isNewLogin)
+  - `PlayerState` 加入 `LoginStreak`/`MaxLoginStreak`/`LastLoginDate` 欄位
+  - `AddPlayer` 非同步呼叫 `checkAndSendDailyBonus()`（200ms 延遲等連線穩定）
+  - `RemovePlayer` 儲存登入資訊到 Store（持久化）
+- **Client 端：** 彈窗顯示連續天數 + 獎勵金額 + 7天預覽 + 5秒自動關閉
+- **教訓：** 每日登入獎勵是「低成本高效益」的留存機制，應該在早期就加入，不是後期補充

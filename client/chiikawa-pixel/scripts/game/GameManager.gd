@@ -23,6 +23,7 @@ signal mission_completed(mission_data: Dictionary)  # 任務完成（DAY-037）
 signal jackpot_updated(jackpot_data: Dictionary)    # Jackpot 池更新（DAY-048）
 signal jackpot_won(win_data: Dictionary)            # Jackpot 中獎（DAY-048）
 signal spectator_joined(spectator_data: Dictionary) # 觀戰者加入通知（DAY-054d）
+signal daily_bonus_received(bonus_data: Dictionary) # 每日登入獎勵（DAY-065）
 signal spectator_left(spectator_data: Dictionary)  # 觀戰者離開通知（DAY-055）
 
 # 遊戲狀態
@@ -97,6 +98,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_jackpot_update(payload)
 		"jackpot_win":
 			_handle_jackpot_win(payload)
+		"daily_bonus":
+			_handle_daily_bonus(payload)
 		"spectator_join":
 			_handle_spectator_join(payload)
 		"spectator_leave":
@@ -207,6 +210,15 @@ func _handle_spectator_join(payload: Dictionary) -> void:
 	var count = payload.get("spectator_count", 1)
 	print("[GameManager] Spectator joined! Total spectators: %d" % count)
 	emit_signal("spectator_joined", payload)
+
+## 每日登入獎勵（DAY-065）
+func _handle_daily_bonus(payload: Dictionary) -> void:
+	var streak = payload.get("streak", 1)
+	var reward = payload.get("reward", 0)
+	var is_new = payload.get("is_new_streak", false)
+	if is_new:
+		print("[GameManager] Daily bonus! Streak=%d Reward=%d" % [streak, reward])
+		emit_signal("daily_bonus_received", payload)
 
 ## 觀戰者離開通知（DAY-055）
 func _handle_spectator_leave(payload: Dictionary) -> void:

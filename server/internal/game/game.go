@@ -132,8 +132,10 @@ func (g *Game) AddPlayer(playerID string) {
 		p := player.NewPlayer(playerID, g.initialCoins)
 
 		// 從 Store 恢復玩家狀態（若有）
+		var savedState *store.PlayerState
 		if g.store != nil {
 			if saved, err := g.store.LoadPlayer(playerID); err == nil && saved != nil {
+				savedState = saved
 				p.Coins = int(saved.Coins)
 				p.MaxCoins = int(saved.MaxCoins)
 				p.KillCount = saved.KillCount
@@ -143,17 +145,22 @@ func (g *Game) AddPlayer(playerID string) {
 				if saved.DisplayName != "" {
 					p.DisplayName = saved.DisplayName
 				}
-				log.Printf("[Game] Player %s restored: coins=%d, kills=%d", playerID, p.Coins, p.KillCount)
+				// 恢復登入資訊（DAY-065）
+				p.LoginStreak = saved.LoginStreak
+				p.MaxLoginStreak = saved.MaxLoginStreak
+				p.LastLoginDate = saved.LastLoginDate
+				log.Printf("[Game] Player %s restored: coins=%d, kills=%d, streak=%d", playerID, p.Coins, p.KillCount, p.LoginStreak)
 			}
 		}
 
 		g.Players[playerID] = p
 		log.Printf("[Game] Player %s joined game %s", playerID, g.ID)
 
-		// 非同步發送任務列表（連線後立即讓玩家看到今日任務）
+		// 非同步發送任務列表 + 每日登入獎勵（連線後立即讓玩家看到）
 		go func() {
 			time.Sleep(200 * time.Millisecond) // 等待連線穩定
 			g.sendMissionUpdate(playerID)
+			g.checkAndSendDailyBonus(playerID, savedState)
 		}()
 	}
 }
@@ -168,15 +175,18 @@ func (g *Game) RemovePlayer(playerID string) {
 	// 儲存玩家狀態到 Store（讓下次加入時能恢復）
 	if g.store != nil && p != nil {
 		state := &store.PlayerState{
-			PlayerID:     p.ID,
-			DisplayName:  p.DisplayName,
-			Coins:        int64(p.Coins),
-			Labor:        p.LaborValue,
-			BetLevel:     p.BetLevel,
-			SessionScore: int64(p.SessionScore),
-			MaxCoins:     int64(p.MaxCoins),
-			KillCount:    p.KillCount,
-			RoomID:       g.ID,
+			PlayerID:       p.ID,
+			DisplayName:    p.DisplayName,
+			Coins:          int64(p.Coins),
+			Labor:          p.LaborValue,
+			BetLevel:       p.BetLevel,
+			SessionScore:   int64(p.SessionScore),
+			MaxCoins:       int64(p.MaxCoins),
+			KillCount:      p.KillCount,
+			RoomID:         g.ID,
+			LoginStreak:    p.LoginStreak,
+			MaxLoginStreak: p.MaxLoginStreak,
+			LastLoginDate:  p.LastLoginDate,
 		}
 		if err := g.store.SavePlayer(state); err != nil {
 			log.Printf("[Game] Failed to save player %s: %v", playerID, err)

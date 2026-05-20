@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-064 自主循環 + 技術研究 + GitHub 同步）
+## 最後更新：2026-05-20（DAY-065 每日登入獎勵系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,18 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-065 更新（自主觸發）：** 每日登入獎勵系統（Daily Login Bonus）✅
+  - `server/internal/game/dailybonus/dailybonus.go`：每日獎勵計算模組（7天循環，500→5000金幣）
+  - `server/internal/game/dailybonus/dailybonus_test.go`：8 個單元測試全部通過
+  - `server/internal/game/dailybonus_handler.go`：`checkAndSendDailyBonus()` handler
+  - `server/internal/ws/protocol.go`：加入 `MsgDailyBonus` + `DailyBonusPayload`
+  - `server/internal/store/store.go`：`PlayerState` 加入 `LoginStreak`/`MaxLoginStreak`/`LastLoginDate`
+  - `server/internal/player/player.go`：`Player` 加入登入追蹤欄位
+  - `server/internal/game/game.go`：`AddPlayer` 整合每日獎勵檢查，`RemovePlayer` 儲存登入資訊
+  - `scripts/game/GameManager.gd`：加入 `daily_bonus_received` 訊號 + `_handle_daily_bonus()`
+  - `scripts/ui/HUD.gd`：加入 `_on_daily_bonus_received()` + `_show_daily_bonus_popup()` 彈窗
+  - build/vet/test 全部通過（10 個套件，新增 dailybonus 套件）
+  - **業界依據：** actionnetwork.com 2026-05-09 確認「Daily Login Rewards」是捕魚機標配功能
 - **DAY-064 更新（自主觸發）：** 技術研究 + KnowHow 更新 + GitHub 同步 ✅
   - 確認 Go 版本：go1.26.2（已包含 1.24 所有效能改善）
   - 確認 Godot 4.6.3 RC 2 修復內容（等正式版再升級）
