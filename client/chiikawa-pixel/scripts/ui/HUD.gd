@@ -187,6 +187,7 @@ func _ready() -> void:
 	_init_weather_panel()     # 天氣系統面板（DAY-087）
 	_init_chain_panel()       # 連鎖爆炸面板（DAY-088）
 	_init_special_weapon_panel() # 特殊武器面板（DAY-089）
+	_init_mystery_box_panel()    # 神秘寶箱面板（DAY-090）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1833,3 +1834,18 @@ func _init_special_weapon_panel() -> void:
 func _on_special_weapon_selected(weapon_type: String) -> void:
 	# 通知 GameManager 當前選中的特殊武器
 	GameManager.set_meta("selected_special_weapon", weapon_type)
+
+# ---- 神秘寶箱面板（DAY-090）----
+
+const MysteryBoxPanelScript = preload("res://scripts/ui/MysteryBoxPanel.gd")
+var _mystery_box_panel: Control = null
+
+func _init_mystery_box_panel() -> void:
+	var panel = MysteryBoxPanelScript.new()
+	panel.name = "MysteryBoxPanel"
+	# 放在 SpecialWeaponPanel 右側（x=420 寬240，所以 MysteryBox 在 x=665）
+	panel.position = Vector2(665, 540)
+	panel.z_index = 8
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_mystery_box_panel = panel

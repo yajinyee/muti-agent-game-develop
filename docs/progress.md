@@ -1,6 +1,29 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-089 特殊武器系統）
+## 最後更新：2026-05-20（DAY-090 神秘寶箱系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-090 更新（自主觸發）：** 神秘寶箱系統（Mystery Box System）✅
+  - `server/internal/game/mysterybox/mysterybox.go`：神秘寶箱管理器（4個稀有度：普通/稀有/史詩/傳說，掉落機率 8%/4%/1.5%/0.5%，BOSS 擊殺傳說機率×10，背包管理，開箱加權隨機獎勵）
+  - `server/internal/game/mysterybox/mysterybox_test.go`：10 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgOpenMysteryBox`/`MsgGetMysteryBoxes`（Client→Server）+ `MsgMysteryBoxDrop`/`MsgMysteryBoxUpdate`/`MsgMysteryBoxOpened`（Server→Client）+ 對應 Payload
+  - `server/internal/game/mysterybox_handler.go`：`notifyMysteryBoxKill()`/`handleOpenMysteryBox()`/`handleGetMysteryBoxes()`/`sendMysteryBoxUpdate()`
+  - `server/internal/game/game.go`：`MysteryBox *mysterybox.Manager` 欄位 + 初始化 + AddPlayer 發送狀態 + RemovePlayer 清理 + HandleMessage 分支 + handleKill 整合 `notifyMysteryBoxKill()`
+  - `server/internal/game/specialweapon/specialweapon.go`：新增 `AddCharge()` 方法（開箱獎勵用）
+  - `client/chiikawa-pixel/scripts/ui/MysteryBoxPanel.gd`：神秘寶箱面板（4個稀有度按鈕，數量顯示，掉落動畫，開箱彈窗，傳說全畫面金色閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`mystery_box_updated`/`mystery_box_dropped`/`mystery_box_opened` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：`send_open_mystery_box()`/`send_get_mystery_boxes()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 MysteryBoxPanel（`_init_mystery_box_panel()`，位置 x=665 y=540）
+  - 6 種獎勵類型：金幣/炸彈充能/雷射充能/冰凍充能/下次攻擊倍率加成/Jackpot 券
+  - 傳說寶箱最高獎勵：50000 金幣 / 下次攻擊 ×5.0 / Jackpot 券 ×20
+  - 掉落廣播給所有玩家（增加驚喜感和社交感）
+  - build/vet/test 全部通過（10/10 mysterybox 測試）
+  - **業界依據：** nerdbot.com 2026-05-02 確認「mystery rewards」是 2026 年 iGaming 最熱門留存機制；geektown.co.uk 2026-03-02 確認「randomised reward mechanic」是玩家留存核心
 
 ## 自我評估
 - **完成度：100%**

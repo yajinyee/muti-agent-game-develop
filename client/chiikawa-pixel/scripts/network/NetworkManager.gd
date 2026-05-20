@@ -310,6 +310,14 @@ func send_use_special_weapon(weapon_type: String, click_x: float, click_y: float
 func send_get_special_weapons() -> void:
 	send("get_special_weapons", {})
 
+## 開箱請求（DAY-090）
+func send_open_mystery_box(rarity: String) -> void:
+	send("open_mystery_box", {"rarity": rarity})
+
+## 查詢持有寶箱（DAY-090）
+func send_get_mystery_boxes() -> void:
+	send("get_mystery_boxes", {})
+
 ## 處理收到的封包
 func _handle_packet(packet: PackedByteArray) -> void:
 	var text = packet.get_string_from_utf8()

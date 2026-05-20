@@ -234,3 +234,19 @@ func (m *Manager) setChargesLocked(s *PlayerWeaponState, wtype WeaponType, v int
 		s.FreezeCharges = v
 	}
 }
+
+// AddCharge 直接增加充能（開箱獎勵用，不扣金幣）
+func (m *Manager) AddCharge(playerID string, wtype WeaponType) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	s := m.getOrCreateLocked(playerID)
+	def := getWeaponDef(wtype)
+	if def == nil {
+		return
+	}
+	charges := m.getChargesLocked(s, wtype)
+	if charges < def.MaxCharges {
+		m.setChargesLocked(s, wtype, charges+1)
+	}
+}

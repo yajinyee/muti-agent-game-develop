@@ -18,6 +18,7 @@ import (
 	"digital-twin/server/internal/game/challenge"
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/dailyboss"
+	"digital-twin/server/internal/game/mysterybox"
 	"digital-twin/server/internal/game/specialweapon"
 	"digital-twin/server/internal/game/event"
 	"digital-twin/server/internal/game/friend"
@@ -67,6 +68,7 @@ type Game struct {
 	Weather     *weather.Manager    // 天氣系統管理器（DAY-087）
 	Chain       *chain.Manager      // 連鎖爆炸管理器（DAY-088）
 	SpecialWeapon *specialweapon.Manager // 特殊武器管理器（DAY-089）
+	MysteryBox    *mysterybox.Manager    // 神秘寶箱管理器（DAY-090）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -131,6 +133,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Weather:            weather.New(),
 		Chain:              chain.NewDefault(),
 		SpecialWeapon:      specialweapon.New(),
+		MysteryBox:         mysterybox.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -244,6 +247,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendWeatherUpdate(playerID, false)
 				// 發送特殊武器狀態（DAY-089）
 				g.sendSpecialWeaponUpdate(pp, true)
+				// 發送神秘寶箱狀態（DAY-090）
+				g.sendMysteryBoxUpdate(pp)
 			}
 		}()
 	}
@@ -295,6 +300,8 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.Challenge.RemovePlayer(playerID)
 		// 清理特殊武器狀態（DAY-089）
 		g.SpecialWeapon.RemovePlayer(playerID)
+		// 清理神秘寶箱狀態（DAY-090）
+		g.MysteryBox.RemovePlayer(playerID)
 	}
 }
 
@@ -414,6 +421,11 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleUseSpecialWeapon(p, msg)
 	case ws.MsgGetSpecialWeapons:
 		g.handleGetSpecialWeapons(p)
+	// 神秘寶箱系統（DAY-090）
+	case ws.MsgOpenMysteryBox:
+		g.handleOpenMysteryBox(p, msg)
+	case ws.MsgGetMysteryBoxes:
+		g.handleGetMysteryBoxes(p)
 	}
 }
 
@@ -730,6 +742,9 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	g.notifyChallengeKill(p, t.DefID, result.Multiplier, finalReward)
 	// 連鎖爆炸：擊破後嘗試觸發連鎖（DAY-088）
 	go g.notifyChainKill(p, t.InstanceID, t.X, t.Y, result.Multiplier, t.DefID)
+	// 神秘寶箱：擊破後嘗試掉落（DAY-090）
+	isBoss := t.DefID == "B001"
+	go g.notifyMysteryBoxKill(p, t.X, t.Y, isBoss)
 }
 
 // handleLock 處理鎖定

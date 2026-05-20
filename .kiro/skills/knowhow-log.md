@@ -2919,3 +2919,16 @@ contribution_per_shot = betCost × 0.005 × level_share
       )
   ```
 - **教訓：** GDScript 4 的 closure 和 Python 一樣，要用局部變數避免 late binding 問題
+
+## 85. 神秘寶箱 RTP 控制設計（2026-05-20）
+- **掉落機率設計：** 普通 8% / 稀有 4% / 史詩 1.5% / 傳說 0.5%（總計 14%）
+- **BOSS 加成：** BOSS 擊殺時傳說機率 ×10（0.5% → 5%），增加 BOSS 戰的驚喜感
+- **獎勵折扣：** 開箱獎勵不影響主遊戲 RTP（獨立獎勵池），不需要折扣
+- **背包設計：** 用 package-level 全域 map 管理背包，避免 Manager 結構體過大
+- **教訓：** 神秘寶箱的掉落機率要夠低（<15%），否則玩家會覺得「太常掉」而失去驚喜感
+
+## 86. Go package-level 全域狀態的 thread-safety（2026-05-20）
+- **問題：** mysterybox 的背包用 package-level 匿名 struct 管理，需要確保 thread-safe
+- **解法：** 用 `var inventories = struct { sync.RWMutex; data map[...] }{data: make(...)}` 
+- **優點：** 不需要在 Manager 結構體中加入額外欄位，背包狀態獨立管理
+- **教訓：** package-level 全域狀態要用匿名 struct 包裝 mutex，確保 thread-safe

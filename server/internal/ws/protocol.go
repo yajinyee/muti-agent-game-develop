@@ -57,6 +57,9 @@ const (
 	MsgBuySpecialWeapon  MessageType = "buy_special_weapon"   // 購買特殊武器
 	MsgUseSpecialWeapon  MessageType = "use_special_weapon"   // 使用特殊武器
 	MsgGetSpecialWeapons MessageType = "get_special_weapons"  // 查詢特殊武器狀態
+	// 神秘寶箱系統（DAY-090）
+	MsgOpenMysteryBox    MessageType = "open_mystery_box"     // 開箱請求
+	MsgGetMysteryBoxes   MessageType = "get_mystery_boxes"    // 查詢持有寶箱
 )
 
 // Server → Client
@@ -130,6 +133,10 @@ const (
 	// 特殊武器系統（DAY-089）
 	MsgSpecialWeaponUpdate MessageType = "special_weapon_update" // 特殊武器狀態更新
 	MsgSpecialWeaponFired  MessageType = "special_weapon_fired"  // 特殊武器發射廣播（所有玩家可見）
+	// 神秘寶箱系統（DAY-090）
+	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
+	MsgMysteryBoxUpdate  MessageType = "mystery_box_update"  // 持有寶箱狀態更新
+	MsgMysteryBoxOpened  MessageType = "mystery_box_opened"  // 開箱結果通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1088,4 +1095,62 @@ type SpecialWeaponFiredPayload struct {
 	TotalReward int                     `json:"total_reward"`
 	NewBalance  int                     `json:"new_balance"` // 只有發射者有值
 	FreezeTime  float64                 `json:"freeze_time"` // 冰凍持續秒數（freeze 武器用）
+}
+
+// ---- 神秘寶箱系統（DAY-090）----
+
+// OpenMysteryBoxPayload 開箱請求（Client → Server）
+type OpenMysteryBoxPayload struct {
+	Rarity string `json:"rarity"` // "common" / "rare" / "epic" / "legendary"
+}
+
+// MysteryBoxInventoryEntry 持有寶箱條目
+type MysteryBoxInventoryEntry struct {
+	Rarity    string `json:"rarity"`
+	Name      string `json:"name"`
+	Icon      string `json:"icon"`
+	Color     string `json:"color"`
+	GlowColor string `json:"glow_color"`
+	Count     int    `json:"count"`
+}
+
+// MysteryBoxUpdatePayload 持有寶箱狀態更新（Server → Client）
+type MysteryBoxUpdatePayload struct {
+	PlayerID  string                     `json:"player_id"`
+	Inventory []MysteryBoxInventoryEntry `json:"inventory"`
+	Total     int                        `json:"total"` // 總持有數量
+}
+
+// MysteryBoxDropPayload 寶箱掉落通知（Server → Client）
+// 擊破目標後掉落寶箱時廣播
+type MysteryBoxDropPayload struct {
+	PlayerID  string `json:"player_id"`
+	Rarity    string `json:"rarity"`
+	Name      string `json:"name"`
+	Icon      string `json:"icon"`
+	Color     string `json:"color"`
+	GlowColor string `json:"glow_color"`
+	DropX     float64 `json:"drop_x"` // 掉落位置（目標物位置）
+	DropY     float64 `json:"drop_y"`
+}
+
+// MysteryBoxRewardPayload 開箱獎勵條目
+type MysteryBoxRewardPayload struct {
+	Type   string `json:"type"`
+	Amount int    `json:"amount"`
+	Label  string `json:"label"`
+	Icon   string `json:"icon"`
+	Color  string `json:"color"`
+}
+
+// MysteryBoxOpenedPayload 開箱結果通知（Server → Client）
+type MysteryBoxOpenedPayload struct {
+	PlayerID        string                  `json:"player_id"`
+	Rarity          string                  `json:"rarity"`
+	BoxName         string                  `json:"box_name"`
+	BoxIcon         string                  `json:"box_icon"`
+	Reward          MysteryBoxRewardPayload `json:"reward"`
+	NewBalance      int                     `json:"new_balance"`
+	PendingMultMult float64                 `json:"pending_mult"` // 待使用倍率（0=無）
+	RemainingBoxes  int                     `json:"remaining_boxes"` // 該稀有度剩餘數量
 }
