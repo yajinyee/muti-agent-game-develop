@@ -7,6 +7,7 @@ import (
 
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/achievement"
+	"digital-twin/server/internal/game/codex"
 )
 
 // Player 玩家狀態
@@ -54,6 +55,9 @@ type Player struct {
 	// 砲台外觀系統（DAY-071）
 	EquippedSkin string   // 當前裝備的外觀 ID（預設 "default"）
 	OwnedSkins   []string // 已擁有的外觀 ID 列表
+
+	// 魚類圖鑑系統（DAY-081）
+	Codex *codex.Manager
 }
 
 // NewPlayer 建立新玩家
@@ -77,6 +81,7 @@ func NewPlayer(id string, initialCoins int) *Player {
 		Titles:       achievement.NewTitleTracker(),
 		EquippedSkin: "default",
 		OwnedSkins:   []string{"default"},
+		Codex:        codex.NewManager(),
 	}
 }
 
@@ -201,6 +206,13 @@ func (p *Player) AddCoins(amount int) {
 	if p.Coins > p.MaxCoins {
 		p.MaxCoins = p.Coins
 	}
+}
+
+// GetCoins 取得當前金幣數（thread-safe）
+func (p *Player) GetCoins() int {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.Coins
 }
 
 // AddLaborValue 增加勞動值，回傳是否觸發 Bonus

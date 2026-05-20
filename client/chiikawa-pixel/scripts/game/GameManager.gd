@@ -44,6 +44,9 @@ signal vip_updated(vip_data: Dictionary)               # VIP 狀態更新（DAY-
 signal vip_level_up(level_data: Dictionary)            # VIP 升級通知（DAY-078）
 signal vip_weekly_claimed(claim_data: Dictionary)      # VIP 週獎勵領取通知（DAY-078）
 signal event_updated(event_data: Dictionary)           # 限時活動狀態更新（DAY-079）
+signal codex_updated(codex_data: Dictionary)           # 圖鑑狀態更新（DAY-081）
+signal codex_unlocked(unlock_data: Dictionary)         # 圖鑑條目解鎖通知（DAY-081）
+signal codex_complete(complete_data: Dictionary)       # 全圖鑑完成通知（DAY-081）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -165,6 +168,12 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_vip_weekly_claimed(payload)
 		"event_update":
 			_handle_event_update(payload)
+		"codex_update":
+			_handle_codex_update(payload)
+		"codex_unlock":
+			_handle_codex_unlock(payload)
+		"codex_complete":
+			_handle_codex_complete(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -446,3 +455,35 @@ func _handle_event_update(payload: Dictionary) -> void:
 ## 請求限時活動狀態（DAY-079）
 func request_event_status() -> void:
 	NetworkManager.send_message("get_event_status", {})
+
+## 處理圖鑑狀態更新（DAY-081）
+func _handle_codex_update(payload: Dictionary) -> void:
+	emit_signal("codex_updated", payload)
+
+## 處理圖鑑條目解鎖通知（DAY-081）
+func _handle_codex_unlock(payload: Dictionary) -> void:
+	emit_signal("codex_unlocked", payload)
+
+## 處理全圖鑑完成通知（DAY-081）
+func _handle_codex_complete(payload: Dictionary) -> void:
+	emit_signal("codex_complete", payload)
+
+## 請求圖鑑狀態（DAY-081）
+func request_codex() -> void:
+	NetworkManager.send_message("get_codex", {})
+
+## 處理圖鑑狀態更新（DAY-081）
+func _handle_codex_update(payload: Dictionary) -> void:
+	emit_signal("codex_updated", payload)
+
+## 處理圖鑑條目解鎖通知（DAY-081）
+func _handle_codex_unlock(payload: Dictionary) -> void:
+	emit_signal("codex_unlocked", payload)
+
+## 處理全圖鑑完成通知（DAY-081）
+func _handle_codex_complete(payload: Dictionary) -> void:
+	emit_signal("codex_complete", payload)
+
+## 請求圖鑑狀態（DAY-081）
+func request_codex() -> void:
+	NetworkManager.send_message("get_codex", {})

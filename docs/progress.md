@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-079 限時活動系統）
+## 最後更新：2026-05-20（DAY-081 魚類圖鑑收集系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-081 更新（自主觸發）：** 魚類圖鑑收集系統（Codex System）✅
+  - `server/internal/game/codex/codex.go`：圖鑑管理器（12種目標物，4稀有度：common/rare/epic/legendary）
+  - `server/internal/game/codex/codex_test.go`：9 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgGetCodex`（Client→Server）+ `MsgCodexUpdate`/`MsgCodexUnlock`/`MsgCodexComplete`（Server→Client）+ 對應 Payload
+  - `server/internal/player/player.go`：`Codex *codex.Manager` 欄位 + `GetCoins()` 方法
+  - `server/internal/game/game.go`：`AddPlayer` 發送圖鑑狀態 + `MsgGetCodex` handler + `GetPlayerCodexSnapshot()` HTTP 方法 + `handleKill` 整合 `notifyCodexKill()`
+  - `server/internal/game/codex_handler.go`：`sendCodexUpdate()`/`handleGetCodex()`/`notifyCodexKill()`/`handleCodexComplete()`
+  - `server/cmd/gameserver/main.go`：`/codex` HTTP 端點（GET，無 player_id 回傳定義，有 player_id 回傳玩家圖鑑）
+  - `client/chiikawa-pixel/scripts/ui/CodexPanel.gd`：圖鑑面板（依稀有度分組，解鎖通知動畫，全收集大彈窗）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`codex_updated`/`codex_unlocked`/`codex_complete` 訊號 + handler + `request_codex()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 CodexPanel（`_init_codex_panel()`，位置 x=1024）
+  - 12 種目標物：T001-T006（普通）/T101-T105（稀有/史詩）/B001（傳說）
+  - 解鎖獎勵：首次擊破 +200 金幣，全收集 +5000 金幣 + 「圖鑑完成者」稱號
+  - 圖鑑記錄：擊破次數 + 最高倍率（每種目標物）
+  - build/vet/test 全部通過（9/9 codex 測試）
+  - **業界依據：** 圖鑑收集系統是 2026 年捕魚機標配留存功能（增加長期目標感，提升玩家黏著度）
+
 - **DAY-079 更新（自主觸發）：** 限時活動系統（Limited Time Event System）✅
   - `server/internal/game/event/event.go`：活動管理器（3 種活動：黃金時段/魚群爆發/幸運時刻，30 分鐘輪換）
   - `server/internal/game/event/event_test.go`：14 個單元測試全部通過

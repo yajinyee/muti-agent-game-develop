@@ -213,6 +213,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendVIPUpdate(pp)
 				// 發送限時活動狀態（DAY-079）
 				g.sendEventUpdate(pp)
+				// 發送圖鑑狀態（DAY-081）
+				g.sendCodexUpdate(pp.ID)
 			}
 		}()
 	}
@@ -364,6 +366,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 限時活動系統（DAY-079）
 	case ws.MsgGetEventStatus:
 		g.handleGetEventStatus(p)
+	// 魚類圖鑑系統（DAY-081）
+	case ws.MsgGetCodex:
+		g.handleGetCodex(p.ID)
 	}
 }
 
@@ -662,6 +667,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	go g.notifyGuildWarKill(p.ID, int(result.Multiplier))
 	// 每日 BOSS 傷害貢獻（DAY-077）
 	go g.notifyDailyBossKill(p, result.Multiplier)
+	// 魚類圖鑑：記錄擊破（DAY-081）
+	g.notifyCodexKill(p.ID, t.DefID, result.Multiplier)
 }
 
 // handleLock 處理鎖定
@@ -1408,6 +1415,25 @@ func (g *Game) GetAllPlayerProfiles() []PlayerProfile {
 		}
 	}
 	return profiles
+}
+
+// GetPlayerCodexSnapshot 取得玩家圖鑑快照（供 /codex HTTP 端點使用，DAY-081）
+func (g *Game) GetPlayerCodexSnapshot(playerID string) (interface{}, bool) {
+	g.mu.RLock()
+	p, ok := g.Players[playerID]
+	g.mu.RUnlock()
+	if !ok || p.Codex == nil {
+		return nil, false
+	}
+	entries := p.Codex.GetSnapshot()
+	unlocked, total := p.Codex.GetStats()
+	return map[string]interface{}{
+		"player_id":      playerID,
+		"entries":        entries,
+		"unlocked_count": unlocked,
+		"total_count":    total,
+		"is_complete":    p.Codex.IsComplete(),
+	}, true
 }
 
 // GetMissionResetAt 取得每日任務下次重置時間（thread-safe）

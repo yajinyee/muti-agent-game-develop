@@ -48,6 +48,8 @@ const (
 	MsgClaimVIPWeekly    MessageType = "claim_vip_weekly"     // 領取 VIP 週獎勵
 	// 限時活動系統（DAY-079）
 	MsgGetEventStatus    MessageType = "get_event_status"     // 查詢限時活動狀態
+	// 魚類圖鑑系統（DAY-081）
+	MsgGetCodex          MessageType = "get_codex"            // 查詢圖鑑狀態
 )
 
 // Server → Client
@@ -97,6 +99,10 @@ const (
 	MsgVIPWeeklyClaimed  MessageType = "vip_weekly_claimed"  // VIP 週獎勵領取通知
 	// 限時活動系統（DAY-079）
 	MsgEventUpdate       MessageType = "event_update"        // 限時活動狀態更新
+	// 魚類圖鑑系統（DAY-081）
+	MsgCodexUpdate       MessageType = "codex_update"        // 圖鑑狀態更新
+	MsgCodexUnlock       MessageType = "codex_unlock"        // 圖鑑條目解鎖通知
+	MsgCodexComplete     MessageType = "codex_complete"      // 全圖鑑完成通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -824,4 +830,46 @@ type EventUpdatePayload struct {
 	RewardMult    float64 `json:"reward_mult"`
 	SpawnMult     float64 `json:"spawn_mult"`
 	KillChanceAdd float64 `json:"kill_chance_add"`
+}
+
+// ---- 魚類圖鑑系統（DAY-081）----
+
+// CodexEntryPayload 圖鑑條目（用於廣播）
+type CodexEntryPayload struct {
+	TargetID      string  `json:"target_id"`
+	TargetName    string  `json:"target_name"`
+	Rarity        string  `json:"rarity"`         // "common"/"rare"/"epic"/"legendary"
+	Unlocked      bool    `json:"unlocked"`
+	UnlockedAt    int64   `json:"unlocked_at"`    // Unix ms，0=未解鎖
+	KillCount     int     `json:"kill_count"`
+	MaxMultiplier float64 `json:"max_multiplier"`
+}
+
+// CodexUpdatePayload 圖鑑狀態更新（Server → Client）
+// 玩家加入時發送完整圖鑑，解鎖時也發送
+type CodexUpdatePayload struct {
+	Entries       []CodexEntryPayload `json:"entries"`
+	UnlockedCount int                 `json:"unlocked_count"`
+	TotalCount    int                 `json:"total_count"`
+	IsComplete    bool                `json:"is_complete"`
+}
+
+// CodexUnlockPayload 圖鑑條目解鎖通知（Server → Client）
+// 首次擊破某種目標物時發送
+type CodexUnlockPayload struct {
+	TargetID      string  `json:"target_id"`
+	TargetName    string  `json:"target_name"`
+	Rarity        string  `json:"rarity"`
+	Reward        int     `json:"reward"`        // 解鎖獎勵金幣
+	NewBalance    int     `json:"new_balance"`
+	UnlockedCount int     `json:"unlocked_count"`
+	TotalCount    int     `json:"total_count"`
+}
+
+// CodexCompletePayload 全圖鑑完成通知（Server → Client）
+type CodexCompletePayload struct {
+	Reward     int    `json:"reward"`      // 完成獎勵金幣
+	NewBalance int    `json:"new_balance"`
+	TitleID    string `json:"title_id"`    // 解鎖的稱號 ID
+	TitleName  string `json:"title_name"`
 }

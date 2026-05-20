@@ -505,6 +505,51 @@ func main() {
 		}
 	})
 
+	// GET /codex?player_id=xxx — 取得玩家圖鑑狀態（DAY-081）
+	mux.HandleFunc("/codex", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		playerID := r.URL.Query().Get("player_id")
+		if playerID == "" {
+			// 回傳圖鑑定義（所有目標物 ID + 名稱 + 稀有度）
+			type codexDef struct {
+				TargetID   string `json:"target_id"`
+				TargetName string `json:"target_name"`
+				Rarity     string `json:"rarity"`
+			}
+			defs := []codexDef{
+				{"T001", "像素雜草", "common"},
+				{"T002", "綠色小蟲", "common"},
+				{"T003", "紅色小蟲", "common"},
+				{"T004", "藍色小蟲", "common"},
+				{"T005", "會走路的布丁", "common"},
+				{"T006", "巨大蘑菇", "common"},
+				{"T101", "擬態型怪物", "rare"},
+				{"T102", "寶箱怪", "rare"},
+				{"T103", "流星", "epic"},
+				{"T104", "金色雜草", "epic"},
+				{"T105", "巨大金幣魚", "epic"},
+				{"B001", "那個孩子", "legendary"},
+			}
+			if err := json.NewEncoder(w).Encode(map[string]interface{}{
+				"entries":   defs,
+				"total":     len(defs),
+				"timestamp": time.Now().UnixMilli(),
+			}); err != nil {
+				http.Error(w, "encode error", http.StatusInternalServerError)
+			}
+			return
+		}
+		// 回傳指定玩家的圖鑑狀態
+		if snap, ok := g.GetPlayerCodexSnapshot(playerID); ok {
+			if err := json.NewEncoder(w).Encode(snap); err != nil {
+				http.Error(w, "encode error", http.StatusInternalServerError)
+			}
+		} else {
+			http.Error(w, `{"error":"player not found"}`, http.StatusNotFound)
+		}
+	})
+
 	// GET /vip — 取得 VIP 等級資訊（DAY-078）
 	mux.HandleFunc("/vip", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
