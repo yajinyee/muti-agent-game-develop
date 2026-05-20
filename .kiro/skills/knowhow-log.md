@@ -2817,3 +2817,26 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **問題：** 這樣做雖然靈活，但在同一個 package 內直接用 `*player.Player` 更清晰
 - **解決：** 直接用具體型別 `*player.Player`，避免不必要的 interface 抽象
 - **教訓：** 在同一個 package 內，具體型別比 interface 更清晰；interface 適合跨 package 的抽象
+
+## 133. fs_write 在 Windows 上可能建立空檔案（2026-05-20 DAY-083）
+- **問題：** `fs_write` 工具建立的 `.go` 檔案有時是 0 bytes（`expected 'package', found 'EOF'`）
+- **原因：** Windows 檔案系統的寫入時序問題，特別是在快速連續建立多個檔案時
+- **解決：** 改用 PowerShell `[System.IO.File]::WriteAllText()` 直接寫入，確保 UTF-8 編碼
+- **驗證：** 寫入後立即用 `[System.IO.File]::ReadAllBytes().Length` 確認檔案大小 > 0
+- **教訓：** 建立重要的 Go 原始碼檔案後，必須確認檔案大小不為 0
+
+## 134. 連擊系統（Kill Streak）設計原則（2026-05-20 DAY-083）
+- **業界依據：** Fisch（Roblox，2026-05-19）的 Catch Streak 系統確認連擊是 2026 年標配留存機制
+- **超時設計：** 3 秒無擊破重置（捕魚機節奏快，3 秒是合理的緊張感窗口）
+- **等級設計：** 6 個等級（3/5/8/12/20 連擊），倍率 1.0→2.0x（線性遞增，不要太陡）
+- **倍率疊加：** 連擊倍率 × 活動倍率（兩者相乘，最高可達 4x）
+- **Server 架構：** per-player Manager + 每秒 ticker 檢查超時（不用 goroutine per player）
+- **Client 顯示：** 連擊 < 3 時隱藏面板，≥ 3 才顯示（避免干擾新手）
+- **教訓：** 連擊系統要有明確的視覺反饋（顏色/動畫），讓玩家感受到「我在連擊中」
+
+## 135. git core.tmpdir 設定（2026-05-20）
+- **問題：** `git add` 報 `error: unable to create temporary file: No such file or directory`
+- **原因：** git 的 temp 目錄（通常是 `%TEMP%`）在 D 槽專案中無法存取
+- **解決：** `git config --global core.tmpdir "C:/Temp/git-tmp"` + 建立目錄
+- **注意：** 每次新 PowerShell session 都要確認設定仍然有效（`git config --global core.tmpdir`）
+- **教訓：** 在 D 槽工作時，git 的 tmpdir 必須指向 C 槽
