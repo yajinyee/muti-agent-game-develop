@@ -317,6 +317,23 @@ func _build_friend_row(index: int, friend_data: Dictionary) -> void:
 	)
 	_friend_list_container.add_child(challenge_btn)
 
+	# 傳訊息按鈕（DAY-103）
+	var dm_btn := Button.new()
+	dm_btn.text = "💬"
+	dm_btn.position = Vector2(PANEL_WIDTH - 104, row_y + 7)
+	dm_btn.size = Vector2(22, 20)
+	dm_btn.flat = true
+	dm_btn.tooltip_text = "傳私訊給 %s" % display_name
+	if _pixel_font:
+		dm_btn.add_theme_font_override("font", _pixel_font)
+		dm_btn.add_theme_font_size_override("font_size", 11)
+	dm_btn.pressed.connect(func():
+		# 通知 HUD 開啟 DM 面板
+		if GameManager.has_signal("open_dm_panel"):
+			GameManager.emit_signal("open_dm_panel", friend_id, display_name)
+	)
+	_friend_list_container.add_child(dm_btn)
+
 	# 移除按鈕
 	var remove_btn := Button.new()
 	remove_btn.text = "✕"

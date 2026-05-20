@@ -18,6 +18,7 @@ import (
 	"digital-twin/server/internal/game/challenge"
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/dailyboss"
+	"digital-twin/server/internal/game/dm"
 	"digital-twin/server/internal/game/mysterybox"
 	"digital-twin/server/internal/game/specialweapon"
 	"digital-twin/server/internal/game/dailyspin"
@@ -63,6 +64,7 @@ type Game struct {
 	Season      *season.Manager     // 賽季通行證管理器（DAY-072）
 	Friends     *friend.Manager     // 好友系統管理器（DAY-073）
 	FriendChallenge *friendchallenge.Manager // 好友挑戰管理器（DAY-102）
+	DM          *dm.Manager         // 私訊管理器（DAY-103）
 	Guild       *guild.Manager      // 公會系統管理器（DAY-074）
 	GuildWar    *guildwar.Manager   // 公會戰管理器（DAY-076）
 	DailyBoss   *dailyboss.Manager  // 每日 BOSS 挑戰管理器（DAY-077）
@@ -135,6 +137,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Season:             season.New(),
 		Friends:            friend.New(),
 		FriendChallenge:    friendchallenge.New(),
+		DM:                 dm.New(),
 		Guild:              guild.New(),
 		GuildWar:           guildwar.New(),
 		DailyBoss:          dailyboss.New(),
@@ -234,6 +237,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.notifyFriendsOnline(playerID, pp.DisplayName)
 				// 發放離線期間收到的禮物（DAY-101）
 				g.deliverPendingGifts(pp)
+				// 發送離線期間收到的私訊（DAY-103）
+				g.deliverPendingDMs(pp)
 				// 更新公會在線狀態 + 發送公會資訊（DAY-074）
 				g.Guild.SetOnlineStatus(playerID, true)
 				g.sendGuildUpdate(pp)
@@ -475,6 +480,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleAcceptChallenge(p, msg)
 	case ws.MsgDeclineChallenge:
 		g.handleDeclineChallenge(p, msg)
+	// 私訊系統（DAY-103）
+	case ws.MsgSendDM:
+		g.handleSendDM(p, msg)
 	}
 }
 

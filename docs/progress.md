@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-102 好友挑戰系統 1v1 PvP）
+## 最後更新：2026-05-21（DAY-103 玩家私訊系統 Direct Message）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-102 更新（自主觸發）：** 好友挑戰系統（Friend Challenge System 1v1 PvP）✅
+- **DAY-103 更新（自主觸發）：** 玩家私訊系統（Direct Message System）✅
+  - `server/internal/game/dm/dm.go`：私訊管理器（`Message` 結構；`Send()`含即時/離線發送；`GetPending()`；`GetDailyCount()`；每日上限100則；最多暫存50則離線訊息；訊息ID唯一性保證）
+  - `server/internal/game/dm/dm_test.go`：10 個單元測試（Windows Defender 誤報，build/vet 通過）
+  - `server/internal/ws/protocol.go`：新增 `MsgSendDM`（Client→Server）；`MsgDMReceived`/`MsgDMSent`/`MsgDMError`（Server→Client）；`SendDMPayload`/`DMReceivedPayload`/`DMSentPayload`/`DMErrorPayload`
+  - `server/internal/game/dm_handler.go`：`handleSendDM()`（好友限定，即時/離線發送）；`deliverPendingDMs()`（上線時自動發送離線訊息）
+  - `server/internal/game/game.go`：整合 `DM *dm.Manager`；HandleMessage 加入 `MsgSendDM`；AddPlayer 加入 `deliverPendingDMs()`
+  - `client/chiikawa-pixel/scripts/ui/DMPanel.gd`：私訊面板（TopBar 💬按鈕；訊息氣泡顯示；輸入框+發送按鈕；未讀徽章；離線訊息標記；浮動通知）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`dm_received`/`dm_sent`/`dm_error`/`open_dm_panel` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/ui/FriendPanel.gd`：好友行加入💬傳訊息按鈕
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 DMPanel（x=1248）+ `open_dm_panel` 訊號連接
+  - 私訊規則：只能傳給好友（防陌生人騷擾）；每日上限 100 則；最多暫存 50 則離線訊息
+  - 離線保護：接收者離線時暫存，上線後自動發送（標記「離線訊息」）
+  - build/vet 全部通過
+  - **業界依據：** optikpi.com（2026）確認 in-app messaging 是留存核心；engagelab.com（2026）確認 70%+ 玩家在首次遊玩後流失，私訊是提升黏著度的關鍵工具
+
+
   - `server/internal/game/friendchallenge/friendchallenge.go`：挑戰管理器（`Challenge` 結構含狀態/分數/賭注/計時；`CreateChallenge()`/`AcceptChallenge()`/`DeclineChallenge()`/`AddScore()`/`CheckAndFinish()`/`ForceFinish()`/`IsInChallenge()`）
   - `server/internal/game/friendchallenge/friendchallenge_test.go`：11 個單元測試全部通過
   - `server/internal/ws/protocol.go`：新增 `MsgSendChallengeRequest`/`MsgAcceptChallenge`/`MsgDeclineChallenge`（Client→Server）；`MsgChallengeRequest`/`MsgChallengeUpdate`/`MsgChallengeResult`/`MsgChallengeError`（Server→Client）；7個 Payload 結構

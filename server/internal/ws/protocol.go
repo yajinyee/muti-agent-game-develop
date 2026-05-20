@@ -73,6 +73,8 @@ const (
 	MsgSendChallengeRequest MessageType = "send_challenge_request" // 發起挑戰
 	MsgAcceptChallenge      MessageType = "accept_challenge"       // 接受挑戰
 	MsgDeclineChallenge     MessageType = "decline_challenge"      // 拒絕挑戰
+	// 私訊系統（DAY-103）
+	MsgSendDM    MessageType = "send_dm"    // 發送私訊
 )
 
 // Server → Client
@@ -182,6 +184,10 @@ const (
 	MsgChallengeUpdate   MessageType = "challenge_update"    // 挑戰狀態/分數更新（Server → Client）
 	MsgChallengeResult   MessageType = "challenge_result"    // 挑戰結果通知（Server → Client）
 	MsgChallengeError    MessageType = "challenge_error"     // 挑戰操作失敗（Server → Client）
+	// 私訊系統（DAY-103）
+	MsgDMReceived MessageType = "dm_received" // 收到私訊（Server → Client）
+	MsgDMSent     MessageType = "dm_sent"     // 發送成功確認（Server → Client）
+	MsgDMError    MessageType = "dm_error"    // 發送失敗（Server → Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -777,6 +783,38 @@ type ChallengeResultPayload struct {
 
 // ChallengeErrorPayload 挑戰操作失敗（Server → Client）
 type ChallengeErrorPayload struct {
+	ErrorCode string `json:"error_code"`
+	Message   string `json:"message"`
+}
+
+// ---- 私訊系統（DAY-103）----
+
+// SendDMPayload 發送私訊請求（Client → Server）
+type SendDMPayload struct {
+	ToID    string `json:"to_id"`
+	Content string `json:"content"`
+}
+
+// DMReceivedPayload 收到私訊通知（Server → Client）
+type DMReceivedPayload struct {
+	MessageID string `json:"message_id"`
+	FromID    string `json:"from_id"`
+	FromName  string `json:"from_name"`
+	Content   string `json:"content"`
+	SentAt    int64  `json:"sent_at"` // Unix milliseconds
+	IsOffline bool   `json:"is_offline,omitempty"` // 是否為離線訊息
+}
+
+// DMSentPayload 發送成功確認（Server → Client）
+type DMSentPayload struct {
+	MessageID string `json:"message_id"`
+	ToID      string `json:"to_id"`
+	SentToday int    `json:"sent_today"`
+	Remaining int    `json:"remaining"`
+}
+
+// DMErrorPayload 發送失敗（Server → Client）
+type DMErrorPayload struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
 }

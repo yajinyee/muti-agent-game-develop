@@ -47,6 +47,11 @@ signal challenge_request(request_data: Dictionary)     # 收到挑戰邀請
 signal challenge_updated(update_data: Dictionary)      # 挑戰狀態/分數更新
 signal challenge_result(result_data: Dictionary)       # 挑戰結果
 signal challenge_error(error_data: Dictionary)         # 挑戰操作失敗
+# 私訊系統（DAY-103）
+signal dm_received(dm_data: Dictionary)                # 收到私訊
+signal dm_sent(dm_data: Dictionary)                    # 發送成功確認
+signal dm_error(error_data: Dictionary)                # 發送失敗
+signal open_dm_panel(friend_id: String, friend_name: String) # 開啟 DM 面板
 signal guild_updated(guild_data: Dictionary)           # 公會資訊更新（DAY-074）
 signal guild_task_complete(task_data: Dictionary)      # 公會任務完成（DAY-074）
 signal guild_message_received(msg_data: Dictionary)    # 公會聊天訊息（DAY-075）
@@ -210,6 +215,13 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_challenge_result(payload)
 		"challenge_error":
 			_handle_challenge_error(payload)
+		# 私訊系統（DAY-103）
+		"dm_received":
+			_handle_dm_received(payload)
+		"dm_sent":
+			_handle_dm_sent(payload)
+		"dm_error":
+			_handle_dm_error(payload)
 		"guild_update":
 			_handle_guild_update(payload)
 		"guild_list":
@@ -522,6 +534,18 @@ func _handle_challenge_result(payload: Dictionary) -> void:
 ## 處理挑戰錯誤（DAY-102）
 func _handle_challenge_error(payload: Dictionary) -> void:
 	emit_signal("challenge_error", payload)
+
+## 處理收到私訊（DAY-103）
+func _handle_dm_received(payload: Dictionary) -> void:
+	emit_signal("dm_received", payload)
+
+## 處理私訊發送確認（DAY-103）
+func _handle_dm_sent(payload: Dictionary) -> void:
+	emit_signal("dm_sent", payload)
+
+## 處理私訊發送失敗（DAY-103）
+func _handle_dm_error(payload: Dictionary) -> void:
+	emit_signal("dm_error", payload)
 
 ## 處理公會資訊更新（DAY-074）
 func _handle_guild_update(payload: Dictionary) -> void:

@@ -172,7 +172,8 @@ func _ready() -> void:
 	_init_title_panel()       # 稱號面板（DAY-068）
 	_init_skin_panel()        # 砲台外觀面板（DAY-071）
 	_init_season_panel()      # 賽季通行證面板（DAY-072）
-	_init_friend_panel()      # 好友系統面板（DAY-073）
+	_init_friend_panel()      # 好友系統面板（DAY-073）+ 挑戰面板（DAY-102）+ 私訊面板（DAY-103）
+	_init_dm_panel()          # 私訊面板（DAY-103）
 	_init_guild_panel()       # 公會系統面板（DAY-074）
 	_init_guild_war_panel()   # 公會戰面板（DAY-076）
 	_init_daily_boss_panel()  # 每日 BOSS 挑戰面板（DAY-077）
@@ -1675,7 +1676,28 @@ func _init_challenge_pvp_panel() -> void:
 		panel.setup(_pixel_font)
 	_challenge_pvp_panel_node = panel
 
-## ── 公會系統面板（DAY-074）──────────────────────────────────────────────────────
+## ── 私訊面板（DAY-103）──────────────────────────────────────────────────────────
+var _dm_panel_node = null
+
+## 初始化私訊面板（DAY-103）
+## 位置：TopBar 右側（x=1248）
+func _init_dm_panel() -> void:
+	var DMPanelScript = load("res://scripts/ui/DMPanel.gd")
+	if DMPanelScript == null:
+		return
+	var panel = DMPanelScript.new()
+	panel.position = Vector2(1248, 4)
+	panel.z_index = 10
+	add_child(panel)
+	if panel.has_method("setup"):
+		panel.setup(_pixel_font)
+	_dm_panel_node = panel
+	# 連接開啟 DM 面板訊號
+	if GameManager.has_signal("open_dm_panel"):
+		GameManager.open_dm_panel.connect(func(friend_id: String, friend_name: String):
+			if is_instance_valid(_dm_panel_node) and _dm_panel_node.has_method("open_conversation"):
+				_dm_panel_node.open_conversation(friend_id, friend_name)
+		)## ── 公會系統面板（DAY-074）──────────────────────────────────────────────────────
 var _guild_panel_node = null
 
 ## 初始化公會系統面板（DAY-074）
