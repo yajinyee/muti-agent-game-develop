@@ -43,6 +43,7 @@ import (
 	"digital-twin/server/internal/anticheat"
 	"digital-twin/server/internal/game/festival"
 	"digital-twin/server/internal/game/halloffame"
+	"digital-twin/server/internal/game/roulette"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -89,6 +90,7 @@ type Game struct {
 	Festival      *festival.Manager      // 賽季節日活動管理器（DAY-109）
 	HallOfFame    *halloffame.Manager    // 全服名人堂管理器（DAY-110）
 	ActivityFeed  *activityfeed.Manager  // 成就動態牆管理器（DAY-112）
+	Roulette      *roulette.Manager      // 雙層倍率輪盤管理器（DAY-113）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -168,6 +170,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Festival:           festival.New(),
 		HallOfFame:         halloffame.New(),
 		ActivityFeed:       activityfeed.New(),
+		Roulette:           roulette.NewManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -349,6 +352,8 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.AntiCheat.RemoveRecord(playerID)
 		// 清理節日進度（DAY-109）
 		g.Festival.RemovePlayer(playerID)
+		// 清理輪盤 session（DAY-113）
+		g.Roulette.CancelSession(playerID)
 	}
 }
 
@@ -890,6 +895,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	g.notifyCodexKill(p.ID, t.DefID, result.Multiplier)
 	// 幸運轉盤：擊破特殊目標後觸發（DAY-084）
 	g.notifyWheelKill(p, t.DefID, finalReward)
+	// 雙層倍率輪盤：擊破 BOSS/特殊目標後觸發（DAY-113）
+	go g.notifyRouletteKill(p, t.DefID, finalReward)
 	// 隱藏挑戰：記錄擊破事件（DAY-085）
 	g.notifyChallengeKill(p, t.DefID, result.Multiplier, finalReward)
 	// 連鎖爆炸：擊破後嘗試觸發連鎖（DAY-088）

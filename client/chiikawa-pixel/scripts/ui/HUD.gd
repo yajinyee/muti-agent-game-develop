@@ -26,6 +26,7 @@ const ReferralPanelScript = preload("res://scripts/ui/ReferralPanel.gd")
 const WheelPanelScript = preload("res://scripts/ui/WheelPanel.gd")
 const ChallengePanelScript = preload("res://scripts/ui/ChallengePanel.gd")
 const MissionStreakPanelScript = preload("res://scripts/ui/MissionStreakPanel.gd")
+const RoulettePanelScript = preload("res://scripts/ui/RoulettePanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -198,6 +199,7 @@ func _ready() -> void:
 	_init_player_card_panel()    # 玩家名片面板（DAY-106）
 	_init_login_milestone_panel() # 登入里程碑面板（DAY-107）
 	_init_player_journey_panel()  # 玩家旅程儀表板（DAY-108）
+	_init_roulette_panel()        # 雙層倍率輪盤面板（DAY-113）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2226,3 +2228,16 @@ func _init_recommend_panel() -> void:
 				_recommend_panel.show_panel()
 		)
 		top_bar.add_child(rec_btn)
+
+## ── 雙層倍率輪盤面板（DAY-113）──────────────────────────────────────────────
+var _roulette_panel_node = null
+
+## 初始化雙層倍率輪盤面板（DAY-113）
+## 位置：畫面中央（全螢幕覆蓋式彈窗，z_index=72 在 WheelPanel 之上）
+func _init_roulette_panel() -> void:
+	var panel = RoulettePanelScript.new()
+	panel.position = Vector2(640, 360)
+	panel.z_index = 72
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_roulette_panel_node = panel

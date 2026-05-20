@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-112 成就動態牆系統）
+## 最後更新：2026-05-21（DAY-113 雙層倍率輪盤系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-113 更新（自主觸發）：** 雙層倍率輪盤系統（Dual-Ring Multiplier Roulette）✅
+  - `server/internal/game/roulette/roulette.go`：雙層輪盤管理器（內圈8格1-10x/外圈12格1-100x；最終倍率=內圈×外圈最高1000x；ShouldTrigger含投注等級限制；StartSession/Resolve/CancelSession；期望倍率~20x；IsJackpot≥500x/IsMegaWin≥100x）
+  - `server/internal/game/roulette/roulette_test.go`：14 個單元測試全部通過（NewManager/ShouldTrigger_Boss/ShouldTrigger_BetLevel/ShouldTrigger_Unknown/StartSession/HasActiveSession/Resolve/Resolve_NoSession/Resolve_AlreadyResolved/CancelSession/IsJackpot/ExpectedRTP/SegmentCounts/WeightDistribution）
+  - `server/internal/ws/protocol.go`：新增 MsgSpinRoulette（Client→Server）；MsgRouletteStart/MsgRouletteResult（Server→Client廣播）；RouletteSegmentPayload/RouletteSpinPayload/RouletteStartPayload/RouletteResultPayload
+  - `server/internal/game/roulette_handler.go`：notifyRouletteKill（觸發判斷/廣播開始/執行旋轉/廣播結果/發放獎勵/整合動態牆/名人堂/統計）
+  - `server/internal/game/game.go`：整合 Roulette *roulette.Manager；NewGame 初始化；handleKill 加入 notifyRouletteKill（goroutine）；RemovePlayer 加入 CancelSession
+  - `server/cmd/gameserver/main.go`：新增 /roulette/segments HTTP 端點（GET，回傳格子定義/期望倍率/觸發條件）
+  - `client/chiikawa-pixel/scripts/ui/RoulettePanel.gd`：雙層輪盤面板（全螢幕覆蓋；內外圈同時旋轉動畫；減速停止效果；Jackpot金色閃光/MegaWin橙色閃光；觀戰者也能看到；z_index=72）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：roulette_started/roulette_result 訊號 + _handle_roulette_start()/_handle_roulette_result() handler
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 RoulettePanelScript preload + _init_roulette_panel()（z_index=72）
+  - 觸發條件：B001 BOSS（100%必定觸發）/ T103流星（5%，需投注≥5）/ T104金草（8%，需投注≥5）/ T105金幣魚（10%，需投注≥7）
+  - 輪盤設計：內圈8格（1x/2x/3x/4x/5x/6x/8x/10x，權重30/25/18/12/8/4/2/1）× 外圈12格（1x-100x，權重25/20/15/12/8/7/5/4/2/1/1/1）
+  - 廣播機制：輪盤開始和結果都廣播給所有玩家，讓全場都能看到精彩時刻
+  - 期望倍率：~20x（內圈期望~3.5x × 外圈期望~5.8x），最高1000x（10x×100x）
+  - build/vet/test 全部通過（14/14 roulette 測試）
+  - **業界依據：** JILI Royal Fishing（2026）ChainLong King 雙層輪盤最高1000x；royal-fishing.uk 確認雙層輪盤是2026年捕魚機最熱門功能；Fishing Frenzy Chapter 3（2026-05-14）確認多層獎勵機制是業界新趨勢
+
 - **DAY-112 更新（自主觸發）：** 成就動態牆系統（Achievement Activity Feed）✅
   - `server/internal/game/activityfeed/activityfeed.go`：動態牆管理器（9種事件類型：成就/稱號/Jackpot/BOSS擊殺/超大獎/連擊記錄/名人堂/賽季升級/登入里程碑；5種稀有度：common/uncommon/rare/epic/legendary；最多保留50條；GetRecent(n)由新到舊；11個事件建構輔助函數）
   - `server/internal/game/activityfeed/activityfeed_test.go`：11 個單元測試全部通過（New/Push/Order/LimitN/MaxSize/AchievementRarity/JackpotRarity/MegaWinRarity/TitleRarity/MilestoneRarity/UniqueIDs）

@@ -77,6 +77,8 @@ const (
 	MsgSendDM    MessageType = "send_dm"    // 發送私訊
 	// 成就動態牆系統（DAY-112）
 	MsgGetActivityFeed   MessageType = "get_activity_feed"   // 查詢最近動態（Client→Server）
+	// 雙層倍率輪盤系統（DAY-113）
+	MsgSpinRoulette      MessageType = "spin_roulette"       // 玩家手動停止輪盤（Client→Server）
 )
 
 // Server → Client
@@ -219,6 +221,9 @@ const (
 	// 智慧推薦系統（DAY-110）
 	MsgGetRecommendations   MessageType = "get_recommendations"    // 查詢推薦（Client → Server）
 	MsgRecommendations      MessageType = "recommendations"        // 推薦結果（Server → Client）
+	// 雙層倍率輪盤系統（DAY-113）
+	MsgRouletteStart    MessageType = "roulette_start"    // 輪盤開始（Server→Client，廣播給所有玩家）
+	MsgRouletteResult   MessageType = "roulette_result"   // 輪盤結果（Server→Client，廣播給所有玩家）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1808,4 +1813,52 @@ type ActivityFeedEventPayload struct {
 type ActivityFeedHistoryPayload struct {
 	Events []ActivityFeedEventPayload `json:"events"`
 	Total  int                        `json:"total"` // 總事件數（最多 50）
+}
+
+// ---- 雙層倍率輪盤系統（DAY-113）----
+
+// RouletteSegmentPayload 輪盤格子定義（供 Client 顯示用）
+type RouletteSegmentPayload struct {
+	Multiplier float64 `json:"multiplier"`
+	Label      string  `json:"label"`
+	Color      string  `json:"color"`
+}
+
+// RouletteSpinPayload 單次旋轉結果
+type RouletteSpinPayload struct {
+	SegmentIndex int     `json:"segment_index"` // 停在哪個格子（Client 動畫用）
+	Multiplier   float64 `json:"multiplier"`
+	Label        string  `json:"label"`
+	Color        string  `json:"color"`
+}
+
+// RouletteStartPayload 輪盤開始廣播（Server → Client）
+// 廣播給所有玩家，讓大家都能看到輪盤動畫
+type RouletteStartPayload struct {
+	SessionID      string                   `json:"session_id"`
+	PlayerID       string                   `json:"player_id"`
+	PlayerName     string                   `json:"player_name"`
+	TargetDefID    string                   `json:"target_def_id"`
+	TargetName     string                   `json:"target_name"`
+	BaseReward     int                      `json:"base_reward"`
+	InnerSegments  []RouletteSegmentPayload `json:"inner_segments"`  // 內圈格子定義
+	OuterSegments  []RouletteSegmentPayload `json:"outer_segments"`  // 外圈格子定義
+	SpinDurationMs int                      `json:"spin_duration_ms"` // 旋轉動畫時長（ms）
+}
+
+// RouletteResultPayload 輪盤結果廣播（Server → Client）
+// 廣播給所有玩家，顯示最終結果
+type RouletteResultPayload struct {
+	SessionID   string              `json:"session_id"`
+	PlayerID    string              `json:"player_id"`
+	PlayerName  string              `json:"player_name"`
+	Inner       RouletteSpinPayload `json:"inner"`        // 內圈結果
+	Outer       RouletteSpinPayload `json:"outer"`        // 外圈結果
+	FinalMult   float64             `json:"final_mult"`   // 最終倍率（內圈 × 外圈）
+	BaseReward  int                 `json:"base_reward"`
+	FinalReward int                 `json:"final_reward"`
+	NewBalance  int                 `json:"new_balance"`  // 中獎後餘額（只對觸發玩家有意義）
+	IsJackpot   bool                `json:"is_jackpot"`   // ≥500x，觸發全畫面特效
+	IsMegaWin   bool                `json:"is_mega_win"`  // ≥100x，觸發大獎特效
+	IsSelf      bool                `json:"is_self"`      // 是否為自己觸發（Client 端標記）
 }

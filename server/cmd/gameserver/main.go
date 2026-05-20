@@ -21,6 +21,7 @@ import (
 	"digital-twin/server/internal/analytics"
 	"digital-twin/server/internal/config"
 	"digital-twin/server/internal/game"
+	"digital-twin/server/internal/game/roulette"
 	"digital-twin/server/internal/room"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -395,6 +396,25 @@ func main() {
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"events": events,
 			"total":  len(events),
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
+	// 雙層倍率輪盤端點（DAY-113）
+	// GET /roulette/segments — 取得輪盤格子定義（供 Client 預載）
+	mux.HandleFunc("/roulette/segments", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		innerSegs := roulette.GetInnerSegments()
+		outerSegs := roulette.GetOuterSegments()
+		expectedRTP := roulette.ExpectedRTP()
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"inner_segments":  innerSegs,
+			"outer_segments":  outerSegs,
+			"expected_mult":   expectedRTP,
+			"max_mult":        1000,
+			"trigger_targets": roulette.TriggerConditions,
 		}); err != nil {
 			http.Error(w, "encode error", http.StatusInternalServerError)
 		}
