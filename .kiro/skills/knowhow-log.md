@@ -2764,3 +2764,17 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **問題：** guildwar_handler.go 需要使用 guildwar.WarResult，但不想在 handler 中 import guildwar 套件
 - **解法：** 直接呼叫 `g.GuildWar.GetLastResult()` 取得結果，不需要 type assertion
 - **教訓：** 當需要跨套件使用型別時，優先考慮在管理器上加 getter 方法，而不是 type assertion
+
+## 130. 每日 BOSS 挑戰設計原則（2026-05-20）
+- **業界依據：** Fishing Frenzy Chapter 3（2026-05-14）確認「Boss Fish」是 2026 年捕魚機最新趨勢
+- **全服合力設計：** 所有玩家共享同一個 BOSS HP，按貢獻比例分配獎勵，增加社群感
+- **難度自適應：** 連續未擊殺時降低難度（每天 -20%，最多 -60%），避免玩家挫折感
+- **傷害來源：** 每次擊破目標自動貢獻傷害（不需要額外操作），降低參與門檻
+- **獎勵保底：** 有貢獻就有最低 100 金幣，確保玩家不會空手而回
+- **7種 BOSS 輪流：** 依 dayOfYear % 7 選擇，確保每天不同，增加新鮮感
+- **教訓：** 全服合力 BOSS 比個人 BOSS 更能增加社群感和留存率
+
+## 131. Go 套件中的 BossStatus 型別比較（2026-05-20）
+- **問題：** handler 中比較 `GetStatus() != "active"` 會編譯錯誤（型別不符）
+- **解法：** import dailyboss 套件，使用 `dailyboss.BossStatusActive` 常數比較
+- **教訓：** 自定義型別（type BossStatus string）不能直接和字串字面量比較，要用套件常數

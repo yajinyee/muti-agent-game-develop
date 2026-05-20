@@ -15,6 +15,7 @@ import (
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/combat"
+	"digital-twin/server/internal/game/dailyboss"
 	"digital-twin/server/internal/game/friend"
 	"digital-twin/server/internal/game/guild"
 	"digital-twin/server/internal/game/guildwar"
@@ -49,6 +50,7 @@ type Game struct {
 	Friends     *friend.Manager     // 好友系統管理器（DAY-073）
 	Guild       *guild.Manager      // 公會系統管理器（DAY-074）
 	GuildWar    *guildwar.Manager   // 公會戰管理器（DAY-076）
+	DailyBoss   *dailyboss.Manager  // 每日 BOSS 挑戰管理器（DAY-077）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -65,6 +67,7 @@ type Game struct {
 	lastJackpotAt      time.Time  // Jackpot 廣播計時（每 5 秒一次，DAY-048）
 	lastTournamentAt   time.Time  // 週賽排名廣播計時（每 30 秒一次，DAY-066）
 	lastGuildWarAt     time.Time  // 公會戰廣播計時（每 60 秒一次，DAY-076）
+	lastDailyBossAt    time.Time  // 每日 BOSS 廣播計時（每 30 秒一次，DAY-077）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -101,6 +104,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Friends:            friend.New(),
 		Guild:              guild.New(),
 		GuildWar:           guildwar.New(),
+		DailyBoss:          dailyboss.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -336,6 +340,11 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 公會戰系統（DAY-076）
 	case ws.MsgGetGuildWarStatus:
 		g.handleGetGuildWarStatus(p)
+	// 每日 BOSS 挑戰（DAY-077）
+	case ws.MsgGetDailyBoss:
+		g.handleGetDailyBoss(p)
+	case ws.MsgDailyBossAttack:
+		g.handleDailyBossAttack(p, msg)
 	}
 }
 
@@ -623,6 +632,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	}
 	// 公會戰積分：擊殺（DAY-076）
 	go g.notifyGuildWarKill(p.ID, int(result.Multiplier))
+	// 每日 BOSS 傷害貢獻（DAY-077）
+	go g.notifyDailyBossKill(p, result.Multiplier)
 }
 
 // handleLock 處理鎖定
@@ -799,6 +810,11 @@ func (g *Game) updateNormalPlay() {
 	if shouldBroadcastGuildWar {
 		g.lastGuildWarAt = now
 	}
+	// 每日 BOSS 廣播（每 30 秒，DAY-077）
+	shouldBroadcastDailyBoss := now.Sub(g.lastDailyBossAt) >= 30*time.Second
+	if shouldBroadcastDailyBoss {
+		g.lastDailyBossAt = now
+	}
 	g.mu.Unlock()
 
 	if shouldBroadcastLeaderboard {
@@ -818,6 +834,10 @@ func (g *Game) updateNormalPlay() {
 	// 公會戰廣播（每 60 秒，DAY-076）
 	if shouldBroadcastGuildWar {
 		go g.broadcastGuildWar()
+	}
+	// 每日 BOSS 廣播（每 30 秒，DAY-077）
+	if shouldBroadcastDailyBoss {
+		go g.broadcastDailyBoss()
 	}
 }
 

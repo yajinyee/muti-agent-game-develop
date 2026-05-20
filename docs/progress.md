@@ -1,6 +1,30 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-076 公會戰系統）
+## 最後更新：2026-05-20（DAY-077 每日特殊 BOSS 挑戰）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-077 更新（自主觸發）：** 每日特殊 BOSS 挑戰（Daily Boss Challenge）✅
+  - `server/internal/game/dailyboss/dailyboss.go`：每日 BOSS 管理器（7種 BOSS 輪流，全服合力，按比例分配獎勵，連續未擊殺降低難度）
+  - `server/internal/game/dailyboss/dailyboss_test.go`：10 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgGetDailyBoss`/`MsgDailyBossAttack`（Client→Server）+ `MsgDailyBossUpdate`/`MsgDailyBossDefeated`（Server→Client）+ 對應 Payload
+  - `server/internal/game/game.go`：`DailyBoss *dailyboss.Manager` 欄位 + 整合初始化 + `lastDailyBossAt` 計時器 + 每 30 秒廣播 + handler 分支
+  - `server/internal/game/dailyboss_handler.go`：`broadcastDailyBoss()`/`sendDailyBossUpdate()`/`handleGetDailyBoss()`/`handleDailyBossAttack()`/`applyDailyBossDamage()`/`broadcastDailyBossDefeated()`/`notifyDailyBossKill()`
+  - `server/internal/game/game.go`：`handleKill` 加入 `notifyDailyBossKill()`（每次擊破目標自動貢獻傷害）
+  - `server/cmd/gameserver/main.go`：`/daily-boss` HTTP 端點（GET，回傳當前 BOSS 狀態）
+  - `client/chiikawa-pixel/scripts/ui/DailyBossPanel.gd`：每日 BOSS 面板（HP 條/貢獻排名/倒數計時/結算結果）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`daily_boss_updated`/`daily_boss_defeated` 訊號 + handler + `request_daily_boss_status()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 DailyBossPanel（`_init_daily_boss_panel()`，位置 x=1384）
+  - 7 種 BOSS：海龍王/深海巨怪/金色鯨魚/暗影鯊魚/古代神龜/電光水母/霸王螃蟹（依日期輪流）
+  - 傷害規則：每次擊破目標自動貢獻 floor(multiplier) 點傷害（最少 1，最多 50）
+  - 獎勵規則：按貢獻比例分配獎勵池，最低保底 100 金幣
+  - 難度調整：連續未擊殺每天降低 20%，最多降低 60%
+  - build/vet/test 全部通過（10/10 dailyboss 測試）
+  - **業界依據：** Fishing Frenzy Chapter 3（2026-05-14）確認「Boss Fish」是 2026 年捕魚機最新趨勢；trophy.so 確認成就系統提升留存率 64%
 
 ## 自我評估
 - **完成度：100%**

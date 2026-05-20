@@ -38,6 +38,8 @@ signal guild_task_complete(task_data: Dictionary)      # 公會任務完成（DA
 signal guild_message_received(msg_data: Dictionary)    # 公會聊天訊息（DAY-075）
 signal guild_war_updated(war_data: Dictionary)         # 公會戰排名更新（DAY-076）
 signal guild_war_result(result_data: Dictionary)       # 公會戰結算通知（DAY-076）
+signal daily_boss_updated(boss_data: Dictionary)       # 每日 BOSS 狀態更新（DAY-077）
+signal daily_boss_defeated(defeat_data: Dictionary)    # 每日 BOSS 擊殺通知（DAY-077）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -147,6 +149,10 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_guild_war_update(payload)
 		"guild_war_result":
 			_handle_guild_war_result(payload)
+		"daily_boss_update":
+			_handle_daily_boss_update(payload)
+		"daily_boss_defeated":
+			_handle_daily_boss_defeated(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -346,6 +352,18 @@ func _handle_guild_war_result(payload: Dictionary) -> void:
 ## 請求公會戰狀態（DAY-076）
 func request_guild_war_status() -> void:
 	NetworkManager.send_message("get_guild_war_status", {})
+
+## 處理每日 BOSS 狀態更新（DAY-077）
+func _handle_daily_boss_update(payload: Dictionary) -> void:
+	emit_signal("daily_boss_updated", payload)
+
+## 處理每日 BOSS 擊殺通知（DAY-077）
+func _handle_daily_boss_defeated(payload: Dictionary) -> void:
+	emit_signal("daily_boss_defeated", payload)
+
+## 請求每日 BOSS 狀態（DAY-077）
+func request_daily_boss_status() -> void:
+	NetworkManager.send_message("get_daily_boss", {})
 
 ## 取得顯示名稱
 func get_display_name() -> String:

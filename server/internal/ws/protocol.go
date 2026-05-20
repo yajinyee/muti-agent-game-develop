@@ -40,6 +40,9 @@ const (
 	MsgGuildChat     MessageType = "guild_chat"     // 公會聊天（DAY-075）
 	// 公會戰系統（DAY-076）
 	MsgGetGuildWarStatus MessageType = "get_guild_war_status" // 查詢公會戰狀態
+	// 每日 BOSS 挑戰（DAY-077）
+	MsgGetDailyBoss      MessageType = "get_daily_boss"       // 查詢每日 BOSS 狀態
+	MsgDailyBossAttack   MessageType = "daily_boss_attack"    // 對每日 BOSS 攻擊
 )
 
 // Server → Client
@@ -80,6 +83,9 @@ const (
 	// 公會戰系統（DAY-076）
 	MsgGuildWarUpdate    MessageType = "guild_war_update"    // 公會戰排名更新
 	MsgGuildWarResult    MessageType = "guild_war_result"    // 公會戰結算通知
+	// 每日 BOSS 挑戰（DAY-077）
+	MsgDailyBossUpdate   MessageType = "daily_boss_update"   // 每日 BOSS 狀態更新
+	MsgDailyBossDefeated MessageType = "daily_boss_defeated" // 每日 BOSS 擊殺通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -699,4 +705,53 @@ type GuildWarResultPayload struct {
 	MyRank      int                   `json:"my_rank"`    // 0 = 不在公會
 	MyReward    int                   `json:"my_reward"`  // 本次獲得獎勵
 	NextWarAt   int64                 `json:"next_war_at"` // 下週開始時間
+}
+
+// ---- 每日 BOSS 挑戰（DAY-077）----
+
+// DailyBossAttackPayload 對每日 BOSS 攻擊（Client → Server）
+type DailyBossAttackPayload struct {
+	Damage int `json:"damage"` // 造成的傷害（由 Server 驗證）
+}
+
+// DailyBossContributorEntry 貢獻者條目
+type DailyBossContributorEntry struct {
+	Rank        int    `json:"rank"`
+	PlayerID    string `json:"player_id"`
+	DisplayName string `json:"display_name"`
+	Damage      int    `json:"damage"`
+	Reward      int    `json:"reward"` // 結算後填入
+	IsMe        bool   `json:"is_me"`
+}
+
+// DailyBossUpdatePayload 每日 BOSS 狀態更新（Server → Client）
+type DailyBossUpdatePayload struct {
+	DateID        string                      `json:"date_id"`
+	BossID        string                      `json:"boss_id"`
+	BossName      string                      `json:"boss_name"`
+	BossIcon      string                      `json:"boss_icon"`
+	BossColor     string                      `json:"boss_color"`
+	Description   string                      `json:"description"`
+	MaxHP         int                         `json:"max_hp"`
+	CurrentHP     int                         `json:"current_hp"`
+	HPPercent     float64                     `json:"hp_percent"`
+	Status        string                      `json:"status"`        // "active" / "defeated" / "expired"
+	EndAt         int64                       `json:"end_at"`        // Unix ms
+	RewardPool    int                         `json:"reward_pool"`
+	TopContribs   []DailyBossContributorEntry `json:"top_contribs"`  // 前 5 名
+	MyDamage      int                         `json:"my_damage"`
+	MyReward      int                         `json:"my_reward"`     // 結算後填入
+	DifficultyMod float64                     `json:"difficulty_mod"`
+}
+
+// DailyBossDefeatedPayload 每日 BOSS 擊殺通知（Server → Client）
+type DailyBossDefeatedPayload struct {
+	DateID      string                      `json:"date_id"`
+	BossName    string                      `json:"boss_name"`
+	BossIcon    string                      `json:"boss_icon"`
+	KillerID    string                      `json:"killer_id"`
+	KillerName  string                      `json:"killer_name"`
+	Rankings    []DailyBossContributorEntry `json:"rankings"`
+	MyReward    int                         `json:"my_reward"`
+	TotalDamage int                         `json:"total_damage"`
 }

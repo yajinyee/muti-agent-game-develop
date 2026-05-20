@@ -448,6 +448,53 @@ func main() {
 		}
 	})
 
+	// GET /daily-boss — 取得每日 BOSS 挑戰狀態（DAY-077）
+	mux.HandleFunc("/daily-boss", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.DailyBoss.GetSnapshot()
+		if snap == nil {
+			http.Error(w, `{"error":"no daily boss"}`, http.StatusNotFound)
+			return
+		}
+		topContribs := g.DailyBoss.GetTopContributors(10)
+		type ContribEntry struct {
+			Rank        int    `json:"rank"`
+			PlayerID    string `json:"player_id"`
+			DisplayName string `json:"display_name"`
+			Damage      int    `json:"damage"`
+			Reward      int    `json:"reward"`
+		}
+		contribs := make([]ContribEntry, 0, len(topContribs))
+		for i, c := range topContribs {
+			contribs = append(contribs, ContribEntry{
+				Rank:        i + 1,
+				PlayerID:    c.PlayerID,
+				DisplayName: c.DisplayName,
+				Damage:      c.Damage,
+				Reward:      c.Reward,
+			})
+		}
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"date_id":        snap.DateID,
+			"boss_id":        snap.BossType.ID,
+			"boss_name":      snap.BossType.Name,
+			"boss_icon":      snap.BossType.Icon,
+			"max_hp":         snap.MaxHP,
+			"current_hp":     snap.CurrentHP,
+			"hp_percent":     g.DailyBoss.GetHPPercent(),
+			"status":         string(snap.Status),
+			"end_at":         snap.EndAt.UnixMilli(),
+			"reward_pool":    snap.RewardPool,
+			"total_damage":   snap.TotalDamage,
+			"top_contribs":   contribs,
+			"difficulty_mod": snap.DifficultyMod,
+			"timestamp":      time.Now().UnixMilli(),
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 玩家個人資料端點（DAY-069）
 	// GET /profile?player_id=xxx — 取得指定玩家的個人資料
 	// GET /profiles — 取得所有在線玩家的個人資料摘要
