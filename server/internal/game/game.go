@@ -16,6 +16,7 @@ import (
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/friend"
+	"digital-twin/server/internal/game/guild"
 	"digital-twin/server/internal/game/jackpot"
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/season"
@@ -45,6 +46,7 @@ type Game struct {
 	tournamentMgr *tournament.Tournament // 週賽管理器（DAY-066）
 	Season      *season.Manager     // 賽季通行證管理器（DAY-072）
 	Friends     *friend.Manager     // 好友系統管理器（DAY-073）
+	Guild       *guild.Manager      // 公會系統管理器（DAY-074）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -94,6 +96,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		tournamentMgr:      tournament.New(),
 		Season:             season.New(),
 		Friends:            friend.New(),
+		Guild:              guild.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -188,6 +191,9 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendFriendList(pp)
 				// 通知好友上線（DAY-073）
 				g.notifyFriendsOnline(playerID, pp.DisplayName)
+				// 更新公會在線狀態 + 發送公會資訊（DAY-074）
+				g.Guild.SetOnlineStatus(playerID, true)
+				g.sendGuildUpdate(pp)
 			}
 		}()
 	}
@@ -233,6 +239,8 @@ func (g *Game) RemovePlayer(playerID string) {
 	// 通知好友下線（DAY-073）
 	if p != nil {
 		go g.notifyFriendsOffline(playerID, p.DisplayName)
+		// 更新公會在線狀態（DAY-074）
+		g.Guild.SetOnlineStatus(playerID, false)
 	}
 }
 
@@ -304,6 +312,21 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	case ws.MsgGetFriendList:
 		// 查詢好友列表（DAY-073）
 		g.handleGetFriendList(p, msg)
+	// 公會系統（DAY-074）
+	case ws.MsgCreateGuild:
+		g.handleCreateGuild(p, msg)
+	case ws.MsgJoinGuild:
+		g.handleJoinGuild(p, msg)
+	case ws.MsgLeaveGuild:
+		g.handleLeaveGuild(p, msg)
+	case ws.MsgKickGuildMember:
+		g.handleKickGuildMember(p, msg)
+	case ws.MsgPromoteGuildMember:
+		g.handlePromoteGuildMember(p, msg)
+	case ws.MsgGetGuildInfo:
+		g.handleGetGuildInfo(p, msg)
+	case ws.MsgGetGuildList:
+		g.handleGetGuildList(p, msg)
 	}
 }
 
@@ -583,6 +606,12 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	}
 	newLevels := g.addSeasonPoints(p.ID, killPts)
 	g.checkSeasonLevelNotify(p, newLevels)
+	// 公會任務進度：擊破目標（DAY-074）
+	guildID := g.Guild.GetPlayerGuildID(p.ID)
+	if guildID != "" {
+		completedTasks := g.Guild.UpdateTaskProgress(p.ID, guild.TaskKillTargets, 1)
+		g.notifyGuildTaskComplete(guildID, completedTasks)
+	}
 }
 
 // handleLock 處理鎖定

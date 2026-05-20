@@ -33,6 +33,8 @@ signal season_level_up(level_data: Dictionary)         # 賽季等級升級（DA
 signal friend_list_updated(friend_data: Dictionary)    # 好友列表更新（DAY-073）
 signal friend_request_received(request_data: Dictionary) # 好友請求通知（DAY-073）
 signal friend_updated(update_data: Dictionary)         # 好友狀態更新（DAY-073）
+signal guild_updated(guild_data: Dictionary)           # 公會資訊更新（DAY-074）
+signal guild_task_complete(task_data: Dictionary)      # 公會任務完成（DAY-074）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -128,6 +130,14 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_friend_request(payload)
 		"friend_update":
 			_handle_friend_update(payload)
+		"guild_update":
+			_handle_guild_update(payload)
+		"guild_list":
+			_handle_guild_list(payload)
+		"guild_task_complete":
+			_handle_guild_task_complete(payload)
+		"guild_error":
+			_handle_guild_error(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -288,6 +298,33 @@ func _handle_friend_request(payload: Dictionary) -> void:
 ## 處理好友狀態更新（DAY-073）
 func _handle_friend_update(payload: Dictionary) -> void:
 	emit_signal("friend_updated", payload)
+
+## 處理公會資訊更新（DAY-074）
+func _handle_guild_update(payload: Dictionary) -> void:
+	emit_signal("guild_updated", payload)
+
+## 處理公會列表（DAY-074）
+func _handle_guild_list(payload: Dictionary) -> void:
+	# 如果沒有公會，自動加入第一個公會（簡化版）
+	var guilds: Array = payload.get("guilds", [])
+	if guilds.size() > 0:
+		var first_guild: Dictionary = guilds[0]
+		var guild_id: String = first_guild.get("guild_id", "")
+		if guild_id != "":
+			send_message("join_guild", {"guild_id": guild_id})
+
+## 處理公會任務完成（DAY-074）
+func _handle_guild_task_complete(payload: Dictionary) -> void:
+	emit_signal("guild_task_complete", payload)
+
+## 處理公會錯誤（DAY-074）
+func _handle_guild_error(payload: Dictionary) -> void:
+	var msg: String = payload.get("message", "公會操作失敗")
+	print("[GameManager] Guild error: ", msg)
+
+## 取得顯示名稱
+func get_display_name() -> String:
+	return player_data.get("display_name", "玩家")
 
 ## 取得目前角色顏色
 func get_character_color() -> Color:

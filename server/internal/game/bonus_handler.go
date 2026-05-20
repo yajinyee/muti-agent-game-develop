@@ -10,6 +10,7 @@ import (
 	"digital-twin/server/internal/analytics"
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/combat"
+	"digital-twin/server/internal/game/guild"
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
@@ -215,6 +216,12 @@ func (g *Game) endBonusGame() {
 		// 賽季積分同步（DAY-072）：Bonus 完成 = 20 分
 		newLevels := g.addSeasonPoints(playerID, 20)
 		g.checkSeasonLevelNotify(p, newLevels)
+		// 公會任務進度：賺取金幣（DAY-074）
+		guildID := g.Guild.GetPlayerGuildID(playerID)
+		if guildID != "" {
+			completedTasks := g.Guild.UpdateTaskProgress(playerID, guild.TaskEarnCoins, reward)
+			g.notifyGuildTaskComplete(guildID, completedTasks)
+		}
 	}
 
 	g.transitionState(state.StateBonusResult)

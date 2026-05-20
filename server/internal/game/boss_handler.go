@@ -11,6 +11,7 @@ import (
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/combat"
+	"digital-twin/server/internal/game/guild"
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
@@ -214,6 +215,12 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 	// 賽季積分同步（DAY-072）：BOSS 擊殺 = 50 分
 	newLevels := g.addSeasonPoints(p.ID, 50)
 	g.checkSeasonLevelNotify(p, newLevels)
+	// 公會任務進度：擊殺 BOSS（DAY-074）
+	guildID := g.Guild.GetPlayerGuildID(p.ID)
+	if guildID != "" {
+		completedTasks := g.Guild.UpdateTaskProgress(p.ID, guild.TaskKillBoss, 1)
+		g.notifyGuildTaskComplete(guildID, completedTasks)
+	}
 
 	g.transitionState(state.StateBossResult)
 	g.safeAfterFunc(3*time.Second, func() {

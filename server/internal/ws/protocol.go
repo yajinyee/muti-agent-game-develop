@@ -29,6 +29,14 @@ const (
 	MsgRejectFriendRequest MessageType = "reject_friend_request" // 拒絕好友請求（DAY-073）
 	MsgRemoveFriend       MessageType = "remove_friend"         // 移除好友（DAY-073）
 	MsgGetFriendList      MessageType = "get_friend_list"       // 查詢好友列表（DAY-073）
+	// 公會系統（DAY-074）
+	MsgCreateGuild   MessageType = "create_guild"   // 建立公會
+	MsgJoinGuild     MessageType = "join_guild"     // 加入公會
+	MsgLeaveGuild    MessageType = "leave_guild"    // 退出公會
+	MsgKickGuildMember MessageType = "kick_guild_member" // 踢出成員
+	MsgPromoteGuildMember MessageType = "promote_guild_member" // 升職成員
+	MsgGetGuildInfo  MessageType = "get_guild_info" // 查詢公會資訊
+	MsgGetGuildList  MessageType = "get_guild_list" // 查詢公會列表
 )
 
 // Server → Client
@@ -60,6 +68,11 @@ const (
 	MsgFriendList        MessageType = "friend_list"        // 好友列表（DAY-073）
 	MsgFriendRequest     MessageType = "friend_request"     // 好友請求通知（DAY-073）
 	MsgFriendUpdate      MessageType = "friend_update"      // 好友狀態更新（DAY-073）
+	// 公會系統（DAY-074）
+	MsgGuildUpdate       MessageType = "guild_update"       // 公會資訊更新
+	MsgGuildList         MessageType = "guild_list"         // 公會列表
+	MsgGuildTaskComplete MessageType = "guild_task_complete" // 公會任務完成通知
+	MsgGuildError        MessageType = "guild_error"        // 公會操作錯誤
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -520,4 +533,100 @@ type FriendUpdatePayload struct {
 	DisplayName string `json:"display_name"`
 	IsOnline    bool   `json:"is_online"`
 	Event       string `json:"event"` // "online" / "offline" / "accepted" / "removed"
+}
+
+// ---- 公會系統（DAY-074）----
+
+// CreateGuildPayload 建立公會請求（Client → Server）
+type CreateGuildPayload struct {
+	Name        string `json:"name"`
+	Description string `json:"description"`
+}
+
+// JoinGuildPayload 加入公會請求（Client → Server）
+type JoinGuildPayload struct {
+	GuildID string `json:"guild_id"`
+}
+
+// KickGuildMemberPayload 踢出成員請求（Client → Server）
+type KickGuildMemberPayload struct {
+	TargetID string `json:"target_id"`
+}
+
+// PromoteGuildMemberPayload 升職成員請求（Client → Server）
+type PromoteGuildMemberPayload struct {
+	TargetID string `json:"target_id"`
+}
+
+// GuildMemberInfo 公會成員資訊（用於廣播）
+type GuildMemberInfo struct {
+	PlayerID     string `json:"player_id"`
+	DisplayName  string `json:"display_name"`
+	Role         string `json:"role"`         // "leader" / "officer" / "member"
+	IsOnline     bool   `json:"is_online"`
+	Contribution int    `json:"contribution"`
+}
+
+// GuildTaskInfo 公會任務資訊（用於廣播）
+type GuildTaskInfo struct {
+	ID          string `json:"id"`
+	Type        string `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	Target      int    `json:"target"`
+	Current     int    `json:"current"`
+	Reward      int    `json:"reward"`
+	Completed   bool   `json:"completed"`
+	ResetAt     int64  `json:"reset_at"` // Unix ms
+}
+
+// GuildUpdatePayload 公會資訊更新（Server → Client）
+// 在玩家加入公會、任務進度更新、成員變動時發送
+type GuildUpdatePayload struct {
+	GuildID     string            `json:"guild_id"`
+	Name        string            `json:"name"`
+	Description string            `json:"description"`
+	Icon        string            `json:"icon"`
+	Level       int               `json:"level"`
+	Exp         int               `json:"exp"`
+	Members     []GuildMemberInfo `json:"members"`
+	Tasks       []GuildTaskInfo   `json:"tasks"`
+	TotalKills  int               `json:"total_kills"`
+	TotalCoins  int               `json:"total_coins"`
+	// 接收者的角色（方便 Client 判斷操作權限）
+	MyRole      string `json:"my_role"` // "leader" / "officer" / "member" / ""（不在公會）
+}
+
+// GuildListEntry 公會列表單筆記錄（用於搜尋）
+type GuildListEntry struct {
+	GuildID     string `json:"guild_id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	Level       int    `json:"level"`
+	MemberCount int    `json:"member_count"`
+	OnlineCount int    `json:"online_count"`
+}
+
+// GuildListPayload 公會列表（Server → Client）
+type GuildListPayload struct {
+	Guilds []GuildListEntry `json:"guilds"`
+}
+
+// GuildTaskCompletePayload 公會任務完成通知（Server → Client）
+type GuildTaskCompletePayload struct {
+	GuildID    string `json:"guild_id"`
+	GuildName  string `json:"guild_name"`
+	TaskID     string `json:"task_id"`
+	TaskName   string `json:"task_name"`
+	TaskIcon   string `json:"task_icon"`
+	Reward     int    `json:"reward"`     // 每人獎勵
+	NewBalance int    `json:"new_balance"` // 領取後餘額
+}
+
+// GuildErrorPayload 公會操作錯誤（Server → Client）
+type GuildErrorPayload struct {
+	Operation string `json:"operation"` // 操作類型
+	Message   string `json:"message"`   // 錯誤訊息
 }

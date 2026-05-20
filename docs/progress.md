@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-073 好友系統）
+## 最後更新：2026-05-20（DAY-074 公會系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-073 更新（自主觸發）：** 好友系統（Friend System）✅
+- **DAY-074 更新（自主觸發）：** 公會系統（Guild System）✅
+  - `server/internal/game/guild/guild.go`：公會管理器（建立/加入/退出/踢人/升職/公會任務/公會等級）
+  - `server/internal/game/guild/guild_test.go`：16 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgCreateGuild`/`MsgJoinGuild`/`MsgLeaveGuild`/`MsgKickGuildMember`/`MsgPromoteGuildMember`/`MsgGetGuildInfo`/`MsgGetGuildList`（Client→Server）+ `MsgGuildUpdate`/`MsgGuildList`/`MsgGuildTaskComplete`/`MsgGuildError`（Server→Client）+ 對應 Payload
+  - `server/internal/game/game.go`：`Guild *guild.Manager` 欄位 + 整合初始化 + `AddPlayer` 設定在線狀態 + 發送公會資訊 + `RemovePlayer` 設定下線狀態 + 7 個 handler 分支
+  - `server/internal/game/guild_handler.go`：`sendGuildUpdate()`/`buildGuildUpdatePayload()`/`broadcastGuildUpdate()`/`handleCreateGuild()`/`handleJoinGuild()`/`handleLeaveGuild()`/`handleKickGuildMember()`/`handlePromoteGuildMember()`/`handleGetGuildInfo()`/`handleGetGuildList()`/`notifyGuildTaskComplete()`
+  - `server/internal/game/boss_handler.go`：BOSS 擊殺更新公會任務進度（TaskKillBoss）
+  - `server/internal/game/bonus_handler.go`：Bonus 完成更新公會任務進度（TaskEarnCoins）
+  - `server/internal/game/game.go`：擊破目標更新公會任務進度（TaskKillTargets）
+  - `client/chiikawa-pixel/scripts/ui/GuildPanel.gd`：公會面板（成員列表/職位圖示/任務進度條/建立加入退出按鈕）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`guild_updated`/`guild_task_complete` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 GuildPanel（`_init_guild_panel()`，位置 x=1312）
+  - 公會功能：最多 20 人，會長/副會長/成員三職位，每日 3 個公會任務（討伐/BOSS/金幣），公會等級 1-5
+  - build/vet/test 全部通過（16/16 guild 測試）
+  - **業界依據：** 公會系統是 2026 年捕魚機標配社交功能（好友系統的自然延伸，增加長期留存）
+
   - `server/internal/game/friend/friend.go`：好友管理器（發送/接受/拒絕請求，移除好友，雙向關係，互相發請求自動接受）
   - `server/internal/game/friend/friend_test.go`：12 個單元測試全部通過
   - `server/internal/ws/protocol.go`：`MsgSendFriendRequest`/`MsgAcceptFriendRequest`/`MsgRejectFriendRequest`/`MsgRemoveFriend`/`MsgGetFriendList`（Client→Server）+ `MsgFriendList`/`MsgFriendRequest`/`MsgFriendUpdate`（Server→Client）+ 對應 Payload
