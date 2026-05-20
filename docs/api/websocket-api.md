@@ -1,7 +1,7 @@
 # WebSocket API 文件
 
-**版本**：v1.6  
-**最後更新**：2026-05-20（DAY-063）  
+**版本**：v1.7  
+**最後更新**：2026-05-20（DAY-069）  
 **協定**：WebSocket + JSON，每訊息獨立 frame  
 **端點**：`wss://[host]/ws`（生產）/ `ws://localhost:7777/ws`（開發）
 
@@ -35,6 +35,9 @@ ws://localhost:7777/ws?player_id=xxx&room_id=room-001      （開發，直連）
 | `/stats` | GET | Server 效能統計（goroutine/記憶體/GC） |
 | `/metrics` | GET | Prometheus 格式監控指標（25 個面板） |
 | `/spectate/snapshot` | GET | 觀戰快照（當前遊戲狀態 + 目標列表 + 排行榜） |
+| `/tournament` | GET | 週賽排名（JSON，DAY-066） |
+| `/profile` | GET | 玩家個人資料（?player_id=xxx，DAY-069） |
+| `/profiles` | GET | 所有在線玩家摘要（DAY-069） |
 | `/` | GET | 靜態檔案服務（HTML5 遊戲） |
 
 ### `/livez` 回傳格式（DAY-063 新增）
