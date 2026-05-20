@@ -1,16 +1,17 @@
 # WebSocket API 文件
 
-**版本**：v1.5  
-**最後更新**：2026-05-20（DAY-054）  
+**版本**：v1.6  
+**最後更新**：2026-05-20（DAY-063）  
 **協定**：WebSocket + JSON，每訊息獨立 frame  
-**端點**：`ws://[host]:7777/ws`
+**端點**：`wss://[host]/ws`（生產）/ `ws://localhost:7777/ws`（開發）
 
 ---
 
 ## 連線說明
 
 ```
-ws://localhost:7777/ws?player_id=xxx&room_id=room-001
+wss://your-domain.com/ws?player_id=xxx&room_id=room-001   （生產，Nginx TLS）
+ws://localhost:7777/ws?player_id=xxx&room_id=room-001      （開發，直連）
 ```
 
 - `player_id`：玩家 ID（可選，不填時 Server 自動生成 UUID）
@@ -18,18 +19,53 @@ ws://localhost:7777/ws?player_id=xxx&room_id=room-001
 
 連線成功後，Server 會立即廣播當前 `game_state`，Client 應根據狀態初始化 UI。
 
+> **注意（DAY-062）：** 生產環境必須使用 `wss://`（WebSocket over TLS）。瀏覽器在 HTTPS 頁面上會阻擋 `ws://` 連線（Mixed Content 政策）。Client 端 `NetworkManager.gd` 已自動偵測協定，無需手動修改。
+
 ### HTTP 端點
 
 | 端點 | 方法 | 說明 |
 |------|------|------|
-| `/health` | GET | Server 健康檢查（含 Jackpot 狀態、任務重置時間、Ping 延遲） |
+| `/health` | GET | Server 完整健康狀態（含 Jackpot、任務、Ping 延遲） |
+| `/livez` | GET | 存活探針（Kubernetes liveness probe，只要程序活著就 200） |
+| `/readyz` | GET | 就緒探針（Kubernetes readiness probe，初始化完成才 200） |
 | `/leaderboard` | GET | 取得當前排行榜（JSON） |
 | `/analytics` | GET | 取得房間整體統計（JSON） |
-| `/jackpot` | GET | 取得 Jackpot 池狀態、中獎歷史、今日統計（JSON，DAY-048 新增） |
-| `/rooms` | GET | 取得所有房間列表（JSON，DAY-019 新增） |
+| `/jackpot` | GET | 取得 Jackpot 池狀態、中獎歷史、今日統計（JSON） |
+| `/rooms` | GET | 取得所有房間列表（JSON） |
 | `/stats` | GET | Server 效能統計（goroutine/記憶體/GC） |
 | `/metrics` | GET | Prometheus 格式監控指標（25 個面板） |
+| `/spectate/snapshot` | GET | 觀戰快照（當前遊戲狀態 + 目標列表 + 排行榜） |
 | `/` | GET | 靜態檔案服務（HTML5 遊戲） |
+
+### `/livez` 回傳格式（DAY-063 新增）
+
+```json
+{
+  "status": "alive",
+  "uptime_sec": 9015
+}
+```
+
+### `/readyz` 回傳格式（DAY-063 新增）
+
+就緒時（HTTP 200）：
+```json
+{
+  "status": "ready",
+  "clients": 3,
+  "game_state": "normal_play",
+  "uptime_sec": 9015
+}
+```
+
+未就緒時（HTTP 503，啟動 2 秒內）：
+```json
+{
+  "status": "not_ready",
+  "reason": "initializing",
+  "uptime_sec": 1
+}
+```
 
 ### `/health` 回傳格式（DAY-054 更新）
 
@@ -701,4 +737,4 @@ Client 擊破目標
 
 ---
 
-*文件由 Spec Architect Agent 生成，2026-05-18*
+*文件由 Spec Architect Agent 生成，2026-05-20（v1.6）*
