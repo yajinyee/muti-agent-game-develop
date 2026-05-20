@@ -317,16 +317,33 @@ func _on_daily_spin_result(data: Dictionary) -> void:
 func _play_spin_animation(target_slot: int, slot: Dictionary, is_super: bool, new_balance: int) -> void:
 	_is_spinning = true
 	_target_slot = target_slot
-	_spin_timer = 2.5  # 轉盤動畫持續 2.5 秒
+	_spin_timer = 2.5  # 轉盤動畫持續 2.5 秒（_process 用來計算 progress）
+	_spin_angle = 0.0  # 重置旋轉角度
 
-	# 高亮目標格子
+	# 2.5 秒後停止動畫並顯示結果
 	var tween = create_tween()
 	tween.tween_delay(2.5)
 	tween.tween_callback(func():
+		if not is_instance_valid(self):
+			return
 		_is_spinning = false
+		_spin_timer = 0.0
+		# 停止後把格子歸位到靜止位置
+		_reset_slot_positions()
 		_show_result(slot, is_super, new_balance)
 		_highlight_slot(target_slot)
 	)
+
+func _reset_slot_positions() -> void:
+	# 動畫結束後把格子歸位到靜止位置
+	for i in range(_slot_nodes.size()):
+		var node = _slot_nodes[i]
+		if not is_instance_valid(node):
+			continue
+		var angle_deg = (float(i) / 8.0) * 360.0 - 90.0
+		var angle_rad = deg_to_rad(angle_deg)
+		var pos = WHEEL_CENTER + Vector2(cos(angle_rad), sin(angle_rad)) * WHEEL_RADIUS
+		node.position = pos - Vector2(32, 32)
 
 func _highlight_slot(index: int) -> void:
 	if index < 0 or index >= _slot_nodes.size():
@@ -359,20 +376,22 @@ func _process(delta: float) -> void:
 		return
 
 	# 轉盤旋轉動畫（視覺效果）
-	if _is_spinning:
+	if _is_spinning and _spin_timer > 0:
 		_spin_timer -= delta
-		var progress = 1.0 - (_spin_timer / 2.5)
-		# 先快後慢的緩動
-		var speed = lerp(800.0, 50.0, ease(progress, 2.0))
+		var elapsed = 2.5 - max(_spin_timer, 0.0)
+		var progress = clamp(elapsed / 2.5, 0.0, 1.0)
+		# 先快後慢的緩動（ease out）
+		var speed = lerp(720.0, 30.0, ease(progress, 2.5))
+		_spin_angle += speed * delta
 		for i in range(_slot_nodes.size()):
 			var node = _slot_nodes[i]
 			if not is_instance_valid(node):
 				continue
-			var base_angle = (float(i) / 8.0) * TAU - PI / 2.0
-			var current_angle = base_angle + _spin_angle
-			var pos = WHEEL_CENTER + Vector2(cos(current_angle), sin(current_angle)) * WHEEL_RADIUS
+			var base_angle = (float(i) / 8.0) * 360.0 - 90.0
+			var current_angle_deg = base_angle + _spin_angle
+			var current_angle_rad = deg_to_rad(current_angle_deg)
+			var pos = WHEEL_CENTER + Vector2(cos(current_angle_rad), sin(current_angle_rad)) * WHEEL_RADIUS
 			node.position = pos - Vector2(32, 32)
-		_spin_angle += speed * delta * PI / 180.0
 
 	# 結果顯示計時
 	if _result_timer > 0:

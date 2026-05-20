@@ -182,7 +182,8 @@ func _build_room_row(room_data: Dictionary) -> Control:
 
 	# 行容器
 	var row = Control.new()
-	row.custom_minimum_size = Vector2(480, 60)
+	row.custom_minimum_size = Vector2(480, 64)
+	row.size = Vector2(480, 64)
 
 	# 背景
 	var bg = ColorRect.new()

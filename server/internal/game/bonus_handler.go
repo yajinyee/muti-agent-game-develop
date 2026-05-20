@@ -283,52 +283,78 @@ func (g *Game) handleBonusClick(p *player.Player, msg *ws.Message) {
 
 	g.mu.Lock()
 	t := g.Targets[payload.TargetID]
-	if t != nil && t.IsAlive {
-		t.IsAlive = false
-		score := t.Def.HP // HP 欄位存 ClickScore
-		defID := t.DefID
-		delete(g.Targets, payload.TargetID)
-		g.bonusScores[p.ID] += score
-
-		// 廣播 target_kill（讓 Client 播放拔草動畫）
+	if t == nil || !t.IsAlive {
 		g.mu.Unlock()
-		g.Hub.Broadcast(&ws.Message{
-			Type: ws.MsgTargetKill,
-			Payload: ws.TargetKillPayload{
-				InstanceID: payload.TargetID,
-				DefID:      defID,
-				Multiplier: 1,
-				Reward:     score,
-				LaborGain:  score,
-				KillerID:   p.ID,
-			},
-		})
-
-		// 特殊雜草效果
-		switch defID {
-		case "BG003": // 發光雜草：增加倍率（加分）
-			g.mu.Lock()
-			g.bonusScores[p.ID] += 5 // 額外加分
-			g.mu.Unlock()
-		case "BG004": // 金色雜草：觸發巨大金幣（大量加分，規格書 29.3）
-			g.mu.Lock()
-			g.bonusScores[p.ID] += 20 // 金色雜草本身 20 分 + 額外 10 分獎勵
-			g.mu.Unlock()
-			// 廣播金幣特效事件（Client 播放金幣雨動畫）
-			g.Hub.Broadcast(&ws.Message{
-				Type: ws.MsgBonusEvent,
-				Payload: ws.BonusEventPayload{
-					Event: "coin_shower",
-				},
-			})
-		case "BG005": // 搗亂怪草：扣分
-			g.mu.Lock()
-			if g.bonusScores[p.ID] > 5 {
-				g.bonusScores[p.ID] -= 5
-			}
-			g.mu.Unlock()
-		}
 		return
 	}
+
+	defID := t.DefID
+	score := t.Def.HP // HP 欄位存 ClickScore
+
+	// BG002 硬雜草：需連點 2 次（規格書 29.3）
+	// 用 HitCount 追蹤已點擊次數
+	if defID == "BG002" {
+		t.HitCount++
+		if t.HitCount < 2 {
+			// 第一次點擊：只廣播受擊效果，不消滅
+			g.mu.Unlock()
+			g.Hub.Broadcast(&ws.Message{
+				Type: ws.MsgTargetUpdate,
+				Payload: ws.TargetUpdatePayload{
+					InstanceID: payload.TargetID,
+					HP:         2 - t.HitCount, // 剩餘點擊次數（視覺用）
+					MaxHP:      2,
+					X:          t.X,
+					Y:          t.Y,
+				},
+			})
+			return
+		}
+		// 第二次點擊：消滅
+	}
+
+	// 消滅目標
+	t.IsAlive = false
+	delete(g.Targets, payload.TargetID)
+	g.bonusScores[p.ID] += score
+
 	g.mu.Unlock()
+
+	// 廣播 target_kill（讓 Client 播放拔草動畫）
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgTargetKill,
+		Payload: ws.TargetKillPayload{
+			InstanceID: payload.TargetID,
+			DefID:      defID,
+			Multiplier: 1,
+			Reward:     score,
+			LaborGain:  score,
+			KillerID:   p.ID,
+		},
+	})
+
+	// 特殊雜草效果
+	switch defID {
+	case "BG003": // 發光雜草：增加倍率（加分）
+		g.mu.Lock()
+		g.bonusScores[p.ID] += 5 // 額外加分
+		g.mu.Unlock()
+	case "BG004": // 金色雜草：觸發巨大金幣（大量加分，規格書 29.3）
+		g.mu.Lock()
+		g.bonusScores[p.ID] += 20 // 金色雜草本身 20 分 + 額外 10 分獎勵
+		g.mu.Unlock()
+		// 廣播金幣特效事件（Client 播放金幣雨動畫）
+		g.Hub.Broadcast(&ws.Message{
+			Type: ws.MsgBonusEvent,
+			Payload: ws.BonusEventPayload{
+				Event: "coin_shower",
+			},
+		})
+	case "BG005": // 搗亂怪草：扣分
+		g.mu.Lock()
+		if g.bonusScores[p.ID] > 5 {
+			g.bonusScores[p.ID] -= 5
+		}
+		g.mu.Unlock()
+	}
 }
