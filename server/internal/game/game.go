@@ -415,6 +415,7 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 		ClickX:         payload.ClickX,
 		ClickY:         payload.ClickY,
 		WeaponPowerMod: p.GetWeaponPowerMod(), // 武器攻擊力加成（DAY-067）
+		EventKillAdd:   g.getEventKillChanceAdd(), // 限時活動擊破率加成（DAY-079）
 	}
 
 	result := combat.ProcessAttack(req, t)
@@ -770,9 +771,12 @@ func (g *Game) updateNormalPlay() {
 	targetCount := len(g.Targets)
 	g.mu.Unlock()
 
-	// 生成新目標
-	if now.Sub(g.lastSpawnAt).Seconds() >= data.SpawnInterval &&
-		targetCount < data.MaxTargetsOnScreen {
+	// 生成新目標（套用限時活動 SpawnMult，DAY-079）
+	eventSpawnMult := g.getEventSpawnMult()
+	effectiveMaxTargets := int(float64(data.MaxTargetsOnScreen) * eventSpawnMult)
+	effectiveInterval := data.SpawnInterval / eventSpawnMult
+	if now.Sub(g.lastSpawnAt).Seconds() >= effectiveInterval &&
+		targetCount < effectiveMaxTargets {
 		g.spawnTarget()
 		g.mu.Lock()
 		g.lastSpawnAt = now

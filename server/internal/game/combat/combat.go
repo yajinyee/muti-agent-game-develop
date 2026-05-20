@@ -19,6 +19,7 @@ type AttackRequest struct {
 	ClickX         float64
 	ClickY         float64
 	WeaponPowerMod float64 // 武器攻擊力加成係數（DAY-067，1.0=無加成）
+	EventKillAdd   float64 // 限時活動擊破率加成（DAY-079，0.0=無加成）
 }
 
 // AttackResult 攻擊結果
@@ -59,11 +60,13 @@ func ProcessAttack(req AttackRequest, t *target.Target) *AttackResult {
 
 	// 擊破判定（混合制）
 	// 武器攻擊力加成：WeaponPowerMod 乘以 charKillMod（DAY-067）
+	// 限時活動擊破率加成：EventKillAdd 直接加到 killMod（DAY-079）
 	weaponMod := req.WeaponPowerMod
 	if weaponMod <= 0 {
 		weaponMod = 1.0
 	}
-	isKill, damage := t.TryKill(bet.BetCost, char.KillModifier*weaponMod)
+	totalKillMod := char.KillModifier*weaponMod + req.EventKillAdd
+	isKill, damage := t.TryKill(bet.BetCost, totalKillMod)
 	result.Damage = damage
 	result.IsKill = isKill
 

@@ -1613,11 +1613,10 @@ func _init_skin_panel() -> void:
 var _season_panel_node = null
 
 ## 初始化賽季通行證面板（DAY-072）
-## 位置：TopBar 右側（TournamentPanel 旁邊）
+## 位置：TopBar 右側（從右往左排列，x=1248）
 func _init_season_panel() -> void:
 	var panel = SeasonPanelScript.new()
-	# 放在 TopBar 右側（TournamentPanel 在 x=1200，SeasonPanel 在 x=1240）
-	panel.position = Vector2(1240, 4)
+	panel.position = Vector2(1248, 4)
 	panel.z_index = 10
 	add_child(panel)
 	panel.setup(_pixel_font)
@@ -1627,11 +1626,10 @@ func _init_season_panel() -> void:
 var _friend_panel_node = null
 
 ## 初始化好友系統面板（DAY-073）
-## 位置：TopBar 右側（SeasonPanel 旁邊）
+## 位置：TopBar 右側（從右往左排列，x=1216）
 func _init_friend_panel() -> void:
 	var panel = FriendPanelScript.new()
-	# 放在 SeasonPanel 右側（SeasonPanel 在 x=1240，FriendPanel 在 x=1276）
-	panel.position = Vector2(1276, 4)
+	panel.position = Vector2(1216, 4)
 	panel.z_index = 10
 	add_child(panel)
 	panel.setup(_pixel_font)
@@ -1641,11 +1639,10 @@ func _init_friend_panel() -> void:
 var _guild_panel_node = null
 
 ## 初始化公會系統面板（DAY-074）
-## 位置：TopBar 右側（FriendPanel 旁邊）
+## 位置：TopBar 右側（從右往左排列，x=1184）
 func _init_guild_panel() -> void:
 	var panel = GuildPanelScript.new()
-	# 放在 FriendPanel 右側（FriendPanel 在 x=1276，GuildPanel 在 x=1312）
-	panel.position = Vector2(1312, 4)
+	panel.position = Vector2(1184, 4)
 	panel.z_index = 10
 	add_child(panel)
 	panel.setup(_pixel_font)
@@ -1655,10 +1652,10 @@ func _init_guild_panel() -> void:
 var _guild_war_panel_node = null
 
 ## 初始化公會戰面板（DAY-076）
-## 位置：GuildPanel 右側（GuildPanel 在 x=1312，GuildWarPanel 在 x=1348）
+## 位置：TopBar 右側（從右往左排列，x=1152）
 func _init_guild_war_panel() -> void:
 	var panel = GuildWarPanelScript.new()
-	panel.position = Vector2(1348, 4)
+	panel.position = Vector2(1152, 4)
 	panel.z_index = 10
 	add_child(panel)
 	panel.setup(_pixel_font)
@@ -1668,10 +1665,10 @@ func _init_guild_war_panel() -> void:
 var _daily_boss_panel_node = null
 
 ## 初始化每日 BOSS 挑戰面板（DAY-077）
-## 位置：GuildWarPanel 右側（GuildWarPanel 在 x=1348，DailyBossPanel 在 x=1384）
+## 位置：TopBar 右側（從右往左排列，x=1120）
 func _init_daily_boss_panel() -> void:
 	var panel = DailyBossPanelScript.new()
-	panel.position = Vector2(1384, 4)
+	panel.position = Vector2(1120, 4)
 	panel.z_index = 10
 	add_child(panel)
 	panel.setup(_pixel_font)
@@ -1681,10 +1678,10 @@ func _init_daily_boss_panel() -> void:
 var _vip_panel_node = null
 
 ## 初始化 VIP 等級面板（DAY-078）
-## 位置：DailyBossPanel 右側（DailyBossPanel 在 x=1384，VIPPanel 在 x=1420）
+## 位置：TopBar 右側（從右往左排列，x=1088）
 func _init_vip_panel() -> void:
 	var panel = VIPPanelScript.new()
-	panel.position = Vector2(1420, 4)
+	panel.position = Vector2(1088, 4)
 	panel.z_index = 10
 	add_child(panel)
 	panel.setup(_pixel_font)
@@ -1694,10 +1691,10 @@ func _init_vip_panel() -> void:
 var _event_panel_node = null
 
 ## 初始化限時活動面板（DAY-079）
-## 位置：VIPPanel 右側（VIPPanel 在 x=1420，EventPanel 在 x=1456）
+## 位置：TopBar 右側（從右往左排列，x=1056）
 func _init_event_panel() -> void:
 	var panel = EventPanelScript.new()
-	panel.position = Vector2(1456, 4)
+	panel.position = Vector2(1056, 4)
 	panel.z_index = 10
 	add_child(panel)
 	panel.setup(_pixel_font)
