@@ -364,3 +364,11 @@ func send_get_room_list() -> void:
 ## 切換房間（DAY-091）
 func send_switch_room(room_id: String) -> void:
 	send("switch_room", {"room_id": room_id})
+
+## 查詢每日轉盤狀態（DAY-092）
+func send_get_daily_spin() -> void:
+	send("get_daily_spin", {})
+
+## 執行每日轉盤（DAY-092）
+func send_daily_spin() -> void:
+	send("daily_spin", {})

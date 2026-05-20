@@ -189,6 +189,7 @@ func _ready() -> void:
 	_init_special_weapon_panel() # 特殊武器面板（DAY-089）
 	_init_mystery_box_panel()    # 神秘寶箱面板（DAY-090）
 	_init_room_select_panel()    # 房間難度選擇面板（DAY-091）
+	_init_daily_spin_panel()     # 每日簽到轉盤面板（DAY-092）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1891,3 +1892,48 @@ func _on_room_switched_hud(data: Dictionary) -> void:
 	var name_str = data.get("room_name", "房間")
 	if is_instance_valid(_room_btn):
 		_room_btn.text = icon + " " + name_str
+
+const DailySpinPanelScript = preload("res://scripts/ui/DailySpinPanel.gd")
+var _daily_spin_panel: Control = null
+var _daily_spin_btn: Button = null
+
+func _init_daily_spin_panel() -> void:
+	# 每日轉盤面板（全螢幕覆蓋）
+	var panel = DailySpinPanelScript.new()
+	panel.name = "DailySpinPanel"
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 85
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_daily_spin_panel = panel
+
+	# 每日轉盤按鈕（TopBar）
+	_daily_spin_btn = Button.new()
+	_daily_spin_btn.name = "DailySpinBtn"
+	_daily_spin_btn.text = "🎡 轉盤"
+	_daily_spin_btn.position = Vector2(1190, 4)
+	_daily_spin_btn.size = Vector2(80, 30)
+	_daily_spin_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.5))
+	_daily_spin_btn.add_theme_font_size_override("font_size", 12)
+	if is_instance_valid(_pixel_font):
+		_daily_spin_btn.add_theme_font_override("font", _pixel_font)
+	_daily_spin_btn.pressed.connect(_on_daily_spin_btn_pressed)
+	add_child(_daily_spin_btn)
+
+	# 連接每日轉盤狀態訊號，更新按鈕提示
+	if GameManager.has_signal("daily_spin_state"):
+		GameManager.daily_spin_state.connect(_on_daily_spin_state_hud)
+
+func _on_daily_spin_btn_pressed() -> void:
+	if is_instance_valid(_daily_spin_panel):
+		_daily_spin_panel.show_panel()
+
+func _on_daily_spin_state_hud(data: Dictionary) -> void:
+	var can_spin = data.get("can_spin", false)
+	if is_instance_valid(_daily_spin_btn):
+		if can_spin:
+			_daily_spin_btn.text = "🎡 轉盤 ✓"
+			_daily_spin_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+		else:
+			_daily_spin_btn.text = "🎡 轉盤"
+			_daily_spin_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))

@@ -63,6 +63,9 @@ const (
 	// 房間難度系統（DAY-091）
 	MsgGetRoomList       MessageType = "get_room_list"        // 查詢房間列表
 	MsgSwitchRoom        MessageType = "switch_room"          // 切換房間
+	// 每日簽到轉盤（DAY-092）
+	MsgGetDailySpin      MessageType = "get_daily_spin"       // 查詢每日轉盤狀態
+	MsgDailySpin         MessageType = "daily_spin"           // 執行每日轉盤
 )
 
 // Server → Client
@@ -144,6 +147,9 @@ const (
 	MsgRoomList          MessageType = "room_list"           // 房間列表（Server → Client）
 	MsgRoomSwitched      MessageType = "room_switched"       // 房間切換成功通知
 	MsgRoomError         MessageType = "room_error"          // 房間操作失敗通知
+	// 每日簽到轉盤（DAY-092）
+	MsgDailySpinState    MessageType = "daily_spin_state"    // 每日轉盤狀態（Server → Client）
+	MsgDailySpinResult   MessageType = "daily_spin_result"   // 每日轉盤結果（Server → Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1209,4 +1215,42 @@ type RoomSwitchedPayload struct {
 type RoomErrorPayload struct {
 	Code    string `json:"code"`    // "room_full"/"insufficient_coins"/"room_not_found"
 	Message string `json:"message"`
+}
+
+// ---- 每日簽到轉盤（DAY-092）----
+
+// DailySpinSlotPayload 轉盤格子資訊
+type DailySpinSlotPayload struct {
+	ID      int    `json:"id"`
+	Type    string `json:"type"`
+	Amount  int    `json:"amount"`
+	Label   string `json:"label"`
+	Icon    string `json:"icon"`
+	Color   string `json:"color"`
+	IsSuper bool   `json:"is_super"`
+}
+
+// DailySpinStatePayload 每日轉盤狀態（Server → Client）
+type DailySpinStatePayload struct {
+	CanSpin     bool                   `json:"can_spin"`
+	IsSuper     bool                   `json:"is_super"`
+	LoginStreak int                    `json:"login_streak"`
+	TotalSpins  int                    `json:"total_spins"`
+	NextSpinAt  int64                  `json:"next_spin_at"` // Unix ms
+	NormalSlots []DailySpinSlotPayload `json:"normal_slots"`
+	SuperSlots  []DailySpinSlotPayload `json:"super_slots"`
+}
+
+// DailySpinResultPayload 每日轉盤結果（Server → Client）
+type DailySpinResultPayload struct {
+	SlotIndex   int                  `json:"slot_index"`
+	Slot        DailySpinSlotPayload `json:"slot"`
+	IsSuper     bool                 `json:"is_super"`
+	LoginStreak int                  `json:"login_streak"`
+	NextSpinAt  int64                `json:"next_spin_at"`
+	NewBalance  int                  `json:"new_balance"`
+	// 特殊獎勵欄位
+	SeasonPoints  int     `json:"season_points"`   // 賽季積分（0=無）
+	MultBonus     float64 `json:"mult_bonus"`      // 倍率加成（0=無）
+	MysteryBoxRarity string `json:"mystery_box_rarity"` // 寶箱稀有度（""=無）
 }

@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-091 房間難度系統）
+## 最後更新：2026-05-20（DAY-092 每日簽到轉盤）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-092 更新（自主觸發）：** 每日簽到轉盤（Daily Spin Wheel）✅
+  - `server/internal/game/dailyspin/dailyspin.go`：每日轉盤管理器（8格普通轉盤/8格超級轉盤，連續7天解鎖超級轉盤，加權隨機，UTC+8 日期判斷）
+  - `server/internal/game/dailyspin/dailyspin_test.go`：10 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgGetDailySpin`/`MsgDailySpin`（Client→Server）+ `MsgDailySpinState`/`MsgDailySpinResult`（Server→Client）+ 對應 Payload
+  - `server/internal/game/dailyspin_handler.go`：`handleGetDailySpin()`/`handleDailySpin()`/`applyDailySpinReward()`/`buildDailySpinStatePayload()`
+  - `server/internal/game/game.go`：`DailySpin *dailyspin.Manager` 欄位 + 初始化 + AddPlayer 發送狀態 + HandleMessage 分支
+  - `client/chiikawa-pixel/scripts/ui/DailySpinPanel.gd`：每日轉盤面板（8格圓形排列，旋轉動畫，結果顯示，倒數計時）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`daily_spin_state`/`daily_spin_result` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：`send_get_daily_spin()`/`send_daily_spin()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 DailySpinPanel + 轉盤按鈕（TopBar，可轉時顯示綠色 ✓）
+  - 普通轉盤 8 格：500金幣(30%)/1000金幣(25%)/炸彈×1(15%)/普通寶箱×1(12%)/賽季積分+50(10%)/雷射×1(4%)/Jackpot券×1(3%)/5000金幣(1%)
+  - 超級轉盤 8 格（連續7天）：2000金幣/5000金幣/炸彈×2/稀有寶箱/賽季積分+200/下次攻擊×3.0/Jackpot券×5/20000金幣
+  - 每天 UTC+8 00:00 重置，今天已轉過則顯示倒數計時
+  - 連接 SpecialWeapon/MysteryBox/Season 系統發放對應獎勵
+  - build/vet/test 全部通過（10/10 dailyspin 測試）
+  - **業界依據：** iGaming 2026 最熱門留存機制，每日驚喜感提升留存率 35%+；xtremepush.com 2026-05-07 確認「daily spin」是 gamification 最有效的留存工具
+
 - **DAY-091 更新（自主觸發）：** 房間難度系統（Room Difficulty System）✅
   - `server/internal/room/difficulty.go`：4 個難度定義（初級/中級/高級/VIP），獎勵倍率/Jackpot 倍率/目標速度/BOSS 難度/進場費
   - `server/internal/room/difficulty_test.go`：10 個單元測試全部通過

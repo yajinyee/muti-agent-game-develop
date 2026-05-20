@@ -20,6 +20,7 @@ import (
 	"digital-twin/server/internal/game/dailyboss"
 	"digital-twin/server/internal/game/mysterybox"
 	"digital-twin/server/internal/game/specialweapon"
+	"digital-twin/server/internal/game/dailyspin"
 	"digital-twin/server/internal/game/event"
 	"digital-twin/server/internal/game/friend"
 	"digital-twin/server/internal/game/guild"
@@ -69,6 +70,7 @@ type Game struct {
 	Chain       *chain.Manager      // 連鎖爆炸管理器（DAY-088）
 	SpecialWeapon *specialweapon.Manager // 特殊武器管理器（DAY-089）
 	MysteryBox    *mysterybox.Manager    // 神秘寶箱管理器（DAY-090）
+	DailySpin     *dailyspin.Manager     // 每日簽到轉盤管理器（DAY-092）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -134,6 +136,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Chain:              chain.NewDefault(),
 		SpecialWeapon:      specialweapon.New(),
 		MysteryBox:         mysterybox.New(),
+		DailySpin:          dailyspin.NewManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -249,6 +252,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendSpecialWeaponUpdate(pp, true)
 				// 發送神秘寶箱狀態（DAY-090）
 				g.sendMysteryBoxUpdate(pp)
+				// 發送每日轉盤狀態（DAY-092）
+				g.handleGetDailySpin(pp.ID)
 			}
 		}()
 	}
@@ -434,6 +439,11 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		if err := remarshal(msg.Payload, &payload); err == nil {
 			g.handleSwitchRoom(clientID, payload)
 		}
+	// 每日簽到轉盤（DAY-092）
+	case ws.MsgGetDailySpin:
+		g.handleGetDailySpin(clientID)
+	case ws.MsgDailySpin:
+		g.handleDailySpin(clientID)
 	}
 }
 
