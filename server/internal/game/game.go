@@ -278,6 +278,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.announcePlayerJoin(pp.DisplayName)
 				// 異常偵測：建立玩家記錄（DAY-105）
 				g.AntiCheat.EnsureRecord(playerID, pp.DisplayName)
+				// 發送登入進度（DAY-107）
+				g.handleGetLoginProgress(pp)
 			}
 		}()
 	}
@@ -493,6 +495,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 玩家名片系統（DAY-106）
 	case ws.MsgGetPlayerCard:
 		g.handleGetPlayerCard(p, msg)
+	// 登入里程碑系統（DAY-107）
+	case ws.MsgGetLoginProgress:
+		g.handleGetLoginProgress(p)
 	}
 }
 

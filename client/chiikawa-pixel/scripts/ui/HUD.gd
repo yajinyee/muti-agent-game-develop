@@ -195,6 +195,7 @@ func _ready() -> void:
 	_init_player_stats_panel()   # 玩家統計面板（DAY-096）
 	_init_announcement_panel()   # 全服公告面板（DAY-097）
 	_init_player_card_panel()    # 玩家名片面板（DAY-106）
+	_init_login_milestone_panel() # 登入里程碑面板（DAY-107）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2074,3 +2075,27 @@ func _init_player_card_panel() -> void:
 func show_player_card(player_id: String) -> void:
 	if is_instance_valid(_player_card_panel_node):
 		_player_card_panel_node.show_card(player_id)
+
+## 登入里程碑面板（DAY-107）
+var _login_milestone_panel_node = null
+const LoginMilestonePanelScript = preload("res://scripts/ui/LoginMilestonePanel.gd")
+
+func _init_login_milestone_panel() -> void:
+	var panel = LoginMilestonePanelScript.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 95
+	add_child(panel)
+	_login_milestone_panel_node = panel
+	# 連接里程碑訊號
+	GameManager.login_milestone_reached.connect(_on_login_milestone_reached)
+	GameManager.login_progress_received.connect(_on_login_progress_received)
+
+## 里程碑達成通知（DAY-107）
+func _on_login_milestone_reached(data: Dictionary) -> void:
+	if is_instance_valid(_login_milestone_panel_node):
+		_login_milestone_panel_node.show_milestone(data)
+
+## 登入進度回應（DAY-107）
+func _on_login_progress_received(data: Dictionary) -> void:
+	if is_instance_valid(_login_milestone_panel_node):
+		_login_milestone_panel_node.show_progress(data)

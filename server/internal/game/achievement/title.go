@@ -18,6 +18,11 @@ const (
 	TitleMegaWinner   TitleID = "mega_winner"   // 超級大獎得主（50x+）
 	TitleSpecialHunter TitleID = "special_hunter" // 特殊目標獵人
 	TitleAllAround    TitleID = "all_around"    // 全能討伐者（解鎖 8 個以上成就）
+	// 登入里程碑稱號（DAY-107）
+	TitleStreakVeteran TitleID = "streak_veteran" // 兩週老手（連續登入 14 天）
+	TitleStreakLegend  TitleID = "streak_legend"  // 月度傳說（連續登入 30 天）
+	TitleStreakMaster  TitleID = "streak_master"  // 兩月霸主（連續登入 60 天）
+	TitleStreakMyth    TitleID = "streak_myth"    // 百日神話（連續登入 100 天）
 )
 
 // TitleDef 稱號定義
@@ -127,6 +132,39 @@ var TitleDefinitions = map[TitleID]*TitleDef{
 		Icon:        "🌟",
 		Color:       "#FF88FF",
 		Priority:    55,
+	},
+	// 登入里程碑稱號（DAY-107）
+	TitleStreakVeteran: {
+		ID:          TitleStreakVeteran,
+		Name:        "兩週老手",
+		Description: "連續登入 14 天",
+		Icon:        "🔥",
+		Color:       "#FF9800",
+		Priority:    60,
+	},
+	TitleStreakLegend: {
+		ID:          TitleStreakLegend,
+		Name:        "月度傳說",
+		Description: "連續登入 30 天",
+		Icon:        "👑",
+		Color:       "#FFD700",
+		Priority:    70,
+	},
+	TitleStreakMaster: {
+		ID:          TitleStreakMaster,
+		Name:        "兩月霸主",
+		Description: "連續登入 60 天",
+		Icon:        "💎",
+		Color:       "#9C27B0",
+		Priority:    80,
+	},
+	TitleStreakMyth: {
+		ID:          TitleStreakMyth,
+		Name:        "百日神話",
+		Description: "連續登入 100 天",
+		Icon:        "🌟",
+		Color:       "#FF5722",
+		Priority:    90,
 	},
 }
 
@@ -240,4 +278,19 @@ func (t *TitleTracker) LoadState(unlockedTitles []TitleID, activeTitle TitleID) 
 	} else {
 		t.recalcActiveTitle()
 	}
+}
+
+// TryUnlockByID 直接用稱號 ID 解鎖稱號（DAY-107，里程碑獎勵用）
+// 回傳解鎖的稱號定義（nil = 已解鎖或不存在）
+func (t *TitleTracker) TryUnlockByID(titleID TitleID) *TitleDef {
+	def, ok := TitleDefinitions[titleID]
+	if !ok {
+		return nil // 稱號不存在
+	}
+	if t.Unlocked[titleID] {
+		return nil // 已解鎖
+	}
+	t.Unlocked[titleID] = true
+	t.recalcActiveTitle()
+	return def
 }

@@ -54,6 +54,9 @@ signal dm_error(error_data: Dictionary)                # 發送失敗
 signal open_dm_panel(friend_id: String, friend_name: String) # 開啟 DM 面板
 # 玩家名片系統（DAY-106）
 signal player_card_received(card_data: Dictionary)     # 收到玩家名片資料
+# 登入里程碑系統（DAY-107）
+signal login_milestone_reached(milestone_data: Dictionary) # 里程碑達成通知
+signal login_progress_received(progress_data: Dictionary)  # 登入進度回應
 signal guild_updated(guild_data: Dictionary)           # 公會資訊更新（DAY-074）
 signal guild_task_complete(task_data: Dictionary)      # 公會任務完成（DAY-074）
 signal guild_message_received(msg_data: Dictionary)    # 公會聊天訊息（DAY-075）
@@ -227,6 +230,11 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 		# 玩家名片系統（DAY-106）
 		"player_card":
 			emit_signal("player_card_received", payload)
+		# 登入里程碑系統（DAY-107）
+		"login_milestone":
+			_handle_login_milestone(payload)
+		"login_progress":
+			_handle_login_progress(payload)
 		"guild_update":
 			_handle_guild_update(payload)
 		"guild_list":
@@ -776,3 +784,27 @@ func _handle_daily_spin_state(payload: Dictionary) -> void:
 ## 處理每日轉盤結果（DAY-092）
 func _handle_daily_spin_result(payload: Dictionary) -> void:
 	emit_signal("daily_spin_result", payload)
+
+## 處理登入里程碑達成通知（DAY-107）
+func _handle_login_milestone(payload: Dictionary) -> void:
+	var days: int = payload.get("days", 0)
+	var name: String = payload.get("name", "")
+	print("[GameManager] Login milestone reached! Day=%d Name=%s" % [days, name])
+	emit_signal("login_milestone_reached", payload)
+	# 播放大獎音效
+	if AudioManager != null:
+		AudioManager.play_sfx("big_win")
+
+## 處理登入進度回應（DAY-107）
+func _handle_login_progress(payload: Dictionary) -> void:
+	var streak: int = payload.get("current_streak", 0)
+	print("[GameManager] Login progress: streak=%d" % streak)
+	emit_signal("login_progress_received", payload)
+
+## 請求登入進度（DAY-107）
+func request_login_progress() -> void:
+	NetworkManager.send_message("get_login_progress", {})
+
+## 發送訊息（通用）
+func send_message(type: String, payload: Dictionary) -> void:
+	NetworkManager.send_message(type, payload)

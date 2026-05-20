@@ -99,6 +99,8 @@ const (
 	MsgJackpotWin      MessageType = "jackpot_win"      // Jackpot 中獎通知（DAY-048）
 	MsgJackpotAnimation MessageType = "jackpot_animation" // Jackpot 觸發動畫通知（DAY-095）
 	MsgDailyBonus        MessageType = "daily_bonus"        // 每日登入獎勵（DAY-065）
+	MsgLoginMilestone    MessageType = "login_milestone"    // 登入里程碑達成通知（DAY-107）
+	MsgLoginProgress     MessageType = "login_progress"     // 登入進度回應（DAY-107）
 	MsgTournamentUpdate  MessageType = "tournament_update"  // 週賽排名更新（DAY-066）
 	MsgTournamentResult  MessageType = "tournament_result"  // 週賽結算通知（DAY-066）
 	MsgGetTournament     MessageType = "get_tournament"     // 查詢週賽/日賽狀態（DAY-093）
@@ -191,6 +193,8 @@ const (
 	// 玩家名片系統（DAY-106）
 	MsgGetPlayerCard  MessageType = "get_player_card"  // 查詢玩家名片（Client → Server）
 	MsgPlayerCard     MessageType = "player_card"      // 玩家名片資料（Server → Client）
+	// 登入里程碑系統（DAY-107）
+	MsgGetLoginProgress MessageType = "get_login_progress" // 查詢登入進度（Client → Server）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1593,4 +1597,45 @@ type PlayerCardPayload struct {
 	LoginStreak      int     `json:"login_streak"`
 	RTP              float64 `json:"rtp"`
 	IsOnline         bool    `json:"is_online"`
+}
+
+// ---- 登入里程碑系統（DAY-107）----
+
+// MilestoneRewardPayload 里程碑獎勵項目（用於通知 Client）
+type MilestoneRewardPayload struct {
+	Type   string `json:"type"`   // "coins" / "mystery_box" / "title"
+	Amount int    `json:"amount"` // 金幣數量 / 寶箱數量
+	Rarity string `json:"rarity"` // 寶箱稀有度（type=mystery_box 時）
+	TitleID string `json:"title_id"` // 稱號 ID（type=title 時）
+}
+
+// LoginMilestonePayload 登入里程碑達成通知（Server → Client）
+type LoginMilestonePayload struct {
+	Days        int                      `json:"days"`        // 達到的里程碑天數
+	Name        string                   `json:"name"`        // 里程碑名稱
+	Description string                   `json:"description"` // 描述
+	Icon        string                   `json:"icon"`        // 圖示 emoji
+	Color       string                   `json:"color"`       // 顏色（hex）
+	Rewards     []MilestoneRewardPayload `json:"rewards"`     // 獎勵列表
+	CoinsGained int                      `json:"coins_gained"` // 本次獲得金幣總計
+	NewBalance  int                      `json:"new_balance"`  // 領取後餘額
+}
+
+// MilestoneInfoPayload 里程碑資訊（用於 LoginProgressPayload）
+type MilestoneInfoPayload struct {
+	Days        int                      `json:"days"`
+	Name        string                   `json:"name"`
+	Icon        string                   `json:"icon"`
+	Color       string                   `json:"color"`
+	Rewards     []MilestoneRewardPayload `json:"rewards"`
+	IsReached   bool                     `json:"is_reached"` // 是否已達到
+}
+
+// LoginProgressPayload 登入進度回應（Server → Client）
+type LoginProgressPayload struct {
+	CurrentStreak  int                    `json:"current_streak"`  // 當前連續天數
+	MaxStreak      int                    `json:"max_streak"`      // 歷史最高
+	NextMilestoneDays int                 `json:"next_milestone_days"` // 下一個里程碑天數（0=已全達成）
+	DaysToNext     int                    `json:"days_to_next"`    // 距離下一個里程碑還差幾天
+	Milestones     []MilestoneInfoPayload `json:"milestones"`      // 所有里程碑狀態
 }

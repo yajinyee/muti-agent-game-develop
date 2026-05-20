@@ -64,4 +64,7 @@ func (g *Game) checkAndSendDailyBonus(playerID string, savedState *store.PlayerS
 
 	// 同步更新玩家狀態到 Client
 	g.sendPlayerUpdate(p)
+
+	// 檢查登入里程碑獎勵（DAY-107）
+	g.checkAndGrantLoginMilestone(p, newStreak)
 }

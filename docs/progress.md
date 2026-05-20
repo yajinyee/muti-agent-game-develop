@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-106 玩家名片系統 Player Card）
+## 最後更新：2026-05-21（DAY-107 登入里程碑獎勵系統 Login Milestone Reward）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-106 更新（自主觸發）：** 玩家名片系統（Player Card System）✅
+- **DAY-107 更新（自主觸發）：** 登入里程碑獎勵系統（Login Milestone Reward System）✅
+  - `server/internal/game/dailybonus/milestone.go`：里程碑定義（6個里程碑：3/7/14/30/60/100天；獎勵類型：金幣/神秘寶箱/稱號；`CheckMilestone()`/`GetAllMilestones()`/`GetNextMilestone()`）
+  - `server/internal/game/dailybonus/milestone_test.go`：10 個單元測試全部通過
+  - `server/internal/game/achievement/title.go`：新增 4 個里程碑稱號（streak_veteran/streak_legend/streak_master/streak_myth）；新增 `TryUnlockByID()` 方法（直接用 ID 解鎖稱號）
+  - `server/internal/ws/protocol.go`：新增 `MsgLoginMilestone`/`MsgLoginProgress`/`MsgGetLoginProgress`；`LoginMilestonePayload`/`LoginProgressPayload`/`MilestoneInfoPayload`/`MilestoneRewardPayload`
+  - `server/internal/game/milestone_handler.go`：`checkAndGrantLoginMilestone()`（發放金幣/寶箱/稱號）；`handleGetLoginProgress()`（回傳所有里程碑進度）
+  - `server/internal/game/dailybonus_handler.go`：`checkAndSendDailyBonus()` 末尾加入 `checkAndGrantLoginMilestone()` 呼叫
+  - `server/internal/game/game.go`：HandleMessage 加入 `MsgGetLoginProgress`；AddPlayer 加入 `handleGetLoginProgress()`（上線時自動發送進度）
+  - `client/chiikawa-pixel/scripts/ui/LoginMilestonePanel.gd`：里程碑達成面板（縮放彈入動畫；金色光暈閃爍；獎勵列表；關閉按鈕；排隊機制）+ 進度面板（所有里程碑進度條；距離下一個里程碑天數）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`login_milestone_reached`/`login_progress_received` 訊號 + handler + `request_login_progress()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 LoginMilestonePanel（z_index=95）+ 訊號連接
+  - 里程碑設計：3天🌱初心者（3000金幣+普通寶箱）/ 7天⚔️一週勇士（8000金幣+稀有寶箱）/ 14天🔥兩週老手（20000金幣+史詩寶箱+稱號）/ 30天👑月度傳說（50000金幣+傳說寶箱×2+稱號）/ 60天💎兩月霸主（120000金幣+傳說寶箱×3+稱號）/ 100天🌟百日神話（300000金幣+傳說寶箱×5+稱號）
+  - 稱號優先級：里程碑稱號（60-90）> 一般稱號（0-55），確保長期玩家的稱號更顯眼
+  - build/vet/test 全部通過（10/10 milestone 測試）
+  - **業界依據：** ilogos.biz（2026）確認 gamified login streaks 讓留存率提升 75%；連續登入里程碑是 2026 年 iGaming 最有效的長期留存機制
+
+
   - `server/internal/ws/protocol.go`：新增 `MsgGetPlayerCard`/`MsgPlayerCard`；`GetPlayerCardPayload`/`PlayerCardPayload`（含稱號/VIP/公會/統計亮點）
   - `server/internal/game/player_card_handler.go`：`handleGetPlayerCard()`/`buildPlayerCard()`（整合 VIP/公會/Stats/成就）
   - `server/internal/game/game.go`：`PlayerProfile` struct 新增 VIP/公會/統計亮點欄位（BestStreak/BestMult/JackpotWins/TotalBet/TotalReward/RTP）；`GetPlayerProfile()` 整合新欄位；HandleMessage 加入 `MsgGetPlayerCard`
