@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-109 賽季節日活動系統）
+## 最後更新：2026-05-21（DAY-110 全服名人堂 + 智慧推薦系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,29 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-110 更新（自主觸發）：** 全服名人堂（Hall of Fame）+ 智慧推薦系統（Smart Recommendation Engine）✅
+  - `server/internal/game/halloffame/halloffame.go`：名人堂管理器（8種記錄類型：最高連擊/最高倍率/Bonus大師/Jackpot收集者/Grand Jackpot傳說/BOSS獵人/金幣大亨/效率之王；TryUpdate競爭更新；GetAll/GetRecord/IsRecordHolder/GetPlayerRecords；RecordTypeLabel/RecordTypeIcon）
+  - `server/internal/game/halloffame/halloffame_test.go`：10 個單元測試全部通過
+  - `server/internal/game/recommend/recommend.go`：智慧推薦引擎（PlayerBehavior輸入；8種推薦類型：bet_up/bet_down/bet_stay/auto_mode/lock_target/bonus_focus/boss_focus/jackpot；analyzeBetLevel/analyzeStrategy/analyzeSpecialOpportunity；信心度0-1；最多3條推薦）
+  - `server/internal/game/recommend/recommend_test.go`：10 個單元測試全部通過
+  - `server/internal/game/halloffame_handler.go`：名人堂 handler（handleGetHallOfFame/notifyHallOfFameKill/notifyHallOfFameStreak/notifyHallOfFameBonus/notifyHallOfFameJackpot/notifyHallOfFameBossKill/broadcastHallOfFameNewRecord/buildHallOfFamePayload/GetHallOfFameSnapshot；betLevelToCharID輔助函數）
+  - `server/internal/game/recommend_handler.go`：推薦 handler（handleGetRecommendations/buildRecommendations/buildPlayerBehavior）
+  - `server/internal/game/game.go`：整合 HallOfFame *halloffame.Manager；HandleMessage 加入 MsgGetHallOfFame/MsgGetRecommendations；handleKill 加入 notifyHallOfFameKill
+  - `server/internal/game/streak_handler.go`：notifyStreakKill 加入 notifyHallOfFameStreak
+  - `server/internal/game/bonus_handler.go`：endBonusGame 加入 notifyHallOfFameBonus
+  - `server/internal/game/jackpot_handler.go`：handleJackpotWin 加入 notifyHallOfFameJackpot
+  - `server/internal/game/boss_handler.go`：handleBossKill 加入 notifyHallOfFameBossKill
+  - `server/internal/ws/protocol.go`：新增 MsgGetHallOfFame/MsgHallOfFameUpdate/MsgHallOfFameNewRecord/MsgGetRecommendations/MsgRecommendations；HallEntryPayload/HallOfFameUpdatePayload/HallOfFameNewRecordPayload/RecommendationPayload/RecommendationsPayload
+  - `server/cmd/gameserver/main.go`：新增 /hall-of-fame HTTP 端點（GET，回傳名人堂快照）
+  - `client/chiikawa-pixel/scripts/ui/HallOfFamePanel.gd`：名人堂面板（8種記錄類型展示；新記錄全畫面金色閃光通知；ScrollContainer；重新整理按鈕）
+  - `client/chiikawa-pixel/scripts/ui/RecommendPanel.gd`：推薦面板（右側滑入；優先級顏色邊框；信心度顯示；快速切換投注按鈕；重新分析按鈕）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：hall_of_fame_updated/hall_of_fame_new_record/recommendations_received 訊號 + handler + request_hall_of_fame() + request_recommendations() + send_bet_change()
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 HallOfFamePanel（🏆按鈕）+ RecommendPanel（💡按鈕）
+  - 名人堂觸發：擊破目標（倍率/金幣/RTP）/ 連擊更新（≥5）/ Bonus 結算 / Jackpot 中獎 / BOSS 擊殺
+  - 推薦邏輯：金幣不足→降投注 / RTP>120%→升投注 / 命中率<5%→自動模式 / 連擊強但倍率低→鎖定目標 / BOSS多→BOSS策略 / 無Jackpot→衝Jackpot
+  - build/vet/test 全部通過（10/10 halloffame + 10/10 recommend）
+  - **業界依據：** gametyrant.com（2026-05-19）確認 72% 玩家偏好個人化推薦平台；lowerbuckstimes.com（2026）確認個人化推薦讓留存率提升 30%；BGaming Fishing Club 2（2026-04）有 Best Win/Best Catch 展示機制
+
 - **DAY-109 更新（自主觸發）：** 賽季節日活動系統（Seasonal Festival System）✅
   - `server/internal/game/festival/festival.go`：節日管理器（4個節日：端午節/中秋節/農曆新年/萬聖節；自動根據月份偵測節日；節日限定目標物；節日任務；節日稱號；Jackpot/獎勵/Bonus 倍率加成）
   - `server/internal/game/festival/rand.go`：隨機數輔助函數
