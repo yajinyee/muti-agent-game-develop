@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-090 神秘寶箱系統）
+## 最後更新：2026-05-20（DAY-091 房間難度系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,27 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-090 更新（自主觸發）：** 神秘寶箱系統（Mystery Box System）✅
+- **DAY-091 更新（自主觸發）：** 房間難度系統（Room Difficulty System）✅
+  - `server/internal/room/difficulty.go`：4 個難度定義（初級/中級/高級/VIP），獎勵倍率/Jackpot 倍率/目標速度/BOSS 難度/進場費
+  - `server/internal/room/difficulty_test.go`：10 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgGetRoomList`/`MsgSwitchRoom`（Client→Server）+ `MsgRoomList`/`MsgRoomSwitched`/`MsgRoomError`（Server→Client）+ 對應 Payload
+  - `server/internal/player/player.go`：`RoomDifficulty` 欄位 + `GetRoomDifficulty()`/`SetRoomDifficulty()`/`DeductCoins()` 方法
+  - `server/internal/game/room_handler.go`：`getRoomDifficulty()`/`getRoomRewardMult()`/`getRoomJackpotMult()`/`handleGetRoomList()`/`handleSwitchRoom()`
+  - `server/internal/game/game.go`：HandleMessage 加入 `MsgGetRoomList`/`MsgSwitchRoom` 分支 + handleKill 套用房間獎勵倍率 + handleAttack 套用房間 Jackpot 倍率
+  - `server/cmd/gameserver/main.go`：`/rooms` HTTP 端點（GET，回傳所有難度定義）
+  - `client/chiikawa-pixel/scripts/ui/RoomSelectPanel.gd`：房間選擇面板（4個難度按鈕，人數/倍率/進場費顯示，切換通知）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`room_list_received`/`room_switched`/`room_error` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：`send_get_room_list()`/`send_switch_room()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 RoomSelectPanel + 房間切換按鈕（TopBar 右側）
+  - 4 個難度：初級🌱（獎勵×1.0，Jackpot×0.5，免費）/ 中級⚔️（×1.2，×1.0，免費）/ 高級🔥（×1.5，×2.0，免費）/ VIP👑（×2.0，×5.0，進場費10000）
+  - 難度越高：目標物更快、BOSS 更強、最大玩家數更少（VIP 限 4 人）
+  - 房間難度倍率直接套用到 handleKill finalReward（疊加活動/天氣/連擊倍率）
+  - Jackpot 貢獻倍率套用到 handleAttack（高難度房間 Jackpot 累積更快）
+  - VIP 房間進場費 10000 金幣，切換時自動扣除
+  - build/vet/test 全部通過（10/10 difficulty 測試）
+  - **業界依據：** Ocean King 系列多難度房間是 2026 年捕魚機標配；accio.com 2026-05-04 確認「Adjustable difficulty levels」是業界標配功能
+
+
   - `server/internal/game/mysterybox/mysterybox.go`：神秘寶箱管理器（4個稀有度：普通/稀有/史詩/傳說，掉落機率 8%/4%/1.5%/0.5%，BOSS 擊殺傳說機率×10，背包管理，開箱加權隨機獎勵）
   - `server/internal/game/mysterybox/mysterybox_test.go`：10 個單元測試全部通過
   - `server/internal/ws/protocol.go`：`MsgOpenMysteryBox`/`MsgGetMysteryBoxes`（Client→Server）+ `MsgMysteryBoxDrop`/`MsgMysteryBoxUpdate`/`MsgMysteryBoxOpened`（Server→Client）+ 對應 Payload

@@ -62,6 +62,9 @@ type Player struct {
 
 	// 連擊系統（DAY-082）
 	Streak *streak.Manager
+
+	// 房間難度系統（DAY-091）
+	RoomDifficulty string // 當前所在房間難度（"beginner"/"intermediate"/"advanced"/"vip"）
 }
 
 // NewPlayer 建立新玩家
@@ -87,6 +90,7 @@ func NewPlayer(id string, initialCoins int) *Player {
 		OwnedSkins:   []string{"default"},
 		Codex:        codex.NewManager(),
 		Streak:       streak.NewManager(),
+		RoomDifficulty: "beginner", // 預設初級房間
 	}
 }
 
@@ -507,4 +511,33 @@ func (p *Player) GetSkinInfo() (equippedSkin string, ownedSkins []string) {
 	owned := make([]string, len(p.OwnedSkins))
 	copy(owned, p.OwnedSkins)
 	return p.EquippedSkin, owned
+}
+
+// GetRoomDifficulty 取得當前房間難度（DAY-091）
+func (p *Player) GetRoomDifficulty() string {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	if p.RoomDifficulty == "" {
+		return "beginner"
+	}
+	return p.RoomDifficulty
+}
+
+// SetRoomDifficulty 設定房間難度（DAY-091）
+func (p *Player) SetRoomDifficulty(diff string) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.RoomDifficulty = diff
+}
+
+// DeductCoins 扣除金幣（用於進場費等，DAY-091）
+// 回傳是否成功（金幣足夠）和扣除後餘額
+func (p *Player) DeductCoins(amount int) (int, bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.Coins < amount {
+		return p.Coins, false
+	}
+	p.Coins -= amount
+	return p.Coins, true
 }

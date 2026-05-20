@@ -910,6 +910,48 @@ func main() {
 		log.Printf("🔍 pprof at http://localhost:%s/debug/pprof/", cfg.Port)
 	}
 
+	// GET /rooms — 取得房間難度列表（DAY-091）
+	mux.HandleFunc("/rooms", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		defs := room.AllDifficulties()
+		type RoomInfo struct {
+			ID          string  `json:"id"`
+			Name        string  `json:"name"`
+			Icon        string  `json:"icon"`
+			Color       string  `json:"color"`
+			MinBetCost  int     `json:"min_bet_cost"`
+			MaxBetCost  int     `json:"max_bet_cost"`
+			MaxPlayers  int     `json:"max_players"`
+			RewardMult  float64 `json:"reward_mult"`
+			JackpotMult float64 `json:"jackpot_mult"`
+			EntryFee    int     `json:"entry_fee"`
+			Description string  `json:"description"`
+		}
+		rooms := make([]RoomInfo, 0, len(defs))
+		for _, def := range defs {
+			rooms = append(rooms, RoomInfo{
+				ID:          string(def.ID),
+				Name:        def.Name,
+				Icon:        def.Icon,
+				Color:       def.Color,
+				MinBetCost:  def.MinBetCost,
+				MaxBetCost:  def.MaxBetCost,
+				MaxPlayers:  def.MaxPlayers,
+				RewardMult:  def.RewardMult,
+				JackpotMult: def.JackpotMult,
+				EntryFee:    def.EntryFee,
+				Description: def.Description,
+			})
+		}
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"rooms":     rooms,
+			"timestamp": time.Now().UnixMilli(),
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 靜態檔案（Godot Web Export 用）
 	// 注意：Godot HTML5 需要 SharedArrayBuffer，必須加 COOP/COEP headers
 	// 支援 gzip 壓縮（wasm 從 36MB 壓縮到 9MB，減少 75% 下載量）

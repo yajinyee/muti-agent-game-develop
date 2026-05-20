@@ -356,3 +356,11 @@ func get_player_id() -> String:
 ## 取得最後一次 ping 延遲（ms），-1 表示尚未測量（DAY-036）
 func get_ping_ms() -> int:
 	return _last_ping_ms
+
+## 查詢房間列表（DAY-091）
+func send_get_room_list() -> void:
+	send("get_room_list", {})
+
+## 切換房間（DAY-091）
+func send_switch_room(room_id: String) -> void:
+	send("switch_room", {"room_id": room_id})

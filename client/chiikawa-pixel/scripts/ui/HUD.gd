@@ -188,6 +188,7 @@ func _ready() -> void:
 	_init_chain_panel()       # 連鎖爆炸面板（DAY-088）
 	_init_special_weapon_panel() # 特殊武器面板（DAY-089）
 	_init_mystery_box_panel()    # 神秘寶箱面板（DAY-090）
+	_init_room_select_panel()    # 房間難度選擇面板（DAY-091）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1849,3 +1850,44 @@ func _init_mystery_box_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_mystery_box_panel = panel
+
+const RoomSelectPanelScript = preload("res://scripts/ui/RoomSelectPanel.gd")
+var _room_select_panel: Control = null
+var _room_btn: Button = null
+
+func _init_room_select_panel() -> void:
+	# 房間選擇面板（全螢幕覆蓋）
+	var panel = RoomSelectPanelScript.new()
+	panel.name = "RoomSelectPanel"
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 90
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_room_select_panel = panel
+
+	# 房間切換按鈕（TopBar 右側）
+	_room_btn = Button.new()
+	_room_btn.name = "RoomBtn"
+	_room_btn.text = "🏠 房間"
+	_room_btn.position = Vector2(1100, 4)
+	_room_btn.size = Vector2(80, 30)
+	_room_btn.add_theme_color_override("font_color", Color(0.9, 0.85, 0.3))
+	_room_btn.add_theme_font_size_override("font_size", 12)
+	if is_instance_valid(_pixel_font):
+		_room_btn.add_theme_font_override("font", _pixel_font)
+	_room_btn.pressed.connect(_on_room_btn_pressed)
+	add_child(_room_btn)
+
+	# 連接房間切換成功訊號，更新按鈕文字
+	if GameManager.has_signal("room_switched"):
+		GameManager.room_switched.connect(_on_room_switched_hud)
+
+func _on_room_btn_pressed() -> void:
+	if is_instance_valid(_room_select_panel):
+		_room_select_panel.show_panel()
+
+func _on_room_switched_hud(data: Dictionary) -> void:
+	var icon = data.get("room_icon", "🏠")
+	var name_str = data.get("room_name", "房間")
+	if is_instance_valid(_room_btn):
+		_room_btn.text = icon + " " + name_str

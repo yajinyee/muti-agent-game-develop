@@ -2932,3 +2932,20 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **解法：** 用 `var inventories = struct { sync.RWMutex; data map[...] }{data: make(...)}` 
 - **優點：** 不需要在 Manager 結構體中加入額外欄位，背包狀態獨立管理
 - **教訓：** package-level 全域狀態要用匿名 struct 包裝 mutex，確保 thread-safe
+
+## 83. 房間難度系統設計原則（DAY-091）
+- **問題：** 單一難度房間讓不同預算玩家體驗差異大
+- **解法：** 4 個難度房間（初級/中級/高級/VIP），不同獎勵倍率和 Jackpot 累積速度
+- **關鍵設計：**
+  - 難度倍率套用在 handleKill 的 finalReward（疊加所有其他倍率）
+  - Jackpot 貢獻倍率套用在 handleAttack（高難度房間 Jackpot 累積更快）
+  - VIP 房間有進場費（10000 金幣），用 `DeductCoins()` 原子操作扣除
+  - 玩家 `RoomDifficulty` 欄位用 thread-safe getter/setter 存取
+- **業界依據：** Ocean King 系列多難度房間是 2026 年捕魚機標配
+- **教訓：** 房間難度系統要讓高難度有明顯的獎勵優勢，才能吸引玩家升級
+
+## 84. player.mu 跨套件存取問題
+- **問題：** `game` 套件直接存取 `player.mu`（unexported）會編譯失敗
+- **解法：** 在 `player` 套件提供 thread-safe 的 getter/setter 方法
+- **模式：** `GetXxx()` 用 `mu.RLock()`，`SetXxx()` 用 `mu.Lock()`
+- **教訓：** 跨套件存取 struct 欄位時，一律用方法封裝，不要直接存取 unexported 欄位

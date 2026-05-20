@@ -426,6 +426,14 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleOpenMysteryBox(p, msg)
 	case ws.MsgGetMysteryBoxes:
 		g.handleGetMysteryBoxes(p)
+	// 房間難度系統（DAY-091）
+	case ws.MsgGetRoomList:
+		g.handleGetRoomList(clientID)
+	case ws.MsgSwitchRoom:
+		var payload ws.SwitchRoomPayload
+		if err := remarshal(msg.Payload, &payload); err == nil {
+			g.handleSwitchRoom(clientID, payload)
+		}
 	}
 }
 
@@ -483,7 +491,12 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	result := combat.ProcessAttack(req, t)
 
 	// Progressive Jackpot 貢獻（DAY-048）：每次攻擊抽取 0.5% 進入 Jackpot 池
-	if jackpotWin := g.jackpotMgr.Contribute(betCost, p.ID); jackpotWin != nil {
+	// 套用房間難度 Jackpot 倍率（DAY-091）：高難度房間累積更快
+	jackpotBetCost := int(float64(betCost) * g.getRoomJackpotMult(p))
+	if jackpotBetCost < betCost {
+		jackpotBetCost = betCost
+	}
+	if jackpotWin := g.jackpotMgr.Contribute(jackpotBetCost, p.ID); jackpotWin != nil {
 		g.handleJackpotWin(p, jackpotWin)
 	}
 
@@ -588,6 +601,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	streakMult := g.notifyStreakKill(p)
 	if streakMult > 1.0 {
 		finalReward = int(float64(finalReward) * streakMult)
+	}
+	// 套用房間難度獎勵倍率（DAY-091）
+	roomRewardMult := g.getRoomRewardMult(p)
+	if roomRewardMult > 1.0 {
+		finalReward = int(float64(finalReward) * roomRewardMult)
 	}
 	rewardUnlocks := p.AddReward(finalReward)
 	killUnlocks := p.AddKill()

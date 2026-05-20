@@ -60,6 +60,9 @@ const (
 	// 神秘寶箱系統（DAY-090）
 	MsgOpenMysteryBox    MessageType = "open_mystery_box"     // 開箱請求
 	MsgGetMysteryBoxes   MessageType = "get_mystery_boxes"    // 查詢持有寶箱
+	// 房間難度系統（DAY-091）
+	MsgGetRoomList       MessageType = "get_room_list"        // 查詢房間列表
+	MsgSwitchRoom        MessageType = "switch_room"          // 切換房間
 )
 
 // Server → Client
@@ -137,6 +140,10 @@ const (
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
 	MsgMysteryBoxUpdate  MessageType = "mystery_box_update"  // 持有寶箱狀態更新
 	MsgMysteryBoxOpened  MessageType = "mystery_box_opened"  // 開箱結果通知
+	// 房間難度系統（DAY-091）
+	MsgRoomList          MessageType = "room_list"           // 房間列表（Server → Client）
+	MsgRoomSwitched      MessageType = "room_switched"       // 房間切換成功通知
+	MsgRoomError         MessageType = "room_error"          // 房間操作失敗通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1153,4 +1160,53 @@ type MysteryBoxOpenedPayload struct {
 	NewBalance      int                     `json:"new_balance"`
 	PendingMultMult float64                 `json:"pending_mult"` // 待使用倍率（0=無）
 	RemainingBoxes  int                     `json:"remaining_boxes"` // 該稀有度剩餘數量
+}
+
+// ---- 房間難度系統（DAY-091）----
+
+// RoomDifficultyInfo 房間難度資訊（用於 UI 顯示）
+type RoomDifficultyInfo struct {
+	ID              string  `json:"id"`               // "beginner"/"intermediate"/"advanced"/"vip"
+	Name            string  `json:"name"`             // 顯示名稱
+	Icon            string  `json:"icon"`             // emoji 圖示
+	Color           string  `json:"color"`            // 主題色
+	MinBetCost      int     `json:"min_bet_cost"`     // 最低 bet 金幣
+	MaxBetCost      int     `json:"max_bet_cost"`     // 最高 bet 金幣
+	MaxPlayers      int     `json:"max_players"`      // 最大玩家數
+	PlayerCount     int     `json:"player_count"`     // 當前玩家數
+	RewardMult      float64 `json:"reward_mult"`      // 獎勵倍率
+	JackpotMult     float64 `json:"jackpot_mult"`     // Jackpot 倍率
+	EntryFee        int     `json:"entry_fee"`        // 進場費（0=免費）
+	Description     string  `json:"description"`      // 房間描述
+	IsAvailable     bool    `json:"is_available"`     // 是否可進入（未滿且有足夠金幣）
+	IsCurrent       bool    `json:"is_current"`       // 是否是當前房間
+}
+
+// RoomListPayload 房間列表（Server → Client）
+type RoomListPayload struct {
+	Rooms       []RoomDifficultyInfo `json:"rooms"`
+	CurrentRoom string               `json:"current_room"` // 當前所在房間 ID
+}
+
+// SwitchRoomPayload 切換房間請求（Client → Server）
+type SwitchRoomPayload struct {
+	RoomID string `json:"room_id"` // 目標房間 ID（"beginner"/"intermediate"/"advanced"/"vip"）
+}
+
+// RoomSwitchedPayload 房間切換成功通知（Server → Client）
+type RoomSwitchedPayload struct {
+	RoomID      string  `json:"room_id"`
+	RoomName    string  `json:"room_name"`
+	RoomIcon    string  `json:"room_icon"`
+	RoomColor   string  `json:"room_color"`
+	RewardMult  float64 `json:"reward_mult"`
+	JackpotMult float64 `json:"jackpot_mult"`
+	EntryFee    int     `json:"entry_fee"`    // 已扣除的進場費
+	NewBalance  int     `json:"new_balance"`  // 扣除進場費後的餘額
+}
+
+// RoomErrorPayload 房間操作失敗通知（Server → Client）
+type RoomErrorPayload struct {
+	Code    string `json:"code"`    // "room_full"/"insufficient_coins"/"room_not_found"
+	Message string `json:"message"`
 }
