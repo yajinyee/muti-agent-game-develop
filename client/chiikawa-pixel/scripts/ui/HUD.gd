@@ -194,6 +194,7 @@ func _ready() -> void:
 	_init_shop_panel()           # 商店面板（DAY-094）
 	_init_player_stats_panel()   # 玩家統計面板（DAY-096）
 	_init_announcement_panel()   # 全服公告面板（DAY-097）
+	_init_player_card_panel()    # 玩家名片面板（DAY-106）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2057,3 +2058,19 @@ func _init_announcement_panel() -> void:
 	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(panel)
 	panel.setup(_pixel_font)
+
+## 玩家名片面板（DAY-106）
+var _player_card_panel_node = null
+const PlayerCardPanelScript = preload("res://scripts/ui/PlayerCardPanel.gd")
+
+func _init_player_card_panel() -> void:
+	var panel = PlayerCardPanelScript.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 90
+	add_child(panel)
+	_player_card_panel_node = panel
+
+## 顯示玩家名片（供排行榜/公會/好友面板呼叫）
+func show_player_card(player_id: String) -> void:
+	if is_instance_valid(_player_card_panel_node):
+		_player_card_panel_node.show_card(player_id)

@@ -52,6 +52,8 @@ signal dm_received(dm_data: Dictionary)                # 收到私訊
 signal dm_sent(dm_data: Dictionary)                    # 發送成功確認
 signal dm_error(error_data: Dictionary)                # 發送失敗
 signal open_dm_panel(friend_id: String, friend_name: String) # 開啟 DM 面板
+# 玩家名片系統（DAY-106）
+signal player_card_received(card_data: Dictionary)     # 收到玩家名片資料
 signal guild_updated(guild_data: Dictionary)           # 公會資訊更新（DAY-074）
 signal guild_task_complete(task_data: Dictionary)      # 公會任務完成（DAY-074）
 signal guild_message_received(msg_data: Dictionary)    # 公會聊天訊息（DAY-075）
@@ -222,6 +224,9 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_dm_sent(payload)
 		"dm_error":
 			_handle_dm_error(payload)
+		# 玩家名片系統（DAY-106）
+		"player_card":
+			emit_signal("player_card_received", payload)
 		"guild_update":
 			_handle_guild_update(payload)
 		"guild_list":

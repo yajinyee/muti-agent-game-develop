@@ -188,6 +188,9 @@ const (
 	MsgDMReceived MessageType = "dm_received" // 收到私訊（Server → Client）
 	MsgDMSent     MessageType = "dm_sent"     // 發送成功確認（Server → Client）
 	MsgDMError    MessageType = "dm_error"    // 發送失敗（Server → Client）
+	// 玩家名片系統（DAY-106）
+	MsgGetPlayerCard  MessageType = "get_player_card"  // 查詢玩家名片（Client → Server）
+	MsgPlayerCard     MessageType = "player_card"      // 玩家名片資料（Server → Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1561,4 +1564,33 @@ type AnnouncementPayload struct {
 	Color      string `json:"color"`       // 顯示顏色（hex）
 	Duration   int    `json:"duration"`    // 顯示時長（毫秒）
 	CreatedAtMs int64 `json:"created_at_ms"`
+}
+
+// ---- 玩家名片系統（DAY-106）----
+
+// GetPlayerCardPayload 查詢玩家名片請求（Client → Server）
+type GetPlayerCardPayload struct {
+	TargetPlayerID string `json:"target_player_id"`
+}
+
+// PlayerCardPayload 玩家名片資料（Server → Client）
+type PlayerCardPayload struct {
+	PlayerID         string  `json:"player_id"`
+	DisplayName      string  `json:"display_name"`
+	TitleName        string  `json:"title_name"`
+	TitleIcon        string  `json:"title_icon"`
+	TitleColor       string  `json:"title_color"`
+	VIPLevel         int     `json:"vip_level"`
+	VIPName          string  `json:"vip_name"`
+	GuildName        string  `json:"guild_name"`
+	GuildRole        string  `json:"guild_role"`
+	KillCount        int     `json:"kill_count"`
+	MaxCoins         int     `json:"max_coins"`
+	BestStreak       int     `json:"best_streak"`
+	BestMult         float64 `json:"best_mult"`
+	JackpotWins      int     `json:"jackpot_wins"`
+	AchievementCount int     `json:"achievement_count"`
+	LoginStreak      int     `json:"login_streak"`
+	RTP              float64 `json:"rtp"`
+	IsOnline         bool    `json:"is_online"`
 }

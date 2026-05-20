@@ -396,3 +396,7 @@ func send_gift(friend_id: String) -> void:
 ## 查詢今日禮物狀態（DAY-101）
 func send_get_gift_status() -> void:
 	send("get_gift_status", {})
+
+## 查詢玩家名片（DAY-106）
+func send_get_player_card(target_player_id: String) -> void:
+	send("get_player_card", {"target_player_id": target_player_id})

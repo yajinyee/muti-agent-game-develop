@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-105 Anti-Cheat 異常行為偵測系統）
+## 最後更新：2026-05-21（DAY-106 玩家名片系統 Player Card）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,19 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-105 更新（自主觸發）：** 異常行為偵測系統（Anti-Cheat System）✅
+- **DAY-106 更新（自主觸發）：** 玩家名片系統（Player Card System）✅
+  - `server/internal/ws/protocol.go`：新增 `MsgGetPlayerCard`/`MsgPlayerCard`；`GetPlayerCardPayload`/`PlayerCardPayload`（含稱號/VIP/公會/統計亮點）
+  - `server/internal/game/player_card_handler.go`：`handleGetPlayerCard()`/`buildPlayerCard()`（整合 VIP/公會/Stats/成就）
+  - `server/internal/game/game.go`：`PlayerProfile` struct 新增 VIP/公會/統計亮點欄位（BestStreak/BestMult/JackpotWins/TotalBet/TotalReward/RTP）；`GetPlayerProfile()` 整合新欄位；HandleMessage 加入 `MsgGetPlayerCard`
+  - `client/chiikawa-pixel/scripts/ui/PlayerCardPanel.gd`：玩家名片面板（全螢幕遮罩；名稱+在線狀態；稱號（顏色）；VIP等級；公會+職位；登入連續；成就數；統計亮點6項）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`player_card_received` 訊號 + `player_card` 訊息分支
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：`send_get_player_card()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 PlayerCardPanel（z_index=90）+ `show_player_card()` 公開方法
+  - 名片內容：稱號/VIP等級/公會職位/登入連續/成就數/擊破數/最高金幣/最高連擊/最高倍率/Jackpot次數/RTP
+  - 觸發方式：排行榜點擊玩家名稱 / 公會成員列表 / 好友列表（透過 HUD.show_player_card()）
+  - build/vet 全部通過
+  - **業界依據：** smartico.ai（2025）確認 Achievement 和 Connection 是 iGaming 留存的核心心理驅動力；玩家名片讓玩家能展示成就，增加社交認同感
+
   - `server/internal/anticheat/anticheat.go`：異常偵測管理器（5種偵測：RTP異常/Bot攻擊/金幣暴增/Bonus濫用/Jackpot異常；AlertLevel 3級；5分鐘冷卻防重複警告；滑動視窗計算）
   - `server/internal/anticheat/anticheat_test.go`：10 個單元測試全部通過
   - `server/internal/game/game.go`：整合 `AntiCheat *anticheat.Manager`；AddPlayer 建立記錄；RemovePlayer 清理記錄；handleAttack 記錄攻擊；handleKill 記錄獎勵+金幣

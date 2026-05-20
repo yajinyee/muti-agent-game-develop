@@ -490,6 +490,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 私訊系統（DAY-103）
 	case ws.MsgSendDM:
 		g.handleSendDM(p, msg)
+	// 玩家名片系統（DAY-106）
+	case ws.MsgGetPlayerCard:
+		g.handleGetPlayerCard(p, msg)
 	}
 }
 
@@ -1531,6 +1534,20 @@ type PlayerProfile struct {
 	// 週賽
 	TournamentPoints int               `json:"tournament_points"`
 	TournamentRank   int               `json:"tournament_rank"`
+	// VIP（DAY-106）
+	VIPLevel    int                    `json:"vip_level"`
+	VIPName     string                 `json:"vip_name"`
+	// 公會（DAY-106）
+	GuildID     string                 `json:"guild_id"`
+	GuildName   string                 `json:"guild_name"`
+	GuildRole   string                 `json:"guild_role"`
+	// 統計亮點（DAY-106）
+	BestStreak  int                    `json:"best_streak"`
+	BestMult    float64                `json:"best_mult"`
+	JackpotWins int                    `json:"jackpot_wins"`
+	TotalBet    int                    `json:"total_bet"`
+	TotalReward int                    `json:"total_reward"`
+	RTP         float64                `json:"rtp"`
 	// 時間戳
 	Timestamp int64                    `json:"timestamp"`
 }
@@ -1581,6 +1598,41 @@ func (g *Game) GetPlayerProfile(playerID string) (*PlayerProfile, bool) {
 		}
 	}
 
+	// VIP 資訊（DAY-106）
+	vipSnap := g.VIP.GetSnapshot(playerID)
+	vipLevel := vipSnap.VIPLevel
+	vipName := vipSnap.TierName
+
+	// 公會資訊（DAY-106）
+	guildID := g.Guild.GetPlayerGuildID(playerID)
+	guildName := ""
+	guildRole := ""
+	if guildID != "" {
+		if gd := g.Guild.GetGuild(guildID); gd != nil {
+			guildName = gd.Name
+			if member, ok := gd.Members[playerID]; ok {
+				guildRole = string(member.Role)
+			}
+		}
+	}
+
+	// 統計亮點（DAY-106）
+	bestStreak := 0
+	bestMult := 0.0
+	jackpotWins := 0
+	totalBet := 0
+	totalReward := 0
+	rtp := 0.0
+	if p.Stats != nil {
+		statsSnap := p.Stats.Snapshot()
+		bestStreak = statsSnap.BestStreak
+		bestMult = statsSnap.BestMultiplier
+		jackpotWins = statsSnap.JackpotWins
+		totalBet = statsSnap.TotalBet
+		totalReward = statsSnap.TotalReward
+		rtp = statsSnap.RTP
+	}
+
 	return &PlayerProfile{
 		PlayerID:       playerID,
 		DisplayName:    snap.DisplayName,
@@ -1599,6 +1651,17 @@ func (g *Game) GetPlayerProfile(playerID string) (*PlayerProfile, bool) {
 		Achievements:   achInfos,
 		TournamentPoints: tournPoints,
 		TournamentRank:   tournRank,
+		VIPLevel:       vipLevel,
+		VIPName:        vipName,
+		GuildID:        guildID,
+		GuildName:      guildName,
+		GuildRole:      guildRole,
+		BestStreak:     bestStreak,
+		BestMult:       bestMult,
+		JackpotWins:    jackpotWins,
+		TotalBet:       totalBet,
+		TotalReward:    totalReward,
+		RTP:            rtp,
 		Timestamp:      time.Now().UnixMilli(),
 	}, true
 }
