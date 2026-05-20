@@ -361,6 +361,49 @@ func main() {
 		}
 	})
 
+	// 公會系統端點（DAY-075）
+	// GET /guilds — 取得所有公會列表
+	// GET /guild?guild_id=xxx — 取得指定公會詳細資訊
+	mux.HandleFunc("/guilds", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		allGuilds := g.Guild.GetAllGuilds()
+		type GuildSummary struct {
+			GuildID     string `json:"guild_id"`
+			Name        string `json:"name"`
+			Level       int    `json:"level"`
+			MemberCount int    `json:"member_count"`
+			OnlineCount int    `json:"online_count"`
+			TotalKills  int    `json:"total_kills"`
+			TotalCoins  int    `json:"total_coins"`
+		}
+		summaries := make([]GuildSummary, 0, len(allGuilds))
+		for _, gd := range allGuilds {
+			onlineCount := 0
+			for _, m := range gd.Members {
+				if m.IsOnline {
+					onlineCount++
+				}
+			}
+			summaries = append(summaries, GuildSummary{
+				GuildID:     gd.ID,
+				Name:        gd.Name,
+				Level:       gd.Level,
+				MemberCount: len(gd.Members),
+				OnlineCount: onlineCount,
+				TotalKills:  gd.TotalKills,
+				TotalCoins:  gd.TotalCoins,
+			})
+		}
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"guilds":    summaries,
+			"count":     len(summaries),
+			"timestamp": time.Now().UnixMilli(),
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 玩家個人資料端點（DAY-069）
 	// GET /profile?player_id=xxx — 取得指定玩家的個人資料
 	// GET /profiles — 取得所有在線玩家的個人資料摘要

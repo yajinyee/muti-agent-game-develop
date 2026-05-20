@@ -37,6 +37,7 @@ const (
 	MsgPromoteGuildMember MessageType = "promote_guild_member" // 升職成員
 	MsgGetGuildInfo  MessageType = "get_guild_info" // 查詢公會資訊
 	MsgGetGuildList  MessageType = "get_guild_list" // 查詢公會列表
+	MsgGuildChat     MessageType = "guild_chat"     // 公會聊天（DAY-075）
 )
 
 // Server → Client
@@ -73,6 +74,7 @@ const (
 	MsgGuildList         MessageType = "guild_list"         // 公會列表
 	MsgGuildTaskComplete MessageType = "guild_task_complete" // 公會任務完成通知
 	MsgGuildError        MessageType = "guild_error"        // 公會操作錯誤
+	MsgGuildMessage      MessageType = "guild_message"      // 公會聊天訊息（DAY-075）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -629,4 +631,21 @@ type GuildTaskCompletePayload struct {
 type GuildErrorPayload struct {
 	Operation string `json:"operation"` // 操作類型
 	Message   string `json:"message"`   // 錯誤訊息
+}
+
+// ---- 公會聊天室（DAY-075）----
+
+// GuildChatPayload 公會聊天訊息（Client → Server）
+type GuildChatPayload struct {
+	Message string `json:"message"` // 聊天內容（最多 100 字）
+}
+
+// GuildMessagePayload 公會聊天廣播（Server → Client）
+type GuildMessagePayload struct {
+	GuildID     string `json:"guild_id"`
+	PlayerID    string `json:"player_id"`
+	DisplayName string `json:"display_name"`
+	Role        string `json:"role"`    // "leader" / "officer" / "member"
+	Message     string `json:"message"`
+	Timestamp   int64  `json:"timestamp"` // Unix ms
 }

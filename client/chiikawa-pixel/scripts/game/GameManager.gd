@@ -35,6 +35,7 @@ signal friend_request_received(request_data: Dictionary) # 好友請求通知（
 signal friend_updated(update_data: Dictionary)         # 好友狀態更新（DAY-073）
 signal guild_updated(guild_data: Dictionary)           # 公會資訊更新（DAY-074）
 signal guild_task_complete(task_data: Dictionary)      # 公會任務完成（DAY-074）
+signal guild_message_received(msg_data: Dictionary)    # 公會聊天訊息（DAY-075）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -138,6 +139,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_guild_task_complete(payload)
 		"guild_error":
 			_handle_guild_error(payload)
+		"guild_message":
+			_handle_guild_message(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -321,6 +324,10 @@ func _handle_guild_task_complete(payload: Dictionary) -> void:
 func _handle_guild_error(payload: Dictionary) -> void:
 	var msg: String = payload.get("message", "公會操作失敗")
 	print("[GameManager] Guild error: ", msg)
+
+## 處理公會聊天訊息（DAY-075）
+func _handle_guild_message(payload: Dictionary) -> void:
+	emit_signal("guild_message_received", payload)
 
 ## 取得顯示名稱
 func get_display_name() -> String:

@@ -3,6 +3,7 @@ package game
 
 import (
 	"log"
+	"time"
 
 	"digital-twin/server/internal/game/guild"
 	"digital-twin/server/internal/player"
@@ -324,4 +325,77 @@ func (g *Game) notifyGuildTaskComplete(guildID string, completedTasks []*guild.G
 		}
 		log.Printf("[Guild] 公會 %s 完成任務 %s，每人獎勵 %d 金幣", guildID, task.Name, task.Reward)
 	}
+}
+
+// handleGuildChat 處理公會聊天訊息（DAY-075）
+// 廣播給所有在線公會成員
+func (g *Game) handleGuildChat(p *player.Player, msg *ws.Message) {
+	var payload ws.GuildChatPayload
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		return
+	}
+
+	// 訊息長度限制
+	if len([]rune(payload.Message)) > 100 {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type: ws.MsgGuildError,
+			Payload: ws.GuildErrorPayload{
+				Operation: "guild_chat",
+				Message:   "訊息不能超過 100 字",
+			},
+		})
+		return
+	}
+
+	if payload.Message == "" {
+		return
+	}
+
+	guildID := g.Guild.GetPlayerGuildID(p.ID)
+	if guildID == "" {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type: ws.MsgGuildError,
+			Payload: ws.GuildErrorPayload{
+				Operation: "guild_chat",
+				Message:   "你不在任何公會中",
+			},
+		})
+		return
+	}
+
+	guildData := g.Guild.GetGuild(guildID)
+	if guildData == nil {
+		return
+	}
+
+	// 取得發送者職位
+	role := "member"
+	if member, ok := guildData.Members[p.ID]; ok {
+		role = string(member.Role)
+	}
+
+	chatMsg := &ws.Message{
+		Type: ws.MsgGuildMessage,
+		Payload: ws.GuildMessagePayload{
+			GuildID:     guildID,
+			PlayerID:    p.ID,
+			DisplayName: p.DisplayName,
+			Role:        role,
+			Message:     payload.Message,
+			Timestamp:   time.Now().UnixMilli(),
+		},
+	}
+
+	// 廣播給所有在線公會成員
+	memberIDs := g.Guild.GetGuildMemberIDs(guildID)
+	for _, memberID := range memberIDs {
+		g.mu.RLock()
+		_, online := g.Players[memberID]
+		g.mu.RUnlock()
+		if online {
+			g.Hub.Send(memberID, chatMsg)
+		}
+	}
+
+	log.Printf("[GuildChat] %s(%s): %s", p.DisplayName, guildID, payload.Message)
 }

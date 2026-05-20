@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-074 公會系統）
+## 最後更新：2026-05-20（DAY-075 公會聊天室 + /guilds HTTP 端點）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,16 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-074 更新（自主觸發）：** 公會系統（Guild System）✅
+- **DAY-075 更新（自主觸發）：** 公會聊天室（Guild Chat）+ /guilds HTTP 端點 ✅
+  - `server/internal/ws/protocol.go`：`MsgGuildChat`（Client→Server）+ `MsgGuildMessage`（Server→Client）+ `GuildChatPayload`/`GuildMessagePayload`
+  - `server/internal/game/guild_handler.go`：`handleGuildChat()` — 廣播給所有在線公會成員，100字限制，職位標記
+  - `server/internal/game/game.go`：`MsgGuildChat` handler 分支
+  - `server/cmd/gameserver/main.go`：`/guilds` HTTP 端點（GET，回傳所有公會摘要）
+  - `client/chiikawa-pixel/scripts/ui/GuildPanel.gd`：聊天室 UI（訊息顯示區 + 輸入框 + 發送按鈕，最近 5 條訊息，職位圖示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`guild_message_received` 訊號 + `_handle_guild_message()` handler
+  - build/vet 全部通過
+  - **業界依據：** 公會聊天室是公會系統的標配功能，增加成員間的即時溝通和凝聚力
+
   - `server/internal/game/guild/guild.go`：公會管理器（建立/加入/退出/踢人/升職/公會任務/公會等級）
   - `server/internal/game/guild/guild_test.go`：16 個單元測試全部通過
   - `server/internal/ws/protocol.go`：`MsgCreateGuild`/`MsgJoinGuild`/`MsgLeaveGuild`/`MsgKickGuildMember`/`MsgPromoteGuildMember`/`MsgGetGuildInfo`/`MsgGetGuildList`（Client→Server）+ `MsgGuildUpdate`/`MsgGuildList`/`MsgGuildTaskComplete`/`MsgGuildError`（Server→Client）+ 對應 Payload

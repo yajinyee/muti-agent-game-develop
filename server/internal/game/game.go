@@ -327,6 +327,8 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleGetGuildInfo(p, msg)
 	case ws.MsgGetGuildList:
 		g.handleGetGuildList(p, msg)
+	case ws.MsgGuildChat:
+		g.handleGuildChat(p, msg)
 	}
 }
 

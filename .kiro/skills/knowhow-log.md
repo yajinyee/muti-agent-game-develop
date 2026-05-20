@@ -2728,3 +2728,25 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **原因：** `D:\Kiro\.git\tmp` 目錄在每次 git 操作後可能被清除
 - **解決：** 每次 git 操作前先執行 `New-Item -ItemType Directory -Force -Path "D:\Kiro\.git\tmp"`
 - **教訓：** GIT_TMPDIR 設定的目錄必須在每次 git 操作前確認存在
+
+## 83. Go 公會系統設計模式（DAY-074）
+- **公會最大成員數：** 20 人（業界標配，太多管理困難，太少社交感不足）
+- **職位設計：** 會長/副會長/成員三層，副會長可踢普通成員，會長可踢所有人
+- **會長轉讓：** 會長退出時優先轉讓給副會長，其次是最早加入的成員
+- **Map 迭代順序：** Go 的 `map` 迭代順序不確定，`findNewLeader` 要用時間排序確保結果一致
+- **公會任務重置：** 用 `nextMidnightUTC8()` 計算下一個 UTC+8 00:00，確保台灣時區正確
+- **教訓：** 公會系統的核心是「共同目標」，任務設計要讓每個成員都有貢獻感
+
+## 84. GDScript 跨系統訊號連接最佳實踐（DAY-074）
+- **問題：** GuildPanel 需要連接 GameManager 的訊號，但 GameManager 是 Autoload
+- **正確做法：** 在 `_connect_signals()` 中用 `if not signal.is_connected(handler)` 防止重複連接
+- **Autoload 存取：** 直接用 `GameManager.signal_name.connect(handler)` 即可，不需要 `get_node`
+- **send_message 模式：** `GameManager.send_message("msg_type", {payload})` 統一發送訊息
+- **教訓：** Autoload 的訊號連接要加 `is_connected` 檢查，避免場景重載時重複連接
+
+## 85. Windows git 暫存目錄問題（DAY-074）
+- **問題：** `git add` 報 `error: unable to create temporary file: No such file or directory`
+- **根本原因：** Windows 的 `%TEMP%` 目錄路徑有空格或特殊字元，git 無法建立暫存檔
+- **解決：** 在 PowerShell 中設定 `$env:TEMP = "D:\Kiro\.git\tmp"` + `$env:TMP = "D:\Kiro\.git\tmp"`
+- **永久解決：** `git config core.tmpdir "D:/Kiro/.git/tmp"`（注意用正斜線）
+- **教訓：** Windows 開發環境的 git 操作要確保 TEMP 目錄路徑沒有問題，建議用專案內的 .git/tmp

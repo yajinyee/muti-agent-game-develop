@@ -1,11 +1,12 @@
-## GuildPanel.gd — 公會系統面板（DAY-074）
-## 顯示公會資訊、成員列表、公會任務進度
+## GuildPanel.gd — 公會系統面板（DAY-074/075）
+## 顯示公會資訊、成員列表、公會任務進度、公會聊天室
 ## 位置：TopBar 右側（可折疊）
 extends Node2D
 
 # ---- 常數 ----
 const PANEL_WIDTH  := 300
-const PANEL_HEIGHT := 260
+const PANEL_HEIGHT := 320
+const MAX_CHAT_MESSAGES := 20
 
 # ---- 節點引用 ----
 var _pixel_font: Font = null
@@ -14,6 +15,9 @@ var _toggle_btn: Button = null
 var _panel_bg: ColorRect = null
 var _content_container: Node2D = null
 var _task_badge: Label = null
+var _chat_container: Node2D = null
+var _chat_input: LineEdit = null
+var _chat_messages_node: Node2D = null
 
 # ---- 公會資料 ----
 var _guild_id: String = ""
@@ -25,6 +29,9 @@ var _tasks: Array = []
 var _my_role: String = ""
 var _total_kills: int = 0
 var _total_coins: int = 0
+
+# ---- 聊天記錄 ----
+var _chat_history: Array = []  # Array of {name, role, message, timestamp}
 
 # ---- 任務完成通知佇列 ----
 var _task_complete_queue: Array = []
@@ -138,6 +145,8 @@ func _connect_signals() -> void:
 			GameManager.guild_updated.connect(_on_guild_updated)
 		if not GameManager.guild_task_complete.is_connected(_on_guild_task_complete):
 			GameManager.guild_task_complete.connect(_on_guild_task_complete)
+		if not GameManager.guild_message_received.is_connected(_on_guild_message):
+			GameManager.guild_message_received.connect(_on_guild_message)
 
 ## 切換面板顯示
 func _on_toggle() -> void:
@@ -170,6 +179,18 @@ func _on_guild_task_complete(data: Dictionary) -> void:
 	_task_complete_queue.append(data)
 	_show_task_badge()
 	_show_task_complete_popup(data)
+
+## 公會聊天訊息接收（DAY-075）
+func _on_guild_message(data: Dictionary) -> void:
+	_chat_history.append(data)
+	if _chat_history.size() > MAX_CHAT_MESSAGES:
+		_chat_history.pop_front()
+	if _is_open and _chat_messages_node:
+		_refresh_chat_messages()
+	# 未開啟時顯示徽章提示
+	if not _is_open:
+		_task_badge.text = "💬"
+		_task_badge.visible = true
 
 ## 顯示任務完成徽章
 func _show_task_badge() -> void:
@@ -314,6 +335,11 @@ func _refresh_panel() -> void:
 		bar_fill.color = Color(0.3, 0.9, 0.3) if completed else Color(0.9, 0.7, 0.1)
 		_content_container.add_child(bar_fill)
 
+	# 聊天室（DAY-075）
+	var chat_y := task_y + 14 + _tasks.size() * 28 + 8
+	_build_chat_area(_content_container, chat_y)
+	_refresh_chat_messages()
+
 ## 取得職位圖示
 func _get_role_icon(role: String) -> String:
 	match role:
@@ -342,3 +368,92 @@ func _on_leave_guild_pressed() -> void:
 	if _guild_id == "":
 		return
 	GameManager.send_message("leave_guild", {})
+
+## 建立聊天室區域（DAY-075）
+func _build_chat_area(parent: Node, y_offset: int) -> void:
+	_chat_container = Node2D.new()
+	_chat_container.name = "ChatContainer"
+	parent.add_child(_chat_container)
+
+	# 聊天標題
+	var chat_title := Label.new()
+	chat_title.position = Vector2(8, y_offset)
+	chat_title.text = "💬 公會聊天"
+	chat_title.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	if _pixel_font:
+		chat_title.add_theme_font_override("font", _pixel_font)
+		chat_title.add_theme_font_size_override("font_size", 10)
+	_chat_container.add_child(chat_title)
+
+	# 聊天訊息區域背景
+	var chat_bg := ColorRect.new()
+	chat_bg.position = Vector2(4, y_offset + 14)
+	chat_bg.size = Vector2(PANEL_WIDTH - 8, 80)
+	chat_bg.color = Color(0.02, 0.02, 0.05, 0.8)
+	_chat_container.add_child(chat_bg)
+
+	# 聊天訊息顯示節點
+	_chat_messages_node = Node2D.new()
+	_chat_messages_node.name = "ChatMessages"
+	_chat_messages_node.position = Vector2(4, y_offset + 14)
+	_chat_container.add_child(_chat_messages_node)
+
+	# 輸入框
+	_chat_input = LineEdit.new()
+	_chat_input.position = Vector2(4, y_offset + 98)
+	_chat_input.size = Vector2(PANEL_WIDTH - 50, 18)
+	_chat_input.placeholder_text = "輸入訊息..."
+	_chat_input.max_length = 100
+	if _pixel_font:
+		_chat_input.add_theme_font_override("font", _pixel_font)
+		_chat_input.add_theme_font_size_override("font_size", 9)
+	_chat_input.text_submitted.connect(_on_chat_submitted)
+	_chat_container.add_child(_chat_input)
+
+	# 發送按鈕
+	var send_btn := Button.new()
+	send_btn.text = "發送"
+	send_btn.position = Vector2(PANEL_WIDTH - 44, y_offset + 98)
+	send_btn.size = Vector2(40, 18)
+	if _pixel_font:
+		send_btn.add_theme_font_override("font", _pixel_font)
+		send_btn.add_theme_font_size_override("font_size", 9)
+	send_btn.pressed.connect(func(): _on_chat_submitted(_chat_input.text))
+	_chat_container.add_child(send_btn)
+
+## 刷新聊天訊息顯示
+func _refresh_chat_messages() -> void:
+	if not _chat_messages_node:
+		return
+
+	# 清除舊訊息
+	for child in _chat_messages_node.get_children():
+		child.queue_free()
+
+	# 顯示最近 5 條訊息
+	var start_idx := max(0, _chat_history.size() - 5)
+	for i in range(start_idx, _chat_history.size()):
+		var chat_data: Dictionary = _chat_history[i]
+		var role_icon := _get_role_icon(chat_data.get("role", "member"))
+		var name_str: String = chat_data.get("display_name", "???")
+		var msg_str: String = chat_data.get("message", "")
+		var y_pos := (i - start_idx) * 15 + 3
+
+		var msg_label := Label.new()
+		msg_label.position = Vector2(4, y_pos)
+		msg_label.text = role_icon + name_str + ": " + msg_str
+		msg_label.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+		if _pixel_font:
+			msg_label.add_theme_font_override("font", _pixel_font)
+			msg_label.add_theme_font_size_override("font_size", 9)
+		_chat_messages_node.add_child(msg_label)
+
+## 發送聊天訊息
+func _on_chat_submitted(text: String) -> void:
+	if text.strip_edges() == "":
+		return
+	if _guild_id == "":
+		return
+	GameManager.send_message("guild_chat", {"message": text.strip_edges()})
+	if _chat_input:
+		_chat_input.text = ""
