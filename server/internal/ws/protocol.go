@@ -196,6 +196,14 @@ const (
 	MsgPlayerCard     MessageType = "player_card"      // 玩家名片資料（Server → Client）
 	// 登入里程碑系統（DAY-107）
 	MsgGetLoginProgress MessageType = "get_login_progress" // 查詢登入進度（Client → Server）
+	// 賽季節日活動系統（DAY-109）
+	MsgGetFestival          MessageType = "get_festival"           // 查詢節日狀態（Client → Server）
+	MsgClaimFestivalTask    MessageType = "claim_festival_task"    // 領取節日任務獎勵（Client → Server）
+	MsgFestivalUpdate       MessageType = "festival_update"        // 節日狀態更新（Server → Client）
+	MsgFestivalTaskReady    MessageType = "festival_task_ready"    // 節日任務可領取通知（Server → Client）
+	MsgFestivalTaskClaimed  MessageType = "festival_task_claimed"  // 節日任務獎勵領取成功（Server → Client）
+	MsgFestivalTitleEarned  MessageType = "festival_title_earned"  // 節日稱號獲得通知（Server → Client）
+	MsgFestivalError        MessageType = "festival_error"         // 節日操作失敗（Server → Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1650,4 +1658,34 @@ type SuperBonusReadyPayload struct {
 	MultBonus   float64 `json:"mult_bonus"`  // 倍率加成（1.5x / 2.0x / 3.0x）
 	Label       string `json:"label"`        // 顯示文字（"SUPER BONUS!" / "MEGA BONUS!" / "ULTRA BONUS!"）
 	Color       string `json:"color"`        // 顏色（hex）
+}
+
+// ---- 賽季節日活動系統（DAY-109）----
+
+// ClaimFestivalTaskPayload 領取節日任務獎勵請求（Client → Server）
+type ClaimFestivalTaskPayload struct {
+	TaskID string `json:"task_id"`
+}
+
+// FestivalTaskReadyPayload 節日任務可領取通知（Server → Client）
+type FestivalTaskReadyPayload struct {
+	TaskID string `json:"task_id"`
+}
+
+// FestivalTaskClaimedPayload 節日任務獎勵領取成功（Server → Client）
+type FestivalTaskClaimedPayload struct {
+	TaskID      string `json:"task_id"`
+	RewardCoins int    `json:"reward_coins"`
+}
+
+// FestivalTitleEarnedPayload 節日稱號獲得通知（Server → Client）
+type FestivalTitleEarnedPayload struct {
+	TitleID    string `json:"title_id"`
+	TitleName  string `json:"title_name"`
+	TitleColor string `json:"title_color"`
+}
+
+// FestivalErrorPayload 節日操作失敗（Server → Client）
+type FestivalErrorPayload struct {
+	Message string `json:"message"`
 }

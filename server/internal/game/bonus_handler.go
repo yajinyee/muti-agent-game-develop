@@ -243,6 +243,8 @@ func (g *Game) endBonusGame() {
 		}
 		// 公會戰積分：Bonus 完成（DAY-076）
 		go g.notifyGuildWarBonus(playerID)
+		// 節日任務：記錄 Bonus 完成（DAY-109）
+		go g.notifyFestivalBonus(p)
 	}
 
 	g.transitionState(state.StateBonusResult)

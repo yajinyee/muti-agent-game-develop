@@ -99,5 +99,8 @@ func (g *Game) notifyChainKill(p *player.Player, triggerID string, triggerX, tri
 	log.Printf("[Chain] player=%s triggered %s (%d targets, reward=%d)",
 		p.ID, result.LevelName, len(chainEntries), totalReward)
 
+	// 節日任務：記錄連鎖爆炸（DAY-109）
+	go g.notifyFestivalChain(p)
+
 	return totalReward
 }

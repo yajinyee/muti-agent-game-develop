@@ -3061,3 +3061,21 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **冷卻機制：** 同類型警告 5 分鐘內不重複，避免 log 爆炸
 - **goroutine 安全：** RecordReward/RecordCoins 在 goroutine 中呼叫，避免阻塞 handleKill
 - **教訓：** 異常偵測要有冷卻時間和最小樣本數，否則正常玩家也會被誤報
+
+## 83. 節日活動系統設計原則（DAY-109）
+- **節日偵測：** 根據月份/日期自動偵測，不需要手動設定
+- **倍率疊加順序：** 基礎獎勵 → 活動倍率 → 天氣倍率 → 連擊倍率 → 房間倍率 → 節日倍率
+- **Jackpot 倍率：** 節日期間 Jackpot 貢獻量增加（jackpotBetCost × festivalJackpotMult），讓玩家更容易觸發 Jackpot
+- **任務設計：** 每個節日 3 個任務，難度遞增（普通擊破 → 特殊目標 → 特殊事件）
+- **稱號優先級：** 節日稱號（75-80）高於一般稱號（0-55），確保節日玩家的稱號更顯眼
+- **教訓：** 節日系統要與現有的 Jackpot/Bonus/連擊/連鎖系統深度整合，不能只是表面的 UI 裝飾
+
+## 84. Go 包設計：避免 import cycle
+- **問題：** festival_handler.go 需要用隨機數，但直接用 math/rand 會讓 festival 包依賴 game 包
+- **解法：** 在 festival 包建立 rand.go 提供 RandFloat64() 函數，game 包直接呼叫 festival.RandFloat64()
+- **教訓：** 跨包的工具函數要放在被依賴的包裡，不要放在依賴方
+
+## 85. GDScript 訊號命名衝突
+- **問題：** GameManager.gd 中 `challenge_unlocked` 訊號名稱與節日系統的 `festival_task_ready` 可能衝突
+- **解法：** 節日系統的訊號加上 `_signal` 後綴（festival_task_ready_signal 等），避免與 GDScript 保留字或其他訊號衝突
+- **教訓：** 新增訊號時要先確認名稱不與現有訊號衝突

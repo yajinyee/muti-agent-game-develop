@@ -40,6 +40,7 @@ import (
 	"digital-twin/server/internal/game/weather"
 	"digital-twin/server/internal/game/wheel"
 	"digital-twin/server/internal/anticheat"
+	"digital-twin/server/internal/game/festival"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -82,6 +83,7 @@ type Game struct {
 	Shop          *shop.Manager          // 商店管理器（DAY-094）
 	Announce      *announce.Manager      // 全服公告管理器（DAY-097）
 	AntiCheat     *anticheat.Manager     // 異常行為偵測管理器（DAY-105）
+	Festival      *festival.Manager      // 賽季節日活動管理器（DAY-109）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -156,6 +158,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Shop:               shop.New(),
 		Announce:           announce.NewManager(),
 		AntiCheat:          anticheat.New(),
+		Festival:           festival.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -280,6 +283,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.AntiCheat.EnsureRecord(playerID, pp.DisplayName)
 				// 發送登入進度（DAY-107）
 				g.handleGetLoginProgress(pp)
+				// 發送節日狀態（DAY-109）
+				g.sendFestivalState(pp)
 			}
 		}()
 	}
@@ -329,6 +334,8 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.MysteryBox.RemovePlayer(playerID)
 		// 清理異常偵測記錄（DAY-105）
 		g.AntiCheat.RemoveRecord(playerID)
+		// 清理節日進度（DAY-109）
+		g.Festival.RemovePlayer(playerID)
 	}
 }
 
@@ -498,6 +505,14 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 登入里程碑系統（DAY-107）
 	case ws.MsgGetLoginProgress:
 		g.handleGetLoginProgress(p)
+	// 賽季節日活動系統（DAY-109）
+	case ws.MsgGetFestival:
+		g.handleGetFestival(p)
+	case ws.MsgClaimFestivalTask:
+		var payload ws.ClaimFestivalTaskPayload
+		if err := remarshal(msg.Payload, &payload); err == nil {
+			g.handleClaimFestivalTask(p, payload.TaskID)
+		}
 	}
 }
 
@@ -565,6 +580,11 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	jackpotBetCost := int(float64(betCost) * g.getRoomJackpotMult(p))
 	if jackpotBetCost < betCost {
 		jackpotBetCost = betCost
+	}
+	// 套用節日 Jackpot 倍率（DAY-109）：節日期間 Jackpot 累積更快
+	festivalJackpotMult := g.getFestivalJackpotMult()
+	if festivalJackpotMult > 1.0 {
+		jackpotBetCost = int(float64(jackpotBetCost) * festivalJackpotMult)
 	}
 	if jackpotWin := g.jackpotMgr.Contribute(jackpotBetCost, p.ID); jackpotWin != nil {
 		g.handleJackpotWin(p, jackpotWin)
@@ -676,6 +696,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	roomRewardMult := g.getRoomRewardMult(p)
 	if roomRewardMult > 1.0 {
 		finalReward = int(float64(finalReward) * roomRewardMult)
+	}
+	// 套用節日獎勵倍率（DAY-109）
+	festivalRewardMult := g.getFestivalRewardMult()
+	if festivalRewardMult > 1.0 {
+		finalReward = int(float64(finalReward) * festivalRewardMult)
 	}
 	rewardUnlocks := p.AddReward(finalReward)
 	killUnlocks := p.AddKill()
@@ -854,6 +879,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	}
 	// 好友挑戰：更新分數（DAY-102）
 	g.notifyChallengeKillScore(p, finalReward)
+	// 節日任務：記錄擊破（DAY-109）
+	go g.notifyFestivalKill(p, t.DefID)
 }
 
 // handleLock 處理鎖定

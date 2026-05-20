@@ -2111,3 +2111,39 @@ func _init_player_journey_panel() -> void:
 	panel.z_index = 85
 	add_child(panel)
 	_player_journey_panel_node = panel
+
+## 賽季節日活動面板（DAY-109）
+var _festival_panel_node = null
+const FestivalPanelScript = preload("res://scripts/ui/FestivalPanel.gd")
+
+func _init_festival_panel() -> void:
+	var panel = FestivalPanelScript.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 87
+	add_child(panel)
+	_festival_panel_node = panel
+	# 連接節日訊號
+	GameManager.festival_updated.connect(_on_festival_updated)
+	GameManager.festival_task_ready_signal.connect(_on_festival_task_ready)
+	GameManager.festival_title_earned_signal.connect(_on_festival_title_earned)
+
+## 節日狀態更新（DAY-109）
+func _on_festival_updated(data: Dictionary) -> void:
+	if is_instance_valid(_festival_panel_node):
+		_festival_panel_node.update_from_data(data)
+
+## 節日任務可領取通知（DAY-109）
+func _on_festival_task_ready(task_id: String) -> void:
+	# 顯示提示（可以加 toast 通知）
+	print("[HUD] Festival task ready: %s" % task_id)
+
+## 節日稱號獲得通知（DAY-109）
+func _on_festival_title_earned(data: Dictionary) -> void:
+	var title_name: String = data.get("title_name", "")
+	print("[HUD] Festival title earned: %s" % title_name)
+
+## 顯示節日面板（供 TopBar 按鈕呼叫）
+func show_festival_panel() -> void:
+	if is_instance_valid(_festival_panel_node):
+		GameManager.request_festival()
+		_festival_panel_node.show()

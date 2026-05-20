@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-108 玩家旅程儀表板 + 超級 Bonus 系統）
+## 最後更新：2026-05-21（DAY-109 賽季節日活動系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,30 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-108 更新（自主觸發）：** 玩家旅程儀表板 + 超級 Bonus 系統（Player Journey Dashboard + Super Bonus）✅
+- **DAY-109 更新（自主觸發）：** 賽季節日活動系統（Seasonal Festival System）✅
+  - `server/internal/game/festival/festival.go`：節日管理器（4個節日：端午節/中秋節/農曆新年/萬聖節；自動根據月份偵測節日；節日限定目標物；節日任務；節日稱號；Jackpot/獎勵/Bonus 倍率加成）
+  - `server/internal/game/festival/rand.go`：隨機數輔助函數
+  - `server/internal/game/festival/festival_test.go`：13 個單元測試全部通過
+  - `server/internal/game/festival_handler.go`：節日 handler（sendFestivalState/handleGetFestival/handleClaimFestivalTask/checkAndGrantFestivalTitle/notifyFestivalKill/notifyFestivalBonus/notifyFestivalStreak/notifyFestivalJackpot/notifyFestivalChain/getFestivalRewardMult/getFestivalJackpotMult/getFestivalBonusChanceAdd）
+  - `server/internal/ws/protocol.go`：新增 MsgGetFestival/MsgClaimFestivalTask/MsgFestivalUpdate/MsgFestivalTaskReady/MsgFestivalTaskClaimed/MsgFestivalTitleEarned/MsgFestivalError；對應 Payload 結構
+  - `server/internal/game/achievement/title.go`：新增 4 個節日稱號（festival_dragon_boat/festival_mid_autumn/festival_new_year/festival_halloween）；TitleDefinitions 加入節日稱號定義
+  - `server/internal/game/game.go`：整合 Festival 系統（AddPlayer 發送節日狀態；RemovePlayer 清理節日進度；HandleMessage 加入 MsgGetFestival/MsgClaimFestivalTask；handleKill 套用節日獎勵倍率；handleAttack 套用節日 Jackpot 倍率）
+  - `server/internal/game/bonus_handler.go`：endBonusGame 加入 notifyFestivalBonus()
+  - `server/internal/game/streak_handler.go`：notifyStreakKill 加入 notifyFestivalStreak()
+  - `server/internal/game/jackpot_handler.go`：handleJackpotWin 加入 notifyFestivalJackpot()
+  - `server/internal/game/chain_handler.go`：notifyChainKill 加入 notifyFestivalChain()
+  - `server/cmd/gameserver/main.go`：新增 /festival HTTP 端點（GET，回傳當前節日快照）
+  - `client/chiikawa-pixel/scripts/ui/FestivalPanel.gd`：節日面板（節日名稱/描述/倒數計時；加成資訊；任務列表含進度條/領取按鈕；稱號獎勵行）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：5個節日訊號 + handler + request_festival() + send_claim_festival_task()
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 FestivalPanel（z_index=87）+ 訊號連接 + show_festival_panel()
+  - 節日設計：端午節（6月1-14日，Jackpot×1.5，獎勵×1.2）/ 中秋節（9月10-30日，Jackpot×1.3，獎勵×1.3）/ 農曆新年（1-2月15日，Jackpot×2.0，獎勵×1.5）/ 萬聖節（10月20-31日，Jackpot×1.2，獎勵×1.4）
+  - 節日限定目標物：粽子/龍舟/月餅/月兔/紅包/金龍/南瓜怪/幽靈（各有不同倍率和生成機率）
+  - 節日任務：每個節日 3 個任務，完成全部可獲得限定稱號（優先級 75-80）
+  - 稱號優先級：農曆新年稱號（80）> 其他節日稱號（75）> 一般稱號（0-55）
+  - build/vet/test 全部通過（13/13 festival 測試）
+  - **業界依據：** casino.guru（2026-04）確認 seasonal events 是 2026 年 iGaming 最有效的留存機制；BGaming Fishing Club 2（2026-04）有 seasonal fishing locations（dawn/dusk/twilight）；xtremepush.com（2026）確認節日主題活動讓玩家留存率提升 40%+
+
+
   - `client/chiikawa-pixel/scripts/ui/PlayerJourneyPanel.gd`：玩家旅程儀表板（📋 按鈕開啟；6個區塊：今日任務/登入連續/賽季通行證/VIP等級/每日轉盤/錦標賽；即時進度條；點擊開啟對應面板）
   - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 PlayerJourneyPanel（z_index=85）
   - `server/internal/player/player.go`：新增 `BonusCombo`/`LastBonusAt` 欄位（Super Bonus 連續計數）

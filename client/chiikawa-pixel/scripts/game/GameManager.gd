@@ -325,6 +325,17 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_error(payload)
 		"pong":
 			pass  # Ping/Pong 心跳
+		# 賽季節日活動系統（DAY-109）
+		"festival_update":
+			_handle_festival_update(payload)
+		"festival_task_ready":
+			_handle_festival_task_ready(payload)
+		"festival_task_claimed":
+			_handle_festival_task_claimed(payload)
+		"festival_title_earned":
+			_handle_festival_title_earned(payload)
+		"festival_error":
+			_handle_festival_error(payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")
@@ -827,3 +838,55 @@ func _handle_super_bonus_ready(payload: Dictionary) -> void:
 ## 發送訊息（通用）
 func send_message(type: String, payload: Dictionary) -> void:
 	NetworkManager.send_message(type, payload)
+
+# ---- 賽季節日活動系統（DAY-109）----
+signal festival_updated(festival_data: Dictionary)      # 節日狀態更新
+signal festival_task_ready_signal(task_id: String)      # 節日任務可領取
+signal festival_task_claimed_signal(task_data: Dictionary) # 節日任務獎勵領取成功
+signal festival_title_earned_signal(title_data: Dictionary) # 節日稱號獲得
+signal festival_error_signal(error_data: Dictionary)    # 節日操作失敗
+
+## 處理節日狀態更新（DAY-109）
+func _handle_festival_update(payload: Dictionary) -> void:
+	var festival_type: String = payload.get("type", "none")
+	var is_active: bool = payload.get("is_active", false)
+	if is_active:
+		print("[GameManager] Festival active: %s" % festival_type)
+	emit_signal("festival_updated", payload)
+
+## 處理節日任務可領取通知（DAY-109）
+func _handle_festival_task_ready(payload: Dictionary) -> void:
+	var task_id: String = payload.get("task_id", "")
+	print("[GameManager] Festival task ready: %s" % task_id)
+	emit_signal("festival_task_ready_signal", task_id)
+	# 播放任務完成音效
+	if AudioManager != null:
+		AudioManager.play_sfx("bonus_ready")
+
+## 處理節日任務獎勵領取成功（DAY-109）
+func _handle_festival_task_claimed(payload: Dictionary) -> void:
+	var task_id: String = payload.get("task_id", "")
+	var coins: int = payload.get("reward_coins", 0)
+	print("[GameManager] Festival task claimed: %s reward=%d" % [task_id, coins])
+	emit_signal("festival_task_claimed_signal", payload)
+
+## 處理節日稱號獲得通知（DAY-109）
+func _handle_festival_title_earned(payload: Dictionary) -> void:
+	var title_name: String = payload.get("title_name", "")
+	print("[GameManager] Festival title earned: %s" % title_name)
+	emit_signal("festival_title_earned_signal", payload)
+	# 播放大獎音效
+	if AudioManager != null:
+		AudioManager.play_sfx("big_win")
+
+## 處理節日操作失敗（DAY-109）
+func _handle_festival_error(payload: Dictionary) -> void:
+	emit_signal("festival_error_signal", payload)
+
+## 請求節日狀態（DAY-109）
+func request_festival() -> void:
+	NetworkManager.send_message("get_festival", {})
+
+## 發送領取節日任務獎勵請求（DAY-109）
+func send_claim_festival_task(task_id: String) -> void:
+	NetworkManager.send_message("claim_festival_task", {"task_id": task_id})

@@ -1038,6 +1038,16 @@ func main() {
 		}
 	})
 
+	// GET /festival — 取得當前節日活動狀態（DAY-109）
+	mux.HandleFunc("/festival", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.Festival.GetSnapshot("") // 不帶玩家 ID，回傳通用快照
+		if err := json.NewEncoder(w).Encode(snap); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
 		Handler:      mux,

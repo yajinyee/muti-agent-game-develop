@@ -23,6 +23,11 @@ const (
 	TitleStreakLegend  TitleID = "streak_legend"  // 月度傳說（連續登入 30 天）
 	TitleStreakMaster  TitleID = "streak_master"  // 兩月霸主（連續登入 60 天）
 	TitleStreakMyth    TitleID = "streak_myth"    // 百日神話（連續登入 100 天）
+	// 節日稱號（DAY-109）
+	TitleFestivalDragonBoat TitleID = "festival_dragon_boat" // 🎋端午勇士
+	TitleFestivalMidAutumn  TitleID = "festival_mid_autumn"  // 🌕中秋賞月者
+	TitleFestivalNewYear    TitleID = "festival_new_year"    // 🧧新年財神
+	TitleFestivalHalloween  TitleID = "festival_halloween"   // 🎃萬聖獵人
 )
 
 // TitleDef 稱號定義
@@ -165,6 +170,39 @@ var TitleDefinitions = map[TitleID]*TitleDef{
 		Icon:        "🌟",
 		Color:       "#FF5722",
 		Priority:    90,
+	},
+	// 節日稱號（DAY-109）
+	TitleFestivalDragonBoat: {
+		ID:          TitleFestivalDragonBoat,
+		Name:        "端午勇士",
+		Description: "完成端午節全部任務",
+		Icon:        "🎋",
+		Color:       "#2E8B57",
+		Priority:    75,
+	},
+	TitleFestivalMidAutumn: {
+		ID:          TitleFestivalMidAutumn,
+		Name:        "中秋賞月者",
+		Description: "完成中秋節全部任務",
+		Icon:        "🌕",
+		Color:       "#FF8C00",
+		Priority:    75,
+	},
+	TitleFestivalNewYear: {
+		ID:          TitleFestivalNewYear,
+		Name:        "新年財神",
+		Description: "完成農曆新年全部任務",
+		Icon:        "🧧",
+		Color:       "#FF0000",
+		Priority:    80,
+	},
+	TitleFestivalHalloween: {
+		ID:          TitleFestivalHalloween,
+		Name:        "萬聖獵人",
+		Description: "完成萬聖節全部任務",
+		Icon:        "🎃",
+		Color:       "#FF6600",
+		Priority:    75,
 	},
 }
 
