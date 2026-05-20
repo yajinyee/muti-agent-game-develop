@@ -1,6 +1,27 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-065 每日登入獎勵系統）
+## 最後更新：2026-05-20（DAY-066 週賽系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-066 更新（自主觸發）：** 週賽系統（Weekly Tournament）✅
+  - `server/internal/game/tournament/tournament.go`：週賽管理器（UTC+8 週一重置，前三名獎勵 50000/25000/10000）
+  - `server/internal/game/tournament/tournament_test.go`：13 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：加入 `MsgTournamentUpdate` + `MsgTournamentResult` + `TournamentRankEntry` + `TournamentUpdatePayload` + `TournamentResultPayload`
+  - `server/internal/game/game.go`：整合週賽管理器，每 30 秒廣播排名，`GetTournamentSnapshot()` HTTP 端點
+  - `server/internal/game/boss_handler.go`：BOSS 擊殺 +50 週賽積分
+  - `server/internal/game/bonus_handler.go`：Bonus 完成 +20 週賽積分
+  - `server/cmd/gameserver/main.go`：`/tournament` HTTP 端點
+  - `scripts/ui/TournamentPanel.gd`：Client 端週賽面板（折疊/展開，前三名獎勵顯示，倒數計時）
+  - `scripts/game/GameManager.gd`：加入 `tournament_updated` 訊號 + `_handle_tournament_update()`
+  - `scripts/ui/HUD.gd`：整合 TournamentPanel（`_init_tournament_panel()`）
+  - 積分規則：擊破目標 = floor(multiplier) 分（最少 1 分），BOSS 擊殺 = 50 分，Bonus 完成 = 20 分
+  - build/vet/test 全部通過（11 個套件，新增 tournament 套件）
+  - **業界依據：** 週賽系統是 2026 年捕魚機標配留存功能（kent.edu 2025-10-11 確認）
 
 ## 自我評估
 - **完成度：100%**

@@ -351,6 +351,16 @@ func main() {
 		}
 	})
 
+	// 週賽排名端點（DAY-066）
+	mux.HandleFunc("/tournament", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.GetTournamentSnapshot()
+		if err := json.NewEncoder(w).Encode(snap); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// Prometheus metrics 端點（DAY-040）
 	// 格式：Prometheus text format（無外部依賴）
 	// 用途：Grafana / Prometheus 監控，生產環境可視化

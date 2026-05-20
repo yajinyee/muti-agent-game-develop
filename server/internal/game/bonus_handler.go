@@ -13,6 +13,7 @@ import (
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
+	"digital-twin/server/internal/game/tournament"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/ws"
 
@@ -208,6 +209,9 @@ func (g *Game) endBonusGame() {
 			g.updateMissionProgress(pid, mission.MissionPlayBonus, 1)
 			g.updateMissionProgress(pid, mission.MissionEarnCoins, r)
 		}(playerID, reward)
+
+		// 週賽積分：完成 Bonus Game（DAY-066）
+		g.tournamentMgr.AddPoints(playerID, p.DisplayName, tournament.PointBonus, 0)
 	}
 
 	g.transitionState(state.StateBonusResult)

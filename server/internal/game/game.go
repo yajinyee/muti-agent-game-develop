@@ -19,6 +19,7 @@ import (
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
+	"digital-twin/server/internal/game/tournament"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -36,9 +37,10 @@ type Game struct {
 	Hub         *ws.Hub
 	store       store.Store // 玩家狀態持久化（DAY-026）
 	initialCoins int        // 玩家初始金幣（從 config 傳入）
-	missionMgr  *mission.Manager // 每日任務管理器（DAY-037）
-	jackpotMgr  *jackpot.Manager  // Progressive Jackpot 管理器（DAY-048）
-	jackpotHist *jackpot.History  // Jackpot 中獎歷史（DAY-048e）
+	missionMgr  *mission.Manager    // 每日任務管理器（DAY-037）
+	jackpotMgr  *jackpot.Manager    // Progressive Jackpot 管理器（DAY-048）
+	jackpotHist *jackpot.History    // Jackpot 中獎歷史（DAY-048e）
+	tournamentMgr *tournament.Tournament // 週賽管理器（DAY-066）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -53,6 +55,7 @@ type Game struct {
 	nextBossAt         time.Time  // BOSS 自動觸發時間（規格書 28.1）
 	lastLeaderboardAt  time.Time  // 排行榜廣播計時（每 10 秒一次）
 	lastJackpotAt      time.Time  // Jackpot 廣播計時（每 5 秒一次，DAY-048）
+	lastTournamentAt   time.Time  // 週賽排名廣播計時（每 30 秒一次，DAY-066）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -84,6 +87,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		missionMgr:         mission.NewManager(),
 		jackpotMgr:         jackpot.NewManager(),
 		jackpotHist:        jackpot.NewHistory(10),
+		tournamentMgr:      tournament.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -484,6 +488,9 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		}
 		g.triggerBonusReady()
 	}
+
+	// 週賽積分：擊破目標（DAY-066）
+	g.tournamentMgr.AddPoints(p.ID, p.DisplayName, tournament.PointKill, result.Multiplier)
 }
 
 // handleLock 處理鎖定
@@ -650,6 +657,11 @@ func (g *Game) updateNormalPlay() {
 	if shouldSaveJackpot {
 		g.lastJackpotSaveAt = now
 	}
+	// 週賽排名廣播（每 30 秒，DAY-066）
+	shouldBroadcastTournament := now.Sub(g.lastTournamentAt) >= 30*time.Second
+	if shouldBroadcastTournament {
+		g.lastTournamentAt = now
+	}
 	g.mu.Unlock()
 
 	if shouldBroadcastLeaderboard {
@@ -661,6 +673,10 @@ func (g *Game) updateNormalPlay() {
 	// Jackpot 狀態儲存（每 30 秒，非同步，DAY-049d）
 	if shouldSaveJackpot {
 		go g.saveJackpotState()
+	}
+	// 週賽排名廣播（每 30 秒，DAY-066）
+	if shouldBroadcastTournament {
+		go g.broadcastTournament()
 	}
 }
 
@@ -976,6 +992,63 @@ func (g *Game) GetLeaderboardData() ws.LeaderboardPayload {
 		Entries:   g.buildLeaderboard(),
 		Timestamp: time.Now().UnixMilli(),
 	}
+}
+
+// broadcastTournament 廣播週賽排名給所有玩家（每 30 秒，DAY-066）
+// 每個玩家收到的訊息包含自己的排名和積分
+func (g *Game) broadcastTournament() {
+	snap := g.tournamentMgr.GetSnapshot()
+
+	// 取得所有在線玩家 ID
+	g.mu.RLock()
+	playerIDs := make([]string, 0, len(g.Players))
+	for id := range g.Players {
+		playerIDs = append(playerIDs, id)
+	}
+	g.mu.RUnlock()
+
+	// 轉換 RankEntry → TournamentRankEntry
+	rankings := make([]ws.TournamentRankEntry, len(snap.Rankings))
+	for i, r := range snap.Rankings {
+		rankings[i] = ws.TournamentRankEntry{
+			Rank:        r.Rank,
+			PlayerID:    r.PlayerID,
+			DisplayName: r.DisplayName,
+			Points:      r.Points,
+			Prize:       r.Prize,
+			PrizeLabel:  r.PrizeLabel,
+		}
+	}
+
+	// 對每個玩家個別發送（包含自己的排名）
+	for _, pid := range playerIDs {
+		rank, points := g.tournamentMgr.GetPlayerRank(pid)
+
+		// 標記自己
+		personalRankings := make([]ws.TournamentRankEntry, len(rankings))
+		copy(personalRankings, rankings)
+		for i := range personalRankings {
+			personalRankings[i].IsSelf = (personalRankings[i].PlayerID == pid)
+		}
+
+		g.Hub.Send(pid, &ws.Message{
+			Type: ws.MsgTournamentUpdate,
+			Payload: ws.TournamentUpdatePayload{
+				WeekStart:    snap.WeekStart,
+				WeekEnd:      snap.WeekEnd,
+				SecondsLeft:  snap.SecondsLeft,
+				Rankings:     personalRankings,
+				TotalPlayers: snap.TotalPlayers,
+				PlayerRank:   rank,
+				PlayerPoints: points,
+			},
+		})
+	}
+}
+
+// GetTournamentSnapshot 取得週賽快照（供 HTTP 端點使用，DAY-066）
+func (g *Game) GetTournamentSnapshot() tournament.Snapshot {
+	return g.tournamentMgr.GetSnapshot()
 }
 
 // GetMissionResetAt 取得每日任務下次重置時間（thread-safe）

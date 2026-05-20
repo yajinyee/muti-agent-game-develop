@@ -41,7 +41,9 @@ const (
 	MsgMissionComplete MessageType = "mission_complete" // 任務完成通知（DAY-037）
 	MsgJackpotUpdate   MessageType = "jackpot_update"   // Jackpot 池更新（DAY-048）
 	MsgJackpotWin      MessageType = "jackpot_win"      // Jackpot 中獎通知（DAY-048）
-	MsgDailyBonus      MessageType = "daily_bonus"      // 每日登入獎勵（DAY-065）
+	MsgDailyBonus        MessageType = "daily_bonus"        // 每日登入獎勵（DAY-065）
+	MsgTournamentUpdate  MessageType = "tournament_update"  // 週賽排名更新（DAY-066）
+	MsgTournamentResult  MessageType = "tournament_result"  // 週賽結算通知（DAY-066）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -275,9 +277,42 @@ type JackpotWinPayload struct {
 // DailyBonusPayload 每日登入獎勵通知
 // Server 在玩家加入時檢查是否是新的一天，計算連續天數，發放獎勵
 type DailyBonusPayload struct {
-	Streak      int    `json:"streak"`       // 連續登入天數（1=首次/重置，2=連續2天...）
-	Reward      int    `json:"reward"`       // 本次獎勵金幣數
-	NewBalance  int    `json:"new_balance"`  // 領取後餘額
+	Streak      int    `json:"streak"`        // 連續登入天數（1=首次/重置，2=連續2天...）
+	Reward      int    `json:"reward"`        // 本次獎勵金幣數
+	NewBalance  int    `json:"new_balance"`   // 領取後餘額
 	IsNewStreak bool   `json:"is_new_streak"` // 是否是今天第一次登入（false=今天已領過）
-	MaxStreak   int    `json:"max_streak"`   // 最高連續天數（用於顯示里程碑）
+	MaxStreak   int    `json:"max_streak"`    // 最高連續天數（用於顯示里程碑）
+}
+
+// ---- 週賽系統（DAY-066）----
+
+// TournamentRankEntry 週賽排名單筆記錄
+type TournamentRankEntry struct {
+	Rank        int    `json:"rank"`
+	PlayerID    string `json:"player_id"`
+	DisplayName string `json:"display_name"`
+	Points      int    `json:"points"`
+	Prize       int    `json:"prize"`        // 獎勵金幣（前三名才有）
+	PrizeLabel  string `json:"prize_label"`  // 獎勵標籤（"🥇 週賽冠軍" 等）
+	IsSelf      bool   `json:"is_self"`      // 是否為自己（Client 端標記用）
+}
+
+// TournamentUpdatePayload 週賽排名更新廣播（每 30 秒）
+type TournamentUpdatePayload struct {
+	WeekStart    int64                 `json:"week_start"`    // Unix ms
+	WeekEnd      int64                 `json:"week_end"`      // Unix ms
+	SecondsLeft  int64                 `json:"seconds_left"`  // 距離結束秒數
+	Rankings     []TournamentRankEntry `json:"rankings"`      // 前 10 名
+	TotalPlayers int                   `json:"total_players"` // 本週參賽人數
+	PlayerRank   int                   `json:"player_rank"`   // 接收者的排名（0=未上榜）
+	PlayerPoints int                   `json:"player_points"` // 接收者的積分
+}
+
+// TournamentResultPayload 週賽結算通知（週結束時廣播）
+type TournamentResultPayload struct {
+	WeekStart int64                 `json:"week_start"`
+	WeekEnd   int64                 `json:"week_end"`
+	Rankings  []TournamentRankEntry `json:"rankings"`
+	Prize     int                   `json:"prize"`       // 接收者獲得的獎勵（0=未獲獎）
+	PrizeLabel string               `json:"prize_label"` // 獎勵標籤
 }

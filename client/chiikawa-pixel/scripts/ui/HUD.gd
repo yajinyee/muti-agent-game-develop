@@ -9,6 +9,7 @@ const JackpotPanelScript = preload("res://scripts/ui/JackpotPanel.gd")
 const MissionPanelScript = preload("res://scripts/ui/MissionPanel.gd")
 const SessionStatsPanelScript = preload("res://scripts/ui/SessionStatsPanel.gd")
 const LeaderboardPanelScript = preload("res://scripts/ui/LeaderboardPanel.gd")
+const TournamentPanelScript = preload("res://scripts/ui/TournamentPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -150,6 +151,7 @@ func _ready() -> void:
 	_init_mission_panel()     # 瘥隞餃?蝟餌絞嚗AY-037嚗AY-053 ??嚗?
 	_init_session_stats()     # Session Stats ?Ｘ嚗AY-046嚗AY-053 ??嚗?
 	_init_jackpot_panel()     # Progressive Jackpot ?Ｘ嚗AY-048嚗AY-053 ??嚗?
+	_init_tournament_panel()  # 週賽排名面板（DAY-066）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1528,3 +1530,17 @@ func _show_daily_bonus_popup(streak: int, reward: int, max_streak: int) -> void:
 		if is_instance_valid(canvas):
 			canvas.queue_free()
 	)
+
+
+# ── 週賽排名面板（DAY-066）──────────────────────────────────────────────
+
+var _tournament_panel_node = null
+
+## 初始化週賽排名面板（DAY-066）
+func _init_tournament_panel() -> void:
+	var panel = TournamentPanelScript.new()
+	panel.position = Vector2(0, 0)
+	panel.z_index = 8
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_tournament_panel_node = panel

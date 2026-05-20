@@ -14,6 +14,7 @@ import (
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
+	"digital-twin/server/internal/game/tournament"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/ws"
 
@@ -207,6 +208,9 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 			"multiplier":  result.Multiplier,
 		})
 	}
+
+	// 週賽積分：擊殺 BOSS（DAY-066）
+	g.tournamentMgr.AddPoints(p.ID, p.DisplayName, tournament.PointBoss, 0)
 
 	g.transitionState(state.StateBossResult)
 	g.safeAfterFunc(3*time.Second, func() {
