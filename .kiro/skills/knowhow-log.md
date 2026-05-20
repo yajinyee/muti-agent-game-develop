@@ -2708,3 +2708,23 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **徽章位置：** 右上角 (16, -44)，不遮擋倍率標籤（倍率標籤在正上方）
 - **進場音效觸發時機：** legendary 品質在 `_add_quality_glow` 內觸發，不在 `_on_target_spawned` 觸發（避免重複）
 - **教訓：** 品質系統的視覺層次要清晰：品質光暈（外圈）> 高倍率光暈（中圈）> Sprite（核心）
+
+## 135. 賽季通行證積分設計原則（2026-05-20）
+- **設計：** 賽季積分 = 週賽積分（1:1 比例），不重置，跨週累積
+- **等級設計：** 10 個等級，積分需求遞增（100→200→350→550→800→1100→1500→2000→2600→3300）
+- **特殊獎勵：** 等級 5 解鎖皮膚（season_gold），等級 10 解鎖稱號（season_legend）
+- **業界依據：** Fishing Frenzy Chapter 3（2026-05-14）確認賽季通行證是 2026 年捕魚機標配
+- **教訓：** 賽季積分不應該重置，讓玩家感受到長期進度的積累感
+
+## 136. Go player.AddCoins vs AddReward 的差異（2026-05-20）
+- **問題：** 賽季獎勵不應該觸發成就（避免玩家刷賽季獎勵解鎖成就）
+- **解決：** 新增 `AddCoins(amount int)` 方法，只加金幣不觸發成就
+- **AddReward：** 加金幣 + 更新 TotalReward/SessionScore + 觸發成就
+- **AddCoins：** 只加金幣 + 更新 MaxCoins（用於系統獎勵）
+- **教訓：** 系統獎勵（賽季/任務/登入）和遊戲獎勵（擊破/BOSS）要用不同的方法
+
+## 137. GIT_TMPDIR 需要每次重建（2026-05-20）
+- **問題：** `git add` 報 `unable to create temporary file: No such file or directory`
+- **原因：** `D:\Kiro\.git\tmp` 目錄在每次 git 操作後可能被清除
+- **解決：** 每次 git 操作前先執行 `New-Item -ItemType Directory -Force -Path "D:\Kiro\.git\tmp"`
+- **教訓：** GIT_TMPDIR 設定的目錄必須在每次 git 操作前確認存在

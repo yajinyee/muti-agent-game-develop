@@ -30,6 +30,9 @@ signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DA
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
 signal season_level_up(level_data: Dictionary)         # 賽季等級升級（DAY-072）
+signal friend_list_updated(friend_data: Dictionary)    # 好友列表更新（DAY-073）
+signal friend_request_received(request_data: Dictionary) # 好友請求通知（DAY-073）
+signal friend_updated(update_data: Dictionary)         # 好友狀態更新（DAY-073）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -119,6 +122,12 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_season_update(payload)
 		"season_level_up":
 			_handle_season_level_up(payload)
+		"friend_list":
+			_handle_friend_list(payload)
+		"friend_request":
+			_handle_friend_request(payload)
+		"friend_update":
+			_handle_friend_update(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -267,6 +276,18 @@ func _handle_season_update(payload: Dictionary) -> void:
 ## 處理賽季等級升級（DAY-072）
 func _handle_season_level_up(payload: Dictionary) -> void:
 	emit_signal("season_level_up", payload)
+
+## 處理好友列表更新（DAY-073）
+func _handle_friend_list(payload: Dictionary) -> void:
+	emit_signal("friend_list_updated", payload)
+
+## 處理好友請求通知（DAY-073）
+func _handle_friend_request(payload: Dictionary) -> void:
+	emit_signal("friend_request_received", payload)
+
+## 處理好友狀態更新（DAY-073）
+func _handle_friend_update(payload: Dictionary) -> void:
+	emit_signal("friend_updated", payload)
 
 ## 取得目前角色顏色
 func get_character_color() -> Color:

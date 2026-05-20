@@ -24,6 +24,11 @@ const (
 	MsgBuySkin         MessageType = "buy_skin"           // 購買砲台外觀（DAY-071）
 	MsgEquipSkin       MessageType = "equip_skin"         // 裝備砲台外觀（DAY-071）
 	MsgClaimSeasonLevel MessageType = "claim_season_level" // 領取賽季等級獎勵（DAY-072）
+	MsgSendFriendRequest  MessageType = "send_friend_request"  // 發送好友請求（DAY-073）
+	MsgAcceptFriendRequest MessageType = "accept_friend_request" // 接受好友請求（DAY-073）
+	MsgRejectFriendRequest MessageType = "reject_friend_request" // 拒絕好友請求（DAY-073）
+	MsgRemoveFriend       MessageType = "remove_friend"         // 移除好友（DAY-073）
+	MsgGetFriendList      MessageType = "get_friend_list"       // 查詢好友列表（DAY-073）
 )
 
 // Server → Client
@@ -52,6 +57,9 @@ const (
 	MsgSkinUpdate        MessageType = "skin_update"        // 砲台外觀更新（DAY-071）
 	MsgSeasonUpdate      MessageType = "season_update"      // 賽季通行證更新（DAY-072）
 	MsgSeasonLevelUp     MessageType = "season_level_up"    // 賽季等級升級通知（DAY-072）
+	MsgFriendList        MessageType = "friend_list"        // 好友列表（DAY-073）
+	MsgFriendRequest     MessageType = "friend_request"     // 好友請求通知（DAY-073）
+	MsgFriendUpdate      MessageType = "friend_update"      // 好友狀態更新（DAY-073）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -455,4 +463,61 @@ type SeasonLevelUpPayload struct {
 	SpecialType string `json:"special_type"` // "" / "skin" / "title"
 	SpecialID   string `json:"special_id"`
 	SpecialName string `json:"special_name"`
+}
+
+// ---- 好友系統（DAY-073）----
+
+// SendFriendRequestPayload 發送好友請求（Client → Server）
+type SendFriendRequestPayload struct {
+	TargetID string `json:"target_id"` // 目標玩家 ID
+}
+
+// AcceptFriendRequestPayload 接受好友請求（Client → Server）
+type AcceptFriendRequestPayload struct {
+	FromID string `json:"from_id"` // 發送請求的玩家 ID
+}
+
+// RejectFriendRequestPayload 拒絕好友請求（Client → Server）
+type RejectFriendRequestPayload struct {
+	FromID string `json:"from_id"`
+}
+
+// RemoveFriendPayload 移除好友（Client → Server）
+type RemoveFriendPayload struct {
+	FriendID string `json:"friend_id"`
+}
+
+// FriendInfoPayload 好友資訊（用於列表顯示）
+type FriendInfoPayload struct {
+	PlayerID     string `json:"player_id"`
+	DisplayName  string `json:"display_name"`
+	IsOnline     bool   `json:"is_online"`
+	Coins        int    `json:"coins"`
+	KillCount    int    `json:"kill_count"`
+	TitleName    string `json:"title_name"`
+	TitleIcon    string `json:"title_icon"`
+	SeasonLevel  int    `json:"season_level"`
+	SeasonPoints int    `json:"season_points"`
+}
+
+// FriendListPayload 好友列表（Server → Client）
+type FriendListPayload struct {
+	Friends        []FriendInfoPayload `json:"friends"`
+	PendingCount   int                 `json:"pending_count"` // 待處理請求數
+}
+
+// FriendRequestPayload 好友請求通知（Server → Client）
+// 當有人發送好友請求時通知目標玩家
+type FriendRequestPayload struct {
+	FromID      string `json:"from_id"`
+	DisplayName string `json:"display_name"`
+}
+
+// FriendUpdatePayload 好友狀態更新（Server → Client）
+// 當好友上線/下線/積分變化時廣播
+type FriendUpdatePayload struct {
+	FriendID    string `json:"friend_id"`
+	DisplayName string `json:"display_name"`
+	IsOnline    bool   `json:"is_online"`
+	Event       string `json:"event"` // "online" / "offline" / "accepted" / "removed"
 }

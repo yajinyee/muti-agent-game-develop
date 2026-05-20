@@ -14,6 +14,7 @@ const WeaponPanelScript = preload("res://scripts/ui/WeaponPanel.gd")
 const TitlePanelScript = preload("res://scripts/ui/TitlePanel.gd")
 const SkinPanelScript = preload("res://scripts/ui/SkinPanel.gd")
 const SeasonPanelScript = preload("res://scripts/ui/SeasonPanel.gd")
+const FriendPanelScript = preload("res://scripts/ui/FriendPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -160,6 +161,7 @@ func _ready() -> void:
 	_init_title_panel()       # 稱號面板（DAY-068）
 	_init_skin_panel()        # 砲台外觀面板（DAY-071）
 	_init_season_panel()      # 賽季通行證面板（DAY-072）
+	_init_friend_panel()      # 好友系統面板（DAY-073）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1610,3 +1612,17 @@ func _init_season_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_season_panel_node = panel
+
+## ── 好友系統面板（DAY-073）──────────────────────────────────────────────────────
+var _friend_panel_node = null
+
+## 初始化好友系統面板（DAY-073）
+## 位置：TopBar 右側（SeasonPanel 旁邊）
+func _init_friend_panel() -> void:
+	var panel = FriendPanelScript.new()
+	# 放在 SeasonPanel 右側（SeasonPanel 在 x=1240，FriendPanel 在 x=1276）
+	panel.position = Vector2(1276, 4)
+	panel.z_index = 10
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_friend_panel_node = panel

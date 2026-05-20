@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-072 賽季通行證系統）
+## 最後更新：2026-05-20（DAY-073 好友系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,18 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-073 更新（自主觸發）：** 好友系統（Friend System）✅
+  - `server/internal/game/friend/friend.go`：好友管理器（發送/接受/拒絕請求，移除好友，雙向關係，互相發請求自動接受）
+  - `server/internal/game/friend/friend_test.go`：12 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgSendFriendRequest`/`MsgAcceptFriendRequest`/`MsgRejectFriendRequest`/`MsgRemoveFriend`/`MsgGetFriendList`（Client→Server）+ `MsgFriendList`/`MsgFriendRequest`/`MsgFriendUpdate`（Server→Client）+ 對應 Payload
+  - `server/internal/game/game.go`：`Friends *friend.Manager` 欄位 + 整合初始化 + `AddPlayer` 發送好友列表 + 通知好友上線 + `RemovePlayer` 通知好友下線 + 5 個 handler 分支
+  - `server/internal/game/friend_handler.go`：`sendFriendList()`/`buildFriendInfo()`/`handleSendFriendRequest()`/`handleAcceptFriendRequest()`/`handleRejectFriendRequest()`/`handleRemoveFriend()`/`handleGetFriendList()`/`notifyFriendsOnline()`/`notifyFriendsOffline()`
+  - `client/chiikawa-pixel/scripts/ui/FriendPanel.gd`：好友系統面板（好友列表/在線狀態/賽季等級/金幣/移除按鈕/好友請求通知）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`friend_list_updated`/`friend_request_received`/`friend_updated` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 FriendPanel（`_init_friend_panel()`，位置 x=1276）
+  - build/vet/test 全部通過
+  - **業界依據：** Fishing Frenzy Chapter 3（2026-05-14）確認好友系統是 2026 年捕魚機標配社交功能
+
 - **DAY-072 更新（自主觸發）：** 賽季通行證系統（Season Pass）✅
   - `server/internal/game/season/season.go`：賽季管理器（10 個等級，積分累積，等級 5 解鎖皮膚，等級 10 解鎖稱號）
   - `server/internal/game/season/season_test.go`：13 個單元測試全部通過

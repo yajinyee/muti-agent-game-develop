@@ -15,6 +15,7 @@ import (
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/combat"
+	"digital-twin/server/internal/game/friend"
 	"digital-twin/server/internal/game/jackpot"
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/season"
@@ -43,6 +44,7 @@ type Game struct {
 	jackpotHist *jackpot.History    // Jackpot 中獎歷史（DAY-048e）
 	tournamentMgr *tournament.Tournament // 週賽管理器（DAY-066）
 	Season      *season.Manager     // 賽季通行證管理器（DAY-072）
+	Friends     *friend.Manager     // 好友系統管理器（DAY-073）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -91,6 +93,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		jackpotHist:        jackpot.NewHistory(10),
 		tournamentMgr:      tournament.New(),
 		Season:             season.New(),
+		Friends:            friend.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -181,6 +184,10 @@ func (g *Game) AddPlayer(playerID string) {
 			g.mu.RUnlock()
 			if pp != nil {
 				g.sendSeasonUpdate(pp)
+				// 發送好友列表（DAY-073）
+				g.sendFriendList(pp)
+				// 通知好友上線（DAY-073）
+				g.notifyFriendsOnline(playerID, pp.DisplayName)
 			}
 		}()
 	}
@@ -222,6 +229,11 @@ func (g *Game) RemovePlayer(playerID string) {
 	}
 
 	log.Printf("[Game] Player %s left game %s", playerID, g.ID)
+
+	// 通知好友下線（DAY-073）
+	if p != nil {
+		go g.notifyFriendsOffline(playerID, p.DisplayName)
+	}
 }
 
 // HandleMessage 處理玩家訊息
@@ -277,6 +289,21 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	case ws.MsgClaimSeasonLevel:
 		// 領取賽季等級獎勵（DAY-072）
 		g.handleClaimSeasonLevel(p, msg)
+	case ws.MsgSendFriendRequest:
+		// 發送好友請求（DAY-073）
+		g.handleSendFriendRequest(p, msg)
+	case ws.MsgAcceptFriendRequest:
+		// 接受好友請求（DAY-073）
+		g.handleAcceptFriendRequest(p, msg)
+	case ws.MsgRejectFriendRequest:
+		// 拒絕好友請求（DAY-073）
+		g.handleRejectFriendRequest(p, msg)
+	case ws.MsgRemoveFriend:
+		// 移除好友（DAY-073）
+		g.handleRemoveFriend(p, msg)
+	case ws.MsgGetFriendList:
+		// 查詢好友列表（DAY-073）
+		g.handleGetFriendList(p, msg)
 	}
 }
 
