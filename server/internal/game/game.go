@@ -64,6 +64,7 @@ type Game struct {
 	jackpotHist *jackpot.History    // Jackpot 中獎歷史（DAY-048e）
 	tournamentMgr *tournament.Tournament // 週賽管理器（DAY-066）
 	dailyTournamentMgr *tournament.DailyTournament // 每日賽管理器（DAY-093）
+	multiFormatMgr *tournament.MultiFormatTournament // 多格式每日賽管理器（DAY-111）
 	Season      *season.Manager     // 賽季通行證管理器（DAY-072）
 	Friends     *friend.Manager     // 好友系統管理器（DAY-073）
 	FriendChallenge *friendchallenge.Manager // 好友挑戰管理器（DAY-102）
@@ -102,6 +103,7 @@ type Game struct {
 	lastJackpotAt      time.Time  // Jackpot 廣播計時（每 5 秒一次，DAY-048）
 	lastTournamentAt   time.Time  // 週賽排名廣播計時（每 30 秒一次，DAY-066）
 	lastDailyTournamentAt time.Time // 每日賽排名廣播計時（每 30 秒一次，DAY-093）
+	lastMultiFormatAt     time.Time // 多格式賽排名廣播計時（每 30 秒一次，DAY-111）
 	lastGuildWarAt     time.Time  // 公會戰廣播計時（每 60 秒一次，DAY-076）
 	lastDailyBossAt    time.Time  // 每日 BOSS 廣播計時（每 30 秒一次，DAY-077）
 	lastEventAt        time.Time  // 限時活動廣播計時（每 30 秒一次，DAY-079）
@@ -140,6 +142,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		jackpotHist:        jackpot.NewHistory(10),
 		tournamentMgr:      tournament.New(),
 		dailyTournamentMgr: tournament.NewDaily(),
+		multiFormatMgr:     tournament.NewMultiFormat(),
 		Season:             season.New(),
 		Friends:            friend.New(),
 		FriendChallenge:    friendchallenge.New(),
@@ -272,6 +275,8 @@ func (g *Game) AddPlayer(playerID string) {
 				// 發送週賽/每日賽狀態（DAY-093）
 				g.sendTournamentUpdate(pp.ID)
 				g.sendDailyTournamentUpdate(pp.ID)
+				// 發送多格式賽狀態（DAY-111）
+				g.sendMultiFormatUpdate(pp.ID)
 				// 發送商店狀態（DAY-094）
 				g.sendShopUpdate(pp)
 				// 啟動統計 Session（DAY-096）
@@ -555,6 +560,8 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	}
 	// 玩家統計：記錄射擊（DAY-096）
 	g.notifyStatsShot(p, betCost)
+	// 多格式每日賽：記錄投注（DAY-111，投注競賽格式用）
+	go g.multiFormatMgr.RecordShot(p.ID, p.DisplayName, betCost)
 	// 異常偵測：記錄攻擊（DAY-105）
 	if alert := g.AntiCheat.RecordAttack(p.ID, betCost); alert != nil {
 		log.Printf("[AntiCheat] Alert triggered for player %s: %s", p.ID, alert.Message)
@@ -852,6 +859,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	g.tournamentMgr.AddPoints(p.ID, p.DisplayName, tournament.PointKill, result.Multiplier)
 	// 每日賽積分：擊破目標（DAY-093）
 	g.notifyDailyTournamentKill(p, result.Multiplier)
+	// 多格式每日賽：記錄擊破（DAY-111）
+	go g.multiFormatMgr.RecordKill(p.ID, p.DisplayName, result.Multiplier, finalReward, data.GetBetDef(p.BetLevel).BetCost)
 	// 賽季積分同步（DAY-072）：擊破積分 = max(1, floor(multiplier))
 	killPts := int(result.Multiplier)
 	if killPts < 1 {
@@ -1071,6 +1080,11 @@ func (g *Game) updateNormalPlay() {
 	if shouldBroadcastDailyTournament {
 		g.lastDailyTournamentAt = now
 	}
+	// 多格式賽排名廣播（每 30 秒，DAY-111）
+	shouldBroadcastMultiFormat := now.Sub(g.lastMultiFormatAt) >= 30*time.Second
+	if shouldBroadcastMultiFormat {
+		g.lastMultiFormatAt = now
+	}
 	// 公會戰廣播（每 60 秒，DAY-076）
 	shouldBroadcastGuildWar := now.Sub(g.lastGuildWarAt) >= 60*time.Second
 	if shouldBroadcastGuildWar {
@@ -1115,6 +1129,10 @@ func (g *Game) updateNormalPlay() {
 	// 每日賽排名廣播（每 30 秒，DAY-093）
 	if shouldBroadcastDailyTournament {
 		go g.broadcastDailyTournament()
+	}
+	// 多格式賽排名廣播（每 30 秒，DAY-111）
+	if shouldBroadcastMultiFormat {
+		go g.broadcastMultiFormat()
 	}
 	// 公會戰廣播（每 60 秒，DAY-076）
 	if shouldBroadcastGuildWar {

@@ -107,6 +107,9 @@ const (
 	MsgGetTournament     MessageType = "get_tournament"     // 查詢週賽/日賽狀態（DAY-093）
 	MsgDailyTournamentUpdate MessageType = "daily_tournament_update" // 每日賽排名更新（DAY-093）
 	MsgDailyTournamentResult MessageType = "daily_tournament_result" // 每日賽結算通知（DAY-093）
+	// 多格式每日賽系統（DAY-111）
+	MsgGetMultiFormat        MessageType = "get_multi_format"        // 查詢多格式賽狀態（Client→Server）
+	MsgMultiFormatUpdate     MessageType = "multi_format_update"     // 多格式賽排名更新（Server→Client）
 	// 商店系統（DAY-094）
 	MsgGetShop      MessageType = "get_shop"       // 查詢商店狀態（Client→Server）
 	MsgBuyShopItem  MessageType = "buy_shop_item"  // 購買商品（Client→Server）
@@ -530,6 +533,39 @@ type DailyTournamentResultPayload struct {
 	Rankings   []TournamentRankEntry `json:"rankings"`
 	Prize      int                   `json:"prize"`       // 接收者獲得的獎勵（0=未獲獎）
 	PrizeLabel string                `json:"prize_label"` // 獎勵標籤
+}
+
+// ---- 多格式每日賽系統（DAY-111）----
+
+// MultiFormatRankEntry 多格式賽排名單筆記錄
+type MultiFormatRankEntry struct {
+	Rank        int     `json:"rank"`
+	PlayerID    string  `json:"player_id"`
+	DisplayName string  `json:"display_name"`
+	Score       float64 `json:"score"`
+	ScoreLabel  string  `json:"score_label"`  // 格式化後的分數（如 "50x"、"5000"）
+	Prize       int     `json:"prize"`
+	PrizeLabel  string  `json:"prize_label"`
+	IsSelf      bool    `json:"is_self"`
+}
+
+// MultiFormatUpdatePayload 多格式賽排名更新廣播（每 30 秒）
+type MultiFormatUpdatePayload struct {
+	DayStart      int64                  `json:"day_start"`       // Unix ms
+	DayEnd        int64                  `json:"day_end"`         // Unix ms
+	SecondsLeft   int64                  `json:"seconds_left"`    // 距離結束秒數
+	TodayFormat   string                 `json:"today_format"`    // "score"/"multiplier"/"reward"/"bet"
+	FormatName    string                 `json:"format_name"`     // "積分賽"/"最高倍率賽"等
+	FormatIcon    string                 `json:"format_icon"`     // "⭐"/"⚡"/"💰"/"🎯"
+	FormatUnit    string                 `json:"format_unit"`     // "分"/"x"/"金幣"
+	FormatDesc    string                 `json:"format_desc"`     // 格式說明
+	Rankings      []MultiFormatRankEntry `json:"rankings"`        // 前 10 名
+	TotalPlayers  int                    `json:"total_players"`   // 今日參賽人數
+	PlayerRank    int                    `json:"player_rank"`     // 接收者的排名（0=未上榜）
+	PlayerScore   float64                `json:"player_score"`    // 接收者的分數
+	NextFormat    string                 `json:"next_format"`     // 明日格式
+	NextFormatName string                `json:"next_format_name"` // 明日格式名稱
+	NextFormatIcon string                `json:"next_format_icon"` // 明日格式圖示
 }
 
 // ---- 武器升級系統（DAY-067）----

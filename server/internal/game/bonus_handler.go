@@ -247,6 +247,8 @@ func (g *Game) endBonusGame() {
 		go g.notifyFestivalBonus(p)
 		// 名人堂：Bonus 獎勵記錄（DAY-110）
 		go g.notifyHallOfFameBonus(p, reward)
+		// 多格式每日賽：記錄 Bonus 完成（DAY-111）
+		go g.multiFormatMgr.RecordBonus(p.ID, p.DisplayName, reward)
 	}
 
 	g.transitionState(state.StateBonusResult)

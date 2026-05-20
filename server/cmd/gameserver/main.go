@@ -375,6 +375,17 @@ func main() {
 		}
 	})
 
+	// 多格式每日賽端點（DAY-111）
+	// GET /multi-format-tournament — 取得多格式賽快照（含今日格式、排名、明日格式預告）
+	mux.HandleFunc("/multi-format-tournament", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.GetMultiFormatSnapshot()
+		if err := json.NewEncoder(w).Encode(snap); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 商店端點（DAY-094）
 	// GET /shop — 取得商店快照
 	mux.HandleFunc("/shop", func(w http.ResponseWriter, r *http.Request) {

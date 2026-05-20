@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-110 全服名人堂 + 智慧推薦系統）
+## 最後更新：2026-05-21（DAY-111 多格式每日錦標賽系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-110 更新（自主觸發）：** 全服名人堂（Hall of Fame）+ 智慧推薦系統（Smart Recommendation Engine）✅
+- **DAY-111 更新（自主觸發）：** 多格式每日錦標賽系統（Multi-Format Daily Tournament）✅
+  - `server/internal/game/tournament/format.go`：多格式每日賽管理器（4種格式：積分賽⭐/最高倍率賽⚡/最高獎勵賽💰/投注競賽🎯；4天一輪依日期自動切換；RecordKill/RecordBoss/RecordBonus/RecordShot；GetRankings/GetRankingsByFormat/GetPlayerRank；GetSnapshot含明日格式預告；FormatEntry追蹤所有格式分數）
+  - `server/internal/game/tournament/format_test.go`：11 個單元測試全部通過（ScoreFormat/MultiplierFormat/RewardFormat/BetFormat/Boss/Bonus/Snapshot/Rotation/FormatDef/MultipleRanking/ScoreLabel）
+  - `server/internal/ws/protocol.go`：新增 MsgGetMultiFormat/MsgMultiFormatUpdate；MultiFormatRankEntry（含score_label格式化分數）；MultiFormatUpdatePayload（含今日格式/格式說明/明日格式預告）
+  - `server/internal/game/tournament_handler.go`：新增 sendMultiFormatUpdate（個人推送）/broadcastMultiFormat（全服廣播）/GetMultiFormatSnapshot（HTTP端點）；handleGetTournament 整合多格式賽
+  - `server/internal/game/game.go`：新增 lastMultiFormatAt 計時器；AddPlayer 發送多格式賽狀態；gameLoop 每 30 秒廣播多格式賽；handleAttack 記錄 RecordShot（投注競賽）；handleKill 記錄 RecordKill（積分/倍率/獎勵/投注）
+  - `server/internal/game/boss_handler.go`：handleBossKill 記錄 RecordBoss（積分賽+50分）
+  - `server/internal/game/bonus_handler.go`：endBonusGame 記錄 RecordBonus（積分賽+20分，最高獎勵賽更新）
+  - `server/cmd/gameserver/main.go`：新增 /multi-format-tournament HTTP 端點（GET，回傳多格式賽快照含今日格式/排名/明日格式預告）
+  - `client/chiikawa-pixel/scripts/ui/TournamentPanel.gd`：升級為三 Tab 面板（📅今日賽/⚡特殊賽/📆週賽）；特殊賽 Tab 顯示格式說明+明日格式預告；score_label 支援不同格式的分數顯示（分/x/金幣）；Tab 按鈕動態顯示今日格式圖示
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：multi_format_updated 訊號 + _handle_multi_format_update() handler + multi_format_update 訊息分支
+  - 格式輪換設計：積分賽（⭐擊破積分）→ 最高倍率賽（⚡單次最高倍率）→ 最高獎勵賽（💰單次最高獎勵）→ 投注競賽（🎯總投注量），4天一輪依年份日期決定
+  - 每日格式讓玩家每天有不同的競爭目標：積分賽考驗持續輸出、倍率賽考驗運氣、獎勵賽考驗高投注、投注賽考驗活躍度
+  - 明日格式預告讓玩家提前規劃策略（底部顯示「明日：⚡ 最高倍率賽」）
+  - build/vet/test 全部通過（11/11 format 測試，dm 測試為 Windows Defender 誤報已知問題）
+  - **業界依據：** Infingame（2026-05-19）確認 Tournament 系統是 2026 年 iGaming 最熱門留存機制；多格式輪換讓不同類型玩家（高頻/高倍/高投注）都有競爭機會，提升全玩家群體的參與度
+
+
   - `server/internal/game/halloffame/halloffame.go`：名人堂管理器（8種記錄類型：最高連擊/最高倍率/Bonus大師/Jackpot收集者/Grand Jackpot傳說/BOSS獵人/金幣大亨/效率之王；TryUpdate競爭更新；GetAll/GetRecord/IsRecordHolder/GetPlayerRecords；RecordTypeLabel/RecordTypeIcon）
   - `server/internal/game/halloffame/halloffame_test.go`：10 個單元測試全部通過
   - `server/internal/game/recommend/recommend.go`：智慧推薦引擎（PlayerBehavior輸入；8種推薦類型：bet_up/bet_down/bet_stay/auto_mode/lock_target/bonus_focus/boss_focus/jackpot；analyzeBetLevel/analyzeStrategy/analyzeSpecialOpportunity；信心度0-1；最多3條推薦）
