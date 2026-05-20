@@ -52,6 +52,7 @@ signal streak_reset(reset_data: Dictionary)            # 連擊重置通知（DA
 signal referral_info_received(info_data: Dictionary)   # 推薦碼資訊（DAY-082）
 signal referral_success(success_data: Dictionary)      # 推薦碼使用成功（DAY-082）
 signal referral_error(error_data: Dictionary)          # 推薦碼使用失敗（DAY-082）
+signal wheel_triggered(wheel_data: Dictionary)         # 幸運轉盤觸發（DAY-084）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -185,6 +186,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_referral_success(payload)
 		"referral_error":
 			_handle_referral_error(payload)
+		"wheel_trigger":
+			_handle_wheel_trigger(payload)
 		"streak_update":
 			_handle_streak_update(payload)
 		"streak_reset":
@@ -514,3 +517,7 @@ func _handle_streak_update(payload: Dictionary) -> void:
 ## 處理連擊重置通知（DAY-083）
 func _handle_streak_reset(payload: Dictionary) -> void:
 	emit_signal("streak_reset", payload)
+
+## 處理幸運轉盤觸發（DAY-084）
+func _handle_wheel_trigger(payload: Dictionary) -> void:
+	emit_signal("wheel_triggered", payload)

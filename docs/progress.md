@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-083 連擊系統 + DAY-082 推薦碼系統修正）
+## 最後更新：2026-05-20（DAY-084 幸運轉盤系統完整整合）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-084 更新（自主觸發）：** 幸運轉盤系統（Lucky Wheel System）✅
+  - `server/internal/game/wheel/wheel.go`：轉盤管理器（8格，2x-100x，加權隨機）
+  - `server/internal/game/wheel/wheel_test.go`：轉盤測試
+  - `server/internal/ws/protocol.go`：`MsgWheelTrigger`（Server→Client）+ `WheelSlotPayload`/`WheelTriggerPayload`
+  - `server/internal/game/wheel_handler.go`：`notifyWheelKill()`（擊殺特殊目標後觸發）
+  - `server/internal/game/game.go`：`Wheel *wheel.Manager` 欄位 + `wheel.NewManager()` 初始化 + `handleKill` 整合 `notifyWheelKill()`
+  - `client/chiikawa-pixel/scripts/ui/WheelPanel.gd`：轉盤面板（8格圓形排列，旋轉動畫，結果顯示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`wheel_triggered` 訊號 + `_handle_wheel_trigger()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 WheelPanel（`_init_wheel_panel()`，位置中央 640,360）
+  - 觸發條件：T103流星(15%) / T104金草(20%) / B001 BOSS(50%)
+  - 8個格子：2x(30%) / 5x(25%) / 10x(20%) / 20x(12%) / 30x(7%) / 50x(4%) / 80x(1%) / 100x(1%)
+  - 修復：`wheel_handler.go` 的 `g.targetDefs` → `data.Targets`（編譯錯誤修復）
+  - 修復：`streak_handler.go` 重複內容清除
+  - build/vet 全部通過
+
 - **DAY-083 更新（自主觸發）：** 連擊系統（Kill Streak System）✅
   - `server/internal/game/streak/streak.go`：連擊管理器（6個等級，3秒超時重置，倍率 1.0→2.0x）
   - `server/internal/game/streak/streak_test.go`：10 個單元測試全部通過

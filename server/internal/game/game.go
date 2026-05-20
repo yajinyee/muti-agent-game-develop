@@ -28,6 +28,7 @@ import (
 	"digital-twin/server/internal/game/tournament"
 	"digital-twin/server/internal/game/vip"
 	"digital-twin/server/internal/game/referral"
+	"digital-twin/server/internal/game/wheel"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -57,6 +58,7 @@ type Game struct {
 	VIP         *vip.Manager        // VIP 等級管理器（DAY-078）
 	Event       *event.Manager      // 限時活動管理器（DAY-079）
 	Referral    *referral.Manager   // 推薦碼管理器（DAY-082）
+	Wheel       *wheel.Manager      // 幸運轉盤管理器（DAY-084）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -115,6 +117,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		VIP:                vip.New(),
 		Event:              event.New(30 * time.Minute),
 		Referral:           referral.NewManager(),
+		Wheel:              wheel.NewManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -686,6 +689,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	go g.notifyDailyBossKill(p, result.Multiplier)
 	// 魚類圖鑑：記錄擊破（DAY-081）
 	g.notifyCodexKill(p.ID, t.DefID, result.Multiplier)
+	// 幸運轉盤：擊破特殊目標後觸發（DAY-084）
+	g.notifyWheelKill(p, t.DefID, finalReward)
 }
 
 // handleLock 處理鎖定

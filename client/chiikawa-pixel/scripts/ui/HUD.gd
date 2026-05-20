@@ -23,6 +23,7 @@ const EventPanelScript = preload("res://scripts/ui/EventPanel.gd")
 const CodexPanelScript = preload("res://scripts/ui/CodexPanel.gd")
 const StreakPanelScript = preload("res://scripts/ui/StreakPanel.gd")
 const ReferralPanelScript = preload("res://scripts/ui/ReferralPanel.gd")
+const WheelPanelScript = preload("res://scripts/ui/WheelPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -178,6 +179,7 @@ func _ready() -> void:
 	_init_codex_panel()       # 魚類圖鑑面板（DAY-081）
 	_init_streak_panel()      # 連擊系統面板（DAY-083）
 	_init_referral_panel()    # 推薦碼面板（DAY-082）
+	_init_wheel_panel()       # 幸運轉盤面板（DAY-084）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1745,3 +1747,16 @@ func _init_referral_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_referral_panel_node = panel
+
+## ── 幸運轉盤面板（DAY-084）──────────────────────────────────────────────────
+var _wheel_panel_node = null
+
+## 初始化幸運轉盤面板（DAY-084）
+## 位置：畫面中央（全螢幕覆蓋式彈窗）
+func _init_wheel_panel() -> void:
+	var panel = WheelPanelScript.new()
+	panel.position = Vector2(640, 360)
+	panel.z_index = 50
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_wheel_panel_node = panel

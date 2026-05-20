@@ -113,6 +113,8 @@ const (
 	// 連擊系統（DAY-083）
 	MsgStreakUpdate      MessageType = "streak_update"       // 連擊狀態更新
 	MsgStreakReset       MessageType = "streak_reset"        // 連擊重置通知
+	// 幸運轉盤系統（DAY-084）
+	MsgWheelTrigger     MessageType = "wheel_trigger"       // 轉盤觸發通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -936,4 +938,27 @@ type StreakUpdatePayload struct {
 type StreakResetPayload struct {
 	FinalStreak int `json:"final_streak"` // 重置前的連擊數
 	MaxStreak   int `json:"max_streak"`   // 本局最高連擊
+}
+
+// ---- 幸運轉盤系統（DAY-084）----
+
+// WheelSlotPayload 轉盤格子定義（用於廣播）
+type WheelSlotPayload struct {
+	Multiplier float64 `json:"multiplier"`
+	Label      string  `json:"label"`
+	Color      string  `json:"color"`
+}
+
+// WheelTriggerPayload 轉盤觸發通知（Server → Client）
+// 擊殺特殊目標後觸發，Client 播放轉盤動畫後顯示結果
+type WheelTriggerPayload struct {
+	PlayerID    string             `json:"player_id"`
+	TargetID    string             `json:"target_id"`    // 觸發的目標物 ID
+	TargetName  string             `json:"target_name"`  // 目標物名稱
+	Slots       []WheelSlotPayload `json:"slots"`        // 所有格子定義
+	WinIndex    int                `json:"win_index"`    // 中獎格子索引
+	Multiplier  float64            `json:"multiplier"`   // 中獎倍率
+	BaseReward  int                `json:"base_reward"`  // 基礎獎勵
+	FinalReward int                `json:"final_reward"` // 最終獎勵
+	NewBalance  int                `json:"new_balance"`  // 新金幣餘額
 }
