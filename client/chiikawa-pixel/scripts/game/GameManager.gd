@@ -37,6 +37,11 @@ signal season_level_up(level_data: Dictionary)         # 賽季等級升級（DA
 signal friend_list_updated(friend_data: Dictionary)    # 好友列表更新（DAY-073）
 signal friend_request_received(request_data: Dictionary) # 好友請求通知（DAY-073）
 signal friend_updated(update_data: Dictionary)         # 好友狀態更新（DAY-073）
+# 好友禮物系統（DAY-101）
+signal gift_received(gift_data: Dictionary)            # 收到禮物通知
+signal gift_sent(gift_data: Dictionary)                # 送出禮物成功通知
+signal gift_status(status_data: Dictionary)            # 今日禮物狀態
+signal gift_error(error_data: Dictionary)              # 禮物操作失敗
 signal guild_updated(guild_data: Dictionary)           # 公會資訊更新（DAY-074）
 signal guild_task_complete(task_data: Dictionary)      # 公會任務完成（DAY-074）
 signal guild_message_received(msg_data: Dictionary)    # 公會聊天訊息（DAY-075）
@@ -182,6 +187,15 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_friend_request(payload)
 		"friend_update":
 			_handle_friend_update(payload)
+		# 好友禮物系統（DAY-101）
+		"gift_received":
+			_handle_gift_received(payload)
+		"gift_sent":
+			_handle_gift_sent(payload)
+		"gift_status":
+			_handle_gift_status(payload)
+		"gift_error":
+			_handle_gift_error(payload)
 		"guild_update":
 			_handle_guild_update(payload)
 		"guild_list":
@@ -462,6 +476,22 @@ func _handle_friend_request(payload: Dictionary) -> void:
 ## 處理好友狀態更新（DAY-073）
 func _handle_friend_update(payload: Dictionary) -> void:
 	emit_signal("friend_updated", payload)
+
+## 處理禮物收到通知（DAY-101）
+func _handle_gift_received(payload: Dictionary) -> void:
+	emit_signal("gift_received", payload)
+
+## 處理禮物送出成功通知（DAY-101）
+func _handle_gift_sent(payload: Dictionary) -> void:
+	emit_signal("gift_sent", payload)
+
+## 處理禮物狀態（DAY-101）
+func _handle_gift_status(payload: Dictionary) -> void:
+	emit_signal("gift_status", payload)
+
+## 處理禮物錯誤（DAY-101）
+func _handle_gift_error(payload: Dictionary) -> void:
+	emit_signal("gift_error", payload)
 
 ## 處理公會資訊更新（DAY-074）
 func _handle_guild_update(payload: Dictionary) -> void:

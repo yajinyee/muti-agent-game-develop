@@ -396,6 +396,8 @@ func (g *Game) saveAllPlayersOnShutdown() {
 			p.Stats.EndSession()
 		}
 		g.saveFullPlayerState(p)
+		// 儲存好友關係（DAY-101）
+		g.saveFriendState(p.ID)
 	}
 
 	log.Printf("[Shutdown] Saved %d players on shutdown", len(players))

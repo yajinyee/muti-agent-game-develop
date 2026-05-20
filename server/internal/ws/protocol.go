@@ -66,6 +66,9 @@ const (
 	// 每日簽到轉盤（DAY-092）
 	MsgGetDailySpin      MessageType = "get_daily_spin"       // 查詢每日轉盤狀態
 	MsgDailySpin         MessageType = "daily_spin"           // 執行每日轉盤
+	// 好友禮物系統（DAY-101）
+	MsgSendGift          MessageType = "send_gift"            // 送禮物給好友
+	MsgGetGiftStatus     MessageType = "get_gift_status"      // 查詢今日禮物狀態
 )
 
 // Server → Client
@@ -165,6 +168,11 @@ const (
 	// 每日簽到轉盤（DAY-092）
 	MsgDailySpinState    MessageType = "daily_spin_state"    // 每日轉盤狀態（Server → Client）
 	MsgDailySpinResult   MessageType = "daily_spin_result"   // 每日轉盤結果（Server → Client）
+	// 好友禮物系統（DAY-101）
+	MsgGiftReceived      MessageType = "gift_received"       // 收到禮物通知（Server → Client）
+	MsgGiftSent          MessageType = "gift_sent"           // 送出禮物成功通知（Server → Client）
+	MsgGiftStatus        MessageType = "gift_status"         // 今日禮物狀態（Server → Client）
+	MsgGiftError         MessageType = "gift_error"          // 禮物操作失敗（Server → Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -664,6 +672,47 @@ type FriendUpdatePayload struct {
 	DisplayName string `json:"display_name"`
 	IsOnline    bool   `json:"is_online"`
 	Event       string `json:"event"` // "online" / "offline" / "accepted" / "removed"
+}
+
+// ---- 好友禮物系統（DAY-101）----
+
+// SendGiftPayload 送禮物請求（Client → Server）
+type SendGiftPayload struct {
+	FriendID string `json:"friend_id"`
+}
+
+// GetGiftStatusPayload 查詢禮物狀態請求（Client → Server）
+type GetGiftStatusPayload struct{}
+
+// GiftReceivedPayload 收到禮物通知（Server → Client）
+type GiftReceivedPayload struct {
+	FromID      string `json:"from_id"`
+	DisplayName string `json:"display_name"`
+	Amount      int    `json:"amount"`
+	NewBalance  int    `json:"new_balance"`
+}
+
+// GiftSentPayload 送出禮物成功通知（Server → Client）
+type GiftSentPayload struct {
+	ToID        string `json:"to_id"`
+	DisplayName string `json:"display_name"`
+	Amount      int    `json:"amount"`
+	SentToday   int    `json:"sent_today"`   // 今日已送次數
+	Remaining   int    `json:"remaining"`    // 今日剩餘次數
+}
+
+// GiftStatusPayload 今日禮物狀態（Server → Client）
+type GiftStatusPayload struct {
+	SentToday int `json:"sent_today"`
+	Remaining int `json:"remaining"`
+	MaxDaily  int `json:"max_daily"`
+	Amount    int `json:"amount"` // 每次禮物金幣數
+}
+
+// GiftErrorPayload 禮物操作失敗（Server → Client）
+type GiftErrorPayload struct {
+	ErrorCode string `json:"error_code"`
+	Message   string `json:"message"`
 }
 
 // ---- 公會系統（DAY-074）----

@@ -388,3 +388,11 @@ func send_buy_shop_item(item_id: String) -> void:
 ## 查詢個人統計（DAY-096）
 func send_get_player_stats() -> void:
 	send("get_player_stats", {})
+
+## 送禮物給好友（DAY-101）
+func send_gift(friend_id: String) -> void:
+	send("send_gift", {"friend_id": friend_id})
+
+## 查詢今日禮物狀態（DAY-101）
+func send_get_gift_status() -> void:
+	send("get_gift_status", {})

@@ -201,6 +201,8 @@ func (g *Game) AddPlayer(playerID string) {
 		var savedState *store.PlayerState
 		if g.store != nil {
 			g.restoreFullPlayerState(p)
+			// 恢復好友關係（DAY-101）
+			g.restoreFriendState(p.ID)
 			// 取得基礎 savedState 供 checkAndSendDailyBonus 使用
 			if saved, err := g.store.LoadPlayer(playerID); err == nil && saved != nil {
 				savedState = saved
@@ -225,6 +227,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendFriendList(pp)
 				// 通知好友上線（DAY-073）
 				g.notifyFriendsOnline(playerID, pp.DisplayName)
+				// 發放離線期間收到的禮物（DAY-101）
+				g.deliverPendingGifts(pp)
 				// 更新公會在線狀態 + 發送公會資訊（DAY-074）
 				g.Guild.SetOnlineStatus(playerID, true)
 				g.sendGuildUpdate(pp)
@@ -285,6 +289,8 @@ func (g *Game) RemovePlayer(playerID string) {
 	if g.store != nil && p != nil {
 		// 結束統計 Session 後再儲存（確保 TotalPlayTime 正確）
 		g.saveFullPlayerState(p)
+		// 儲存好友關係（DAY-101）
+		g.saveFriendState(p.ID)
 	}
 
 	log.Printf("[Game] Player %s left game %s", playerID, g.ID)
@@ -448,6 +454,11 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 玩家統計系統（DAY-096）
 	case ws.MsgGetPlayerStats:
 		g.handleGetPlayerStats(p)
+	// 好友禮物系統（DAY-101）
+	case ws.MsgSendGift:
+		g.handleSendGift(p, msg)
+	case ws.MsgGetGiftStatus:
+		g.handleGetGiftStatus(p)
 	}
 }
 

@@ -1,11 +1,38 @@
 // Package friend 好友系統（DAY-073）
 // 玩家可以加好友、查看好友列表、比較積分
 // 好友關係是雙向的（A 加 B，B 也要接受）
+// DAY-101：新增禮物贈送系統 + 好友關係持久化
 package friend
 
 import (
 	"sync"
 	"time"
+)
+
+// GiftRecord 禮物贈送記錄
+type GiftRecord struct {
+	SentCount int       `json:"sent_count"`  // 今日已送出次數
+	LastDate  string    `json:"last_date"`   // 最後送出日期（UTC+8，格式 2006-01-02）
+}
+
+// GiftResult 禮物贈送結果
+type GiftResult struct {
+	Success     bool   `json:"success"`
+	Amount      int    `json:"amount"`
+	ErrorCode   string `json:"error_code,omitempty"`
+	ErrorMsg    string `json:"error_msg,omitempty"`
+}
+
+// FriendState 好友關係持久化狀態（DAY-101）
+type FriendState struct {
+	PlayerID  string   `json:"player_id"`
+	FriendIDs []string `json:"friend_ids"`
+}
+
+const (
+	MaxDailyGifts  = 3    // 每日最多送出禮物次數
+	GiftAmount     = 500  // 每次禮物金幣數量
+	MaxFriends     = 50   // 最多好友數量
 )
 
 // FriendStatus 好友狀態
@@ -44,6 +71,7 @@ type Manager struct {
 	mu       sync.RWMutex
 	requests map[string]*FriendRequest // key: fromID+":"+toID
 	friends  map[string][]string       // playerID → 好友 ID 列表
+	gifts    map[string]*GiftRecord    // playerID → 今日禮物記錄（DAY-101）
 }
 
 // New 建立新的好友管理器
@@ -51,6 +79,7 @@ func New() *Manager {
 	return &Manager{
 		requests: make(map[string]*FriendRequest),
 		friends:  make(map[string][]string),
+		gifts:    make(map[string]*GiftRecord),
 	}
 }
 
@@ -224,4 +253,100 @@ func removeFromSlice(slice []string, item string) []string {
 		}
 	}
 	return result
+}
+
+// ---- 禮物贈送系統（DAY-101）----
+
+// todayDate 取得今日日期字串（UTC+8）
+func todayDate() string {
+	loc := time.FixedZone("UTC+8", 8*60*60)
+	return time.Now().In(loc).Format("2006-01-02")
+}
+
+// SendGift 向好友贈送禮物
+// 回傳 GiftResult（含成功/失敗原因）
+func (m *Manager) SendGift(fromID, toID string) GiftResult {
+	if fromID == toID {
+		return GiftResult{ErrorCode: "self_gift", ErrorMsg: "不能送禮物給自己"}
+	}
+
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	// 必須是好友
+	if !m.areFriends(fromID, toID) {
+		return GiftResult{ErrorCode: "not_friend", ErrorMsg: "只能送禮物給好友"}
+	}
+
+	// 檢查今日送出次數
+	today := todayDate()
+	rec, ok := m.gifts[fromID]
+	if !ok {
+		rec = &GiftRecord{}
+		m.gifts[fromID] = rec
+	}
+	// 跨日重置
+	if rec.LastDate != today {
+		rec.SentCount = 0
+		rec.LastDate = today
+	}
+	if rec.SentCount >= MaxDailyGifts {
+		return GiftResult{ErrorCode: "daily_limit", ErrorMsg: "今日禮物已送完（每日上限 3 次）"}
+	}
+
+	rec.SentCount++
+	rec.LastDate = today
+	return GiftResult{Success: true, Amount: GiftAmount}
+}
+
+// GetGiftStatus 取得今日禮物狀態（已送次數 / 剩餘次數）
+func (m *Manager) GetGiftStatus(playerID string) (sentToday int, remaining int) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	today := todayDate()
+	rec, ok := m.gifts[playerID]
+	if !ok || rec.LastDate != today {
+		return 0, MaxDailyGifts
+	}
+	sent := rec.SentCount
+	if sent > MaxDailyGifts {
+		sent = MaxDailyGifts
+	}
+	return sent, MaxDailyGifts - sent
+}
+
+// ---- 持久化支援（DAY-101）----
+
+// GetFriendState 取得好友關係持久化狀態
+func (m *Manager) GetFriendState(playerID string) *FriendState {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	ids := m.friends[playerID]
+	result := make([]string, len(ids))
+	copy(result, ids)
+	return &FriendState{
+		PlayerID:  playerID,
+		FriendIDs: result,
+	}
+}
+
+// LoadFriendState 從持久化狀態恢復好友關係
+// 只恢復單向（playerID 的好友列表），不重複建立雙向關係
+func (m *Manager) LoadFriendState(state *FriendState) {
+	if state == nil || len(state.FriendIDs) == 0 {
+		return
+	}
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	if m.friends[state.PlayerID] == nil {
+		m.friends[state.PlayerID] = []string{}
+	}
+	for _, fid := range state.FriendIDs {
+		if !m.areFriends(state.PlayerID, fid) {
+			m.friends[state.PlayerID] = append(m.friends[state.PlayerID], fid)
+		}
+	}
 }

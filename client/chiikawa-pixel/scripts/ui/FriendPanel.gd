@@ -1,11 +1,12 @@
 ## FriendPanel.gd — 好友系統面板（DAY-073）
-## 顯示好友列表、好友請求、好友積分比較
+## DAY-101：新增禮物贈送系統 + 好友持久化支援
+## 顯示好友列表、好友請求、好友積分比較、禮物贈送
 ## 位置：TopBar 右側（可折疊）
 extends Node2D
 
 # ---- 常數 ----
-const PANEL_WIDTH  := 280
-const PANEL_HEIGHT := 220
+const PANEL_WIDTH  := 300
+const PANEL_HEIGHT := 240
 
 # ---- 節點引用 ----
 var _pixel_font: Font = null
@@ -14,10 +15,13 @@ var _toggle_btn: Button = null
 var _panel_bg: ColorRect = null
 var _friend_list_container: Node2D = null
 var _pending_badge: Label = null
+var _gift_status_label: Label = null
 
 # ---- 好友資料 ----
 var _friends: Array = []
 var _pending_count: int = 0
+var _gift_sent_today: int = 0
+var _gift_remaining: int = 3
 
 # ---- 訊號 ----
 signal friend_request_sent(target_id: String)
@@ -89,9 +93,26 @@ func _build_panel() -> void:
 	add_btn.pressed.connect(_on_add_friend_pressed)
 	_panel_bg.add_child(add_btn)
 
+	# 禮物狀態列（DAY-101）
+	_gift_status_label = Label.new()
+	_gift_status_label.position = Vector2(8, 22)
+	_gift_status_label.text = "🎁 今日禮物：剩餘 3 次（每次 500🪙）"
+	_gift_status_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+	if _pixel_font:
+		_gift_status_label.add_theme_font_override("font", _pixel_font)
+		_gift_status_label.add_theme_font_size_override("font_size", 9)
+	_panel_bg.add_child(_gift_status_label)
+
+	# 分隔線
+	var sep := ColorRect.new()
+	sep.position = Vector2(4, 36)
+	sep.size = Vector2(PANEL_WIDTH - 8, 1)
+	sep.color = Color(0.3, 0.3, 0.5, 0.6)
+	_panel_bg.add_child(sep)
+
 	# 好友列表容器
 	_friend_list_container = Node2D.new()
-	_friend_list_container.position = Vector2(0, 24)
+	_friend_list_container.position = Vector2(0, 40)
 	_panel_bg.add_child(_friend_list_container)
 
 ## 連接訊號
@@ -104,16 +125,25 @@ func _connect_signals() -> void:
 		GameManager.friend_request_received.connect(_on_friend_request_received)
 	if GameManager.has_signal("friend_updated"):
 		GameManager.friend_updated.connect(_on_friend_updated)
+	# 禮物系統訊號（DAY-101）
+	if GameManager.has_signal("gift_received"):
+		GameManager.gift_received.connect(_on_gift_received)
+	if GameManager.has_signal("gift_sent"):
+		GameManager.gift_sent.connect(_on_gift_sent)
+	if GameManager.has_signal("gift_status"):
+		GameManager.gift_status.connect(_on_gift_status)
+	if GameManager.has_signal("gift_error"):
+		GameManager.gift_error.connect(_on_gift_error)
 
 func _on_toggle_pressed() -> void:
 	_is_open = !_is_open
 	_panel_bg.visible = _is_open
 	if _is_open:
-		# 開啟時請求最新好友列表
+		# 開啟時請求最新好友列表 + 禮物狀態
 		NetworkManager.send_message({"type": "get_friend_list", "payload": {}})
+		NetworkManager.send_message({"type": "get_gift_status", "payload": {}})
 
 func _on_add_friend_pressed() -> void:
-	# 顯示輸入框（簡單實作：用 OS.get_clipboard 或固定 ID）
 	_show_add_friend_dialog()
 
 func _on_friend_list_updated(data: Dictionary) -> void:
@@ -123,9 +153,7 @@ func _on_friend_list_updated(data: Dictionary) -> void:
 
 func _on_friend_request_received(data: Dictionary) -> void:
 	var from_name = data.get("display_name", data.get("from_id", "?"))
-	# 顯示好友請求通知
 	_show_friend_request_notification(data.get("from_id", ""), from_name)
-	# 更新待處理徽章
 	_pending_count += 1
 	_update_pending_badge()
 
@@ -144,9 +172,47 @@ func _on_friend_updated(data: Dictionary) -> void:
 			_show_notification("👥 %s 移除了你的好友" % friend_name, Color(1.0, 0.5, 0.5))
 			NetworkManager.send_message({"type": "get_friend_list", "payload": {}})
 
+# ---- 禮物系統 handler（DAY-101）----
+
+func _on_gift_received(data: Dictionary) -> void:
+	var from_name = data.get("display_name", "好友")
+	var amount = data.get("amount", 500)
+	var new_balance = data.get("new_balance", 0)
+	_show_notification("🎁 %s 送你 %d🪙！（餘額：%d）" % [from_name, amount, new_balance],
+		Color(1.0, 0.85, 0.2))
+
+func _on_gift_sent(data: Dictionary) -> void:
+	var to_name = data.get("display_name", "好友")
+	var amount = data.get("amount", 500)
+	_gift_sent_today = data.get("sent_today", _gift_sent_today)
+	_gift_remaining = data.get("remaining", _gift_remaining)
+	_update_gift_status_label()
+	_show_notification("🎁 已送 %d🪙 給 %s！（今日剩餘 %d 次）" % [amount, to_name, _gift_remaining],
+		Color(0.4, 1.0, 0.6))
+	# 重新整理好友列表（更新禮物按鈕狀態）
+	_refresh_ui()
+
+func _on_gift_status(data: Dictionary) -> void:
+	_gift_sent_today = data.get("sent_today", 0)
+	_gift_remaining = data.get("remaining", 3)
+	_update_gift_status_label()
+
+func _on_gift_error(data: Dictionary) -> void:
+	var msg = data.get("message", "禮物發送失敗")
+	_show_notification("❌ %s" % msg, Color(1.0, 0.4, 0.4))
+
+func _update_gift_status_label() -> void:
+	if not is_instance_valid(_gift_status_label):
+		return
+	if _gift_remaining > 0:
+		_gift_status_label.text = "🎁 今日禮物：剩餘 %d 次（每次 500🪙）" % _gift_remaining
+		_gift_status_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.4))
+	else:
+		_gift_status_label.text = "🎁 今日禮物已送完（明日重置）"
+		_gift_status_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
+
 ## 更新 UI
 func _refresh_ui() -> void:
-	# 清除舊的好友列表
 	for child in _friend_list_container.get_children():
 		child.queue_free()
 
@@ -163,24 +229,31 @@ func _refresh_ui() -> void:
 		_friend_list_container.add_child(empty_label)
 		return
 
-	# 顯示好友列表（最多 6 個）
-	var max_show = min(_friends.size(), 6)
+	# 顯示好友列表（最多 5 個，留空間給禮物按鈕）
+	var max_show = min(_friends.size(), 5)
 	for i in range(max_show):
-		var friend = _friends[i]
-		_build_friend_row(i, friend)
+		var friend_data = _friends[i]
+		_build_friend_row(i, friend_data)
 
-## 建立好友行
-func _build_friend_row(index: int, friend: Dictionary) -> void:
-	var row_y = index * 30
-	var is_online = friend.get("is_online", false)
-	var display_name = friend.get("display_name", "?")
-	var season_level = friend.get("season_level", 0)
-	var coins = friend.get("coins", 0)
-	var friend_id = friend.get("player_id", "")
+## 建立好友行（DAY-101：加入禮物按鈕）
+func _build_friend_row(index: int, friend_data: Dictionary) -> void:
+	var row_y = index * 38
+	var is_online = friend_data.get("is_online", false)
+	var display_name = friend_data.get("display_name", "?")
+	var season_level = friend_data.get("season_level", 0)
+	var coins = friend_data.get("coins", 0)
+	var friend_id = friend_data.get("player_id", "")
+
+	# 行背景（hover 效果）
+	var row_bg := ColorRect.new()
+	row_bg.position = Vector2(4, row_y)
+	row_bg.size = Vector2(PANEL_WIDTH - 8, 34)
+	row_bg.color = Color(0.1, 0.08, 0.25, 0.5) if index % 2 == 0 else Color(0.08, 0.06, 0.2, 0.3)
+	_friend_list_container.add_child(row_bg)
 
 	# 在線狀態指示
 	var status_dot := ColorRect.new()
-	status_dot.position = Vector2(8, row_y + 10)
+	status_dot.position = Vector2(8, row_y + 13)
 	status_dot.size = Vector2(8, 8)
 	status_dot.color = Color(0.3, 1.0, 0.3) if is_online else Color(0.5, 0.5, 0.5)
 	_friend_list_container.add_child(status_dot)
@@ -197,28 +270,39 @@ func _build_friend_row(index: int, friend: Dictionary) -> void:
 
 	# 賽季等級
 	var level_label := Label.new()
-	level_label.position = Vector2(130, row_y + 4)
-	level_label.text = "Lv%d" % season_level
-	level_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
+	level_label.position = Vector2(20, row_y + 18)
+	level_label.text = "Lv%d  🪙%d" % [season_level, coins]
+	level_label.add_theme_color_override("font_color", Color(0.8, 0.75, 0.5))
 	if _pixel_font:
 		level_label.add_theme_font_override("font", _pixel_font)
-		level_label.add_theme_font_size_override("font_size", 9)
+		level_label.add_theme_font_size_override("font_size", 8)
 	_friend_list_container.add_child(level_label)
 
-	# 金幣
-	var coins_label := Label.new()
-	coins_label.position = Vector2(165, row_y + 4)
-	coins_label.text = "🪙%d" % coins
-	coins_label.add_theme_color_override("font_color", Color(0.9, 0.8, 0.4))
+	# 禮物按鈕（DAY-101）
+	var gift_btn := Button.new()
+	var can_gift = _gift_remaining > 0
+	gift_btn.text = "🎁" if can_gift else "✗"
+	gift_btn.position = Vector2(PANEL_WIDTH - 56, row_y + 7)
+	gift_btn.size = Vector2(24, 20)
+	gift_btn.flat = true
+	gift_btn.disabled = not can_gift
+	gift_btn.tooltip_text = "送 500🪙 禮物" if can_gift else "今日禮物已送完"
 	if _pixel_font:
-		coins_label.add_theme_font_override("font", _pixel_font)
-		coins_label.add_theme_font_size_override("font_size", 9)
-	_friend_list_container.add_child(coins_label)
+		gift_btn.add_theme_font_override("font", _pixel_font)
+		gift_btn.add_theme_font_size_override("font_size", 11)
+	if can_gift:
+		gift_btn.pressed.connect(func():
+			NetworkManager.send_message({
+				"type": "send_gift",
+				"payload": {"friend_id": friend_id}
+			})
+		)
+	_friend_list_container.add_child(gift_btn)
 
 	# 移除按鈕
 	var remove_btn := Button.new()
 	remove_btn.text = "✕"
-	remove_btn.position = Vector2(PANEL_WIDTH - 28, row_y + 4)
+	remove_btn.position = Vector2(PANEL_WIDTH - 28, row_y + 7)
 	remove_btn.size = Vector2(20, 20)
 	remove_btn.flat = true
 	remove_btn.add_theme_color_override("font_color", Color(1.0, 0.4, 0.4))
@@ -245,7 +329,6 @@ func _update_pending_badge() -> void:
 
 ## 顯示加好友對話框（輸入玩家 ID）
 func _show_add_friend_dialog() -> void:
-	# 建立輸入框
 	var dialog_bg := ColorRect.new()
 	dialog_bg.position = Vector2(-PANEL_WIDTH + 32, 28 + PANEL_HEIGHT + 4)
 	dialog_bg.size = Vector2(PANEL_WIDTH, 50)
@@ -281,7 +364,6 @@ func _show_add_friend_dialog() -> void:
 		confirm_btn.add_theme_font_size_override("font_size", 9)
 	dialog_bg.add_child(confirm_btn)
 
-	# 確認發送
 	var send_fn = func():
 		var target_id = line_edit.text.strip_edges()
 		if target_id.length() >= 4:
@@ -297,7 +379,6 @@ func _show_add_friend_dialog() -> void:
 	confirm_btn.pressed.connect(send_fn)
 	line_edit.text_submitted.connect(func(_t): send_fn.call())
 
-	# 5 秒後自動關閉
 	var tween = create_tween()
 	tween.tween_interval(5.0)
 	tween.tween_callback(func():
@@ -316,7 +397,6 @@ func _show_friend_request_notification(from_id: String, from_name: String) -> vo
 		notify.add_theme_font_size_override("font_size", 10)
 	add_child(notify)
 
-	# 接受/拒絕按鈕
 	var accept_btn := Button.new()
 	accept_btn.text = "✓ 接受"
 	accept_btn.position = Vector2(-120, -30)
@@ -345,7 +425,7 @@ func _show_friend_request_notification(from_id: String, from_name: String) -> vo
 func _show_notification(text: String, color: Color) -> void:
 	var notify := Label.new()
 	notify.text = text
-	notify.position = Vector2(-100, -30)
+	notify.position = Vector2(-120, -30)
 	notify.add_theme_color_override("font_color", color)
 	if _pixel_font:
 		notify.add_theme_font_override("font", _pixel_font)

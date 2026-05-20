@@ -1,10 +1,13 @@
 // friend_handler.go — 好友系統 handler（DAY-073）
+// DAY-101：新增禮物贈送系統 + 好友持久化
 package game
 
 import (
 	"log"
 
+	"digital-twin/server/internal/game/friend"
 	"digital-twin/server/internal/player"
+	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
 )
 
@@ -159,6 +162,10 @@ func (g *Game) handleAcceptFriendRequest(p *player.Player, msg *ws.Message) {
 		})
 	}
 
+	// 持久化雙方好友關係（DAY-101）
+	go g.saveFriendState(p.ID)
+	go g.saveFriendState(payload.FromID)
+
 	log.Printf("[Friend] 玩家 %s 接受了 %s 的好友請求", p.ID, payload.FromID)
 }
 
@@ -209,6 +216,10 @@ func (g *Game) handleRemoveFriend(p *player.Player, msg *ws.Message) {
 		})
 	}
 
+	// 持久化雙方好友關係（DAY-101）
+	go g.saveFriendState(p.ID)
+	go g.saveFriendState(payload.FriendID)
+
 	log.Printf("[Friend] 玩家 %s 移除了好友 %s", p.ID, payload.FriendID)
 }
 
@@ -257,4 +268,172 @@ func (g *Game) notifyFriendsOffline(playerID string, displayName string) {
 			})
 		}
 	}
+}
+
+// ---- 好友禮物系統（DAY-101）----
+
+// handleSendGift 處理送禮物請求（DAY-101）
+func (g *Game) handleSendGift(p *player.Player, msg *ws.Message) {
+	var payload ws.SendGiftPayload
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		return
+	}
+
+	if payload.FriendID == "" {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgGiftError,
+			Payload: ws.GiftErrorPayload{ErrorCode: "invalid_target", Message: "無效的好友 ID"},
+		})
+		return
+	}
+
+	result := g.Friends.SendGift(p.ID, payload.FriendID)
+	if !result.Success {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgGiftError,
+			Payload: ws.GiftErrorPayload{ErrorCode: result.ErrorCode, Message: result.ErrorMsg},
+		})
+		return
+	}
+
+	// 取得好友顯示名稱
+	friendDisplayName := payload.FriendID
+	g.mu.RLock()
+	friendPlayer, friendOnline := g.Players[payload.FriendID]
+	g.mu.RUnlock()
+	if friendOnline && friendPlayer != nil {
+		friendDisplayName = friendPlayer.DisplayName
+		// 發放金幣給好友
+		friendPlayer.Coins += result.Amount
+		// 通知好友收到禮物
+		g.Hub.Send(payload.FriendID, &ws.Message{
+			Type: ws.MsgGiftReceived,
+			Payload: ws.GiftReceivedPayload{
+				FromID:      p.ID,
+				DisplayName: p.DisplayName,
+				Amount:      result.Amount,
+				NewBalance:  friendPlayer.Coins,
+			},
+		})
+		// 更新好友的玩家狀態顯示
+		g.sendPlayerUpdate(friendPlayer)
+	} else {
+		// 好友離線：儲存待領取禮物（用 KV store 暫存）
+		if g.store != nil {
+			pendingKey := "pending_gift:" + payload.FriendID
+			var pending []int
+			_ = g.store.GetJSON(pendingKey, &pending)
+			pending = append(pending, result.Amount)
+			_ = g.store.SetJSON(pendingKey, pending, 0)
+		}
+		// 嘗試從 store 取得好友名稱
+		if g.store != nil {
+			if state, err := g.store.LoadPlayer(payload.FriendID); err == nil && state != nil {
+				friendDisplayName = state.DisplayName
+			}
+		}
+	}
+
+	// 取得今日禮物狀態
+	sentToday, remaining := g.Friends.GetGiftStatus(p.ID)
+
+	// 通知送禮者成功
+	g.Hub.Send(p.ID, &ws.Message{
+		Type: ws.MsgGiftSent,
+		Payload: ws.GiftSentPayload{
+			ToID:        payload.FriendID,
+			DisplayName: friendDisplayName,
+			Amount:      result.Amount,
+			SentToday:   sentToday,
+			Remaining:   remaining,
+		},
+	})
+
+	log.Printf("[Gift] 玩家 %s 送禮物 %d 金幣給 %s（今日第 %d 次）",
+		p.ID, result.Amount, payload.FriendID, sentToday)
+}
+
+// handleGetGiftStatus 處理查詢禮物狀態（DAY-101）
+func (g *Game) handleGetGiftStatus(p *player.Player) {
+	sentToday, remaining := g.Friends.GetGiftStatus(p.ID)
+	g.Hub.Send(p.ID, &ws.Message{
+		Type: ws.MsgGiftStatus,
+		Payload: ws.GiftStatusPayload{
+			SentToday: sentToday,
+			Remaining: remaining,
+			MaxDaily:  3,
+			Amount:    500,
+		},
+	})
+}
+
+// deliverPendingGifts 玩家上線時發放離線期間收到的禮物（DAY-101）
+func (g *Game) deliverPendingGifts(p *player.Player) {
+	if g.store == nil {
+		return
+	}
+	pendingKey := "pending_gift:" + p.ID
+	var pending []int
+	if err := g.store.GetJSON(pendingKey, &pending); err != nil || len(pending) == 0 {
+		return
+	}
+
+	total := 0
+	for _, amount := range pending {
+		total += amount
+	}
+	if total <= 0 {
+		return
+	}
+
+	p.Coins += total
+	// 清除待領取禮物
+	_ = g.store.SetJSON(pendingKey, []int{}, 0)
+
+	// 通知玩家收到離線禮物
+	g.Hub.Send(p.ID, &ws.Message{
+		Type: ws.MsgGiftReceived,
+		Payload: ws.GiftReceivedPayload{
+			FromID:      "system",
+			DisplayName: "離線禮物",
+			Amount:      total,
+			NewBalance:  p.Coins,
+		},
+	})
+	log.Printf("[Gift] 玩家 %s 收到離線禮物共 %d 金幣（%d 份）", p.ID, total, len(pending))
+}
+
+// ---- 好友持久化（DAY-101）----
+
+// saveFriendState 儲存玩家好友關係到 FileStore
+func (g *Game) saveFriendState(playerID string) {
+	fs, ok := g.store.(*store.FileStore)
+	if !ok {
+		return
+	}
+	friendIDs := g.Friends.GetFriendIDs(playerID)
+	if err := fs.SaveFriends(playerID, friendIDs); err != nil {
+		log.Printf("[Friend] Failed to save friends for %s: %v", playerID, err)
+	}
+}
+
+// restoreFriendState 從 FileStore 恢復玩家好友關係
+func (g *Game) restoreFriendState(playerID string) {
+	fs, ok := g.store.(*store.FileStore)
+	if !ok {
+		return
+	}
+	friendIDs, err := fs.LoadFriends(playerID)
+	if err != nil {
+		log.Printf("[Friend] Failed to load friends for %s: %v", playerID, err)
+		return
+	}
+	if len(friendIDs) == 0 {
+		return
+	}
+	g.Friends.LoadFriendState(&friend.FriendState{
+		PlayerID:  playerID,
+		FriendIDs: friendIDs,
+	})
+	log.Printf("[Friend] Player %s restored %d friends", playerID, len(friendIDs))
 }

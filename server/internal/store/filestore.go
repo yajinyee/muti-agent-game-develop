@@ -375,3 +375,65 @@ func (fs *FileStore) Close() error {
 func (fs *FileStore) IsRedis() bool {
 	return false
 }
+
+// ---- 好友關係持久化（DAY-101）----
+
+// FriendPersistState 好友關係持久化結構
+type FriendPersistState struct {
+	PlayerID  string   `json:"player_id"`
+	FriendIDs []string `json:"friend_ids"`
+	UpdatedAt time.Time `json:"updated_at"`
+}
+
+// friendPath 取得好友關係 JSON 檔案路徑
+func (fs *FileStore) friendPath(playerID string) string {
+	safe := filepath.Base(playerID)
+	if safe == "." || safe == ".." {
+		safe = "unknown"
+	}
+	friendsDir := filepath.Join(fs.dataDir, "friends")
+	return filepath.Join(friendsDir, safe+".json")
+}
+
+// SaveFriends 儲存玩家好友關係
+func (fs *FileStore) SaveFriends(playerID string, friendIDs []string) error {
+	friendsDir := filepath.Join(fs.dataDir, "friends")
+	if err := os.MkdirAll(friendsDir, 0755); err != nil {
+		return fmt.Errorf("create friends dir: %w", err)
+	}
+
+	state := &FriendPersistState{
+		PlayerID:  playerID,
+		FriendIDs: friendIDs,
+		UpdatedAt: time.Now(),
+	}
+	data, err := json.MarshalIndent(state, "", "  ")
+	if err != nil {
+		return fmt.Errorf("marshal friends: %w", err)
+	}
+
+	path := fs.friendPath(playerID)
+	tmpPath := path + ".tmp"
+	if err := os.WriteFile(tmpPath, data, 0644); err != nil {
+		return fmt.Errorf("write friends file: %w", err)
+	}
+	return os.Rename(tmpPath, path)
+}
+
+// LoadFriends 讀取玩家好友關係
+func (fs *FileStore) LoadFriends(playerID string) ([]string, error) {
+	path := fs.friendPath(playerID)
+	data, err := os.ReadFile(path)
+	if os.IsNotExist(err) {
+		return []string{}, nil // 新玩家，無好友
+	}
+	if err != nil {
+		return nil, fmt.Errorf("read friends file: %w", err)
+	}
+
+	var state FriendPersistState
+	if err := json.Unmarshal(data, &state); err != nil {
+		return nil, fmt.Errorf("unmarshal friends: %w", err)
+	}
+	return state.FriendIDs, nil
+}

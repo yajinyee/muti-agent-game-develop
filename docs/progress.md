@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-100 完整持久化擴充：成就/稱號/任務/特殊武器）
+## 最後更新：2026-05-21（DAY-101 好友禮物系統 + 好友持久化）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-100 更新（自主觸發）：** 完整持久化擴充（Achievement/Title/Mission/SpecialWeapon Persistence）✅
+- **DAY-101 更新（自主觸發）：** 好友禮物系統 + 好友關係持久化（Friend Gift System + Friend Persistence）✅
+  - `server/internal/game/friend/friend.go`：新增 `GiftRecord`/`GiftResult`/`FriendState` 結構；新增 `SendGift()`（每日上限3次，每次500金幣，跨日重置）；`GetGiftStatus()`；`GetFriendState()`/`LoadFriendState()`（持久化支援）
+  - `server/internal/store/filestore.go`：新增 `FriendPersistState` 結構；新增 `SaveFriends()`/`LoadFriends()` 方法（原子寫入，儲存到 `data/friends/<playerID>.json`）
+  - `server/internal/ws/protocol.go`：新增 `MsgSendGift`/`MsgGetGiftStatus`（Client→Server）；`MsgGiftReceived`/`MsgGiftSent`/`MsgGiftStatus`/`MsgGiftError`（Server→Client）；`SendGiftPayload`/`GiftReceivedPayload`/`GiftSentPayload`/`GiftStatusPayload`/`GiftErrorPayload`
+  - `server/internal/game/friend_handler.go`：新增 `handleSendGift()`（在線好友直接發放金幣，離線好友暫存待領取）；`handleGetGiftStatus()`；`deliverPendingGifts()`（上線時自動發放離線禮物）；`saveFriendState()`/`restoreFriendState()`（持久化整合）
+  - `server/internal/game/game.go`：HandleMessage 加入 `MsgSendGift`/`MsgGetGiftStatus` 分支；AddPlayer 加入 `restoreFriendState()` + `deliverPendingGifts()`；RemovePlayer 加入 `saveFriendState()`
+  - `server/internal/game/persistence_handler.go`：`saveAllPlayersOnShutdown()` 加入 `saveFriendState()`
+  - `client/chiikawa-pixel/scripts/ui/FriendPanel.gd`：升級 UI（禮物狀態列、每個好友行加入🎁禮物按鈕、禮物剩餘次數顯示、離線禮物通知）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：新增 `gift_received`/`gift_sent`/`gift_status`/`gift_error` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：新增 `send_gift()`/`send_get_gift_status()`
+  - 禮物規則：每日最多送出 3 次，每次 500 金幣，UTC+8 00:00 重置
+  - 離線保護：好友離線時禮物暫存 KV store，上線時自動發放
+  - 持久化：好友關係儲存到 `data/friends/<playerID>.json`，Server 重啟後完整恢復
+  - 好友接受/移除時自動觸發持久化（goroutine 非同步）
+  - build/vet 全部通過
+  - **業界依據：** developex.com（2026）確認好友系統是 iGaming 留存核心；gamerbolt.com 確認禮物贈送是社交賭場留存的核心驅動力
+
+
   - `server/internal/store/filestore.go`：`FullPlayerState` 新增成就/稱號/任務進度/特殊武器充能欄位；新增 `AchievementState`/`TitleState`/`MissionProgState` 結構
   - `server/internal/game/achievement/achievement.go`：新增 `LoadUnlocked()` 方法
   - `server/internal/game/achievement/title.go`：新增 `LoadState()` 方法
