@@ -294,6 +294,22 @@ func send_perf_report(fps: float, memory_mb: float, draw_calls: int, node_count:
 		"timestamp": int(Time.get_unix_time_from_system() * 1000)
 	})
 
+## 購買特殊武器（DAY-089）
+func send_buy_special_weapon(weapon_type: String) -> void:
+	send("buy_special_weapon", {"weapon_type": weapon_type})
+
+## 使用特殊武器（DAY-089）
+func send_use_special_weapon(weapon_type: String, click_x: float, click_y: float) -> void:
+	send("use_special_weapon", {
+		"weapon_type": weapon_type,
+		"click_x": click_x,
+		"click_y": click_y
+	})
+
+## 查詢特殊武器狀態（DAY-089）
+func send_get_special_weapons() -> void:
+	send("get_special_weapons", {})
+
 ## 處理收到的封包
 func _handle_packet(packet: PackedByteArray) -> void:
 	var text = packet.get_string_from_utf8()

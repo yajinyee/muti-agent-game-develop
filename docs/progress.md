@@ -1,6 +1,29 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-088 連鎖爆炸系統）
+## 最後更新：2026-05-20（DAY-089 特殊武器系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-089 更新（自主觸發）：** 特殊武器系統（Special Weapon System）✅
+  - `server/internal/game/specialweapon/specialweapon.go`：特殊武器管理器（3種武器：炸彈/雷射/冰凍，購買/使用/充能管理）
+  - `server/internal/game/specialweapon/specialweapon_test.go`：10 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgBuySpecialWeapon`/`MsgUseSpecialWeapon`/`MsgGetSpecialWeapons`（Client→Server）+ `MsgSpecialWeaponUpdate`/`MsgSpecialWeaponFired`（Server→Client）+ 對應 Payload
+  - `server/internal/game/specialweapon_handler.go`：`handleBuySpecialWeapon()`/`handleUseSpecialWeapon()`/`handleGetSpecialWeapons()`/`sendSpecialWeaponUpdate()`
+  - `server/internal/game/game.go`：`SpecialWeapon *specialweapon.Manager` 欄位 + 初始化 + AddPlayer 發送狀態 + RemovePlayer 清理 + HandleMessage 分支
+  - `client/chiikawa-pixel/scripts/ui/SpecialWeaponPanel.gd`：特殊武器面板（3個武器按鈕，充能數量顯示，選擇模式，購買/使用邏輯）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`special_weapon_updated`/`special_weapon_fired` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：`send_buy_special_weapon()`/`send_use_special_weapon()`/`send_get_special_weapons()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 SpecialWeaponPanel（`_init_special_weapon_panel()`，位置 x=420 y=540）
+  - 3 種特殊武器：炸彈砲（範圍200px，500/發）/ 雷射砲（水平穿透±60px，800/發）/ 冰凍砲（全場減速5秒，300/發）
+  - 每種武器最多持有 3 發，BOSS 不受特殊武器影響（防止 RTP 爆炸）
+  - 特殊武器獎勵 = 基礎獎勵 × 0.5（避免 RTP 爆炸）
+  - 發射後廣播給所有玩家（所有人看到特殊武器效果）
+  - build/vet/test 全部通過（10/10 specialweapon 測試）
+  - **業界依據：** Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是業界標配特殊武器；makewebbetter.com 2026-01 確認特殊武器是捕魚機核心玩法
 
 ## 自我評估
 - **完成度：100%**

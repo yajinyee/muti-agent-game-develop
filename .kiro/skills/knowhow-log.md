@@ -2898,3 +2898,24 @@ contribution_per_shot = betCost × 0.005 × level_share
 - `Target.Multiplier`（不是 `Target.Def.Multiplier`，Def 只有 MultiplierMin/MultiplierMax）
 - `data.TargetDef` 沒有 `Multiplier` 欄位，實際倍率在 `Target.Multiplier`（NewTarget 時計算）
 - **教訓：** 使用 Target 欄位前先確認 struct 定義，不要假設欄位名稱
+
+## 83. 特殊武器 RTP 控制設計（2026-05-20）
+- **問題：** 特殊武器（炸彈/雷射）可以一次命中多個目標，如果每個目標都給全額獎勵，RTP 會爆炸
+- **解法：** 特殊武器獎勵 = 基礎獎勵 × 0.5（半額），BOSS 不受特殊武器影響
+- **炸彈半徑：** 200px（遊戲畫面 1280px 寬，約 15% 範圍）
+- **雷射容差：** ±60px（水平穿透，約 9% 高度範圍）
+- **冰凍持續：** 5 秒（Client 端處理視覺，Server 不需要追蹤狀態）
+- **教訓：** 範圍武器的獎勵必須打折，否則 RTP 會因為多目標命中而爆炸
+
+## 84. GDScript Area2D 點擊事件 closure 捕獲（2026-05-20）
+- **問題：** 在 for 迴圈中用 Area2D.input_event.connect 時，closure 捕獲的 wtype 變數會是最後一個值
+- **解法：** 用 `var wtype = w["type"]` 在迴圈內建立局部變數，closure 捕獲局部變數
+- **正確做法：**
+  ```gdscript
+  for i in range(WEAPONS.size()):
+      var wtype = WEAPONS[i]["type"]  # 局部變數，每次迴圈都是新的
+      area.input_event.connect(func(...):
+          _on_weapon_btn_pressed(wtype)  # 捕獲局部變數
+      )
+  ```
+- **教訓：** GDScript 4 的 closure 和 Python 一樣，要用局部變數避免 late binding 問題

@@ -186,6 +186,7 @@ func _ready() -> void:
 	_init_mission_streak_panel() # 任務連續完成面板（DAY-086）
 	_init_weather_panel()     # 天氣系統面板（DAY-087）
 	_init_chain_panel()       # 連鎖爆炸面板（DAY-088）
+	_init_special_weapon_panel() # 特殊武器面板（DAY-089）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1811,3 +1812,24 @@ func _init_chain_panel() -> void:
 	panel.name = "ChainExplosionPanel"
 	add_child(panel)
 	_chain_panel = panel
+
+# ---- 特殊武器面板（DAY-089）----
+
+const SpecialWeaponPanelScript = preload("res://scripts/ui/SpecialWeaponPanel.gd")
+var _special_weapon_panel: Control = null
+
+func _init_special_weapon_panel() -> void:
+	var panel = SpecialWeaponPanelScript.new()
+	panel.name = "SpecialWeaponPanel"
+	# 放在 WeaponPanel 右側（WeaponPanel x=10 寬200，SkinPanel x=215 寬200，SpecialWeapon x=420）
+	panel.position = Vector2(420, 540)
+	panel.z_index = 8
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_special_weapon_panel = panel
+	# 連接選擇訊號（讓 Cannon.gd 知道玩家選了特殊武器）
+	panel.weapon_selected.connect(_on_special_weapon_selected)
+
+func _on_special_weapon_selected(weapon_type: String) -> void:
+	# 通知 GameManager 當前選中的特殊武器
+	GameManager.set_meta("selected_special_weapon", weapon_type)

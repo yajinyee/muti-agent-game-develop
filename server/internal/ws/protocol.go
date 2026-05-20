@@ -53,6 +53,10 @@ const (
 	// 推薦碼系統（DAY-082）
 	MsgGetReferralInfo   MessageType = "get_referral_info"    // 查詢推薦碼資訊
 	MsgUseReferralCode   MessageType = "use_referral_code"    // 使用推薦碼
+	// 特殊武器系統（DAY-089）
+	MsgBuySpecialWeapon  MessageType = "buy_special_weapon"   // 購買特殊武器
+	MsgUseSpecialWeapon  MessageType = "use_special_weapon"   // 使用特殊武器
+	MsgGetSpecialWeapons MessageType = "get_special_weapons"  // 查詢特殊武器狀態
 )
 
 // Server → Client
@@ -123,6 +127,9 @@ const (
 	MsgWeatherUpdate MessageType = "weather_update" // 天氣狀態更新
 	// 連鎖爆炸系統（DAY-088）
 	MsgChainExplosion MessageType = "chain_explosion" // 連鎖爆炸通知
+	// 特殊武器系統（DAY-089）
+	MsgSpecialWeaponUpdate MessageType = "special_weapon_update" // 特殊武器狀態更新
+	MsgSpecialWeaponFired  MessageType = "special_weapon_fired"  // 特殊武器發射廣播（所有玩家可見）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1023,4 +1030,62 @@ type ChainExplosionPayload struct {
 	TotalReward int              `json:"total_reward"` // 連鎖總獎勵
 	BonusMult   float64          `json:"bonus_mult"`   // 連鎖獎勵倍率加成
 	PlayerID    string           `json:"player_id"`    // 觸發玩家 ID
+}
+
+// ---- 特殊武器系統（DAY-089）----
+
+// BuySpecialWeaponPayload 購買特殊武器請求（Client → Server）
+type BuySpecialWeaponPayload struct {
+	WeaponType string `json:"weapon_type"` // "bomb" / "laser" / "freeze"
+}
+
+// UseSpecialWeaponPayload 使用特殊武器請求（Client → Server）
+type UseSpecialWeaponPayload struct {
+	WeaponType string  `json:"weapon_type"` // "bomb" / "laser" / "freeze"
+	ClickX     float64 `json:"click_x"`     // 點擊位置 X（炸彈/雷射用）
+	ClickY     float64 `json:"click_y"`     // 點擊位置 Y（炸彈/雷射用）
+}
+
+// SpecialWeaponDef 特殊武器定義（用於廣播）
+type SpecialWeaponDef struct {
+	Type        string `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Cost        int    `json:"cost"`
+	MaxCharges  int    `json:"max_charges"`
+	Icon        string `json:"icon"`
+	Color       string `json:"color"`
+}
+
+// SpecialWeaponUpdatePayload 特殊武器狀態更新（Server → Client）
+// 玩家加入、購買、使用後發送
+type SpecialWeaponUpdatePayload struct {
+	PlayerID      string             `json:"player_id"`
+	BombCharges   int                `json:"bomb_charges"`
+	LaserCharges  int                `json:"laser_charges"`
+	FreezeCharges int                `json:"freeze_charges"`
+	NewBalance    int                `json:"new_balance"`    // 購買後的新餘額（0=使用操作）
+	Definitions   []SpecialWeaponDef `json:"definitions"`    // 武器定義（首次發送時填入）
+}
+
+// SpecialWeaponHitEntry 特殊武器命中的目標條目
+type SpecialWeaponHitEntry struct {
+	InstanceID string  `json:"instance_id"`
+	DefID      string  `json:"def_id"`
+	Multiplier float64 `json:"multiplier"`
+	Reward     int     `json:"reward"`
+	Killed     bool    `json:"killed"` // 是否被擊破
+}
+
+// SpecialWeaponFiredPayload 特殊武器發射廣播（Server → Client，廣播給所有玩家）
+// 讓所有玩家看到特殊武器效果
+type SpecialWeaponFiredPayload struct {
+	PlayerID    string                  `json:"player_id"`
+	WeaponType  string                  `json:"weapon_type"`
+	ClickX      float64                 `json:"click_x"`
+	ClickY      float64                 `json:"click_y"`
+	HitTargets  []SpecialWeaponHitEntry `json:"hit_targets"`
+	TotalReward int                     `json:"total_reward"`
+	NewBalance  int                     `json:"new_balance"` // 只有發射者有值
+	FreezeTime  float64                 `json:"freeze_time"` // 冰凍持續秒數（freeze 武器用）
 }

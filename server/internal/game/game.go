@@ -18,6 +18,7 @@ import (
 	"digital-twin/server/internal/game/challenge"
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/dailyboss"
+	"digital-twin/server/internal/game/specialweapon"
 	"digital-twin/server/internal/game/event"
 	"digital-twin/server/internal/game/friend"
 	"digital-twin/server/internal/game/guild"
@@ -65,6 +66,7 @@ type Game struct {
 	Challenge   *challenge.Manager  // 隱藏挑戰管理器（DAY-085）
 	Weather     *weather.Manager    // 天氣系統管理器（DAY-087）
 	Chain       *chain.Manager      // 連鎖爆炸管理器（DAY-088）
+	SpecialWeapon *specialweapon.Manager // 特殊武器管理器（DAY-089）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -128,6 +130,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Challenge:          challenge.NewManager(),
 		Weather:            weather.New(),
 		Chain:              chain.NewDefault(),
+		SpecialWeapon:      specialweapon.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -239,6 +242,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.Challenge.InitPlayer(playerID)
 				// 發送天氣狀態（DAY-087）
 				g.sendWeatherUpdate(playerID, false)
+				// 發送特殊武器狀態（DAY-089）
+				g.sendSpecialWeaponUpdate(pp, true)
 			}
 		}()
 	}
@@ -288,6 +293,8 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.Guild.SetOnlineStatus(playerID, false)
 		// 清理挑戰 session（DAY-085）
 		g.Challenge.RemovePlayer(playerID)
+		// 清理特殊武器狀態（DAY-089）
+		g.SpecialWeapon.RemovePlayer(playerID)
 	}
 }
 
@@ -400,6 +407,13 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleGetReferralInfo(p)
 	case ws.MsgUseReferralCode:
 		g.handleUseReferralCode(p, msg)
+	// 特殊武器系統（DAY-089）
+	case ws.MsgBuySpecialWeapon:
+		g.handleBuySpecialWeapon(p, msg)
+	case ws.MsgUseSpecialWeapon:
+		g.handleUseSpecialWeapon(p, msg)
+	case ws.MsgGetSpecialWeapons:
+		g.handleGetSpecialWeapons(p)
 	}
 }
 
