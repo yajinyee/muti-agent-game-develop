@@ -1,4 +1,4 @@
-// Package game — Jackpot 相關 handler（DAY-057 拆分自 game.go）
+// Package game — Jackpot 相關 handler（DAY-057 拆分，DAY-095 升級四層）
 package game
 
 import (
@@ -15,6 +15,7 @@ func (g *Game) GetJackpotSnapshot() map[string]int {
 	snap := g.jackpotMgr.GetSnapshot()
 	return map[string]int{
 		"mini":  snap[jackpot.LevelMini],
+		"minor": snap[jackpot.LevelMinor],
 		"major": snap[jackpot.LevelMajor],
 		"grand": snap[jackpot.LevelGrand],
 	}
@@ -30,8 +31,8 @@ func (g *Game) GetJackpotDailyStats() jackpot.DailyStats {
 	return g.jackpotHist.GetDailyStats()
 }
 
-// handleJackpotWin 處理 Jackpot 中獎（DAY-048）
-// 發放獎勵、記錄歷史、廣播中獎通知
+// handleJackpotWin 處理 Jackpot 中獎（DAY-048，DAY-095 升級）
+// 發放獎勵、記錄歷史、廣播中獎通知 + 動畫通知
 func (g *Game) handleJackpotWin(p *player.Player, win *jackpot.JackpotWin) {
 	// 發放獎勵給中獎玩家
 	p.AddReward(win.Amount)
@@ -42,18 +43,42 @@ func (g *Game) handleJackpotWin(p *player.Player, win *jackpot.JackpotWin) {
 		displayName = p.ID[:8]
 	}
 
+	// 取得等級顯示資訊
+	levelName, levelColor, levelIcon := jackpot.GetLevelInfo(win.Level)
+	isGrand := win.Level == jackpot.LevelGrand
+	isMajor := win.Level == jackpot.LevelMajor
+
 	// 記錄到歷史（DAY-048e）
 	g.jackpotHist.Add(win, displayName)
+
+	// 廣播動畫通知給所有玩家（DAY-095）
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgJackpotAnimation,
+		Payload: ws.JackpotAnimationPayload{
+			Level:      string(win.Level),
+			LevelName:  levelName,
+			LevelColor: levelColor,
+			LevelIcon:  levelIcon,
+			Amount:     win.Amount,
+			WinnerName: displayName,
+			IsGrand:    isGrand,
+			IsMajor:    isMajor,
+		},
+	})
 
 	// 廣播中獎通知給所有玩家
 	g.Hub.Broadcast(&ws.Message{
 		Type: ws.MsgJackpotWin,
 		Payload: ws.JackpotWinPayload{
 			Level:      string(win.Level),
+			LevelName:  levelName,
+			LevelColor: levelColor,
+			LevelIcon:  levelIcon,
 			Amount:     win.Amount,
 			WinnerID:   p.ID,
 			WinnerName: displayName,
 			NewBalance: p.Coins,
+			IsGrand:    isGrand,
 		},
 	})
 
@@ -63,17 +88,18 @@ func (g *Game) handleJackpotWin(p *player.Player, win *jackpot.JackpotWin) {
 	// 隱藏挑戰：Jackpot 中獎（DAY-085）
 	g.notifyChallengeJackpot(p.ID)
 
-	log.Printf("[Jackpot] %s won %s jackpot: %d coins (player: %s)",
-		p.ID, win.Level, win.Amount, displayName)
+	log.Printf("[Jackpot] %s won %s jackpot: %d coins (player: %s, grand=%v)",
+		p.ID, win.Level, win.Amount, displayName, isGrand)
 }
 
-// broadcastJackpot 廣播 Jackpot 池當前金額（每 5 秒，DAY-048）
+// broadcastJackpot 廣播 Jackpot 池當前金額（每 5 秒，DAY-048，DAY-095 升級四層）
 func (g *Game) broadcastJackpot() {
 	snap := g.jackpotMgr.GetSnapshot()
 	g.Hub.Broadcast(&ws.Message{
 		Type: ws.MsgJackpotUpdate,
 		Payload: ws.JackpotUpdatePayload{
 			Mini:  snap[jackpot.LevelMini],
+			Minor: snap[jackpot.LevelMinor],
 			Major: snap[jackpot.LevelMajor],
 			Grand: snap[jackpot.LevelGrand],
 		},
@@ -106,6 +132,6 @@ func (g *Game) loadJackpotState() {
 		return
 	}
 	g.jackpotMgr.LoadState(state)
-	log.Printf("[Jackpot] Restored state: mini=%d major=%d grand=%d",
-		state.Mini, state.Major, state.Grand)
+	log.Printf("[Jackpot] Restored state: mini=%d minor=%d major=%d grand=%d",
+		state.Mini, state.Minor, state.Major, state.Grand)
 }

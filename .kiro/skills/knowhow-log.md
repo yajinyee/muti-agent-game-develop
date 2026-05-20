@@ -2966,3 +2966,11 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **優點：** 減少重複代碼，測試更容易，協定 Payload 可以共用 TournamentRankEntry
 - **注意：** 兩個管理器各自有獨立的 mutex，不會互相干擾
 - **教訓：** 同一 package 內的結構共用是 Go 的最佳實踐，不需要額外的 interface 抽象
+
+## 83. 四層累進 Jackpot 設計（DAY-095）
+- **業界標準：** JILI Jackpot Fishing 用 Mini/Minor/Major/Grand 四層，是 2026 年業界標配
+- **貢獻分配：** Mini 50% / Minor 25% / Major 15% / Grand 10%（高頻小獎 + 低頻大獎）
+- **觸發機率：** 達到門檻後才開始觸發，防止池子太小時中獎
+- **動畫分離：** `jackpot_animation`（廣播特效）和 `jackpot_win`（顯示慶祝面板）分開，讓所有玩家都能看到特效
+- **PoolState 持久化：** 升級時要同步更新 PoolState struct，否則 Redis 恢復會遺失 minor 層
+- **教訓：** 升級 Jackpot 層數時，要同步更新：jackpot.go / history.go / protocol.go / jackpot_handler.go / main.go / JackpotPanel.gd / GameManager.gd（7個檔案）

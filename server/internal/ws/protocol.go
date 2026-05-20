@@ -88,6 +88,7 @@ const (
 	MsgMissionComplete MessageType = "mission_complete" // 任務完成通知（DAY-037）
 	MsgJackpotUpdate   MessageType = "jackpot_update"   // Jackpot 池更新（DAY-048）
 	MsgJackpotWin      MessageType = "jackpot_win"      // Jackpot 中獎通知（DAY-048）
+	MsgJackpotAnimation MessageType = "jackpot_animation" // Jackpot 觸發動畫通知（DAY-095）
 	MsgDailyBonus        MessageType = "daily_bonus"        // 每日登入獎勵（DAY-065）
 	MsgTournamentUpdate  MessageType = "tournament_update"  // 週賽排名更新（DAY-066）
 	MsgTournamentResult  MessageType = "tournament_result"  // 週賽結算通知（DAY-066）
@@ -378,22 +379,40 @@ type ClientPerfPayload struct {
 	Timestamp  int64   `json:"timestamp"`   // Unix ms
 }
 
-// ---- Progressive Jackpot（DAY-048）----
+// ---- Progressive Jackpot（DAY-048，DAY-095 升級四層）----
 
 // JackpotUpdatePayload Jackpot 池更新廣播（每 5 秒）
 type JackpotUpdatePayload struct {
-	Mini    int                  `json:"mini"`    // Mini Jackpot 當前金額
-	Major   int                  `json:"major"`   // Major Jackpot 當前金額
-	Grand   int                  `json:"grand"`   // Grand Jackpot 當前金額
+	Mini  int `json:"mini"`  // Mini Jackpot 當前金額
+	Minor int `json:"minor"` // Minor Jackpot 當前金額（DAY-095）
+	Major int `json:"major"` // Major Jackpot 當前金額
+	Grand int `json:"grand"` // Grand Jackpot 當前金額
 }
 
 // JackpotWinPayload Jackpot 中獎通知
 type JackpotWinPayload struct {
-	Level       string `json:"level"`        // "mini" / "major" / "grand"
-	Amount      int    `json:"amount"`       // 中獎金額
-	WinnerID    string `json:"winner_id"`    // 中獎玩家 ID
-	WinnerName  string `json:"winner_name"`  // 中獎玩家顯示名稱
-	NewBalance  int    `json:"new_balance"`  // 中獎後餘額（只對中獎玩家有意義）
+	Level      string `json:"level"`       // "mini" / "minor" / "major" / "grand"
+	LevelName  string `json:"level_name"`  // "MINI" / "MINOR" / "MAJOR" / "GRAND"
+	LevelColor string `json:"level_color"` // 顯示顏色（DAY-095）
+	LevelIcon  string `json:"level_icon"`  // 圖示（DAY-095）
+	Amount     int    `json:"amount"`      // 中獎金額
+	WinnerID   string `json:"winner_id"`   // 中獎玩家 ID
+	WinnerName string `json:"winner_name"` // 中獎玩家顯示名稱
+	NewBalance int    `json:"new_balance"` // 中獎後餘額（只對中獎玩家有意義）
+	IsGrand    bool   `json:"is_grand"`    // 是否是 Grand Jackpot（觸發全畫面動畫）
+}
+
+// JackpotAnimationPayload Jackpot 觸發動畫通知（DAY-095）
+// 廣播給所有玩家，觸發對應等級的動畫效果
+type JackpotAnimationPayload struct {
+	Level      string `json:"level"`       // "mini" / "minor" / "major" / "grand"
+	LevelName  string `json:"level_name"`  // 顯示名稱
+	LevelColor string `json:"level_color"` // 顯示顏色
+	LevelIcon  string `json:"level_icon"`  // 圖示
+	Amount     int    `json:"amount"`      // 中獎金額
+	WinnerName string `json:"winner_name"` // 中獎玩家名稱
+	IsGrand    bool   `json:"is_grand"`    // Grand 觸發全畫面特效
+	IsMajor    bool   `json:"is_major"`    // Major 觸發半畫面特效
 }
 
 // ---- 每日登入獎勵（DAY-065）----

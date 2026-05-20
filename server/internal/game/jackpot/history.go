@@ -1,5 +1,5 @@
-// history.go — Jackpot 中獎歷史記錄（DAY-048e）
-// 保存最近 10 筆中獎記錄，供 /jackpot HTTP 端點和 Client 顯示
+// history.go — Jackpot 中獎歷史記錄（DAY-048e，DAY-095 升級四層）
+// 保存最近 20 筆中獎記錄，供 /jackpot HTTP 端點和 Client 顯示
 package jackpot
 
 import (
@@ -15,6 +15,9 @@ type WinRecord struct {
 	WinnerName string    `json:"winner_name"`
 	WonAt      time.Time `json:"won_at"`
 	WonAtMs    int64     `json:"won_at_ms"` // Unix milliseconds（Client 用）
+	LevelName  string    `json:"level_name"` // "MINI" / "MINOR" / "MAJOR" / "GRAND"
+	LevelColor string    `json:"level_color"` // 顯示顏色
+	LevelIcon  string    `json:"level_icon"`  // 圖示
 }
 
 // History Jackpot 中獎歷史
@@ -37,6 +40,7 @@ func (h *History) Add(win *JackpotWin, winnerName string) {
 	h.mu.Lock()
 	defer h.mu.Unlock()
 
+	name, color, icon := GetLevelInfo(win.Level)
 	record := WinRecord{
 		Level:      win.Level,
 		Amount:     win.Amount,
@@ -44,6 +48,9 @@ func (h *History) Add(win *JackpotWin, winnerName string) {
 		WinnerName: winnerName,
 		WonAt:      win.WonAt,
 		WonAtMs:    win.WonAt.UnixMilli(),
+		LevelName:  name,
+		LevelColor: color,
+		LevelIcon:  icon,
 	}
 
 	// 插入到最前面（最新的在前）
@@ -75,10 +82,11 @@ func (h *History) Count() int {
 	return len(h.records)
 }
 
-// DailyStats 每日 Jackpot 統計
+// DailyStats 每日 Jackpot 統計（DAY-095 升級四層）
 type DailyStats struct {
 	Date        string `json:"date"`         // YYYY-MM-DD
 	MiniCount   int    `json:"mini_count"`   // Mini 中獎次數
+	MinorCount  int    `json:"minor_count"`  // Minor 中獎次數（DAY-095）
 	MajorCount  int    `json:"major_count"`  // Major 中獎次數
 	GrandCount  int    `json:"grand_count"`  // Grand 中獎次數
 	TotalPayout int    `json:"total_payout"` // 今日總發放金額
@@ -102,6 +110,8 @@ func (h *History) GetDailyStats() DailyStats {
 		switch r.Level {
 		case LevelMini:
 			stats.MiniCount++
+		case LevelMinor:
+			stats.MinorCount++
 		case LevelMajor:
 			stats.MajorCount++
 		case LevelGrand:

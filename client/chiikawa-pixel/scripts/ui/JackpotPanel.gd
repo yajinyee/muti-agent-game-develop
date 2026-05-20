@@ -1,6 +1,6 @@
 ## JackpotPanel.gd
-## Progressive Jackpot 面板（DAY-048，從 HUD.gd 拆分 DAY-053）
-## 顯示三個等級的 Jackpot 累積金額，中獎時全畫面慶祝特效
+## Progressive Jackpot 面板（DAY-048，DAY-095 升級四層 + 動畫通知）
+## 顯示四個等級的 Jackpot 累積金額，中獎時全畫面慶祝特效
 
 extends Control
 
@@ -11,14 +11,23 @@ var _jackpot_labels: Dictionary = {}  # level -> Label
 var _jackpot_history: Array = []      # 最近 5 筆中獎記錄
 const MAX_JACKPOT_HISTORY = 5
 
+# 四層等級定義（DAY-095）
+const JACKPOT_LEVELS = [
+	{"key": "mini",  "label": "MINI",  "color": Color(0.75, 0.75, 0.75), "icon": "🥈", "x": 0},
+	{"key": "minor", "label": "MINOR", "color": Color(1.0, 0.85, 0.2),   "icon": "🥇", "x": 160},
+	{"key": "major", "label": "MAJOR", "color": Color(1.0, 0.5, 0.1),    "icon": "🔥", "x": 320},
+	{"key": "grand", "label": "GRAND", "color": Color(1.0, 0.2, 0.6),    "icon": "👑", "x": 480},
+]
+
 ## 初始化面板（由 HUD.gd 呼叫）
 func setup(font: Font) -> void:
 	pixel_font = font
 	_build_panel()
 	GameManager.jackpot_updated.connect(_on_jackpot_updated)
 	GameManager.jackpot_won.connect(_on_jackpot_won)
+	GameManager.jackpot_animation.connect(_on_jackpot_animation)
 
-## 建立面板 UI
+## 建立面板 UI（四層版本）
 func _build_panel() -> void:
 	# 背景（深色半透明，帶金色邊框）
 	var bg = ColorRect.new()
@@ -34,25 +43,19 @@ func _build_panel() -> void:
 	top_line.color = Color(0.90, 0.75, 0.20, 0.80)
 	add_child(top_line)
 
-	# 三個 Jackpot 等級（Mini / Major / Grand）
-	var levels = [
-		{"key": "mini",  "label": "MINI",  "color": Color(0.6, 0.9, 1.0), "x": 20},
-		{"key": "major", "label": "MAJOR", "color": Color(1.0, 0.8, 0.2), "x": 220},
-		{"key": "grand", "label": "GRAND", "color": Color(1.0, 0.3, 0.3), "x": 420},
-	]
-
-	for lvl in levels:
+	# 四個 Jackpot 等級（Mini / Minor / Major / Grand）
+	for lvl in JACKPOT_LEVELS:
 		var container = Control.new()
 		container.position = Vector2(lvl["x"], 2)
-		container.size = Vector2(200, 32)
+		container.size = Vector2(160, 32)
 		add_child(container)
 
-		# 等級標籤
+		# 等級標籤（含圖示）
 		var title = Label.new()
-		title.text = lvl["label"]
+		title.text = "%s %s" % [lvl["icon"], lvl["label"]]
 		title.position = Vector2(0, 2)
-		title.size = Vector2(80, 14)
-		title.add_theme_font_size_override("font_size", 10)
+		title.size = Vector2(155, 14)
+		title.add_theme_font_size_override("font_size", 9)
 		title.add_theme_color_override("font_color", lvl["color"])
 		if is_instance_valid(pixel_font):
 			title.add_theme_font_override("font", pixel_font)
@@ -63,8 +66,8 @@ func _build_panel() -> void:
 		amount_lbl.name = "Amount_" + lvl["key"]
 		amount_lbl.text = "---"
 		amount_lbl.position = Vector2(0, 16)
-		amount_lbl.size = Vector2(180, 16)
-		amount_lbl.add_theme_font_size_override("font_size", 13)
+		amount_lbl.size = Vector2(155, 16)
+		amount_lbl.add_theme_font_size_override("font_size", 12)
 		amount_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.7))
 		if is_instance_valid(pixel_font):
 			amount_lbl.add_theme_font_override("font", pixel_font)
@@ -90,27 +93,98 @@ func _build_panel() -> void:
 		ticker_lbl.add_theme_font_override("font", pixel_font)
 	add_child(ticker_lbl)
 
-	# 面板高度擴展（加入 ticker 後從 36 增加到 54）
+	# 面板高度
 	var bg_node = get_node_or_null("JackpotBG")
 	if is_instance_valid(bg_node):
 		bg_node.size.y = 54
 	size.y = 54
 
-## Jackpot 池更新（每 5 秒收到一次）
+## Jackpot 池更新（每 5 秒收到一次，四層版本）
 func _on_jackpot_updated(data: Dictionary) -> void:
-	var levels = ["mini", "major", "grand"]
-	for lvl in levels:
-		var lbl = _jackpot_labels.get(lvl)
+	for lvl in JACKPOT_LEVELS:
+		var lbl = _jackpot_labels.get(lvl["key"])
 		if is_instance_valid(lbl):
-			var amount = data.get(lvl, 0)
+			var amount = data.get(lvl["key"], 0)
 			lbl.text = "🪙%d" % amount
-			# 脈動動畫（金額越大越明顯）
-			if amount > 0:
+			# Grand 金額大時加閃爍效果
+			if lvl["key"] == "grand" and amount > 5000:
 				var tween = create_tween()
-				tween.tween_property(lbl, "modulate:a", 0.6, 0.15)
-				tween.tween_property(lbl, "modulate:a", 1.0, 0.15)
+				tween.tween_property(lbl, "modulate:a", 0.5, 0.2)
+				tween.tween_property(lbl, "modulate:a", 1.0, 0.2)
 
-## Jackpot 中獎！全畫面慶祝特效
+## Jackpot 觸發動畫通知（DAY-095）— 廣播給所有玩家
+func _on_jackpot_animation(data: Dictionary) -> void:
+	var level = data.get("level", "mini")
+	var level_name = data.get("level_name", level.to_upper())
+	var level_color_hex = data.get("level_color", "#FFFFFF")
+	var amount = data.get("amount", 0)
+	var winner_name = data.get("winner_name", "")
+	var is_grand = data.get("is_grand", false)
+	var is_major = data.get("is_major", false)
+
+	# 解析顏色
+	var level_color = Color.WHITE
+	if level_color_hex.begins_with("#"):
+		level_color = Color(level_color_hex)
+
+	# 依等級觸發不同強度的動畫
+	if is_grand:
+		_show_grand_jackpot_animation(level_name, amount, winner_name, level_color)
+	elif is_major:
+		_show_major_jackpot_animation(level_name, amount, winner_name, level_color)
+	else:
+		_show_mini_jackpot_animation(level_name, amount, winner_name, level_color)
+
+## Grand Jackpot 全畫面動畫（最強特效）
+func _show_grand_jackpot_animation(level_name: String, amount: int, winner_name: String, color: Color) -> void:
+	var canvas_layer = get_parent()
+	if not is_instance_valid(canvas_layer):
+		return
+
+	# 全畫面金色閃光
+	var flash = ColorRect.new()
+	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	flash.color = Color(1.0, 0.9, 0.2, 0.0)
+	flash.z_index = 195
+	canvas_layer.add_child(flash)
+
+	var flash_tween = flash.create_tween()
+	flash_tween.tween_property(flash, "color:a", 0.6, 0.1)
+	flash_tween.tween_property(flash, "color:a", 0.0, 0.3)
+	flash_tween.tween_callback(flash.queue_free)
+
+	# 螢幕震動
+	if ScreenShake != null:
+		ScreenShake.add_trauma(0.9)
+
+	# 三波金幣雨
+	for i in 3:
+		var timer = get_tree().create_timer(i * 0.35)
+		timer.timeout.connect(func():
+			_spawn_jackpot_coin_rain(color, 25)
+		)
+
+	# 大獎特效
+	if HitEffect != null:
+		HitEffect.spawn_big_win(Vector2(640, 360), 100.0)
+
+## Major Jackpot 半畫面動畫
+func _show_major_jackpot_animation(level_name: String, amount: int, winner_name: String, color: Color) -> void:
+	if ScreenShake != null:
+		ScreenShake.add_trauma(0.6)
+	_spawn_jackpot_coin_rain(color, 16)
+	var timer = get_tree().create_timer(0.4)
+	timer.timeout.connect(func():
+		_spawn_jackpot_coin_rain(color, 12)
+	)
+	if HitEffect != null:
+		HitEffect.spawn_big_win(Vector2(640, 360), 50.0)
+
+## Mini/Minor Jackpot 小動畫
+func _show_mini_jackpot_animation(level_name: String, amount: int, winner_name: String, color: Color) -> void:
+	_spawn_jackpot_coin_rain(color, 8)
+
+## Jackpot 中獎！顯示慶祝面板
 func _on_jackpot_won(data: Dictionary) -> void:
 	var level = data.get("level", "mini")
 	var amount = data.get("amount", 0)
@@ -124,9 +198,8 @@ func _on_jackpot_won(data: Dictionary) -> void:
 	# 全畫面慶祝 overlay
 	_show_jackpot_celebration(level, amount, winner_name, is_self)
 
-## 顯示 Jackpot 慶祝畫面
+## 顯示 Jackpot 慶祝畫面（四層版本）
 func _show_jackpot_celebration(level: String, amount: int, winner_name: String, is_self: bool) -> void:
-	# 建立全畫面 overlay（掛在 CanvasLayer 的父節點上）
 	var canvas_layer = get_parent()
 	if not is_instance_valid(canvas_layer):
 		return
@@ -143,22 +216,23 @@ func _show_jackpot_celebration(level: String, amount: int, winner_name: String, 
 	bg.color = Color(0.0, 0.0, 0.0, 0.0)
 	overlay.add_child(bg)
 
-	# 等級顏色
-	var level_colors = {
-		"mini":  Color(0.6, 0.9, 1.0),
-		"major": Color(1.0, 0.8, 0.2),
-		"grand": Color(1.0, 0.3, 0.3),
-	}
-	var level_color = level_colors.get(level, Color.WHITE)
+	# 等級顏色（四層）
+	var level_color = Color.WHITE
+	var level_icon = "✨"
+	for lvl in JACKPOT_LEVELS:
+		if lvl["key"] == level:
+			level_color = lvl["color"]
+			level_icon = lvl["icon"]
+			break
 	var level_name = level.to_upper()
 
 	# 主標題
 	var title = Label.new()
-	title.text = "✨ %s JACKPOT ✨" % level_name
+	title.text = "%s %s JACKPOT %s" % [level_icon, level_name, level_icon]
 	title.position = Vector2(0, 200)
 	title.size = Vector2(1280, 80)
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	title.add_theme_font_size_override("font_size", 56)
+	title.add_theme_font_size_override("font_size", 52)
 	title.add_theme_color_override("font_color", level_color)
 	title.add_theme_color_override("font_shadow_color", Color(0.0, 0.0, 0.0, 0.9))
 	title.add_theme_constant_override("shadow_offset_x", 4)
@@ -207,35 +281,10 @@ func _show_jackpot_celebration(level: String, amount: int, winner_name: String, 
 	tween.tween_property(overlay, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(overlay.queue_free)
 
-	# 螢幕震動（Grand 最強）
-	if ScreenShake != null:
-		var trauma = {"mini": 0.4, "major": 0.6, "grand": 0.9}.get(level, 0.4)
-		ScreenShake.add_trauma(trauma)
-
-	# 觸發 HitEffect 大獎特效（依等級強度不同）
-	if HitEffect != null:
-		match level:
-			"grand":
-				HitEffect.spawn_big_win(Vector2(640, 360), 100.0)
-				for i in 3:
-					var delay_t = get_tree().create_timer(i * 0.4)
-					delay_t.timeout.connect(func():
-						_spawn_jackpot_coin_rain(level_color, 20)
-					)
-			"major":
-				HitEffect.spawn_big_win(Vector2(640, 360), 50.0)
-				_spawn_jackpot_coin_rain(level_color, 14)
-				var delay_t = get_tree().create_timer(0.5)
-				delay_t.timeout.connect(func():
-					_spawn_jackpot_coin_rain(level_color, 10)
-				)
-			"mini":
-				_spawn_jackpot_coin_rain(level_color, 8)
-
-	# 記錄到 Jackpot 歷史 ticker（DAY-049）
+	# 記錄到 Jackpot 歷史 ticker
 	_add_jackpot_history_entry(level, amount, winner_name, is_self)
 
-## 生成 Jackpot 金幣雨特效（DAY-049）
+## 生成 Jackpot 金幣雨特效
 func _spawn_jackpot_coin_rain(color: Color, count: int) -> void:
 	var rng = RandomNumberGenerator.new()
 	rng.randomize()
@@ -262,7 +311,7 @@ func _spawn_jackpot_coin_rain(color: Color, count: int) -> void:
 
 ## 加入一筆 Jackpot 中獎記錄並更新 ticker
 func _add_jackpot_history_entry(level: String, amount: int, winner_name: String, is_self: bool) -> void:
-	var level_icons = {"mini": "💙", "major": "💛", "grand": "❤️"}
+	var level_icons = {"mini": "🥈", "minor": "🥇", "major": "🔥", "grand": "👑"}
 	var icon = level_icons.get(level, "✨")
 	var name_display = "YOU" if is_self else winner_name
 	var entry_text = "%s %s: %s 🪙%d" % [icon, level.to_upper(), name_display, amount]
@@ -279,7 +328,12 @@ func _add_jackpot_history_entry(level: String, amount: int, winner_name: String,
 	if is_self:
 		ticker_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.3, 1.0))
 	else:
-		var level_colors = {"mini": Color(0.6, 0.9, 1.0), "major": Color(1.0, 0.8, 0.2), "grand": Color(1.0, 0.4, 0.4)}
+		var level_colors = {
+			"mini":  Color(0.75, 0.75, 0.75),
+			"minor": Color(1.0, 0.85, 0.2),
+			"major": Color(1.0, 0.5, 0.1),
+			"grand": Color(1.0, 0.2, 0.6)
+		}
 		ticker_lbl.add_theme_color_override("font_color", level_colors.get(level, Color.WHITE))
 
 	# 閃爍動畫

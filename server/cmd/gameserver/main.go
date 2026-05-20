@@ -230,7 +230,7 @@ func main() {
 		}
 		avgPing, _, _ := hub.GetPingStats()
 
-		// Jackpot 池狀態（DAY-054）
+		// Jackpot 池狀態（DAY-054，DAY-095 升級四層）
 		jackpotSnap := g.GetJackpotSnapshot()
 		jackpotDaily := g.GetJackpotDailyStats()
 
@@ -248,6 +248,7 @@ func main() {
 			"avg_ping_ms":          avgPing,
 			"jackpot": map[string]interface{}{
 				"mini":        jackpotSnap["mini"],
+				"minor":       jackpotSnap["minor"],
 				"major":       jackpotSnap["major"],
 				"grand":       jackpotSnap["grand"],
 				"daily_wins":  jackpotDaily.TotalWins,
@@ -331,16 +332,17 @@ func main() {
 		}
 	})
 
-	// Jackpot 狀態端點（DAY-048）
-	// GET /jackpot — 回傳三個 Jackpot 池的當前金額和最近中獎記錄
+	// Jackpot 狀態端點（DAY-048，DAY-095 升級四層）
+	// GET /jackpot — 回傳四個 Jackpot 池的當前金額和最近中獎記錄
 	mux.HandleFunc("/jackpot", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		snap := g.GetJackpotSnapshot()
-		history := g.GetJackpotHistory(5)
+		history := g.GetJackpotHistory(10)
 		daily := g.GetJackpotDailyStats()
 		if err := json.NewEncoder(w).Encode(map[string]interface{}{
 			"mini":        snap["mini"],
+			"minor":       snap["minor"],
 			"major":       snap["major"],
 			"grand":       snap["grand"],
 			"history":     history,
@@ -911,6 +913,7 @@ func main() {
 		fmt.Fprintf(w, "# HELP chiikawa_jackpot_pool Current jackpot pool amount by level\n")
 		fmt.Fprintf(w, "# TYPE chiikawa_jackpot_pool gauge\n")
 		fmt.Fprintf(w, "chiikawa_jackpot_pool{level=\"mini\"} %d\n", jackpotSnap["mini"])
+		fmt.Fprintf(w, "chiikawa_jackpot_pool{level=\"minor\"} %d\n", jackpotSnap["minor"])
 		fmt.Fprintf(w, "chiikawa_jackpot_pool{level=\"major\"} %d\n", jackpotSnap["major"])
 		fmt.Fprintf(w, "chiikawa_jackpot_pool{level=\"grand\"} %d\n\n", jackpotSnap["grand"])
 
@@ -919,6 +922,7 @@ func main() {
 		fmt.Fprintf(w, "# HELP chiikawa_jackpot_daily_wins Today's jackpot win count by level\n")
 		fmt.Fprintf(w, "# TYPE chiikawa_jackpot_daily_wins counter\n")
 		fmt.Fprintf(w, "chiikawa_jackpot_daily_wins{level=\"mini\"} %d\n", jackpotDaily.MiniCount)
+		fmt.Fprintf(w, "chiikawa_jackpot_daily_wins{level=\"minor\"} %d\n", jackpotDaily.MinorCount)
 		fmt.Fprintf(w, "chiikawa_jackpot_daily_wins{level=\"major\"} %d\n", jackpotDaily.MajorCount)
 		fmt.Fprintf(w, "chiikawa_jackpot_daily_wins{level=\"grand\"} %d\n\n", jackpotDaily.GrandCount)
 		fmt.Fprintf(w, "# HELP chiikawa_jackpot_daily_payout Today's total jackpot payout\n")

@@ -22,6 +22,7 @@ signal mission_updated(missions: Array)     # 任務進度更新（DAY-037）
 signal mission_completed(mission_data: Dictionary)  # 任務完成（DAY-037）
 signal jackpot_updated(jackpot_data: Dictionary)    # Jackpot 池更新（DAY-048）
 signal jackpot_won(win_data: Dictionary)            # Jackpot 中獎（DAY-048）
+signal jackpot_animation(anim_data: Dictionary)     # Jackpot 觸發動畫（DAY-095）
 signal spectator_joined(spectator_data: Dictionary) # 觀戰者加入通知（DAY-054d）
 signal daily_bonus_received(bonus_data: Dictionary) # 每日登入獎勵（DAY-065）
 signal spectator_left(spectator_data: Dictionary)  # 觀戰者離開通知（DAY-055）
@@ -148,6 +149,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_jackpot_update(payload)
 		"jackpot_win":
 			_handle_jackpot_win(payload)
+		"jackpot_animation":
+			_handle_jackpot_animation(payload)
 		"daily_bonus":
 			_handle_daily_bonus(payload)
 		"spectator_join":
@@ -354,6 +357,13 @@ func _handle_jackpot_win(payload: Dictionary) -> void:
 	var winner_name = payload.get("winner_name", "")
 	print("[GameManager] JACKPOT WIN! Level=%s Amount=%d Winner=%s" % [level, amount, winner_name])
 	emit_signal("jackpot_won", payload)
+
+## Jackpot 觸發動畫通知（DAY-095）
+func _handle_jackpot_animation(payload: Dictionary) -> void:
+	var level = payload.get("level", "mini")
+	var amount = payload.get("amount", 0)
+	print("[GameManager] JACKPOT ANIMATION! Level=%s Amount=%d" % [level, amount])
+	emit_signal("jackpot_animation", payload)
 
 ## 觀戰者加入通知（DAY-054d）
 func _handle_spectator_join(payload: Dictionary) -> void:
