@@ -178,8 +178,30 @@ func _fire_projectile(target_pos: Vector2) -> void:
 				proj.queue_free()
 	)
 
-	# 拖尾效果
-	_spawn_trail(parent, CANNON_POSITION, target_pos, flight_time, CHAR_COLORS.get(char_id, Color.WHITE))
+	# 拖尾效果（武器等級影響顏色，DAY-067）
+	var weapon_level = GameManager.player_data.get("weapon_level", 1)
+	var base_color = CHAR_COLORS.get(char_id, Color.WHITE)
+	var trail_color: Color
+	match weapon_level:
+		2: trail_color = Color(0.0, 0.9, 1.0)  # 強化砲：青色
+		3: trail_color = Color(1.0, 0.85, 0.0) # 超級砲：金色
+		_: trail_color = base_color             # 標準砲：角色顏色
+	_spawn_trail(parent, CANNON_POSITION, target_pos, flight_time, trail_color)
+
+	# 超級砲：投射物放大 + 發光（DAY-067）
+	if weapon_level >= 3 and is_instance_valid(proj):
+		proj.scale = Vector2(1.5, 1.5)
+		if is_instance_valid(sprite):
+			sprite.modulate = Color(1.0, 0.85, 0.0, 1.0)
+	elif weapon_level == 2 and is_instance_valid(proj):
+		proj.scale = Vector2(1.2, 1.2)
+		if is_instance_valid(sprite):
+			sprite.modulate = Color(0.0, 0.9, 1.0, 1.0)
+	else:
+		if is_instance_valid(proj):
+			proj.scale = Vector2(1.0, 1.0)
+		if is_instance_valid(sprite):
+			sprite.modulate = Color.WHITE
 
 func _on_attack_result(result: Dictionary) -> void:
 	if result.get("is_hit", false):

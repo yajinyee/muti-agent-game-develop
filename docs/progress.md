@@ -22,6 +22,17 @@
   - 積分規則：擊破目標 = floor(multiplier) 分（最少 1 分），BOSS 擊殺 = 50 分，Bonus 完成 = 20 分
   - build/vet/test 全部通過（11 個套件，新增 tournament 套件）
   - **業界依據：** 週賽系統是 2026 年捕魚機標配留存功能（kent.edu 2025-10-11 確認）
+- **DAY-067 更新（自主觸發）：** 武器升級系統（Weapon Upgrade System）✅
+  - `server/internal/data/tables.go`：加入 `WeaponDef` 結構 + `Weapons` 定義（LV1標準/LV2強化+25%/LV3超級+60%）
+  - `server/internal/player/player.go`：加入 `WeaponLevel` 欄位，`DeductBet()` 扣除武器額外費用，`GetWeaponPowerMod()` / `UpgradeWeapon()` 方法，`PlayerSnapshot` 加入武器資訊
+  - `server/internal/game/combat/combat.go`：`AttackRequest` 加入 `WeaponPowerMod`，`ProcessAttack` 套用武器加成到 `KillChance`
+  - `server/internal/ws/protocol.go`：加入 `MsgUpgradeWeapon` + `UpgradeWeaponPayload`
+  - `server/internal/game/game.go`：`HandleMessage` 加入 `upgrade_weapon` 分支，`handleUpgradeWeapon()` handler，`handleAttack` 傳入 `WeaponPowerMod`
+  - `scripts/ui/WeaponPanel.gd`：Client 端武器選擇面板（三個武器按鈕，選中高亮，顏色區分）
+  - `scripts/ui/HUD.gd`：整合 WeaponPanel（`_init_weapon_panel()`）
+  - `scripts/game/Cannon.gd`：投射物顏色依武器等級變化（標準=角色色/強化=青色/超級=金色），超級砲投射物放大 1.5x
+  - build/vet/test 全部通過（145/145）
+  - **業界依據：** esportsinsider.com（2026-05-08）確認「weapon scaling」是捕魚機標配功能
 
 ## 自我評估
 - **完成度：100%**

@@ -44,6 +44,9 @@ type Player struct {
 	LoginStreak    int    // 連續登入天數
 	MaxLoginStreak int    // 歷史最高連續天數
 	LastLoginDate  string // 最後登入日期（UTC+8，格式 "2006-01-02"）
+
+	// 武器升級系統（DAY-067）
+	WeaponLevel int // 武器等級 1/2/3（預設 1）
 }
 
 // NewPlayer 建立新玩家
@@ -57,6 +60,7 @@ func NewPlayer(id string, initialCoins int) *Player {
 		ID:           id,
 		Coins:        initialCoins,
 		BetLevel:     1,
+		WeaponLevel:  1,
 		LaborValue:   0,
 		IsAuto:       false,
 		SessionStart: time.Now(),
@@ -93,14 +97,35 @@ func (p *Player) DeductBet() (int, bool) {
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	bet := data.GetBetDef(p.BetLevel)
-	if p.Coins < bet.BetCost {
+	weapon := data.GetWeaponDef(p.WeaponLevel)
+	totalCost := bet.BetCost + weapon.ExtraCost
+	if p.Coins < totalCost {
 		return 0, false
 	}
-	p.Coins -= bet.BetCost
-	p.TotalBet += bet.BetCost
+	p.Coins -= totalCost
+	p.TotalBet += totalCost
 	p.AttackCount++
 	p.LastAttackAt = time.Now()
 	return bet.BetCost, true
+}
+
+// GetWeaponPowerMod 取得武器攻擊力加成係數（thread-safe）
+func (p *Player) GetWeaponPowerMod() float64 {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return data.GetWeaponDef(p.WeaponLevel).PowerMod
+}
+
+// UpgradeWeapon 升級武器，回傳是否成功（DAY-067）
+// 武器升級不需要金幣，只是切換等級（費用在每次攻擊時扣除）
+func (p *Player) UpgradeWeapon(level int) bool {
+	if level < 1 || level > 3 {
+		return false
+	}
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.WeaponLevel = level
+	return true
 }
 
 // AddKill 增加擊破計數，回傳解鎖的成就（可能為 nil）
@@ -247,6 +272,7 @@ func (p *Player) Snapshot() PlayerSnapshot {
 	defer p.mu.RUnlock()
 	char := data.GetCharacterByBetLevel(p.BetLevel)
 	bet := data.GetBetDef(p.BetLevel)
+	weapon := data.GetWeaponDef(p.WeaponLevel)
 	return PlayerSnapshot{
 		ID:              p.ID,
 		Coins:           p.Coins,
@@ -263,6 +289,12 @@ func (p *Player) Snapshot() PlayerSnapshot {
 		SessionScore:    p.SessionScore,
 		KillCount:       p.KillCount,
 		DisplayName:     p.DisplayName,
+		// 武器升級（DAY-067）
+		WeaponLevel:     p.WeaponLevel,
+		WeaponName:      weapon.Name,
+		WeaponIcon:      weapon.Icon,
+		WeaponColor:     weapon.Color,
+		WeaponExtraCost: weapon.ExtraCost,
 	}
 }
 
@@ -329,4 +361,10 @@ type PlayerSnapshot struct {
 	SessionScore    int     `json:"session_score"`
 	KillCount       int     `json:"kill_count"`
 	DisplayName     string  `json:"display_name"`
+	// 武器升級（DAY-067）
+	WeaponLevel     int     `json:"weapon_level"`
+	WeaponName      string  `json:"weapon_name"`
+	WeaponIcon      string  `json:"weapon_icon"`
+	WeaponColor     string  `json:"weapon_color"`
+	WeaponExtraCost int     `json:"weapon_extra_cost"`
 }

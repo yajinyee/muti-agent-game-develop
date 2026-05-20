@@ -19,6 +19,7 @@ const (
 	MsgClaimMission    MessageType = "claim_mission"     // 領取任務獎勵（DAY-037）
 	MsgGetMissions     MessageType = "get_missions"      // 查詢任務列表（DAY-037）
 	MsgClientPerf      MessageType = "client_perf"       // Client 端效能數據上報（DAY-045）
+	MsgUpgradeWeapon   MessageType = "upgrade_weapon"    // 武器升級（DAY-067）
 )
 
 // Server → Client
@@ -315,4 +316,11 @@ type TournamentResultPayload struct {
 	Rankings  []TournamentRankEntry `json:"rankings"`
 	Prize     int                   `json:"prize"`       // 接收者獲得的獎勵（0=未獲獎）
 	PrizeLabel string               `json:"prize_label"` // 獎勵標籤
+}
+
+// ---- 武器升級系統（DAY-067）----
+
+// UpgradeWeaponPayload 武器升級請求（Client → Server）
+type UpgradeWeaponPayload struct {
+	WeaponLevel int `json:"weapon_level"` // 目標武器等級（1/2/3）
 }

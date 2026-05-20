@@ -242,6 +242,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	case ws.MsgClientPerf:
 		// Client 端效能數據上報（DAY-045）
 		g.handleClientPerf(clientID, msg)
+	case ws.MsgUpgradeWeapon:
+		// 武器升級（DAY-067）
+		g.handleUpgradeWeapon(p, msg)
 	}
 }
 
@@ -285,13 +288,14 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 
 	// 處理攻擊
 	req := combat.AttackRequest{
-		PlayerID: p.ID,
-		TargetID: targetID,
-		BetLevel: p.BetLevel,
-		IsAuto:   p.IsAuto,
-		IsLock:   targetID != "",
-		ClickX:   payload.ClickX,
-		ClickY:   payload.ClickY,
+		PlayerID:       p.ID,
+		TargetID:       targetID,
+		BetLevel:       p.BetLevel,
+		IsAuto:         p.IsAuto,
+		IsLock:         targetID != "",
+		ClickX:         payload.ClickX,
+		ClickY:         payload.ClickY,
+		WeaponPowerMod: p.GetWeaponPowerMod(), // 武器攻擊力加成（DAY-067）
 	}
 
 	result := combat.ProcessAttack(req, t)
@@ -788,6 +792,26 @@ func (g *Game) handleSetDisplayName(p *player.Player, msg *ws.Message) {
 	}
 	p.SetDisplayName(name)
 	log.Printf("[Game] Player %s set display name: %s", p.ID, name)
+	g.sendPlayerUpdate(p)
+}
+
+// handleUpgradeWeapon 處理武器升級（DAY-067）
+func (g *Game) handleUpgradeWeapon(p *player.Player, msg *ws.Message) {
+	var payload ws.UpgradeWeaponPayload
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		return
+	}
+	if payload.WeaponLevel < 1 || payload.WeaponLevel > 3 {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgError,
+			Payload: ws.ErrorPayload{Code: "invalid_weapon", Message: "武器等級需在 1-3 之間"},
+		})
+		return
+	}
+	if !p.UpgradeWeapon(payload.WeaponLevel) {
+		return
+	}
+	log.Printf("[Game] Player %s upgraded weapon to LV%d", p.ID, payload.WeaponLevel)
 	g.sendPlayerUpdate(p)
 }
 

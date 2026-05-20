@@ -156,3 +156,55 @@ const BossDuration = 60.0
 
 // BonusDuration Bonus Game 持續時間（秒）
 const BonusDuration = 15.0
+
+// ---- 武器升級系統（DAY-067）----
+
+// WeaponDef 武器定義
+type WeaponDef struct {
+	Level       int
+	Name        string
+	Icon        string    // 顯示圖示
+	PowerMod    float64   // 攻擊力加成係數（1.0=無加成，1.25=+25%）
+	ExtraCost   int       // 每次攻擊額外扣除的金幣（在 BetCost 之外）
+	Color       string    // 投射物顏色（Client 端視覺）
+	Description string
+}
+
+// Weapons 武器等級定義（DAY-067）
+var Weapons = []*WeaponDef{
+	{
+		Level:       1,
+		Name:        "標準砲",
+		Icon:        "🔫",
+		PowerMod:    1.00,
+		ExtraCost:   0,
+		Color:       "white",
+		Description: "標準攻擊力，無額外費用",
+	},
+	{
+		Level:       2,
+		Name:        "強化砲",
+		Icon:        "⚡",
+		PowerMod:    1.25,
+		ExtraCost:   50,  // 每次攻擊額外扣 50 金幣
+		Color:       "cyan",
+		Description: "攻擊力 +25%，每次攻擊額外消耗 50 金幣",
+	},
+	{
+		Level:       3,
+		Name:        "超級砲",
+		Icon:        "🌟",
+		PowerMod:    1.60,
+		ExtraCost:   150, // 每次攻擊額外扣 150 金幣
+		Color:       "gold",
+		Description: "攻擊力 +60%，每次攻擊額外消耗 150 金幣",
+	},
+}
+
+// GetWeaponDef 取得武器定義
+func GetWeaponDef(level int) *WeaponDef {
+	if level < 1 || level > len(Weapons) {
+		return Weapons[0]
+	}
+	return Weapons[level-1]
+}

@@ -10,6 +10,7 @@ const MissionPanelScript = preload("res://scripts/ui/MissionPanel.gd")
 const SessionStatsPanelScript = preload("res://scripts/ui/SessionStatsPanel.gd")
 const LeaderboardPanelScript = preload("res://scripts/ui/LeaderboardPanel.gd")
 const TournamentPanelScript = preload("res://scripts/ui/TournamentPanel.gd")
+const WeaponPanelScript = preload("res://scripts/ui/WeaponPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -152,6 +153,7 @@ func _ready() -> void:
 	_init_session_stats()     # Session Stats ?Ｘ嚗AY-046嚗AY-053 ??嚗?
 	_init_jackpot_panel()     # Progressive Jackpot ?Ｘ嚗AY-048嚗AY-053 ??嚗?
 	_init_tournament_panel()  # 週賽排名面板（DAY-066）
+	_init_weapon_panel()      # 武器升級面板（DAY-067）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1544,3 +1546,19 @@ func _init_tournament_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_tournament_panel_node = panel
+
+
+# ── 武器升級面板（DAY-067）──────────────────────────────────────────────
+
+var _weapon_panel_node = null
+
+## 初始化武器升級面板（DAY-067）
+## 位置：BottomBar 左側（x=10, y=畫面高度-90）
+func _init_weapon_panel() -> void:
+	var panel = WeaponPanelScript.new()
+	# 放在畫面左下角，BottomBar 上方
+	panel.position = Vector2(10, 540)
+	panel.z_index = 8
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_weapon_panel_node = panel
