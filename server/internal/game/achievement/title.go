@@ -225,3 +225,19 @@ func (t *TitleTracker) SetActiveTitle(titleID TitleID) bool {
 	t.ActiveTitle = titleID
 	return true
 }
+
+// LoadState 從持久化資料恢復稱號狀態（DAY-100）
+func (t *TitleTracker) LoadState(unlockedTitles []TitleID, activeTitle TitleID) {
+	for _, id := range unlockedTitles {
+		t.Unlocked[id] = true
+	}
+	if activeTitle != "" {
+		if t.Unlocked[activeTitle] {
+			t.ActiveTitle = activeTitle
+		} else {
+			t.recalcActiveTitle()
+		}
+	} else {
+		t.recalcActiveTitle()
+	}
+}

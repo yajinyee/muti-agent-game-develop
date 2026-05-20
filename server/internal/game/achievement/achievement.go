@@ -190,3 +190,10 @@ func (t *Tracker) UnlockedList() []AchievementUnlock {
 	}
 	return result
 }
+
+// LoadUnlocked 從持久化資料恢復已解鎖成就（DAY-100）
+func (t *Tracker) LoadUnlocked(id AchievementID, unlockedAt time.Time) {
+	if _, already := t.Unlocked[id]; !already {
+		t.Unlocked[id] = unlockedAt
+	}
+}

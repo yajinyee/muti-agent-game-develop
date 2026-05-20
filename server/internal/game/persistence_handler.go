@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/codex"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
@@ -93,6 +94,27 @@ func (g *Game) saveFullPlayerState(p *player.Player) {
 				MaxMultiplier: e.MaxMultiplier,
 			})
 		}
+	}
+
+	// 成就系統（DAY-100）
+	if p.Achievements != nil {
+		unlocked := p.Achievements.UnlockedList()
+		full.Achievements = make([]store.AchievementState, 0, len(unlocked))
+		for _, u := range unlocked {
+			full.Achievements = append(full.Achievements, store.AchievementState{
+				ID:         string(u.ID),
+				UnlockedAt: u.UnlockedAt,
+			})
+		}
+	}
+	// 稱號系統（DAY-100）
+	if p.Titles != nil {
+		titles := p.Titles.GetUnlockedTitles()
+		full.UnlockedTitles = make([]store.TitleState, 0, len(titles))
+		for _, t := range titles {
+			full.UnlockedTitles = append(full.UnlockedTitles, store.TitleState{ID: string(t.ID)})
+		}
+		full.ActiveTitle = string(p.Titles.GetActiveTitle().ID)
 	}
 
 	// 玩家統計（DAY-096）
@@ -231,6 +253,21 @@ func (g *Game) restoreFullPlayerState(p *player.Player) {
 			})
 		}
 		p.Codex.LoadState(entries)
+	}
+
+	// 恢復成就系統（DAY-100）
+	if p.Achievements != nil && len(full.Achievements) > 0 {
+		for _, a := range full.Achievements {
+			p.Achievements.LoadUnlocked(achievement.AchievementID(a.ID), a.UnlockedAt)
+		}
+	}
+	// 恢復稱號系統（DAY-100）
+	if p.Titles != nil && len(full.UnlockedTitles) > 0 {
+		titleIDs := make([]achievement.TitleID, 0, len(full.UnlockedTitles))
+		for _, t := range full.UnlockedTitles {
+			titleIDs = append(titleIDs, achievement.TitleID(t.ID))
+		}
+		p.Titles.LoadState(titleIDs, achievement.TitleID(full.ActiveTitle))
 	}
 
 	// 恢復玩家統計（DAY-096）

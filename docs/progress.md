@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-099 定期自動儲存 + Graceful Shutdown）
+## 最後更新：2026-05-21（DAY-100 成就與稱號持久化）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,15 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-100 更新（自主觸發）：** 成就與稱號持久化（Achievement & Title Persistence）✅
+  - `server/internal/store/filestore.go`：`FullPlayerState` 新增 `Achievements`/`UnlockedTitles`/`ActiveTitle` 欄位；新增 `AchievementState`/`TitleState` 結構
+  - `server/internal/game/achievement/achievement.go`：新增 `LoadUnlocked()` 方法（從持久化資料恢復已解鎖成就）
+  - `server/internal/game/achievement/title.go`：新增 `LoadState()` 方法（從持久化資料恢復稱號列表和當前稱號）
+  - `server/internal/game/persistence_handler.go`：`saveFullPlayerState()` 加入成就/稱號儲存；`restoreFullPlayerState()` 加入成就/稱號恢復
+  - 持久化範圍擴充：成就（12種，含解鎖時間）+ 稱號（12種，含當前顯示稱號）
+  - Server 重啟後玩家的成就進度和稱號完整保留
+  - build/vet 全部通過
+
 - **DAY-099 更新（自主觸發）：** 定期自動儲存 + Graceful Shutdown（Auto-Save & Graceful Shutdown）✅
   - `server/internal/game/game.go`：新增 `lastAutoSaveAt` 計時器（每 60 秒觸發）；`Stop()` 改為先呼叫 `saveAllPlayersOnShutdown()` 再關閉 goroutine
   - `server/internal/game/persistence_handler.go`：新增 `autoSaveAllPlayers()`（每 60 秒儲存所有在線玩家）；新增 `saveAllPlayersOnShutdown()`（關閉時儲存所有玩家 + 結束 Stats Session）

@@ -54,6 +54,11 @@ type FullPlayerState struct {
 	// 魚類圖鑑（DAY-081）
 	CodexEntries []CodexEntryState `json:"codex_entries"`
 
+	// 成就系統（DAY-100）
+	Achievements []AchievementState `json:"achievements"`
+	UnlockedTitles []TitleState     `json:"unlocked_titles"`
+	ActiveTitle    string           `json:"active_title"`
+
 	// 玩家統計（DAY-096）
 	StatsTotalSessions   int     `json:"stats_total_sessions"`
 	StatsTotalPlayTime   int64   `json:"stats_total_play_time"`
@@ -87,6 +92,17 @@ type CodexEntryState struct {
 	UnlockedAt    time.Time `json:"unlocked_at,omitempty"`
 	KillCount     int       `json:"kill_count"`
 	MaxMultiplier float64   `json:"max_multiplier"`
+}
+
+// AchievementState 成就持久化狀態
+type AchievementState struct {
+	ID         string    `json:"id"`
+	UnlockedAt time.Time `json:"unlocked_at"`
+}
+
+// TitleState 稱號持久化狀態
+type TitleState struct {
+	ID string `json:"id"`
 }
 
 // FileStore JSON 檔案持久化 Store（DAY-098）
