@@ -11,6 +11,7 @@ const SessionStatsPanelScript = preload("res://scripts/ui/SessionStatsPanel.gd")
 const LeaderboardPanelScript = preload("res://scripts/ui/LeaderboardPanel.gd")
 const TournamentPanelScript = preload("res://scripts/ui/TournamentPanel.gd")
 const WeaponPanelScript = preload("res://scripts/ui/WeaponPanel.gd")
+const TitlePanelScript = preload("res://scripts/ui/TitlePanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -154,6 +155,7 @@ func _ready() -> void:
 	_init_jackpot_panel()     # Progressive Jackpot ?Ｘ嚗AY-048嚗AY-053 ??嚗?
 	_init_tournament_panel()  # 週賽排名面板（DAY-066）
 	_init_weapon_panel()      # 武器升級面板（DAY-067）
+	_init_title_panel()       # 稱號面板（DAY-068）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1562,3 +1564,17 @@ func _init_weapon_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_weapon_panel_node = panel
+
+## ── 稱號面板（DAY-068）──────────────────────────────────────────────────────
+var _title_panel_node = null
+
+## 初始化稱號面板（DAY-068）
+## 位置：TopBar 下方左側，顯示玩家當前稱號
+func _init_title_panel() -> void:
+	var panel = TitlePanelScript.new()
+	# 放在 TopBar 下方，金幣顯示旁邊
+	panel.position = Vector2(10, 44)
+	panel.z_index = 7
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_title_panel_node = panel

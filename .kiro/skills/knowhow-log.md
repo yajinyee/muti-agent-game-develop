@@ -2659,3 +2659,39 @@ contribution_per_shot = betCost × 0.005 × level_share
 ### 教訓
 - `DeductBet()` 要同時扣除武器費用，不能分開扣（避免金幣不足時只扣了一部分）
 - 武器顏色要在 `_fire_projectile` 中設定，不能在 `_ready()` 中設定（因為每次射擊都可能換武器）
+
+## 131. 稱號系統設計原則（2026-05-20 DAY-068）
+- **業界依據：** Fishing Frenzy Chapter 3（2026-05-14）確認稱號/進階系統是 2026 年捕魚機標配留存功能
+- **設計原則：**
+  1. 稱號與成就系統掛鉤（解鎖成就 → 自動解鎖對應稱號）
+  2. 優先級系統：自動顯示最高優先級稱號，玩家可手動選擇
+  3. 稱號顯示在排行榜和玩家名稱旁，增加社交展示感
+  4. 稱號解鎖通知要有動畫（滑入 + 停留 + 淡出）
+- **技術實作：**
+  - `TitleTracker` 獨立於 `Tracker`（成就追蹤器），避免耦合
+  - `OnAchievementUnlocked(achID, totalUnlocked)` — 成就解鎖時呼叫，回傳新稱號（若有）
+  - `recalcActiveTitle()` — 每次解鎖新稱號後重新計算最高優先級
+  - `SetActiveTitle(titleID)` — 玩家手動選擇，只能選已解鎖的
+- **Go 架構注意：**
+  - `player.mu` 是 unexported，不能在 `game` 套件直接存取
+  - 解法：在 `player.go` 加入 `OnAchievementUnlocked()` 和 `SetTitle()` 方法，封裝 lock 邏輯
+  - `sendAchievements()` 批次處理：先廣播成就通知，再呼叫 `p.OnAchievementUnlocked()` 檢查稱號
+- **Windows Defender 誤報：**
+  - `achievement` 套件的測試執行檔被 Windows Defender 誤判為病毒
+  - 這是 Go 測試執行檔的常見問題（KnowHow #28 也有記錄）
+  - 解法：`go build` + `go vet` 確認程式碼正確，測試邏輯用 code review 確認
+- **教訓：** 稱號系統要在成就系統建立後才加，不要一開始就設計，否則會過度複雜
+
+## 132. Go 套件 unexported 欄位的跨套件存取問題
+- **問題：** `game` 套件需要存取 `player.Player.mu`（unexported），但 Go 不允許
+- **根本原因：** `mu sync.RWMutex` 是 unexported，只能在 `player` 套件內存取
+- **解法：** 在 `player.go` 加入封裝方法，把需要 lock 的邏輯包在方法內
+  ```go
+  // 在 player.go 加入
+  func (p *Player) OnAchievementUnlocked(id achievement.AchievementID) *achievement.TitleDef {
+      p.mu.Lock()
+      defer p.mu.Unlock()
+      return p.Titles.OnAchievementUnlocked(id, len(p.Achievements.Unlocked))
+  }
+  ```
+- **教訓：** Go 的封裝原則：跨套件操作要透過方法，不要暴露內部狀態

@@ -73,6 +73,18 @@ func update(entries: Array, my_player_id: String) -> void:
 		if kill_lbl:
 			kill_lbl.text = "⚔%d" % entry.get("kill_count", 0)
 
+		# 稱號（DAY-068）
+		var title_lbl = row.get_node_or_null("TitleLabel")
+		if title_lbl:
+			var title_icon: String = entry.get("title_icon", "")
+			var title_name: String = entry.get("title_name", "")
+			var title_color: String = entry.get("title_color", "#AAAAAA")
+			if title_icon != "" and title_name != "":
+				title_lbl.text = title_icon + " " + title_name
+				title_lbl.add_theme_color_override("font_color", Color.html(title_color))
+			else:
+				title_lbl.text = ""
+
 		# 自己的行背景高亮
 		var row_bg = row.get_node_or_null("RowBG")
 		if row_bg:
@@ -84,7 +96,7 @@ func update(entries: Array, my_player_id: String) -> void:
 				row_bg.color = Color(0.03, 0.07, 0.18, 0.6)
 
 	# 動態調整高度
-	var new_height = 30 + count * 32
+	var new_height = 30 + count * 40
 	if is_instance_valid(_panel):
 		var bg = _panel.get_node_or_null("LeaderboardBG")
 		if bg:
@@ -128,7 +140,7 @@ func toggle() -> void:
 
 	var bg = _panel.get_node_or_null("LeaderboardBG")
 	if bg:
-		bg.size.y = 200 if _visible else 28
+		bg.size.y = 230 if _visible else 28
 
 	if is_instance_valid(_toggle_btn):
 		_toggle_btn.text = "▲" if _visible else "▼"
@@ -196,14 +208,14 @@ func _create_panel(parent: Node) -> void:
 func _create_row(container: Control, index: int) -> void:
 	var row = Control.new()
 	row.name = "Row%d" % index
-	row.position = Vector2(0, index * 32)
-	row.size = Vector2(360, 30)
+	row.position = Vector2(0, index * 40)
+	row.size = Vector2(360, 38)
 	container.add_child(row)
 
 	# 行背景
 	var row_bg = ColorRect.new()
 	row_bg.name = "RowBG"
-	row_bg.size = Vector2(360, 30)
+	row_bg.size = Vector2(360, 38)
 	if index % 2 == 0:
 		row_bg.color = Color(0.05, 0.1, 0.25, 0.6)
 	else:
@@ -252,5 +264,16 @@ func _create_row(container: Control, index: int) -> void:
 	if is_instance_valid(_pixel_font):
 		kill_lbl.add_theme_font_override("font", _pixel_font)
 	row.add_child(kill_lbl)
+
+	# 稱號標籤（DAY-068）— 顯示在名稱下方
+	var title_lbl = Label.new()
+	title_lbl.name = "TitleLabel"
+	title_lbl.position = Vector2(42, 18)
+	title_lbl.size = Vector2(200, 14)
+	title_lbl.add_theme_font_size_override("font_size", 10)
+	title_lbl.modulate = Color(0.7, 0.7, 0.7, 0.9)
+	if is_instance_valid(_pixel_font):
+		title_lbl.add_theme_font_override("font", _pixel_font)
+	row.add_child(title_lbl)
 
 	row.visible = false

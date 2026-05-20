@@ -184,7 +184,7 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 
 	// 成就：首次擊敗 BOSS
 	if u := p.TryUnlockAchievement(achievement.AchKillBoss); u != nil {
-		g.sendAchievement(p.ID, u)
+		g.sendAchievements(p.ID, []*achievement.AchievementUnlock{u})
 	}
 
 	// 任務進度：擊敗 BOSS（DAY-037）

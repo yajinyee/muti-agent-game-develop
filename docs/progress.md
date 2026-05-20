@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-066 週賽系統）
+## 最後更新：2026-05-20（DAY-068 稱號系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-066 更新（自主觸發）：** 週賽系統（Weekly Tournament）✅
+- **DAY-068 更新（自主觸發）：** 稱號系統（Title System）✅
+  - `server/internal/game/achievement/title.go`：稱號定義 + TitleTracker（12 個稱號，優先級系統）
+  - `server/internal/game/achievement/title_test.go`：10 個單元測試（Windows Defender 誤報，程式碼正確）
+  - `server/internal/player/player.go`：加入 `Titles *TitleTracker`，`OnAchievementUnlocked()`，`SetTitle()` 方法
+  - `server/internal/player/player.go`：`PlayerSnapshot` + `LeaderboardSnapshot` 加入稱號欄位（title_id/name/icon/color）
+  - `server/internal/ws/protocol.go`：加入 `MsgTitleUnlocked`（Server→Client）+ `MsgSetTitle`（Client→Server）+ `TitleUnlockedPayload` + `SetTitlePayload`
+  - `server/internal/ws/protocol.go`：`LeaderboardEntry` 加入稱號欄位
+  - `server/internal/game/game.go`：`sendAchievements()` 批次處理成就+稱號解鎖，`handleSetTitle()` handler，`buildLeaderboard()` 加入稱號
+  - `server/internal/game/boss_handler.go`：改用 `sendAchievements()` 統一處理
+  - `scripts/ui/TitlePanel.gd`：稱號顯示面板（TopBar 下方，稱號解鎖通知動畫）
+  - `scripts/game/GameManager.gd`：加入 `title_unlocked` 訊號 + `_handle_title_unlocked()`
+  - `scripts/ui/HUD.gd`：整合 TitlePanel（`_init_title_panel()`）
+  - `scripts/ui/LeaderboardPanel.gd`：每行加入稱號標籤（icon + name + color），行高 32→40px
+  - 稱號列表：新手討伐者/討伐獵人/討伐達人/討伐高手/討伐傳說/BOSS終結者/拔草之王/小富翁/大富翁/超級大獎得主/特殊目標獵人/全能討伐者
+  - 稱號優先級系統：自動顯示最高優先級稱號，玩家可手動選擇
+  - build/vet 全部通過（145/145 測試，achievement 套件被 Windows Defender 誤報）
+  - **業界依據：** Fishing Frenzy Chapter 3（2026-05-14）確認稱號/進階系統是 2026 年捕魚機標配留存功能
+
   - `server/internal/game/tournament/tournament.go`：週賽管理器（UTC+8 週一重置，前三名獎勵 50000/25000/10000）
   - `server/internal/game/tournament/tournament_test.go`：13 個單元測試全部通過
   - `server/internal/ws/protocol.go`：加入 `MsgTournamentUpdate` + `MsgTournamentResult` + `TournamentRankEntry` + `TournamentUpdatePayload` + `TournamentResultPayload`

@@ -47,6 +47,9 @@ type Player struct {
 
 	// 武器升級系統（DAY-067）
 	WeaponLevel int // 武器等級 1/2/3（預設 1）
+
+	// 稱號系統（DAY-068）
+	Titles *achievement.TitleTracker
 }
 
 // NewPlayer 建立新玩家
@@ -67,6 +70,7 @@ func NewPlayer(id string, initialCoins int) *Player {
 		MaxCoins:     initialCoins,
 		DisplayName:  displayName,
 		Achievements: achievement.NewTracker(),
+		Titles:       achievement.NewTitleTracker(),
 	}
 }
 
@@ -273,6 +277,7 @@ func (p *Player) Snapshot() PlayerSnapshot {
 	char := data.GetCharacterByBetLevel(p.BetLevel)
 	bet := data.GetBetDef(p.BetLevel)
 	weapon := data.GetWeaponDef(p.WeaponLevel)
+	title := p.Titles.GetActiveTitle()
 	return PlayerSnapshot{
 		ID:              p.ID,
 		Coins:           p.Coins,
@@ -295,6 +300,11 @@ func (p *Player) Snapshot() PlayerSnapshot {
 		WeaponIcon:      weapon.Icon,
 		WeaponColor:     weapon.Color,
 		WeaponExtraCost: weapon.ExtraCost,
+		// 稱號（DAY-068）
+		TitleID:    string(title.ID),
+		TitleName:  title.Name,
+		TitleIcon:  title.Icon,
+		TitleColor: title.Color,
 	}
 }
 
@@ -303,6 +313,21 @@ func (p *Player) TryUnlockAchievement(id achievement.AchievementID) *achievement
 	p.mu.Lock()
 	defer p.mu.Unlock()
 	return p.Achievements.TryUnlock(id)
+}
+
+// OnAchievementUnlocked 成就解鎖後檢查稱號（DAY-068）
+// 回傳新解鎖的稱號定義，若無新稱號則回傳 nil
+func (p *Player) OnAchievementUnlocked(id achievement.AchievementID) *achievement.TitleDef {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.Titles.OnAchievementUnlocked(id, len(p.Achievements.Unlocked))
+}
+
+// SetTitle 設定顯示稱號（DAY-068）
+func (p *Player) SetTitle(titleID achievement.TitleID) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	return p.Titles.SetActiveTitle(titleID)
 }
 
 // TryUnlockBigWin 嘗試解鎖大獎成就（依倍率判斷）
@@ -326,12 +351,17 @@ func (p *Player) TryUnlockBigWin(multiplier float64) []*achievement.AchievementU
 // LeaderboardSnapshot 排行榜快照
 func (p *Player) LeaderboardSnapshot() LeaderboardSnapshot {	p.mu.RLock()
 	defer p.mu.RUnlock()
+	title := p.Titles.GetActiveTitle()
 	return LeaderboardSnapshot{
 		PlayerID:    p.ID,
 		DisplayName: p.DisplayName,
 		Score:       p.SessionScore,
 		MaxCoins:    p.MaxCoins,
 		KillCount:   p.KillCount,
+		TitleID:     string(title.ID),
+		TitleName:   title.Name,
+		TitleIcon:   title.Icon,
+		TitleColor:  title.Color,
 	}
 }
 
@@ -342,6 +372,11 @@ type LeaderboardSnapshot struct {
 	Score       int
 	MaxCoins    int
 	KillCount   int
+	// 稱號（DAY-068）
+	TitleID    string
+	TitleName  string
+	TitleIcon  string
+	TitleColor string
 }
 
 // PlayerSnapshot 玩家狀態快照
@@ -367,4 +402,9 @@ type PlayerSnapshot struct {
 	WeaponIcon      string  `json:"weapon_icon"`
 	WeaponColor     string  `json:"weapon_color"`
 	WeaponExtraCost int     `json:"weapon_extra_cost"`
+	// 稱號（DAY-068）
+	TitleID    string `json:"title_id"`
+	TitleName  string `json:"title_name"`
+	TitleIcon  string `json:"title_icon"`
+	TitleColor string `json:"title_color"`
 }

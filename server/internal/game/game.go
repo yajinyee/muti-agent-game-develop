@@ -245,6 +245,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	case ws.MsgUpgradeWeapon:
 		// 武器升級（DAY-067）
 		g.handleUpgradeWeapon(p, msg)
+	case ws.MsgSetTitle:
+		// 設定顯示稱號（DAY-068）
+		g.handleSetTitle(p, msg)
 	}
 }
 
@@ -424,7 +427,7 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		allUnlocks = append(allUnlocks, specialUnlock)
 	}
 	for _, u := range allUnlocks {
-		g.sendAchievement(p.ID, u)
+		g.sendAchievements(p.ID, []*achievement.AchievementUnlock{u})
 	}
 
 	// 任務進度更新（DAY-037）
@@ -488,7 +491,7 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if bonusTriggered {
 		// 成就：首次觸發 Bonus
 		if u := p.TryUnlockAchievement(achievement.AchBonus); u != nil {
-			g.sendAchievement(p.ID, u)
+			g.sendAchievements(p.ID, []*achievement.AchievementUnlock{u})
 		}
 		g.triggerBonusReady()
 	}
@@ -815,6 +818,23 @@ func (g *Game) handleUpgradeWeapon(p *player.Player, msg *ws.Message) {
 	g.sendPlayerUpdate(p)
 }
 
+// handleSetTitle 處理設定顯示稱號（DAY-068）
+func (g *Game) handleSetTitle(p *player.Player, msg *ws.Message) {
+	var payload ws.SetTitlePayload
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		return
+	}
+	if !p.SetTitle(achievement.TitleID(payload.TitleID)) {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgError,
+			Payload: ws.ErrorPayload{Code: "title_not_unlocked", Message: "尚未解鎖此稱號"},
+		})
+		return
+	}
+	log.Printf("[Game] Player %s set title to %s", p.ID, payload.TitleID)
+	g.sendPlayerUpdate(p)
+}
+
 // processAutoAttack 處理自動攻擊（智慧目標選擇）
 func (g *Game) processAutoAttack() {
 	g.mu.RLock()
@@ -1005,6 +1025,11 @@ func (g *Game) buildLeaderboard() []ws.LeaderboardEntry {
 			Score:       snapshots[i].Score,
 			MaxCoins:    snapshots[i].MaxCoins,
 			KillCount:   snapshots[i].KillCount,
+			// 稱號（DAY-068）
+			TitleID:    snapshots[i].TitleID,
+			TitleName:  snapshots[i].TitleName,
+			TitleIcon:  snapshots[i].TitleIcon,
+			TitleColor: snapshots[i].TitleColor,
 		}
 	}
 	return entries
@@ -1140,6 +1165,37 @@ func (g *Game) sendAchievement(playerID string, u *achievement.AchievementUnlock
 			UnlockedAt:  u.UnlockedAt.UnixMilli(),
 		},
 	})
+}
+
+// sendAchievements 批次傳送成就解鎖通知，並檢查稱號解鎖（DAY-068）
+func (g *Game) sendAchievements(playerID string, unlocks []*achievement.AchievementUnlock) {
+	if len(unlocks) == 0 {
+		return
+	}
+	g.mu.RLock()
+	p, ok := g.Players[playerID]
+	g.mu.RUnlock()
+
+	for _, u := range unlocks {
+		g.sendAchievement(playerID, u)
+		// 檢查是否解鎖新稱號
+		if ok {
+			titleDef := p.OnAchievementUnlocked(u.ID)
+			if titleDef != nil {
+				log.Printf("[Title] Player %s unlocked title: %s (%s)", playerID, titleDef.Name, titleDef.ID)
+				g.Hub.Send(playerID, &ws.Message{
+					Type: ws.MsgTitleUnlocked,
+					Payload: ws.TitleUnlockedPayload{
+						TitleID:     string(titleDef.ID),
+						TitleName:   titleDef.Name,
+						TitleIcon:   titleDef.Icon,
+						TitleColor:  titleDef.Color,
+						Description: titleDef.Description,
+					},
+				})
+			}
+		}
+	}
 }
 
 // ── 每日任務系統（DAY-037）已移至 mission_handler.go ──────────────────────────────────────

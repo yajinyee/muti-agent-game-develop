@@ -20,6 +20,7 @@ const (
 	MsgGetMissions     MessageType = "get_missions"      // 查詢任務列表（DAY-037）
 	MsgClientPerf      MessageType = "client_perf"       // Client 端效能數據上報（DAY-045）
 	MsgUpgradeWeapon   MessageType = "upgrade_weapon"    // 武器升級（DAY-067）
+	MsgSetTitle        MessageType = "set_title"          // 設定顯示稱號（DAY-068）
 )
 
 // Server → Client
@@ -181,6 +182,11 @@ type LeaderboardEntry struct {
 	MaxCoins    int    `json:"max_coins"`   // 歷史最高金幣
 	KillCount   int    `json:"kill_count"`  // 本局擊破數
 	IsSelf      bool   `json:"is_self"`     // 是否為自己（Client 端標記用）
+	// 稱號（DAY-068）
+	TitleID    string `json:"title_id"`
+	TitleName  string `json:"title_name"`
+	TitleIcon  string `json:"title_icon"`
+	TitleColor string `json:"title_color"`
 }
 
 // LeaderboardPayload 排行榜廣播
@@ -323,4 +329,24 @@ type TournamentResultPayload struct {
 // UpgradeWeaponPayload 武器升級請求（Client → Server）
 type UpgradeWeaponPayload struct {
 	WeaponLevel int `json:"weapon_level"` // 目標武器等級（1/2/3）
+}
+
+// ---- 稱號系統（DAY-068）----
+
+// MsgTitleUnlocked 稱號解鎖通知（Server → Client）
+// 當玩家解鎖新稱號時廣播
+const MsgTitleUnlocked MessageType = "title_unlocked"
+
+// TitleUnlockedPayload 稱號解鎖通知
+type TitleUnlockedPayload struct {
+	TitleID    string `json:"title_id"`
+	TitleName  string `json:"title_name"`
+	TitleIcon  string `json:"title_icon"`
+	TitleColor string `json:"title_color"`
+	Description string `json:"description"`
+}
+
+// SetTitlePayload 設定顯示稱號請求
+type SetTitlePayload struct {
+	TitleID string `json:"title_id"`
 }
