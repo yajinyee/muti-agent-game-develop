@@ -3054,3 +3054,10 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **錯誤處理：** 連續 3 次失敗才顯示 OFFLINE，避免短暫網路抖動誤報
 - **Promise.allSettled：** 所有 API 並行請求，任一失敗不影響其他
 - **教訓：** 監控 Dashboard 用輪詢比 WebSocket 更簡單，5 秒間隔對運營監控足夠
+
+## 85. Anti-Cheat 滑動視窗偵測設計（DAY-105）
+- **攻擊頻率偵測：** 用計數（10秒內 > 80次）而非時間差，避免同一時間點 duration=0 的問題
+- **RTP 偵測：** 需要至少 100 次攻擊才計算，避免小樣本誤報
+- **冷卻機制：** 同類型警告 5 分鐘內不重複，避免 log 爆炸
+- **goroutine 安全：** RecordReward/RecordCoins 在 goroutine 中呼叫，避免阻塞 handleKill
+- **教訓：** 異常偵測要有冷卻時間和最小樣本數，否則正常玩家也會被誤報

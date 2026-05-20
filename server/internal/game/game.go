@@ -39,6 +39,7 @@ import (
 	"digital-twin/server/internal/game/referral"
 	"digital-twin/server/internal/game/weather"
 	"digital-twin/server/internal/game/wheel"
+	"digital-twin/server/internal/anticheat"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -80,6 +81,7 @@ type Game struct {
 	DailySpin     *dailyspin.Manager     // 每日簽到轉盤管理器（DAY-092）
 	Shop          *shop.Manager          // 商店管理器（DAY-094）
 	Announce      *announce.Manager      // 全服公告管理器（DAY-097）
+	AntiCheat     *anticheat.Manager     // 異常行為偵測管理器（DAY-105）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -153,6 +155,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		DailySpin:          dailyspin.NewManager(),
 		Shop:               shop.New(),
 		Announce:           announce.NewManager(),
+		AntiCheat:          anticheat.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -273,6 +276,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendPlayerStats(pp)
 				// 全服公告：玩家加入（DAY-097）
 				g.announcePlayerJoin(pp.DisplayName)
+				// 異常偵測：建立玩家記錄（DAY-105）
+				g.AntiCheat.EnsureRecord(playerID, pp.DisplayName)
 			}
 		}()
 	}
@@ -320,6 +325,8 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.SpecialWeapon.RemovePlayer(playerID)
 		// 清理神秘寶箱狀態（DAY-090）
 		g.MysteryBox.RemovePlayer(playerID)
+		// 清理異常偵測記錄（DAY-105）
+		g.AntiCheat.RemoveRecord(playerID)
 	}
 }
 
@@ -516,6 +523,10 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	}
 	// 玩家統計：記錄射擊（DAY-096）
 	g.notifyStatsShot(p, betCost)
+	// 異常偵測：記錄攻擊（DAY-105）
+	if alert := g.AntiCheat.RecordAttack(p.ID, betCost); alert != nil {
+		log.Printf("[AntiCheat] Alert triggered for player %s: %s", p.ID, alert.Message)
+	}
 
 	// 找目標
 	g.mu.Lock()
@@ -660,6 +671,17 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	}
 	rewardUnlocks := p.AddReward(finalReward)
 	killUnlocks := p.AddKill()
+
+	// 異常偵測：記錄獎勵和金幣（DAY-105）
+	go func() {
+		if alert := g.AntiCheat.RecordReward(p.ID, finalReward); alert != nil {
+			log.Printf("[AntiCheat] RTP Alert for player %s: %s", p.ID, alert.Message)
+		}
+		snap := p.Snapshot()
+		if alert := g.AntiCheat.RecordCoins(p.ID, int64(snap.Coins)); alert != nil {
+			log.Printf("[AntiCheat] Coin Spike Alert for player %s: %s", p.ID, alert.Message)
+		}
+	}()
 
 	// 埋點：擊破事件
 	if tracker := analytics.Get(); tracker != nil {

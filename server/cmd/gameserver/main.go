@@ -1020,6 +1020,24 @@ func main() {
 	// GET /admin — 即時遊戲監控 Web UI（HTML，輪詢現有 API）
 	mux.HandleFunc("/admin", admin.Handler())
 
+	// Anti-Cheat 警告端點（DAY-105）
+	// GET /anticheat/alerts — 取得最近異常警告列表
+	mux.HandleFunc("/anticheat/alerts", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		alerts := g.AntiCheat.GetAlerts(20)
+		total, critical, warning := g.AntiCheat.GetAlertCount()
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"alerts":   alerts,
+			"total":    total,
+			"critical": critical,
+			"warning":  warning,
+			"timestamp": time.Now().UnixMilli(),
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
 		Handler:      mux,

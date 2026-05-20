@@ -220,6 +220,20 @@
       <tbody id="jackpot-history-body"><tr><td colspan="4" style="text-align:center;color:var(--muted)">載入中...</td></tr></tbody>
     </table>
   </div>
+
+  <!-- Anti-Cheat 警告面板 -->
+  <div class="card">
+    <h2>🛡️ 異常行為偵測（Anti-Cheat）</h2>
+    <div style="display:flex;gap:16px;margin-bottom:12px;">
+      <span><span class="val red" id="ac-critical">—</span> <span class="key">嚴重</span></span>
+      <span><span class="val yellow" id="ac-warning">—</span> <span class="key">警告</span></span>
+      <span><span class="val" id="ac-total">—</span> <span class="key">總計</span></span>
+    </div>
+    <table>
+      <thead><tr><th>時間</th><th>玩家</th><th>類型</th><th>等級</th><th>說明</th></tr></thead>
+      <tbody id="anticheat-body"><tr><td colspan="5" style="text-align:center;color:var(--muted)">暫無警告</td></tr></tbody>
+    </table>
+  </div>
 </main>
 <script>
 const BASE = window.location.origin;
@@ -411,6 +425,36 @@ async function updateJackpotHistory() {
     </tr>`).join('');
 }
 
+async function updateAntiCheat() {
+  try {
+    const d = await fetchJSON('/anticheat/alerts');
+    setText('ac-critical', d.critical || 0, d.critical > 0 ? 'red' : '');
+    setText('ac-warning', d.warning || 0, d.warning > 0 ? 'yellow' : '');
+    setText('ac-total', d.total || 0);
+    const alerts = d.alerts || [];
+    const tbody = document.getElementById('anticheat-body');
+    if (!alerts.length) {
+      tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted)">暫無警告 ✅</td></tr>';
+      return;
+    }
+    const typeNames = {
+      high_rtp: 'RTP異常', bot_attack: 'Bot攻擊',
+      coin_spike: '金幣暴增', bonus_abuse: 'Bonus濫用', jackpot_abuse: 'Jackpot異常'
+    };
+    const levelColors = { critical: 'var(--red)', warning: 'var(--yellow)', info: 'var(--muted)' };
+    tbody.innerHTML = alerts.slice(0, 10).map(a => `
+      <tr>
+        <td style="color:var(--muted);font-size:12px">${new Date(a.created_at).toLocaleTimeString('zh-TW')}</td>
+        <td>${a.display_name || a.player_id || '—'}</td>
+        <td style="color:var(--accent)">${typeNames[a.type] || a.type}</td>
+        <td style="color:${levelColors[a.level] || 'var(--text)'};font-weight:700">${a.level}</td>
+        <td style="font-size:12px;color:var(--muted)">${a.message}</td>
+      </tr>`).join('');
+  } catch(e) {
+    // 端點不存在時靜默失敗
+  }
+}
+
 async function refresh() {
   try {
     await Promise.allSettled([
@@ -424,6 +468,7 @@ async function refresh() {
       updateGuilds(),
       updateGuildWar(),
       updateJackpotHistory(),
+      updateAntiCheat(),
     ]);
     errorCount = 0;
     document.getElementById('error-banner').style.display = 'none';

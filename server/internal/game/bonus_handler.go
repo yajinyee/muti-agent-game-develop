@@ -4,6 +4,7 @@
 package game
 
 import (
+	"log"
 	"math/rand"
 	"time"
 
@@ -171,6 +172,10 @@ func (g *Game) endBonusGame() {
 		p.ResetLaborValue()
 		// 玩家統計：記錄 Bonus（DAY-096）
 		g.notifyStatsBonus(p, reward)
+		// 異常偵測：記錄 Bonus 觸發（DAY-105）
+		if alert := g.AntiCheat.RecordBonus(playerID); alert != nil {
+			log.Printf("[AntiCheat] Bonus Abuse Alert for player %s: %s", playerID, alert.Message)
+		}
 
 		g.Hub.Send(playerID, &ws.Message{
 			Type: ws.MsgBonusEvent,

@@ -91,6 +91,10 @@ func (g *Game) handleJackpotWin(p *player.Player, win *jackpot.JackpotWin) {
 	g.notifyStatsJackpot(p, string(win.Level), win.Amount)
 	// 全服公告：Jackpot 中獎（DAY-097）
 	g.announceJackpotWin(displayName, string(win.Level), levelName, win.Amount)
+	// 異常偵測：記錄 Jackpot 中獎（DAY-105）
+	if alert := g.AntiCheat.RecordJackpot(p.ID); alert != nil {
+		log.Printf("[AntiCheat] Jackpot Abuse Alert for player %s: %s", p.ID, alert.Message)
+	}
 
 	log.Printf("[Jackpot] %s won %s jackpot: %d coins (player: %s, grand=%v)",
 		p.ID, win.Level, win.Amount, displayName, isGrand)

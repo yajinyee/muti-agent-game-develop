@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-104 Admin Dashboard 管理後台）
+## 最後更新：2026-05-21（DAY-105 Anti-Cheat 異常行為偵測系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,20 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-104 更新（自主觸發）：** Admin Dashboard 管理後台 Web UI ✅
+- **DAY-105 更新（自主觸發）：** 異常行為偵測系統（Anti-Cheat System）✅
+  - `server/internal/anticheat/anticheat.go`：異常偵測管理器（5種偵測：RTP異常/Bot攻擊/金幣暴增/Bonus濫用/Jackpot異常；AlertLevel 3級；5分鐘冷卻防重複警告；滑動視窗計算）
+  - `server/internal/anticheat/anticheat_test.go`：10 個單元測試全部通過
+  - `server/internal/game/game.go`：整合 `AntiCheat *anticheat.Manager`；AddPlayer 建立記錄；RemovePlayer 清理記錄；handleAttack 記錄攻擊；handleKill 記錄獎勵+金幣
+  - `server/internal/game/bonus_handler.go`：endBonusGame 加入 `RecordBonus()`
+  - `server/internal/game/jackpot_handler.go`：handleJackpotWin 加入 `RecordJackpot()`
+  - `server/cmd/gameserver/main.go`：新增 `/anticheat/alerts` 端點（GET，回傳最近20條警告）
+  - `server/internal/admin/dashboard.html`：新增 Anti-Cheat 警告面板（嚴重/警告計數；最近10條警告表格；類型/等級/說明）
+  - 偵測門檻：RTP > 250%（需100次攻擊）/ 10秒內攻擊 > 80次 / 60秒金幣增加 > 50000 / 10分鐘Bonus > 5次 / 1小時Jackpot > 3次
+  - 警告等級：info/warning/critical（Jackpot異常為critical）
+  - 冷卻機制：同類型警告 5 分鐘內不重複觸發
+  - build/vet/test 全部通過（10/10 anticheat 測試）
+  - **業界依據：** seon.io（2026-05）確認 iGaming 異常偵測是 2026 年最重要的平台保護機制；everymatrix.com（2026）確認 Bonus 濫用是 iGaming 最大的財務風險
+
   - `server/internal/admin/dashboard.go`：Go embed 靜態 HTML handler（`//go:embed dashboard.html`）
   - `server/internal/admin/dashboard.html`：即時監控 Web UI（純 HTML+CSS+JS，無外部依賴）
     - 頂部統計卡片：在線玩家/觀戰者/整體RTP/Server運行時間
