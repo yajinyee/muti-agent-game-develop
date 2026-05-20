@@ -25,6 +25,7 @@ import (
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
 	"digital-twin/server/internal/game/tournament"
+	"digital-twin/server/internal/game/vip"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -51,6 +52,7 @@ type Game struct {
 	Guild       *guild.Manager      // 公會系統管理器（DAY-074）
 	GuildWar    *guildwar.Manager   // 公會戰管理器（DAY-076）
 	DailyBoss   *dailyboss.Manager  // 每日 BOSS 挑戰管理器（DAY-077）
+	VIP         *vip.Manager        // VIP 等級管理器（DAY-078）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -105,6 +107,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Guild:              guild.New(),
 		GuildWar:           guildwar.New(),
 		DailyBoss:          dailyboss.New(),
+		VIP:                vip.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -202,6 +205,8 @@ func (g *Game) AddPlayer(playerID string) {
 				// 更新公會在線狀態 + 發送公會資訊（DAY-074）
 				g.Guild.SetOnlineStatus(playerID, true)
 				g.sendGuildUpdate(pp)
+				// 發送 VIP 狀態（DAY-078）
+				g.sendVIPUpdate(pp)
 			}
 		}()
 	}
@@ -345,6 +350,11 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleGetDailyBoss(p)
 	case ws.MsgDailyBossAttack:
 		g.handleDailyBossAttack(p, msg)
+	// VIP 等級系統（DAY-078）
+	case ws.MsgGetVIPStatus:
+		g.handleGetVIPStatus(p)
+	case ws.MsgClaimVIPWeekly:
+		g.handleClaimVIPWeekly(p)
 	}
 }
 
@@ -404,6 +414,9 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	if jackpotWin := g.jackpotMgr.Contribute(betCost, p.ID); jackpotWin != nil {
 		g.handleJackpotWin(p, jackpotWin)
 	}
+
+	// VIP 消費記錄 + 金幣返還（DAY-078）
+	g.notifyVIPSpend(p, betCost)
 
 	// 埋點：攻擊事件
 	if tracker := analytics.Get(); tracker != nil {

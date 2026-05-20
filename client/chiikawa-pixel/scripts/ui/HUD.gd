@@ -18,6 +18,7 @@ const FriendPanelScript = preload("res://scripts/ui/FriendPanel.gd")
 const GuildPanelScript = preload("res://scripts/ui/GuildPanel.gd")
 const GuildWarPanelScript = preload("res://scripts/ui/GuildWarPanel.gd")
 const DailyBossPanelScript = preload("res://scripts/ui/DailyBossPanel.gd")
+const VIPPanelScript = preload("res://scripts/ui/VIPPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -168,6 +169,7 @@ func _ready() -> void:
 	_init_guild_panel()       # 公會系統面板（DAY-074）
 	_init_guild_war_panel()   # 公會戰面板（DAY-076）
 	_init_daily_boss_panel()  # 每日 BOSS 挑戰面板（DAY-077）
+	_init_vip_panel()         # VIP 等級面板（DAY-078）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1672,3 +1674,16 @@ func _init_daily_boss_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_daily_boss_panel_node = panel
+
+## ── VIP 等級面板（DAY-078）──────────────────────────────────────────────────
+var _vip_panel_node = null
+
+## 初始化 VIP 等級面板（DAY-078）
+## 位置：DailyBossPanel 右側（DailyBossPanel 在 x=1384，VIPPanel 在 x=1420）
+func _init_vip_panel() -> void:
+	var panel = VIPPanelScript.new()
+	panel.position = Vector2(1420, 4)
+	panel.z_index = 10
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_vip_panel_node = panel

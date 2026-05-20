@@ -43,6 +43,9 @@ const (
 	// 每日 BOSS 挑戰（DAY-077）
 	MsgGetDailyBoss      MessageType = "get_daily_boss"       // 查詢每日 BOSS 狀態
 	MsgDailyBossAttack   MessageType = "daily_boss_attack"    // 對每日 BOSS 攻擊
+	// VIP 等級系統（DAY-078）
+	MsgGetVIPStatus      MessageType = "get_vip_status"       // 查詢 VIP 狀態
+	MsgClaimVIPWeekly    MessageType = "claim_vip_weekly"     // 領取 VIP 週獎勵
 )
 
 // Server → Client
@@ -86,6 +89,10 @@ const (
 	// 每日 BOSS 挑戰（DAY-077）
 	MsgDailyBossUpdate   MessageType = "daily_boss_update"   // 每日 BOSS 狀態更新
 	MsgDailyBossDefeated MessageType = "daily_boss_defeated" // 每日 BOSS 擊殺通知
+	// VIP 等級系統（DAY-078）
+	MsgVIPUpdate         MessageType = "vip_update"          // VIP 狀態更新
+	MsgVIPLevelUp        MessageType = "vip_level_up"        // VIP 升級通知
+	MsgVIPWeeklyClaimed  MessageType = "vip_weekly_claimed"  // VIP 週獎勵領取通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -754,4 +761,45 @@ type DailyBossDefeatedPayload struct {
 	Rankings    []DailyBossContributorEntry `json:"rankings"`
 	MyReward    int                         `json:"my_reward"`
 	TotalDamage int                         `json:"total_damage"`
+}
+
+// ---- VIP 等級系統（DAY-078）----
+
+// VIPUpdatePayload VIP 狀態更新（Server → Client）
+// 在玩家加入、消費、升級時發送
+type VIPUpdatePayload struct {
+	PlayerID       string  `json:"player_id"`
+	TotalSpend     int     `json:"total_spend"`
+	VIPLevel       int     `json:"vip_level"`
+	TierName       string  `json:"tier_name"`
+	TierIcon       string  `json:"tier_icon"`
+	TierColor      string  `json:"tier_color"`
+	CashbackRate   float64 `json:"cashback_rate"`
+	DailyBonusMult float64 `json:"daily_bonus_mult"`
+	WeeklyBonus    int     `json:"weekly_bonus"`
+	NextLevel      int     `json:"next_level"`
+	SpendToNext    int     `json:"spend_to_next"`
+	Progress       float64 `json:"progress"`
+	CanClaimWeekly bool    `json:"can_claim_weekly"`
+}
+
+// VIPLevelUpPayload VIP 升級通知（Server → Client）
+type VIPLevelUpPayload struct {
+	PlayerID    string `json:"player_id"`
+	NewLevel    int    `json:"new_level"`
+	TierName    string `json:"tier_name"`
+	TierIcon    string `json:"tier_icon"`
+	TierColor   string `json:"tier_color"`
+	TitleID     string `json:"title_id"`
+	TitleName   string `json:"title_name"`
+	WeeklyBonus int    `json:"weekly_bonus"`
+}
+
+// VIPWeeklyClaimedPayload VIP 週獎勵領取通知（Server → Client）
+type VIPWeeklyClaimedPayload struct {
+	PlayerID   string `json:"player_id"`
+	VIPLevel   int    `json:"vip_level"`
+	TierName   string `json:"tier_name"`
+	Coins      int    `json:"coins"`
+	NewBalance int    `json:"new_balance"`
 }

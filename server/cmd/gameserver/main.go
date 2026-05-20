@@ -495,6 +495,27 @@ func main() {
 		}
 	})
 
+	// GET /vip — 取得 VIP 等級資訊（DAY-078）
+	mux.HandleFunc("/vip", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		playerID := r.URL.Query().Get("player_id")
+		if playerID == "" {
+			// 回傳 VIP 等級定義列表
+			if err := json.NewEncoder(w).Encode(map[string]interface{}{
+				"tiers":     g.VIP.GetTiers(),
+				"timestamp": time.Now().UnixMilli(),
+			}); err != nil {
+				http.Error(w, "encode error", http.StatusInternalServerError)
+			}
+			return
+		}
+		snap := g.VIP.GetSnapshot(playerID)
+		if err := json.NewEncoder(w).Encode(snap); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 玩家個人資料端點（DAY-069）
 	// GET /profile?player_id=xxx — 取得指定玩家的個人資料
 	// GET /profiles — 取得所有在線玩家的個人資料摘要

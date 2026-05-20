@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-077 每日特殊 BOSS 挑戰）
+## 最後更新：2026-05-20（DAY-078 VIP 等級系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-077 更新（自主觸發）：** 每日特殊 BOSS 挑戰（Daily Boss Challenge）✅
+- **DAY-078 更新（自主觸發）：** VIP 等級系統（VIP Tier System）✅
+  - `server/internal/game/vip/vip.go`：VIP 管理器（5 個等級：青銅/白銀/黃金/白金/鑽石，累積消費解鎖，不重置）
+  - `server/internal/game/vip/vip_test.go`：15 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgGetVIPStatus`/`MsgClaimVIPWeekly`（Client→Server）+ `MsgVIPUpdate`/`MsgVIPLevelUp`/`MsgVIPWeeklyClaimed`（Server→Client）+ 對應 Payload
+  - `server/internal/game/game.go`：`VIP *vip.Manager` 欄位 + 整合初始化 + `handleGetVIPStatus`/`handleClaimVIPWeekly` handler + `notifyVIPSpend`（每次攻擊後記錄消費）
+  - `server/internal/game/vip_handler.go`：`sendVIPUpdate()`/`handleGetVIPStatus()`/`handleClaimVIPWeekly()`/`notifyVIPSpend()`/`applyVIPDailyBonusMult()`
+  - `server/cmd/gameserver/main.go`：`/vip` HTTP 端點（GET，無 player_id 回傳等級定義，有 player_id 回傳玩家快照）
+  - `client/chiikawa-pixel/scripts/ui/VIPPanel.gd`：VIP 面板（等級顯示/消費進度條/返還率/每日獎勵倍率/週獎勵領取按鈕/升級彈窗）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`vip_updated`/`vip_level_up`/`vip_weekly_claimed` 訊號 + handler + `request_vip_status()`/`claim_vip_weekly()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 VIPPanel（`_init_vip_panel()`，位置 x=1420）
+  - 5 個 VIP 等級：青銅(10k)/白銀(50k)/黃金(200k)/白金(500k)/鑽石(2M)
+  - 金幣返還：1%/2%/3%/5%/8%（每次攻擊自動返還）
+  - 每日獎勵倍率：×1.1/×1.2/×1.5/×2.0/×3.0
+  - 週獎勵：500/1500/5000/15000/50000 金幣（7天冷卻）
+  - 每個等級解鎖專屬稱號（vip_bronze/silver/gold/platinum/diamond）
+  - build/vet/test 全部通過（15/15 vip 測試）
+  - **業界依據：** VIP 等級系統是 2026 年捕魚機標配留存功能（累積消費獎勵，提升玩家黏著度）
+
+
   - `server/internal/game/dailyboss/dailyboss.go`：每日 BOSS 管理器（7種 BOSS 輪流，全服合力，按比例分配獎勵，連續未擊殺降低難度）
   - `server/internal/game/dailyboss/dailyboss_test.go`：10 個單元測試全部通過
   - `server/internal/ws/protocol.go`：`MsgGetDailyBoss`/`MsgDailyBossAttack`（Client→Server）+ `MsgDailyBossUpdate`/`MsgDailyBossDefeated`（Server→Client）+ 對應 Payload
