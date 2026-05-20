@@ -23,6 +23,7 @@ import (
 	"digital-twin/server/internal/game/dailyspin"
 	"digital-twin/server/internal/game/event"
 	"digital-twin/server/internal/game/friend"
+	"digital-twin/server/internal/game/friendchallenge"
 	"digital-twin/server/internal/game/guild"
 	"digital-twin/server/internal/game/guildwar"
 	"digital-twin/server/internal/game/jackpot"
@@ -61,6 +62,7 @@ type Game struct {
 	dailyTournamentMgr *tournament.DailyTournament // 每日賽管理器（DAY-093）
 	Season      *season.Manager     // 賽季通行證管理器（DAY-072）
 	Friends     *friend.Manager     // 好友系統管理器（DAY-073）
+	FriendChallenge *friendchallenge.Manager // 好友挑戰管理器（DAY-102）
 	Guild       *guild.Manager      // 公會系統管理器（DAY-074）
 	GuildWar    *guildwar.Manager   // 公會戰管理器（DAY-076）
 	DailyBoss   *dailyboss.Manager  // 每日 BOSS 挑戰管理器（DAY-077）
@@ -132,6 +134,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		dailyTournamentMgr: tournament.NewDaily(),
 		Season:             season.New(),
 		Friends:            friend.New(),
+		FriendChallenge:    friendchallenge.New(),
 		Guild:              guild.New(),
 		GuildWar:           guildwar.New(),
 		DailyBoss:          dailyboss.New(),
@@ -181,6 +184,8 @@ func (g *Game) Start() {
 	g.loadJackpotState()
 	// 啟動連擊超時檢查（DAY-083）
 	g.startStreakTicker()
+	// 啟動好友挑戰結算計時器（DAY-102）
+	g.startChallengeTicker()
 	go g.gameLoop()
 }
 
@@ -298,6 +303,10 @@ func (g *Game) RemovePlayer(playerID string) {
 	// 通知好友下線（DAY-073）
 	if p != nil {
 		go g.notifyFriendsOffline(playerID, p.DisplayName)
+		// 強制結算進行中的挑戰（DAY-102）
+		if c := g.FriendChallenge.ForceFinish(playerID); c != nil {
+			go g.settleChallengeResult(c)
+		}
 		// 更新公會在線狀態（DAY-074）
 		g.Guild.SetOnlineStatus(playerID, false)
 		// 清理挑戰 session（DAY-085）
@@ -459,6 +468,13 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleSendGift(p, msg)
 	case ws.MsgGetGiftStatus:
 		g.handleGetGiftStatus(p)
+	// 好友挑戰系統（DAY-102）
+	case ws.MsgSendChallengeRequest:
+		g.handleSendChallengeRequest(p, msg)
+	case ws.MsgAcceptChallenge:
+		g.handleAcceptChallenge(p, msg)
+	case ws.MsgDeclineChallenge:
+		g.handleDeclineChallenge(p, msg)
 	}
 }
 
@@ -798,6 +814,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if result.Multiplier >= 20 {
 		g.announceBigWin(p.DisplayName, result.Multiplier, finalReward)
 	}
+	// 好友挑戰：更新分數（DAY-102）
+	g.notifyChallengeKillScore(p, finalReward)
 }
 
 // handleLock 處理鎖定

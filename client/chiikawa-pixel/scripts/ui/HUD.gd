@@ -1655,6 +1655,25 @@ func _init_friend_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_friend_panel_node = panel
+	# 初始化好友挑戰面板（DAY-102）
+	_init_challenge_pvp_panel()
+
+## ── 好友挑戰面板（DAY-102）──────────────────────────────────────────────────────
+var _challenge_pvp_panel_node = null
+
+## 初始化好友挑戰面板（DAY-102）
+## 位置：左下角，顯示進行中的挑戰分數
+func _init_challenge_pvp_panel() -> void:
+	var ChallengePvPPanelScript = load("res://scripts/ui/ChallengePvPPanel.gd")
+	if ChallengePvPPanelScript == null:
+		return
+	var panel = ChallengePvPPanelScript.new()
+	panel.position = Vector2(8, 540)
+	panel.z_index = 50
+	add_child(panel)
+	if panel.has_method("setup"):
+		panel.setup(_pixel_font)
+	_challenge_pvp_panel_node = panel
 
 ## ── 公會系統面板（DAY-074）──────────────────────────────────────────────────────
 var _guild_panel_node = null

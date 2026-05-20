@@ -299,6 +299,24 @@ func _build_friend_row(index: int, friend_data: Dictionary) -> void:
 		)
 	_friend_list_container.add_child(gift_btn)
 
+	# 挑戰按鈕（DAY-102）
+	var challenge_btn := Button.new()
+	challenge_btn.text = "⚔️"
+	challenge_btn.position = Vector2(PANEL_WIDTH - 80, row_y + 7)
+	challenge_btn.size = Vector2(22, 20)
+	challenge_btn.flat = true
+	challenge_btn.tooltip_text = "發起 1v1 挑戰（賭注 1000🪙）"
+	if _pixel_font:
+		challenge_btn.add_theme_font_override("font", _pixel_font)
+		challenge_btn.add_theme_font_size_override("font_size", 11)
+	challenge_btn.pressed.connect(func():
+		NetworkManager.send_message({
+			"type": "send_challenge_request",
+			"payload": {"friend_id": friend_id}
+		})
+	)
+	_friend_list_container.add_child(challenge_btn)
+
 	# 移除按鈕
 	var remove_btn := Button.new()
 	remove_btn.text = "✕"

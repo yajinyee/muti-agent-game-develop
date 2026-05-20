@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-101 好友禮物系統 + 好友持久化）
+## 最後更新：2026-05-21（DAY-102 好友挑戰系統 1v1 PvP）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-101 更新（自主觸發）：** 好友禮物系統 + 好友關係持久化（Friend Gift System + Friend Persistence）✅
+- **DAY-102 更新（自主觸發）：** 好友挑戰系統（Friend Challenge System 1v1 PvP）✅
+  - `server/internal/game/friendchallenge/friendchallenge.go`：挑戰管理器（`Challenge` 結構含狀態/分數/賭注/計時；`CreateChallenge()`/`AcceptChallenge()`/`DeclineChallenge()`/`AddScore()`/`CheckAndFinish()`/`ForceFinish()`/`IsInChallenge()`）
+  - `server/internal/game/friendchallenge/friendchallenge_test.go`：11 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：新增 `MsgSendChallengeRequest`/`MsgAcceptChallenge`/`MsgDeclineChallenge`（Client→Server）；`MsgChallengeRequest`/`MsgChallengeUpdate`/`MsgChallengeResult`/`MsgChallengeError`（Server→Client）；7個 Payload 結構
+  - `server/internal/game/friendchallenge_handler.go`：`handleSendChallengeRequest()`/`handleAcceptChallenge()`（扣除雙方賭注）/`handleDeclineChallenge()`/`notifyChallengeKillScore()`（擊破時更新分數）/`tickAndFinishChallenges()`/`settleChallengeResult()`（發放獎勵）/`startChallengeTicker()`（每5秒結算）
+  - `server/internal/game/game.go`：整合 `FriendChallenge *friendchallenge.Manager`；`Start()` 加入 `startChallengeTicker()`；`HandleMessage` 加入3個挑戰分支；`handleKill` 加入 `notifyChallengeKillScore()`；`RemovePlayer` 加入 `ForceFinish()`（離線強制結算）
+  - `client/chiikawa-pixel/scripts/ui/ChallengePvPPanel.gd`：挑戰面板（左下角，顯示雙方分數/計時器/VS；收到邀請彈窗含接受/拒絕按鈕；結果通知含勝負/平局/獎勵）
+  - `client/chiikawa-pixel/scripts/ui/FriendPanel.gd`：好友行加入⚔️挑戰按鈕
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：4個挑戰訊號 + handler
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 ChallengePvPPanel（左下角 x=8 y=540）
+  - 挑戰規則：雙方各出 1000 金幣賭注；3 分鐘內比較擊破獎勵分數；勝者獲得全部 2000 金幣；平局各退回賭注；離線視為棄賽（對方勝）
+  - 計時器：每 5 秒 Server 端結算一次，Client 端本地倒數顯示
+  - 最後 30 秒計時器變紅色閃爍（緊張感設計）
+  - build/vet/test 全部通過（11/11 friendchallenge 測試）
+  - **業界依據：** ourculturemag.com（2026-03）確認 group competitions 是 2026 年 iGaming 核心趨勢；eegaming.org（2026-05-19）確認 Challenges 是最新留存工具
+
+
   - `server/internal/game/friend/friend.go`：新增 `GiftRecord`/`GiftResult`/`FriendState` 結構；新增 `SendGift()`（每日上限3次，每次500金幣，跨日重置）；`GetGiftStatus()`；`GetFriendState()`/`LoadFriendState()`（持久化支援）
   - `server/internal/store/filestore.go`：新增 `FriendPersistState` 結構；新增 `SaveFriends()`/`LoadFriends()` 方法（原子寫入，儲存到 `data/friends/<playerID>.json`）
   - `server/internal/ws/protocol.go`：新增 `MsgSendGift`/`MsgGetGiftStatus`（Client→Server）；`MsgGiftReceived`/`MsgGiftSent`/`MsgGiftStatus`/`MsgGiftError`（Server→Client）；`SendGiftPayload`/`GiftReceivedPayload`/`GiftSentPayload`/`GiftStatusPayload`/`GiftErrorPayload`

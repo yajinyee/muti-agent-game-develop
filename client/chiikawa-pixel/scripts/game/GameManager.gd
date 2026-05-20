@@ -42,6 +42,11 @@ signal gift_received(gift_data: Dictionary)            # 收到禮物通知
 signal gift_sent(gift_data: Dictionary)                # 送出禮物成功通知
 signal gift_status(status_data: Dictionary)            # 今日禮物狀態
 signal gift_error(error_data: Dictionary)              # 禮物操作失敗
+# 好友挑戰系統（DAY-102）
+signal challenge_request(request_data: Dictionary)     # 收到挑戰邀請
+signal challenge_updated(update_data: Dictionary)      # 挑戰狀態/分數更新
+signal challenge_result(result_data: Dictionary)       # 挑戰結果
+signal challenge_error(error_data: Dictionary)         # 挑戰操作失敗
 signal guild_updated(guild_data: Dictionary)           # 公會資訊更新（DAY-074）
 signal guild_task_complete(task_data: Dictionary)      # 公會任務完成（DAY-074）
 signal guild_message_received(msg_data: Dictionary)    # 公會聊天訊息（DAY-075）
@@ -196,6 +201,15 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_gift_status(payload)
 		"gift_error":
 			_handle_gift_error(payload)
+		# 好友挑戰系統（DAY-102）
+		"challenge_request":
+			_handle_challenge_request(payload)
+		"challenge_update":
+			_handle_challenge_updated(payload)
+		"challenge_result":
+			_handle_challenge_result(payload)
+		"challenge_error":
+			_handle_challenge_error(payload)
 		"guild_update":
 			_handle_guild_update(payload)
 		"guild_list":
@@ -492,6 +506,22 @@ func _handle_gift_status(payload: Dictionary) -> void:
 ## 處理禮物錯誤（DAY-101）
 func _handle_gift_error(payload: Dictionary) -> void:
 	emit_signal("gift_error", payload)
+
+## 處理挑戰邀請（DAY-102）
+func _handle_challenge_request(payload: Dictionary) -> void:
+	emit_signal("challenge_request", payload)
+
+## 處理挑戰狀態更新（DAY-102）
+func _handle_challenge_updated(payload: Dictionary) -> void:
+	emit_signal("challenge_updated", payload)
+
+## 處理挑戰結果（DAY-102）
+func _handle_challenge_result(payload: Dictionary) -> void:
+	emit_signal("challenge_result", payload)
+
+## 處理挑戰錯誤（DAY-102）
+func _handle_challenge_error(payload: Dictionary) -> void:
+	emit_signal("challenge_error", payload)
 
 ## 處理公會資訊更新（DAY-074）
 func _handle_guild_update(payload: Dictionary) -> void:

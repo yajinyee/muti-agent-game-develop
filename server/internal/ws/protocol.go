@@ -69,6 +69,10 @@ const (
 	// 好友禮物系統（DAY-101）
 	MsgSendGift          MessageType = "send_gift"            // 送禮物給好友
 	MsgGetGiftStatus     MessageType = "get_gift_status"      // 查詢今日禮物狀態
+	// 好友挑戰系統（DAY-102）
+	MsgSendChallengeRequest MessageType = "send_challenge_request" // 發起挑戰
+	MsgAcceptChallenge      MessageType = "accept_challenge"       // 接受挑戰
+	MsgDeclineChallenge     MessageType = "decline_challenge"      // 拒絕挑戰
 )
 
 // Server → Client
@@ -173,6 +177,11 @@ const (
 	MsgGiftSent          MessageType = "gift_sent"           // 送出禮物成功通知（Server → Client）
 	MsgGiftStatus        MessageType = "gift_status"         // 今日禮物狀態（Server → Client）
 	MsgGiftError         MessageType = "gift_error"          // 禮物操作失敗（Server → Client）
+	// 好友挑戰系統（DAY-102）
+	MsgChallengeRequest  MessageType = "challenge_request"   // 收到挑戰通知（Server → Client）
+	MsgChallengeUpdate   MessageType = "challenge_update"    // 挑戰狀態/分數更新（Server → Client）
+	MsgChallengeResult   MessageType = "challenge_result"    // 挑戰結果通知（Server → Client）
+	MsgChallengeError    MessageType = "challenge_error"     // 挑戰操作失敗（Server → Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -711,6 +720,63 @@ type GiftStatusPayload struct {
 
 // GiftErrorPayload 禮物操作失敗（Server → Client）
 type GiftErrorPayload struct {
+	ErrorCode string `json:"error_code"`
+	Message   string `json:"message"`
+}
+
+// ---- 好友挑戰系統（DAY-102）----
+
+// SendChallengeRequestPayload 發起挑戰請求（Client → Server）
+type SendChallengeRequestPayload struct {
+	FriendID string `json:"friend_id"`
+}
+
+// AcceptChallengePayload 接受挑戰請求（Client → Server）
+type AcceptChallengePayload struct {
+	ChallengeID string `json:"challenge_id"`
+}
+
+// DeclineChallengePayload 拒絕挑戰請求（Client → Server）
+type DeclineChallengePayload struct {
+	ChallengeID string `json:"challenge_id"`
+}
+
+// ChallengeRequestPayload 收到挑戰通知（Server → Client）
+type ChallengeRequestPayload struct {
+	ChallengeID    string `json:"challenge_id"`
+	ChallengerID   string `json:"challenger_id"`
+	ChallengerName string `json:"challenger_name"`
+	Stake          int    `json:"stake"`
+	ExpiresInSec   int    `json:"expires_in_sec"`
+}
+
+// ChallengeUpdatePayload 挑戰狀態/分數更新（Server → Client）
+type ChallengeUpdatePayload struct {
+	ChallengeID   string `json:"challenge_id"`
+	Status        string `json:"status"`
+	OpponentID    string `json:"opponent_id"`
+	OpponentName  string `json:"opponent_name,omitempty"`
+	Stake         int    `json:"stake,omitempty"`
+	MyScore       int    `json:"my_score"`
+	OpponentScore int    `json:"opponent_score"`
+	TimeRemaining int    `json:"time_remaining"` // 剩餘秒數
+}
+
+// ChallengeResultPayload 挑戰結果通知（Server → Client）
+type ChallengeResultPayload struct {
+	ChallengeID   string `json:"challenge_id"`
+	IsWinner      bool   `json:"is_winner"`
+	IsDraw        bool   `json:"is_draw"`
+	WinnerName    string `json:"winner_name"`
+	MyScore       int    `json:"my_score"`
+	OpponentScore int    `json:"opponent_score"`
+	OpponentID    string `json:"opponent_id"`
+	OpponentName  string `json:"opponent_name"`
+	Prize         int    `json:"prize"` // 獲得的金幣（勝者=2x賭注，平局=退回賭注）
+}
+
+// ChallengeErrorPayload 挑戰操作失敗（Server → Client）
+type ChallengeErrorPayload struct {
 	ErrorCode string `json:"error_code"`
 	Message   string `json:"message"`
 }
