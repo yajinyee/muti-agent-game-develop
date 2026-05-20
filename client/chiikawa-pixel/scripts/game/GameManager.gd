@@ -43,6 +43,7 @@ signal daily_boss_defeated(defeat_data: Dictionary)    # 每日 BOSS 擊殺通�
 signal vip_updated(vip_data: Dictionary)               # VIP 狀態更新（DAY-078）
 signal vip_level_up(level_data: Dictionary)            # VIP 升級通知（DAY-078）
 signal vip_weekly_claimed(claim_data: Dictionary)      # VIP 週獎勵領取通知（DAY-078）
+signal event_updated(event_data: Dictionary)           # 限時活動狀態更新（DAY-079）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -162,6 +163,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_vip_level_up(payload)
 		"vip_weekly_claimed":
 			_handle_vip_weekly_claimed(payload)
+		"event_update":
+			_handle_event_update(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -435,3 +438,11 @@ func request_vip_status() -> void:
 ## 領取 VIP 週獎勵（DAY-078）
 func claim_vip_weekly() -> void:
 	NetworkManager.send_message("claim_vip_weekly", {})
+
+## 處理限時活動狀態更新（DAY-079）
+func _handle_event_update(payload: Dictionary) -> void:
+	emit_signal("event_updated", payload)
+
+## 請求限時活動狀態（DAY-079）
+func request_event_status() -> void:
+	NetworkManager.send_message("get_event_status", {})

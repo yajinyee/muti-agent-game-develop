@@ -495,6 +495,16 @@ func main() {
 		}
 	})
 
+	// GET /event — 取得當前限時活動狀態（DAY-079）
+	mux.HandleFunc("/event", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.Event.GetSnapshot()
+		if err := json.NewEncoder(w).Encode(snap); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// GET /vip — 取得 VIP 等級資訊（DAY-078）
 	mux.HandleFunc("/vip", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

@@ -19,6 +19,7 @@ const GuildPanelScript = preload("res://scripts/ui/GuildPanel.gd")
 const GuildWarPanelScript = preload("res://scripts/ui/GuildWarPanel.gd")
 const DailyBossPanelScript = preload("res://scripts/ui/DailyBossPanel.gd")
 const VIPPanelScript = preload("res://scripts/ui/VIPPanel.gd")
+const EventPanelScript = preload("res://scripts/ui/EventPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -170,6 +171,7 @@ func _ready() -> void:
 	_init_guild_war_panel()   # 公會戰面板（DAY-076）
 	_init_daily_boss_panel()  # 每日 BOSS 挑戰面板（DAY-077）
 	_init_vip_panel()         # VIP 等級面板（DAY-078）
+	_init_event_panel()       # 限時活動面板（DAY-079）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1687,3 +1689,16 @@ func _init_vip_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_vip_panel_node = panel
+
+## ── 限時活動面板（DAY-079）──────────────────────────────────────────────────
+var _event_panel_node = null
+
+## 初始化限時活動面板（DAY-079）
+## 位置：VIPPanel 右側（VIPPanel 在 x=1420，EventPanel 在 x=1456）
+func _init_event_panel() -> void:
+	var panel = EventPanelScript.new()
+	panel.position = Vector2(1456, 4)
+	panel.z_index = 10
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_event_panel_node = panel

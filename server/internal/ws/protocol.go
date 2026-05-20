@@ -46,6 +46,8 @@ const (
 	// VIP 等級系統（DAY-078）
 	MsgGetVIPStatus      MessageType = "get_vip_status"       // 查詢 VIP 狀態
 	MsgClaimVIPWeekly    MessageType = "claim_vip_weekly"     // 領取 VIP 週獎勵
+	// 限時活動系統（DAY-079）
+	MsgGetEventStatus    MessageType = "get_event_status"     // 查詢限時活動狀態
 )
 
 // Server → Client
@@ -93,6 +95,8 @@ const (
 	MsgVIPUpdate         MessageType = "vip_update"          // VIP 狀態更新
 	MsgVIPLevelUp        MessageType = "vip_level_up"        // VIP 升級通知
 	MsgVIPWeeklyClaimed  MessageType = "vip_weekly_claimed"  // VIP 週獎勵領取通知
+	// 限時活動系統（DAY-079）
+	MsgEventUpdate       MessageType = "event_update"        // 限時活動狀態更新
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -802,4 +806,22 @@ type VIPWeeklyClaimedPayload struct {
 	TierName   string `json:"tier_name"`
 	Coins      int    `json:"coins"`
 	NewBalance int    `json:"new_balance"`
+}
+
+// ---- 限時活動系統（DAY-079）----
+
+// EventUpdatePayload 限時活動狀態更新（Server → Client）
+// 在玩家加入、活動切換時發送
+type EventUpdatePayload struct {
+	Type          string  `json:"type"`
+	Name          string  `json:"name"`
+	Description   string  `json:"description"`
+	Icon          string  `json:"icon"`
+	Color         string  `json:"color"`
+	IsActive      bool    `json:"is_active"`
+	EndAt         int64   `json:"end_at"`    // Unix ms
+	TimeLeft      float64 `json:"time_left"` // 秒
+	RewardMult    float64 `json:"reward_mult"`
+	SpawnMult     float64 `json:"spawn_mult"`
+	KillChanceAdd float64 `json:"kill_chance_add"`
 }

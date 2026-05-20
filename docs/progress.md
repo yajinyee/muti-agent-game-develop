@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-078 VIP 等級系統）
+## 最後更新：2026-05-20（DAY-079 限時活動系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-078 更新（自主觸發）：** VIP 等級系統（VIP Tier System）✅
+- **DAY-079 更新（自主觸發）：** 限時活動系統（Limited Time Event System）✅
+  - `server/internal/game/event/event.go`：活動管理器（3 種活動：黃金時段/魚群爆發/幸運時刻，30 分鐘輪換）
+  - `server/internal/game/event/event_test.go`：14 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgGetEventStatus`（Client→Server）+ `MsgEventUpdate`（Server→Client）+ `EventUpdatePayload`
+  - `server/internal/game/game.go`：`Event *event.Manager` 欄位 + 整合初始化 + `handleGetEventStatus` handler + 每 30 秒 Tick + 獎勵套用活動倍率
+  - `server/internal/game/event_handler.go`：`sendEventUpdate()`/`handleGetEventStatus()`/`tickAndBroadcastEvent()`
+  - `server/cmd/gameserver/main.go`：`/event` HTTP 端點（GET，回傳當前活動狀態）
+  - `client/chiikawa-pixel/scripts/ui/EventPanel.gd`：限時活動面板（活動圖示/名稱/倒數計時/效果說明/開始彈窗）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`event_updated` 訊號 + handler + `request_event_status()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 EventPanel（`_init_event_panel()`，位置 x=1456）
+  - 3 種活動：黃金時段（獎勵×1.5）/魚群爆發（目標×2）/幸運時刻（擊破率+20%）
+  - 輪換順序：黃金時段→無活動→魚群爆發→無活動→幸運時刻→無活動（每 30 分鐘一槽）
+  - 活動效果即時套用到獎勵計算（finalReward = reward × eventRewardMult）
+  - build/vet/test 全部通過（14/14 event 測試）
+  - **業界依據：** 限時活動是 2026 年捕魚機標配新鮮感機制，讓玩家每次登入都有新內容
+
+
   - `server/internal/game/vip/vip.go`：VIP 管理器（5 個等級：青銅/白銀/黃金/白金/鑽石，累積消費解鎖，不重置）
   - `server/internal/game/vip/vip_test.go`：15 個單元測試全部通過
   - `server/internal/ws/protocol.go`：`MsgGetVIPStatus`/`MsgClaimVIPWeekly`（Client→Server）+ `MsgVIPUpdate`/`MsgVIPLevelUp`/`MsgVIPWeeklyClaimed`（Server→Client）+ 對應 Payload

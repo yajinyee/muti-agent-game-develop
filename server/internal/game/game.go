@@ -16,6 +16,7 @@ import (
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/dailyboss"
+	"digital-twin/server/internal/game/event"
 	"digital-twin/server/internal/game/friend"
 	"digital-twin/server/internal/game/guild"
 	"digital-twin/server/internal/game/guildwar"
@@ -53,6 +54,7 @@ type Game struct {
 	GuildWar    *guildwar.Manager   // 公會戰管理器（DAY-076）
 	DailyBoss   *dailyboss.Manager  // 每日 BOSS 挑戰管理器（DAY-077）
 	VIP         *vip.Manager        // VIP 等級管理器（DAY-078）
+	Event       *event.Manager      // 限時活動管理器（DAY-079）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -70,6 +72,7 @@ type Game struct {
 	lastTournamentAt   time.Time  // 週賽排名廣播計時（每 30 秒一次，DAY-066）
 	lastGuildWarAt     time.Time  // 公會戰廣播計時（每 60 秒一次，DAY-076）
 	lastDailyBossAt    time.Time  // 每日 BOSS 廣播計時（每 30 秒一次，DAY-077）
+	lastEventAt        time.Time  // 限時活動廣播計時（每 30 秒一次，DAY-079）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -108,6 +111,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		GuildWar:           guildwar.New(),
 		DailyBoss:          dailyboss.New(),
 		VIP:                vip.New(),
+		Event:              event.New(30 * time.Minute),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -207,6 +211,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendGuildUpdate(pp)
 				// 發送 VIP 狀態（DAY-078）
 				g.sendVIPUpdate(pp)
+				// 發送限時活動狀態（DAY-079）
+				g.sendEventUpdate(pp)
 			}
 		}()
 	}
@@ -355,6 +361,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleGetVIPStatus(p)
 	case ws.MsgClaimVIPWeekly:
 		g.handleClaimVIPWeekly(p)
+	// 限時活動系統（DAY-079）
+	case ws.MsgGetEventStatus:
+		g.handleGetEventStatus(p)
 	}
 }
 
@@ -501,8 +510,13 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		go g.updateMissionProgress(p.ID, mission.MissionCombo, 1)
 	}
 
-	// 發放獎勵
-	rewardUnlocks := p.AddReward(result.Reward)
+	// 發放獎勵（套用限時活動倍率，DAY-079）
+	eventRewardMult := g.Event.GetRewardMult()
+	finalReward := result.Reward
+	if eventRewardMult > 1.0 {
+		finalReward = int(float64(result.Reward) * eventRewardMult)
+	}
+	rewardUnlocks := p.AddReward(finalReward)
 	killUnlocks := p.AddKill()
 
 	// 埋點：擊破事件
@@ -566,7 +580,7 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			InstanceID: t.InstanceID,
 			DefID:      t.DefID,
 			Multiplier: result.Multiplier,
-			Reward:     result.Reward,
+			Reward:     finalReward, // 套用活動倍率後的獎勵（DAY-079）
 			LaborGain:  result.LaborGain,
 			KillerID:   p.ID,
 			Quality:    string(t.Quality),
@@ -828,6 +842,11 @@ func (g *Game) updateNormalPlay() {
 	if shouldBroadcastDailyBoss {
 		g.lastDailyBossAt = now
 	}
+	// 限時活動廣播（每 30 秒，DAY-079）
+	shouldBroadcastEvent := now.Sub(g.lastEventAt) >= 30*time.Second
+	if shouldBroadcastEvent {
+		g.lastEventAt = now
+	}
 	g.mu.Unlock()
 
 	if shouldBroadcastLeaderboard {
@@ -851,6 +870,10 @@ func (g *Game) updateNormalPlay() {
 	// 每日 BOSS 廣播（每 30 秒，DAY-077）
 	if shouldBroadcastDailyBoss {
 		go g.broadcastDailyBoss()
+	}
+	// 限時活動 Tick + 廣播（每 30 秒，DAY-079）
+	if shouldBroadcastEvent {
+		go g.tickAndBroadcastEvent()
 	}
 }
 
