@@ -104,6 +104,9 @@ type TargetSpawnPayload struct {
 	Lifetime   float64 `json:"lifetime"`
 	Behavior   string  `json:"behavior"`
 	Multiplier float64 `json:"multiplier"` // 目標倍率（Client 顯示用）
+	// 品質等級（DAY-070）
+	Quality      string `json:"quality"`       // "normal"/"rare"/"epic"/"legendary"
+	QualityColor string `json:"quality_color"` // 光暈顏色（hex，空字串=無光暈）
 }
 
 // TargetUpdatePayload 目標狀態更新

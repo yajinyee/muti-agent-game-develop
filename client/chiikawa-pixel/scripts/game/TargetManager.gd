@@ -422,12 +422,17 @@ func _on_target_spawned(data: Dictionary) -> void:
 	# 讓目標物出現更有存在感，而不是突然冒出來
 	var target_type = data.get("type", "basic")
 	var multiplier = data.get("multiplier", 0.0)
+	var quality = data.get("quality", "normal")
 	node.scale = Vector2.ZERO
 	var spawn_tween = node.create_tween()
 
 	if target_type == "boss":
 		# BOSS：慢速放大（0.4s），更有威壓感
 		spawn_tween.tween_property(node, "scale", Vector2(1.0, 1.0), 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
+	elif quality == "legendary":
+		# 傳說品質：誇張彈入（0.25s）+ 過衝（1.3x → 1.0x）
+		spawn_tween.tween_property(node, "scale", Vector2(1.3, 1.3), 0.25).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+		spawn_tween.tween_property(node, "scale", Vector2(1.0, 1.0), 0.1)
 	elif multiplier >= 30.0:
 		# 高倍率特殊目標（30x+）：彈入 + 輕微過衝（1.15x → 1.0x）
 		spawn_tween.tween_property(node, "scale", Vector2(1.15, 1.15), 0.18).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
@@ -559,6 +564,12 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	# 讓玩家一眼識別高價值目標，增加遊戲爽感
 	if multiplier >= 30.0 and target_type != "boss":
 		_add_high_value_glow(container, multiplier)
+
+	# 品質光暈效果（DAY-070：rare/epic/legendary 有對應顏色光暈）
+	var quality = data.get("quality", "normal")
+	var quality_color_hex = data.get("quality_color", "")
+	if quality != "normal" and quality_color_hex != "" and target_type != "boss":
+		_add_quality_glow(container, quality, quality_color_hex)
 
 	# 游泳動畫：輕微上下搖擺 + 旋轉傾斜（讓目標物有生命感）
 	# T103/T104 已有旋轉搖晃，不再加上下搖擺
@@ -701,6 +712,12 @@ func _play_kill_effect(node: Node2D, data: Dictionary) -> void:
 
 	# 使用 HitEffect 系統（取代舊的 _spawn_death_particles）
 	HitEffect.spawn_kill(kill_pos, multiplier)
+
+	# legendary 品質擊破：額外全畫面閃光（讓玩家感受到「這個很值」）
+	var quality = data.get("quality", "normal")
+	if quality == "legendary":
+		# 觸發大獎等級特效（金色閃光 + 震動）
+		HitEffect.spawn_big_win(kill_pos, max(multiplier, 20.0))
 
 	# 震動（依倍率）
 	var trauma = clamp(0.2 + multiplier * 0.005, 0.2, 0.6)
@@ -1115,3 +1132,72 @@ func _add_high_value_glow(container: Node2D, multiplier: float) -> void:
 		var scale_tween = glow.create_tween().set_loops()
 		scale_tween.tween_property(glow, "scale", Vector2(1.15, 1.15), pulse_speed * 0.8).set_ease(Tween.EASE_IN_OUT)
 		scale_tween.tween_property(glow, "scale", Vector2(0.9, 0.9), pulse_speed * 0.8).set_ease(Tween.EASE_IN_OUT)
+
+## 品質光暈效果（DAY-070）
+## rare=藍色，epic=紫色，legendary=金色
+## 品質光暈疊加在高倍率光暈之上，讓玩家一眼識別稀有目標
+func _add_quality_glow(container: Node2D, quality: String, color_hex: String) -> void:
+	var glow_color: Color
+	var glow_size: float
+	var pulse_speed: float
+	var badge_text: String
+
+	match quality:
+		"rare":
+			glow_color = Color(0.267, 0.533, 1.0, 0.30)  # #4488FF 藍色
+			glow_size = 56.0
+			pulse_speed = 0.8
+			badge_text = "★"
+		"epic":
+			glow_color = Color(0.667, 0.267, 1.0, 0.35)  # #AA44FF 紫色
+			glow_size = 60.0
+			pulse_speed = 0.6
+			badge_text = "◆"
+		"legendary":
+			glow_color = Color(1.0, 0.843, 0.0, 0.45)    # #FFD700 金色
+			glow_size = 68.0
+			pulse_speed = 0.4
+			badge_text = "♛"
+		_:
+			return  # normal 不加光暈
+
+	# 品質光暈（外圈，比高倍率光暈更大）
+	var quality_glow = ColorRect.new()
+	quality_glow.name = "QualityGlow"
+	quality_glow.size = Vector2(glow_size, glow_size)
+	quality_glow.position = Vector2(-glow_size / 2.0, -glow_size / 2.0)
+	quality_glow.color = glow_color
+	quality_glow.z_index = -2  # 在高倍率光暈後面
+	container.add_child(quality_glow)
+	container.move_child(quality_glow, 0)  # 移到最底層
+
+	# 脈動動畫
+	var glow_tween = quality_glow.create_tween().set_loops()
+	glow_tween.tween_property(quality_glow, "modulate:a", 0.4, pulse_speed).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	glow_tween.tween_property(quality_glow, "modulate:a", 1.0, pulse_speed).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+	# legendary 額外：旋轉光暈（更有傳說感）
+	if quality == "legendary":
+		var rot_tween = quality_glow.create_tween().set_loops()
+		rot_tween.tween_property(quality_glow, "rotation_degrees", 360.0, 3.0).set_trans(Tween.TRANS_LINEAR)
+
+	# 品質徽章（右上角小標記）
+	if _cached_pixel_font != null:
+		var badge = Label.new()
+		badge.name = "QualityBadge"
+		badge.text = badge_text
+		badge.add_theme_font_override("font", _cached_pixel_font)
+		badge.add_theme_font_size_override("font_size", 10)
+		match quality:
+			"rare":
+				badge.add_theme_color_override("font_color", Color(0.4, 0.7, 1.0))
+			"epic":
+				badge.add_theme_color_override("font_color", Color(0.8, 0.4, 1.0))
+			"legendary":
+				badge.add_theme_color_override("font_color", Color(1.0, 0.9, 0.0))
+		badge.position = Vector2(16, -44)  # 右上角，倍率標籤旁邊
+		container.add_child(badge)
+
+	# legendary 進場音效（讓玩家注意到傳說品質目標出現）
+	if quality == "legendary":
+		AudioManager.play_sfx(AudioManager.SFX.COIN_DROP)

@@ -9,6 +9,48 @@ import (
 	"digital-twin/server/internal/data"
 )
 
+// Quality 目標品質等級（DAY-070）
+type Quality string
+
+const (
+	QualityNormal    Quality = "normal"    // 普通（70%）— 無加成
+	QualityRare      Quality = "rare"      // 稀有（20%）— 倍率 +20%，藍色光暈
+	QualityEpic      Quality = "epic"      // 史詩（8%）— 倍率 +50%，紫色光暈
+	QualityLegendary Quality = "legendary" // 傳說（2%）— 倍率 +100%，金色光暈
+)
+
+// QualityMultiplierBonus 品質倍率加成
+var QualityMultiplierBonus = map[Quality]float64{
+	QualityNormal:    1.0,
+	QualityRare:      1.2,
+	QualityEpic:      1.5,
+	QualityLegendary: 2.0,
+}
+
+// QualityColor 品質顏色（Client 端光暈顏色）
+var QualityColor = map[Quality]string{
+	QualityNormal:    "",        // 無光暈
+	QualityRare:      "#4488FF", // 藍色
+	QualityEpic:      "#AA44FF", // 紫色
+	QualityLegendary: "#FFD700", // 金色
+}
+
+// rollQuality 隨機決定品質等級
+// 普通 70%，稀有 20%，史詩 8%，傳說 2%
+func rollQuality() Quality {
+	r := rand.Intn(100)
+	switch {
+	case r < 70:
+		return QualityNormal
+	case r < 90:
+		return QualityRare
+	case r < 98:
+		return QualityEpic
+	default:
+		return QualityLegendary
+	}
+}
+
 // Target 遊戲中的目標物實例
 type Target struct {
 	InstanceID  string
@@ -24,6 +66,9 @@ type Target struct {
 	IsAlive     bool
 	Phase       int // BOSS 用：0=Phase1, 1=Phase2
 	IsFleeing   bool // 寶箱怪逃跑狀態
+	// 品質等級（DAY-070）
+	Quality     Quality
+	QualityColor string
 }
 
 // NewTarget 建立新目標實例
@@ -39,19 +84,46 @@ func NewTarget(instanceID string, def *data.TargetDef, x, y float64) *Target {
 		}
 	}
 
+	// 品質等級（DAY-070）：BOSS 和特殊目標固定 Legendary，普通目標隨機
+	quality := QualityNormal
+	if def.Type == data.TargetTypeBoss {
+		quality = QualityLegendary
+	} else if def.Type == data.TargetTypeSpecial {
+		// 特殊目標有更高機率出現高品質
+		r := rand.Intn(100)
+		switch {
+		case r < 40:
+			quality = QualityNormal
+		case r < 70:
+			quality = QualityRare
+		case r < 90:
+			quality = QualityEpic
+		default:
+			quality = QualityLegendary
+		}
+	} else {
+		quality = rollQuality()
+	}
+
+	// 套用品質倍率加成
+	qualityBonus := QualityMultiplierBonus[quality]
+	multiplier = multiplier * qualityBonus
+
 	return &Target{
-		InstanceID: instanceID,
-		DefID:      def.ID,
-		Def:        def,
-		HP:         def.HP,
-		MaxHP:      def.HP,
-		HitCount:   0,
-		Multiplier: multiplier,
-		X:          x,
-		Y:          y,
-		SpawnedAt:  time.Now(),
-		IsAlive:    true,
-		Phase:      0,
+		InstanceID:   instanceID,
+		DefID:        def.ID,
+		Def:          def,
+		HP:           def.HP,
+		MaxHP:        def.HP,
+		HitCount:     0,
+		Multiplier:   multiplier,
+		X:            x,
+		Y:            y,
+		SpawnedAt:    time.Now(),
+		IsAlive:      true,
+		Phase:        0,
+		Quality:      quality,
+		QualityColor: QualityColor[quality],
 	}
 }
 

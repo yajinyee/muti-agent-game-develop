@@ -118,7 +118,8 @@ func TestPickTargetDef_LowBetLevel(t *testing.T) {
 	}
 }
 
-// TestNewTarget_MeteorMultiplier 流星倍率應在 20-50 範圍內
+// TestNewTarget_MeteorMultiplier 流星倍率應在 20-100 範圍內
+// DAY-070 品質系統：基礎 20-50x，Legendary 品質加成 2.0x → 最高 100x
 func TestNewTarget_MeteorMultiplier(t *testing.T) {
 	def := data.Targets["T103"]
 	if def == nil {
@@ -127,8 +128,10 @@ func TestNewTarget_MeteorMultiplier(t *testing.T) {
 
 	for i := 0; i < 1000; i++ {
 		target := NewTarget("test-id", def, 100, 100)
-		if target.Multiplier < 20 || target.Multiplier > 50 {
-			t.Errorf("T103 multiplier = %.0f, expected 20-50", target.Multiplier)
+		// 基礎倍率 20-50，品質加成最高 2.0x（Legendary），所以上限 100
+		maxExpected := def.MultiplierMax * QualityMultiplierBonus[QualityLegendary]
+		if target.Multiplier < float64(def.MultiplierMin) || target.Multiplier > maxExpected {
+			t.Errorf("T103 multiplier = %.0f, expected %.0f-%.0f", target.Multiplier, float64(def.MultiplierMin), maxExpected)
 		}
 	}
 }

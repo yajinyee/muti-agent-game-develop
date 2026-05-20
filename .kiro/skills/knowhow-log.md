@@ -2695,3 +2695,16 @@ contribution_per_shot = betCost × 0.005 × level_share
   }
   ```
 - **教訓：** Go 的封裝原則：跨套件操作要透過方法，不要暴露內部狀態
+
+## 133. 品質系統測試更新原則（2026-05-20 DAY-070）
+- **問題：** DAY-070 加入品質系統後，T103 流星倍率上限從 50x 變成 100x（Legendary 2.0x 加成），但測試仍期望 20-50
+- **根本原因：** 新功能（品質加成）改變了現有函數的輸出範圍，但測試沒有同步更新
+- **修復方式：** 測試改用動態計算上限：`maxExpected := def.MultiplierMax * QualityMultiplierBonus[QualityLegendary]`
+- **教訓：** 加入乘數系統時，所有依賴「固定範圍」的測試都要同步更新，改用動態計算而非硬編碼數值
+
+## 134. GDScript 品質光暈系統設計（2026-05-20 DAY-070）
+- **設計原則：** 品質光暈要疊加在高倍率光暈之上（z_index=-2 vs -1），形成視覺層次
+- **旋轉光暈技巧：** legendary 品質用 `tween_property(glow, "rotation_degrees", 360.0, 3.0)` 做持續旋轉，增加傳說感
+- **徽章位置：** 右上角 (16, -44)，不遮擋倍率標籤（倍率標籤在正上方）
+- **進場音效觸發時機：** legendary 品質在 `_add_quality_glow` 內觸發，不在 `_on_target_spawned` 觸發（避免重複）
+- **教訓：** 品質系統的視覺層次要清晰：品質光暈（外圈）> 高倍率光暈（中圈）> Sprite（核心）
