@@ -35,6 +35,9 @@ signal activity_feed_event(event_data: Dictionary)          # 動態牆新事件
 signal activity_feed_history(history_data: Dictionary)      # 動態牆歷史（DAY-112）
 signal roulette_started(roulette_data: Dictionary)          # 雙層輪盤開始（DAY-113）
 signal roulette_result(result_data: Dictionary)             # 雙層輪盤結果（DAY-113）
+signal buy_bonus_status(status_data: Dictionary)            # Buy Bonus 狀態（DAY-114）
+signal buy_bonus_success(success_data: Dictionary)          # Buy Bonus 購買成功（DAY-114）
+signal buy_bonus_error(error_data: Dictionary)              # Buy Bonus 購買失敗（DAY-114）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -213,6 +216,13 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_roulette_start(payload)
 		"roulette_result":
 			_handle_roulette_result(payload)
+		# Buy Bonus 系統（DAY-114）
+		"buy_bonus_success":
+			emit_signal("buy_bonus_success", payload)
+		"buy_bonus_error":
+			emit_signal("buy_bonus_error", payload)
+		"buy_bonus_status":
+			emit_signal("buy_bonus_status", payload)
 		"title_unlocked":
 			_handle_title_unlocked(payload)
 		"skin_update":

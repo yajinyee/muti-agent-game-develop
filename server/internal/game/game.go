@@ -540,6 +540,11 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 成就動態牆系統（DAY-112）
 	case ws.MsgGetActivityFeed:
 		g.handleGetActivityFeed(p)
+	// Buy Bonus 系統（DAY-114）
+	case ws.MsgBuyBonus:
+		g.handleBuyBonus(p, msg)
+	case ws.MsgGetBuyBonusStatus:
+		g.handleGetBuyBonusStatus(p)
 	}
 }
 

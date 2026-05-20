@@ -79,6 +79,9 @@ const (
 	MsgGetActivityFeed   MessageType = "get_activity_feed"   // 查詢最近動態（Client→Server）
 	// 雙層倍率輪盤系統（DAY-113）
 	MsgSpinRoulette      MessageType = "spin_roulette"       // 玩家手動停止輪盤（Client→Server）
+	// Buy Bonus 系統（DAY-114）
+	MsgBuyBonus          MessageType = "buy_bonus"           // 購買 Bonus 觸發（Client→Server）
+	MsgGetBuyBonusStatus MessageType = "get_buy_bonus_status" // 查詢今日購買狀態（Client→Server）
 )
 
 // Server → Client
@@ -224,6 +227,10 @@ const (
 	// 雙層倍率輪盤系統（DAY-113）
 	MsgRouletteStart    MessageType = "roulette_start"    // 輪盤開始（Server→Client，廣播給所有玩家）
 	MsgRouletteResult   MessageType = "roulette_result"   // 輪盤結果（Server→Client，廣播給所有玩家）
+	// Buy Bonus 系統（DAY-114）
+	MsgBuyBonusSuccess  MessageType = "buy_bonus_success"  // 購買成功，Bonus 即將開始（Server→Client）
+	MsgBuyBonusError    MessageType = "buy_bonus_error"    // 購買失敗（Server→Client）
+	MsgBuyBonusStatus   MessageType = "buy_bonus_status"   // 今日購買狀態（Server→Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1861,4 +1868,38 @@ type RouletteResultPayload struct {
 	IsJackpot   bool                `json:"is_jackpot"`   // ≥500x，觸發全畫面特效
 	IsMegaWin   bool                `json:"is_mega_win"`  // ≥100x，觸發大獎特效
 	IsSelf      bool                `json:"is_self"`      // 是否為自己觸發（Client 端標記）
+}
+
+// ---- Buy Bonus 系統（DAY-114）----
+
+// BuyBonusPayload 購買 Bonus 請求（Client → Server）
+type BuyBonusPayload struct {
+	BonusType string `json:"bonus_type"` // "standard"（標準）或 "tnt"（TNT，更貴更強）
+}
+
+// BuyBonusSuccessPayload 購買成功通知（Server → Client）
+type BuyBonusSuccessPayload struct {
+	BonusType   string `json:"bonus_type"`   // "standard" / "tnt"
+	Cost        int    `json:"cost"`         // 實際扣除金幣
+	NewBalance  int    `json:"new_balance"`  // 購買後餘額
+	DailyLeft   int    `json:"daily_left"`   // 今日剩餘購買次數
+	MultBonus   float64 `json:"mult_bonus"`  // 本次 Bonus 的倍率加成（TNT=1.5x）
+}
+
+// BuyBonusErrorPayload 購買失敗通知（Server → Client）
+type BuyBonusErrorPayload struct {
+	Reason  string `json:"reason"`  // "insufficient_coins" / "daily_limit" / "game_busy"
+	Message string `json:"message"` // 顯示給玩家的訊息
+	Cost    int    `json:"cost"`    // 需要的金幣數
+	Balance int    `json:"balance"` // 當前餘額
+}
+
+// BuyBonusStatusPayload 今日購買狀態（Server → Client）
+type BuyBonusStatusPayload struct {
+	DailyLimit    int  `json:"daily_limit"`    // 每日上限（3次）
+	DailyUsed     int  `json:"daily_used"`     // 今日已購買次數
+	DailyLeft     int  `json:"daily_left"`     // 今日剩餘次數
+	StandardCost  int  `json:"standard_cost"`  // 標準 Bonus 費用
+	TNTCost       int  `json:"tnt_cost"`       // TNT Bonus 費用
+	CanBuy        bool `json:"can_buy"`        // 是否可以購買（未達上限且遊戲狀態正常）
 }

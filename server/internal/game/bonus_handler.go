@@ -177,6 +177,14 @@ func (g *Game) endBonusGame() {
 			log.Printf("[SuperBonus] Player %s combo=%d superMult=%.1fx finalReward=%d",
 				p.ID, p.BonusCombo, superMult, reward)
 		}
+		// Buy Bonus TNT 倍率加成（DAY-114）
+		tntMult := g.getBuyBonusTNTMult(playerID)
+		if tntMult > 1.0 {
+			reward = int(float64(reward) * tntMult)
+			multiplier *= tntMult
+			log.Printf("[BuyBonus] Player %s TNT mult=%.1fx finalReward=%d",
+				playerID, tntMult, reward)
+		}
 
 		p.AddReward(reward)
 		p.ResetLaborValue()

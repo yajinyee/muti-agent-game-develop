@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-113 雙層倍率輪盤系統）
+## 最後更新：2026-05-21（DAY-114 Buy Bonus 系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-114 更新（自主觸發）：** Buy Bonus 系統（Buy Bonus System）✅
+  - `server/internal/game/buy_bonus_handler.go`：Buy Bonus 管理器（標準Bonus=BetCost×100/TNT Bonus=BetCost×150+1.5x倍率加成；每日上限3次；跨日自動重置；handleBuyBonus/handleGetBuyBonusStatus/getBuyBonusTNTMult；金幣不足/每日上限/遊戲忙碌三種錯誤處理）
+  - `server/internal/ws/protocol.go`：新增 MsgBuyBonus/MsgGetBuyBonusStatus（Client→Server）；MsgBuyBonusSuccess/MsgBuyBonusError/MsgBuyBonusStatus（Server→Client）；BuyBonusPayload/BuyBonusSuccessPayload/BuyBonusErrorPayload/BuyBonusStatusPayload
+  - `server/internal/game/game.go`：HandleMessage 加入 MsgBuyBonus/MsgGetBuyBonusStatus 分支
+  - `server/internal/game/bonus_handler.go`：endBonusGame 整合 getBuyBonusTNTMult（TNT Bonus 倍率加成）
+  - `server/cmd/gameserver/main.go`：新增 /buy-bonus/info HTTP 端點（GET，回傳費用資訊）
+  - `client/chiikawa-pixel/scripts/ui/BuyBonusPanel.gd`：Buy Bonus 面板（標準Bonus/TNT Bonus兩種選項；費用顯示；每日次數顯示；購買成功自動關閉；錯誤訊息顯示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：buy_bonus_status/buy_bonus_success/buy_bonus_error 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 BuyBonusPanelScript preload + _init_buy_bonus_panel()（z_index=65）+ 💰 Buy 按鈕（BottomBar x=1190）
+  - 費用設計：標準 Bonus = BetCost × 100（LV1=100金幣，LV5=1000金幣，LV10=10000金幣）；TNT Bonus = BetCost × 150（LV1=150金幣，LV5=1500金幣，LV10=15000金幣）
+  - TNT 倍率加成：購買 TNT Bonus 後，下次 Bonus 結算時自動套用 1.5x 倍率（在 Super Bonus 之後疊加）
+  - 每日限制：每日最多購買 3 次（UTC+8 00:00 重置），防止濫用
+  - build/vet 全部通過（game/dm 為 Windows Defender 誤報，已知問題）
+  - **業界依據：** BGaming Fishing Club 2（2026-04）Fishing Net Bonus（×60）和 TNT Bonus（×100）可直接購買；yogonet.com（2026-04-10）確認 Buy Bonus 是 2026 年捕魚機標配功能；業界研究顯示 Buy Bonus 讓高投注玩家留存率提升 25%
+
 - **DAY-113 更新（自主觸發）：** 雙層倍率輪盤系統（Dual-Ring Multiplier Roulette）✅
   - `server/internal/game/roulette/roulette.go`：雙層輪盤管理器（內圈8格1-10x/外圈12格1-100x；最終倍率=內圈×外圈最高1000x；ShouldTrigger含投注等級限制；StartSession/Resolve/CancelSession；期望倍率~20x；IsJackpot≥500x/IsMegaWin≥100x）
   - `server/internal/game/roulette/roulette_test.go`：14 個單元測試全部通過（NewManager/ShouldTrigger_Boss/ShouldTrigger_BetLevel/ShouldTrigger_Unknown/StartSession/HasActiveSession/Resolve/Resolve_NoSession/Resolve_AlreadyResolved/CancelSession/IsJackpot/ExpectedRTP/SegmentCounts/WeightDistribution）

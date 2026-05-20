@@ -420,6 +420,22 @@ func main() {
 		}
 	})
 
+	// Buy Bonus 端點（DAY-114）
+	// GET /buy-bonus/info — 取得 Buy Bonus 費用資訊
+	mux.HandleFunc("/buy-bonus/info", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"daily_limit":          game.BuyBonusDailyLimit,
+			"standard_multiplier":  game.BuyBonusStandardMultiplier,
+			"tnt_multiplier":       game.BuyBonusTNTMultiplier,
+			"tnt_bonus_mult":       game.BuyBonusTNTBonusMult,
+			"description":          "花費 BetCost × 倍率 直接觸發 Bonus Game",
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 商店端點（DAY-094）
 	// GET /shop — 取得商店快照
 	mux.HandleFunc("/shop", func(w http.ResponseWriter, r *http.Request) {

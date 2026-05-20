@@ -27,6 +27,7 @@ const WheelPanelScript = preload("res://scripts/ui/WheelPanel.gd")
 const ChallengePanelScript = preload("res://scripts/ui/ChallengePanel.gd")
 const MissionStreakPanelScript = preload("res://scripts/ui/MissionStreakPanel.gd")
 const RoulettePanelScript = preload("res://scripts/ui/RoulettePanel.gd")
+const BuyBonusPanelScript = preload("res://scripts/ui/BuyBonusPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -200,6 +201,7 @@ func _ready() -> void:
 	_init_login_milestone_panel() # 登入里程碑面板（DAY-107）
 	_init_player_journey_panel()  # 玩家旅程儀表板（DAY-108）
 	_init_roulette_panel()        # 雙層倍率輪盤面板（DAY-113）
+	_init_buy_bonus_panel()       # Buy Bonus 面板（DAY-114）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2241,3 +2243,35 @@ func _init_roulette_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_roulette_panel_node = panel
+
+## ── Buy Bonus 面板（DAY-114）──────────────────────────────────────────────────
+var _buy_bonus_panel_node = null
+var _buy_bonus_btn: Button = null
+
+## 初始化 Buy Bonus 面板（DAY-114）
+## 位置：畫面中央（全螢幕覆蓋式彈窗，z_index=65）
+## 同時在 BottomBar 加入 Buy Bonus 按鈕
+func _init_buy_bonus_panel() -> void:
+	# 建立面板
+	var panel = BuyBonusPanelScript.new()
+	panel.position = Vector2(640, 360)
+	panel.z_index = 65
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_buy_bonus_panel_node = panel
+
+	# 在 BottomBar 加入 Buy Bonus 按鈕（Bonus 按鈕旁邊）
+	_buy_bonus_btn = Button.new()
+	_buy_bonus_btn.text = "💰 Buy"
+	_buy_bonus_btn.size = Vector2(70, 30)
+	_buy_bonus_btn.position = Vector2(1190, 4)
+	_buy_bonus_btn.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1))
+	if is_instance_valid(_pixel_font):
+		_buy_bonus_btn.add_theme_font_override("font", _pixel_font)
+		_buy_bonus_btn.add_theme_font_size_override("font_size", 12)
+	_buy_bonus_btn.pressed.connect(_on_buy_bonus_btn_pressed)
+	add_child(_buy_bonus_btn)
+
+func _on_buy_bonus_btn_pressed() -> void:
+	if is_instance_valid(_buy_bonus_panel_node):
+		_buy_bonus_panel_node.show_panel()
