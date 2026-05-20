@@ -28,6 +28,8 @@ signal spectator_left(spectator_data: Dictionary)  # 觀戰者離開通知（DAY
 signal tournament_updated(tournament_data: Dictionary) # 週賽排名更新（DAY-066）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
+signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
+signal season_level_up(level_data: Dictionary)         # 賽季等級升級（DAY-072）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -113,6 +115,10 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_title_unlocked(payload)
 		"skin_update":
 			_handle_skin_update(payload)
+		"season_update":
+			_handle_season_update(payload)
+		"season_level_up":
+			_handle_season_level_up(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -253,6 +259,14 @@ func _handle_title_unlocked(payload: Dictionary) -> void:
 ## 處理砲台外觀更新（DAY-071）
 func _handle_skin_update(payload: Dictionary) -> void:
 	emit_signal("skin_updated", payload)
+
+## 處理賽季通行證更新（DAY-072）
+func _handle_season_update(payload: Dictionary) -> void:
+	emit_signal("season_updated", payload)
+
+## 處理賽季等級升級（DAY-072）
+func _handle_season_level_up(payload: Dictionary) -> void:
+	emit_signal("season_level_up", payload)
 
 ## 取得目前角色顏色
 func get_character_color() -> Color:

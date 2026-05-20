@@ -212,6 +212,9 @@ func (g *Game) endBonusGame() {
 
 		// 週賽積分：完成 Bonus Game（DAY-066）
 		g.tournamentMgr.AddPoints(playerID, p.DisplayName, tournament.PointBonus, 0)
+		// 賽季積分同步（DAY-072）：Bonus 完成 = 20 分
+		newLevels := g.addSeasonPoints(playerID, 20)
+		g.checkSeasonLevelNotify(p, newLevels)
 	}
 
 	g.transitionState(state.StateBonusResult)

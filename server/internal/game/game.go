@@ -17,6 +17,7 @@ import (
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/jackpot"
 	"digital-twin/server/internal/game/mission"
+	"digital-twin/server/internal/game/season"
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
 	"digital-twin/server/internal/game/tournament"
@@ -41,6 +42,7 @@ type Game struct {
 	jackpotMgr  *jackpot.Manager    // Progressive Jackpot 管理器（DAY-048）
 	jackpotHist *jackpot.History    // Jackpot 中獎歷史（DAY-048e）
 	tournamentMgr *tournament.Tournament // 週賽管理器（DAY-066）
+	Season      *season.Manager     // 賽季通行證管理器（DAY-072）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -88,6 +90,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		jackpotMgr:         jackpot.NewManager(),
 		jackpotHist:        jackpot.NewHistory(10),
 		tournamentMgr:      tournament.New(),
+		Season:             season.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -167,11 +170,18 @@ func (g *Game) AddPlayer(playerID string) {
 		g.Players[playerID] = p
 		log.Printf("[Game] Player %s joined game %s", playerID, g.ID)
 
-		// 非同步發送任務列表 + 每日登入獎勵（連線後立即讓玩家看到）
+		// 非同步發送任務列表 + 每日登入獎勵 + 賽季快照（連線後立即讓玩家看到）
 		go func() {
 			time.Sleep(200 * time.Millisecond) // 等待連線穩定
 			g.sendMissionUpdate(playerID)
 			g.checkAndSendDailyBonus(playerID, savedState)
+			// 發送賽季通行證快照（DAY-072）
+			g.mu.RLock()
+			pp := g.Players[playerID]
+			g.mu.RUnlock()
+			if pp != nil {
+				g.sendSeasonUpdate(pp)
+			}
 		}()
 	}
 }
@@ -264,6 +274,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	case ws.MsgEquipSkin:
 		// 裝備砲台外觀（DAY-071）
 		g.handleEquipSkin(p, msg)
+	case ws.MsgClaimSeasonLevel:
+		// 領取賽季等級獎勵（DAY-072）
+		g.handleClaimSeasonLevel(p, msg)
 	}
 }
 
@@ -536,6 +549,13 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 
 	// 週賽積分：擊破目標（DAY-066）
 	g.tournamentMgr.AddPoints(p.ID, p.DisplayName, tournament.PointKill, result.Multiplier)
+	// 賽季積分同步（DAY-072）：擊破積分 = max(1, floor(multiplier))
+	killPts := int(result.Multiplier)
+	if killPts < 1 {
+		killPts = 1
+	}
+	newLevels := g.addSeasonPoints(p.ID, killPts)
+	g.checkSeasonLevelNotify(p, newLevels)
 }
 
 // handleLock 處理鎖定

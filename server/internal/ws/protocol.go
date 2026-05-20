@@ -23,6 +23,7 @@ const (
 	MsgSetTitle        MessageType = "set_title"          // 設定顯示稱號（DAY-068）
 	MsgBuySkin         MessageType = "buy_skin"           // 購買砲台外觀（DAY-071）
 	MsgEquipSkin       MessageType = "equip_skin"         // 裝備砲台外觀（DAY-071）
+	MsgClaimSeasonLevel MessageType = "claim_season_level" // 領取賽季等級獎勵（DAY-072）
 )
 
 // Server → Client
@@ -49,6 +50,8 @@ const (
 	MsgTournamentUpdate  MessageType = "tournament_update"  // 週賽排名更新（DAY-066）
 	MsgTournamentResult  MessageType = "tournament_result"  // 週賽結算通知（DAY-066）
 	MsgSkinUpdate        MessageType = "skin_update"        // 砲台外觀更新（DAY-071）
+	MsgSeasonUpdate      MessageType = "season_update"      // 賽季通行證更新（DAY-072）
+	MsgSeasonLevelUp     MessageType = "season_level_up"    // 賽季等級升級通知（DAY-072）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -408,4 +411,48 @@ type SkinUpdatePayload struct {
 	EquippedSkin string  `json:"equipped_skin"`
 	OwnedSkins  []string `json:"owned_skins"`
 	NewBalance  int      `json:"new_balance"` // 購買後的新餘額（0=裝備操作）
+}
+
+// ---- 賽季通行證系統（DAY-072）----
+
+// ClaimSeasonLevelPayload 領取賽季等級獎勵請求（Client → Server）
+type ClaimSeasonLevelPayload struct {
+	Level int `json:"level"` // 要領取的等級（1-10）
+}
+
+// SeasonUpdatePayload 賽季通行證更新廣播（Server → Client）
+// 在玩家加入、積分增加、領取獎勵時發送
+type SeasonUpdatePayload struct {
+	PlayerID     string              `json:"player_id"`
+	SeasonPoints int                 `json:"season_points"`
+	CurrentLevel int                 `json:"current_level"`
+	NextLevel    int                 `json:"next_level"`    // 0 = 已滿級
+	PointsToNext int                 `json:"points_to_next"`
+	Progress     float64             `json:"progress"`      // 0.0-1.0
+	Levels       []SeasonLevelStatus `json:"levels"`
+}
+
+// SeasonLevelStatus 賽季等級狀態（用於 SeasonUpdatePayload）
+type SeasonLevelStatus struct {
+	Level        int    `json:"level"`
+	PointsNeeded int    `json:"points_needed"`
+	CoinReward   int    `json:"coin_reward"`
+	SpecialType  string `json:"special_type"`  // "" / "skin" / "title"
+	SpecialID    string `json:"special_id"`
+	SpecialName  string `json:"special_name"`
+	Icon         string `json:"icon"`
+	Claimed      bool   `json:"claimed"`
+	Unlocked     bool   `json:"unlocked"`
+}
+
+// SeasonLevelUpPayload 賽季等級升級通知（Server → Client）
+// 當玩家成功領取等級獎勵時發送
+type SeasonLevelUpPayload struct {
+	PlayerID    string `json:"player_id"`
+	Level       int    `json:"level"`
+	CoinReward  int    `json:"coin_reward"`
+	NewBalance  int    `json:"new_balance"`
+	SpecialType string `json:"special_type"` // "" / "skin" / "title"
+	SpecialID   string `json:"special_id"`
+	SpecialName string `json:"special_name"`
 }

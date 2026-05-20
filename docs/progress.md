@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-071 砲台外觀皮膚系統）
+## 最後更新：2026-05-20（DAY-072 賽季通行證系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-072 更新（自主觸發）：** 賽季通行證系統（Season Pass）✅
+  - `server/internal/game/season/season.go`：賽季管理器（10 個等級，積分累積，等級 5 解鎖皮膚，等級 10 解鎖稱號）
+  - `server/internal/game/season/season_test.go`：13 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgClaimSeasonLevel`/`MsgSeasonUpdate`/`MsgSeasonLevelUp` + `ClaimSeasonLevelPayload`/`SeasonUpdatePayload`/`SeasonLevelUpPayload`/`SeasonLevelStatus`
+  - `server/internal/player/player.go`：`AddCoins()` 方法（不觸發成就，用於系統獎勵）
+  - `server/internal/game/game.go`：`Season *season.Manager` 欄位 + 整合初始化 + `AddPlayer` 發送賽季快照 + `MsgClaimSeasonLevel` handler
+  - `server/internal/game/season_handler.go`：`sendSeasonUpdate()`/`addSeasonPoints()`/`handleClaimSeasonLevel()`/`checkSeasonLevelNotify()`
+  - `server/internal/game/boss_handler.go`：BOSS 擊殺 +50 賽季積分
+  - `server/internal/game/bonus_handler.go`：Bonus 完成 +20 賽季積分
+  - `server/internal/game/game.go`：擊破目標 +max(1,floor(multiplier)) 賽季積分
+  - `client/chiikawa-pixel/scripts/ui/SeasonPanel.gd`：賽季通行證面板（進度條 + 10 個等級按鈕，可折疊）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`season_updated`/`season_level_up` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 SeasonPanel（`_init_season_panel()`，位置 x=1240）
+  - build/vet/test 全部通過
+  - **業界依據：** Fishing Frenzy Chapter 3（2026-05-14）確認賽季通行證是 2026 年捕魚機標配留存功能
+
 - **DAY-071 更新（自主觸發）：** 砲台外觀皮膚系統（Skin System）✅
   - `server/internal/ws/protocol.go`：`SkinDef` struct + `AvailableSkins`（4種：default/golden/sakura/rainbow）+ `MsgBuySkin`/`MsgEquipSkin`/`MsgSkinUpdate` + `BuySkinPayload`/`EquipSkinPayload`/`SkinUpdatePayload`
   - `server/internal/player/player.go`：`EquippedSkin`/`OwnedSkins` 欄位 + `BuySkin()`/`EquipSkin()`/`GetSkinInfo()` 方法 + `PlayerSnapshot` 加入外觀欄位

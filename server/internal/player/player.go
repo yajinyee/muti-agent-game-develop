@@ -193,6 +193,16 @@ func (p *Player) AddReward(amount int) []*achievement.AchievementUnlock {
 	return unlocks
 }
 
+// AddCoins 直接增加金幣（不觸發成就，用於系統獎勵如賽季通行證）（DAY-072）
+func (p *Player) AddCoins(amount int) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	p.Coins += amount
+	if p.Coins > p.MaxCoins {
+		p.MaxCoins = p.Coins
+	}
+}
+
 // AddLaborValue 增加勞動值，回傳是否觸發 Bonus
 func (p *Player) AddLaborValue(amount int) bool {
 	p.mu.Lock()
