@@ -1048,6 +1048,16 @@ func main() {
 		}
 	})
 
+	// GET /hall-of-fame — 取得全服名人堂記錄（DAY-110）
+	mux.HandleFunc("/hall-of-fame", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.GetHallOfFameSnapshot()
+		if err := json.NewEncoder(w).Encode(snap); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
 		Handler:      mux,

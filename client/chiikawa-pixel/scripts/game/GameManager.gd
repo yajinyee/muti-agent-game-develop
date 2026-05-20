@@ -100,6 +100,11 @@ signal daily_spin_result(result_data: Dictionary)      # 每日轉盤結果
 signal shop_updated(shop_data: Dictionary)             # 商店狀態更新
 signal shop_purchased(purchase_data: Dictionary)       # 購買成功通知
 signal shop_error(error_data: Dictionary)              # 購買失敗通知
+# 名人堂系統（DAY-110）
+signal hall_of_fame_updated(hall_data: Dictionary)     # 名人堂更新
+signal hall_of_fame_new_record(record_data: Dictionary) # 新記錄誕生廣播
+# 智慧推薦系統（DAY-110）
+signal recommendations_received(rec_data: Dictionary)  # 推薦結果
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -336,6 +341,14 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_festival_title_earned(payload)
 		"festival_error":
 			_handle_festival_error(payload)
+		# 名人堂系統（DAY-110）
+		"hall_of_fame_update":
+			_handle_hall_of_fame_update(payload)
+		"hall_of_fame_new_record":
+			_handle_hall_of_fame_new_record(payload)
+		# 智慧推薦系統（DAY-110）
+		"recommendations":
+			_handle_recommendations(payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")
@@ -890,3 +903,40 @@ func request_festival() -> void:
 ## 發送領取節日任務獎勵請求（DAY-109）
 func send_claim_festival_task(task_id: String) -> void:
 	NetworkManager.send_message("claim_festival_task", {"task_id": task_id})
+
+# ---- 名人堂系統（DAY-110）----
+
+## 處理名人堂更新（DAY-110）
+func _handle_hall_of_fame_update(payload: Dictionary) -> void:
+	emit_signal("hall_of_fame_updated", payload)
+
+## 處理新記錄誕生廣播（DAY-110）
+func _handle_hall_of_fame_new_record(payload: Dictionary) -> void:
+	var entry: Dictionary = payload.get("entry", {})
+	var holder: String = entry.get("display_name", "")
+	var label: String = entry.get("record_label", "")
+	print("[GameManager] Hall of Fame NEW RECORD! %s by %s" % [label, holder])
+	emit_signal("hall_of_fame_new_record", payload)
+	# 播放大獎音效
+	if AudioManager != null:
+		AudioManager.play_sfx("big_win")
+
+## 請求名人堂資料（DAY-110）
+func request_hall_of_fame() -> void:
+	NetworkManager.send_message("get_hall_of_fame", {})
+
+# ---- 智慧推薦系統（DAY-110）----
+
+## 處理推薦結果（DAY-110）
+func _handle_recommendations(payload: Dictionary) -> void:
+	var count: int = payload.get("recommendations", []).size()
+	print("[GameManager] Recommendations received: %d" % count)
+	emit_signal("recommendations_received", payload)
+
+## 請求智慧推薦（DAY-110）
+func request_recommendations() -> void:
+	NetworkManager.send_message("get_recommendations", {})
+
+## 發送投注等級切換（供推薦面板使用）
+func send_bet_change(bet_level: int) -> void:
+	NetworkManager.send_message("bet_change", {"bet_level": bet_level})

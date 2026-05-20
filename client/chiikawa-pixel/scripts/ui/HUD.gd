@@ -2147,3 +2147,72 @@ func show_festival_panel() -> void:
 	if is_instance_valid(_festival_panel_node):
 		GameManager.request_festival()
 		_festival_panel_node.show()
+
+# ---- 名人堂面板（DAY-110）----
+var _hall_of_fame_panel = null
+
+func _init_hall_of_fame_panel() -> void:
+	var HallOfFamePanelScript = load("res://scripts/ui/HallOfFamePanel.gd")
+	if HallOfFamePanelScript == null:
+		return
+	_hall_of_fame_panel = HallOfFamePanelScript.new()
+	add_child(_hall_of_fame_panel)
+
+	# 連接訊號
+	GameManager.hall_of_fame_updated.connect(func(data): 
+		if is_instance_valid(_hall_of_fame_panel):
+			_hall_of_fame_panel.update_records(data)
+	)
+	GameManager.hall_of_fame_new_record.connect(func(data):
+		if is_instance_valid(_hall_of_fame_panel):
+			_hall_of_fame_panel.show_new_record(data)
+	)
+
+	# 在 TopBar 加入名人堂按鈕
+	var top_bar = get_node_or_null("TopBar")
+	if is_instance_valid(top_bar):
+		var hof_btn = Button.new()
+		hof_btn.name = "HallOfFameButton"
+		hof_btn.text = "🏆"
+		hof_btn.custom_minimum_size = Vector2(36, 30)
+		hof_btn.position = Vector2(1100, 5)
+		hof_btn.pressed.connect(func():
+			if is_instance_valid(_hall_of_fame_panel):
+				_hall_of_fame_panel.show_panel()
+		)
+		top_bar.add_child(hof_btn)
+
+## 公開方法：顯示名人堂面板
+func show_hall_of_fame():
+	if is_instance_valid(_hall_of_fame_panel):
+		_hall_of_fame_panel.show_panel()
+
+# ---- 智慧推薦面板（DAY-110）----
+var _recommend_panel = null
+
+func _init_recommend_panel() -> void:
+	var RecommendPanelScript = load("res://scripts/ui/RecommendPanel.gd")
+	if RecommendPanelScript == null:
+		return
+	_recommend_panel = RecommendPanelScript.new()
+	add_child(_recommend_panel)
+
+	# 連接訊號
+	GameManager.recommendations_received.connect(func(data):
+		if is_instance_valid(_recommend_panel):
+			_recommend_panel.update_recommendations(data)
+	)
+
+	# 在 TopBar 加入推薦按鈕
+	var top_bar = get_node_or_null("TopBar")
+	if is_instance_valid(top_bar):
+		var rec_btn = Button.new()
+		rec_btn.name = "RecommendButton"
+		rec_btn.text = "💡"
+		rec_btn.custom_minimum_size = Vector2(36, 30)
+		rec_btn.position = Vector2(1140, 5)
+		rec_btn.pressed.connect(func():
+			if is_instance_valid(_recommend_panel):
+				_recommend_panel.show_panel()
+		)
+		top_bar.add_child(rec_btn)

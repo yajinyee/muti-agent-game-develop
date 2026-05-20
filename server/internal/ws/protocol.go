@@ -204,6 +204,13 @@ const (
 	MsgFestivalTaskClaimed  MessageType = "festival_task_claimed"  // 節日任務獎勵領取成功（Server → Client）
 	MsgFestivalTitleEarned  MessageType = "festival_title_earned"  // 節日稱號獲得通知（Server → Client）
 	MsgFestivalError        MessageType = "festival_error"         // 節日操作失敗（Server → Client）
+	// 名人堂系統（DAY-110）
+	MsgGetHallOfFame        MessageType = "get_hall_of_fame"       // 查詢名人堂（Client → Server）
+	MsgHallOfFameUpdate     MessageType = "hall_of_fame_update"    // 名人堂更新（Server → Client）
+	MsgHallOfFameNewRecord  MessageType = "hall_of_fame_new_record" // 新記錄誕生廣播（Server → Client）
+	// 智慧推薦系統（DAY-110）
+	MsgGetRecommendations   MessageType = "get_recommendations"    // 查詢推薦（Client → Server）
+	MsgRecommendations      MessageType = "recommendations"        // 推薦結果（Server → Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1688,4 +1695,53 @@ type FestivalTitleEarnedPayload struct {
 // FestivalErrorPayload 節日操作失敗（Server → Client）
 type FestivalErrorPayload struct {
 	Message string `json:"message"`
+}
+
+// ---- 名人堂系統（DAY-110）----
+
+// HallEntryPayload 名人堂條目（Server → Client）
+type HallEntryPayload struct {
+	PlayerID    string  `json:"player_id"`
+	DisplayName string  `json:"display_name"`
+	RecordType  string  `json:"record_type"`
+	RecordLabel string  `json:"record_label"` // 中文標籤
+	RecordIcon  string  `json:"record_icon"`  // 圖示
+	Value       float64 `json:"value"`
+	Description string  `json:"description"`
+	AchievedAt  int64   `json:"achieved_at_ms"`
+	BetLevel    int     `json:"bet_level"`
+	CharacterID int     `json:"character_id"`
+}
+
+// HallOfFameUpdatePayload 名人堂更新（Server → Client）
+type HallOfFameUpdatePayload struct {
+	Records   []HallEntryPayload `json:"records"`
+	UpdatedAt int64              `json:"updated_at_ms"`
+}
+
+// HallOfFameNewRecordPayload 新記錄誕生廣播（Server → Client）
+type HallOfFameNewRecordPayload struct {
+	Entry       HallEntryPayload `json:"entry"`
+	OldHolder   string           `json:"old_holder"`   // 舊記錄持有者名稱（空=首次記錄）
+	OldValue    float64          `json:"old_value"`    // 舊記錄數值（0=首次記錄）
+	IsFirstTime bool             `json:"is_first_time"` // 是否是首次建立此記錄
+}
+
+// ---- 智慧推薦系統（DAY-110）----
+
+// RecommendationPayload 單條推薦（Server → Client）
+type RecommendationPayload struct {
+	Type        string  `json:"type"`
+	Title       string  `json:"title"`
+	Description string  `json:"description"`
+	Icon        string  `json:"icon"`
+	Priority    int     `json:"priority"`
+	TargetBetLv int     `json:"target_bet_lv,omitempty"`
+	Confidence  float64 `json:"confidence"`
+}
+
+// RecommendationsPayload 推薦結果（Server → Client）
+type RecommendationsPayload struct {
+	Recommendations []RecommendationPayload `json:"recommendations"`
+	GeneratedAt     int64                   `json:"generated_at_ms"`
 }

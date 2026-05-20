@@ -245,6 +245,8 @@ func (g *Game) endBonusGame() {
 		go g.notifyGuildWarBonus(playerID)
 		// 節日任務：記錄 Bonus 完成（DAY-109）
 		go g.notifyFestivalBonus(p)
+		// 名人堂：Bonus 獎勵記錄（DAY-110）
+		go g.notifyHallOfFameBonus(p, reward)
 	}
 
 	g.transitionState(state.StateBonusResult)

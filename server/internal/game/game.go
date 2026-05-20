@@ -41,6 +41,7 @@ import (
 	"digital-twin/server/internal/game/wheel"
 	"digital-twin/server/internal/anticheat"
 	"digital-twin/server/internal/game/festival"
+	"digital-twin/server/internal/game/halloffame"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -84,6 +85,7 @@ type Game struct {
 	Announce      *announce.Manager      // 全服公告管理器（DAY-097）
 	AntiCheat     *anticheat.Manager     // 異常行為偵測管理器（DAY-105）
 	Festival      *festival.Manager      // 賽季節日活動管理器（DAY-109）
+	HallOfFame    *halloffame.Manager    // 全服名人堂管理器（DAY-110）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -159,6 +161,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Announce:           announce.NewManager(),
 		AntiCheat:          anticheat.New(),
 		Festival:           festival.New(),
+		HallOfFame:         halloffame.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -513,6 +516,12 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		if err := remarshal(msg.Payload, &payload); err == nil {
 			g.handleClaimFestivalTask(p, payload.TaskID)
 		}
+	// 名人堂系統（DAY-110）
+	case ws.MsgGetHallOfFame:
+		g.handleGetHallOfFame(p)
+	// 智慧推薦系統（DAY-110）
+	case ws.MsgGetRecommendations:
+		g.handleGetRecommendations(p)
 	}
 }
 
@@ -881,6 +890,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	g.notifyChallengeKillScore(p, finalReward)
 	// 節日任務：記錄擊破（DAY-109）
 	go g.notifyFestivalKill(p, t.DefID)
+	// 名人堂：倍率和金幣記錄（DAY-110）
+	go g.notifyHallOfFameKill(p, float64(t.Multiplier), finalReward)
 }
 
 // handleLock 處理鎖定

@@ -231,6 +231,8 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 	g.notifyChallengeBoss(p)
 	// 玩家統計：記錄 BOSS 擊殺（DAY-096）
 	g.notifyStatsBossKill(p)
+	// 名人堂：BOSS 擊殺記錄（DAY-110）
+	go g.notifyHallOfFameBossKill(p)
 	// 全服公告：BOSS 擊殺（DAY-097）
 	g.announceBossKill(p.DisplayName, "BOSS", result.Reward)
 
