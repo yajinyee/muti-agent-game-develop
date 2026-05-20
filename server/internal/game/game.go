@@ -147,6 +147,8 @@ func (g *Game) Start() {
 	log.Printf("[Game] %s started", g.ID)
 	// 恢復 Jackpot 池狀態（DAY-049d）
 	g.loadJackpotState()
+	// 啟動連擊超時檢查（DAY-083）
+	g.startStreakTicker()
 	go g.gameLoop()
 }
 
@@ -531,6 +533,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	finalReward := result.Reward
 	if eventRewardMult > 1.0 {
 		finalReward = int(float64(result.Reward) * eventRewardMult)
+	}
+	// 套用連擊倍率（DAY-083）
+	streakMult := g.notifyStreakKill(p)
+	if streakMult > 1.0 {
+		finalReward = int(float64(finalReward) * streakMult)
 	}
 	rewardUnlocks := p.AddReward(finalReward)
 	killUnlocks := p.AddKill()

@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-083 連擊系統）
+## 最後更新：2026-05-20（DAY-083 連擊系統 + DAY-082 推薦碼系統修正）
 
 ## 自我評估
 - **完成度：100%**
@@ -23,6 +23,18 @@
   - 3 秒無擊破自動重置，Server 每秒檢查
   - build/vet/test 全部通過（10/10 streak 測試）
   - **業界依據：** Fisch（2026-05-19）確認 Catch Streak 是 2026 年最新留存機制，增加緊張感和爽感
+
+- **DAY-082 更新（自主觸發）：** 推薦碼系統（Referral Code System）✅
+  - `server/internal/game/referral/referral.go`：推薦碼管理器（唯一碼生成，雙向獎勵，最多20人）
+  - `server/internal/game/referral/referral_test.go`：10 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgGetReferralInfo`/`MsgUseReferralCode`（Client→Server）+ `MsgReferralInfo`/`MsgReferralSuccess`/`MsgReferralError`（Server→Client）
+  - `server/internal/game/referral_handler.go`：推薦碼 handler
+  - `client/chiikawa-pixel/scripts/ui/ReferralPanel.gd`：推薦碼面板（顯示我的碼/輸入他人碼/獎勵說明）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：推薦碼訊號 + handler + `request_referral_info()`/`use_referral_code()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 ReferralPanel（`_init_referral_panel()`）
+  - 推薦人獎勵：+1000 金幣/人（最多20人），被推薦人獎勵：+500 金幣（首次）
+  - build/vet/test 全部通過（10/10 referral 測試）
+  - **業界依據：** 推薦碼系統是 2026 年社交遊戲標配病毒式傳播機制
 
 - **DAY-081 更新（自主觸發）：** 魚類圖鑑收集系統（Codex System）✅
   - `server/internal/game/codex/codex.go`：圖鑑管理器（12種目標物，4稀有度：common/rare/epic/legendary）
