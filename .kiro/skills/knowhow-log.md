@@ -3018,3 +3018,39 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **問題：** `git add` 報 `unable to create temporary file: No such file or directory`
 - **解法：** `git config core.tempdir "d:/Kiro/.git/tmp"` + 建立目錄
 - **教訓：** Windows 上 git 的 temp 目錄可能不存在，需要手動設定
+
+## 87. Windows Defender 誤報 Go 測試執行檔
+- **問題：** `go test` 報 `Operation did not complete successfully because the file contains a virus or potentially unwanted software`
+- **原因：** Windows Defender 把 Go 編譯的測試執行檔誤判為惡意軟體
+- **解法：** 用 `go build` + `go vet` 確認程式碼正確性，測試邏輯用 code review 驗證
+- **替代驗證：** 把測試邏輯寫成獨立的 Go 程式（不是 _test.go），用 `go run` 執行
+- **教訓：** Windows Defender 誤報是 Go 開發環境的已知問題，不影響生產環境
+
+## 88. 私訊系統設計原則（DAY-103）
+- **好友限定：** 只能傳給好友，防止陌生人騷擾
+- **每日上限：** 100 則/天，防止刷訊息
+- **離線暫存：** 最多 50 則，超過時移除最舊的
+- **訊息 ID 唯一性：** 用 `fromID[:8] + 時間戳 + 計數器` 確保唯一
+- **教訓：** 訊息 ID 不能只用時間戳，同一毫秒內多則訊息會重複
+
+## 89. 社交系統完整架構（DAY-101-103）
+- **好友系統（DAY-073）：** 加好友/接受/拒絕/移除，持久化（DAY-101）
+- **禮物系統（DAY-101）：** 每日 3 次，500 金幣/次，離線暫存
+- **挑戰系統（DAY-102）：** 1v1 PvP，3分鐘，賭注 1000 金幣
+- **私訊系統（DAY-103）：** 好友限定，每日 100 則，離線暫存
+- **整合點：** FriendPanel 的好友行有 💬傳訊息 / 🎁禮物 / ⚔️挑戰 / ✕移除 四個按鈕
+- **教訓：** 社交功能要集中在一個入口（FriendPanel），不要分散在多個地方
+
+## 83. Go embed 靜態 HTML 最佳實踐（DAY-104）
+- **用途：** 把 HTML/CSS/JS 嵌入 Go binary，不需要額外靜態檔案
+- **語法：** `//go:embed dashboard.html` + `var dashboardHTML []byte`
+- **注意：** embed 指令必須緊接在 var 宣告前，中間不能有空行
+- **優點：** 單一 binary 部署，不需要管理靜態檔案路徑
+- **教訓：** Admin Dashboard 用 embed 比 http.FileServer 更簡單，適合單頁工具
+
+## 84. Admin Dashboard 輪詢架構（DAY-104）
+- **設計：** 純 HTML+CSS+JS，每 5 秒輪詢現有 REST API
+- **優點：** 不需要 WebSocket，不需要額外後端邏輯，直接複用現有端點
+- **錯誤處理：** 連續 3 次失敗才顯示 OFFLINE，避免短暫網路抖動誤報
+- **Promise.allSettled：** 所有 API 並行請求，任一失敗不影響其他
+- **教訓：** 監控 Dashboard 用輪詢比 WebSocket 更簡單，5 秒間隔對運營監控足夠

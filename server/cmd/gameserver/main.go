@@ -17,6 +17,7 @@ import (
 
 	"github.com/google/uuid"
 
+	"digital-twin/server/internal/admin"
 	"digital-twin/server/internal/analytics"
 	"digital-twin/server/internal/config"
 	"digital-twin/server/internal/game"
@@ -1015,6 +1016,10 @@ func main() {
 		staticHandler.ServeHTTP(w, r)
 	}))
 
+	// Admin Dashboard（DAY-104）
+	// GET /admin — 即時遊戲監控 Web UI（HTML，輪詢現有 API）
+	mux.HandleFunc("/admin", admin.Handler())
+
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
 		Handler:      mux,
@@ -1035,6 +1040,7 @@ func main() {
 	log.Printf("📈 Analytics at http://localhost:%s/analytics", cfg.Port)
 	log.Printf("🏠 Rooms at http://localhost:%s/rooms", cfg.Port)
 	log.Printf("📉 Metrics at http://localhost:%s/metrics", cfg.Port)
+	log.Printf("🖥️  Admin Dashboard at http://localhost:%s/admin", cfg.Port)
 
 	// Graceful shutdown
 	quit := make(chan os.Signal, 1)

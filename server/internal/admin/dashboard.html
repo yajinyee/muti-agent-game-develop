@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🎮 吉伊卡哇：像素大討伐 — Admin Dashboard</title>
+<style>
+  :root {
+    --bg: #0d1117; --card: #161b22; --border: #30363d;
+    --text: #e6edf3; --muted: #8b949e; --accent: #58a6ff;
+    --green: #3fb950; --yellow: #d29922; --red: #f85149;
+    --purple: #bc8cff; --orange: #ffa657;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', system-ui, sans-serif; font-size: 14px; }
+  header { background: var(--card); border-bottom: 1px solid var(--border); padding: 12px 24px; display: flex; align-items: center; gap: 12px; }
+  header h1 { font-size: 18px; font-weight: 600; }
+  .badge { background: var(--green); color: #000; padding: 2px 8px; border-radius: 12px; font-size: 11px; font-weight: 700; }
+  .badge.red { background: var(--red); color: #fff; }
+  .badge.yellow { background: var(--yellow); color: #000; }
+  #last-update { margin-left: auto; color: var(--muted); font-size: 12px; }
+  main { padding: 20px 24px; display: grid; gap: 16px; }
+  .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+  .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 16px; }
+  .card h2 { font-size: 13px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 12px; }
+  .stat-big { font-size: 32px; font-weight: 700; color: var(--accent); }
+  .stat-label { font-size: 12px; color: var(--muted); margin-top: 4px; }
+  .stat-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .stat-row:last-child { border-bottom: none; }
+  .stat-row .key { color: var(--muted); }
+  .stat-row .val { font-weight: 600; }
+  .val.green { color: var(--green); }
+  .val.red { color: var(--red); }
+  .val.yellow { color: var(--yellow); }
+  .val.purple { color: var(--purple); }
+  .val.orange { color: var(--orange); }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; padding: 8px 12px; font-size: 11px; color: var(--muted); text-transform: uppercase; border-bottom: 1px solid var(--border); }
+  td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: rgba(255,255,255,0.03); }
+  .rank-1 { color: #ffd700; font-weight: 700; }
+  .rank-2 { color: #c0c0c0; font-weight: 700; }
+  .rank-3 { color: #cd7f32; font-weight: 700; }
+  .progress-bar { background: var(--border); border-radius: 4px; height: 6px; overflow: hidden; margin-top: 4px; }
+  .progress-fill { height: 100%; border-radius: 4px; transition: width 0.5s; }
+  .section-title { font-size: 16px; font-weight: 600; margin-bottom: 8px; padding-bottom: 8px; border-bottom: 1px solid var(--border); }
+  .alert { background: rgba(248,81,73,0.1); border: 1px solid var(--red); border-radius: 6px; padding: 10px 14px; color: var(--red); font-size: 13px; }
+  .online-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--green); margin-right: 6px; animation: pulse 2s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
+  .jackpot-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .jackpot-item { background: var(--bg); border-radius: 6px; padding: 10px; text-align: center; }
+  .jackpot-item .jname { font-size: 11px; color: var(--muted); }
+  .jackpot-item .jval { font-size: 20px; font-weight: 700; margin: 4px 0; }
+  .mini .jval { color: #c0c0c0; }
+  .minor .jval { color: #ffd700; }
+  .major .jval { color: var(--orange); }
+  .grand .jval { color: var(--red); }
+  #error-banner { display: none; }
+</style>
+</head>
+<body>
+<header>
+  <span>🎮</span>
+  <h1>吉伊卡哇：像素大討伐</h1>
+  <span class="badge" id="server-status">LIVE</span>
+  <span id="last-update">更新中...</span>
+</header>
+<main>
+  <div id="error-banner" class="alert">⚠️ 無法連線到 Server，請確認 Server 正在運行</div>
+
+  <!-- 頂部統計卡片 -->
+  <div class="grid-4">
+    <div class="card">
+      <h2>在線玩家</h2>
+      <div class="stat-big" id="stat-players">—</div>
+      <div class="stat-label">/ <span id="stat-max-players">—</span> 上限</div>
+    </div>
+    <div class="card">
+      <h2>觀戰者</h2>
+      <div class="stat-big" id="stat-spectators">—</div>
+      <div class="stat-label">即時觀戰人數</div>
+    </div>
+    <div class="card">
+      <h2>整體 RTP</h2>
+      <div class="stat-big" id="stat-rtp">—</div>
+      <div class="stat-label">目標 94-96%</div>
+    </div>
+    <div class="card">
+      <h2>Server 運行時間</h2>
+      <div class="stat-big" id="stat-uptime">—</div>
+      <div class="stat-label" id="stat-version">v—</div>
+    </div>
+  </div>
+
+  <!-- Jackpot 狀態 -->
+  <div class="card">
+    <h2>🎰 Jackpot 池狀態</h2>
+    <div class="jackpot-grid">
+      <div class="jackpot-item mini">
+        <div class="jname">🥈 Mini</div>
+        <div class="jval" id="jp-mini">—</div>
+        <div class="stat-label">門檻 300x</div>
+      </div>
+      <div class="jackpot-item minor">
+        <div class="jname">🥇 Minor</div>
+        <div class="jval" id="jp-minor">—</div>
+        <div class="stat-label">門檻 1000x</div>
+      </div>
+      <div class="jackpot-item major">
+        <div class="jname">🔥 Major</div>
+        <div class="jval" id="jp-major">—</div>
+        <div class="stat-label">門檻 3000x</div>
+      </div>
+      <div class="jackpot-item grand">
+        <div class="jname">👑 Grand</div>
+        <div class="jval" id="jp-grand">—</div>
+        <div class="stat-label">門檻 15000x</div>
+      </div>
+    </div>
+    <div style="margin-top:12px; display:flex; gap:24px;">
+      <span class="stat-row" style="border:none;gap:8px;"><span class="key">今日中獎次數</span><span class="val green" id="jp-daily-wins">—</span></span>
+      <span class="stat-row" style="border:none;gap:8px;"><span class="key">今日總派彩</span><span class="val orange" id="jp-daily-payout">—</span></span>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- 系統健康 -->
+    <div class="card">
+      <h2>⚙️ 系統健康</h2>
+      <div class="stat-row"><span class="key">遊戲狀態</span><span class="val green" id="sys-game-state">—</span></div>
+      <div class="stat-row"><span class="key">Goroutines</span><span class="val" id="sys-goroutines">—</span></div>
+      <div class="stat-row"><span class="key">Heap 使用</span><span class="val" id="sys-heap">—</span></div>
+      <div class="stat-row"><span class="key">GC 次數</span><span class="val" id="sys-gc">—</span></div>
+      <div class="stat-row"><span class="key">平均 Ping</span><span class="val" id="sys-ping">—</span></div>
+      <div class="stat-row"><span class="key">WS 訊息收</span><span class="val" id="sys-msg-recv">—</span></div>
+      <div class="stat-row"><span class="key">WS 訊息送</span><span class="val" id="sys-msg-sent">—</span></div>
+    </div>
+
+    <!-- 數據分析 -->
+    <div class="card">
+      <h2>📊 數據分析</h2>
+      <div class="stat-row"><span class="key">總加入玩家</span><span class="val" id="ana-total-players">—</span></div>
+      <div class="stat-row"><span class="key">峰值同時在線</span><span class="val orange" id="ana-peak-players">—</span></div>
+      <div class="stat-row"><span class="key">總攻擊次數</span><span class="val" id="ana-total-attacks">—</span></div>
+      <div class="stat-row"><span class="key">總擊破次數</span><span class="val" id="ana-total-kills">—</span></div>
+      <div class="stat-row"><span class="key">總派彩金幣</span><span class="val green" id="ana-total-reward">—</span></div>
+      <div class="stat-row"><span class="key">BOSS 出現次數</span><span class="val purple" id="ana-boss-spawns">—</span></div>
+      <div class="stat-row"><span class="key">Bonus 次數</span><span class="val yellow" id="ana-bonus-count">—</span></div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <!-- 天氣 & 活動 -->
+    <div class="card">
+      <h2>🌤️ 天氣 & 限時活動</h2>
+      <div class="stat-row"><span class="key">當前天氣</span><span class="val" id="weather-name">—</span></div>
+      <div class="stat-row"><span class="key">天氣效果</span><span class="val yellow" id="weather-effect">—</span></div>
+      <div class="stat-row"><span class="key">獎勵倍率</span><span class="val green" id="weather-mult">—</span></div>
+      <div class="stat-row"><span class="key">剩餘時間</span><span class="val" id="weather-remaining">—</span></div>
+      <div style="margin-top:12px; border-top:1px solid var(--border); padding-top:12px;">
+        <div class="stat-row"><span class="key">活動名稱</span><span class="val orange" id="event-name">—</span></div>
+        <div class="stat-row"><span class="key">活動倍率</span><span class="val" id="event-mult">—</span></div>
+        <div class="stat-row"><span class="key">活動剩餘</span><span class="val" id="event-remaining">—</span></div>
+      </div>
+    </div>
+
+    <!-- 每日 BOSS -->
+    <div class="card">
+      <h2>👹 每日 BOSS 挑戰</h2>
+      <div class="stat-row"><span class="key">BOSS 名稱</span><span class="val red" id="boss-name">—</span></div>
+      <div class="stat-row"><span class="key">狀態</span><span class="val" id="boss-status">—</span></div>
+      <div class="stat-row"><span class="key">HP</span><span class="val" id="boss-hp">—</span></div>
+      <div id="boss-hp-bar" class="progress-bar" style="margin:8px 0;">
+        <div class="progress-fill" id="boss-hp-fill" style="background:var(--red);width:0%"></div>
+      </div>
+      <div class="stat-row"><span class="key">獎勵池</span><span class="val green" id="boss-reward-pool">—</span></div>
+      <div class="stat-row"><span class="key">總傷害</span><span class="val" id="boss-total-damage">—</span></div>
+      <div class="stat-row"><span class="key">結束時間</span><span class="val" id="boss-end-at">—</span></div>
+    </div>
+  </div>
+
+  <!-- 排行榜 -->
+  <div class="card">
+    <h2>🏆 即時排行榜（Top 10）</h2>
+    <table>
+      <thead><tr><th>#</th><th>玩家</th><th>金幣</th><th>VIP</th><th>擊破數</th><th>RTP</th></tr></thead>
+      <tbody id="leaderboard-body"><tr><td colspan="6" style="text-align:center;color:var(--muted)">載入中...</td></tr></tbody>
+    </table>
+  </div>
+
+  <div class="grid-2">
+    <!-- 公會排行 -->
+    <div class="card">
+      <h2>⚔️ 公會列表</h2>
+      <table>
+        <thead><tr><th>#</th><th>公會</th><th>等級</th><th>成員</th><th>在線</th></tr></thead>
+        <tbody id="guild-body"><tr><td colspan="5" style="text-align:center;color:var(--muted)">載入中...</td></tr></tbody>
+      </table>
+    </div>
+
+    <!-- 公會戰排名 -->
+    <div class="card">
+      <h2>🏅 公會戰排名（本週）</h2>
+      <div class="stat-row" style="margin-bottom:8px;"><span class="key">週次</span><span class="val" id="gw-week-id">—</span></div>
+      <table>
+        <thead><tr><th>#</th><th>公會</th><th>積分</th><th>擊殺</th><th>BOSS</th></tr></thead>
+        <tbody id="guildwar-body"><tr><td colspan="5" style="text-align:center;color:var(--muted)">載入中...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Jackpot 歷史 -->
+  <div class="card">
+    <h2>🎰 Jackpot 最近中獎記錄</h2>
+    <table>
+      <thead><tr><th>時間</th><th>玩家</th><th>等級</th><th>金額</th></tr></thead>
+      <tbody id="jackpot-history-body"><tr><td colspan="4" style="text-align:center;color:var(--muted)">載入中...</td></tr></tbody>
+    </table>
+  </div>
+</main>
+<script>
+const BASE = window.location.origin;
+let errorCount = 0;
+
+function fmt(n) {
+  if (n === undefined || n === null) return '—';
+  if (typeof n === 'number') return n.toLocaleString();
+  return n;
+}
+function fmtCoins(n) {
+  if (!n && n !== 0) return '—';
+  if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+  if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+  return n.toLocaleString();
+}
+function fmtTime(ms) {
+  if (!ms) return '—';
+  return new Date(ms).toLocaleTimeString('zh-TW');
+}
+function fmtRemaining(ms) {
+  if (!ms) return '—';
+  const sec = Math.max(0, Math.floor((ms - Date.now()) / 1000));
+  if (sec <= 0) return '已結束';
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return m > 0 ? `${m}分${s}秒` : `${s}秒`;
+}
+function setText(id, val, cls) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.textContent = val;
+  if (cls) { el.className = 'val ' + cls; }
+}
+function rankClass(i) {
+  if (i === 0) return 'rank-1';
+  if (i === 1) return 'rank-2';
+  if (i === 2) return 'rank-3';
+  return '';
+}
+
+async function fetchJSON(path) {
+  const r = await fetch(BASE + path);
+  if (!r.ok) throw new Error(r.status);
+  return r.json();
+}
+
+async function updateHealth() {
+  const d = await fetchJSON('/health');
+  setText('stat-players', d.clients);
+  setText('stat-max-players', d.max_players);
+  setText('stat-spectators', d.spectators);
+  setText('stat-uptime', d.uptime);
+  setText('stat-version', d.version ? 'v' + d.version : '—');
+  setText('sys-game-state', d.game_state, d.game_state === 'running' ? 'green' : 'yellow');
+  setText('sys-ping', d.avg_ping_ms ? d.avg_ping_ms.toFixed(1) + ' ms' : '—');
+  if (d.jackpot) {
+    setText('jp-mini', fmtCoins(d.jackpot.mini));
+    setText('jp-minor', fmtCoins(d.jackpot.minor));
+    setText('jp-major', fmtCoins(d.jackpot.major));
+    setText('jp-grand', fmtCoins(d.jackpot.grand));
+    setText('jp-daily-wins', d.jackpot.daily_wins);
+    setText('jp-daily-payout', fmtCoins(d.jackpot.daily_payout));
+  }
+}
+
+async function updateStats() {
+  const d = await fetchJSON('/stats');
+  setText('sys-goroutines', d.goroutines);
+  setText('sys-heap', d.heap_alloc_mb ? d.heap_alloc_mb.toFixed(1) + ' MB' : '—');
+  setText('sys-gc', d.gc_count);
+  setText('sys-msg-recv', fmtCoins(d.messages_received));
+  setText('sys-msg-sent', fmtCoins(d.messages_sent));
+}
+
+async function updateAnalytics() {
+  const d = await fetchJSON('/analytics');
+  setText('ana-total-players', fmt(d.total_players));
+  setText('ana-peak-players', fmt(d.peak_players), 'orange');
+  setText('ana-total-attacks', fmtCoins(d.total_attacks));
+  setText('ana-total-kills', fmtCoins(d.total_kills));
+  setText('ana-total-reward', fmtCoins(d.total_reward), 'green');
+  setText('ana-boss-spawns', fmt(d.boss_spawn_count), 'purple');
+  setText('ana-bonus-count', fmt(d.bonus_count), 'yellow');
+  const rtp = d.overall_rtp;
+  if (rtp) {
+    const pct = (rtp * 100).toFixed(2) + '%';
+    const cls = rtp > 0.98 ? 'red' : rtp > 0.94 ? 'green' : 'yellow';
+    setText('stat-rtp', pct, cls);
+  }
+}
+
+async function updateWeather() {
+  const d = await fetchJSON('/weather');
+  setText('weather-name', (d.icon || '') + ' ' + (d.name || '—'));
+  setText('weather-effect', d.effect || '—', 'yellow');
+  setText('weather-mult', d.reward_mult ? '×' + d.reward_mult.toFixed(1) : '×1.0', 'green');
+  setText('weather-remaining', fmtRemaining(d.ends_at));
+}
+
+async function updateEvent() {
+  const d = await fetchJSON('/event');
+  if (d && d.name) {
+    setText('event-name', (d.icon || '') + ' ' + d.name, 'orange');
+    setText('event-mult', d.reward_mult ? '×' + d.reward_mult.toFixed(1) : '—');
+    setText('event-remaining', fmtRemaining(d.ends_at));
+  } else {
+    setText('event-name', '無活動');
+    setText('event-mult', '—');
+    setText('event-remaining', '—');
+  }
+}
+
+async function updateDailyBoss() {
+  try {
+    const d = await fetchJSON('/daily-boss');
+    setText('boss-name', (d.boss_icon || '') + ' ' + (d.boss_name || '—'), 'red');
+    const statusMap = { active: '進行中', defeated: '已擊敗', expired: '已過期' };
+    setText('boss-status', statusMap[d.status] || d.status, d.status === 'active' ? 'green' : 'muted');
+    const hpPct = d.hp_percent || 0;
+    setText('boss-hp', Math.round(hpPct * 100) + '%');
+    document.getElementById('boss-hp-fill').style.width = (hpPct * 100) + '%';
+    setText('boss-reward-pool', fmtCoins(d.reward_pool), 'green');
+    setText('boss-total-damage', fmtCoins(d.total_damage));
+    setText('boss-end-at', fmtTime(d.end_at));
+  } catch(e) {
+    setText('boss-name', '今日無 BOSS');
+  }
+}
+
+async function updateLeaderboard() {
+  const d = await fetchJSON('/leaderboard');
+  const entries = Array.isArray(d) ? d : (d.entries || []);
+  const tbody = document.getElementById('leaderboard-body');
+  if (!entries.length) { tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">暫無資料</td></tr>'; return; }
+  tbody.innerHTML = entries.slice(0, 10).map((e, i) => `
+    <tr>
+      <td class="${rankClass(i)}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}</td>
+      <td>${e.display_name || e.player_id || '—'}</td>
+      <td style="color:var(--yellow)">${fmtCoins(e.coins)}</td>
+      <td style="color:var(--purple)">${e.vip_level ? 'VIP ' + e.vip_level : '—'}</td>
+      <td>${fmtCoins(e.total_kills)}</td>
+      <td style="color:${(e.rtp||0)>0.98?'var(--red)':(e.rtp||0)>0.94?'var(--green)':'var(--yellow)'}">${e.rtp ? (e.rtp*100).toFixed(1)+'%' : '—'}</td>
+    </tr>`).join('');
+}
+
+async function updateGuilds() {
+  const d = await fetchJSON('/guilds');
+  const guilds = d.guilds || [];
+  const tbody = document.getElementById('guild-body');
+  if (!guilds.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted)">暫無公會</td></tr>'; return; }
+  tbody.innerHTML = guilds.slice(0, 8).map((g, i) => `
+    <tr>
+      <td class="${rankClass(i)}">${i+1}</td>
+      <td>${g.name}</td>
+      <td style="color:var(--accent)">Lv.${g.level}</td>
+      <td>${g.member_count}/20</td>
+      <td><span class="online-dot"></span>${g.online_count}</td>
+    </tr>`).join('');
+}
+
+async function updateGuildWar() {
+  const d = await fetchJSON('/guild-war');
+  setText('gw-week-id', d.week_id || '—');
+  const rankings = d.rankings || [];
+  const tbody = document.getElementById('guildwar-body');
+  if (!rankings.length) { tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted)">暫無資料</td></tr>'; return; }
+  tbody.innerHTML = rankings.slice(0, 5).map((r, i) => `
+    <tr>
+      <td class="${rankClass(i)}">${i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : i+1}</td>
+      <td>${r.guild_icon || ''} ${r.guild_name}</td>
+      <td style="color:var(--accent);font-weight:700">${fmt(r.score)}</td>
+      <td>${fmt(r.kill_score)}</td>
+      <td style="color:var(--red)">${fmt(r.boss_score)}</td>
+    </tr>`).join('');
+}
+
+async function updateJackpotHistory() {
+  const d = await fetchJSON('/jackpot');
+  const history = d.history || [];
+  const tbody = document.getElementById('jackpot-history-body');
+  if (!history.length) { tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted)">暫無記錄</td></tr>'; return; }
+  const levelColors = { mini: '#c0c0c0', minor: '#ffd700', major: 'var(--orange)', grand: 'var(--red)' };
+  tbody.innerHTML = history.slice(0, 8).map(h => `
+    <tr>
+      <td style="color:var(--muted)">${h.won_at ? new Date(h.won_at).toLocaleString('zh-TW') : '—'}</td>
+      <td>${h.player_id || '—'}</td>
+      <td style="color:${levelColors[h.level] || 'var(--text)'};font-weight:700">${h.level_name || h.level || '—'}</td>
+      <td style="color:var(--yellow);font-weight:700">${fmtCoins(h.amount)}</td>
+    </tr>`).join('');
+}
+
+async function refresh() {
+  try {
+    await Promise.allSettled([
+      updateHealth(),
+      updateStats(),
+      updateAnalytics(),
+      updateWeather(),
+      updateEvent(),
+      updateDailyBoss(),
+      updateLeaderboard(),
+      updateGuilds(),
+      updateGuildWar(),
+      updateJackpotHistory(),
+    ]);
+    errorCount = 0;
+    document.getElementById('error-banner').style.display = 'none';
+    document.getElementById('server-status').textContent = 'LIVE';
+    document.getElementById('server-status').className = 'badge';
+    document.getElementById('last-update').textContent = '最後更新：' + new Date().toLocaleTimeString('zh-TW');
+  } catch(e) {
+    errorCount++;
+    if (errorCount >= 3) {
+      document.getElementById('error-banner').style.display = 'block';
+      document.getElementById('server-status').textContent = 'OFFLINE';
+      document.getElementById('server-status').className = 'badge red';
+    }
+  }
+}
+
+refresh();
+setInterval(refresh, 5000); // 每 5 秒更新
+</script>
+</body>
+</html>
