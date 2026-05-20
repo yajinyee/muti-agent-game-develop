@@ -1100,6 +1100,118 @@ func (g *Game) GetTournamentSnapshot() tournament.Snapshot {
 	return g.tournamentMgr.GetSnapshot()
 }
 
+// PlayerProfile 玩家個人資料（DAY-069）
+type PlayerProfile struct {
+	PlayerID    string                 `json:"player_id"`
+	DisplayName string                 `json:"display_name"`
+	Coins       int                    `json:"coins"`
+	KillCount   int                    `json:"kill_count"`
+	SessionScore int                   `json:"session_score"`
+	MaxCoins    int                    `json:"max_coins"`
+	WeaponLevel int                    `json:"weapon_level"`
+	LoginStreak int                    `json:"login_streak"`
+	MaxLoginStreak int                 `json:"max_login_streak"`
+	// 稱號
+	TitleID    string                  `json:"title_id"`
+	TitleName  string                  `json:"title_name"`
+	TitleIcon  string                  `json:"title_icon"`
+	TitleColor string                  `json:"title_color"`
+	// 成就
+	AchievementCount int               `json:"achievement_count"`
+	Achievements     []AchievementInfo `json:"achievements"`
+	// 週賽
+	TournamentPoints int               `json:"tournament_points"`
+	TournamentRank   int               `json:"tournament_rank"`
+	// 時間戳
+	Timestamp int64                    `json:"timestamp"`
+}
+
+// AchievementInfo 成就資訊（用於 Profile）
+type AchievementInfo struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Icon        string `json:"icon"`
+	UnlockedAt  int64  `json:"unlocked_at"` // Unix ms
+}
+
+// GetPlayerProfile 取得玩家個人資料（供 /profile HTTP 端點使用）
+func (g *Game) GetPlayerProfile(playerID string) (*PlayerProfile, bool) {
+	g.mu.RLock()
+	p, ok := g.Players[playerID]
+	g.mu.RUnlock()
+	if !ok {
+		return nil, false
+	}
+
+	snap := p.Snapshot()
+	leaderSnap := p.LeaderboardSnapshot()
+
+	// 成就列表
+	achUnlocked := p.GetAchievements()
+	loginStreak, maxLoginStreak := p.GetLoginInfo()
+
+	achInfos := make([]AchievementInfo, 0, len(achUnlocked))
+	for _, u := range achUnlocked {
+		achInfos = append(achInfos, AchievementInfo{
+			ID:         string(u.ID),
+			Name:       u.Name,
+			Icon:       u.Icon,
+			UnlockedAt: u.UnlockedAt.UnixMilli(),
+		})
+	}
+
+	// 週賽排名
+	tournSnap := g.tournamentMgr.GetSnapshot()
+	tournPoints := 0
+	tournRank := 0
+	for _, entry := range tournSnap.Rankings {
+		if entry.PlayerID == playerID {
+			tournPoints = entry.Points
+			tournRank = entry.Rank
+			break
+		}
+	}
+
+	return &PlayerProfile{
+		PlayerID:       playerID,
+		DisplayName:    snap.DisplayName,
+		Coins:          snap.Coins,
+		KillCount:      snap.KillCount,
+		SessionScore:   snap.SessionScore,
+		MaxCoins:       leaderSnap.MaxCoins,
+		WeaponLevel:    snap.WeaponLevel,
+		LoginStreak:    loginStreak,
+		MaxLoginStreak: maxLoginStreak,
+		TitleID:        snap.TitleID,
+		TitleName:      snap.TitleName,
+		TitleIcon:      snap.TitleIcon,
+		TitleColor:     snap.TitleColor,
+		AchievementCount: len(achUnlocked),
+		Achievements:   achInfos,
+		TournamentPoints: tournPoints,
+		TournamentRank:   tournRank,
+		Timestamp:      time.Now().UnixMilli(),
+	}, true
+}
+
+// GetAllPlayerProfiles 取得所有在線玩家的個人資料摘要（供 /profiles 端點）
+func (g *Game) GetAllPlayerProfiles() []PlayerProfile {
+	g.mu.RLock()
+	playerIDs := make([]string, 0, len(g.Players))
+	for id := range g.Players {
+		playerIDs = append(playerIDs, id)
+	}
+	g.mu.RUnlock()
+
+	profiles := make([]PlayerProfile, 0, len(playerIDs))
+	for _, id := range playerIDs {
+		if profile, ok := g.GetPlayerProfile(id); ok {
+			profiles = append(profiles, *profile)
+		}
+	}
+	return profiles
+}
+
 // GetMissionResetAt 取得每日任務下次重置時間（thread-safe）
 func (g *Game) GetMissionResetAt() time.Time {
 	return g.missionMgr.ResetAt()

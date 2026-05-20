@@ -330,6 +330,20 @@ func (p *Player) SetTitle(titleID achievement.TitleID) bool {
 	return p.Titles.SetActiveTitle(titleID)
 }
 
+// GetAchievements 取得已解鎖成就列表（DAY-069）
+func (p *Player) GetAchievements() []achievement.AchievementUnlock {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.Achievements.UnlockedList()
+}
+
+// GetLoginInfo 取得登入資訊（DAY-069）
+func (p *Player) GetLoginInfo() (streak int, maxStreak int) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.LoginStreak, p.MaxLoginStreak
+}
+
 // TryUnlockBigWin 嘗試解鎖大獎成就（依倍率判斷）
 func (p *Player) TryUnlockBigWin(multiplier float64) []*achievement.AchievementUnlock {
 	p.mu.Lock()

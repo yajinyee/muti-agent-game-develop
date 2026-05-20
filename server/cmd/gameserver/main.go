@@ -361,6 +361,40 @@ func main() {
 		}
 	})
 
+	// 玩家個人資料端點（DAY-069）
+	// GET /profile?player_id=xxx — 取得指定玩家的個人資料
+	// GET /profiles — 取得所有在線玩家的個人資料摘要
+	mux.HandleFunc("/profile", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		playerID := r.URL.Query().Get("player_id")
+		if playerID == "" {
+			http.Error(w, `{"error":"player_id required"}`, http.StatusBadRequest)
+			return
+		}
+		profile, ok := g.GetPlayerProfile(playerID)
+		if !ok {
+			http.Error(w, `{"error":"player not found"}`, http.StatusNotFound)
+			return
+		}
+		if err := json.NewEncoder(w).Encode(profile); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
+	mux.HandleFunc("/profiles", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		profiles := g.GetAllPlayerProfiles()
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"profiles":   profiles,
+			"count":      len(profiles),
+			"timestamp":  time.Now().UnixMilli(),
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// Prometheus metrics 端點（DAY-040）
 	// 格式：Prometheus text format（無外部依賴）
 	// 用途：Grafana / Prometheus 監控，生產環境可視化

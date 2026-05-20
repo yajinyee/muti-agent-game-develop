@@ -8,7 +8,16 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-068 更新（自主觸發）：** 稱號系統（Title System）✅
+- **DAY-069 更新（自主觸發）：** 玩家個人資料 API（Player Profile）✅
+  - `server/internal/game/game.go`：`PlayerProfile` struct + `AchievementInfo` struct
+  - `server/internal/game/game.go`：`GetPlayerProfile(playerID)` — 取得單一玩家完整資料（成就/稱號/統計/週賽）
+  - `server/internal/game/game.go`：`GetAllPlayerProfiles()` — 取得所有在線玩家摘要
+  - `server/internal/player/player.go`：`GetAchievements()` + `GetLoginInfo()` 封裝方法（避免跨套件存取 unexported mu）
+  - `server/cmd/gameserver/main.go`：`/profile?player_id=xxx` HTTP 端點（GET，回傳完整個人資料）
+  - `server/cmd/gameserver/main.go`：`/profiles` HTTP 端點（GET，回傳所有在線玩家摘要）
+  - build/vet 全部通過
+  - **業界依據：** 玩家個人資料 API 是社交功能的基礎，為未來公會戰/好友系統鋪路
+
   - `server/internal/game/achievement/title.go`：稱號定義 + TitleTracker（12 個稱號，優先級系統）
   - `server/internal/game/achievement/title_test.go`：10 個單元測試（Windows Defender 誤報，程式碼正確）
   - `server/internal/player/player.go`：加入 `Titles *TitleTracker`，`OnAchievementUnlocked()`，`SetTitle()` 方法
