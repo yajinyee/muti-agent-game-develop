@@ -212,6 +212,8 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 
 	// 週賽積分：擊殺 BOSS（DAY-066）
 	g.tournamentMgr.AddPoints(p.ID, p.DisplayName, tournament.PointBoss, 0)
+	// 每日賽積分：擊殺 BOSS（DAY-093）
+	g.notifyDailyTournamentBoss(p)
 	// 賽季積分同步（DAY-072）：BOSS 擊殺 = 50 分
 	newLevels := g.addSeasonPoints(p.ID, 50)
 	g.checkSeasonLevelNotify(p, newLevels)

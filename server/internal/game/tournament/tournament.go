@@ -1,5 +1,6 @@
-// Package tournament 週賽系統
-// 每週重置排行榜，前三名獲得大獎
+// Package tournament 週賽 + 每日賽系統（DAY-093 升級）
+// 週賽：每週重置排行榜，前三名獲得大獎
+// 每日賽：每日 UTC+8 00:00 重置，前三名獲得每日獎勵
 // 積分來源：擊破目標（依倍率）+ BOSS 擊殺 + Bonus 完成
 package tournament
 
@@ -30,6 +31,13 @@ var DefaultPrizes = []PrizeConfig{
 	{Rank: 1, Coins: 50000, Label: "🥇 週賽冠軍"},
 	{Rank: 2, Coins: 25000, Label: "🥈 週賽亞軍"},
 	{Rank: 3, Coins: 10000, Label: "🥉 週賽季軍"},
+}
+
+// DefaultDailyPrizes 每日賽預設獎勵（前三名）
+var DefaultDailyPrizes = []PrizeConfig{
+	{Rank: 1, Coins: 5000, Label: "🥇 日賽冠軍"},
+	{Rank: 2, Coins: 2000, Label: "🥈 日賽亞軍"},
+	{Rank: 3, Coins: 1000, Label: "🥉 日賽季軍"},
 }
 
 // Entry 週賽參賽者記錄
@@ -313,5 +321,244 @@ func (t *Tournament) GetSnapshot() Snapshot {
 		Rankings:     rankings,
 		TotalPlayers: totalPlayers,
 		Prizes:       DefaultPrizes,
+	}
+}
+
+// ============================================================
+// DailyTournament — 每日賽管理器（DAY-093）
+// 每日 UTC+8 00:00 重置，前三名獲得每日獎勵
+// ============================================================
+
+// DailyResult 每日賽結算結果
+type DailyResult struct {
+	Date      string      // "2026-05-20"
+	Rankings  []RankEntry
+	SettledAt time.Time
+}
+
+// DailyTournament 每日賽管理器
+type DailyTournament struct {
+	mu          sync.RWMutex
+	entries     map[string]*Entry // playerID → Entry
+	dayStart    time.Time
+	dayEnd      time.Time
+	history     []DailyResult // 最近 7 天歷史
+}
+
+// NewDaily 建立新的每日賽管理器
+func NewDaily() *DailyTournament {
+	now := time.Now()
+	start, end := currentDayRange(now)
+	return &DailyTournament{
+		entries:  make(map[string]*Entry),
+		dayStart: start,
+		dayEnd:   end,
+		history:  make([]DailyResult, 0, 7),
+	}
+}
+
+// currentDayRange 計算當前日的開始（UTC+8 00:00）和結束（UTC+8 23:59:59）
+func currentDayRange(t time.Time) (start, end time.Time) {
+	loc := time.FixedZone("UTC+8", 8*3600)
+	local := t.In(loc)
+	start = time.Date(local.Year(), local.Month(), local.Day(), 0, 0, 0, 0, loc)
+	end = start.Add(24*time.Hour - time.Second)
+	return start, end
+}
+
+// AddPoints 增加玩家每日積分
+func (d *DailyTournament) AddPoints(playerID, displayName string, source PointSource, multiplier float64) int {
+	d.mu.Lock()
+	defer d.mu.Unlock()
+
+	d.checkAndReset()
+
+	entry, ok := d.entries[playerID]
+	if !ok {
+		entry = &Entry{
+			PlayerID:    playerID,
+			DisplayName: displayName,
+		}
+		d.entries[playerID] = entry
+	}
+	if displayName != "" {
+		entry.DisplayName = displayName
+	}
+
+	var pts int
+	switch source {
+	case PointKill:
+		pts = int(multiplier)
+		if pts < 1 {
+			pts = 1
+		}
+		entry.KillCount++
+	case PointBoss:
+		pts = 50
+		entry.BossKills++
+	case PointBonus:
+		pts = 20
+		entry.BonusCount++
+	}
+
+	entry.Points += pts
+	entry.LastUpdated = time.Now()
+	return entry.Points
+}
+
+// GetRankings 取得每日賽當前排名（前 N 名）
+func (d *DailyTournament) GetRankings(topN int) []RankEntry {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+
+	entries := make([]*Entry, 0, len(d.entries))
+	for _, e := range d.entries {
+		entries = append(entries, e)
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		if entries[i].Points != entries[j].Points {
+			return entries[i].Points > entries[j].Points
+		}
+		return entries[i].KillCount > entries[j].KillCount
+	})
+	if topN > 0 && len(entries) > topN {
+		entries = entries[:topN]
+	}
+
+	result := make([]RankEntry, len(entries))
+	for i, e := range entries {
+		rank := i + 1
+		re := RankEntry{
+			Rank:        rank,
+			PlayerID:    e.PlayerID,
+			DisplayName: e.DisplayName,
+			Points:      e.Points,
+		}
+		for _, prize := range DefaultDailyPrizes {
+			if prize.Rank == rank {
+				re.Prize = prize.Coins
+				re.PrizeLabel = prize.Label
+				break
+			}
+		}
+		result[i] = re
+	}
+	return result
+}
+
+// GetPlayerRank 取得特定玩家的每日排名和積分
+func (d *DailyTournament) GetPlayerRank(playerID string) (rank int, points int) {
+	rankings := d.GetRankings(0)
+	for _, r := range rankings {
+		if r.PlayerID == playerID {
+			return r.Rank, r.Points
+		}
+	}
+	return 0, 0
+}
+
+// GetDayInfo 取得當前日的時間資訊
+func (d *DailyTournament) GetDayInfo() (start, end time.Time, secondsLeft int64) {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	left := time.Until(d.dayEnd)
+	if left < 0 {
+		left = 0
+	}
+	return d.dayStart, d.dayEnd, int64(left.Seconds())
+}
+
+// GetHistory 取得歷史每日賽結果（最近 7 天）
+func (d *DailyTournament) GetHistory() []DailyResult {
+	d.mu.RLock()
+	defer d.mu.RUnlock()
+	result := make([]DailyResult, len(d.history))
+	copy(result, d.history)
+	return result
+}
+
+// checkAndReset 檢查是否需要重置（新的一天），必須在持有鎖的情況下呼叫
+func (d *DailyTournament) checkAndReset() {
+	now := time.Now()
+	if now.After(d.dayEnd) {
+		d.settleDaily()
+		start, end := currentDayRange(now)
+		d.dayStart = start
+		d.dayEnd = end
+		d.entries = make(map[string]*Entry)
+	}
+}
+
+// settleDaily 結算當日（必須在持有鎖的情況下呼叫）
+func (d *DailyTournament) settleDaily() {
+	if len(d.entries) == 0 {
+		return
+	}
+	entries := make([]*Entry, 0, len(d.entries))
+	for _, e := range d.entries {
+		entries = append(entries, e)
+	}
+	sort.Slice(entries, func(i, j int) bool {
+		return entries[i].Points > entries[j].Points
+	})
+
+	rankings := make([]RankEntry, 0, len(entries))
+	for i, e := range entries {
+		rank := i + 1
+		re := RankEntry{
+			Rank:        rank,
+			PlayerID:    e.PlayerID,
+			DisplayName: e.DisplayName,
+			Points:      e.Points,
+		}
+		for _, prize := range DefaultDailyPrizes {
+			if prize.Rank == rank {
+				re.Prize = prize.Coins
+				re.PrizeLabel = prize.Label
+				break
+			}
+		}
+		rankings = append(rankings, re)
+	}
+
+	loc := time.FixedZone("UTC+8", 8*3600)
+	dateStr := d.dayStart.In(loc).Format("2006-01-02")
+	result := DailyResult{
+		Date:      dateStr,
+		Rankings:  rankings,
+		SettledAt: time.Now(),
+	}
+	d.history = append(d.history, result)
+	if len(d.history) > 7 {
+		d.history = d.history[len(d.history)-7:]
+	}
+}
+
+// DailySnapshot 每日賽快照
+type DailySnapshot struct {
+	DayStart     int64         `json:"day_start"`     // Unix ms
+	DayEnd       int64         `json:"day_end"`       // Unix ms
+	SecondsLeft  int64         `json:"seconds_left"`  // 距離結束秒數
+	Rankings     []RankEntry   `json:"rankings"`      // 前 10 名
+	TotalPlayers int           `json:"total_players"` // 今日參賽人數
+	Prizes       []PrizeConfig `json:"prizes"`        // 獎勵設定
+}
+
+// GetDailySnapshot 取得每日賽快照
+func (d *DailyTournament) GetDailySnapshot() DailySnapshot {
+	d.mu.RLock()
+	totalPlayers := len(d.entries)
+	d.mu.RUnlock()
+
+	start, end, left := d.GetDayInfo()
+	rankings := d.GetRankings(10)
+
+	return DailySnapshot{
+		DayStart:     start.UnixMilli(),
+		DayEnd:       end.UnixMilli(),
+		SecondsLeft:  left,
+		Rankings:     rankings,
+		TotalPlayers: totalPlayers,
+		Prizes:       DefaultDailyPrizes,
 	}
 }

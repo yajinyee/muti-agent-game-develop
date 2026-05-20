@@ -1,11 +1,11 @@
-## TournamentPanel.gd — 週賽排名面板（DAY-066）
-## 顯示本週排名、積分、獎勵資訊
+## TournamentPanel.gd — 週賽 + 每日賽面板（DAY-093 升級）
+## 顯示本週排名、今日排名、積分、獎勵資訊
 ## 每 30 秒由 Server 推送更新
 extends Node2D
 
 # ---- 常數 ----
 const PANEL_WIDTH  := 260
-const PANEL_HEIGHT := 320
+const PANEL_HEIGHT := 340
 const PANEL_X      := 10
 const PANEL_Y      := 50
 
@@ -13,6 +13,8 @@ const PANEL_Y      := 50
 var _panel_bg: ColorRect
 var _title_label: Label
 var _toggle_btn: Button
+var _tab_weekly_btn: Button
+var _tab_daily_btn: Button
 var _entries_container: VBoxContainer
 var _footer_label: Label
 var _my_rank_label: Label
@@ -20,12 +22,22 @@ var _time_label: Label
 
 # ---- 狀態 ----
 var _is_expanded: bool = false
+var _active_tab: String = "daily"  # "weekly" or "daily"（預設顯示每日賽）
 var _pixel_font: Font = null
-var _rankings: Array = []
-var _my_rank: int = 0
-var _my_points: int = 0
-var _seconds_left: int = 0
-var _total_players: int = 0
+
+# 週賽資料
+var _weekly_rankings: Array = []
+var _weekly_my_rank: int = 0
+var _weekly_my_points: int = 0
+var _weekly_seconds_left: int = 0
+var _weekly_total_players: int = 0
+
+# 每日賽資料（DAY-093）
+var _daily_rankings: Array = []
+var _daily_my_rank: int = 0
+var _daily_my_points: int = 0
+var _daily_seconds_left: int = 0
+var _daily_total_players: int = 0
 
 # ---- 初始化 ----
 func _ready() -> void:
@@ -58,7 +70,7 @@ func _build_ui() -> void:
 	# 標題文字
 	_title_label = Label.new()
 	_title_label.position = Vector2(8, 6)
-	_title_label.text = "🏆 週賽排名"
+	_title_label.text = "🏆 錦標賽"
 	_title_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0))
 	if _pixel_font:
 		_title_label.add_theme_font_override("font", _pixel_font)
@@ -74,9 +86,35 @@ func _build_ui() -> void:
 	_toggle_btn.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
 	title_bar.add_child(_toggle_btn)
 
-	# 我的排名（標題列下方，折疊時也顯示）
+	# Tab 切換列（每日賽 / 週賽）
+	var tab_bar := HBoxContainer.new()
+	tab_bar.position = Vector2(0, 36)
+	tab_bar.size = Vector2(PANEL_WIDTH, 24)
+	_panel_bg.add_child(tab_bar)
+
+	_tab_daily_btn = Button.new()
+	_tab_daily_btn.text = "📅 今日賽"
+	_tab_daily_btn.custom_minimum_size = Vector2(PANEL_WIDTH / 2, 24)
+	_tab_daily_btn.flat = false
+	_tab_daily_btn.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
+	if _pixel_font:
+		_tab_daily_btn.add_theme_font_override("font", _pixel_font)
+		_tab_daily_btn.add_theme_font_size_override("font_size", 10)
+	tab_bar.add_child(_tab_daily_btn)
+
+	_tab_weekly_btn = Button.new()
+	_tab_weekly_btn.text = "📆 週賽"
+	_tab_weekly_btn.custom_minimum_size = Vector2(PANEL_WIDTH / 2, 24)
+	_tab_weekly_btn.flat = false
+	_tab_weekly_btn.add_theme_color_override("font_color", Color(0.7, 0.8, 1.0))
+	if _pixel_font:
+		_tab_weekly_btn.add_theme_font_override("font", _pixel_font)
+		_tab_weekly_btn.add_theme_font_size_override("font_size", 10)
+	tab_bar.add_child(_tab_weekly_btn)
+
+	# 我的排名（Tab 下方）
 	_my_rank_label = Label.new()
-	_my_rank_label.position = Vector2(8, 38)
+	_my_rank_label.position = Vector2(8, 62)
 	_my_rank_label.text = "我的排名：未上榜"
 	_my_rank_label.add_theme_color_override("font_color", Color(0.7, 0.9, 1.0))
 	if _pixel_font:
@@ -86,7 +124,7 @@ func _build_ui() -> void:
 
 	# 倒數計時
 	_time_label = Label.new()
-	_time_label.position = Vector2(PANEL_WIDTH - 90, 38)
+	_time_label.position = Vector2(PANEL_WIDTH - 90, 62)
 	_time_label.text = ""
 	_time_label.add_theme_color_override("font_color", Color(0.6, 0.8, 0.6))
 	if _pixel_font:
@@ -96,8 +134,8 @@ func _build_ui() -> void:
 
 	# 排名列表容器（展開時顯示）
 	_entries_container = VBoxContainer.new()
-	_entries_container.position = Vector2(0, 58)
-	_entries_container.size = Vector2(PANEL_WIDTH, PANEL_HEIGHT - 80)
+	_entries_container.position = Vector2(0, 82)
+	_entries_container.size = Vector2(PANEL_WIDTH, PANEL_HEIGHT - 100)
 	_entries_container.visible = false
 	_panel_bg.add_child(_entries_container)
 
@@ -114,9 +152,14 @@ func _build_ui() -> void:
 
 func _connect_signals() -> void:
 	_toggle_btn.pressed.connect(_on_toggle_pressed)
+	_tab_daily_btn.pressed.connect(_on_tab_daily_pressed)
+	_tab_weekly_btn.pressed.connect(_on_tab_weekly_pressed)
 	# 連接 GameManager 的週賽更新訊號
 	if GameManager.has_signal("tournament_updated"):
 		GameManager.tournament_updated.connect(_on_tournament_updated)
+	# 連接 GameManager 的每日賽更新訊號（DAY-093）
+	if GameManager.has_signal("daily_tournament_updated"):
+		GameManager.daily_tournament_updated.connect(_on_daily_tournament_updated)
 
 # ---- 訊號處理 ----
 func _on_toggle_pressed() -> void:
@@ -129,42 +172,76 @@ func _on_toggle_pressed() -> void:
 		_panel_bg.size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
 		_rebuild_entries()
 	else:
-		_panel_bg.size = Vector2(PANEL_WIDTH, 58)
+		_panel_bg.size = Vector2(PANEL_WIDTH, 82)
 
-func _on_tournament_updated(data: Dictionary) -> void:
-	_rankings = data.get("rankings", [])
-	_my_rank = data.get("player_rank", 0)
-	_my_points = data.get("player_points", 0)
-	_seconds_left = data.get("seconds_left", 0)
-	_total_players = data.get("total_players", 0)
-
+func _on_tab_daily_pressed() -> void:
+	_active_tab = "daily"
+	_tab_daily_btn.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
+	_tab_weekly_btn.add_theme_color_override("font_color", Color(0.7, 0.8, 1.0))
 	_update_my_rank_label()
 	_update_time_label()
-
 	if _is_expanded:
 		_rebuild_entries()
 
+func _on_tab_weekly_pressed() -> void:
+	_active_tab = "weekly"
+	_tab_weekly_btn.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
+	_tab_daily_btn.add_theme_color_override("font_color", Color(0.7, 0.8, 1.0))
+	_update_my_rank_label()
+	_update_time_label()
+	if _is_expanded:
+		_rebuild_entries()
+
+func _on_tournament_updated(data: Dictionary) -> void:
+	_weekly_rankings = data.get("rankings", [])
+	_weekly_my_rank = data.get("player_rank", 0)
+	_weekly_my_points = data.get("player_points", 0)
+	_weekly_seconds_left = data.get("seconds_left", 0)
+	_weekly_total_players = data.get("total_players", 0)
+
+	if _active_tab == "weekly":
+		_update_my_rank_label()
+		_update_time_label()
+		if _is_expanded:
+			_rebuild_entries()
+
+func _on_daily_tournament_updated(data: Dictionary) -> void:
+	_daily_rankings = data.get("rankings", [])
+	_daily_my_rank = data.get("player_rank", 0)
+	_daily_my_points = data.get("player_points", 0)
+	_daily_seconds_left = data.get("seconds_left", 0)
+	_daily_total_players = data.get("total_players", 0)
+
+	if _active_tab == "daily":
+		_update_my_rank_label()
+		_update_time_label()
+		if _is_expanded:
+			_rebuild_entries()
+
 # ---- UI 更新 ----
 func _update_my_rank_label() -> void:
-	if _my_rank > 0:
-		var rank_icon := _get_rank_icon(_my_rank)
-		_my_rank_label.text = "%s #%d  %d分" % [rank_icon, _my_rank, _my_points]
-		# 前三名用金色
-		if _my_rank <= 3:
+	var my_rank := _daily_my_rank if _active_tab == "daily" else _weekly_my_rank
+	var my_points := _daily_my_points if _active_tab == "daily" else _weekly_my_points
+
+	if my_rank > 0:
+		var rank_icon := _get_rank_icon(my_rank)
+		_my_rank_label.text = "%s #%d  %d分" % [rank_icon, my_rank, my_points]
+		if my_rank <= 3:
 			_my_rank_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0))
 		else:
 			_my_rank_label.add_theme_color_override("font_color", Color(0.7, 0.9, 1.0))
 	else:
-		_my_rank_label.text = "我的積分：%d分" % _my_points if _my_points > 0 else "我的排名：未上榜"
+		_my_rank_label.text = "我的積分：%d分" % my_points if my_points > 0 else "我的排名：未上榜"
 		_my_rank_label.add_theme_color_override("font_color", Color(0.6, 0.7, 0.8))
 
 func _update_time_label() -> void:
-	if _seconds_left <= 0:
+	var seconds_left := _daily_seconds_left if _active_tab == "daily" else _weekly_seconds_left
+	if seconds_left <= 0:
 		_time_label.text = "結算中..."
 		return
-	var days := _seconds_left / 86400
-	var hours := (_seconds_left % 86400) / 3600
-	var mins := (_seconds_left % 3600) / 60
+	var days := seconds_left / 86400
+	var hours := (seconds_left % 86400) / 3600
+	var mins := (seconds_left % 3600) / 60
 	if days > 0:
 		_time_label.text = "%dd%dh" % [days, hours]
 	elif hours > 0:
@@ -173,22 +250,35 @@ func _update_time_label() -> void:
 		_time_label.text = "%dm" % mins
 
 func _rebuild_entries() -> void:
-	# 清除舊的條目
 	for child in _entries_container.get_children():
 		child.queue_free()
 
-	if _rankings.is_empty():
+	var rankings := _daily_rankings if _active_tab == "daily" else _weekly_rankings
+
+	if rankings.is_empty():
 		var empty_label := Label.new()
-		empty_label.text = "  本週尚無參賽者"
+		empty_label.text = "  尚無參賽者"
 		empty_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 		if _pixel_font:
 			empty_label.add_theme_font_override("font", _pixel_font)
 			empty_label.add_theme_font_size_override("font_size", 11)
 		_entries_container.add_child(empty_label)
+
+		# 更新底部獎勵說明
+		if _active_tab == "daily":
+			_footer_label.text = "🥇5000  🥈2000  🥉1000"
+		else:
+			_footer_label.text = "🥇50000  🥈25000  🥉10000"
 		return
 
-	for entry in _rankings:
+	for entry in rankings:
 		_add_entry_row(entry)
+
+	# 更新底部獎勵說明
+	if _active_tab == "daily":
+		_footer_label.text = "🥇5000  🥈2000  🥉1000"
+	else:
+		_footer_label.text = "🥇50000  🥈25000  🥉10000"
 
 func _add_entry_row(entry: Dictionary) -> void:
 	var rank: int = entry.get("rank", 0)
@@ -269,8 +359,13 @@ func _get_rank_color(rank: int) -> Color:
 
 # ---- 每幀更新倒數 ----
 func _process(delta: float) -> void:
-	if _seconds_left > 0:
-		_seconds_left -= int(delta)
-		if _seconds_left < 0:
-			_seconds_left = 0
+	if _active_tab == "daily" and _daily_seconds_left > 0:
+		_daily_seconds_left -= int(delta)
+		if _daily_seconds_left < 0:
+			_daily_seconds_left = 0
+		_update_time_label()
+	elif _active_tab == "weekly" and _weekly_seconds_left > 0:
+		_weekly_seconds_left -= int(delta)
+		if _weekly_seconds_left < 0:
+			_weekly_seconds_left = 0
 		_update_time_label()

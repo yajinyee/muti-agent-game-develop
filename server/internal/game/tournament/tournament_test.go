@@ -192,3 +192,148 @@ func TestDisplayNameUpdate(t *testing.T) {
 		t.Errorf("expected display name 'NewName', got '%s'", rankings[0].DisplayName)
 	}
 }
+
+// ============================================================
+// DailyTournament 測試（DAY-093）
+// ============================================================
+
+func TestNewDaily(t *testing.T) {
+	dt := NewDaily()
+	if dt == nil {
+		t.Fatal("NewDaily() returned nil")
+	}
+	if len(dt.entries) != 0 {
+		t.Errorf("expected 0 entries, got %d", len(dt.entries))
+	}
+}
+
+func TestDailyAddPoints_Kill(t *testing.T) {
+	dt := NewDaily()
+	pts := dt.AddPoints("p1", "Player1", PointKill, 10.0)
+	if pts != 10 {
+		t.Errorf("expected 10 points, got %d", pts)
+	}
+}
+
+func TestDailyAddPoints_Boss(t *testing.T) {
+	dt := NewDaily()
+	pts := dt.AddPoints("p1", "Player1", PointBoss, 0)
+	if pts != 50 {
+		t.Errorf("expected 50 points for boss kill, got %d", pts)
+	}
+}
+
+func TestDailyAddPoints_Bonus(t *testing.T) {
+	dt := NewDaily()
+	pts := dt.AddPoints("p1", "Player1", PointBonus, 0)
+	if pts != 20 {
+		t.Errorf("expected 20 points for bonus, got %d", pts)
+	}
+}
+
+func TestDailyGetRankings_Order(t *testing.T) {
+	dt := NewDaily()
+	dt.AddPoints("p1", "Alice", PointKill, 5.0)   // 5 pts
+	dt.AddPoints("p2", "Bob", PointBoss, 0)        // 50 pts
+	dt.AddPoints("p3", "Charlie", PointBonus, 0)   // 20 pts
+
+	rankings := dt.GetRankings(3)
+	if len(rankings) != 3 {
+		t.Fatalf("expected 3 rankings, got %d", len(rankings))
+	}
+	if rankings[0].PlayerID != "p2" {
+		t.Errorf("expected p2 (Bob) at rank 1, got %s", rankings[0].PlayerID)
+	}
+}
+
+func TestDailyGetRankings_Prizes(t *testing.T) {
+	dt := NewDaily()
+	dt.AddPoints("p1", "Alice", PointBoss, 0)
+	dt.AddPoints("p2", "Bob", PointKill, 5.0)
+	dt.AddPoints("p3", "Charlie", PointBonus, 0)
+
+	rankings := dt.GetRankings(3)
+	// 第一名應有 5000 金幣獎勵（每日賽）
+	if rankings[0].Prize != 5000 {
+		t.Errorf("expected rank 1 daily prize 5000, got %d", rankings[0].Prize)
+	}
+	// 第二名應有 2000 金幣獎勵
+	if rankings[1].Prize != 2000 {
+		t.Errorf("expected rank 2 daily prize 2000, got %d", rankings[1].Prize)
+	}
+}
+
+func TestDailyGetPlayerRank(t *testing.T) {
+	dt := NewDaily()
+	dt.AddPoints("p1", "Alice", PointBoss, 0)   // 50 pts
+	dt.AddPoints("p2", "Bob", PointKill, 10.0)  // 10 pts
+
+	rank, pts := dt.GetPlayerRank("p2")
+	if rank != 2 {
+		t.Errorf("expected rank 2, got %d", rank)
+	}
+	if pts != 10 {
+		t.Errorf("expected 10 points, got %d", pts)
+	}
+}
+
+func TestDailyGetDayInfo(t *testing.T) {
+	dt := NewDaily()
+	start, end, left := dt.GetDayInfo()
+	if start.IsZero() {
+		t.Error("day start should not be zero")
+	}
+	if end.IsZero() {
+		t.Error("day end should not be zero")
+	}
+	if end.Before(start) {
+		t.Error("day end should be after day start")
+	}
+	if left <= 0 {
+		t.Error("seconds left should be positive for a new daily tournament")
+	}
+}
+
+func TestCurrentDayRange(t *testing.T) {
+	loc := time.FixedZone("UTC+8", 8*3600)
+	// 2026-05-20 12:00 UTC+8
+	noon := time.Date(2026, 5, 20, 12, 0, 0, 0, loc)
+	start, end := currentDayRange(noon)
+
+	// 開始應該是當天 00:00 UTC+8
+	if start.Hour() != 0 || start.Minute() != 0 {
+		t.Errorf("day start should be 00:00, got %02d:%02d", start.Hour(), start.Minute())
+	}
+	// 結束應該是當天 23:59:59 UTC+8
+	if end.Hour() != 23 || end.Minute() != 59 || end.Second() != 59 {
+		t.Errorf("day end should be 23:59:59, got %02d:%02d:%02d", end.Hour(), end.Minute(), end.Second())
+	}
+	// 開始和結束應該是同一天
+	if start.Day() != end.Day() {
+		t.Errorf("day start and end should be same day, got %d and %d", start.Day(), end.Day())
+	}
+}
+
+func TestDailyGetDailySnapshot(t *testing.T) {
+	dt := NewDaily()
+	dt.AddPoints("p1", "Alice", PointBoss, 0)
+	dt.AddPoints("p2", "Bob", PointKill, 5.0)
+
+	snap := dt.GetDailySnapshot()
+	if snap.TotalPlayers != 2 {
+		t.Errorf("expected 2 total players, got %d", snap.TotalPlayers)
+	}
+	if len(snap.Rankings) != 2 {
+		t.Errorf("expected 2 rankings, got %d", len(snap.Rankings))
+	}
+	if snap.SecondsLeft <= 0 {
+		t.Error("seconds left should be positive")
+	}
+	if len(snap.Prizes) != 3 {
+		t.Errorf("expected 3 daily prizes, got %d", len(snap.Prizes))
+	}
+	// 每日賽獎勵應該比週賽少
+	if snap.Prizes[0].Coins != 5000 {
+		t.Errorf("expected daily rank 1 prize 5000, got %d", snap.Prizes[0].Coins)
+	}
+}

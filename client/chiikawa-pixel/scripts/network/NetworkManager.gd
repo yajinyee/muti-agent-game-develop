@@ -372,3 +372,7 @@ func send_get_daily_spin() -> void:
 ## 執行每日轉盤（DAY-092）
 func send_daily_spin() -> void:
 	send("daily_spin", {})
+
+## 查詢週賽/每日賽狀態（DAY-093）
+func send_get_tournament() -> void:
+	send("get_tournament", {})

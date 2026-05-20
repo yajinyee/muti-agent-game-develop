@@ -361,6 +361,17 @@ func main() {
 		}
 	})
 
+	// 每日賽端點（DAY-093）
+	// GET /daily-tournament — 取得今日賽排名快照
+	mux.HandleFunc("/daily-tournament", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.GetDailyTournamentSnapshot()
+		if err := json.NewEncoder(w).Encode(snap); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 公會系統端點（DAY-075）
 	// GET /guilds — 取得所有公會列表
 	// GET /guild?guild_id=xxx — 取得指定公會詳細資訊

@@ -91,6 +91,9 @@ const (
 	MsgDailyBonus        MessageType = "daily_bonus"        // 每日登入獎勵（DAY-065）
 	MsgTournamentUpdate  MessageType = "tournament_update"  // 週賽排名更新（DAY-066）
 	MsgTournamentResult  MessageType = "tournament_result"  // 週賽結算通知（DAY-066）
+	MsgGetTournament     MessageType = "get_tournament"     // 查詢週賽/日賽狀態（DAY-093）
+	MsgDailyTournamentUpdate MessageType = "daily_tournament_update" // 每日賽排名更新（DAY-093）
+	MsgDailyTournamentResult MessageType = "daily_tournament_result" // 每日賽結算通知（DAY-093）
 	MsgSkinUpdate        MessageType = "skin_update"        // 砲台外觀更新（DAY-071）
 	MsgSeasonUpdate      MessageType = "season_update"      // 賽季通行證更新（DAY-072）
 	MsgSeasonLevelUp     MessageType = "season_level_up"    // 賽季等級升級通知（DAY-072）
@@ -430,6 +433,27 @@ type TournamentResultPayload struct {
 	Rankings  []TournamentRankEntry `json:"rankings"`
 	Prize     int                   `json:"prize"`       // 接收者獲得的獎勵（0=未獲獎）
 	PrizeLabel string               `json:"prize_label"` // 獎勵標籤
+}
+
+// ---- 每日賽系統（DAY-093）----
+
+// DailyTournamentUpdatePayload 每日賽排名更新廣播（每 30 秒）
+type DailyTournamentUpdatePayload struct {
+	DayStart     int64                 `json:"day_start"`     // Unix ms
+	DayEnd       int64                 `json:"day_end"`       // Unix ms
+	SecondsLeft  int64                 `json:"seconds_left"`  // 距離結束秒數
+	Rankings     []TournamentRankEntry `json:"rankings"`      // 前 10 名
+	TotalPlayers int                   `json:"total_players"` // 今日參賽人數
+	PlayerRank   int                   `json:"player_rank"`   // 接收者的排名（0=未上榜）
+	PlayerPoints int                   `json:"player_points"` // 接收者的積分
+}
+
+// DailyTournamentResultPayload 每日賽結算通知（每日結束時廣播）
+type DailyTournamentResultPayload struct {
+	Date       string                `json:"date"`        // "2026-05-20"
+	Rankings   []TournamentRankEntry `json:"rankings"`
+	Prize      int                   `json:"prize"`       // 接收者獲得的獎勵（0=未獲獎）
+	PrizeLabel string                `json:"prize_label"` // 獎勵標籤
 }
 
 // ---- 武器升級系統（DAY-067）----

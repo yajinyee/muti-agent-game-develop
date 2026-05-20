@@ -56,6 +56,7 @@ type Game struct {
 	jackpotMgr  *jackpot.Manager    // Progressive Jackpot 管理器（DAY-048）
 	jackpotHist *jackpot.History    // Jackpot 中獎歷史（DAY-048e）
 	tournamentMgr *tournament.Tournament // 週賽管理器（DAY-066）
+	dailyTournamentMgr *tournament.DailyTournament // 每日賽管理器（DAY-093）
 	Season      *season.Manager     // 賽季通行證管理器（DAY-072）
 	Friends     *friend.Manager     // 好友系統管理器（DAY-073）
 	Guild       *guild.Manager      // 公會系統管理器（DAY-074）
@@ -86,6 +87,7 @@ type Game struct {
 	lastLeaderboardAt  time.Time  // 排行榜廣播計時（每 10 秒一次）
 	lastJackpotAt      time.Time  // Jackpot 廣播計時（每 5 秒一次，DAY-048）
 	lastTournamentAt   time.Time  // 週賽排名廣播計時（每 30 秒一次，DAY-066）
+	lastDailyTournamentAt time.Time // 每日賽排名廣播計時（每 30 秒一次，DAY-093）
 	lastGuildWarAt     time.Time  // 公會戰廣播計時（每 60 秒一次，DAY-076）
 	lastDailyBossAt    time.Time  // 每日 BOSS 廣播計時（每 30 秒一次，DAY-077）
 	lastEventAt        time.Time  // 限時活動廣播計時（每 30 秒一次，DAY-079）
@@ -122,6 +124,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		jackpotMgr:         jackpot.NewManager(),
 		jackpotHist:        jackpot.NewHistory(10),
 		tournamentMgr:      tournament.New(),
+		dailyTournamentMgr: tournament.NewDaily(),
 		Season:             season.New(),
 		Friends:            friend.New(),
 		Guild:              guild.New(),
@@ -254,6 +257,9 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendMysteryBoxUpdate(pp)
 				// 發送每日轉盤狀態（DAY-092）
 				g.handleGetDailySpin(pp.ID)
+				// 發送週賽/每日賽狀態（DAY-093）
+				g.sendTournamentUpdate(pp.ID)
+				g.sendDailyTournamentUpdate(pp.ID)
 			}
 		}()
 	}
@@ -444,6 +450,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleGetDailySpin(clientID)
 	case ws.MsgDailySpin:
 		g.handleDailySpin(clientID)
+	// 週賽/每日賽查詢（DAY-093）
+	case ws.MsgGetTournament:
+		g.handleGetTournament(p)
 	}
 }
 
@@ -745,6 +754,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 
 	// 週賽積分：擊破目標（DAY-066）
 	g.tournamentMgr.AddPoints(p.ID, p.DisplayName, tournament.PointKill, result.Multiplier)
+	// 每日賽積分：擊破目標（DAY-093）
+	g.notifyDailyTournamentKill(p, result.Multiplier)
 	// 賽季積分同步（DAY-072）：擊破積分 = max(1, floor(multiplier))
 	killPts := int(result.Multiplier)
 	if killPts < 1 {
@@ -947,6 +958,11 @@ func (g *Game) updateNormalPlay() {
 	if shouldBroadcastTournament {
 		g.lastTournamentAt = now
 	}
+	// 每日賽排名廣播（每 30 秒，DAY-093）
+	shouldBroadcastDailyTournament := now.Sub(g.lastDailyTournamentAt) >= 30*time.Second
+	if shouldBroadcastDailyTournament {
+		g.lastDailyTournamentAt = now
+	}
 	// 公會戰廣播（每 60 秒，DAY-076）
 	shouldBroadcastGuildWar := now.Sub(g.lastGuildWarAt) >= 60*time.Second
 	if shouldBroadcastGuildWar {
@@ -982,6 +998,10 @@ func (g *Game) updateNormalPlay() {
 	// 週賽排名廣播（每 30 秒，DAY-066）
 	if shouldBroadcastTournament {
 		go g.broadcastTournament()
+	}
+	// 每日賽排名廣播（每 30 秒，DAY-093）
+	if shouldBroadcastDailyTournament {
+		go g.broadcastDailyTournament()
 	}
 	// 公會戰廣播（每 60 秒，DAY-076）
 	if shouldBroadcastGuildWar {

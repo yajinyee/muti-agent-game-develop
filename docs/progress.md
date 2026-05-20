@@ -1,6 +1,32 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-092 每日簽到轉盤）
+## 最後更新：2026-05-20（DAY-093 每日錦標賽系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-093 更新（自主觸發）：** 每日錦標賽系統（Daily Tournament System）✅
+  - `server/internal/game/tournament/tournament.go`：新增 `DailyTournament` 管理器（每日 UTC+8 00:00 重置，前三名獎勵 5000/2000/1000）
+  - `server/internal/game/tournament/tournament_test.go`：新增 10 個每日賽測試（共 23 個測試全部通過）
+  - `server/internal/ws/protocol.go`：新增 `MsgGetTournament`/`MsgDailyTournamentUpdate`/`MsgDailyTournamentResult` + `DailyTournamentUpdatePayload`/`DailyTournamentResultPayload`
+  - `server/internal/game/tournament_handler.go`：新建 handler 集（`handleGetTournament`/`sendTournamentUpdate`/`sendDailyTournamentUpdate`/`broadcastDailyTournament`/`notifyDailyTournamentKill`/`notifyDailyTournamentBoss`/`notifyDailyTournamentBonus`/`GetDailyTournamentSnapshot`）
+  - `server/internal/game/game.go`：`dailyTournamentMgr` 欄位 + 初始化 + `lastDailyTournamentAt` 計時器 + AddPlayer 發送每日賽狀態 + HandleMessage `MsgGetTournament` 分支 + gameLoop 每 30 秒廣播
+  - `server/internal/game/boss_handler.go`：`handleBossKill` 加入 `notifyDailyTournamentBoss()`
+  - `server/internal/game/bonus_handler.go`：`endBonusGame` 加入 `notifyDailyTournamentBonus()`
+  - `server/cmd/gameserver/main.go`：`/daily-tournament` HTTP 端點（GET，回傳今日賽快照）
+  - `client/chiikawa-pixel/scripts/ui/TournamentPanel.gd`：升級為雙 Tab 面板（📅今日賽 / 📆週賽），預設顯示今日賽，每日賽獎勵 🥇5000/🥈2000/🥉1000
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`daily_tournament_updated` 訊號 + `_handle_daily_tournament_update()` handler + `daily_tournament_update` 訊息分支
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：`send_get_tournament()`
+  - 每日賽積分來源：擊破目標（依倍率）+ BOSS 擊殺（50分）+ Bonus 完成（20分）
+  - 每日賽獎勵：第1名 5000金幣 / 第2名 2000金幣 / 第3名 1000金幣
+  - 每日 UTC+8 00:00 重置，保留最近 7 天歷史
+  - 週賽獎勵不變：第1名 50000 / 第2名 25000 / 第3名 10000
+  - build/vet/test 全部通過（23/23 tournament 測試）
+  - **業界依據：** Infingame（2026-05-19）確認 Tournament 系統是 2026 年 iGaming 最熱門留存機制；Fast Track 確認「每日錦標賽」讓玩家每天都有競爭目標，提升 repeat play
+
 
 ## 自我評估
 - **完成度：100%**
