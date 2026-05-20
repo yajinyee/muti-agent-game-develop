@@ -52,13 +52,13 @@ type PurchaseRecord struct {
 
 // DefaultItems 預設商品列表
 var DefaultItems = []Item{
-	// 金幣包（模擬，實際應接入支付系統）
+	// 每日免費金幣包（每日限領 1 次，price=0）
 	{
 		ID:          "coin_pack_small",
-		Name:        "💰 小金幣包",
-		Description: "獲得 5000 金幣",
+		Name:        "💰 每日小禮包",
+		Description: "每日免費領取 5000 金幣",
 		Type:        ItemCoinPack,
-		Price:       0, // 模擬免費（實際應有價格）
+		Price:       0,
 		OrigPrice:   0,
 		Reward:      ItemReward{Coins: 5000},
 		Stock:       -1,
@@ -66,8 +66,8 @@ var DefaultItems = []Item{
 	},
 	{
 		ID:          "coin_pack_medium",
-		Name:        "💰 中金幣包",
-		Description: "獲得 15000 金幣",
+		Name:        "💰 每日大禮包",
+		Description: "每日免費領取 15000 金幣（需 VIP 白銀+）",
 		Type:        ItemCoinPack,
 		Price:       0,
 		OrigPrice:   0,

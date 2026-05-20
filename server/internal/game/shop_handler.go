@@ -103,9 +103,9 @@ func (g *Game) handleBuyShopItem(p *player.Player, msg *ws.Message) {
 		}
 	}
 	if reward.AttackMult > 0 {
-		// 攻擊倍率加成：記錄到 MysteryBox 系統（複用現有機制）
-		// 實際上 MysteryBox 的 AttackMult 獎勵也是這樣處理的
-		log.Printf("[Shop] player=%s got attack mult bonus x%.1f (applied via next attack)", p.ID, reward.AttackMult)
+		// 攻擊倍率加成：複用 MysteryBox 的 PendingMultiplier 機制
+		g.MysteryBox.SetPendingMultiplier(p.ID, reward.AttackMult)
+		log.Printf("[Shop] player=%s got attack mult bonus x%.1f", p.ID, reward.AttackMult)
 	}
 	if reward.SeasonPoints > 0 {
 		newLevels := g.addSeasonPoints(p.ID, reward.SeasonPoints)
