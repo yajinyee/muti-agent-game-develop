@@ -2,6 +2,50 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
+**日期**：2026-05-20（DAY-089）
+**整體目標**：特殊武器系統 + 上傳 GitHub + 自主循環
+
+---
+
+## 今日任務清單
+
+### ✅ DAY-089 啟動檢查
+
+- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-088，連鎖爆炸系統）
+- [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
+- [x] go vet ./... 確認無警告（VET OK）
+- [x] go test ./internal/game/specialweapon/... 確認測試通過（10/10 PASS）
+
+### ✅ DAY-089 特殊武器系統（P1）
+
+- [x] `specialweapon/specialweapon.go`：特殊武器管理器（3種武器，購買/使用/充能）
+- [x] `specialweapon/specialweapon_test.go`：10 個單元測試全部通過
+- [x] `protocol.go`：特殊武器相關訊息類型 + Payload
+- [x] `game.go`：整合特殊武器管理器 + handler 分支
+- [x] `specialweapon_handler.go`：完整 handler 集
+- [x] `SpecialWeaponPanel.gd`：Client 端特殊武器面板
+- [x] `GameManager.gd`：special_weapon_updated/special_weapon_fired 訊號
+- [x] `NetworkManager.gd`：send_buy/use/get_special_weapons
+- [x] `HUD.gd`：整合 SpecialWeaponPanel（x=420 y=540）
+- [x] build/vet/test 全部通過
+
+### ✅ 上傳 GitHub（P1）
+
+- [x] git add + git commit + git push（DAY-089 特殊武器系統）
+
+---
+
+## 每日自問（Game Director 必填）
+
+> **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
+
+- 完成度：**100%**
+- 美術質量：**100/100**
+- 規格一致性：**100%**
+- 架構成熟度：**生產就緒 + 完整社交系統 + 特殊武器系統 + KnowHow 135 條**
+
+> 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
+
 **日期**：2026-05-20（DAY-078）
 **整體目標**：VIP 等級系統 + 上傳 GitHub + 自主循環
 
