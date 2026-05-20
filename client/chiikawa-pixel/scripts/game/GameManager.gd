@@ -56,6 +56,8 @@ signal wheel_triggered(wheel_data: Dictionary)         # 幸運轉盤觸發（DA
 signal challenge_unlocked(challenge_data: Dictionary)  # 隱藏挑戰解鎖（DAY-085）
 signal mission_streak_bonus(streak_data: Dictionary)   # 任務連續完成獎勵（DAY-086）
 signal weather_updated(weather_data: Dictionary)       # 天氣狀態更新（DAY-087）
+signal chain_explosion(chain_data: Dictionary)         # 連鎖爆炸（DAY-088）
+signal chain_target_killed(instance_id: String, multiplier: float) # 連鎖目標擊破（DAY-088）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -197,6 +199,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_mission_streak_bonus(payload)
 		"weather_update":
 			_handle_weather_update(payload)
+		"chain_explosion":
+			_handle_chain_explosion(payload)
 		"streak_update":
 			_handle_streak_update(payload)
 		"streak_reset":
@@ -542,3 +546,7 @@ func _handle_mission_streak_bonus(payload: Dictionary) -> void:
 ## 處理天氣狀態更新（DAY-087）
 func _handle_weather_update(payload: Dictionary) -> void:
 	emit_signal("weather_updated", payload)
+
+## 處理連鎖爆炸（DAY-088）
+func _handle_chain_explosion(payload: Dictionary) -> void:
+	emit_signal("chain_explosion", payload)

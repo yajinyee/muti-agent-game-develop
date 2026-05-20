@@ -14,6 +14,7 @@ import (
 	"digital-twin/server/internal/analytics"
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/achievement"
+	"digital-twin/server/internal/game/chain"
 	"digital-twin/server/internal/game/challenge"
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/dailyboss"
@@ -63,6 +64,7 @@ type Game struct {
 	Wheel       *wheel.Manager      // 幸運轉盤管理器（DAY-084）
 	Challenge   *challenge.Manager  // 隱藏挑戰管理器（DAY-085）
 	Weather     *weather.Manager    // 天氣系統管理器（DAY-087）
+	Chain       *chain.Manager      // 連鎖爆炸管理器（DAY-088）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -125,6 +127,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Wheel:              wheel.NewManager(),
 		Challenge:          challenge.NewManager(),
 		Weather:            weather.New(),
+		Chain:              chain.NewDefault(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -711,6 +714,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	g.notifyWheelKill(p, t.DefID, finalReward)
 	// 隱藏挑戰：記錄擊破事件（DAY-085）
 	g.notifyChallengeKill(p, t.DefID, result.Multiplier, finalReward)
+	// 連鎖爆炸：擊破後嘗試觸發連鎖（DAY-088）
+	go g.notifyChainKill(p, t.InstanceID, t.X, t.Y, result.Multiplier, t.DefID)
 }
 
 // handleLock 處理鎖定

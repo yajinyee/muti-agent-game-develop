@@ -121,6 +121,8 @@ const (
 	MsgMissionStreakBonus MessageType = "mission_streak_bonus" // 連續完成獎勵通知
 	// 天氣系統（DAY-087）
 	MsgWeatherUpdate MessageType = "weather_update" // 天氣狀態更新
+	// 連鎖爆炸系統（DAY-088）
+	MsgChainExplosion MessageType = "chain_explosion" // 連鎖爆炸通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -998,4 +1000,27 @@ type WeatherUpdatePayload struct {
 	BossChanceBonus  float64 `json:"boss_chance_bonus"` // BOSS 出現機率加成
 	FogEffect        bool    `json:"fog_effect"`        // 是否有濃霧效果
 	IsNew            bool    `json:"is_new"`            // 是否剛切換（用於 Client 端顯示通知）
+}
+
+// ---- 連鎖爆炸系統（DAY-088）----
+
+// ChainKillEntry 連鎖擊破的目標條目
+type ChainKillEntry struct {
+	InstanceID string  `json:"instance_id"`
+	DefID      string  `json:"def_id"`
+	Multiplier float64 `json:"multiplier"`
+	Reward     int     `json:"reward"`
+}
+
+// ChainExplosionPayload 連鎖爆炸通知（Server → Client）
+// 擊破目標後觸發連鎖，周圍目標同時爆炸
+type ChainExplosionPayload struct {
+	TriggerID   string           `json:"trigger_id"`   // 觸發連鎖的目標 ID
+	Level       int              `json:"level"`        // 連鎖等級（1-4）
+	LevelName   string           `json:"level_name"`   // 等級名稱
+	LevelColor  string           `json:"level_color"`  // 顯示顏色（hex）
+	Chains      []ChainKillEntry `json:"chains"`       // 被連鎖擊破的目標列表
+	TotalReward int              `json:"total_reward"` // 連鎖總獎勵
+	BonusMult   float64          `json:"bonus_mult"`   // 連鎖獎勵倍率加成
+	PlayerID    string           `json:"player_id"`    // 觸發玩家 ID
 }

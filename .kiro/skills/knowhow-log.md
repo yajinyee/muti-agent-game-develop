@@ -2884,3 +2884,17 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **Snapshot 設計**：`GetSnapshot(isNew bool)` 回傳完整快照，`isNew` 控制 Client 是否顯示通知
 - **gameLoop 整合**：每 30 秒呼叫 `tickAndBroadcastWeather()`，只在天氣真正切換時廣播
 - **教訓：** 天氣 tick 要用 `lastWeatherAt` 計時，不要用 `time.After` 或 goroutine sleep
+
+## 138. 連鎖爆炸系統設計原則（DAY-088）
+- **業界依據：** Avalanche/Cascading Reels 是 2026 年最熱門的留存機制（thegamehaus.com 2026-04-19）
+- **RTP 控制關鍵：** 最大深度 2 層 + 排除 BOSS，防止連鎖無限觸發導致 RTP 爆炸
+- **機率設計：** 依觸發目標倍率調整機率（2x=5% → 50x+=30%），高倍率目標更容易觸發連鎖
+- **獎勵設計：** 連鎖獎勵 = 基礎獎勵 × 連鎖倍率加成（1.0/1.2/1.5/2.0），不是直接給固定金幣
+- **goroutine 非同步：** `notifyChainKill` 用 goroutine 執行，避免阻塞 handleKill 主流程
+- **教訓：** 連鎖系統要有明確的上限（深度/數量），否則 RTP 會失控
+
+## 139. Target 欄位命名（重要）
+- `Target.InstanceID`（不是 `Target.ID`）
+- `Target.Multiplier`（不是 `Target.Def.Multiplier`，Def 只有 MultiplierMin/MultiplierMax）
+- `data.TargetDef` 沒有 `Multiplier` 欄位，實際倍率在 `Target.Multiplier`（NewTarget 時計算）
+- **教訓：** 使用 Target 欄位前先確認 struct 定義，不要假設欄位名稱

@@ -185,6 +185,7 @@ func _ready() -> void:
 	_init_challenge_panel()   # 隱藏挑戰面板（DAY-085）
 	_init_mission_streak_panel() # 任務連續完成面板（DAY-086）
 	_init_weather_panel()     # 天氣系統面板（DAY-087）
+	_init_chain_panel()       # 連鎖爆炸面板（DAY-088）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1799,3 +1800,14 @@ func _init_weather_panel() -> void:
 	panel.name = "WeatherPanel"
 	add_child(panel)
 	_weather_panel = panel
+
+# ---- 連鎖爆炸面板（DAY-088）----
+
+const ChainExplosionPanelScript = preload("res://scripts/ui/ChainExplosionPanel.gd")
+var _chain_panel: Control = null
+
+func _init_chain_panel() -> void:
+	var panel = ChainExplosionPanelScript.new()
+	panel.name = "ChainExplosionPanel"
+	add_child(panel)
+	_chain_panel = panel
