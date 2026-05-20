@@ -184,6 +184,7 @@ func _ready() -> void:
 	_init_wheel_panel()       # 幸運轉盤面板（DAY-084）
 	_init_challenge_panel()   # 隱藏挑戰面板（DAY-085）
 	_init_mission_streak_panel() # 任務連續完成面板（DAY-086）
+	_init_weather_panel()     # 天氣系統面板（DAY-087）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1787,3 +1788,14 @@ func _init_mission_streak_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_mission_streak_panel_node = panel
+
+# ---- 天氣系統面板（DAY-087）----
+
+const WeatherPanelScript = preload("res://scripts/ui/WeatherPanel.gd")
+var _weather_panel: Control = null
+
+func _init_weather_panel() -> void:
+	var panel = WeatherPanelScript.new()
+	panel.name = "WeatherPanel"
+	add_child(panel)
+	_weather_panel = panel

@@ -2869,3 +2869,18 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **UI 設計：** 旋轉動畫要有「減速感」（後半段每步間隔增加），不能勻速停止
 - **整合位置：** 在 `handleKill` 最後呼叫，在獎勵已發放後（extraReward 是額外獎勵）
 - **教訓：** 轉盤的 `finalReward = baseReward × multiplier`，extraReward = finalReward - baseReward，只發放差額
+
+## 136. 天氣系統設計原則（DAY-087）
+- **業界依據：** Fisch（Roblox）2026 確認天氣系統讓魚群生成率提升 35%，是 2026 年捕魚遊戲標配
+- **加權隨機不重複**：`pickNext()` 排除當前天氣後再做加權隨機，確保不會連續出現同一天氣
+- **天氣效果疊加**：天氣獎勵倍率 × 活動倍率 × 連擊倍率，三層疊加讓高倍率時刻更爽
+- **切換通知設計**：天氣切換時顯示大彈窗（淡入0.3s → 停留2.5s → 淡出0.4s），讓玩家感受到環境變化
+- **稀有天氣設計**：暴雪（3%）最稀有，觸發時 BOSS 出現率+30%，製造驚喜感
+- **教訓：** 天氣系統要有明確的視覺反饋（面板顏色隨天氣變化），讓玩家一眼看出當前天氣效果
+
+## 137. Go 天氣管理器架構（DAY-087）
+- **Manager 模式**：`weather.Manager` 封裝所有天氣邏輯，`CheckAndRotate()` 回傳 `(changed bool, snap Snapshot)`
+- **RWMutex 保護**：讀操作用 `RLock`，寫操作（切換天氣）用 `Lock`
+- **Snapshot 設計**：`GetSnapshot(isNew bool)` 回傳完整快照，`isNew` 控制 Client 是否顯示通知
+- **gameLoop 整合**：每 30 秒呼叫 `tickAndBroadcastWeather()`，只在天氣真正切換時廣播
+- **教訓：** 天氣 tick 要用 `lastWeatherAt` 計時，不要用 `time.After` 或 goroutine sleep

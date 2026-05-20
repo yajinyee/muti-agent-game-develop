@@ -505,6 +505,16 @@ func main() {
 		}
 	})
 
+	// GET /weather — 取得當前天氣狀態（DAY-087）
+	mux.HandleFunc("/weather", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.Weather.GetSnapshot(false)
+		if err := json.NewEncoder(w).Encode(snap); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// GET /codex?player_id=xxx — 取得玩家圖鑑狀態（DAY-081）
 	mux.HandleFunc("/codex", func(w http.ResponseWriter, r *http.Request) {		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")

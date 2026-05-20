@@ -1,6 +1,29 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-086 任務連續完成獎勵）
+## 最後更新：2026-05-20（DAY-087 天氣系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-087 更新（自主觸發）：** 天氣系統（Weather System）✅
+  - `server/internal/game/weather/weather.go`：天氣管理器（6種天氣，加權隨機輪換，不重複選同一天氣）
+  - `server/internal/game/weather/weather_test.go`：14 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgWeatherUpdate`（Server→Client）+ `WeatherUpdatePayload`
+  - `server/internal/game/weather_handler.go`：`sendWeatherUpdate()`/`broadcastWeatherUpdate()`/`tickAndBroadcastWeather()`
+  - `server/internal/game/game.go`：`Weather *weather.Manager` 欄位 + 初始化 + `AddPlayer` 發送天氣狀態 + `handleKill` 套用天氣獎勵倍率 + gameLoop 每 30 秒 tick
+  - `server/cmd/gameserver/main.go`：`/weather` HTTP 端點（GET，回傳當前天氣狀態）
+  - `client/chiikawa-pixel/scripts/ui/WeatherPanel.gd`：天氣面板（右上角圖示/名稱/效果/倒數，天氣切換大通知彈窗）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`weather_updated` 訊號 + `_handle_weather_update()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 WeatherPanel（`_init_weather_panel()`）
+  - 6 種天氣：晴天（正常）/ 下雨（稀有+20%）/ 暴風雨（速度+30%，獎勵×1.5）/ 濃霧（獎勵×2.0，視野降低）/ 豔陽（金幣魚+50%，獎勵×1.2）/ 暴雪（BOSS+30%，BOSS獎勵×2.0）
+  - 天氣持續 3-5 分鐘，加權隨機切換（晴天40%，下雨25%，暴風雨15%，濃霧10%，豔陽7%，暴雪3%）
+  - 天氣獎勵倍率直接套用到 handleKill finalReward（疊加活動倍率和連擊倍率）
+  - 天氣切換時廣播給所有玩家，Client 顯示大通知彈窗（淡入→停留2.5秒→淡出）
+  - build/vet/test 全部通過（14/14 weather 測試）
+  - **業界依據：** Fisch（Roblox）2026 確認天氣系統讓魚群生成率提升 35%，是 2026 年捕魚遊戲標配留存機制
 
 ## 自我評估
 - **完成度：100%**

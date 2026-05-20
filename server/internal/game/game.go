@@ -29,6 +29,7 @@ import (
 	"digital-twin/server/internal/game/tournament"
 	"digital-twin/server/internal/game/vip"
 	"digital-twin/server/internal/game/referral"
+	"digital-twin/server/internal/game/weather"
 	"digital-twin/server/internal/game/wheel"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
@@ -61,6 +62,7 @@ type Game struct {
 	Referral    *referral.Manager   // 推薦碼管理器（DAY-082）
 	Wheel       *wheel.Manager      // 幸運轉盤管理器（DAY-084）
 	Challenge   *challenge.Manager  // 隱藏挑戰管理器（DAY-085）
+	Weather     *weather.Manager    // 天氣系統管理器（DAY-087）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -79,6 +81,7 @@ type Game struct {
 	lastGuildWarAt     time.Time  // 公會戰廣播計時（每 60 秒一次，DAY-076）
 	lastDailyBossAt    time.Time  // 每日 BOSS 廣播計時（每 30 秒一次，DAY-077）
 	lastEventAt        time.Time  // 限時活動廣播計時（每 30 秒一次，DAY-079）
+	lastWeatherAt      time.Time  // 天氣廣播計時（每 30 秒一次，DAY-087）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -121,6 +124,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Referral:           referral.NewManager(),
 		Wheel:              wheel.NewManager(),
 		Challenge:          challenge.NewManager(),
+		Weather:            weather.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -230,6 +234,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendReferralInfo(pp)
 				// 初始化隱藏挑戰（DAY-085）
 				g.Challenge.InitPlayer(playerID)
+				// 發送天氣狀態（DAY-087）
+				g.sendWeatherUpdate(playerID, false)
 			}
 		}()
 	}
@@ -543,6 +549,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	finalReward := result.Reward
 	if eventRewardMult > 1.0 {
 		finalReward = int(float64(result.Reward) * eventRewardMult)
+	}
+	// 套用天氣獎勵倍率（DAY-087）
+	weatherRewardMult := g.Weather.GetRewardMult()
+	if weatherRewardMult > 1.0 {
+		finalReward = int(float64(finalReward) * weatherRewardMult)
 	}
 	// 套用連擊倍率（DAY-083）
 	streakMult := g.notifyStreakKill(p)
@@ -889,6 +900,11 @@ func (g *Game) updateNormalPlay() {
 	if shouldBroadcastEvent {
 		g.lastEventAt = now
 	}
+	// 天氣廣播（每 30 秒，DAY-087）
+	shouldBroadcastWeather := now.Sub(g.lastWeatherAt) >= 30*time.Second
+	if shouldBroadcastWeather {
+		g.lastWeatherAt = now
+	}
 	g.mu.Unlock()
 
 	if shouldBroadcastLeaderboard {
@@ -916,6 +932,10 @@ func (g *Game) updateNormalPlay() {
 	// 限時活動 Tick + 廣播（每 30 秒，DAY-079）
 	if shouldBroadcastEvent {
 		go g.tickAndBroadcastEvent()
+	}
+	// 天氣 Tick + 廣播（每 30 秒，DAY-087）
+	if shouldBroadcastWeather {
+		go g.tickAndBroadcastWeather()
 	}
 }
 

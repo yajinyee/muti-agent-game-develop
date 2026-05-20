@@ -119,6 +119,8 @@ const (
 	MsgChallengeUnlocked MessageType = "challenge_unlocked" // 挑戰解鎖通知
 	// 每日任務連續完成獎勵（DAY-086）
 	MsgMissionStreakBonus MessageType = "mission_streak_bonus" // 連續完成獎勵通知
+	// 天氣系統（DAY-087）
+	MsgWeatherUpdate MessageType = "weather_update" // 天氣狀態更新
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -976,4 +978,24 @@ type MissionStreakBonusPayload struct {
 	Reward     int    `json:"reward"`      // 本次獎勵金幣
 	Label      string `json:"label"`       // 獎勵標籤（如「連續 7 天 🏆」）
 	NewBalance int    `json:"new_balance"` // 領取後餘額
+}
+
+// ---- 天氣系統（DAY-087）----
+
+// WeatherUpdatePayload 天氣狀態更新（Server → Client）
+// 玩家加入時發送當前天氣，天氣切換時廣播給所有玩家
+type WeatherUpdatePayload struct {
+	Type             string  `json:"type"`              // 天氣類型
+	Name             string  `json:"name"`              // 顯示名稱
+	Icon             string  `json:"icon"`              // 圖示（emoji）
+	Description      string  `json:"description"`       // 效果說明
+	RemainingSeconds int     `json:"remaining_seconds"` // 剩餘秒數
+	SpawnRateMult    float64 `json:"spawn_rate_mult"`   // 目標生成倍率
+	RewardMult       float64 `json:"reward_mult"`       // 獎勵倍率
+	SpeedMult        float64 `json:"speed_mult"`        // 目標移動速度倍率
+	RareChanceBonus  float64 `json:"rare_chance_bonus"` // 稀有目標出現機率加成
+	GoldFishBonus    float64 `json:"gold_fish_bonus"`   // 金幣魚出現機率加成
+	BossChanceBonus  float64 `json:"boss_chance_bonus"` // BOSS 出現機率加成
+	FogEffect        bool    `json:"fog_effect"`        // 是否有濃霧效果
+	IsNew            bool    `json:"is_new"`            // 是否剛切換（用於 Client 端顯示通知）
 }
