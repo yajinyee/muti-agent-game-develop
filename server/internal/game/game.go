@@ -28,6 +28,7 @@ import (
 	"digital-twin/server/internal/game/jackpot"
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/season"
+	"digital-twin/server/internal/game/shop"
 	"digital-twin/server/internal/game/state"
 	"digital-twin/server/internal/game/target"
 	"digital-twin/server/internal/game/tournament"
@@ -72,6 +73,7 @@ type Game struct {
 	SpecialWeapon *specialweapon.Manager // 特殊武器管理器（DAY-089）
 	MysteryBox    *mysterybox.Manager    // 神秘寶箱管理器（DAY-090）
 	DailySpin     *dailyspin.Manager     // 每日簽到轉盤管理器（DAY-092）
+	Shop          *shop.Manager          // 商店管理器（DAY-094）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -140,6 +142,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		SpecialWeapon:      specialweapon.New(),
 		MysteryBox:         mysterybox.New(),
 		DailySpin:          dailyspin.NewManager(),
+		Shop:               shop.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -260,6 +263,8 @@ func (g *Game) AddPlayer(playerID string) {
 				// 發送週賽/每日賽狀態（DAY-093）
 				g.sendTournamentUpdate(pp.ID)
 				g.sendDailyTournamentUpdate(pp.ID)
+				// 發送商店狀態（DAY-094）
+				g.sendShopUpdate(pp)
 			}
 		}()
 	}
@@ -453,6 +458,11 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 週賽/每日賽查詢（DAY-093）
 	case ws.MsgGetTournament:
 		g.handleGetTournament(p)
+	// 商店系統（DAY-094）
+	case ws.MsgGetShop:
+		g.handleGetShop(p)
+	case ws.MsgBuyShopItem:
+		g.handleBuyShopItem(p, msg)
 	}
 }
 

@@ -94,6 +94,12 @@ const (
 	MsgGetTournament     MessageType = "get_tournament"     // 查詢週賽/日賽狀態（DAY-093）
 	MsgDailyTournamentUpdate MessageType = "daily_tournament_update" // 每日賽排名更新（DAY-093）
 	MsgDailyTournamentResult MessageType = "daily_tournament_result" // 每日賽結算通知（DAY-093）
+	// 商店系統（DAY-094）
+	MsgGetShop      MessageType = "get_shop"       // 查詢商店狀態（Client→Server）
+	MsgBuyShopItem  MessageType = "buy_shop_item"  // 購買商品（Client→Server）
+	MsgShopUpdate   MessageType = "shop_update"    // 商店狀態更新（Server→Client）
+	MsgShopPurchased MessageType = "shop_purchased" // 購買成功通知（Server→Client）
+	MsgShopError    MessageType = "shop_error"     // 購買失敗通知（Server→Client）
 	MsgSkinUpdate        MessageType = "skin_update"        // 砲台外觀更新（DAY-071）
 	MsgSeasonUpdate      MessageType = "season_update"      // 賽季通行證更新（DAY-072）
 	MsgSeasonLevelUp     MessageType = "season_level_up"    // 賽季等級升級通知（DAY-072）
@@ -1277,4 +1283,59 @@ type DailySpinResultPayload struct {
 	SeasonPoints  int     `json:"season_points"`   // 賽季積分（0=無）
 	MultBonus     float64 `json:"mult_bonus"`      // 倍率加成（0=無）
 	MysteryBoxRarity string `json:"mystery_box_rarity"` // 寶箱稀有度（""=無）
+}
+
+// ---- 商店系統（DAY-094）----
+
+// ShopItemReward 商品獎勵（用於 Payload）
+type ShopItemReward struct {
+	Coins        int     `json:"coins"`
+	BombCharge   int     `json:"bomb_charge"`
+	LaserCharge  int     `json:"laser_charge"`
+	FreezeCharge int     `json:"freeze_charge"`
+	AttackMult   float64 `json:"attack_mult"`
+	SeasonPoints int     `json:"season_points"`
+}
+
+// ShopItem 商品資訊（用於 Payload）
+type ShopItem struct {
+	ID             string         `json:"id"`
+	Name           string         `json:"name"`
+	Description    string         `json:"description"`
+	Type           string         `json:"type"`
+	Price          int            `json:"price"`
+	OrigPrice      int            `json:"orig_price"`
+	Reward         ShopItemReward `json:"reward"`
+	Stock          int            `json:"stock"`
+	LimitPerDay    int            `json:"limit_per_day"`
+	IsFlashSale    bool           `json:"is_flash_sale"`
+	FlashEndAt     int64          `json:"flash_end_at"`
+	PurchasedToday int            `json:"purchased_today"` // 今日已購買次數
+}
+
+// ShopUpdatePayload 商店狀態更新（Server → Client）
+type ShopUpdatePayload struct {
+	Items          []ShopItem `json:"items"`
+	FlashSaleEndAt int64      `json:"flash_sale_end_at"` // Unix ms
+	SecondsLeft    int64      `json:"seconds_left"`      // 特賣剩餘秒數
+}
+
+// BuyShopItemPayload 購買商品請求（Client → Server）
+type BuyShopItemPayload struct {
+	ItemID string `json:"item_id"`
+}
+
+// ShopPurchasedPayload 購買成功通知（Server → Client）
+type ShopPurchasedPayload struct {
+	ItemID     string         `json:"item_id"`
+	ItemName   string         `json:"item_name"`
+	Price      int            `json:"price"`
+	NewBalance int            `json:"new_balance"`
+	Reward     ShopItemReward `json:"reward"`
+}
+
+// ShopErrorPayload 購買失敗通知（Server → Client）
+type ShopErrorPayload struct {
+	ItemID string `json:"item_id"`
+	Reason string `json:"reason"` // "item_not_found" / "insufficient_coins" / "daily_limit_reached" / "out_of_stock"
 }

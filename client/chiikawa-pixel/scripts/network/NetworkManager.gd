@@ -376,3 +376,11 @@ func send_daily_spin() -> void:
 ## 查詢週賽/每日賽狀態（DAY-093）
 func send_get_tournament() -> void:
 	send("get_tournament", {})
+
+## 查詢商店狀態（DAY-094）
+func send_get_shop() -> void:
+	send("get_shop", {})
+
+## 購買商品（DAY-094）
+func send_buy_shop_item(item_id: String) -> void:
+	send("buy_shop_item", {"item_id": item_id})

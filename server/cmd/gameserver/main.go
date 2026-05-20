@@ -372,6 +372,17 @@ func main() {
 		}
 	})
 
+	// 商店端點（DAY-094）
+	// GET /shop — 取得商店快照
+	mux.HandleFunc("/shop", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.GetShopSnapshot()
+		if err := json.NewEncoder(w).Encode(snap); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 公會系統端點（DAY-075）
 	// GET /guilds — 取得所有公會列表
 	// GET /guild?guild_id=xxx — 取得指定公會詳細資訊

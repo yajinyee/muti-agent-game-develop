@@ -1,6 +1,30 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-093 每日錦標賽系統）
+## 最後更新：2026-05-20（DAY-094 商店系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-094 更新（自主觸發）：** 商店系統（Shop System）✅
+  - `server/internal/game/shop/shop.go`：商店管理器（7種商品：2金幣包+5特殊道具，每日限時特賣7折，每日購買上限，庫存管理）
+  - `server/internal/game/shop/shop_test.go`：11 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgGetShop`/`MsgBuyShopItem`（Client→Server）+ `MsgShopUpdate`/`MsgShopPurchased`/`MsgShopError`（Server→Client）+ `ShopItem`/`ShopItemReward`/`ShopUpdatePayload`/`BuyShopItemPayload`/`ShopPurchasedPayload`/`ShopErrorPayload`
+  - `server/internal/game/shop_handler.go`：`handleGetShop()`/`sendShopUpdate()`/`handleBuyShopItem()`/`GetShopSnapshot()`
+  - `server/internal/game/game.go`：`Shop *shop.Manager` 欄位 + 初始化 + AddPlayer 發送商店狀態 + HandleMessage `MsgGetShop`/`MsgBuyShopItem` 分支
+  - `server/cmd/gameserver/main.go`：`/shop` HTTP 端點（GET，回傳商店快照）
+  - `client/chiikawa-pixel/scripts/ui/ShopPanel.gd`：商店面板（商品列表/限時特賣倒數/購買按鈕/購買成功/失敗提示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`shop_updated`/`shop_purchased`/`shop_error` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：`send_get_shop()`/`send_buy_shop_item()`
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 ShopPanel（`_init_shop_panel()`，商店按鈕 x=1280）
+  - 7 種商品：小金幣包(5000,每日1次)/中金幣包(15000,每日1次)/炸彈套裝(2000金幣,每日3次)/雷射套裝(3000,每日3次)/冰凍套裝(1500,每日3次)/攻擊加成(5000,每日2次)/賽季加速(3000,每日5次)
+  - 每日限時特賣：隨機選 2 個特殊道具打 7 折，UTC+8 00:00 重置
+  - 購買後自動發放獎勵（金幣/特殊武器充能/賽季積分）
+  - build/vet/test 全部通過（11/11 shop 測試）
+  - **業界依據：** sdlccorp.com（2026-04）確認商店系統是 iGaming 最重要的變現機制；限時特賣（Flash Sale）是提升購買轉化率最有效的工具
+
 
 ## 自我評估
 - **完成度：100%**

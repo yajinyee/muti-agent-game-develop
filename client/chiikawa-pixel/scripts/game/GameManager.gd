@@ -71,6 +71,10 @@ signal room_error(error_data: Dictionary)              # 房間操作失敗
 # 每日簽到轉盤（DAY-092）
 signal daily_spin_state(state_data: Dictionary)        # 每日轉盤狀態
 signal daily_spin_result(result_data: Dictionary)      # 每日轉盤結果
+# 商店系統（DAY-094）
+signal shop_updated(shop_data: Dictionary)             # 商店狀態更新
+signal shop_purchased(purchase_data: Dictionary)       # 購買成功通知
+signal shop_error(error_data: Dictionary)              # 購買失敗通知
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -243,6 +247,13 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_daily_spin_state(payload)
 		"daily_spin_result":
 			_handle_daily_spin_result(payload)
+		# 商店系統（DAY-094）
+		"shop_update":
+			_handle_shop_update(payload)
+		"shop_purchased":
+			_handle_shop_purchased(payload)
+		"shop_error":
+			_handle_shop_error(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -380,6 +391,22 @@ func _handle_daily_tournament_update(payload: Dictionary) -> void:
 	if rank > 0:
 		print("[GameManager] Daily Tournament rank=%d points=%d" % [rank, points])
 	emit_signal("daily_tournament_updated", payload)
+
+## 商店狀態更新（DAY-094）
+func _handle_shop_update(payload: Dictionary) -> void:
+	emit_signal("shop_updated", payload)
+
+## 購買成功通知（DAY-094）
+func _handle_shop_purchased(payload: Dictionary) -> void:
+	var item_name = payload.get("item_name", "")
+	print("[GameManager] Shop purchased: %s" % item_name)
+	emit_signal("shop_purchased", payload)
+
+## 購買失敗通知（DAY-094）
+func _handle_shop_error(payload: Dictionary) -> void:
+	var reason = payload.get("reason", "")
+	print("[GameManager] Shop error: %s" % reason)
+	emit_signal("shop_error", payload)
 
 ## 處理稱號解鎖通知（DAY-068）
 func _handle_title_unlocked(payload: Dictionary) -> void:

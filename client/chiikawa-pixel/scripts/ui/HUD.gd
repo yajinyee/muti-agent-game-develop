@@ -190,6 +190,7 @@ func _ready() -> void:
 	_init_mystery_box_panel()    # 神秘寶箱面板（DAY-090）
 	_init_room_select_panel()    # 房間難度選擇面板（DAY-091）
 	_init_daily_spin_panel()     # 每日簽到轉盤面板（DAY-092）
+	_init_shop_panel()           # 商店面板（DAY-094）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1937,3 +1938,33 @@ func _on_daily_spin_state_hud(data: Dictionary) -> void:
 		else:
 			_daily_spin_btn.text = "🎡 轉盤"
 			_daily_spin_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+
+# ---- 商店系統（DAY-094）----
+const ShopPanelScript = preload("res://scripts/ui/ShopPanel.gd")
+var _shop_panel_node = null
+
+func _init_shop_panel() -> void:
+	var panel = ShopPanelScript.new()
+	panel.name = "ShopPanel"
+	panel.z_index = 50
+	add_child(panel)
+	if _pixel_font:
+		panel.setup(_pixel_font)
+	_shop_panel_node = panel
+
+	# 商店按鈕（TopBar）
+	var shop_btn := Button.new()
+	shop_btn.name = "ShopBtn"
+	shop_btn.text = "🛒 商店"
+	shop_btn.position = Vector2(1280, 4)
+	shop_btn.size = Vector2(80, 30)
+	shop_btn.add_theme_color_override("font_color", Color(0.9, 0.6, 1.0))
+	shop_btn.add_theme_font_size_override("font_size", 12)
+	if is_instance_valid(_pixel_font):
+		shop_btn.add_theme_font_override("font", _pixel_font)
+	shop_btn.pressed.connect(_on_shop_btn_pressed)
+	add_child(shop_btn)
+
+func _on_shop_btn_pressed() -> void:
+	if is_instance_valid(_shop_panel_node):
+		_shop_panel_node._on_toggle_pressed()
