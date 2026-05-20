@@ -223,6 +223,8 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 	}
 	// 公會戰積分：BOSS 擊殺（DAY-076）
 	go g.notifyGuildWarBoss(p.ID)
+	// 隱藏挑戰：首次擊敗 BOSS（DAY-085）
+	g.notifyChallengeBoss(p)
 
 	g.transitionState(state.StateBossResult)
 	g.safeAfterFunc(3*time.Second, func() {

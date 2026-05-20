@@ -53,6 +53,7 @@ signal referral_info_received(info_data: Dictionary)   # 推薦碼資訊（DAY-0
 signal referral_success(success_data: Dictionary)      # 推薦碼使用成功（DAY-082）
 signal referral_error(error_data: Dictionary)          # 推薦碼使用失敗（DAY-082）
 signal wheel_triggered(wheel_data: Dictionary)         # 幸運轉盤觸發（DAY-084）
+signal challenge_unlocked(challenge_data: Dictionary)  # 隱藏挑戰解鎖（DAY-085）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -188,6 +189,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_referral_error(payload)
 		"wheel_trigger":
 			_handle_wheel_trigger(payload)
+		"challenge_unlocked":
+			_handle_challenge_unlocked(payload)
 		"streak_update":
 			_handle_streak_update(payload)
 		"streak_reset":
@@ -521,3 +524,7 @@ func _handle_streak_reset(payload: Dictionary) -> void:
 ## 處理幸運轉盤觸發（DAY-084）
 func _handle_wheel_trigger(payload: Dictionary) -> void:
 	emit_signal("wheel_triggered", payload)
+
+## 處理隱藏挑戰解鎖（DAY-085）
+func _handle_challenge_unlocked(payload: Dictionary) -> void:
+	emit_signal("challenge_unlocked", payload)

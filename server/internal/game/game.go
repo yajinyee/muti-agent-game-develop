@@ -14,6 +14,7 @@ import (
 	"digital-twin/server/internal/analytics"
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/achievement"
+	"digital-twin/server/internal/game/challenge"
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/dailyboss"
 	"digital-twin/server/internal/game/event"
@@ -59,6 +60,7 @@ type Game struct {
 	Event       *event.Manager      // 限時活動管理器（DAY-079）
 	Referral    *referral.Manager   // 推薦碼管理器（DAY-082）
 	Wheel       *wheel.Manager      // 幸運轉盤管理器（DAY-084）
+	Challenge   *challenge.Manager  // 隱藏挑戰管理器（DAY-085）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -118,6 +120,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Event:              event.New(30 * time.Minute),
 		Referral:           referral.NewManager(),
 		Wheel:              wheel.NewManager(),
+		Challenge:          challenge.NewManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -225,6 +228,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendCodexUpdate(pp.ID)
 				// 發送推薦碼資訊（DAY-082）
 				g.sendReferralInfo(pp)
+				// 初始化隱藏挑戰（DAY-085）
+				g.Challenge.InitPlayer(playerID)
 			}
 		}()
 	}
@@ -272,6 +277,8 @@ func (g *Game) RemovePlayer(playerID string) {
 		go g.notifyFriendsOffline(playerID, p.DisplayName)
 		// 更新公會在線狀態（DAY-074）
 		g.Guild.SetOnlineStatus(playerID, false)
+		// 清理挑戰 session（DAY-085）
+		g.Challenge.RemovePlayer(playerID)
 	}
 }
 
@@ -691,6 +698,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	g.notifyCodexKill(p.ID, t.DefID, result.Multiplier)
 	// 幸運轉盤：擊破特殊目標後觸發（DAY-084）
 	g.notifyWheelKill(p, t.DefID, finalReward)
+	// 隱藏挑戰：記錄擊破事件（DAY-085）
+	g.notifyChallengeKill(p, t.DefID, result.Multiplier, finalReward)
 }
 
 // handleLock 處理鎖定

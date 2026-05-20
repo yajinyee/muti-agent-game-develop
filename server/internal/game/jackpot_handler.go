@@ -60,6 +60,9 @@ func (g *Game) handleJackpotWin(p *player.Player, win *jackpot.JackpotWin) {
 	// 更新中獎玩家的狀態
 	g.sendPlayerUpdate(p)
 
+	// 隱藏挑戰：Jackpot 中獎（DAY-085）
+	g.notifyChallengeJackpot(p.ID)
+
 	log.Printf("[Jackpot] %s won %s jackpot: %d coins (player: %s)",
 		p.ID, win.Level, win.Amount, displayName)
 }

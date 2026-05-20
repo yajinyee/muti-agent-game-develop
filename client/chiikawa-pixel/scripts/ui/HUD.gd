@@ -24,6 +24,7 @@ const CodexPanelScript = preload("res://scripts/ui/CodexPanel.gd")
 const StreakPanelScript = preload("res://scripts/ui/StreakPanel.gd")
 const ReferralPanelScript = preload("res://scripts/ui/ReferralPanel.gd")
 const WheelPanelScript = preload("res://scripts/ui/WheelPanel.gd")
+const ChallengePanelScript = preload("res://scripts/ui/ChallengePanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -180,6 +181,7 @@ func _ready() -> void:
 	_init_streak_panel()      # 連擊系統面板（DAY-083）
 	_init_referral_panel()    # 推薦碼面板（DAY-082）
 	_init_wheel_panel()       # 幸運轉盤面板（DAY-084）
+	_init_challenge_panel()   # 隱藏挑戰面板（DAY-085）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1760,3 +1762,15 @@ func _init_wheel_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_wheel_panel_node = panel
+
+## ── 隱藏挑戰面板（DAY-085）──────────────────────────────────────────────────
+var _challenge_panel_node = null
+
+## 初始化隱藏挑戰面板（DAY-085）
+## 位置：畫面上方中央（挑戰解鎖通知彈窗）
+func _init_challenge_panel() -> void:
+	var panel = ChallengePanelScript.new()
+	panel.z_index = 60
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_challenge_panel_node = panel

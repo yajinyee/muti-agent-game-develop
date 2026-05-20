@@ -65,5 +65,8 @@ func (g *Game) notifyWheelKill(p *player.Player, defID string, baseReward int) i
 	log.Printf("[Wheel] player=%s triggered wheel on %s: %.0fx, base=%d, final=%d",
 		p.ID, defID, slot.Multiplier, baseReward, finalReward)
 
+	// 隱藏挑戰：轉盤 100x（DAY-085）
+	g.notifyChallengeWheel(p, slot.Multiplier)
+
 	return extraReward
 }

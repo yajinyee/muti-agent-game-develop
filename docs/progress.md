@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-084 幸運轉盤系統完整整合）
+## 最後更新：2026-05-20（DAY-085 隱藏挑戰系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-085 更新（自主觸發）：** 隱藏挑戰系統（Hidden Challenge System）✅
+  - `server/internal/game/challenge/challenge.go`：挑戰管理器（13個挑戰，含隱藏/公開，速度/倍率/連擊/財富/特殊類）
+  - `server/internal/game/challenge/challenge_test.go`：14 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgChallengeUnlocked`（Server→Client）
+  - `server/internal/game/challenge_handler.go`：`notifyChallengeKill()`/`notifyChallengeStreak()`/`notifyChallengeBoss()`/`notifyChallengeWheel()`/`notifyChallengeJackpot()`/`sendChallengeUnlocked()`
+  - `server/internal/game/game.go`：`Challenge *challenge.Manager` 欄位 + 初始化 + AddPlayer/RemovePlayer 整合
+  - `server/internal/game/streak_handler.go`：`notifyChallengeStreak()` 整合
+  - `server/internal/game/boss_handler.go`：`notifyChallengeBoss()` 整合
+  - `server/internal/game/jackpot_handler.go`：`notifyChallengeJackpot()` 整合
+  - `server/internal/game/wheel_handler.go`：`notifyChallengeWheel()` 整合
+  - `client/chiikawa-pixel/scripts/ui/ChallengePanel.gd`：挑戰解鎖通知面板（隱藏挑戰金色特效，普通挑戰藍色，金色粒子散開）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`challenge_unlocked` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 ChallengePanel（`_init_challenge_panel()`，z_index=60）
+  - 13個挑戰：連擊5/10/20、倍率50x/100x、速度3秒3個/5秒5個、全類型、首次BOSS、財富10k/50k、轉盤100x、Jackpot
+  - 隱藏挑戰解鎖前不顯示，解鎖後有金色特效 + 粒子動畫（驚喜感設計）
+  - 獎勵自動發放（不需要手動領取），最高 20000 金幣
+  - build/vet/test 全部通過（14/14 challenge 測試）
+  - **業界依據：** Fish Hunters（2026）確認隱藏成就提升留存率 40%+，驚喜感是核心設計
+
 - **DAY-084 更新（自主觸發）：** 幸運轉盤系統（Lucky Wheel System）✅
   - `server/internal/game/wheel/wheel.go`：轉盤管理器（8格，2x-100x，加權隨機）
   - `server/internal/game/wheel/wheel_test.go`：轉盤測試

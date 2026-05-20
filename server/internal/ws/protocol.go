@@ -115,6 +115,8 @@ const (
 	MsgStreakReset       MessageType = "streak_reset"        // 連擊重置通知
 	// 幸運轉盤系統（DAY-084）
 	MsgWheelTrigger     MessageType = "wheel_trigger"       // 轉盤觸發通知
+	// 隱藏挑戰系統（DAY-085）
+	MsgChallengeUnlocked MessageType = "challenge_unlocked" // 挑戰解鎖通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
