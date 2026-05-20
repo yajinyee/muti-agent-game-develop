@@ -38,9 +38,9 @@
 - [x] `HUD.gd`：整合 GuildPanel
 - [x] build/vet/test 全部通過
 
-### 🟠 上傳 GitHub（P1）
+### ✅ 上傳 GitHub（P1）
 
-- [ ] git add + git commit + git push（DAY-074 公會系統）
+- [x] git add + git commit + git push（DAY-074 公會系統）
 
 ---
 
