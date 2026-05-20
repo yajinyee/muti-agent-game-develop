@@ -101,6 +101,7 @@ const (
 	MsgDailyBonus        MessageType = "daily_bonus"        // 每日登入獎勵（DAY-065）
 	MsgLoginMilestone    MessageType = "login_milestone"    // 登入里程碑達成通知（DAY-107）
 	MsgLoginProgress     MessageType = "login_progress"     // 登入進度回應（DAY-107）
+	MsgSuperBonusReady   MessageType = "super_bonus_ready"  // 超級 Bonus 準備通知（DAY-108）
 	MsgTournamentUpdate  MessageType = "tournament_update"  // 週賽排名更新（DAY-066）
 	MsgTournamentResult  MessageType = "tournament_result"  // 週賽結算通知（DAY-066）
 	MsgGetTournament     MessageType = "get_tournament"     // 查詢週賽/日賽狀態（DAY-093）
@@ -1638,4 +1639,15 @@ type LoginProgressPayload struct {
 	NextMilestoneDays int                 `json:"next_milestone_days"` // 下一個里程碑天數（0=已全達成）
 	DaysToNext     int                    `json:"days_to_next"`    // 距離下一個里程碑還差幾天
 	Milestones     []MilestoneInfoPayload `json:"milestones"`      // 所有里程碑狀態
+}
+
+// ---- 超級 Bonus 系統（DAY-108）----
+
+// SuperBonusReadyPayload 超級 Bonus 準備通知（Server → Client）
+// 當玩家連續觸發 3 次 Bonus 後，第 4 次觸發超級 Bonus
+type SuperBonusReadyPayload struct {
+	ComboCount  int    `json:"combo_count"`  // 當前連續次數
+	MultBonus   float64 `json:"mult_bonus"`  // 倍率加成（1.5x / 2.0x / 3.0x）
+	Label       string `json:"label"`        // 顯示文字（"SUPER BONUS!" / "MEGA BONUS!" / "ULTRA BONUS!"）
+	Color       string `json:"color"`        // 顏色（hex）
 }

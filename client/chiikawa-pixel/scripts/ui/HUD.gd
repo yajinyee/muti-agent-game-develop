@@ -196,6 +196,7 @@ func _ready() -> void:
 	_init_announcement_panel()   # 全服公告面板（DAY-097）
 	_init_player_card_panel()    # 玩家名片面板（DAY-106）
 	_init_login_milestone_panel() # 登入里程碑面板（DAY-107）
+	_init_player_journey_panel()  # 玩家旅程儀表板（DAY-108）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2099,3 +2100,14 @@ func _on_login_milestone_reached(data: Dictionary) -> void:
 func _on_login_progress_received(data: Dictionary) -> void:
 	if is_instance_valid(_login_milestone_panel_node):
 		_login_milestone_panel_node.show_progress(data)
+
+## 玩家旅程儀表板（DAY-108）
+var _player_journey_panel_node = null
+const PlayerJourneyPanelScript = preload("res://scripts/ui/PlayerJourneyPanel.gd")
+
+func _init_player_journey_panel() -> void:
+	var panel = PlayerJourneyPanelScript.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 85
+	add_child(panel)
+	_player_journey_panel_node = panel

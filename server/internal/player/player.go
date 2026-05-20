@@ -69,6 +69,10 @@ type Player struct {
 
 	// 玩家統計系統（DAY-096）
 	Stats *stats.PlayerStats
+
+	// Super Bonus 系統（DAY-108）
+	BonusCombo     int       // 連續 Bonus 次數（用於觸發 Super Bonus）
+	LastBonusAt    time.Time // 上次 Bonus 時間（24小時內才算連續）
 }
 
 // NewPlayer 建立新玩家

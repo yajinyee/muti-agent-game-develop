@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-107 登入里程碑獎勵系統 Login Milestone Reward）
+## 最後更新：2026-05-21（DAY-108 玩家旅程儀表板 + 超級 Bonus 系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,19 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-107 更新（自主觸發）：** 登入里程碑獎勵系統（Login Milestone Reward System）✅
+- **DAY-108 更新（自主觸發）：** 玩家旅程儀表板 + 超級 Bonus 系統（Player Journey Dashboard + Super Bonus）✅
+  - `client/chiikawa-pixel/scripts/ui/PlayerJourneyPanel.gd`：玩家旅程儀表板（📋 按鈕開啟；6個區塊：今日任務/登入連續/賽季通行證/VIP等級/每日轉盤/錦標賽；即時進度條；點擊開啟對應面板）
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 PlayerJourneyPanel（z_index=85）
+  - `server/internal/player/player.go`：新增 `BonusCombo`/`LastBonusAt` 欄位（Super Bonus 連續計數）
+  - `server/internal/game/bonus_handler.go`：`calcSuperBonusMult()`（連續 3/5/7 次 Bonus 觸發 1.5x/2.0x/3.0x 加成）；`notifySuperBonus()`（通知玩家）；`endBonusGame()` 整合 Super Bonus 計算
+  - `server/internal/ws/protocol.go`：新增 `MsgSuperBonusReady`/`SuperBonusReadyPayload`
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`super_bonus_triggered` 訊號 + `_handle_super_bonus_ready()` handler
+  - Super Bonus 設計：連續 3-4 次 ⚡SUPER BONUS（×1.5）/ 5-6 次 💥MEGA BONUS（×2.0）/ 7次+ 🌟ULTRA BONUS（×3.0）
+  - 24 小時內算連續，超過 24 小時重置計數
+  - build/vet 全部通過
+  - **業界依據：** BGaming Fishing Club 2（2026-04）有 Fishing Net Bonus（×60）和 TNT Bonus（×100）多層 Bonus 機制；everymatrix.com（2026）確認整合式玩家旅程是 2026 年 iGaming 核心競爭力
+
+
   - `server/internal/game/dailybonus/milestone.go`：里程碑定義（6個里程碑：3/7/14/30/60/100天；獎勵類型：金幣/神秘寶箱/稱號；`CheckMilestone()`/`GetAllMilestones()`/`GetNextMilestone()`）
   - `server/internal/game/dailybonus/milestone_test.go`：10 個單元測試全部通過
   - `server/internal/game/achievement/title.go`：新增 4 個里程碑稱號（streak_veteran/streak_legend/streak_master/streak_myth）；新增 `TryUnlockByID()` 方法（直接用 ID 解鎖稱號）

@@ -168,6 +168,16 @@ func (g *Game) endBonusGame() {
 
 		entryBet := entryBets[playerID]
 		reward, multiplier := combat.CalcBonusReward(entryBet, score)
+
+		// Super Bonus 倍率加成（DAY-108）
+		superMult := g.calcSuperBonusMult(p)
+		if superMult > 1.0 {
+			reward = int(float64(reward) * superMult)
+			multiplier *= superMult
+			log.Printf("[SuperBonus] Player %s combo=%d superMult=%.1fx finalReward=%d",
+				p.ID, p.BonusCombo, superMult, reward)
+		}
+
 		p.AddReward(reward)
 		p.ResetLaborValue()
 		// 玩家統計：記錄 Bonus（DAY-096）
@@ -366,4 +376,53 @@ func (g *Game) handleBonusClick(p *player.Player, msg *ws.Message) {
 		}
 		g.mu.Unlock()
 	}
+}
+
+// calcSuperBonusMult 計算 Super Bonus 倍率加成（DAY-108）
+// 連續 Bonus 次數越多，倍率越高
+// 回傳倍率加成（1.0 = 無加成）
+func (g *Game) calcSuperBonusMult(p *player.Player) float64 {
+	// 更新連續 Bonus 計數
+	now := time.Now()
+	const bonusComboWindow = 24 * time.Hour // 24 小時內算連續
+
+	if !p.LastBonusAt.IsZero() && now.Sub(p.LastBonusAt) <= bonusComboWindow {
+		p.BonusCombo++
+	} else {
+		p.BonusCombo = 1 // 重置
+	}
+	p.LastBonusAt = now
+
+	// 依連續次數決定倍率
+	switch {
+	case p.BonusCombo >= 7:
+		// ULTRA BONUS：7次以上，3.0x
+		g.notifySuperBonus(p, p.BonusCombo, 3.0, "🌟 ULTRA BONUS!", "#FF5722")
+		return 3.0
+	case p.BonusCombo >= 5:
+		// MEGA BONUS：5-6次，2.0x
+		g.notifySuperBonus(p, p.BonusCombo, 2.0, "💥 MEGA BONUS!", "#9C27B0")
+		return 2.0
+	case p.BonusCombo >= 3:
+		// SUPER BONUS：3-4次，1.5x
+		g.notifySuperBonus(p, p.BonusCombo, 1.5, "⚡ SUPER BONUS!", "#FF9800")
+		return 1.5
+	default:
+		return 1.0 // 無加成
+	}
+}
+
+// notifySuperBonus 通知玩家 Super Bonus 觸發（DAY-108）
+func (g *Game) notifySuperBonus(p *player.Player, combo int, mult float64, label string, color string) {
+	g.Hub.Send(p.ID, &ws.Message{
+		Type: ws.MsgSuperBonusReady,
+		Payload: ws.SuperBonusReadyPayload{
+			ComboCount: combo,
+			MultBonus:  mult,
+			Label:      label,
+			Color:      color,
+		},
+	})
+	log.Printf("[SuperBonus] Player %s triggered %s (combo=%d, mult=%.1fx)",
+		p.ID, label, combo, mult)
 }
