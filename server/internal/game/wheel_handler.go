@@ -1,4 +1,4 @@
-﻿// wheel_handler.go - DAY-084 幸運轉盤 handler
+// wheel_handler.go - DAY-084 幸運轉盤 handler
 package game
 
 import (

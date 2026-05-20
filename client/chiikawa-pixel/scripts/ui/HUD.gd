@@ -25,6 +25,7 @@ const StreakPanelScript = preload("res://scripts/ui/StreakPanel.gd")
 const ReferralPanelScript = preload("res://scripts/ui/ReferralPanel.gd")
 const WheelPanelScript = preload("res://scripts/ui/WheelPanel.gd")
 const ChallengePanelScript = preload("res://scripts/ui/ChallengePanel.gd")
+const MissionStreakPanelScript = preload("res://scripts/ui/MissionStreakPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -182,6 +183,7 @@ func _ready() -> void:
 	_init_referral_panel()    # 推薦碼面板（DAY-082）
 	_init_wheel_panel()       # 幸運轉盤面板（DAY-084）
 	_init_challenge_panel()   # 隱藏挑戰面板（DAY-085）
+	_init_mission_streak_panel() # 任務連續完成面板（DAY-086）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1774,3 +1776,14 @@ func _init_challenge_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_challenge_panel_node = panel
+
+## ── 任務連續完成面板（DAY-086）──────────────────────────────────────────────
+var _mission_streak_panel_node = null
+
+## 初始化任務連續完成面板（DAY-086）
+func _init_mission_streak_panel() -> void:
+	var panel = MissionStreakPanelScript.new()
+	panel.z_index = 55
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_mission_streak_panel_node = panel

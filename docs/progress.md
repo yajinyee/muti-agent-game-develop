@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-085 隱藏挑戰系統）
+## 最後更新：2026-05-20（DAY-086 任務連續完成獎勵）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-086 更新（自主觸發）：** 每日任務連續完成獎勵（Mission Streak Bonus）✅
+  - `server/internal/game/mission/mission.go`：加入 `AllCompleted()` 方法
+  - `server/internal/game/mission_streak_handler.go`：連續完成追蹤（`MissionStreakRecord`，UTC+8 日期計算，連續中斷重置）
+  - `server/internal/game/mission_handler.go`：`handleClaimMission` 整合 `notifyMissionAllComplete()`
+  - `server/internal/ws/protocol.go`：`MsgMissionStreakBonus`（Server→Client）+ `MissionStreakBonusPayload`
+  - `server/internal/game/challenge/challenge.go`：新增 `ChallengeMissionStreak7`/`ChallengeMissionStreak30` 隱藏挑戰
+  - `client/chiikawa-pixel/scripts/ui/MissionStreakPanel.gd`：連續完成通知面板（連續天數越高越金色）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`mission_streak_bonus` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 MissionStreakPanel（z_index=55）
+  - 連續獎勵：1天=500 / 2天=1000 / 3天=2000 / 5天=5000 / 7天=10000 / 14天=25000 / 30天=100000
+  - 連續 7 天解鎖隱藏挑戰「任務達人」（30000 金幣 + 稱號）
+  - 連續 30 天解鎖隱藏挑戰「任務傳說」（200000 金幣 + 稱號）
+  - build/vet/test 全部通過
+  - **業界依據：** actionnetwork.com 2026-05-09 確認連續任務完成是留存率最高的機制之一
+
 - **DAY-085 更新（自主觸發）：** 隱藏挑戰系統（Hidden Challenge System）✅
   - `server/internal/game/challenge/challenge.go`：挑戰管理器（13個挑戰，含隱藏/公開，速度/倍率/連擊/財富/特殊類）
   - `server/internal/game/challenge/challenge_test.go`：14 個單元測試全部通過

@@ -117,6 +117,8 @@ const (
 	MsgWheelTrigger     MessageType = "wheel_trigger"       // 轉盤觸發通知
 	// 隱藏挑戰系統（DAY-085）
 	MsgChallengeUnlocked MessageType = "challenge_unlocked" // 挑戰解鎖通知
+	// 每日任務連續完成獎勵（DAY-086）
+	MsgMissionStreakBonus MessageType = "mission_streak_bonus" // 連續完成獎勵通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -963,4 +965,15 @@ type WheelTriggerPayload struct {
 	BaseReward  int                `json:"base_reward"`  // 基礎獎勵
 	FinalReward int                `json:"final_reward"` // 最終獎勵
 	NewBalance  int                `json:"new_balance"`  // 新金幣餘額
+}
+
+// ---- 每日任務連續完成獎勵（DAY-086）----
+
+// MissionStreakBonusPayload 連續完成獎勵通知（Server → Client）
+type MissionStreakBonusPayload struct {
+	Streak     int    `json:"streak"`      // 當前連續天數
+	MaxStreak  int    `json:"max_streak"`  // 歷史最高連續天數
+	Reward     int    `json:"reward"`      // 本次獎勵金幣
+	Label      string `json:"label"`       // 獎勵標籤（如「連續 7 天 🏆」）
+	NewBalance int    `json:"new_balance"` // 領取後餘額
 }

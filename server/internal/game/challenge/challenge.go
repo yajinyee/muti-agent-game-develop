@@ -13,29 +13,32 @@ type ChallengeID string
 
 const (
 	// 連擊類
-	ChallengeStreak5   ChallengeID = "streak_5"    // 達成 5 連擊
-	ChallengeStreak10  ChallengeID = "streak_10"   // 達成 10 連擊
-	ChallengeStreak20  ChallengeID = "streak_20"   // 達成 20 連擊（傳說連擊）
+	ChallengeStreak5  ChallengeID = "streak_5"  // 達成 5 連擊
+	ChallengeStreak10 ChallengeID = "streak_10" // 達成 10 連擊
+	ChallengeStreak20 ChallengeID = "streak_20" // 達成 20 連擊（傳說連擊）
 
 	// 倍率類
-	ChallengeMult50    ChallengeID = "mult_50"     // 單次擊破 50x+
-	ChallengeMult100   ChallengeID = "mult_100"    // 單次擊破 100x+（轉盤最高）
+	ChallengeMult50  ChallengeID = "mult_50"  // 單次擊破 50x+
+	ChallengeMult100 ChallengeID = "mult_100" // 單次擊破 100x+（轉盤最高）
 
 	// 速度類
-	ChallengeSpeed3    ChallengeID = "speed_3"     // 3 秒內擊破 3 個目標
-	ChallengeSpeed5    ChallengeID = "speed_5"     // 5 秒內擊破 5 個目標
+	ChallengeSpeed3 ChallengeID = "speed_3" // 3 秒內擊破 3 個目標
+	ChallengeSpeed5 ChallengeID = "speed_5" // 5 秒內擊破 5 個目標
 
 	// 收集類
-	ChallengeAllTypes  ChallengeID = "all_types"   // 在一局中擊破所有類型目標
-	ChallengeBossFirst ChallengeID = "boss_first"  // 首次擊敗 BOSS
+	ChallengeAllTypes  ChallengeID = "all_types"  // 在一局中擊破所有類型目標
+	ChallengeBossFirst ChallengeID = "boss_first" // 首次擊敗 BOSS
 
 	// 財富類
-	ChallengeRich10k   ChallengeID = "rich_10k"    // 單局累積 10000 金幣
-	ChallengeRich50k   ChallengeID = "rich_50k"    // 單局累積 50000 金幣
+	ChallengeRich10k ChallengeID = "rich_10k" // 單局累積 10000 金幣
+	ChallengeRich50k ChallengeID = "rich_50k" // 單局累積 50000 金幣
 
 	// 特殊類
-	ChallengeWheelMax  ChallengeID = "wheel_max"   // 轉盤獲得 100x
-	ChallengeJackpot   ChallengeID = "jackpot"     // 中任意 Jackpot
+	ChallengeWheelMax ChallengeID = "wheel_max" // 轉盤獲得 100x
+	ChallengeJackpot  ChallengeID = "jackpot"   // 中任意 Jackpot
+	// 任務連續完成類（DAY-086）
+	ChallengeMissionStreak7  ChallengeID = "mission_streak_7"  // 連續 7 天完成所有任務
+	ChallengeMissionStreak30 ChallengeID = "mission_streak_30" // 連續 30 天完成所有任務
 )
 
 // ChallengeDef 挑戰定義
@@ -44,9 +47,9 @@ type ChallengeDef struct {
 	Name        string      `json:"name"`
 	Description string      `json:"description"`
 	Icon        string      `json:"icon"`
-	Reward      int         `json:"reward"`      // 解鎖獎勵（金幣）
-	TitleID     string      `json:"title_id"`    // 解鎖稱號（可選）
-	IsHidden    bool        `json:"is_hidden"`   // 是否隱藏（解鎖前不顯示）
+	Reward      int         `json:"reward"`    // 解鎖獎勵（金幣）
+	TitleID     string      `json:"title_id"`  // 解鎖稱號（可選）
+	IsHidden    bool        `json:"is_hidden"` // 是否隱藏（解鎖前不顯示）
 }
 
 // Challenges 所有挑戰定義
@@ -161,27 +164,45 @@ var Challenges = map[ChallengeID]*ChallengeDef{
 		Reward:      5000,
 		IsHidden:    false,
 	},
+	ChallengeMissionStreak7: {
+		ID:          ChallengeMissionStreak7,
+		Name:        "任務達人",
+		Description: "連續 7 天完成所有每日任務",
+		Icon:        "📅",
+		Reward:      30000,
+		TitleID:     "mission_master",
+		IsHidden:    true,
+	},
+	ChallengeMissionStreak30: {
+		ID:          ChallengeMissionStreak30,
+		Name:        "任務傳說",
+		Description: "連續 30 天完成所有每日任務",
+		Icon:        "🌟",
+		Reward:      200000,
+		TitleID:     "mission_legend",
+		IsHidden:    true,
+	},
 }
 
 // PlayerChallengeState 玩家挑戰狀態
 type PlayerChallengeState struct {
-	Unlocked    bool      `json:"unlocked"`
-	UnlockedAt  time.Time `json:"unlocked_at,omitempty"`
-	RewardClaimed bool    `json:"reward_claimed"`
+	Unlocked      bool      `json:"unlocked"`
+	UnlockedAt    time.Time `json:"unlocked_at,omitempty"`
+	RewardClaimed bool      `json:"reward_claimed"`
 }
 
 // SessionStats 單局統計（用於速度/收集類挑戰）
 type SessionStats struct {
-	KillTimestamps []time.Time        // 擊破時間戳（用於速度挑戰）
-	KilledTypes    map[string]bool    // 已擊破的目標類型
-	TotalCoins     int                // 本局累積金幣
+	KillTimestamps []time.Time     // 擊破時間戳（用於速度挑戰）
+	KilledTypes    map[string]bool // 已擊破的目標類型
+	TotalCoins     int             // 本局累積金幣
 }
 
 // Manager 挑戰管理器
 type Manager struct {
 	mu       sync.RWMutex
 	states   map[string]map[ChallengeID]*PlayerChallengeState // playerID → challengeID → state
-	sessions map[string]*SessionStats                          // playerID → session stats
+	sessions map[string]*SessionStats                         // playerID → session stats
 }
 
 // NewManager 建立挑戰管理器

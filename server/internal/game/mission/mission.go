@@ -238,3 +238,21 @@ func (m *Manager) ResetAt() time.Time {
 	defer m.mu.RUnlock()
 	return m.resetAt
 }
+
+// AllCompleted 檢查玩家是否完成所有任務（用於連續完成獎勵）
+func (m *Manager) AllCompleted(playerID string) bool {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+
+	playerProgress, ok := m.progress[playerID]
+	if !ok {
+		return false
+	}
+	for _, mission := range DailyMissions {
+		prog, ok := playerProgress[mission.ID]
+		if !ok || !prog.Completed {
+			return false
+		}
+	}
+	return true
+}

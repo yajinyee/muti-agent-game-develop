@@ -2840,3 +2840,32 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **解決：** `git config --global core.tmpdir "C:/Temp/git-tmp"` + 建立目錄
 - **注意：** 每次新 PowerShell session 都要確認設定仍然有效（`git config --global core.tmpdir`）
 - **教訓：** 在 D 槽工作時，git 的 tmpdir 必須指向 C 槽
+
+## 83. Go 檔案縮排規範（gofmt 強制）
+- **問題：** 手動建立的 Go 檔案用空格縮排，不符合 Go 標準（應用 tab）
+- **症狀：** `gofmt -l` 顯示檔案需要格式化
+- **解決：** 每次建立新 Go 檔案後執行 `gofmt -w <file>`，或批次 `gofmt -w ./...`
+- **教訓：** Go 強制用 tab 縮排，不是 2 或 4 個空格。IDE 通常自動處理，但手動建立的檔案要特別注意
+
+## 84. Go struct 欄位重複定義的 grep 誤判
+- **問題：** grep 搜尋 `Wheel.*wheel\.Manager` 顯示同一行出現兩次，誤以為有重複定義
+- **根本原因：** grep 的 context 行（-B/-A）和 ripgrep 的輸出格式，同一行可能被多個 pattern 匹配而顯示多次
+- **確認方法：** 直接讀取檔案確認，不要只看 grep 輸出
+- **教訓：** grep 顯示重複不代表程式碼真的重複，要讀原始檔案確認
+
+## 85. 隱藏挑戰系統設計原則（2026-05-20）
+- **業界依據：** Fish Hunters（2026）確認隱藏成就提升留存率 40%+
+- **設計要點：**
+  1. 隱藏挑戰解鎖前完全不顯示（`is_hidden: true`），解鎖後才出現
+  2. 解鎖通知要比普通成就更誇張（金色特效 + 粒子動畫）
+  3. 獎勵自動發放，不需要玩家手動領取（減少摩擦）
+  4. 速度挑戰用時間戳追蹤（保留最近 10 秒），不用計數器
+  5. 隱藏挑戰的獎勵要比普通任務高 3-10 倍（驚喜感）
+- **技術實作：** `challenge.Manager` 用 `SessionStats.KillTimestamps` 追蹤速度挑戰，定期清理超過 10 秒的舊時間戳
+
+## 86. 幸運轉盤系統設計原則（2026-05-20）
+- **觸發設計：** 不是每次都觸發，而是有機率（T103=15%, T104=20%, B001=50%）
+- **加權隨機：** 低倍率高權重（2x=30），高倍率低權重（100x=1），確保 RTP 可控
+- **UI 設計：** 旋轉動畫要有「減速感」（後半段每步間隔增加），不能勻速停止
+- **整合位置：** 在 `handleKill` 最後呼叫，在獎勵已發放後（extraReward 是額外獎勵）
+- **教訓：** 轉盤的 `finalReward = baseReward × multiplier`，extraReward = finalReward - baseReward，只發放差額

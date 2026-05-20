@@ -97,4 +97,9 @@ func (g *Game) handleClaimMission(p *player.Player, msg *ws.Message) {
 	})
 	g.sendPlayerUpdate(p)
 	g.sendMissionUpdate(p.ID)
+
+	// 檢查是否全部任務完成（連續完成獎勵，DAY-086）
+	if g.missionMgr.AllCompleted(p.ID) {
+		g.notifyMissionAllComplete(p)
+	}
 }
