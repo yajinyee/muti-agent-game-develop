@@ -459,8 +459,30 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			Reward:     result.Reward,
 			LaborGain:  result.LaborGain,
 			KillerID:   p.ID,
+			Quality:    string(t.Quality),
 		},
 	})
+
+	// legendary 品質目標擊破：10% 機率觸發提前 BOSS（DAY-070）
+	// 參考 Fishing Frenzy Chapter 3 的 S 級魚召喚 Boss Fish 機制
+	if t.Quality == target.QualityLegendary && t.Def.Type != data.TargetTypeBoss {
+		g.mu.RLock()
+		currentState := g.State
+		g.mu.RUnlock()
+		if currentState == state.StateNormalPlay && rand.Intn(10) == 0 {
+			// 廣播特殊 BOSS 召喚通知
+			g.Hub.Broadcast(&ws.Message{
+				Type: ws.MsgBossEvent,
+				Payload: ws.BossEventPayload{
+					Event: "legendary_summon",
+				},
+			})
+			// 縮短 BOSS 觸發冷卻（讓 BOSS 更快出現）
+			g.mu.Lock()
+			g.nextBossAt = time.Now().Add(5 * time.Second) // 5 秒後觸發 BOSS
+			g.mu.Unlock()
+		}
+	}
 
 	// 發放獎勵通知
 	g.Hub.Send(p.ID, &ws.Message{

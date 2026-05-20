@@ -254,6 +254,15 @@ func _on_target_updated(data: Dictionary) -> void:
 
 ## 受擊閃白（shader 方式，只影響 Sprite2D）
 func _flash_hit(node: Node2D) -> void:
+	# 依品質決定閃光顏色（legendary=金色，epic=紫色，rare=藍色，normal=白色）
+	var quality = node.get_meta("quality", "normal")
+	var flash_color: Color
+	match quality:
+		"legendary": flash_color = Color(2.0, 1.8, 0.2, 1.0)  # 金色閃光
+		"epic":      flash_color = Color(1.5, 0.5, 2.5, 1.0)  # 紫色閃光
+		"rare":      flash_color = Color(0.5, 1.0, 2.5, 1.0)  # 藍色閃光
+		_:           flash_color = Color(3.0, 3.0, 3.0, 1.0)  # 白色閃光
+
 	# 找到 Sprite2D 子節點
 	for child in node.get_children():
 		if child is Sprite2D:
@@ -268,9 +277,9 @@ func _flash_hit(node: Node2D) -> void:
 				var tween = create_tween()
 				tween.tween_method(func(v): mat.set_shader_parameter("flash_amount", v), 1.0, 0.0, 0.12)
 			else:
-				# 備用：modulate 閃白
+				# 備用：modulate 閃光（依品質顏色）
 				var tween = create_tween()
-				tween.tween_property(child, "modulate", Color(3.0, 3.0, 3.0, 1.0), 0.04)
+				tween.tween_property(child, "modulate", flash_color, 0.04)
 				tween.tween_property(child, "modulate", Color.WHITE, 0.08)
 			break
 
@@ -289,6 +298,20 @@ func _on_boss_event(event_data: Dictionary) -> void:
 				break
 		HitEffect.spawn_boss_enter(boss_pos)
 		ScreenShake.add_trauma(0.9)
+		return
+
+	# legendary 品質目標召喚 BOSS（DAY-070）
+	if event == "legendary_summon":
+		# 顯示「傳說目標召喚了 BOSS！」通知
+		HitEffect.spawn_big_win(Vector2(640, 360), 50.0)  # 全畫面金色特效
+		ScreenShake.add_trauma(0.5)
+		# 通知 HUD 顯示成就通知
+		GameManager.emit_signal("achievement_unlocked", {
+			"name": "傳說召喚",
+			"desc": "傳說品質目標召喚了 BOSS！",
+			"icon": "♛",
+			"type": "special"
+		})
 		return
 
 	if event != "phase_change":
@@ -570,6 +593,9 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	var quality_color_hex = data.get("quality_color", "")
 	if quality != "normal" and quality_color_hex != "" and target_type != "boss":
 		_add_quality_glow(container, quality, quality_color_hex)
+
+	# 儲存品質到 meta（供受擊特效使用）
+	container.set_meta("quality", quality)
 
 	# 游泳動畫：輕微上下搖擺 + 旋轉傾斜（讓目標物有生命感）
 	# T103/T104 已有旋轉搖晃，不再加上下搖擺

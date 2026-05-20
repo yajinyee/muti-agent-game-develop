@@ -128,6 +128,7 @@ type TargetKillPayload struct {
 	Reward      int     `json:"reward"`
 	LaborGain   int     `json:"labor_gain"`
 	KillerID    string  `json:"killer_id"`
+	Quality     string  `json:"quality"`      // 品質等級（DAY-070）
 }
 
 // AttackResultPayload 攻擊結果

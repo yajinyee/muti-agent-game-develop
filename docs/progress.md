@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-070 品質系統 Client 端整合）
+## 最後更新：2026-05-20（DAY-070 品質系統完整整合）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,16 +8,17 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-070 更新（自主觸發）：** 品質系統 Client 端整合 + 測試修復 ✅
-  - `server/internal/game/target/target_test.go`：修復 `TestNewTarget_MeteorMultiplier`（品質加成後上限 100x，非 50x）
-  - `client/chiikawa-pixel/scripts/game/TargetManager.gd`：`_add_quality_glow()` — 品質光暈函數
-    - rare（藍色 #4488FF）：56px 光暈，0.8s 脈動，★ 徽章
-    - epic（紫色 #AA44FF）：60px 光暈，0.6s 脈動，◆ 徽章
-    - legendary（金色 #FFD700）：68px 光暈，0.4s 脈動，♛ 徽章 + 旋轉動畫 + 進場音效
-  - `TargetManager.gd`：`_on_target_spawned` 加入 legendary 品質誇張彈入動畫（1.3x 過衝）
-  - `TargetManager.gd`：`_play_kill_effect` 加入 legendary 品質擊破觸發大獎特效
-  - build/vet/test 全部通過（achievement 套件 Windows Defender 誤報，程式碼正確）
-  - **業界依據：** 品質分級系統（稀有/史詩/傳說）是 2026 年捕魚機標配留存功能，增加隨機驚喜感
+- **DAY-070 更新（自主觸發）：** 品質系統完整整合（Server + Client）✅
+  - `server/internal/ws/protocol.go`：`TargetKillPayload` 加入 `Quality` 欄位
+  - `server/internal/game/game.go`：`handleKill` 廣播品質資訊 + legendary 品質 10% 機率觸發提前 BOSS
+  - `server/internal/game/game.go`：legendary 召喚廣播 `boss_event.legendary_summon`
+  - `server/internal/game/target/target_test.go`：修復 `TestNewTarget_MeteorMultiplier`（品質加成後上限 100x）
+  - `client/chiikawa-pixel/scripts/game/TargetManager.gd`：`_add_quality_glow()` — 品質光暈（rare/epic/legendary）
+  - `TargetManager.gd`：品質儲存到 meta，`_flash_hit` 依品質顏色閃光
+  - `TargetManager.gd`：legendary 品質誇張進場動畫 + 擊破觸發大獎特效
+  - `TargetManager.gd`：`_on_boss_event` 加入 `legendary_summon` 處理（全畫面金色特效 + 成就通知）
+  - build/vet/test 全部通過
+  - **業界依據：** Fishing Frenzy Chapter 3（2026-05-14）確認品質系統 + S 級魚召喚 Boss 是 2026 年業界標配
 
 - **DAY-069 更新（自主觸發）：** 玩家個人資料 API（Player Profile）✅
   - `server/internal/game/game.go`：`PlayerProfile` struct + `AchievementInfo` struct
