@@ -2796,3 +2796,24 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **效果即時套用**：活動效果在 Server 端計算（finalReward = reward × eventRewardMult），不依賴 Client 端計算，確保公平性
 - **廣播策略**：每 30 秒廣播一次活動狀態（包含剩餘時間），Client 端用 end_at 自己計算倒數，減少 Server 廣播頻率
 - **教訓**：限時活動的「稀缺感」比「永久加成」更能刺激玩家行動，30 分鐘是合適的活動時長
+
+## 131. 魚類圖鑑收集系統設計原則（2026-05-20 DAY-081）
+- **業界依據：** bsu.edu（2025-10-11）確認「Hidden Treasure Unlocks」和收集系統是 2026 年捕魚機標配留存功能
+- **設計要點：**
+  1. 圖鑑條目與目標物 ID 一一對應（T001-T105 + B001 = 12 個）
+  2. 稀有度分層（common/rare/epic/legendary）讓玩家有收集目標感
+  3. 首次解鎖即時獎勵（+200 金幣）讓玩家有即時正向回饋
+  4. 全圖鑑完成大獎（+5000 金幣 + 稱號）提供長期目標
+  5. 記錄擊破次數和最高倍率，讓玩家有「刷記錄」的動力
+- **技術要點：**
+  - `codex.Manager` 獨立套件，不依賴 game 套件（避免循環依賴）
+  - `RecordKill` 回傳 `(isNewUnlock, isComplete)` 讓 handler 決定要發哪些通知
+  - `GetCoins()` 方法是必要的（之前 player.go 只有 AddCoins，沒有 GetCoins）
+  - Hub.Send 接受 `*ws.Message`，不是 `[]byte`（要用 Hub.Send，不是 Hub.SendToPlayer）
+- **教訓：** 收集系統要在玩家 AddPlayer 時發送完整快照，讓玩家一進遊戲就看到進度
+
+## 132. Go interface 設計陷阱（2026-05-20 DAY-081）
+- **問題：** codex_handler.go 最初用 `interface{ AddCoins(int); GetCoins() int }` 作為參數型別
+- **問題：** 這樣做雖然靈活，但在同一個 package 內直接用 `*player.Player` 更清晰
+- **解決：** 直接用具體型別 `*player.Player`，避免不必要的 interface 抽象
+- **教訓：** 在同一個 package 內，具體型別比 interface 更清晰；interface 適合跨 package 的抽象
