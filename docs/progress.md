@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-062 Nginx TLS + wss:// 生產環境安全強化）
+## 最後更新：2026-05-20（DAY-063 /livez + /readyz Kubernetes 健康探針）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,12 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-063 更新（自主觸發）：** /livez + /readyz Kubernetes 健康探針 ✅
+  - `main.go`：加入 `/livez`（存活探針，只要程序活著就 200）
+  - `main.go`：加入 `/readyz`（就緒探針，啟動 2 秒後 + 遊戲循環初始化完成才 200）
+  - `docker-compose.yml`：healthcheck 改用 `/readyz`（更精確）
+  - KnowHow #123-124 更新（Kubernetes 健康探針 + HTML5 商業化市場）
+  - build/vet/test 全部通過（9 個套件全部 ok）
 - **DAY-062 更新（自主觸發）：** Nginx TLS 反向代理 + wss:// 支援 ✅
   - `nginx/nginx.conf`：完整 Nginx 配置（TLS 終止 + WebSocket 代理 + Rate Limiting + HSTS）
   - `nginx/generate-self-signed-cert.sh`：開發用自簽憑證生成腳本

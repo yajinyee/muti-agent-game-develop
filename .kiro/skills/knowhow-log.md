@@ -2505,3 +2505,40 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **Docker Compose：** 加入 `nginx:1.27-alpine` 服務，Game Server 改用 `expose` 不直接暴露 port
 - **教訓：** 遊戲 Server 生產部署必須有 Nginx 反向代理，不能直接暴露 Go Server
 - **來源：** websocket.org/guides/infrastructure/nginx/ 2026-03-14
+
+## 123. /livez + /readyz — Kubernetes 健康探針最佳實踐（DAY-063）
+- **問題：** 本專案只有 `/health` 端點，Kubernetes 最佳實踐是分開存活和就緒探針
+- **差異：**
+  - `/livez`（存活探針）：只要程序活著就回 200，不檢查依賴。Kubernetes 用來判斷是否重啟 Pod
+  - `/readyz`（就緒探針）：檢查是否準備好接受流量（初始化完成 + 依賴可用）。Kubernetes 用來判斷是否路由流量
+  - `/health`：保留，提供完整狀態資訊（給人看的）
+- **實作：**
+  ```go
+  // /livez — 只要活著就 200
+  mux.HandleFunc("/livez", func(w http.ResponseWriter, r *http.Request) {
+      w.WriteHeader(http.StatusOK)
+      fmt.Fprintf(w, `{"status":"alive","uptime_sec":%d}`, uptimeSec)
+  })
+  // /readyz — 啟動超過 2 秒才就緒
+  mux.HandleFunc("/readyz", func(w http.ResponseWriter, r *http.Request) {
+      if uptimeSec < 2 {
+          w.WriteHeader(http.StatusServiceUnavailable)
+          return
+      }
+      w.WriteHeader(http.StatusOK)
+  })
+  ```
+- **Docker Compose healthcheck：** 改用 `/readyz`（更精確，確保遊戲循環已初始化）
+- **教訓：** 生產環境 Server 必須分開 liveness 和 readiness，單一 /health 不夠精確
+- **來源：** oneuptime.com 2026-01-07（Go Kubernetes health checks）
+
+## 124. HTML5 遊戲商業化市場 2026（DAY-063 上網研究）
+- **市場規模：** 2026 年 HTML5 遊戲市場超過 60 億美元（Statista 估計），2027 年預計超過 400 億美元
+- **趨勢：** 純廣告模式已死，混合模式（廣告 + 虛擬貨幣 + 訂閱）是標準
+- **捕魚機類型的商業化策略：**
+  1. **虛擬貨幣購買**：玩家購買金幣（最直接）
+  2. **廣告換金幣**：看廣告獲得額外金幣（低門檻）
+  3. **訂閱制**：月費解鎖高倍率投注等級
+  4. **錦標賽入場費**：付費參加高獎池比賽
+- **本專案適用：** 虛擬貨幣系統已完整，可直接接入支付 API
+- **來源：** playgama.com 2026-04-17

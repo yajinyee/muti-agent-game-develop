@@ -259,6 +259,33 @@ func main() {
 		}
 	})
 
+	// /livez — 存活探針（Kubernetes liveness probe）
+	// 只要 Server 程序還活著就回傳 200，不檢查依賴服務
+	// 用途：Kubernetes 判斷是否需要重啟 Pod
+	mux.HandleFunc("/livez", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `{"status":"alive","uptime_sec":%d}`,
+			int(time.Since(serverStartTime).Seconds()))
+	})
+
+	// /readyz — 就緒探針（Kubernetes readiness probe）
+	// 檢查 Server 是否準備好接受流量（遊戲循環已啟動 + Store 可用）
+	// 用途：Kubernetes 判斷是否將流量路由到此 Pod
+	mux.HandleFunc("/readyz", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		// 就緒條件：Server 啟動超過 2 秒（遊戲循環已初始化）
+		uptimeSec := int(time.Since(serverStartTime).Seconds())
+		if uptimeSec < 2 {
+			w.WriteHeader(http.StatusServiceUnavailable)
+			fmt.Fprintf(w, `{"status":"not_ready","reason":"initializing","uptime_sec":%d}`, uptimeSec)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, `{"status":"ready","clients":%d,"game_state":%q,"uptime_sec":%d}`,
+			hub.PlayerCount(), g.GetState(), uptimeSec)
+	})
+
 	// 統計端點（goroutine 數量、記憶體使用）
 	mux.HandleFunc("/stats", func(w http.ResponseWriter, r *http.Request) {
 		var ms runtime.MemStats
@@ -644,6 +671,8 @@ func main() {
 	log.Printf("👁️  Spectate at ws://localhost:%s/spectate", cfg.Port)
 	log.Printf("📸 Snapshot at http://localhost:%s/spectate/snapshot", cfg.Port)
 	log.Printf("❤️  Health at http://localhost:%s/health", cfg.Port)
+	log.Printf("🟢 Liveness at http://localhost:%s/livez", cfg.Port)
+	log.Printf("🔵 Readiness at http://localhost:%s/readyz", cfg.Port)
 	log.Printf("📊 Stats at http://localhost:%s/stats", cfg.Port)
 	log.Printf("🏆 Leaderboard at http://localhost:%s/leaderboard", cfg.Port)
 	log.Printf("📈 Analytics at http://localhost:%s/analytics", cfg.Port)
