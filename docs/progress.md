@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-070 品質系統完整整合）
+## 最後更新：2026-05-20（DAY-071 砲台外觀皮膚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,18 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-071 更新（自主觸發）：** 砲台外觀皮膚系統（Skin System）✅
+  - `server/internal/ws/protocol.go`：`SkinDef` struct + `AvailableSkins`（4種：default/golden/sakura/rainbow）+ `MsgBuySkin`/`MsgEquipSkin`/`MsgSkinUpdate` + `BuySkinPayload`/`EquipSkinPayload`/`SkinUpdatePayload`
+  - `server/internal/player/player.go`：`EquippedSkin`/`OwnedSkins` 欄位 + `BuySkin()`/`EquipSkin()`/`GetSkinInfo()` 方法 + `PlayerSnapshot` 加入外觀欄位
+  - `server/internal/store/store.go`：`PlayerState` 加入 `EquippedSkin`/`OwnedSkins`（持久化）
+  - `server/internal/game/game.go`：`handleBuySkin()`/`handleEquipSkin()` handler + `AddPlayer`/`RemovePlayer` 恢復/儲存外觀資訊
+  - `client/chiikawa-pixel/scripts/ui/SkinPanel.gd`：外觀選擇面板（4個按鈕，已裝備/已擁有/未擁有三種狀態，金幣不足提示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`skin_updated` 訊號 + `_handle_skin_update()` handler
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 SkinPanel（`_init_skin_panel()`，位置 x=215）
+  - `client/chiikawa-pixel/scripts/game/Cannon.gd`：`SKIN_CANNON_COLORS`/`SKIN_BULLET_COLORS` 常數 + `_on_skin_updated()` handler + `_update_cannon_visual()` 皮膚顏色覆蓋 + 投射物/拖尾顏色套用皮膚
+  - build/vet 全部通過
+  - **業界依據：** 砲台外觀系統是 2026 年捕魚機標配留存功能（玩家個性化 + 金幣消耗設計）
+
 - **DAY-070 更新（自主觸發）：** 品質系統完整整合（Server + Client）✅
   - `server/internal/ws/protocol.go`：`TargetKillPayload` 加入 `Quality` 欄位
   - `server/internal/game/game.go`：`handleKill` 廣播品質資訊 + legendary 品質 10% 機率觸發提前 BOSS

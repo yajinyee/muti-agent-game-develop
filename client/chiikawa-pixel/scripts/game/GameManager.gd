@@ -27,6 +27,7 @@ signal daily_bonus_received(bonus_data: Dictionary) # 每日登入獎勵（DAY-0
 signal spectator_left(spectator_data: Dictionary)  # 觀戰者離開通知（DAY-055）
 signal tournament_updated(tournament_data: Dictionary) # 週賽排名更新（DAY-066）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
+signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 
 # 遊戲狀態
 var current_state: String = "normal_play"
@@ -110,6 +111,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_tournament_update(payload)
 		"title_unlocked":
 			_handle_title_unlocked(payload)
+		"skin_update":
+			_handle_skin_update(payload)
 		"error":
 			_handle_error(payload)
 		"pong":
@@ -246,6 +249,10 @@ func _handle_title_unlocked(payload: Dictionary) -> void:
 	# 播放稱號解鎖音效（用 big_win 音效）
 	if AudioManager != null:
 		AudioManager.play_sfx("big_win")
+
+## 處理砲台外觀更新（DAY-071）
+func _handle_skin_update(payload: Dictionary) -> void:
+	emit_signal("skin_updated", payload)
 
 ## 取得目前角色顏色
 func get_character_color() -> Color:

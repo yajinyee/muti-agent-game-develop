@@ -12,6 +12,7 @@ const LeaderboardPanelScript = preload("res://scripts/ui/LeaderboardPanel.gd")
 const TournamentPanelScript = preload("res://scripts/ui/TournamentPanel.gd")
 const WeaponPanelScript = preload("res://scripts/ui/WeaponPanel.gd")
 const TitlePanelScript = preload("res://scripts/ui/TitlePanel.gd")
+const SkinPanelScript = preload("res://scripts/ui/SkinPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -156,6 +157,7 @@ func _ready() -> void:
 	_init_tournament_panel()  # 週賽排名面板（DAY-066）
 	_init_weapon_panel()      # 武器升級面板（DAY-067）
 	_init_title_panel()       # 稱號面板（DAY-068）
+	_init_skin_panel()        # 砲台外觀面板（DAY-071）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1578,3 +1580,17 @@ func _init_title_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_title_panel_node = panel
+
+## ── 砲台外觀面板（DAY-071）──────────────────────────────────────────────────────
+var _skin_panel_node = null
+
+## 初始化砲台外觀面板（DAY-071）
+## 位置：BottomBar 右側（WeaponPanel 右邊）
+func _init_skin_panel() -> void:
+	var panel = SkinPanelScript.new()
+	# 放在 WeaponPanel 右側（WeaponPanel 在 x=10，寬 200，所以 SkinPanel 在 x=215）
+	panel.position = Vector2(215, 540)
+	panel.z_index = 8
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_skin_panel_node = panel

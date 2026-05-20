@@ -153,7 +153,14 @@ func (g *Game) AddPlayer(playerID string) {
 				p.LoginStreak = saved.LoginStreak
 				p.MaxLoginStreak = saved.MaxLoginStreak
 				p.LastLoginDate = saved.LastLoginDate
-				log.Printf("[Game] Player %s restored: coins=%d, kills=%d, streak=%d", playerID, p.Coins, p.KillCount, p.LoginStreak)
+				// 恢復外觀資訊（DAY-071）
+				if saved.EquippedSkin != "" {
+					p.EquippedSkin = saved.EquippedSkin
+				}
+				if len(saved.OwnedSkins) > 0 {
+					p.OwnedSkins = saved.OwnedSkins
+				}
+				log.Printf("[Game] Player %s restored: coins=%d, kills=%d, streak=%d, skin=%s", playerID, p.Coins, p.KillCount, p.LoginStreak, p.EquippedSkin)
 			}
 		}
 
@@ -191,6 +198,9 @@ func (g *Game) RemovePlayer(playerID string) {
 			LoginStreak:    p.LoginStreak,
 			MaxLoginStreak: p.MaxLoginStreak,
 			LastLoginDate:  p.LastLoginDate,
+			// 外觀資訊（DAY-071）
+			EquippedSkin: p.EquippedSkin,
+			OwnedSkins:   p.OwnedSkins,
 		}
 		if err := g.store.SavePlayer(state); err != nil {
 			log.Printf("[Game] Failed to save player %s: %v", playerID, err)
@@ -248,6 +258,12 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	case ws.MsgSetTitle:
 		// 設定顯示稱號（DAY-068）
 		g.handleSetTitle(p, msg)
+	case ws.MsgBuySkin:
+		// 購買砲台外觀（DAY-071）
+		g.handleBuySkin(p, msg)
+	case ws.MsgEquipSkin:
+		// 裝備砲台外觀（DAY-071）
+		g.handleEquipSkin(p, msg)
 	}
 }
 
@@ -1341,3 +1357,87 @@ func (g *Game) sendAchievements(playerID string, unlocks []*achievement.Achievem
 // ── 效能上報（DAY-045）已移至 perf_handler.go ──────────────────────────────────────
 
 // ── Jackpot 系統（DAY-048）已移至 jackpot_handler.go ──────────────────────────────────────
+
+// handleBuySkin 處理購買砲台外觀（DAY-071）
+func (g *Game) handleBuySkin(p *player.Player, msg *ws.Message) {
+	var payload ws.BuySkinPayload
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		return
+	}
+
+	// 找到外觀定義
+	var skinDef *ws.SkinDef
+	for i := range ws.AvailableSkins {
+		if ws.AvailableSkins[i].ID == payload.SkinID {
+			skinDef = &ws.AvailableSkins[i]
+			break
+		}
+	}
+	if skinDef == nil {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgError,
+			Payload: map[string]string{"message": "外觀不存在"},
+		})
+		return
+	}
+
+	// 嘗試購買
+	if !p.BuySkin(skinDef.ID, skinDef.Price) {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgError,
+			Payload: map[string]string{"message": "金幣不足或已擁有此外觀"},
+		})
+		return
+	}
+
+	// 購買成功：自動裝備
+	p.EquipSkin(skinDef.ID)
+	equippedSkin, ownedSkins := p.GetSkinInfo()
+
+	// 通知玩家
+	g.Hub.Send(p.ID, &ws.Message{
+		Type: ws.MsgSkinUpdate,
+		Payload: ws.SkinUpdatePayload{
+			PlayerID:     p.ID,
+			EquippedSkin: equippedSkin,
+			OwnedSkins:   ownedSkins,
+			NewBalance:   p.Coins,
+		},
+	})
+
+	// 更新玩家狀態（讓 Client 看到新金幣餘額）
+	g.sendPlayerUpdate(p)
+
+	log.Printf("[Skin] 玩家 %s 購買外觀 %s（%s），剩餘金幣 %d",
+		p.ID, skinDef.ID, skinDef.Name, p.Coins)
+}
+
+// handleEquipSkin 處理裝備砲台外觀（DAY-071）
+func (g *Game) handleEquipSkin(p *player.Player, msg *ws.Message) {
+	var payload ws.EquipSkinPayload
+	if err := remarshal(msg.Payload, &payload); err != nil {
+		return
+	}
+
+	if !p.EquipSkin(payload.SkinID) {
+		g.Hub.Send(p.ID, &ws.Message{
+			Type:    ws.MsgError,
+			Payload: map[string]string{"message": "未擁有此外觀"},
+		})
+		return
+	}
+
+	equippedSkin, ownedSkins := p.GetSkinInfo()
+	g.Hub.Send(p.ID, &ws.Message{
+		Type: ws.MsgSkinUpdate,
+		Payload: ws.SkinUpdatePayload{
+			PlayerID:     p.ID,
+			EquippedSkin: equippedSkin,
+			OwnedSkins:   ownedSkins,
+			NewBalance:   0, // 裝備操作不改變金幣
+		},
+	})
+
+	g.sendPlayerUpdate(p)
+	log.Printf("[Skin] 玩家 %s 裝備外觀 %s", p.ID, payload.SkinID)
+}

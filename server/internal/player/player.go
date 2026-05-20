@@ -50,6 +50,10 @@ type Player struct {
 
 	// 稱號系統（DAY-068）
 	Titles *achievement.TitleTracker
+
+	// 砲台外觀系統（DAY-071）
+	EquippedSkin string   // 當前裝備的外觀 ID（預設 "default"）
+	OwnedSkins   []string // 已擁有的外觀 ID 列表
 }
 
 // NewPlayer 建立新玩家
@@ -71,6 +75,8 @@ func NewPlayer(id string, initialCoins int) *Player {
 		DisplayName:  displayName,
 		Achievements: achievement.NewTracker(),
 		Titles:       achievement.NewTitleTracker(),
+		EquippedSkin: "default",
+		OwnedSkins:   []string{"default"},
 	}
 }
 
@@ -305,6 +311,9 @@ func (p *Player) Snapshot() PlayerSnapshot {
 		TitleName:  title.Name,
 		TitleIcon:  title.Icon,
 		TitleColor: title.Color,
+		// 砲台外觀（DAY-071）
+		EquippedSkin: p.EquippedSkin,
+		OwnedSkins:   append([]string{}, p.OwnedSkins...),
 	}
 }
 
@@ -421,4 +430,54 @@ type PlayerSnapshot struct {
 	TitleName  string `json:"title_name"`
 	TitleIcon  string `json:"title_icon"`
 	TitleColor string `json:"title_color"`
+	// 砲台外觀（DAY-071）
+	EquippedSkin string   `json:"equipped_skin"`
+	OwnedSkins   []string `json:"owned_skins"`
+}
+
+// BuySkin 購買砲台外觀（DAY-071）
+// 回傳 true=購買成功，false=金幣不足或已擁有
+func (p *Player) BuySkin(skinID string, price int) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	// 已擁有
+	for _, s := range p.OwnedSkins {
+		if s == skinID {
+			return false
+		}
+	}
+
+	// 金幣不足
+	if p.Coins < price {
+		return false
+	}
+
+	p.Coins -= price
+	p.OwnedSkins = append(p.OwnedSkins, skinID)
+	return true
+}
+
+// EquipSkin 裝備砲台外觀（DAY-071）
+// 回傳 true=裝備成功，false=未擁有
+func (p *Player) EquipSkin(skinID string) bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+
+	for _, s := range p.OwnedSkins {
+		if s == skinID {
+			p.EquippedSkin = skinID
+			return true
+		}
+	}
+	return false
+}
+
+// GetSkinInfo 取得外觀資訊（DAY-071）
+func (p *Player) GetSkinInfo() (equippedSkin string, ownedSkins []string) {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	owned := make([]string, len(p.OwnedSkins))
+	copy(owned, p.OwnedSkins)
+	return p.EquippedSkin, owned
 }

@@ -31,6 +31,9 @@ type PlayerState struct {
 	LastLoginDate string `json:"last_login_date"` // "2026-05-20"（UTC+8）
 	LoginStreak   int    `json:"login_streak"`    // 連續登入天數
 	MaxLoginStreak int   `json:"max_login_streak"` // 歷史最高連續天數
+	// 砲台外觀（DAY-071）
+	EquippedSkin string   `json:"equipped_skin"` // 當前裝備外觀
+	OwnedSkins   []string `json:"owned_skins"`   // 已擁有外觀列表
 }
 
 // Store 玩家狀態儲存介面

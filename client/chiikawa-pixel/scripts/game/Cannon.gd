@@ -35,10 +35,30 @@ var _cached_rainbow_shader: Shader = null
 @onready var cannon_sprite: Sprite2D = $CannonSprite
 @onready var attack_label: Label = $AttackLabel
 
+## 當前裝備的皮膚定義（DAY-071）
+var _current_skin_id: String = "default"
+
+## 皮膚顏色定義（與 SkinPanel.gd 同步）
+const SKIN_CANNON_COLORS = {
+	"default": Color(1.0, 1.0, 1.0),
+	"golden":  Color(1.0, 0.843, 0.0),
+	"sakura":  Color(1.0, 0.714, 0.773),
+	"rainbow": Color(1.0, 0.412, 0.706),
+}
+const SKIN_BULLET_COLORS = {
+	"default": Color(0.0, 0.0, 0.0, 0.0),  # 透明 = 使用角色顏色
+	"golden":  Color(1.0, 0.647, 0.0),
+	"sakura":  Color(1.0, 0.412, 0.706),
+	"rainbow": Color(0.0, 1.0, 1.0),
+}
+
 func _ready() -> void:
 	GameManager.attack_result.connect(_on_attack_result)
 	GameManager.reward_received.connect(_on_reward_received)
 	GameManager.player_updated.connect(_on_player_updated)
+	# 皮膚更新訊號（DAY-071）
+	if GameManager.has_signal("skin_updated"):
+		GameManager.skin_updated.connect(_on_skin_updated)
 	# 預載入資源
 	if ResourceLoader.exists(PIXEL_FONT_PATH):
 		_pixel_font = load(PIXEL_FONT_PATH)
@@ -178,14 +198,17 @@ func _fire_projectile(target_pos: Vector2) -> void:
 				proj.queue_free()
 	)
 
-	# 拖尾效果（武器等級影響顏色，DAY-067）
+	# 拖尾效果（武器等級影響顏色，DAY-067；皮膚影響顏色，DAY-071）
 	var weapon_level = GameManager.player_data.get("weapon_level", 1)
 	var base_color = CHAR_COLORS.get(char_id, Color.WHITE)
+	# 皮膚子彈顏色（DAY-071）
+	var skin_bullet = SKIN_BULLET_COLORS.get(_current_skin_id, Color(0, 0, 0, 0))
+	var effective_bullet_color = base_color if skin_bullet.a < 0.01 else skin_bullet
 	var trail_color: Color
 	match weapon_level:
 		2: trail_color = Color(0.0, 0.9, 1.0)  # 強化砲：青色
 		3: trail_color = Color(1.0, 0.85, 0.0) # 超級砲：金色
-		_: trail_color = base_color             # 標準砲：角色顏色
+		_: trail_color = effective_bullet_color # 標準砲：皮膚/角色顏色
 	_spawn_trail(parent, CANNON_POSITION, target_pos, flight_time, trail_color)
 
 	# 超級砲：投射物放大 + 發光（DAY-067）
@@ -201,7 +224,8 @@ func _fire_projectile(target_pos: Vector2) -> void:
 		if is_instance_valid(proj):
 			proj.scale = Vector2(1.0, 1.0)
 		if is_instance_valid(sprite):
-			sprite.modulate = Color.WHITE
+			# 皮膚子彈顏色（DAY-071）
+			sprite.modulate = effective_bullet_color if skin_bullet.a > 0.01 else Color.WHITE
 
 func _on_attack_result(result: Dictionary) -> void:
 	if result.get("is_hit", false):
@@ -354,8 +378,18 @@ func _on_player_updated(data: Dictionary) -> void:
 	var bet_level = data.get("bet_level", 1)
 	_update_cannon_visual(bet_level, color)
 
+## 處理皮膚更新（DAY-071）
+func _on_skin_updated(data: Dictionary) -> void:
+	_current_skin_id = data.get("equipped_skin", "default")
+	# 立即更新砲台顏色
+	var char_id = GameManager.player_data.get("character_id", "chiikawa")
+	var char_color = CHAR_COLORS.get(char_id, Color.WHITE)
+	var bet_level = GameManager.player_data.get("bet_level", 1)
+	_update_cannon_visual(bet_level, char_color)
+
 ## 依投注等級更新砲台視覺（DAY-048）
 ## 等級越高，砲台越大、顏色越亮、有特效光暈
+## DAY-071：皮膚顏色覆蓋
 func _update_cannon_visual(bet_level: int, char_color: Color) -> void:
 	if not is_instance_valid(cannon_sprite):
 		return
@@ -364,8 +398,23 @@ func _update_cannon_visual(bet_level: int, char_color: Color) -> void:
 	var scale_factor = 1.0 + (bet_level - 1) * 0.055  # LV10 = 1.495x ≈ 1.5x
 	cannon_sprite.scale = Vector2(scale_factor, scale_factor)
 
-	# 砲台顏色調整：高等級時加入金色光暈
-	if bet_level >= 8:
+	# 皮膚顏色優先（DAY-071）
+	var skin_cannon = SKIN_CANNON_COLORS.get(_current_skin_id, Color.WHITE)
+	var use_skin = _current_skin_id != "default"
+
+	if use_skin:
+		# 皮膚模式：使用皮膚顏色，但保留等級亮度加成
+		var bright = 1.0
+		if bet_level >= 8:
+			bright = 1.0 + (bet_level - 7) * 0.08
+		elif bet_level >= 5:
+			bright = 1.0 + (bet_level - 4) * 0.04
+		cannon_sprite.modulate = Color(
+			skin_cannon.r * bright,
+			skin_cannon.g * bright,
+			skin_cannon.b * bright
+		)
+	elif bet_level >= 8:
 		# LV8-10：金色光暈（混合角色色和金色）
 		var gold_mix = (bet_level - 7) / 3.0  # 0.33 → 1.0
 		var glow_color = char_color.lerp(Color(1.0, 0.85, 0.2), gold_mix * 0.4)

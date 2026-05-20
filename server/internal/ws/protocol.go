@@ -21,6 +21,8 @@ const (
 	MsgClientPerf      MessageType = "client_perf"       // Client 端效能數據上報（DAY-045）
 	MsgUpgradeWeapon   MessageType = "upgrade_weapon"    // 武器升級（DAY-067）
 	MsgSetTitle        MessageType = "set_title"          // 設定顯示稱號（DAY-068）
+	MsgBuySkin         MessageType = "buy_skin"           // 購買砲台外觀（DAY-071）
+	MsgEquipSkin       MessageType = "equip_skin"         // 裝備砲台外觀（DAY-071）
 )
 
 // Server → Client
@@ -46,6 +48,7 @@ const (
 	MsgDailyBonus        MessageType = "daily_bonus"        // 每日登入獎勵（DAY-065）
 	MsgTournamentUpdate  MessageType = "tournament_update"  // 週賽排名更新（DAY-066）
 	MsgTournamentResult  MessageType = "tournament_result"  // 週賽結算通知（DAY-066）
+	MsgSkinUpdate        MessageType = "skin_update"        // 砲台外觀更新（DAY-071）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -353,4 +356,56 @@ type TitleUnlockedPayload struct {
 // SetTitlePayload 設定顯示稱號請求
 type SetTitlePayload struct {
 	TitleID string `json:"title_id"`
+}
+
+// ---- 砲台外觀系統（DAY-071）----
+
+// SkinDef 砲台外觀定義
+type SkinDef struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Price       int    `json:"price"`       // 0 = 免費
+	CannonColor string `json:"cannon_color"` // 砲台顏色（hex）
+	BulletColor string `json:"bullet_color"` // 投射物顏色（hex）
+	GlowColor   string `json:"glow_color"`   // 光暈顏色（hex，空=無光暈）
+	Icon        string `json:"icon"`
+}
+
+// AvailableSkins 可用外觀列表
+var AvailableSkins = []SkinDef{
+	{
+		ID: "default", Name: "標準砲台", Description: "預設外觀",
+		Price: 0, CannonColor: "", BulletColor: "", GlowColor: "", Icon: "🔫",
+	},
+	{
+		ID: "golden", Name: "黃金砲台", Description: "閃耀的黃金外觀，彰顯財富",
+		Price: 5000, CannonColor: "#FFD700", BulletColor: "#FFA500", GlowColor: "#FFD700", Icon: "✨",
+	},
+	{
+		ID: "rainbow", Name: "彩虹砲台", Description: "七彩光芒，傳說等級外觀",
+		Price: 20000, CannonColor: "#FF69B4", BulletColor: "#00FFFF", GlowColor: "#FF00FF", Icon: "🌈",
+	},
+	{
+		ID: "sakura", Name: "櫻花砲台", Description: "吉伊卡哇限定，粉嫩可愛",
+		Price: 8000, CannonColor: "#FFB7C5", BulletColor: "#FF69B4", GlowColor: "#FFB7C5", Icon: "🌸",
+	},
+}
+
+// BuySkinPayload 購買外觀請求（Client → Server）
+type BuySkinPayload struct {
+	SkinID string `json:"skin_id"`
+}
+
+// EquipSkinPayload 裝備外觀請求（Client → Server）
+type EquipSkinPayload struct {
+	SkinID string `json:"skin_id"`
+}
+
+// SkinUpdatePayload 外觀更新通知（Server → Client）
+type SkinUpdatePayload struct {
+	PlayerID    string   `json:"player_id"`
+	EquippedSkin string  `json:"equipped_skin"`
+	OwnedSkins  []string `json:"owned_skins"`
+	NewBalance  int      `json:"new_balance"` // 購買後的新餘額（0=裝備操作）
 }
