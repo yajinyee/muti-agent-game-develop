@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-081 魚類圖鑑收集系統）
+## 最後更新：2026-05-20（DAY-083 連擊系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-083 更新（自主觸發）：** 連擊系統（Kill Streak System）✅
+  - `server/internal/game/streak/streak.go`：連擊管理器（6個等級，3秒超時重置，倍率 1.0→2.0x）
+  - `server/internal/game/streak/streak_test.go`：10 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：`MsgStreakUpdate`/`MsgStreakReset`（Server→Client）+ `StreakUpdatePayload`/`StreakResetPayload`
+  - `server/internal/player/player.go`：`Streak *streak.Manager` 欄位
+  - `server/internal/game/game.go`：`handleKill` 整合 `notifyStreakKill()` + 連擊倍率套用到 finalReward + `startStreakTicker()`
+  - `server/internal/game/streak_handler.go`：`notifyStreakKill()`/`tickStreakTimeout()`/`startStreakTicker()`
+  - `client/chiikawa-pixel/scripts/ui/StreakPanel.gd`：連擊面板（連擊數/等級名稱/倍率，升級動畫）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`streak_updated`/`streak_reset` 訊號 + handler
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 StreakPanel（`_init_streak_panel()`，位置 x=740 y=48）
+  - 6 個連擊等級：開始(1x)/連擊！(3x,+10%)/熱身中(5x,+20%)/火力全開(8x,+35%)/無法阻擋(12x,+50%)/傳說連擊(20x,+100%)
+  - 連擊倍率直接套用到最終獎勵（疊加活動倍率）
+  - 3 秒無擊破自動重置，Server 每秒檢查
+  - build/vet/test 全部通過（10/10 streak 測試）
+  - **業界依據：** Fisch（2026-05-19）確認 Catch Streak 是 2026 年最新留存機制，增加緊張感和爽感
+
 - **DAY-081 更新（自主觸發）：** 魚類圖鑑收集系統（Codex System）✅
   - `server/internal/game/codex/codex.go`：圖鑑管理器（12種目標物，4稀有度：common/rare/epic/legendary）
   - `server/internal/game/codex/codex_test.go`：9 個單元測試全部通過

@@ -8,6 +8,7 @@ import (
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/codex"
+	"digital-twin/server/internal/game/streak"
 )
 
 // Player 玩家狀態
@@ -58,6 +59,9 @@ type Player struct {
 
 	// 魚類圖鑑系統（DAY-081）
 	Codex *codex.Manager
+
+	// 連擊系統（DAY-082）
+	Streak *streak.Manager
 }
 
 // NewPlayer 建立新玩家
@@ -82,6 +86,7 @@ func NewPlayer(id string, initialCoins int) *Player {
 		EquippedSkin: "default",
 		OwnedSkins:   []string{"default"},
 		Codex:        codex.NewManager(),
+		Streak:       streak.NewManager(),
 	}
 }
 

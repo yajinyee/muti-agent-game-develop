@@ -506,8 +506,7 @@ func main() {
 	})
 
 	// GET /codex?player_id=xxx — 取得玩家圖鑑狀態（DAY-081）
-	mux.HandleFunc("/codex", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+	mux.HandleFunc("/codex", func(w http.ResponseWriter, r *http.Request) {		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		playerID := r.URL.Query().Get("player_id")
 		if playerID == "" {
@@ -547,6 +546,32 @@ func main() {
 			}
 		} else {
 			http.Error(w, `{"error":"player not found"}`, http.StatusNotFound)
+		}
+	})
+
+	// GET /referral?player_id=xxx — 取得玩家推薦碼資訊（DAY-082）
+	mux.HandleFunc("/referral", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		playerID := r.URL.Query().Get("player_id")
+		if playerID == "" {
+			// 回傳全局推薦統計
+			totalCodes, totalReferrals := g.Referral.GetStats()
+			if err := json.NewEncoder(w).Encode(map[string]interface{}{
+				"total_codes":     totalCodes,
+				"total_referrals": totalReferrals,
+				"referrer_reward": 1000,
+				"referee_reward":  500,
+				"max_referrals":   20,
+				"timestamp":       time.Now().UnixMilli(),
+			}); err != nil {
+				http.Error(w, "encode error", http.StatusInternalServerError)
+			}
+			return
+		}
+		info := g.Referral.GetInfo(playerID)
+		if err := json.NewEncoder(w).Encode(info); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
 		}
 	})
 

@@ -50,6 +50,9 @@ const (
 	MsgGetEventStatus    MessageType = "get_event_status"     // 查詢限時活動狀態
 	// 魚類圖鑑系統（DAY-081）
 	MsgGetCodex          MessageType = "get_codex"            // 查詢圖鑑狀態
+	// 推薦碼系統（DAY-082）
+	MsgGetReferralInfo   MessageType = "get_referral_info"    // 查詢推薦碼資訊
+	MsgUseReferralCode   MessageType = "use_referral_code"    // 使用推薦碼
 )
 
 // Server → Client
@@ -103,6 +106,13 @@ const (
 	MsgCodexUpdate       MessageType = "codex_update"        // 圖鑑狀態更新
 	MsgCodexUnlock       MessageType = "codex_unlock"        // 圖鑑條目解鎖通知
 	MsgCodexComplete     MessageType = "codex_complete"      // 全圖鑑完成通知
+	// 推薦碼系統（DAY-082）
+	MsgReferralInfo      MessageType = "referral_info"       // 推薦碼資訊（Server → Client）
+	MsgReferralSuccess   MessageType = "referral_success"    // 推薦碼使用成功通知
+	MsgReferralError     MessageType = "referral_error"      // 推薦碼使用失敗通知
+	// 連擊系統（DAY-083）
+	MsgStreakUpdate      MessageType = "streak_update"       // 連擊狀態更新
+	MsgStreakReset       MessageType = "streak_reset"        // 連擊重置通知
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -872,4 +882,58 @@ type CodexCompletePayload struct {
 	NewBalance int    `json:"new_balance"`
 	TitleID    string `json:"title_id"`    // 解鎖的稱號 ID
 	TitleName  string `json:"title_name"`
+}
+
+// ---- 推薦碼系統（DAY-082）----
+
+// UseReferralCodePayload 使用推薦碼請求（Client → Server）
+type UseReferralCodePayload struct {
+	Code string `json:"code"` // 推薦碼（6位英數字）
+}
+
+// ReferralInfoPayload 推薦碼資訊（Server → Client）
+type ReferralInfoPayload struct {
+	MyCode        string `json:"my_code"`        // 我的推薦碼
+	UsedCode      string `json:"used_code"`      // 我使用的推薦碼（空=未使用）
+	ReferredBy    string `json:"referred_by"`    // 推薦我的玩家 ID
+	ReferralCount int    `json:"referral_count"` // 我成功推薦的人數
+	TotalReward   int    `json:"total_reward"`   // 累計推薦獎勵
+	ReferrerReward int   `json:"referrer_reward"` // 每次推薦獎勵金幣
+	RefereeReward  int   `json:"referee_reward"`  // 被推薦人獎勵金幣
+	MaxReferrals   int   `json:"max_referrals"`   // 最多推薦人數
+}
+
+// ReferralSuccessPayload 推薦碼使用成功通知（Server → Client）
+type ReferralSuccessPayload struct {
+	Code        string `json:"code"`
+	ReferrerID  string `json:"referrer_id"`
+	Reward      int    `json:"reward"`      // 被推薦人獲得的獎勵
+	NewBalance  int    `json:"new_balance"`
+	Message     string `json:"message"`
+}
+
+// ReferralErrorPayload 推薦碼使用失敗通知（Server → Client）
+type ReferralErrorPayload struct {
+	Code    string `json:"code"`
+	Reason  string `json:"reason"`
+}
+
+// ---- 連擊系統（DAY-082）----
+
+// StreakUpdatePayload 連擊狀態更新（Server → Client）
+// 每次擊破目標後發送
+type StreakUpdatePayload struct {
+	Current    int     `json:"current"`     // 當前連擊數
+	MultBonus  float64 `json:"mult_bonus"`  // 獎勵倍率加成
+	LevelName  string  `json:"level_name"`  // 等級名稱
+	LevelColor string  `json:"level_color"` // 顯示顏色（hex）
+	IsNewLevel bool    `json:"is_new_level"` // 是否剛升到新等級
+	MaxStreak  int     `json:"max_streak"`  // 本局最高連擊
+}
+
+// StreakResetPayload 連擊重置通知（Server → Client）
+// 超時未擊破時發送
+type StreakResetPayload struct {
+	FinalStreak int `json:"final_streak"` // 重置前的連擊數
+	MaxStreak   int `json:"max_streak"`   // 本局最高連擊
 }

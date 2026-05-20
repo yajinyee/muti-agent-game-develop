@@ -27,6 +27,7 @@ import (
 	"digital-twin/server/internal/game/target"
 	"digital-twin/server/internal/game/tournament"
 	"digital-twin/server/internal/game/vip"
+	"digital-twin/server/internal/game/referral"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -55,6 +56,7 @@ type Game struct {
 	DailyBoss   *dailyboss.Manager  // 每日 BOSS 挑戰管理器（DAY-077）
 	VIP         *vip.Manager        // VIP 等級管理器（DAY-078）
 	Event       *event.Manager      // 限時活動管理器（DAY-079）
+	Referral    *referral.Manager   // 推薦碼管理器（DAY-082）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -112,6 +114,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		DailyBoss:          dailyboss.New(),
 		VIP:                vip.New(),
 		Event:              event.New(30 * time.Minute),
+		Referral:           referral.NewManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -215,6 +218,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendEventUpdate(pp)
 				// 發送圖鑑狀態（DAY-081）
 				g.sendCodexUpdate(pp.ID)
+				// 發送推薦碼資訊（DAY-082）
+				g.sendReferralInfo(pp)
 			}
 		}()
 	}
@@ -369,6 +374,11 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 魚類圖鑑系統（DAY-081）
 	case ws.MsgGetCodex:
 		g.handleGetCodex(p.ID)
+	// 推薦碼系統（DAY-082）
+	case ws.MsgGetReferralInfo:
+		g.handleGetReferralInfo(p)
+	case ws.MsgUseReferralCode:
+		g.handleUseReferralCode(p, msg)
 	}
 }
 
