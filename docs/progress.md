@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-061 Redis Pub/Sub 整合到 main.go）
+## 最後更新：2026-05-20（DAY-062 Nginx TLS + wss:// 生產環境安全強化）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,15 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-062 更新（自主觸發）：** Nginx TLS 反向代理 + wss:// 支援 ✅
+  - `nginx/nginx.conf`：完整 Nginx 配置（TLS 終止 + WebSocket 代理 + Rate Limiting + HSTS）
+  - `nginx/generate-self-signed-cert.sh`：開發用自簽憑證生成腳本
+  - `nginx/certbot-setup.sh`：生產用 Let's Encrypt 憑證申請腳本
+  - `docker-compose.yml`：加入 `nginx:1.27-alpine` 服務（Port 80/443），Game Server 改用 `expose`
+  - `NetworkManager.gd`：移除硬編碼 IP，動態偵測 `window.location.protocol`（https: → wss://）
+  - `docs/deployment-guide.md`：加入架構概覽圖 + Nginx 快速啟動 + Let's Encrypt 說明
+  - KnowHow #121-122 更新（wss:// 必要性 + Nginx 反向代理架構）
+  - build/vet/test 全部通過（9 個套件全部 ok）
 - **DAY-061 更新（自主觸發）：** Redis Pub/Sub 整合到 main.go（水平擴展閉環完成）✅
   - `main.go`：建立 `serverID`（hostname + uuid[:8]）
   - `main.go`：`NewPubSubBroker()` 建立代理，有 Redis 時啟動，無 Redis 時降級

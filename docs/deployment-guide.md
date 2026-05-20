@@ -149,6 +149,32 @@ go tool pprof http://localhost:7777/debug/pprof/profile?seconds=30
 
 ## 生產環境部署
 
+### 架構概覽（DAY-062 更新）
+
+```
+Internet
+    │
+    ▼ HTTPS/WSS (443)
+┌─────────────────┐
+│   Nginx (TLS)   │  ← TLS 終止 + 反向代理
+│  cert.pem/key   │
+└────────┬────────┘
+         │ HTTP/WS (7777, 內部)
+         ▼
+┌─────────────────┐
+│  Game Server    │  ← Go WebSocket Server
+│  Port 7777      │
+└────────┬────────┘
+         │
+         ▼
+┌─────────────────┐
+│     Redis       │  ← 玩家資料持久化
+│  Port 6379      │
+└─────────────────┘
+```
+
+**重要：** 生產環境必須使用 `wss://`（WebSocket over TLS），瀏覽器在 HTTPS 頁面上會阻擋 `ws://` 連線。
+
 ### Linux Server 部署
 
 ```bash
@@ -192,36 +218,87 @@ sudo systemctl start chiikawa
 sudo systemctl status chiikawa
 ```
 
-### Nginx 反向代理（HTTPS）
+### Nginx 反向代理（HTTPS + WSS）
+
+本專案提供完整的 Nginx 配置，支援 TLS 終止和 WebSocket 代理。
+
+#### 快速啟動（Docker Compose，含 Nginx）
+
+```bash
+# 1. 生成自簽憑證（開發/測試用）
+bash nginx/generate-self-signed-cert.sh
+
+# 2. 啟動所有服務（含 Nginx）
+docker-compose up -d
+
+# 遊戲入口：https://localhost（自簽憑證，瀏覽器會警告）
+# WebSocket：wss://localhost/ws
+```
+
+#### 生產環境（Let's Encrypt 免費憑證）
+
+```bash
+# 1. 確認網域 DNS 已指向此 Server
+# 2. 取得 Let's Encrypt 憑證
+bash nginx/certbot-setup.sh your-domain.com
+
+# 3. 啟動服務
+docker-compose up -d
+
+# 遊戲入口：https://your-domain.com
+# WebSocket：wss://your-domain.com/ws
+```
+
+#### 手動 Nginx 設定（不用 Docker）
 
 ```nginx
+# /etc/nginx/sites-available/chiikawa
 server {
-    listen 443 ssl;
+    listen 80;
+    server_name your-domain.com;
+    return 301 https://$host$request_uri;
+}
+
+server {
+    listen 443 ssl http2;
     server_name your-domain.com;
 
-    ssl_certificate /path/to/cert.pem;
-    ssl_certificate_key /path/to/key.pem;
+    ssl_certificate /etc/letsencrypt/live/your-domain.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/your-domain.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
 
-    # WebSocket 代理
+    # SharedArrayBuffer 必要 Headers（Godot HTML5 需要）
+    add_header Cross-Origin-Opener-Policy "same-origin" always;
+    add_header Cross-Origin-Embedder-Policy "require-corp" always;
+
+    # WebSocket 代理（wss://）
     location /ws {
         proxy_pass http://localhost:7777;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
         proxy_set_header Host $host;
-        proxy_read_timeout 86400;
+        proxy_read_timeout 86400s;
+        proxy_buffering off;
     }
 
-    # 靜態檔案
+    # 靜態資源 + API
     location / {
         proxy_pass http://localhost:7777;
         proxy_set_header Host $host;
-        # 必要的 COOP/COEP headers（SharedArrayBuffer 需要）
-        add_header Cross-Origin-Opener-Policy "same-origin";
-        add_header Cross-Origin-Embedder-Policy "require-corp";
+        proxy_set_header X-Real-IP $remote_addr;
     }
 }
 ```
+
+#### Client 端自動偵測（DAY-062）
+
+`NetworkManager.gd` 已升級為自動偵測協定：
+- HTTPS 頁面 → 自動使用 `wss://`（安全）
+- HTTP 頁面 → 使用 `ws://`（僅開發用）
+- 本機 localhost → 使用 `ws://localhost:7777`
+
+不需要手動修改 Client 端 URL。
 
 ### 路由器 Port Forwarding
 - 外部 Port：7777
@@ -330,4 +407,4 @@ docker-compose logs -f gameserver
 
 ---
 
-*最後更新：2026-05-19*
+*最後更新：2026-05-20（DAY-062 Nginx TLS + wss:// 支援）*

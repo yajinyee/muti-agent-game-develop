@@ -2464,3 +2464,44 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **升級時機：** 等 4.6.3 正式版發布後評估升級（RC 版本不建議用於生產）
 - **4.6.3 重點：** 穩定性修復，無重大 API 變更
 - **教訓：** 定期追蹤 Godot 版本，維護版本（x.y.z）可以安全升級，功能版本（x.y）需要評估
+
+## 121. wss:// vs ws:// — 生產環境必須用 wss://（DAY-062）
+- **問題：** 本專案原本 Client 硬編碼 `ws://`，在 HTTPS 頁面上瀏覽器會阻擋 ws:// 連線
+- **根本原因：** 瀏覽器的 Mixed Content 政策：HTTPS 頁面不允許 ws:// 連線（只允許 wss://）
+- **解決：** `NetworkManager.gd` 改為動態偵測 `window.location.protocol`
+  - `https:` → 使用 `wss://`
+  - `http:` → 使用 `ws://`（僅開發用）
+- **GDScript 實作：**
+  ```gdscript
+  var protocol = JavaScriptBridge.eval("window.location.protocol")
+  var ws_scheme = "wss" if protocol == "https:" else "ws"
+  return ws_scheme + "://" + host + "/ws"
+  ```
+- **教訓：** 不要硬編碼 ws:// 或 IP，用動態偵測確保 HTTPS/HTTP 都能正常運作
+- **來源：** websocket.org 2026-05-05（"Always use wss:// in production"）
+
+## 122. Nginx 反向代理 + TLS 終止（遊戲 Server 生產部署）（DAY-062）
+- **架構：** Internet → Nginx(443/TLS) → Game Server(7777/內部) → Redis(6379/內部)
+- **優點：**
+  1. TLS 終止在 Nginx，Game Server 不需要處理 TLS（簡化 Go 程式碼）
+  2. 靜態資源快取（.pck, .wasm 等）
+  3. Rate Limiting（防 DDoS）
+  4. HSTS（強制 HTTPS）
+  5. 生產環境 Game Server 不直接暴露 7777 port
+- **關鍵 Nginx 設定（WebSocket 代理）：**
+  ```nginx
+  location /ws {
+      proxy_pass http://gameserver:7777;
+      proxy_http_version 1.1;
+      proxy_set_header Upgrade $http_upgrade;
+      proxy_set_header Connection "upgrade";
+      proxy_read_timeout 86400s;  # 遊戲需要長連線
+      proxy_buffering off;        # WebSocket 不需要緩衝
+  }
+  ```
+- **TLS 憑證：**
+  - 開發：自簽憑證（`bash nginx/generate-self-signed-cert.sh`）
+  - 生產：Let's Encrypt（`bash nginx/certbot-setup.sh your-domain.com`）
+- **Docker Compose：** 加入 `nginx:1.27-alpine` 服務，Game Server 改用 `expose` 不直接暴露 port
+- **教訓：** 遊戲 Server 生產部署必須有 Nginx 反向代理，不能直接暴露 Go Server
+- **來源：** websocket.org/guides/infrastructure/nginx/ 2026-03-14

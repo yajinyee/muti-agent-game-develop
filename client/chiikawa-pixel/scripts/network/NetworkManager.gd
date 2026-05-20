@@ -14,36 +14,45 @@ signal rooms_fetched(rooms: Array)  # 房間列表取得（DAY-020）
 signal spectator_snapshot_received(snapshot: Dictionary)  # 觀戰快照（DAY-024）
 
 # 設定
+# 本機開發（直連 Game Server，無 TLS）
 const SERVER_URL_LOCAL = "ws://localhost:7777/ws"
-const SERVER_URL_REMOTE = "ws://220.137.205.22:7777/ws"
-const SPECTATE_URL_LOCAL = "ws://localhost:7777/spectate"   # 觀戰端點（DAY-024）
-const SPECTATE_URL_REMOTE = "ws://220.137.205.22:7777/spectate"
+const SPECTATE_URL_LOCAL = "ws://localhost:7777/spectate"
 const HTTP_URL_LOCAL = "http://localhost:7777"
-const HTTP_URL_REMOTE = "http://220.137.205.22:7777"
 
-# 自動判斷：Web 平台讀 hostname，桌面版用 localhost
+# 生產環境（透過 Nginx TLS 反向代理，wss://）
+# 自動偵測：HTTPS 頁面用 wss://，HTTP 頁面用 ws://
+# 自動偵測：hostname 動態取得，不硬編碼 IP
+
+# 自動判斷：Web 平台讀 hostname + protocol，桌面版用 localhost
 var SERVER_URL: String:
 	get:
 		if OS.has_feature("web"):
 			var host = JavaScriptBridge.eval("window.location.hostname")
+			var protocol = JavaScriptBridge.eval("window.location.protocol")
 			if host != "localhost" and host != "127.0.0.1" and host != "":
-				return SERVER_URL_REMOTE
+				# HTTPS 頁面用 wss://（安全），HTTP 頁面用 ws://
+				var ws_scheme = "wss" if protocol == "https:" else "ws"
+				return ws_scheme + "://" + host + "/ws"
 		return SERVER_URL_LOCAL
 
 var SPECTATE_URL: String:
 	get:
 		if OS.has_feature("web"):
 			var host = JavaScriptBridge.eval("window.location.hostname")
+			var protocol = JavaScriptBridge.eval("window.location.protocol")
 			if host != "localhost" and host != "127.0.0.1" and host != "":
-				return SPECTATE_URL_REMOTE
+				var ws_scheme = "wss" if protocol == "https:" else "ws"
+				return ws_scheme + "://" + host + "/spectate"
 		return SPECTATE_URL_LOCAL
 
 var HTTP_BASE: String:
 	get:
 		if OS.has_feature("web"):
 			var host = JavaScriptBridge.eval("window.location.hostname")
+			var protocol = JavaScriptBridge.eval("window.location.protocol")
 			if host != "localhost" and host != "127.0.0.1" and host != "":
-				return HTTP_URL_REMOTE
+				# HTTPS 頁面用 https://，HTTP 頁面用 http://
+				return protocol + "//" + host
 		return HTTP_URL_LOCAL
 
 const RECONNECT_DELAY_MIN = 1.0   # 最短重連延遲（秒）

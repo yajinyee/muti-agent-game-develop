@@ -1,5 +1,5 @@
 # docker-compose.yml — 吉伊卡哇：像素大討伐
-# 一鍵啟動 Game Server + Redis + Prometheus + Grafana
+# 一鍵啟動 Nginx(TLS) + Game Server + Redis + Prometheus + Grafana
 #
 # 使用方式：
 #   docker-compose up -d          # 背景啟動
@@ -7,13 +7,52 @@
 #   docker-compose down           # 停止並移除容器
 #   docker-compose down -v        # 停止並移除容器 + 資料卷
 #
+# 遊戲入口（生產）：
+#   https://your-domain.com       # HTTPS（Nginx TLS 終止）
+#   wss://your-domain.com/ws      # WebSocket（安全）
+#
+# 遊戲入口（本機開發，無 TLS）：
+#   http://localhost:7777          # 直連 Game Server
+#   ws://localhost:7777/ws         # WebSocket（不安全，僅開發用）
+#
 # 監控面板：
 #   Prometheus: http://localhost:9090
 #   Grafana:    http://localhost:3001 (admin/chiikawa)
+#
+# TLS 憑證設定（生產環境）：
+#   1. 自簽憑證（開發）：bash nginx/generate-self-signed-cert.sh
+#   2. Let's Encrypt（生產）：bash nginx/certbot-setup.sh your-domain.com
 
 version: '3.8'
 
 services:
+  # ── Nginx（TLS 終止 + 反向代理）─────────────────────────────
+  nginx:
+    image: nginx:1.27-alpine
+    container_name: chiikawa-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"    # HTTP → HTTPS 重定向
+      - "443:443"  # HTTPS + WSS
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./nginx/certbot-webroot:/var/www/certbot:ro
+    depends_on:
+      - gameserver
+    networks:
+      - chiikawa-net
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
   # ── Redis（玩家資料持久化 + 排行榜）──────────────────────────
   redis:
     image: redis:7-alpine
@@ -44,8 +83,12 @@ services:
       dockerfile: Dockerfile
     container_name: chiikawa-gameserver
     restart: unless-stopped
-    ports:
-      - "7777:7777"
+    # 生產環境：不直接暴露 7777，由 Nginx 代理
+    # 開發環境：取消下面的 ports 注釋可直連
+    # ports:
+    #   - "7777:7777"
+    expose:
+      - "7777"
     environment:
       - PORT=7777
       - MAX_PLAYERS=10
