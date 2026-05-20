@@ -394,3 +394,26 @@ type VIPSnapshot struct {
 	Progress       float64 `json:"progress"`        // 0.0-1.0 當前等級進度
 	CanClaimWeekly bool    `json:"can_claim_weekly"` // 是否可領取週獎勵
 }
+
+// LoadState 從持久化資料恢復 VIP 狀態（DAY-098）
+func (m *Manager) LoadState(playerID string, totalSpend int, vipLevel int, lastWeeklyAt time.Time) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	m.players[playerID] = &PlayerVIPData{
+		PlayerID:    playerID,
+		TotalSpend:  totalSpend,
+		VIPLevel:    vipLevel,
+		LastWeeklyAt: lastWeeklyAt,
+		LastUpdated: time.Now(),
+	}
+}
+
+// GetData 取得玩家 VIP 原始資料（用於持久化，DAY-098）
+func (m *Manager) GetData(playerID string) (totalSpend int, vipLevel int, lastWeeklyAt time.Time) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	if data, ok := m.players[playerID]; ok {
+		return data.TotalSpend, data.VIPLevel, data.LastWeeklyAt
+	}
+	return 0, 0, time.Time{}
+}

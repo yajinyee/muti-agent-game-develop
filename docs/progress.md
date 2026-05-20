@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-097 全服公告系統）
+## 最後更新：2026-05-21（DAY-098 完整玩家資料持久化）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,38 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-098 更新（自主觸發）：** 完整玩家資料持久化（Full Player Persistence）✅
+  - `server/internal/store/filestore.go`：JSON 檔案持久化 Store（不需要 Redis，Server 重啟後完整恢復）
+    - `FullPlayerState`：完整玩家狀態結構（基礎/VIP/賽季/圖鑑/統計，共 50+ 欄位）
+    - `CodexEntryState`：圖鑑條目持久化結構
+    - `FileStore`：JSON 檔案 Store（原子寫入 tmp→rename，記憶體快取，排行榜）
+    - `SaveFull()`/`LoadFull()`：完整狀態儲存/讀取
+    - `SavePlayer()`/`LoadPlayer()`：向下相容舊介面
+    - `SetJSON()`/`GetJSON()`：通用 KV 儲存（Jackpot 狀態等）
+    - 原子寫入：先寫 `.tmp` 再 `rename`，避免 crash 時資料損壞
+    - 記憶體快取：避免頻繁讀檔，提升效能
+  - `server/internal/store/filestore_test.go`：8 個單元測試全部通過
+    - `TestFileStore_SaveAndLoad`：完整狀態儲存/讀取驗證
+    - `TestFileStore_NewPlayer`：新玩家回傳 nil（不是錯誤）
+    - `TestFileStore_Cache`：快取一致性驗證
+    - `TestFileStore_Delete`：刪除後讀不到
+    - `TestFileStore_AtomicWrite`：確認無 .tmp 殘留
+    - `TestFileStore_SetGetJSON`：通用 KV 儲存驗證
+    - `TestFileStore_Leaderboard`：排行榜排序驗證
+    - `TestFileStore_StoreInterface`：向下相容介面驗證
+  - `server/internal/store/store.go`：`New()` 函式升級，優先使用 FileStore（Redis > FileStore > MemoryStore）
+  - `server/internal/game/persistence_handler.go`：集中管理持久化邏輯
+    - `saveFullPlayerState()`：儲存完整玩家狀態（含 VIP/賽季/圖鑑/統計）
+    - `restoreFullPlayerState()`：恢復完整玩家狀態（含所有子系統）
+  - `server/internal/game/vip/vip.go`：新增 `LoadState()`/`GetData()` 方法
+  - `server/internal/game/season/season.go`：新增 `LoadState()`/`GetData()` 方法
+  - `server/internal/game/stats/stats.go`：新增 `LoadState()` 方法
+  - `server/internal/game/game.go`：`AddPlayer` 改用 `restoreFullPlayerState()`；`RemovePlayer` 改用 `saveFullPlayerState()`
+  - 持久化範圍：金幣/最高金幣/投注等級/武器等級/擊破數/投注總額/獎勵總額/攻擊數/房間難度/登入連續/外觀/VIP等級+消費+週獎勵/賽季積分+等級+已領取/圖鑑12種目標物/統計24個維度
+  - 儲存路徑：`data/players/<playerID>.json`（每玩家一個 JSON 檔案）
+  - build/vet/test 全部通過（8/8 filestore 測試）
+  - **業界依據：** Epic Online Services 確認 server-side player data storage 是 2026 年 iGaming 基礎設施標配；nodecraft.studio 確認原子寫入是防止資料損壞的最佳實踐
+
 - **DAY-097 更新（自主觸發）：** 全服公告系統（Server Announcement System）✅
   - `server/internal/game/announce/announce.go`：公告管理器（12種事件類型：Jackpot/BigWin/MegaWin/BossKill/StreakRecord/PlayerJoin/PlayerLeave/WeatherChange/EventStart/DailyReset/BossWarning/GrandJackpot，4個優先級，自動生成標題/訊息/圖示/顏色/時長）
   - `server/internal/game/announce/announce_test.go`：11 個單元測試全部通過

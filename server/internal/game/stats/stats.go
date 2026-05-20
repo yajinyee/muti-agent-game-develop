@@ -271,3 +271,42 @@ type StatsSnapshot struct {
 	FirstPlayAt        int64   `json:"first_play_at_ms"`
 	LastPlayAt         int64   `json:"last_play_at_ms"`
 }
+
+// LoadState 從持久化資料恢復統計狀態（DAY-098）
+func (s *PlayerStats) LoadState(
+	totalSessions int, totalPlayTime int64, totalShots int, totalKills int,
+	totalBet int, totalReward int, totalBonuses int, totalBossKills int,
+	bestMultiplier float64, bestStreak int, bestSession int, bestBonus int, maxCoins int,
+	jackpotWins int, jackpotMini int, jackpotMinor int, jackpotMajor int, jackpotGrand int, jackpotPayout int,
+	hitCount int, missCount int, firstPlayAt time.Time, lastPlayAt time.Time,
+) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	s.TotalSessions = totalSessions
+	s.TotalPlayTime = totalPlayTime
+	s.TotalShots = totalShots
+	s.TotalKills = totalKills
+	s.TotalBet = totalBet
+	s.TotalReward = totalReward
+	s.TotalBonuses = totalBonuses
+	s.TotalBossKills = totalBossKills
+	s.BestMultiplier = bestMultiplier
+	s.BestStreak = bestStreak
+	s.BestSessionScore = bestSession
+	s.BestBonusReward = bestBonus
+	s.MaxCoins = maxCoins
+	s.JackpotWins = jackpotWins
+	s.JackpotMiniWins = jackpotMini
+	s.JackpotMinorWins = jackpotMinor
+	s.JackpotMajorWins = jackpotMajor
+	s.JackpotGrandWins = jackpotGrand
+	s.TotalJackpotPayout = jackpotPayout
+	s.HitCount = hitCount
+	s.MissCount = missCount
+	if !firstPlayAt.IsZero() {
+		s.FirstPlayAt = firstPlayAt
+	}
+	if !lastPlayAt.IsZero() {
+		s.LastPlayAt = lastPlayAt
+	}
+}

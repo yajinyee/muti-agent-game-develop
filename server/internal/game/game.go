@@ -195,32 +195,13 @@ func (g *Game) AddPlayer(playerID string) {
 	if _, exists := g.Players[playerID]; !exists {
 		p := player.NewPlayer(playerID, g.initialCoins)
 
-		// 從 Store 恢復玩家狀態（若有）
+		// 從 Store 恢復玩家完整狀態（DAY-098）
 		var savedState *store.PlayerState
 		if g.store != nil {
+			g.restoreFullPlayerState(p)
+			// 取得基礎 savedState 供 checkAndSendDailyBonus 使用
 			if saved, err := g.store.LoadPlayer(playerID); err == nil && saved != nil {
 				savedState = saved
-				p.Coins = int(saved.Coins)
-				p.MaxCoins = int(saved.MaxCoins)
-				p.KillCount = saved.KillCount
-				if saved.BetLevel >= 1 && saved.BetLevel <= 10 {
-					p.BetLevel = saved.BetLevel
-				}
-				if saved.DisplayName != "" {
-					p.DisplayName = saved.DisplayName
-				}
-				// 恢復登入資訊（DAY-065）
-				p.LoginStreak = saved.LoginStreak
-				p.MaxLoginStreak = saved.MaxLoginStreak
-				p.LastLoginDate = saved.LastLoginDate
-				// 恢復外觀資訊（DAY-071）
-				if saved.EquippedSkin != "" {
-					p.EquippedSkin = saved.EquippedSkin
-				}
-				if len(saved.OwnedSkins) > 0 {
-					p.OwnedSkins = saved.OwnedSkins
-				}
-				log.Printf("[Game] Player %s restored: coins=%d, kills=%d, streak=%d, skin=%s", playerID, p.Coins, p.KillCount, p.LoginStreak, p.EquippedSkin)
 			}
 		}
 
@@ -298,32 +279,10 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.announcePlayerLeave(p.DisplayName)
 	}
 
-	// 儲存玩家狀態到 Store（讓下次加入時能恢復）
+	// 儲存玩家完整狀態到 Store（DAY-098）
 	if g.store != nil && p != nil {
-		state := &store.PlayerState{
-			PlayerID:       p.ID,
-			DisplayName:    p.DisplayName,
-			Coins:          int64(p.Coins),
-			Labor:          p.LaborValue,
-			BetLevel:       p.BetLevel,
-			SessionScore:   int64(p.SessionScore),
-			MaxCoins:       int64(p.MaxCoins),
-			KillCount:      p.KillCount,
-			RoomID:         g.ID,
-			LoginStreak:    p.LoginStreak,
-			MaxLoginStreak: p.MaxLoginStreak,
-			LastLoginDate:  p.LastLoginDate,
-			// 外觀資訊（DAY-071）
-			EquippedSkin: p.EquippedSkin,
-			OwnedSkins:   p.OwnedSkins,
-		}
-		if err := g.store.SavePlayer(state); err != nil {
-			log.Printf("[Game] Failed to save player %s: %v", playerID, err)
-		} else {
-			log.Printf("[Game] Player %s saved: coins=%d", playerID, p.Coins)
-		}
-		// 更新排行榜
-		g.store.UpdateLeaderboard(playerID, int64(p.SessionScore))
+		// 結束統計 Session 後再儲存（確保 TotalPlayTime 正確）
+		g.saveFullPlayerState(p)
 	}
 
 	log.Printf("[Game] Player %s left game %s", playerID, g.ID)

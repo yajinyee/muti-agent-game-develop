@@ -288,3 +288,30 @@ func hasClaimed(data *PlayerSeasonData, level int) bool {
 	}
 	return false
 }
+
+// LoadState 從持久化資料恢復賽季狀態（DAY-098）
+func (m *Manager) LoadState(playerID string, points int, level int, claimed []int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+	claimedCopy := make([]int, len(claimed))
+	copy(claimedCopy, claimed)
+	m.players[playerID] = &PlayerSeasonData{
+		PlayerID:      playerID,
+		SeasonPoints:  points,
+		CurrentLevel:  level,
+		ClaimedLevels: claimedCopy,
+		LastUpdated:   time.Now(),
+	}
+}
+
+// GetData 取得玩家賽季原始資料（用於持久化，DAY-098）
+func (m *Manager) GetData(playerID string) (points int, level int, claimed []int) {
+	m.mu.RLock()
+	defer m.mu.RUnlock()
+	if data, ok := m.players[playerID]; ok {
+		claimedCopy := make([]int, len(data.ClaimedLevels))
+		copy(claimedCopy, data.ClaimedLevels)
+		return data.SeasonPoints, data.CurrentLevel, claimedCopy
+	}
+	return 0, 0, []int{}
+}

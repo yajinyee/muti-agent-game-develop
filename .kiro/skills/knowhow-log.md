@@ -2974,3 +2974,22 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **動畫分離：** `jackpot_animation`（廣播特效）和 `jackpot_win`（顯示慶祝面板）分開，讓所有玩家都能看到特效
 - **PoolState 持久化：** 升級時要同步更新 PoolState struct，否則 Redis 恢復會遺失 minor 層
 - **教訓：** 升級 Jackpot 層數時，要同步更新：jackpot.go / history.go / protocol.go / jackpot_handler.go / main.go / JackpotPanel.gd / GameManager.gd（7個檔案）
+
+## 83. JSON 檔案持久化的原子寫入技術（DAY-098）
+- **問題：** 直接 `os.WriteFile` 寫到一半 crash 會產生損壞的 JSON 檔案
+- **解法：** 先寫 `<path>.tmp`，成功後 `os.Rename(tmpPath, path)`（原子操作）
+- **原因：** `os.Rename` 在同一個 filesystem 上是原子操作，不會有中間狀態
+- **教訓：** 任何重要資料的寫入都要用 tmp→rename 模式
+
+## 84. Go Store 介面向下相容設計（DAY-098）
+- **問題：** 新增 FileStore 後，舊的 `SavePlayer`/`LoadPlayer` 介面仍需支援
+- **解法：** FileStore 同時實作 `Store` 介面（舊）和新增 `SaveFull`/`LoadFull` 方法（新）
+- **在 game.go 中：** 用 type assertion `fs, ok := g.store.(*store.FileStore)` 判斷是否為 FileStore
+- **教訓：** 新功能用 type assertion 擴充，不破壞舊介面
+
+## 85. Windows Defender 誤報 Go 測試執行檔（已知問題）
+- **問題：** `go test` 產生的 `.exe` 被 Windows Defender 誤判為病毒
+- **症狀：** `open achievement.test.exe: Operation did not complete successfully because the file contains a virus`
+- **原因：** Windows Defender 對動態生成的 .exe 有誤報，特別是 Go 的測試執行檔
+- **解法：** 在 Windows Defender 排除清單加入 Go 的 temp 目錄（`%TEMP%\go-build*`）
+- **教訓：** 這不是程式錯誤，build/vet 通過即可，測試誤報不影響功能

@@ -69,19 +69,33 @@ type Store interface {
 	IsRedis() bool
 }
 
-// New 建立 Store 實例，自動選擇 Redis 或記憶體模式
-// redisURL 為空或連線失敗時，自動降級到記憶體模式
+// New 建立 Store 實例，優先順序：Redis > FileStore > MemoryStore
+// redisURL 為空時，使用 FileStore（JSON 檔案持久化，DAY-098）
+// FileStore 建立失敗時，降級到 MemoryStore
 func New(redisURL string) Store {
 	if redisURL == "" {
-		log.Println("[Store] REDIS_URL not set, using in-memory store (player state will not persist)")
-		return NewMemoryStore()
+		// 優先使用 FileStore（JSON 檔案持久化）
+		fs, err := NewFileStore("data")
+		if err != nil {
+			log.Printf("[Store] FileStore init failed: %v", err)
+			log.Println("[Store] Falling back to in-memory store (player state will not persist)")
+			return NewMemoryStore()
+		}
+		log.Println("[Store] Using FileStore (JSON file persistence) at data/players/")
+		return fs
 	}
 
 	store, err := NewRedisStore(redisURL)
 	if err != nil {
 		log.Printf("[Store] Redis connection failed: %v", err)
-		log.Println("[Store] Falling back to in-memory store (player state will not persist)")
-		return NewMemoryStore()
+		// 降級到 FileStore
+		fs, fsErr := NewFileStore("data")
+		if fsErr != nil {
+			log.Println("[Store] Falling back to in-memory store (player state will not persist)")
+			return NewMemoryStore()
+		}
+		log.Println("[Store] Redis failed, using FileStore at data/players/")
+		return fs
 	}
 
 	log.Printf("[Store] Connected to Redis: %s", redisURL)
