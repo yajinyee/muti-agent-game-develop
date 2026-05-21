@@ -150,6 +150,11 @@ var Targets = map[string]*TargetDef{
 	// 是「輔助型特殊目標」，不直接給高獎勵，但讓玩家在 8 秒內大量擊破其他目標
 	// 設計：中等倍率（30-50x）+ 中等 HP（60）+ 中等生成權重（5）= 常見但有輔助效果的特殊目標
 	"T119": {ID: "T119", Name: "黃金海龜", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 60, SpawnWeight: 5, Speed: 20, Lifetime: 15, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "golden_turtle"},
+	// T120 幸運星魚（DAY-160）— 業界依據：捕魚機業界標準「倍率爆發」機制
+	// 擊破後觸發「全場倍率翻倍」10 秒，所有目標物的獎勵倍率 ×2
+	// 是「爆發型特殊目標」，讓玩家在 10 秒內所有擊破獎勵翻倍，製造「大豐收」的爽感
+	// 設計：中等倍率（40-60x）+ 中等 HP（70）+ 低生成權重（4）= 稀有但爆發效果強的特殊目標
+	"T120": {ID: "T120", Name: "幸運星魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 60, HP: 70, SpawnWeight: 4, Speed: 45, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_star_fish"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

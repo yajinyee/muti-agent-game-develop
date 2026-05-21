@@ -136,6 +136,7 @@ type Game struct {
 	ThunderboltLobster *thunderboltLobsterManager // 雷霆龍蝦免費射擊系統管理器（DAY-150）
 	RainbowPhoenix     *rainbowPhoenixManager     // 彩虹鳳凰 Power Up 系統管理器（DAY-151）
 	GoldenTurtle       *goldenTurtleManager       // 黃金海龜時間停止系統管理器（DAY-159）
+	LuckyStarFish      *luckyStarFishManager      // 幸運星魚全場倍率翻倍管理器（DAY-160）
 	CrystalDragon      *crystaldragon.Manager     // 水晶龍收集大獎系統管理器（DAY-153）
 
 	// 計時器
@@ -252,6 +253,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		ThunderboltLobster: newThunderboltLobsterManager(),
 		RainbowPhoenix:     newRainbowPhoenixManager(),
 		GoldenTurtle:       newGoldenTurtleManager(),
+		LuckyStarFish:      newLuckyStarFishManager(),
 		CrystalDragon:      crystaldragon.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
@@ -1008,6 +1010,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		// 記錄 Power Up 期間的擊破
 		go g.notifyRainbowPhoenixKill(p, finalReward)
 	}
+	// 套用幸運星魚倍率翻倍（DAY-160）
+	luckyStarMult := g.getLuckyStarMult(p.ID)
+	if luckyStarMult > 1.0 {
+		finalReward = int(float64(finalReward) * luckyStarMult)
+	}
 	// 雙環輪盤：擊破高倍率目標後嘗試觸發（DAY-139）
 	go g.tryDualRoulette(p, float64(t.Multiplier), finalReward)
 	// 懸賞領取：擊破懸賞目標獲得額外金幣（DAY-137）
@@ -1286,6 +1293,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 黃金海龜時間停止：擊破 T119 時觸發（DAY-159）
 	if isGoldenTurtle(t.DefID) {
 		go g.tryGoldenTurtleTimeStop(p, t.InstanceID, t.X, t.Y)
+	}
+	// 幸運星魚全場倍率翻倍：擊破 T120 時觸發（DAY-160）
+	if isLuckyStarFish(t.DefID) {
+		go g.tryLuckyStarFish(p, t.InstanceID, t.X, t.Y)
 	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)

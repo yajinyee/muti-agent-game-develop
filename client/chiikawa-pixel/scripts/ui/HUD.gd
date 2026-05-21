@@ -244,6 +244,7 @@ func _ready() -> void:
 	_init_crystal_dragon_panel()      # 水晶龍收集大獎面板（DAY-153）
 	_init_royal_chain_lightning_panel() # 皇家閃電鰻持續連鎖電擊面板（DAY-156）
 	_init_golden_turtle_panel()       # 黃金海龜時間停止面板（DAY-159）
+	_init_lucky_star_fish_panel()     # 幸運星魚全場倍率翻倍面板（DAY-160）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3177,3 +3178,19 @@ func _init_golden_turtle_panel() -> void:
 	if panel.has_method("setup"):
 		panel.setup(_pixel_font)
 	_golden_turtle_panel = panel
+
+# ---- 幸運星魚全場倍率翻倍面板（DAY-160）----
+
+const LuckyStarFishPanelScript = preload("res://scripts/ui/LuckyStarFishPanel.gd")
+var _lucky_star_fish_panel: Control = null
+
+func _init_lucky_star_fish_panel() -> void:
+	var panel = LuckyStarFishPanelScript.new()
+	panel.name = "LuckyStarFishPanel"
+	panel.z_index = 81  # 在 GoldenTurtlePanel(82) 下方
+	panel.position = Vector2(640, 360)  # 畫面中心
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	if panel.has_method("setup"):
+		panel.setup(_pixel_font)
+	_lucky_star_fish_panel = panel

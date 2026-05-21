@@ -168,6 +168,7 @@ signal torpedo_result(result_data: Dictionary)         # 魚雷爆炸結果（DA
 signal railgun_result(result_data: Dictionary)         # 軌道炮穿透結果（DAY-157）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
+signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
 signal drill_lobster_chain(chain_data: Dictionary)      # 鑽頭龍蝦連帶效果（DAY-142）
 signal bomb_crab_chain(chain_data: Dictionary)          # 炸彈蟹連環爆炸（DAY-143）
 signal mega_octopus_wheel_start(wheel_data: Dictionary) # 巨型章魚轉盤開始（DAY-144）
@@ -468,6 +469,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_railgun_result(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
+		"lucky_star_fish":
+			_handle_lucky_star_fish(payload)
 		"royal_chain_lightning":
 			_handle_royal_chain_lightning(payload)
 		"drill_lobster_chain":
@@ -1213,6 +1216,12 @@ func _handle_golden_turtle_time_stop(payload: Dictionary) -> void:
 	emit_signal("golden_turtle_time_stop", payload)
 	var phase: String = payload.get("phase", "")
 	print("[GameManager] Golden Turtle time stop: phase=%s" % phase)
+
+## 處理幸運星魚全場倍率翻倍（DAY-160）
+func _handle_lucky_star_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_star_fish", payload)
+	var phase: String = payload.get("phase", "")
+	print("[GameManager] Lucky Star Fish: phase=%s" % phase)
 
 ## 處理皇家閃電鰻持續連鎖電擊（DAY-156）
 func _handle_royal_chain_lightning(payload: Dictionary) -> void:

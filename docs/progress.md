@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-159 黃金海龜時間停止系統）
+## 最後更新：2026-05-22（DAY-160 幸運星魚全場倍率翻倍系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,19 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-160 更新（自主觸發）：** 幸運星魚全場倍率翻倍系統（Lucky Star Fish x2 Multiplier System）✅
+  - **業界依據：** 捕魚機業界標準「倍率爆發」機制 — 擊破特殊目標後觸發短期倍率翻倍，讓玩家在有限時間內大量獲得高獎勵，製造「大豐收」的爽感
+  - `server/internal/data/tables.go`：新增 T120 幸運星魚（40-60x/HP70/SpawnWeight4/lucky_star_fish 行為）
+  - `server/internal/game/lucky_star_fish_handler.go`：luckyStarFishManager（per-player session/cooldown 管理）；isLuckyStarFish 判斷；getLuckyStarMult（供 handleKill 使用，活躍 session 回傳 2.0）；tryLuckyStarFish（觸發倍率翻倍/全服廣播/全服公告/10秒後廣播結束）
+  - `server/internal/ws/protocol.go`：新增 MsgLuckyStarFish；LuckyStarFishPayload（兩階段：lucky_start/lucky_end）
+  - `server/internal/game/game.go`：Game struct 加入 LuckyStarFish *luckyStarFishManager；NewGameWithStore 初始化；handleKill 加入 getLuckyStarMult 倍率套用（在彩虹鳳凰之後）+ isLuckyStarFish 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/LuckyStarFishPanel.gd`：幸運星魚面板（金色星星主題；lucky_start 全螢幕金色閃光+頂部橫幅滑入+右上角倒數計時器；自己觸發時中央大 ×2 標誌彈跳動畫；lucky_end 淡出所有 UI；_process 更新倒數計時）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：lucky_star_fish 訊號 + _handle_lucky_star_fish
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 LuckyStarFishPanelScript（z_index=81）
+  - 倍率設計：觸發玩家在 10 秒內所有擊破獎勵 ×2；60 秒冷卻防止頻繁觸發；每個玩家獨立 session
+  - 視覺設計：自己觸發時中央大 ×2 標誌（讓玩家清楚知道倍率翻倍了）；全服廣播讓其他玩家也看到
+  - 倍率疊加：幸運星魚倍率在彩虹鳳凰 Power Up 之後套用（最後一層），最大化爽感
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-159 更新（自主觸發）：** 黃金海龜時間停止系統（Golden Sea Turtle Time Stop System）✅
   - **業界依據：** Ocean King 系列「Time Stop」機制 — 擊破特殊目標後觸發全場時間停止，所有目標物暫停移動，玩家可以輕鬆瞄準並大量擊破，是業界經典的「輔助型特殊目標」機制
   - `server/internal/data/tables.go`：新增 T119 黃金海龜（30-50x/HP60/SpawnWeight5/golden_turtle 行為）
