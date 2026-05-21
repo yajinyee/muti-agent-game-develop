@@ -166,6 +166,10 @@ signal speed_race_started(race_data: Dictionary)       # 競速獵殺開始（DA
 signal speed_race_ended(race_data: Dictionary)         # 競速獵殺結束（DAY-136）
 signal speed_race_cancelled(race_data: Dictionary)     # 競速獵殺取消（DAY-136）
 signal speed_race_result(result_data: Dictionary)      # 競速個人結果（DAY-136）
+signal bounty_posted(bounty_data: Dictionary)          # 懸賞發布廣播（DAY-137）
+signal bounty_claimed(claim_data: Dictionary)          # 懸賞個人領取通知（DAY-137）
+signal bounty_killed(kill_data: Dictionary)            # 懸賞目標擊破廣播（DAY-137）
+signal bounty_expired(expire_data: Dictionary)         # 懸賞過期通知（DAY-137）
 signal mystery_box_updated(box_data: Dictionary)       # 神秘寶箱狀態更新（DAY-090）
 signal mystery_box_dropped(drop_data: Dictionary)      # 神秘寶箱掉落通知（DAY-090）
 signal mystery_box_opened(open_data: Dictionary)       # 神秘寶箱開箱結果（DAY-090）
@@ -428,6 +432,14 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_speed_race_cancel(payload)
 		"speed_race_result":
 			_handle_speed_race_result(payload)
+		"bounty_posted":
+			_handle_bounty_posted(payload)
+		"bounty_claimed":
+			_handle_bounty_claimed(payload)
+		"bounty_killed":
+			_handle_bounty_killed(payload)
+		"bounty_expired":
+			_handle_bounty_expired(payload)
 		"mystery_box_drop":
 			_handle_mystery_box_drop(payload)
 		"mystery_box_update":
@@ -1242,3 +1254,45 @@ func _handle_speed_race_result(payload: Dictionary) -> void:
 	emit_signal("speed_race_result", payload)
 	if rank == 1 and AudioManager != null:
 		AudioManager.play_sfx("big_win")
+
+# ---- 全服目標懸賞系統（DAY-137）----
+
+## 處理懸賞發布廣播（DAY-137）
+func _handle_bounty_posted(payload: Dictionary) -> void:
+	var poster_name: String = payload.get("poster_name", "")
+	var target_name: String = payload.get("target_name", "")
+	var amount: int = payload.get("amount", 0)
+	print("[GameManager] Bounty posted by %s on %s for %d coins" % [poster_name, target_name, amount])
+	emit_signal("bounty_posted", payload)
+
+## 處理懸賞個人領取通知（DAY-137）
+func _handle_bounty_claimed(payload: Dictionary) -> void:
+	var total_amount: int = payload.get("total_amount", 0)
+	print("[GameManager] Bounty claimed! Total: %d coins" % total_amount)
+	emit_signal("bounty_claimed", payload)
+	if AudioManager != null:
+		AudioManager.play_sfx("coin_drop")
+
+## 處理懸賞目標擊破廣播（DAY-137）
+func _handle_bounty_killed(payload: Dictionary) -> void:
+	var killer_name: String = payload.get("killer_name", "")
+	var total_amount: int = payload.get("total_amount", 0)
+	print("[GameManager] Bounty killed by %s! Total: %d coins" % [killer_name, total_amount])
+	emit_signal("bounty_killed", payload)
+
+## 處理懸賞過期通知（DAY-137）
+func _handle_bounty_expired(payload: Dictionary) -> void:
+	var target_name: String = payload.get("target_name", "")
+	print("[GameManager] Bounty expired: %s" % target_name)
+	emit_signal("bounty_expired", payload)
+
+## 對目標下懸賞（DAY-137）
+func post_bounty(target_instance_id: String, amount: int) -> void:
+	NetworkManager.send_message("post_bounty", {
+		"target_instance_id": target_instance_id,
+		"amount": amount
+	})
+
+## 查詢懸賞列表（DAY-137）
+func request_bounties() -> void:
+	NetworkManager.send_message("get_bounties", {})

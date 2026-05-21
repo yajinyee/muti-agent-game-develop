@@ -332,6 +332,16 @@ const (
 	MsgSpeedRaceCancel MessageType = "speed_race_cancel" // 競速取消廣播（Server→Client，全服）
 	MsgSpeedRaceResult MessageType = "speed_race_result" // 競速個人結果（Server→Client，個人）
 
+	// 全服目標懸賞系統（DAY-137）
+	MsgPostBounty   MessageType = "post_bounty"    // 玩家下懸賞（Client→Server）
+	MsgGetBounties  MessageType = "get_bounties"   // 查詢懸賞列表（Client→Server）
+	MsgBountyPosted MessageType = "bounty_posted"  // 懸賞發布廣播（Server→Client，全服）
+	MsgBountyClaimed MessageType = "bounty_claimed" // 懸賞領取通知（Server→Client，個人）
+	MsgBountyKilled  MessageType = "bounty_killed"  // 懸賞目標擊破廣播（Server→Client，全服）
+	MsgBountyExpired MessageType = "bounty_expired" // 懸賞過期通知（Server→Client，個人+全服）
+	MsgBountyList    MessageType = "bounty_list"    // 懸賞列表回應（Server→Client，個人）
+	MsgBountyError   MessageType = "bounty_error"   // 懸賞操作失敗（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2722,4 +2732,79 @@ type SpeedRaceResultPayload struct {
 	BonusMult   float64 `json:"bonus_mult"`   // 獎勵倍率
 	RankIcon    string  `json:"rank_icon"`    // 名次圖示（🥇/🥈/🥉）
 	Message     string  `json:"message"`      // 顯示訊息
+}
+
+// ---- 全服目標懸賞系統 Payloads（DAY-137）----
+
+// PostBountyPayload 玩家下懸賞請求（Client → Server）
+type PostBountyPayload struct {
+	TargetInstanceID string `json:"target_instance_id"` // 目標 instanceID
+	Amount           int    `json:"amount"`             // 懸賞金額
+}
+
+// BountySnap 懸賞快照（用於列表）
+type BountySnap struct {
+	BountyID         string  `json:"bounty_id"`
+	TargetInstanceID string  `json:"target_instance_id"`
+	TargetDefID      string  `json:"target_def_id"`
+	TargetName       string  `json:"target_name"`
+	TargetMult       float64 `json:"target_mult"`
+	PosterID         string  `json:"poster_id"`
+	PosterName       string  `json:"poster_name"`
+	Amount           int     `json:"amount"`
+	SecondsLeft      float64 `json:"seconds_left"`
+}
+
+// BountyPostedPayload 懸賞發布廣播（Server → Client，全服）
+type BountyPostedPayload struct {
+	BountyID         string  `json:"bounty_id"`
+	TargetInstanceID string  `json:"target_instance_id"`
+	TargetDefID      string  `json:"target_def_id"`
+	TargetName       string  `json:"target_name"`
+	TargetMult       float64 `json:"target_mult"`
+	PosterID         string  `json:"poster_id"`
+	PosterName       string  `json:"poster_name"`
+	Amount           int     `json:"amount"`
+	SecondsLeft      float64 `json:"seconds_left"`
+	Message          string  `json:"message"`
+}
+
+// BountyClaimedPayload 懸賞領取通知（Server → Client，個人）
+type BountyClaimedPayload struct {
+	KillerID    string `json:"killer_id"`
+	KillerName  string `json:"killer_name"`
+	TotalAmount int    `json:"total_amount"`
+	BountyCount int    `json:"bounty_count"`
+	NewBalance  int    `json:"new_balance"`
+	Message     string `json:"message"`
+}
+
+// BountyKilledPayload 懸賞目標擊破廣播（Server → Client，全服）
+type BountyKilledPayload struct {
+	KillerID    string `json:"killer_id"`
+	KillerName  string `json:"killer_name"`
+	TargetName  string `json:"target_name"`
+	TotalAmount int    `json:"total_amount"`
+	BountyCount int    `json:"bounty_count"`
+	Message     string `json:"message"`
+}
+
+// BountyExpiredPayload 懸賞過期通知（Server → Client）
+type BountyExpiredPayload struct {
+	BountyID   string `json:"bounty_id"`
+	TargetName string `json:"target_name"`
+	Amount     int    `json:"amount"`
+	Message    string `json:"message"`
+}
+
+// BountyListPayload 懸賞列表回應（Server → Client，個人）
+type BountyListPayload struct {
+	Bounties     []BountySnap `json:"bounties"`
+	CooldownLeft int          `json:"cooldown_left"` // 玩家下懸賞冷卻剩餘秒數
+}
+
+// BountyErrorPayload 懸賞操作失敗（Server → Client，個人）
+type BountyErrorPayload struct {
+	Code    string `json:"code"`
+	Message string `json:"message"`
 }

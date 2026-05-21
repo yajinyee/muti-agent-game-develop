@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-136 全服競速獵殺系統）
+## 最後更新：2026-05-21（DAY-137 全服目標懸賞系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -24,6 +24,22 @@
   - 社交設計：競速開始/結束全服廣播，讓所有玩家都能看到「有人搶先擊破了」，增加競爭感
   - 倍率疊加：競速倍率在狂熱模式倍率之後套用（最後一層），最大化爽感
   - build/vet 全部通過（零錯誤零警告）；16/16 speedrace 測試通過
+
+- **DAY-137 更新（自主觸發）：** 全服目標懸賞系統（Global Bounty System）✅
+  - **業界依據：** strivecloud.io 2026「social streaks + tiered rewards」是 2026 年最有效的留存機制；玩家對高價值目標下懸賞，擊破者獲得額外金幣，增加社交互動和策略深度
+  - `server/internal/game/bounty/bounty.go`：懸賞管理器；BountyConfig（MaxActiveBounties=3/MinBountyAmount=100/MaxBountyAmount=5000/BountyDuration=60s/CooldownPerPlayer=120s）；PostBounty（金額驗證/冷卻/懸賞數上限）；ClaimBounty（擊破領取/多筆累加）；CheckExpiry（過期退款）；CancelBountyForTarget（目標消失退款）；GetActiveBounties/GetBountiesForTarget/GetPlayerCooldown
+  - `server/internal/game/bounty/bounty_test.go`：16 個單元測試全部通過（New/CanPost_Initial/PostBounty_Basic/PostBounty_InvalidAmount_TooLow/PostBounty_InvalidAmount_TooHigh/PostBounty_Cooldown/PostBounty_Full/ClaimBounty_Basic/ClaimBounty_NoMatch/ClaimBounty_MultipleBounties/CheckExpiry/CancelBountyForTarget/GetActiveBounties/GetBountiesForTarget/GetPlayerCooldown/GetPlayerCooldown_NoPost）
+  - `server/internal/game/bounty_handler.go`：handlePostBounty（目標驗證/金幣扣除/全服廣播/公告）；notifyBountyKill（懸賞領取/金幣發放/個人通知/全服廣播）；tickBountyExpiry（過期退款/廣播）；cancelBountyForTarget（目標消失退款）；sendBountyStatus（登入時發送懸賞列表）
+  - `server/internal/ws/protocol.go`：新增 MsgPostBounty/MsgGetBounties/MsgBountyPosted/MsgBountyClaimed/MsgBountyKilled/MsgBountyExpired/MsgBountyList/MsgBountyError；對應 Payload 定義
+  - `server/internal/game/announce/announce.go`：新增 EventBountyPosted/EventBountyClaimed；buildContent 加入懸賞公告（金色/綠色，3.5-4秒）
+  - `server/internal/game/game.go`：Game struct 加入 Bounty *bounty.Manager；NewGameWithStore 初始化；AddPlayer 發送懸賞列表；HandleMessage 加入 MsgPostBounty/MsgGetBounties；handleKill 整合懸賞領取；updateNormalPlay 加入 tickBountyExpiry + cancelBountyForTarget
+  - `client/chiikawa-pixel/scripts/ui/BountyPanel.gd`：懸賞面板（頂部橫幅淡入；懸賞發布/擊破廣播；個人領取彈窗；退款通知；金色/綠色主題）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：4個訊號（bounty_posted/bounty_claimed/bounty_killed/bounty_expired）+ 訊息分支 + post_bounty/request_bounties API
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 BountyPanelScript（z_index=80）
+  - 懸賞設計：最多 3 個同時活躍懸賞；金額 100-5000 金幣；60 秒有效期；玩家下懸賞後 120 秒冷卻
+  - 退款機制：懸賞超時或目標消失時自動退款，讓玩家放心下懸賞
+  - 多筆累加：同一目標可有多個玩家下懸賞，擊破者獲得全部懸賞金額
+  - build/vet 全部通過（零錯誤零警告）；16/16 bounty 測試通過
 - **DAY-135 更新（自主觸發）：** 失敗補償系統（Unlucky Bonus System）✅
   - **業界依據：** Funrize 2026 的「Unlucky Bonus」— 連續花費超過一定金額但獲得低回報時，自動給予補償獎勵，防止玩家因為「運氣太差」而離開，是 2026 年業界最新的留存機制
   - `server/internal/game/unlucky/unlucky.go`：失敗補償管理器；UnluckyConfig（TrackingShots=30/SpendThreshold=3.0/MinSpend=200/CooldownSecs=120/BaseRewardMult=0.3/MaxRewardMult=0.5/MinReward=100）；環形緩衝追蹤最近 30 次射擊；RecordShot（記錄花費/回報，觸發判斷，補償計算）；GetSnapshot（進度快照）；RemovePlayer

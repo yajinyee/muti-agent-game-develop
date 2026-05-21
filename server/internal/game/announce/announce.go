@@ -34,6 +34,8 @@ const (
 	EventUnluckyBonus   EventType = "unlucky_bonus"   // 失敗補償觸發（DAY-135）
 	EventSpeedRace      EventType = "speed_race"      // 競速獵殺開始（DAY-136）
 	EventSpeedRaceWin   EventType = "speed_race_win"  // 競速獵殺第一名（DAY-136）
+	EventBountyPosted   EventType = "bounty_posted"   // 懸賞發布（DAY-137）
+	EventBountyClaimed  EventType = "bounty_claimed"  // 懸賞被領取（DAY-137）
 )
 
 // Priority 公告優先級
@@ -357,6 +359,38 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = "#FFD700"
 		priority = PriorityHigh
 		duration = 5000
+
+	case EventBountyPosted:
+		targetName := "目標"
+		multStr := "?"
+		if extra != nil {
+			if tn, ok := extra["target_name"]; ok {
+				targetName = tn
+			}
+			if ms, ok := extra["mult"]; ok {
+				multStr = ms
+			}
+		}
+		title = "💰 懸賞發布！"
+		message = fmt.Sprintf("%s 對【%s】(×%s) 懸賞 🪙%d！", name, targetName, multStr, amount)
+		icon = "💰"
+		color = "#FFC107"
+		priority = PriorityNormal
+		duration = 3500
+
+	case EventBountyClaimed:
+		targetName := "目標"
+		if extra != nil {
+			if tn, ok := extra["target_name"]; ok {
+				targetName = tn
+			}
+		}
+		title = "💰 懸賞領取！"
+		message = fmt.Sprintf("%s 擊破懸賞目標【%s】！獲得 🪙%d！", name, targetName, amount)
+		icon = "💰"
+		color = "#4CAF50"
+		priority = PriorityNormal
+		duration = 4000
 
 	default:
 		title = "📢 公告"

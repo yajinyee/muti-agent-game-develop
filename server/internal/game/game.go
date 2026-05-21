@@ -58,6 +58,7 @@ import (
 	raidboss "digital-twin/server/internal/game/raidBoss"
 	"digital-twin/server/internal/game/unlucky"
 	"digital-twin/server/internal/game/speedrace"
+	"digital-twin/server/internal/game/bounty"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -119,6 +120,7 @@ type Game struct {
 	FeverMode      *fevermode.Manager      // 狂熱模式管理器（DAY-133）
 	UnluckyBonus   *unlucky.Manager        // 失敗補償系統管理器（DAY-135）
 	SpeedRace      *speedrace.Manager      // 競速獵殺系統管理器（DAY-136）
+	Bounty         *bounty.Manager         // 全服目標懸賞系統管理器（DAY-137）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -223,6 +225,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		FeverMode:          fevermode.New(),
 		UnluckyBonus:       unlucky.NewDefault(),
 		SpeedRace:          speedrace.NewDefault(),
+		Bounty:             bounty.NewDefault(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -373,6 +376,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendUnluckyBonusStatus(pp)
 				// 發送競速獵殺狀態（DAY-136）
 				g.sendSpeedRaceStatus(pp)
+				// 發送懸賞列表（DAY-137）
+				g.sendBountyStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -668,6 +673,11 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 龍怒蓄力大招系統（DAY-128）
 	case ws.MsgUseWrath:
 		g.handleUseWrath(clientID)
+	// 全服目標懸賞系統（DAY-137）
+	case ws.MsgPostBounty:
+		g.handlePostBounty(p, msg)
+	case ws.MsgGetBounties:
+		g.sendBountyStatus(p)
 	}
 }
 
@@ -892,6 +902,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if speedRaceMult > 1.0 {
 		finalReward = int(float64(finalReward) * speedRaceMult)
 	}
+	// 懸賞領取：擊破懸賞目標獲得額外金幣（DAY-137）
+	go g.notifyBountyKill(p, t.InstanceID)
 	// 龍怒蓄力大招：擊破目標累積怒氣（DAY-128）
 	go g.notifyWrathKill(p, t.Multiplier)
 	// 連勝獎勵：記錄擊破（DAY-131）
@@ -1219,6 +1231,8 @@ func (g *Game) updateNormalPlay() {
 			delete(g.Targets, id)
 			// 競速獵殺：目標消失時取消競速（DAY-136）
 			go g.cancelSpeedRaceIfTarget(id)
+			// 懸賞：目標消失時取消懸賞並退款（DAY-137）
+			go g.cancelBountyForTarget(id)
 		}
 	}
 	targetCount := len(g.Targets)
@@ -1398,6 +1412,8 @@ func (g *Game) updateNormalPlay() {
 	go g.tickFeverModeExpiry()
 	// 競速獵殺超時檢查（每次 update，DAY-136）
 	go g.tickSpeedRace()
+	// 懸賞過期檢查（每次 update，DAY-137）
+	go g.tickBountyExpiry()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }

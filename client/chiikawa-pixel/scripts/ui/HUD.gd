@@ -226,6 +226,7 @@ func _ready() -> void:
 	_init_fever_mode_panel()      # 狂熱模式面板（DAY-133）
 	_init_unlucky_bonus_panel()   # 失敗補償面板（DAY-135）
 	_init_speed_race_panel()      # 競速獵殺面板（DAY-136）
+	_init_bounty_panel()          # 全服目標懸賞面板（DAY-137）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2714,3 +2715,21 @@ func _init_speed_race_panel() -> void:
 	GameManager.speed_race_ended.connect(func(data): panel.on_speed_race_end(data))
 	GameManager.speed_race_cancelled.connect(func(data): panel.on_speed_race_cancel(data))
 	GameManager.speed_race_result.connect(func(data): panel.on_speed_race_result(data))
+
+# ---- 全服目標懸賞面板（DAY-137）----
+const BountyPanelScript = preload("res://scripts/ui/BountyPanel.gd")
+var _bounty_panel: Control = null
+
+func _init_bounty_panel() -> void:
+	var panel = BountyPanelScript.new()
+	panel.name = "BountyPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 80  # 在競速面板（79）之上
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_bounty_panel = panel
+
+	GameManager.bounty_posted.connect(func(data): panel.on_bounty_posted(data))
+	GameManager.bounty_claimed.connect(func(data): panel.on_bounty_claimed(data))
+	GameManager.bounty_killed.connect(func(data): panel.on_bounty_killed(data))
+	GameManager.bounty_expired.connect(func(data): panel.on_bounty_expired(data))
