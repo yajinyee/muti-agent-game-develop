@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-141 追蹤飛彈武器系統）
+## 最後更新：2026-05-21（DAY-142 鑽頭龍蝦特殊目標物）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,20 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-142 更新（自主觸發）：** 鑽頭龍蝦特殊目標物（Drill Lobster Target）✅
+  - **業界依據：** Royal Fishing JILI 2026「Drill Bit Lobster (80X) — fires a penetrating drill through multiple fish before self-detonating, capturing everything in blast radius」— 擊破後觸發穿透鑽頭，沿水平方向穿透所有目標，到達邊緣後爆炸，連帶擊破爆炸範圍內目標，是 2026 年最新的「連帶效果」機制
+  - `server/internal/data/tables.go`：新增 T106 鑽頭龍蝦（60-80x/HP60/SpawnWeight6/drill_lobster 行為）
+  - `server/internal/game/drill_lobster_handler.go`：isDrillLobster 判斷；tryDrillLobsterChain（穿透路徑收集/分批穿透60ms/邊緣爆炸180px/全服廣播）；announceDrillLobsterChain（≥3個目標全服公告）
+  - `server/internal/ws/protocol.go`：新增 MsgDrillLobsterChain；DrillKillEntry；DrillLobsterChainPayload（三階段：drill_start/explosion/result）
+  - `server/internal/game/game.go`：handleKill 加入 isDrillLobster 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/DrillLobsterPanel.gd`：鑽頭龍蝦面板（橙紅主題；drill_start 橫幅+閃光；explosion 爆炸閃光；result 右側滑入彈窗含擊破數+獎勵；自己觸發時金色閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：drill_lobster_chain 訊號 + _handle_drill_lobster_chain 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 DrillLobsterPanelScript（layer=84）
+  - 穿透設計：Y 軸 ±80px 範圍內的目標都會被穿透；每 60ms 一個目標，製造連續穿透感
+  - 爆炸設計：鑽頭到達邊緣（x=0 或 x=1280）後爆炸，180px 半徑內所有目標被擊破
+  - 獎勵設計：連帶擊破獎勵 = 目標倍率 × betLevel × 0.55（比直接擊破低，平衡 RTP）
+  - 全服公告：連帶擊破 ≥3 個目標時全服廣播，讓其他玩家看到「有人觸發了鑽頭龍蝦連帶效果」
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-141 更新（自主觸發）：** 追蹤飛彈武器系統（Homing Missile Weapon System）✅
   - **業界依據：** thechipotlemenu.com 2026「Automatic Target Locking Weapon — AI technology, locking onto more than 10 consecutive targets in one minute, saving players time and increasing efficiency」— 自動追蹤倍率最高的目標，100% 命中，獎勵 ×1.5，是 2026 年最新的 AI 輔助武器，讓玩家感受到「科技感」和「精準感」
   - `server/internal/game/specialweapon/specialweapon.go`：新增 WeaponHoming 類型；追蹤飛彈定義（充能 35 次/最多 3 發/不可購買/🎯圖示/粉紅色）；新增 HomingRewardMult=1.5；新增 CalcHomingTarget（選擇倍率最高的目標）；PlayerWeaponState 加入 HomingCharges/HomingChargeProgress；所有 switch 分支加入 WeaponHoming 處理

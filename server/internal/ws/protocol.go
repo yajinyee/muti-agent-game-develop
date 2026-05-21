@@ -358,6 +358,9 @@ const (
 	MsgMegaCatchEnd    MessageType = "mega_catch_end"    // 事件結束廣播（Server→Client，全服）
 	MsgMegaCatchStatus MessageType = "mega_catch_status" // 事件狀態（Server→Client，個人）
 
+	// 鑽頭龍蝦連帶效果系統（DAY-142）
+	MsgDrillLobsterChain MessageType = "drill_lobster_chain" // 鑽頭連帶效果廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2912,4 +2915,28 @@ type HomingMissileResultPayload struct {
 	NewBalance int     `json:"new_balance"` // 命中後餘額
 	Killed     bool    `json:"killed"`      // 是否擊破（100% 命中，但不一定擊破）
 	Message    string  `json:"message"`     // 顯示訊息
+}
+
+// DrillKillEntry 鑽頭連帶擊破的目標條目（DAY-142）
+type DrillKillEntry struct {
+	InstanceID string  `json:"instance_id"`
+	DefID      string  `json:"def_id"`
+	Multiplier float64 `json:"multiplier"`
+	Reward     int     `json:"reward"`
+	Phase      string  `json:"phase"` // "penetrate" or "explosion"
+}
+
+// DrillLobsterChainPayload 鑽頭龍蝦連帶效果廣播（Server → Client，DAY-142）
+// Phase: "drill_start" → "explosion" → "result"
+type DrillLobsterChainPayload struct {
+	TriggerID     string          `json:"trigger_id"`    // 觸發的 T106 InstanceID
+	TriggerX      float64         `json:"trigger_x"`     // 觸發位置 X
+	TriggerY      float64         `json:"trigger_y"`     // 觸發位置 Y
+	Phase         string          `json:"phase"`         // 當前階段
+	PenetrateIDs  []string        `json:"penetrate_ids"` // 穿透路徑上的目標 ID（drill_start 時）
+	ExplodeIDs    []string        `json:"explode_ids"`   // 爆炸範圍內的目標 ID（explosion 時）
+	KilledTargets []DrillKillEntry `json:"killed_targets"` // 所有被擊破的目標（result 時）
+	TotalReward   int             `json:"total_reward"`  // 總獎勵（result 時）
+	KillerID      string          `json:"killer_id"`     // 觸發玩家 ID
+	KillerName    string          `json:"killer_name"`   // 觸發玩家名稱
 }

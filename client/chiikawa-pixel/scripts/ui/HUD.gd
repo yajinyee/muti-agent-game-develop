@@ -230,6 +230,7 @@ func _ready() -> void:
 	_init_mult_storm_panel()      # 全服倍率風暴面板（DAY-138）
 	_init_dual_roulette_panel()   # 雙環輪盤面板（DAY-139）
 	_init_mega_catch_panel()      # Mega Catch 事件面板（DAY-140）
+	_init_drill_lobster_panel()   # 鑽頭龍蝦連帶效果面板（DAY-142）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2801,3 +2802,16 @@ func _init_mega_catch_panel() -> void:
 
 	GameManager.mega_catch_started.connect(func(data): panel.on_mega_catch_start(data))
 	GameManager.mega_catch_ended.connect(func(data): panel.on_mega_catch_end(data))
+
+# ---- 鑽頭龍蝦連帶效果面板（DAY-142）----
+
+const DrillLobsterPanelScript = preload("res://scripts/ui/DrillLobsterPanel.gd")
+var _drill_lobster_panel: Control = null
+
+func _init_drill_lobster_panel() -> void:
+	var panel = DrillLobsterPanelScript.new()
+	panel.name = "DrillLobsterPanel"
+	panel.layer = 84  # 在 MegaCatchPanel(83) 之上
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_drill_lobster_panel = panel

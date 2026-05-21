@@ -81,6 +81,9 @@ var Targets = map[string]*TargetDef{
 	"T103": {ID: "T103", Name: "流星", Type: TargetTypeSpecial, MultiplierMin: 20, MultiplierMax: 50, HP: 20, SpawnWeight: 18, Speed: 220, Lifetime: 4, LaborGain: 5, DifficultyFactor: 16.0, SpecialBehavior: "meteor"},
 	"T104": {ID: "T104", Name: "金色雜草", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 30, HP: 45, SpawnWeight: 12, Speed: 0, Lifetime: 8, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "static"},
 	"T105": {ID: "T105", Name: "巨大金幣魚", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 50, HP: 90, SpawnWeight: 8, Speed: 80, Lifetime: 8, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "coin_rain"},
+	// T106 鑽頭龍蝦（DAY-142）— 業界依據：Royal Fishing JILI 2026「Drill Bit Lobster (80X) — penetrating drill through multiple fish, self-detonates at end of trajectory」
+	// 擊破後觸發穿透鑽頭，沿水平方向穿透所有目標，到達邊緣後爆炸，連帶擊破爆炸範圍內目標
+	"T106": {ID: "T106", Name: "鑽頭龍蝦", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 80, HP: 60, SpawnWeight: 6, Speed: 45, Lifetime: 10, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "drill_lobster"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
