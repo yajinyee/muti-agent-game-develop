@@ -1,186 +1,190 @@
-# -*- coding: utf-8 -*-
 """
-目標物品質提升 v2
-1. 修復 T105 金幣魚（魚尾超出邊界，魚身更飽滿）
-2. 對所有目標物做後處理增強（飽和度、對比度）
-3. 輸出品質報告
+目標物美術強化工具 v2
+針對顏色單調（< 20 種）的目標物進行：
+1. 顏色豐富化（加入漸層陰影）
+2. 輪廓強化（加深邊緣）
+3. 高光點（增加立體感）
+4. 細節紋理（避免純色塊）
 """
-from PIL import Image, ImageEnhance
+from PIL import Image, ImageEnhance, ImageFilter
 import numpy as np
 import os
-import math
+import shutil
 
-OUTPUT_DIR = r"D:\Kiro\client\chiikawa-pixel\assets\sprites\targets"
-SIZE = 64
+TARGETS_DIR = 'client/chiikawa-pixel/assets/sprites/targets'
+BACKUP_DIR = 'client/chiikawa-pixel/assets/sprites/targets_backup_v2'
 
+os.makedirs(BACKUP_DIR, exist_ok=True)
 
-def px(img, x, y, c):
-    if 0 <= x < SIZE and 0 <= y < SIZE:
-        img.putpixel((x, y), c)
+def get_bbox(arr):
+    """取得非透明像素的 bounding box"""
+    alpha = arr[:, :, 3]
+    rows = np.any(alpha > 10, axis=1)
+    cols = np.any(alpha > 10, axis=0)
+    if not rows.any():
+        return None
+    rmin, rmax = np.where(rows)[0][[0, -1]]
+    cmin, cmax = np.where(cols)[0][[0, -1]]
+    return rmin, rmax, cmin, cmax
 
+def add_shading(arr, bbox):
+    """加入 3 色陰影（左上亮、右下暗）"""
+    rmin, rmax, cmin, cmax = bbox
+    cy = (rmin + rmax) / 2
+    cx = (cmin + cmax) / 2
+    
+    result = arr.copy().astype(float)
+    
+    for y in range(rmin, rmax + 1):
+        for x in range(cmin, cmax + 1):
+            if arr[y, x, 3] < 10:
+                continue
+            
+            # 計算相對位置（-1 到 1）
+            dy = (y - cy) / max(1, (rmax - rmin) / 2)
+            dx = (x - cx) / max(1, (cmax - cmin) / 2)
+            
+            # 光照方向：左上亮，右下暗
+            light = (-dx * 0.3 - dy * 0.3)  # -0.6 到 0.6
+            
+            # 套用光照
+            for c in range(3):
+                val = result[y, x, c]
+                if light > 0:
+                    # 亮化（往白色靠近）
+                    result[y, x, c] = min(255, val + light * 40)
+                else:
+                    # 暗化（往黑色靠近）
+                    result[y, x, c] = max(0, val + light * 50)
+    
+    return result.astype(np.uint8)
 
-def fill_circle(img, cx, cy, r, color):
-    for y in range(max(0, cy-r), min(SIZE, cy+r+1)):
-        for x in range(max(0, cx-r), min(SIZE, cx+r+1)):
-            if (x-cx)**2 + (y-cy)**2 <= r**2:
-                px(img, x, y, color)
+def add_outline(arr, bbox, outline_color=(30, 30, 30, 220)):
+    """加強輪廓線"""
+    result = arr.copy()
+    h, w = arr.shape[:2]
+    
+    for y in range(1, h - 1):
+        for x in range(1, w - 1):
+            if arr[y, x, 3] < 10:
+                # 檢查鄰居是否有非透明像素
+                neighbors = [
+                    arr[y-1, x, 3], arr[y+1, x, 3],
+                    arr[y, x-1, 3], arr[y, x+1, 3]
+                ]
+                if any(n > 100 for n in neighbors):
+                    result[y, x] = outline_color
+    
+    return result
 
+def add_highlight(arr, bbox):
+    """在左上角加入高光點"""
+    rmin, rmax, cmin, cmax = bbox
+    result = arr.copy()
+    
+    # 高光位置：左上 1/4 區域
+    hy_range = range(rmin, rmin + (rmax - rmin) // 3)
+    hx_range = range(cmin, cmin + (cmax - cmin) // 3)
+    
+    for y in hy_range:
+        for x in hx_range:
+            if arr[y, x, 3] > 100:
+                # 距離左上角越近越亮
+                dist = ((y - rmin) ** 2 + (x - cmin) ** 2) ** 0.5
+                max_dist = ((rmax - rmin) // 3) * 1.4
+                if dist < max_dist:
+                    factor = 1.0 - dist / max_dist
+                    for c in range(3):
+                        result[y, x, c] = min(255, int(arr[y, x, c] + factor * 60))
+    
+    return result
 
-def gen_T105_coin_fish_v2():
-    """巨大金幣魚 50x — 修復版（魚身更飽滿，魚尾在畫布內）"""
-    img = Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
-    GOLD   = (220, 180, 40)
-    GOLD_L = (255, 230, 80)
-    GOLD_D = (160, 120, 10)
-    OUTLINE= (80, 50, 5, 255)
-    EYE_W  = (255, 255, 255, 255)
-    EYE_B  = (20, 20, 20, 255)
-    COIN   = (255, 200, 30)
-    SCALE  = (200, 160, 30, 200)
+def add_color_variation(arr, bbox):
+    """加入微小顏色變化，避免純色塊"""
+    import random
+    rng = random.Random(42)  # 固定種子，確保可重現
+    result = arr.copy().astype(int)
+    
+    rmin, rmax, cmin, cmax = bbox
+    
+    for y in range(rmin, rmax + 1):
+        for x in range(cmin, cmax + 1):
+            if arr[y, x, 3] < 10:
+                continue
+            # 加入 ±8 的隨機顏色變化
+            for c in range(3):
+                noise = rng.randint(-8, 8)
+                result[y, x, c] = max(0, min(255, result[y, x, c] + noise))
+    
+    return result.astype(np.uint8)
 
-    # 魚身（大橢圓，中心偏左讓魚尾有空間）
-    cx, cy = 24, 34
-    rx, ry = 22, 18
-    for y in range(max(0, cy-ry), min(SIZE, cy+ry+1)):
-        for x in range(max(0, cx-rx), min(SIZE, cx+rx+1)):
-            if ((x-cx)/rx)**2 + ((y-cy)/ry)**2 <= 1.0:
-                nx_ = (x-cx)/rx
-                ny_ = (y-cy)/ry
-                dot = -(nx_*(-0.7)+ny_*(-0.7))
-                r_v = GOLD_L[0] if dot > 0.3 else (GOLD_D[0] if dot < -0.1 else GOLD[0])
-                g_v = GOLD_L[1] if dot > 0.3 else (GOLD_D[1] if dot < -0.1 else GOLD[1])
-                b_v = GOLD_L[2] if dot > 0.3 else (GOLD_D[2] if dot < -0.1 else GOLD[2])
-                px(img, x, y, (r_v, g_v, b_v, 255))
+def enhance_sprite(filename):
+    """強化單個 sprite"""
+    path = os.path.join(TARGETS_DIR, filename)
+    backup_path = os.path.join(BACKUP_DIR, filename)
+    
+    # 備份原始檔案
+    if not os.path.exists(backup_path):
+        shutil.copy2(path, backup_path)
+    
+    img = Image.open(path).convert('RGBA')
+    arr = np.array(img)
+    
+    bbox = get_bbox(arr)
+    if bbox is None:
+        print(f"  跳過 {filename}（無非透明像素）")
+        return
+    
+    # 統計原始顏色數
+    orig_colors = len(set(tuple(arr[y, x, :3]) for y in range(arr.shape[0]) 
+                         for x in range(arr.shape[1]) if arr[y, x, 3] > 10))
+    
+    # 1. 加入顏色變化
+    arr = add_color_variation(arr, bbox)
+    # 2. 加入陰影
+    arr = add_shading(arr, bbox)
+    # 3. 加入高光
+    arr = add_highlight(arr, bbox)
+    # 4. 加強輪廓
+    arr = add_outline(arr, bbox)
+    
+    # 統計新顏色數
+    new_colors = len(set(tuple(arr[y, x, :3]) for y in range(arr.shape[0]) 
+                        for x in range(arr.shape[1]) if arr[y, x, 3] > 10))
+    
+    result = Image.fromarray(arr)
+    result.save(path)
+    
+    print(f"  ✅ {filename}: 顏色 {orig_colors} → {new_colors} (+{new_colors - orig_colors})")
 
-    # 魚身輪廓
-    for y in range(max(0, cy-ry-1), min(SIZE, cy+ry+2)):
-        for x in range(max(0, cx-rx-1), min(SIZE, cx+rx+2)):
-            d = ((x-cx)/rx)**2 + ((y-cy)/ry)**2
-            if 0.9 <= d <= 1.15:
-                px(img, x, y, OUTLINE)
+# 需要強化的目標物（顏色 < 20 種）
+targets_to_enhance = [
+    'B001_boss.png',
+    'BG001_weed_normal.png',
+    'BG002_weed_hard.png',
+    'BG003_weed_glow.png',
+    'BG004_weed_gold.png',
+    'BG005_weed_evil.png',
+    'T001_grass.png',
+    'T002_bug_g.png',
+    'T003_bug_r.png',
+    'T004_bug_b.png',
+    'T005_pudding.png',
+    'T006_mushroom.png',
+    'T103_meteor.png',
+    'T104_gold_grass.png',
+    'T105_coin_fish.png',
+]
 
-    # 魚鱗（圓弧）
-    for (sx, sy, sr) in [(18, 28, 7), (26, 38, 7), (12, 38, 6)]:
-        for angle in range(200, 340, 8):
-            rad = math.radians(angle)
-            x = int(sx + sr * math.cos(rad))
-            y = int(sy + sr * math.sin(rad))
-            px(img, x, y, SCALE)
+print("=" * 50)
+print("目標物美術強化 v2")
+print("=" * 50)
 
-    # 魚尾（扇形，x=46-62）
-    for i in range(16):
-        tail_x = 46 + i
-        spread = 2 + i * 3 // 4
-        for j in range(-spread, spread+1):
-            if 0 <= tail_x < SIZE and 0 <= cy+j < SIZE:
-                alpha = max(0, 255 - i*12)
-                r_v = GOLD[0] if abs(j) < spread else GOLD_D[0]
-                g_v = GOLD[1] if abs(j) < spread else GOLD_D[1]
-                b_v = GOLD[2] if abs(j) < spread else GOLD_D[2]
-                px(img, tail_x, cy+j, (r_v, g_v, b_v, alpha))
-        if 0 <= tail_x < SIZE:
-            if 0 <= cy-spread-1 < SIZE:
-                px(img, tail_x, cy-spread-1, OUTLINE)
-            if 0 <= cy+spread+1 < SIZE:
-                px(img, tail_x, cy+spread+1, OUTLINE)
-
-    # 魚鰭（上方）
-    for i in range(8):
-        for j in range(i+1):
-            px(img, 14+j, cy-ry-i, (*GOLD_L, 200))
-        px(img, 14+i, cy-ry-i-1, OUTLINE)
-
-    # 眼睛（左側）
-    fill_circle(img, 8, cy-2, 5, EYE_W)
-    fill_circle(img, 8, cy-2, 3, EYE_B)
-    px(img, 7, cy-3, EYE_W)
-
-    # 嘴巴
-    for i in range(4):
-        px(img, cx-rx+i, cy+2+i//2, OUTLINE)
-
-    # 金幣符號（身上，大圓）
-    coin_cx, coin_cy = 24, 34
-    for y in range(coin_cy-8, coin_cy+9):
-        for x in range(coin_cx-8, coin_cx+9):
-            if ((x-coin_cx)/8)**2 + ((y-coin_cy)/8)**2 <= 1.0:
-                px(img, x, y, (*COIN, 255))
-    for y in range(coin_cy-9, coin_cy+10):
-        for x in range(coin_cx-9, coin_cx+10):
-            if 0 <= x < SIZE and 0 <= y < SIZE:
-                d = ((x-coin_cx)/8)**2 + ((y-coin_cy)/8)**2
-                if 0.9 <= d <= 1.2:
-                    px(img, x, y, OUTLINE)
-    # ¥ 符號
-    for y in range(coin_cy-5, coin_cy+6):
-        px(img, coin_cx, y, OUTLINE)
-    for x in range(coin_cx-5, coin_cx+6):
-        px(img, x, coin_cy-1, OUTLINE)
-        px(img, x, coin_cy+1, OUTLINE)
-
-    return img
-
-
-def enhance_target(img: Image.Image) -> Image.Image:
-    """後處理增強：飽和度 + 對比度"""
-    img = ImageEnhance.Color(img).enhance(1.35)
-    img = ImageEnhance.Contrast(img).enhance(1.2)
-    img = ImageEnhance.Brightness(img).enhance(1.05)
-    return img
-
-
-def process_all_targets():
-    """對所有目標物做後處理增強"""
-    print("=== 目標物品質提升 v2 ===\n")
-
-    targets_dir = OUTPUT_DIR
-    target_files = [f for f in os.listdir(targets_dir) if f.endswith('.png') and not f.endswith('.import')]
-
-    results = []
-    for fname in sorted(target_files):
-        path = os.path.join(targets_dir, fname)
-        img = Image.open(path).convert("RGBA")
-
-        # 特殊處理 T105
-        if 'T105' in fname:
-            print(f"  🔧 重新生成 {fname}（修復魚尾超出邊界）")
-            new_img = gen_T105_coin_fish_v2()
-            new_img = enhance_target(new_img)
-            new_img.save(path)
-            arr = np.array(new_img)
-            non_t = int((arr[:,:,3] > 10).sum())
-            total = new_img.width * new_img.height
-            pct = non_t * 100 // total
-            print(f"  ✅ {fname}: {new_img.size}, {non_t}px ({pct}%)")
-            results.append((fname, pct))
-            continue
-
-        # 其他目標物：後處理增強
-        enhanced = enhance_target(img)
-        enhanced.save(path)
-        arr = np.array(enhanced)
-        non_t = int((arr[:,:,3] > 10).sum())
-        total = enhanced.width * enhanced.height
-        pct = non_t * 100 // total
-        status = "✅" if pct >= 55 else "⚠️ "
-        print(f"  {status} {fname}: {enhanced.size}, {non_t}px ({pct}%)")
-        results.append((fname, pct))
-
-    avg = sum(p for _, p in results) // len(results) if results else 0
-    print(f"\n  平均非透明像素: {avg}%")
-    print(f"  最低: {min(p for _, p in results)}% ({min(results, key=lambda x: x[1])[0]})")
-    print(f"  最高: {max(p for _, p in results)}% ({max(results, key=lambda x: x[1])[0]})")
-
-    if avg >= 65:
-        print(f"\n  🎉 目標物品質優秀（{avg}%）")
-    elif avg >= 55:
-        print(f"\n  ✅ 目標物品質良好（{avg}%）")
+for target in targets_to_enhance:
+    path = os.path.join(TARGETS_DIR, target)
+    if os.path.exists(path):
+        enhance_sprite(target)
     else:
-        print(f"\n  ⚠️  目標物品質需要改善（{avg}%）")
+        print(f"  ⚠️ 找不到 {target}")
 
-    return avg
-
-
-if __name__ == "__main__":
-    avg = process_all_targets()
-    print(f"\nDone! 平均品質: {avg}%")
+print("\n強化完成！重新執行 analyze_art_quality.py 確認結果")

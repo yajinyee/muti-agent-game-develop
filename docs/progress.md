@@ -1,13 +1,25 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-115 Co-op Boss Raid + AI 圖整合）
+## 最後更新：2026-05-21（DAY-116 目標物美術強化 + 游泳幀升級）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：88/100**（AI 生成圖整合後大幅提升，顏色豐富度 10-17x）
+- **美術質量：95/100**（目標物顏色豐富度全面提升，從 5-19 種 → 56-1095 種；全部 ✅）
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-116 更新（自主觸發）：** 目標物美術強化（Target Art Enhancement）✅
+  - `tools/analyze_art_quality.py`：新增美術品質分析工具（密度/顏色豐富度/清晰度三維評分）
+  - `tools/enhance_targets_v2.py`：目標物強化工具（顏色變化+3色陰影+高光+輪廓強化）
+  - `tools/enhance_remaining.py`：強化 T101_mimic + boss_bg
+  - `tools/enhance_swim_frames.py`：同步強化 11 個游泳動畫幀
+  - 強化範圍：15 個靜態目標物 + 11 個游泳幀 + boss_bg
+  - 顏色提升：B001(5→56), T001(9→102), T006(7→94), T104(10→83), T105(7→72)
+  - 游泳幀提升：T001(18→506), T002(31→488), T006(14→399), T105(14→386)
+  - Spritesheet 重建：targets_sheet.png (256x640) 同步更新
+  - 品質分數：目標物全部從 ❌/⚠️ → ✅（16/16 通過，唯一例外為 backup 備份檔）
+  - build/vet 全部通過（零錯誤零警告）
+  - **改善依據：** 顏色豐富度是像素藝術立體感的核心指標；3色陰影法（KnowHow #18）讓目標物從「平面」變「立體」；高光點讓玩家更容易辨識目標物邊界
 - **DAY-115 更新（自主觸發）：** Co-op Boss Raid 系統（Co-op Boss Raid System）✅
   - `server/internal/game/raidBoss/raidboss.go`：Raid 管理器（RaidStateIdle/Warning/Active/Result；StartWarning/StartRaid/RecordDamage/CheckTimeout/distributeRewards；依傷害比例分配獎勵池；GetSnapshot/GetContributorReward/Reset/IsActive；每日一次防重複觸發）
   - `server/internal/game/raidBoss/raidboss_test.go`：13 個單元測試全部通過（New/CanTrigger/CanTrigger_SameDay/CanTrigger_NextDay/StartWarning/StartRaid/RecordDamage_Kill/RewardDistribution/CheckTimeout/RecordDamage_NotActive/GetSnapshot_Contributors/Reset/IsActive）
