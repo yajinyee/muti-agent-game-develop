@@ -133,6 +133,12 @@ var Targets = map[string]*TargetDef{
 	// 每次被命中倍率增加：5次→×2.0覺醒，10次→×3.5狂暴，15次→×5.0血月（全服廣播）
 	// 設計：基礎倍率（20-30x）+ 高 HP（120）+ 中等生成權重（6）= 需要多人合力打的成長型目標
 	"T116": {ID: "T116", Name: "吸血鬼", Type: TargetTypeSpecial, MultiplierMin: 20, MultiplierMax: 30, HP: 120, SpawnWeight: 6, Speed: 45, Lifetime: 18, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "vampire_grow"},
+	// T117 水晶龍（DAY-153）— 業界依據：jiligames.com JILI Flying Dragon 2026「collect crystals to get the grand prize!
+	// Kill the Underworld Dragon and win the prize!」
+	// 擊破後掉落 5 個水晶碎片，全服玩家共同收集水晶（目標 50 個），達到目標後觸發「地獄龍大獎」
+	// 按貢獻比例分配獎勵（最高 200x betLevel），全服廣播，增加社交合作感
+	// 設計：中等倍率（30-50x）+ 中等 HP（80）+ 中等生成權重（5）= 常見但有合作感的特殊目標
+	"T117": {ID: "T117", Name: "水晶龍", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 80, SpawnWeight: 5, Speed: 38, Lifetime: 15, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "crystal_dragon"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

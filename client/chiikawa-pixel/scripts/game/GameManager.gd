@@ -180,6 +180,9 @@ signal rainbow_phoenix_end(end_data: Dictionary)            # 彩虹鳳凰 Power
 signal vampire_grow(grow_data: Dictionary)                  # 吸血鬼倍率成長（DAY-152）
 signal vampire_blood_moon(moon_data: Dictionary)            # 吸血鬼血月模式（DAY-152）
 signal vampire_killed(kill_data: Dictionary)                # 吸血鬼被擊破（DAY-152）
+signal crystal_dragon_drop(drop_data: Dictionary)           # 水晶龍掉落水晶（DAY-153）
+signal crystal_dragon_reward(reward_data: Dictionary)       # 水晶龍地獄龍大獎（DAY-153）
+signal crystal_dragon_status(status_data: Dictionary)       # 水晶龍狀態（DAY-153）
 signal unlucky_bonus(bonus_data: Dictionary)           # 失敗補償觸發（DAY-135）
 signal speed_race_started(race_data: Dictionary)       # 競速獵殺開始（DAY-136）
 signal speed_race_ended(race_data: Dictionary)         # 競速獵殺結束（DAY-136）
@@ -494,6 +497,15 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("vampire_blood_moon", payload)
 		"vampire_killed":
 			emit_signal("vampire_killed", payload)
+		# 水晶龍收集大獎系統（DAY-153）
+		"crystal_dragon_drop":
+			emit_signal("crystal_dragon_drop", payload)
+		"crystal_dragon_update":
+			emit_signal("crystal_dragon_status", payload)
+		"crystal_dragon_reward":
+			emit_signal("crystal_dragon_reward", payload)
+		"crystal_dragon_status":
+			emit_signal("crystal_dragon_status", payload)
 		"unlucky_bonus":
 			_handle_unlucky_bonus(payload)
 		"speed_race_start":

@@ -241,6 +241,7 @@ func _ready() -> void:
 	_init_thunderbolt_lobster_panel() # 雷霆龍蝦免費射擊面板（DAY-150）
 	_init_rainbow_phoenix_panel()     # 彩虹鳳凰 Power Up 面板（DAY-151）
 	_init_vampire_panel()             # 吸血鬼成長倍率面板（DAY-152）
+	_init_crystal_dragon_panel()      # 水晶龍收集大獎面板（DAY-153）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3086,3 +3087,56 @@ func _on_vampire_killed(data: Dictionary) -> void:
 	if not is_instance_valid(_vampire_panel):
 		return
 	_vampire_panel.handle_killed(data)
+
+# ---- 水晶龍收集大獎面板（DAY-153）----
+
+const CrystalDragonPanelScript = preload("res://scripts/ui/CrystalDragonPanel.gd")
+var _crystal_dragon_panel: Control = null
+
+func _init_crystal_dragon_panel() -> void:
+	var panel = CrystalDragonPanelScript.new()
+	panel.name = "CrystalDragonPanel"
+	panel.z_index = 84  # 在 BombCrabPanel(85) 下方，水晶龍是常駐進度條
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_crystal_dragon_panel = panel
+
+	# 連接水晶龍訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("crystal_dragon_drop"):
+			gm.crystal_dragon_drop.connect(_on_crystal_dragon_drop)
+		if gm.has_signal("crystal_dragon_reward"):
+			gm.crystal_dragon_reward.connect(_on_crystal_dragon_reward)
+		if gm.has_signal("crystal_dragon_status"):
+			gm.crystal_dragon_status.connect(_on_crystal_dragon_status)
+
+func _on_crystal_dragon_drop(data: Dictionary) -> void:
+	if not is_instance_valid(_crystal_dragon_panel):
+		return
+	_crystal_dragon_panel.on_crystal_drop(
+		data.get("killer_name", ""),
+		data.get("crystals_gain", 0),
+		data.get("total_crystals", 0),
+		data.get("goal", 50),
+		data.get("progress", 0.0)
+	)
+
+func _on_crystal_dragon_reward(data: Dictionary) -> void:
+	if not is_instance_valid(_crystal_dragon_panel):
+		return
+	_crystal_dragon_panel.on_crystal_reward(
+		data.get("contributors", []),
+		data.get("total_reward", 0),
+		data.get("message", "")
+	)
+
+func _on_crystal_dragon_status(data: Dictionary) -> void:
+	if not is_instance_valid(_crystal_dragon_panel):
+		return
+	_crystal_dragon_panel.update_status(
+		data.get("total_crystals", 0),
+		data.get("goal", 50),
+		data.get("progress", 0.0)
+	)

@@ -402,6 +402,12 @@ const (
 	MsgVampireBloodMoon MessageType = "vampire_blood_moon" // 血月模式觸發（Server→Client，全服）
 	MsgVampireKilled    MessageType = "vampire_killed"     // 吸血鬼被擊破（Server→Client，全服）
 
+	// 水晶龍收集大獎系統（DAY-153）
+	MsgCrystalDragonDrop   MessageType = "crystal_dragon_drop"   // 水晶掉落（Server→Client，全服）
+	MsgCrystalDragonUpdate MessageType = "crystal_dragon_update" // 水晶進度更新（Server→Client，全服）
+	MsgCrystalDragonReward MessageType = "crystal_dragon_reward" // 地獄龍大獎（Server→Client，全服）
+	MsgCrystalDragonStatus MessageType = "crystal_dragon_status" // 水晶狀態（Server→Client，個人，登入時）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3268,4 +3274,47 @@ type VampireKilledPayload struct {
 	FinalReward int     `json:"final_reward"`  // 最終獎勵
 	PhaseName   string  `json:"phase_name"`    // 最終階段名稱
 	Message     string  `json:"message"`       // 廣播訊息
+}
+
+// ---- 水晶龍收集大獎系統（DAY-153）----
+
+// CrystalDragonDropPayload 水晶掉落（Server → Client，全服）（DAY-153）
+type CrystalDragonDropPayload struct {
+	KillerID      string  `json:"killer_id"`      // 擊破玩家 ID
+	KillerName    string  `json:"killer_name"`    // 擊破玩家名稱
+	CrystalsGain  int     `json:"crystals_gain"`  // 本次掉落水晶數量
+	TotalCrystals int     `json:"total_crystals"` // 全服水晶總數
+	Goal          int     `json:"goal"`           // 目標水晶數量
+	Progress      float64 `json:"progress"`       // 進度（0.0-1.0）
+	Message       string  `json:"message"`        // 廣播訊息
+}
+
+// CrystalDragonUpdatePayload 水晶進度更新（Server → Client，全服）（DAY-153）
+type CrystalDragonUpdatePayload struct {
+	TotalCrystals int     `json:"total_crystals"` // 全服水晶總數
+	Goal          int     `json:"goal"`           // 目標水晶數量
+	Progress      float64 `json:"progress"`       // 進度（0.0-1.0）
+}
+
+// CrystalContributorEntry 水晶貢獻者（DAY-153）
+type CrystalContributorEntry struct {
+	PlayerID   string `json:"player_id"`   // 玩家 ID
+	PlayerName string `json:"player_name"` // 玩家名稱
+	Crystals   int    `json:"crystals"`    // 貢獻水晶數量
+	Reward     int    `json:"reward"`      // 獲得獎勵
+}
+
+// CrystalDragonRewardPayload 地獄龍大獎（Server → Client，全服）（DAY-153）
+type CrystalDragonRewardPayload struct {
+	Contributors []CrystalContributorEntry `json:"contributors"` // 貢獻者列表
+	TotalReward  int                       `json:"total_reward"` // 總獎勵（所有貢獻者合計）
+	Message      string                    `json:"message"`      // 廣播訊息
+}
+
+// CrystalDragonStatusPayload 水晶狀態（Server → Client，個人，登入時）（DAY-153）
+type CrystalDragonStatusPayload struct {
+	TotalCrystals int     `json:"total_crystals"` // 全服水晶總數
+	Goal          int     `json:"goal"`           // 目標水晶數量
+	Progress      float64 `json:"progress"`       // 進度（0.0-1.0）
+	CooldownSecs  int     `json:"cooldown_secs"`  // 冷卻剩餘秒數
 }

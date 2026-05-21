@@ -64,6 +64,7 @@ import (
 	"digital-twin/server/internal/game/megacatch"
 	"digital-twin/server/internal/game/megaoctopus"
 	"digital-twin/server/internal/game/chainlongwheel"
+	"digital-twin/server/internal/game/crystaldragon"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -134,6 +135,7 @@ type Game struct {
 	ChainLongWheel *chainlongwheel.Manager // 千龍王強化輪盤系統管理器（DAY-148）
 	ThunderboltLobster *thunderboltLobsterManager // 雷霆龍蝦免費射擊系統管理器（DAY-150）
 	RainbowPhoenix     *rainbowPhoenixManager     // 彩虹鳳凰 Power Up 系統管理器（DAY-151）
+	CrystalDragon      *crystaldragon.Manager     // 水晶龍收集大獎系統管理器（DAY-153）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -248,6 +250,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		ChainLongWheel:     chainlongwheel.New(),
 		ThunderboltLobster: newThunderboltLobsterManager(),
 		RainbowPhoenix:     newRainbowPhoenixManager(),
+		CrystalDragon:      crystaldragon.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -414,6 +417,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendChainLongWheelStatus(pp)
 				// 發送彩虹鳳凰 Power Up 狀態（DAY-151）
 				g.sendRainbowPhoenixStatus(pp)
+				// 發送水晶龍收集進度狀態（DAY-153）
+				g.sendCrystalDragonStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -1266,6 +1271,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isVampire(t.DefID) {
 		go g.notifyVampireKill(p, t, finalReward)
 	}
+	// 水晶龍收集大獎：擊破 T117 時掉落水晶（DAY-153）
+	if isCrystalDragon(t.DefID) {
+		go g.notifyCrystalDragonKill(p, t)
+	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }
@@ -1571,6 +1580,8 @@ func (g *Game) updateNormalPlay() {
 	}
 	// 千龍王輪盤超時自動停止（每次 update，DAY-148）
 	go g.tickChainLongWheel()
+	// 水晶龍水晶衰減檢查（每次 update，DAY-153）
+	go g.tickCrystalDragonDecay()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }

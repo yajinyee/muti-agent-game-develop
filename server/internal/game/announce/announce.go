@@ -45,6 +45,7 @@ const (
 	EventRainbowPhoenixResult     EventType = "rainbow_phoenix_result"     // 彩虹鳳凰 Power Up 結果（DAY-151）
 	EventVampireBloodMoon         EventType = "vampire_blood_moon"         // 吸血鬼血月模式觸發（DAY-152）
 	EventVampireKill              EventType = "vampire_kill"               // 吸血鬼血月模式被擊破（DAY-152）
+	EventCrystalDragon            EventType = "crystal_dragon"             // 水晶龍地獄龍大獎觸發（DAY-153）
 )
 
 // Priority 公告優先級
@@ -553,6 +554,24 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = "#880000"
 		priority = PriorityNormal
 		duration = 4000
+
+	case EventCrystalDragon:
+		totalStr := ""
+		if extra != nil {
+			if t, ok := extra["total"]; ok {
+				totalStr = t
+			}
+		}
+		title = "🐉 地獄龍大獎！"
+		if totalStr != "" {
+			message = fmt.Sprintf("🐉 %s 貢獻最多水晶！地獄龍大獎！全服共獲得 %s 金幣！", playerName, totalStr)
+		} else {
+			message = fmt.Sprintf("🐉 %s 貢獻最多水晶！地獄龍大獎觸發！", playerName)
+		}
+		icon = "🐉"
+		color = "#7B2FBE"
+		priority = PriorityHigh
+		duration = 5000
 
 	default:
 		title = "📢 公告"

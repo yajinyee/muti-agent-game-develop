@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-152 吸血鬼成長倍率系統）
+## 最後更新：2026-05-22（DAY-153 水晶龍收集大獎系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-153 更新（自主觸發）：** 水晶龍收集大獎系統（Crystal Dragon Collect Grand Prize System）✅
+  - **業界依據：** jiligames.com JILI Flying Dragon 2026「collect crystals to get the grand prize! Kill the Underworld Dragon and win the prize!」— 擊破水晶龍後掉落水晶碎片，全服玩家共同收集水晶（目標 50 個），達到目標後觸發「地獄龍大獎」，按貢獻比例分配獎勵
+  - `server/internal/data/tables.go`：新增 T117 水晶龍（30-50x/HP80/SpawnWeight5/crystal_dragon 行為）
+  - `server/internal/game/crystaldragon/crystaldragon.go`：水晶龍管理器（AddCrystals/TriggerHellDragon/CheckDecay/GetSnapshot/CalcReward）；全服共享水晶槽（目標50個）；120秒冷卻；30秒衰減防止永遠不觸發；按貢獻比例計算獎勵（最高 200x betLevel）
+  - `server/internal/game/crystaldragon/crystaldragon_test.go`：18 個單元測試全部通過
+  - `server/internal/ws/protocol.go`：新增 MsgCrystalDragonDrop/MsgCrystalDragonUpdate/MsgCrystalDragonReward/MsgCrystalDragonStatus；CrystalDragonDropPayload/CrystalDragonUpdatePayload/CrystalContributorEntry/CrystalDragonRewardPayload/CrystalDragonStatusPayload
+  - `server/internal/game/crystal_dragon_handler.go`：isCrystalDragon 判斷；notifyCrystalDragonKill（擊破後掉落水晶/廣播進度）；triggerHellDragonReward（達到目標/按比例發放獎勵/全服廣播/全服公告）；tickCrystalDragonDecay（水晶衰減）；sendCrystalDragonStatus（登入時發送狀態）
+  - `server/internal/game/announce/announce.go`：新增 EventCrystalDragon；buildContent 加入地獄龍大獎公告（紫色，5秒，高優先）
+  - `server/internal/game/game.go`：Game struct 加入 CrystalDragon *crystaldragon.Manager；NewGameWithStore 初始化；AddPlayer 發送狀態；handleKill 加入 isCrystalDragon 分支；updateNormalPlay 加入 tickCrystalDragonDecay
+  - `client/chiikawa-pixel/scripts/ui/CrystalDragonPanel.gd`：水晶龍面板（紫水晶主題；頂部常駐進度條（0/50）；crystal_dragon_drop 浮動水晶文字+進度條更新；crystal_dragon_reward 全螢幕紫色閃光+右側滑入大獎彈窗含貢獻者列表；進度接近目標時進度條閃爍）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：3個訊號（crystal_dragon_drop/crystal_dragon_reward/crystal_dragon_status）+ 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 CrystalDragonPanelScript（z_index=84）
+  - 水晶設計：每次擊破水晶龍掉落 5 個水晶；全服共享水晶槽（目標 50 個）；120 秒冷卻；30 秒衰減（防止永遠不觸發）
+  - 獎勵設計：按貢獻比例分配（貢獻 50% 水晶 → 獲得 50% 獎勵）；最高 200x betLevel；最少 1x betLevel（保底）
+  - 社交設計：全服合作收集，讓所有玩家都有參與感；大獎廣播讓所有玩家看到「有人觸發了地獄龍大獎」
+  - build/vet 全部通過（零錯誤零警告）；18/18 crystaldragon 測試通過
 - **DAY-152 更新（自主觸發）：** 吸血鬼成長倍率系統（Vampire Growing Multiplier System）✅
   - **業界依據：** jiligames.com 2026「The explicit multiplier of vampires increases the more you fight, and there is a chance that you can enter the multiplier mode, up to X5.」— 吸血鬼目標每次被命中倍率增加，達到閾值後進入「倍率模式」，最終擊破獲得最高倍率獎勵
   - `server/internal/data/tables.go`：新增 T116 吸血鬼（20-30x基礎/HP120/SpawnWeight6/vampire_grow 行為）
