@@ -272,8 +272,15 @@ const (
 	MsgFlashChallengeReward MessageType = "flash_challenge_reward" // 閃電挑戰獎勵通知（Server→Client，個人）
 	// 傳說目標警報系統（DAY-124）
 	MsgRareTargetAlert MessageType = "rare_target_alert" // 稀有/傳說目標出現廣播（Server→Client）
-	MsgError        MessageType = "error"
-	MsgPong         MessageType = "pong"
+	// 個人最佳記錄通知系統（DAY-125）
+	MsgPersonalBest MessageType = "personal_best" // 個人最佳記錄通知（Server→Client，個人）
+	// 黃金時間系統（DAY-125）
+	MsgGetGoldenTime    MessageType = "get_golden_time"    // 查詢黃金時間狀態（Client→Server）
+	MsgGoldenTimeStart  MessageType = "golden_time_start"  // 黃金時間開始廣播（Server→Client）
+	MsgGoldenTimeEnd    MessageType = "golden_time_end"    // 黃金時間結束廣播（Server→Client）
+	MsgGoldenTimeStatus MessageType = "golden_time_status" // 黃金時間狀態回應（Server→Client，個人）
+	MsgError            MessageType = "error"
+	MsgPong             MessageType = "pong"
 )
 
 // Message 通用訊息結構
@@ -2230,4 +2237,52 @@ type RareTargetAlertPayload struct {
 	Icon       string `json:"icon"`        // 圖示（⭐/💜）
 	Message    string `json:"message"`     // 顯示訊息
 	Color      string `json:"color"`       // 顏色（hex）
+}
+
+// ---- 個人最佳記錄通知系統（DAY-125）----
+
+// PersonalBestPayload 個人最佳記錄通知（Server → Client，個人）（DAY-125）
+type PersonalBestPayload struct {
+	RecordType  string  `json:"record_type"`  // 記錄類型：multiplier/streak/reward/coins
+	OldValue    float64 `json:"old_value"`    // 舊記錄
+	NewValue    float64 `json:"new_value"`    // 新記錄
+	Label       string  `json:"label"`        // 顯示文字（如「最高倍率」）
+	Icon        string  `json:"icon"`         // 圖示
+	Message     string  `json:"message"`      // 完整訊息
+}
+
+// ---- 黃金時間系統（DAY-125）----
+
+// GoldenTimeStartPayload 黃金時間開始廣播（Server → Client）（DAY-125）
+type GoldenTimeStartPayload struct {
+	Tier        int     `json:"tier"`         // 等級（0=Silver, 1=Gold, 2=Rainbow）
+	TierName    string  `json:"tier_name"`    // 等級名稱（如「✨ 黃金時間」）
+	MultBoost   float64 `json:"mult_boost"`   // 倍率加成（1.5/2.0/3.0）
+	Duration    int     `json:"duration"`     // 持續秒數
+	SecondsLeft int     `json:"seconds_left"` // 剩餘秒數（開始時等於 Duration）
+	Icon        string  `json:"icon"`         // 圖示（⚡/✨/🌈）
+	Color       string  `json:"color"`        // 主色（hex）
+	BgColor     string  `json:"bg_color"`     // 背景色（hex）
+	TriggerType string  `json:"trigger_type"` // 觸發類型（boss_kill/random/flash_combo/raid_victory）
+	Message     string  `json:"message"`      // 廣播訊息
+}
+
+// GoldenTimeEndPayload 黃金時間結束廣播（Server → Client）（DAY-125）
+type GoldenTimeEndPayload struct {
+	Tier     int    `json:"tier"`      // 等級
+	TierName string `json:"tier_name"` // 等級名稱
+	Message  string `json:"message"`   // 結束訊息
+}
+
+// GoldenTimeStatusPayload 黃金時間狀態回應（Server → Client，個人）（DAY-125）
+type GoldenTimeStatusPayload struct {
+	IsActive    bool    `json:"is_active"`    // 是否進行中
+	Tier        int     `json:"tier"`         // 等級
+	TierName    string  `json:"tier_name"`    // 等級名稱
+	MultBoost   float64 `json:"mult_boost"`   // 倍率加成
+	SecondsLeft int     `json:"seconds_left"` // 剩餘秒數
+	Icon        string  `json:"icon"`         // 圖示
+	Color       string  `json:"color"`        // 主色
+	BgColor     string  `json:"bg_color"`     // 背景色
+	TriggerType string  `json:"trigger_type"` // 觸發類型
 }

@@ -22,6 +22,7 @@ import (
 	"digital-twin/server/internal/game/dm"
 	"digital-twin/server/internal/game/fragment"
 	"digital-twin/server/internal/game/flashchallenge"
+	"digital-twin/server/internal/game/goldentime"
 	"digital-twin/server/internal/game/mysterybox"
 	"digital-twin/server/internal/game/respin"
 	"digital-twin/server/internal/game/treasuremap"
@@ -101,6 +102,7 @@ type Game struct {
 	RespinMgr     *respin.Manager        // Rapid Respin 管理器（DAY-121）
 	TreasureMap   *treasuremap.Manager   // 寶藏地圖管理器（DAY-122）
 	FlashChallenge *flashchallenge.Manager // 閃電挑戰管理器（DAY-123）
+	GoldenTime     *goldentime.Manager     // 黃金時間管理器（DAY-125）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -124,6 +126,7 @@ type Game struct {
 	lastWeatherAt      time.Time  // 天氣廣播計時（每 30 秒一次，DAY-087）
 	lastAutoSaveAt     time.Time  // 玩家資料定期自動儲存計時（每 60 秒，DAY-099）
 	lastRaidTickAt     time.Time  // Co-op Raid 狀態廣播計時（每 3 秒，DAY-115）
+	lastGoldenTimeTickAt time.Time // 黃金時間 tick 計時（每秒，DAY-125）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -187,6 +190,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		RespinMgr:          respin.New(),
 		TreasureMap:        treasuremap.New(),
 		FlashChallenge:     flashchallenge.New(),
+		GoldenTime:         goldentime.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -321,6 +325,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendFragmentStatus(pp)
 				// 發送寶藏地圖狀態（DAY-122）
 				g.sendTreasureMapUpdate(pp)
+				// 發送黃金時間狀態（DAY-125）
+				g.handleGetGoldenTime(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -592,6 +598,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 閃電挑戰系統（DAY-123）
 	case ws.MsgGetFlashChallenge:
 		g.handleGetFlashChallenge(p)
+	// 黃金時間系統（DAY-125）
+	case ws.MsgGetGoldenTime:
+		g.handleGetGoldenTime(p)
 	}
 }
 
@@ -782,6 +791,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	festivalRewardMult := g.getFestivalRewardMult()
 	if festivalRewardMult > 1.0 {
 		finalReward = int(float64(finalReward) * festivalRewardMult)
+	}
+	// 套用黃金時間倍率（DAY-125）
+	goldenTimeMult := g.GoldenTime.GetMultBoost()
+	if goldenTimeMult > 1.0 {
+		finalReward = int(float64(finalReward) * goldenTimeMult)
 	}
 	rewardUnlocks := p.AddReward(finalReward)
 	killUnlocks := p.AddKill()
@@ -1258,6 +1272,8 @@ func (g *Game) updateNormalPlay() {
 	}
 	// 閃電挑戰 tick（每次 update，DAY-123）
 	go g.tickFlashChallenge()
+	// 黃金時間 tick（每次 update，DAY-125）
+	go g.tickGoldenTime()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }

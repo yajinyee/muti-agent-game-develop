@@ -27,6 +27,7 @@ const (
 	EventDailyReset    EventType = "daily_reset"     // 每日重置
 	EventBossWarning   EventType = "boss_warning"    // BOSS 即將出現
 	EventGrandJackpot  EventType = "grand_jackpot"   // Grand Jackpot 中獎（最高優先）
+	EventGoldenTime    EventType = "golden_time"     // 黃金時間開始（DAY-125）
 )
 
 // Priority 公告優先級
@@ -238,6 +239,24 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = "#81C784"
 		priority = PriorityNormal
 		duration = 3000
+
+	case EventGoldenTime:
+		tierName := "✨ 黃金時間"
+		multStr := "2.0"
+		if extra != nil {
+			if t, ok := extra["tier_name"]; ok {
+				tierName = t
+			}
+			if ms, ok := extra["mult"]; ok {
+				multStr = ms
+			}
+		}
+		title = tierName + " 開始！"
+		message = fmt.Sprintf("全場獎勵 ×%s！把握機會！", multStr)
+		icon = "✨"
+		color = "#FFD700"
+		priority = PriorityHigh
+		duration = 5000
 
 	default:
 		title = "📢 公告"

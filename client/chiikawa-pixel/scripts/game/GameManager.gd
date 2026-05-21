@@ -65,6 +65,10 @@ signal flash_challenge_ended(data: Dictionary)              # 閃電挑戰結束
 signal flash_challenge_reward(data: Dictionary)             # 閃電挑戰獎勵通知（個人）
 # 傳說目標警報系統（DAY-124）
 signal rare_target_alerted(data: Dictionary)                # 稀有/傳說目標出現廣播
+# 黃金時間系統（DAY-125）
+signal golden_time_started(data: Dictionary)                # 黃金時間開始廣播
+signal golden_time_ended(data: Dictionary)                  # 黃金時間結束廣播
+signal golden_time_status(data: Dictionary)                 # 黃金時間狀態回應（個人）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -453,6 +457,13 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 		# 傳說目標警報系統（DAY-124）
 		"rare_target_alert":
 			emit_signal("rare_target_alerted", payload)
+		# 黃金時間系統（DAY-125）
+		"golden_time_start":
+			emit_signal("golden_time_started", payload)
+		"golden_time_end":
+			emit_signal("golden_time_ended", payload)
+		"golden_time_status":
+			emit_signal("golden_time_status", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")

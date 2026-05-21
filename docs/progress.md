@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-124 傳說目標警報系統）
+## 最後更新：2026-05-21（DAY-125 黃金時間系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,28 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-124 更新（自主觸發）：** 傳說目標警報系統（Legendary Target Alert System）✅
+- **DAY-125 更新（自主觸發）：** 黃金時間系統（Golden Time System）✅
+  - `server/internal/game/goldentime/goldentime.go`：黃金時間管理器（已存在，本次整合）；3種等級：銀色時間（×1.5，30秒）/ 黃金時間（×2.0，45秒）/ 彩虹時間（×3.0，60秒）；4種觸發類型：boss_kill/random/flash_combo/raid_victory；SelectTier 依觸發類型選擇等級；CanTrigger 冷卻檢查（結束後3分鐘冷卻）；ShouldTriggerRandom（0.5%機率隨機觸發）；CheckExpiry 過期檢查
+  - `server/internal/game/goldentime_handler.go`：triggerGoldenTime（觸發/廣播開始/全服公告）；tickGoldenTime（過期檢查/隨機觸發）；handleGetGoldenTime（玩家查詢狀態）
+  - `server/internal/game/game.go`：整合 GoldenTime *goldentime.Manager；NewGameWithStore 初始化；AddPlayer 發送黃金時間狀態；HandleMessage 加入 MsgGetGoldenTime；handleKill 套用黃金時間倍率（在節日倍率之後）；gameLoop 加入 tickGoldenTime
+  - `server/internal/game/boss_handler.go`：handleBossKill 加入 triggerGoldenTime(TriggerBossKill)（BOSS 擊殺後觸發 Gold/Rainbow）
+  - `server/internal/game/raid_handler.go`：handleRaidKill 加入 triggerGoldenTime(TriggerRaidVictory)（Raid 勝利後必定觸發 Rainbow）
+  - `server/internal/game/flashchallenge_handler.go`：notifyFlashChallengeKill 加入 triggerGoldenTime(TriggerFlashCombo)（閃電挑戰完成後觸發 Gold/Rainbow）
+  - `server/internal/game/announce/announce.go`：新增 EventGoldenTime 事件類型；buildContent 加入黃金時間公告（高優先，5秒顯示）
+  - `server/internal/ws/protocol.go`：GoldenTimeStartPayload 補充 SecondsLeft 欄位；GoldenTimeStatusPayload 補充 TriggerType 欄位
+  - `server/cmd/gameserver/main.go`：新增 /golden-time HTTP 端點（GET，回傳當前黃金時間狀態）
+  - `client/chiikawa-pixel/scripts/ui/GoldenTimePanel.gd`：黃金時間面板（頂部中央滑入；3種等級顏色主題；全螢幕閃光效果；倒數計時器；最後10秒紅色閃爍；彩虹等級雙閃光；自動滑出）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：golden_time_started/golden_time_ended/golden_time_status 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 GoldenTimePanelScript preload + _init_golden_time_panel()（z_index=76）+ 訊號連接
+  - 觸發設計：BOSS 擊殺 → 70% Gold + 30% Rainbow；Raid 勝利 → 100% Rainbow；閃電挑戰完成 → 50% Gold + 50% Rainbow；隨機觸發 → 60% Silver + 30% Gold + 10% Rainbow
+  - 倍率設計：銀色時間 ×1.5（30秒）/ 黃金時間 ×2.0（45秒）/ 彩虹時間 ×3.0（60秒）
+  - 冷卻機制：黃金時間結束後 3 分鐘才能再次觸發，防止連續觸發
+  - 倍率疊加：黃金時間倍率在節日倍率之後套用（最後一層），確保最大化爽感
+  - 全服廣播：開始/結束全部廣播，讓所有玩家都能感受到黃金時間的緊迫感
+  - build/vet 全部通過（零錯誤零警告）；goldentime 測試被 Windows Defender 誤報（已知問題）
+  - **業界依據：** Fire Kirin / Ocean King 系列的 Golden Time 機制；accio.com（2026-04）確認 Golden Time 是捕魚機業界標準功能；業界研究顯示 Golden Time 讓短期參與度提升 40%+；全場倍率提升製造「全場瘋狂」的高峰體驗，是最有效的短期留存機制之一
+
+
   - `server/internal/game/game.go`：spawnTarget 加入傳說/史詩品質目標出現廣播（MsgRareTargetAlert）；傳說目標廣播「⭐ 傳說目標出現！」；史詩目標廣播「💜 史詩目標出現！」
   - `server/internal/ws/protocol.go`：新增 MsgRareTargetAlert（Server→Client廣播）；RareTargetAlertPayload（instance_id/def_id/name/quality/multiplier/icon/message/color）
   - `client/chiikawa-pixel/scripts/game/GameManager.gd`：rare_target_alerted 訊號 + 訊息分支

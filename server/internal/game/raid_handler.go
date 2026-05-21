@@ -6,6 +6,7 @@ import (
 	"log"
 	"time"
 
+	"digital-twin/server/internal/game/goldentime"
 	raidboss "digital-twin/server/internal/game/raidBoss"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/ws"
@@ -141,6 +142,9 @@ func (g *Game) handleRaidKill() {
 
 	// 全服公告
 	g.announceEventStart("🏆 Raid 勝利！全服合作擊敗「" + snap.BossName + "」！獎勵池已分配！")
+
+	// 黃金時間：Raid 勝利後觸發彩虹時間（DAY-125）
+	go g.triggerGoldenTime(goldentime.TriggerRaidVictory)
 
 	// 5 秒後重置
 	g.safeAfterFunc(5*time.Second, func() {

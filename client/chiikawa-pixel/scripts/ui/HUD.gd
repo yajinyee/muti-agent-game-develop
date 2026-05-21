@@ -215,6 +215,7 @@ func _ready() -> void:
 	_init_treasure_map_panel()    # 寶藏地圖面板（DAY-122）
 	_init_flash_challenge_panel() # 閃電挑戰面板（DAY-123）
 	_init_rare_target_alert()     # 傳說目標警報（DAY-124）
+	_init_golden_time_panel()     # 黃金時間面板（DAY-125）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2472,3 +2473,36 @@ func _show_rare_target_banner(icon: String, message: String, color: Color, is_le
 	tween.tween_interval(3.0)
 	tween.tween_property(banner, "position:y", -50, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
 	tween.tween_callback(banner.queue_free)
+
+# ---- 黃金時間系統（DAY-125）----
+
+const GoldenTimePanelScript = preload("res://scripts/ui/GoldenTimePanel.gd")
+var _golden_time_panel: Control = null
+
+func _init_golden_time_panel() -> void:
+	var panel = GoldenTimePanelScript.new()
+	panel.name = "GoldenTimePanel"
+	panel.z_index = 76
+	add_child(panel)
+	_golden_time_panel = panel
+
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("golden_time_started"):
+			gm.golden_time_started.connect(_on_golden_time_started)
+		if gm.has_signal("golden_time_ended"):
+			gm.golden_time_ended.connect(_on_golden_time_ended)
+		if gm.has_signal("golden_time_status"):
+			gm.golden_time_status.connect(_on_golden_time_status)
+
+func _on_golden_time_started(data: Dictionary) -> void:
+	if is_instance_valid(_golden_time_panel):
+		_golden_time_panel.show_golden_time_start(data)
+
+func _on_golden_time_ended(data: Dictionary) -> void:
+	if is_instance_valid(_golden_time_panel):
+		_golden_time_panel.show_golden_time_end(data)
+
+func _on_golden_time_status(data: Dictionary) -> void:
+	if is_instance_valid(_golden_time_panel):
+		_golden_time_panel.update_status(data)

@@ -8,6 +8,7 @@ import (
 
 	"digital-twin/server/internal/game/activityfeed"
 	"digital-twin/server/internal/game/flashchallenge"
+	"digital-twin/server/internal/game/goldentime"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/ws"
 )
@@ -101,6 +102,8 @@ func (g *Game) notifyFlashChallengeKill(p *player.Player, targetDefID string, mu
 
 		// 動態牆廣播
 		go g.notifyFeedFlashChallenge(p, snap.Title, reward)
+		// 黃金時間：閃電挑戰完成後觸發（DAY-125）
+		go g.triggerGoldenTime(goldentime.TriggerFlashCombo)
 	}
 }
 

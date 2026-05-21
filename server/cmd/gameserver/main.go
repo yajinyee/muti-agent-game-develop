@@ -1198,6 +1198,27 @@ func main() {
 		}
 	})
 
+	// 黃金時間端點（DAY-125）
+	// GET /golden-time — 取得當前黃金時間狀態
+	mux.HandleFunc("/golden-time", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.GoldenTime.GetSnapshot()
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"is_active":    snap.IsActive,
+			"tier":         snap.Tier,
+			"tier_name":    snap.TierName,
+			"mult_boost":   snap.MultBoost,
+			"seconds_left": snap.SecondsLeft,
+			"icon":         snap.Icon,
+			"color":        snap.Color,
+			"bg_color":     snap.BgColor,
+			"trigger_type": snap.TriggerType,
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
 		Handler:      mux,

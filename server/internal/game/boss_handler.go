@@ -11,6 +11,7 @@ import (
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/achievement"
 	"digital-twin/server/internal/game/combat"
+	"digital-twin/server/internal/game/goldentime"
 	"digital-twin/server/internal/game/guild"
 	"digital-twin/server/internal/game/mission"
 	"digital-twin/server/internal/game/state"
@@ -241,6 +242,8 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 	g.announceBossKill(p.DisplayName, "BOSS", result.Reward)
 	// 閃電挑戰：BOSS 擊殺後觸發（DAY-123）
 	go g.tryStartFlashChallenge("boss")
+	// 黃金時間：BOSS 擊殺後觸發（DAY-125）
+	go g.triggerGoldenTime(goldentime.TriggerBossKill)
 
 	g.transitionState(state.StateBossResult)
 	g.safeAfterFunc(3*time.Second, func() {

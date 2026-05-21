@@ -3222,3 +3222,30 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **每日重置：** UTC 日期重置，讓玩家每天都有新目標，提升每日回訪率
 - **賓果機制：** 8 種完成方式（3行+3列+2對角線），讓玩家有多種策略
 - **教訓：** 賓果式地圖比單純收集更有策略性，玩家會主動選擇攻擊特定目標物
+
+## 83. 閃電挑戰系統設計原則（DAY-123）
+- **觸發機制雙軌**：BOSS 擊殺後必定觸發（高峰時刻）+ game loop 隨機觸發（15%，5分鐘冷卻）
+- **挑戰類型多樣化**：KillCount/KillSpecific/KillStreak/HighMult 四種類型，讓不同玩法風格都有機會
+- **安慰獎設計**：完成 10%+ 進度的玩家獲得安慰獎（基礎獎勵 × 進度比例 × 50%），避免玩家感到挫折
+- **全服廣播策略**：開始/進度更新/結束全部廣播，讓所有玩家看到競爭，增加社交感
+- **排行榜設計**：完成者優先排序，再按完成時間排序，鼓勵快速完成
+- **業界依據**：Infingame（2026-05-19）確認 Challenges 工具是 2026 年最熱門留存機制
+
+## 84. git add 在 Windows 的 temporary file 問題
+- **問題**：`git add -A` 或 `git add <dir>` 有時報 `unable to create temporary file: No such file or directory`
+- **原因**：Windows 的 git 在某些目錄（特別是有 .gitignore 的子目錄）建立暫存檔失敗
+- **解法**：逐一 `git add <file>` 或用 `git update-index --add <file>`
+- **教訓**：Windows 上 git add 失敗時，改用逐一加入，不要用萬用字元
+
+## 83. 黃金時間系統整合模式（DAY-125）
+- **模式：** 模組已寫好但未整合（goldentime.go 存在，但 handler/game.go 整合缺失）
+- **整合步驟：**
+  1. 建立 `goldentime_handler.go`（trigger/tick/handleGet 三個函數）
+  2. game.go：import + struct 欄位 + NewGameWithStore 初始化 + AddPlayer 發送狀態 + HandleMessage case + handleKill 套用倍率 + gameLoop tick
+  3. 觸發點：boss_handler（BOSS 擊殺）/ raid_handler（Raid 勝利）/ flashchallenge_handler（挑戰完成）
+  4. announce.go：加入新 EventType + buildContent case
+  5. protocol.go：確認 Payload 欄位完整（SecondsLeft/TriggerType）
+  6. main.go：加入 HTTP 端點
+  7. Client：GoldenTimePanel.gd + GameManager.gd 訊號 + HUD.gd 整合
+- **倍率疊加順序：** 限時活動 → 天氣 → 連擊 → 房間難度 → 節日 → 黃金時間（最後套用）
+- **教訓：** 新系統整合時，要同時確認 AddPlayer（玩家加入時同步狀態）和 gameLoop（定期 tick）兩個入口
