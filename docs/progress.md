@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-148 千龍王強化輪盤系統）
+## 最後更新：2026-05-22（DAY-149 黃金水母全場電擊系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,19 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-149 更新（自主觸發）：** 黃金水母全場電擊系統（Golden Jellyfish Global Shock System）✅
+  - **業界依據：** Ocean King 3 2026「Electric Jellyfish chain shocks across multiple targets. Devastating against clustered schools.」— 擊破後觸發全場電擊，對畫面上所有目標發動電擊，比閃電鰻（T103，200px 範圍跳躍 5 次）更強
+  - `server/internal/data/tables.go`：新增 T113 黃金水母（60-80x/HP80/SpawnWeight3/golden_jellyfish 行為）
+  - `server/internal/ws/protocol.go`：新增 MsgGoldenJellyfishShock；GoldenJellyfishShockEntry；GoldenJellyfishShockPayload（三階段：shock_start/shock×N/result）
+  - `server/internal/game/golden_jellyfish_handler.go`：isGoldenJellyfish 判斷；tryGoldenJellyfishShock（全場目標收集/隨機打亂/最多8個/逐一電擊150ms間隔/40%擊破機率/全服廣播）；announceGoldenJellyfishShock（≥3個擊破全服公告）
+  - `server/internal/game/game.go`：handleKill 加入 isGoldenJellyfish 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/GoldenJellyfishPanel.gd`：黃金水母面板（黃金電流主題；shock_start 橫幅滑入+全螢幕黃色閃光；shock 逐一電擊動畫+計數器；result 右側滑入彈窗含擊破列表+獎勵；5個以上擊破雙閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：golden_jellyfish_shock 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 GoldenJellyfishPanelScript（z_index=86）
+  - 電擊設計：全場範圍（無距離限制）；隨機打亂目標順序；最多 8 個目標；每 150ms 一個；40% 擊破機率
+  - 獎勵設計：連帶擊破獎勵 = 目標倍率 × betLevel × 0.65（比直接擊破低，平衡 RTP）
+  - 全服公告：擊破 ≥3 個目標時全服廣播，讓其他玩家看到「有人的黃金水母電擊了全場」
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-148 更新（自主觸發）：** 千龍王強化輪盤系統（ChainLong King Wheel System）✅
   - **業界依據：** Royal Fishing JILI 2026「ChainLong King — capture this golden dragon to trigger the dual-ring roulette. The ChainLong King itself can award up to 1000X mega wins.」— 擊破千龍王後觸發強化版雙環輪盤，最高 1000x，是全遊戲最高倍率的個人機制
   - `server/internal/data/tables.go`：新增 T112 千龍王（150-1000x/HP300/SpawnWeight1/chainlong_king 行為）

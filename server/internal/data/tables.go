@@ -112,6 +112,11 @@ var Targets = map[string]*TargetDef{
 	// 設計：超高倍率（150-1000x）+ 超高 HP（300）+ 極低生成權重（1）= 終極稀有目標
 	// 千龍王是全遊戲最高倍率目標，擊破後觸發專屬強化輪盤，最高 1000x 是業界最高水準
 	"T112": {ID: "T112", Name: "千龍王", Type: TargetTypeSpecial, MultiplierMin: 150, MultiplierMax: 1000, HP: 300, SpawnWeight: 1, Speed: 15, Lifetime: 20, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "chainlong_king"},
+	// T113 黃金水母（DAY-149）— 業界依據：Ocean King 3 2026「Electric Jellyfish chain shocks across multiple targets.
+	// Devastating against clustered schools.」— 擊破後觸發「全場電擊」，對畫面上所有目標發動電擊
+	// 比閃電鰻（T103，200px 範圍跳躍 5 次）更強：全場範圍，最多 8 個目標，40% 擊破機率
+	// 設計：中等倍率（60-80x）+ 中等 HP（80）+ 低生成權重（3）= 稀有但可遇到的強力目標
+	"T113": {ID: "T113", Name: "黃金水母", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 80, HP: 80, SpawnWeight: 3, Speed: 30, Lifetime: 12, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "golden_jellyfish"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

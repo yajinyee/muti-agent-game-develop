@@ -1226,6 +1226,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isChainLongKing(t.DefID) {
 		go g.tryChainLongWheel(p, t.InstanceID, finalReward, t.Multiplier)
 	}
+	// 黃金水母全場電擊：擊破 T113 時觸發（DAY-149）
+	if isGoldenJellyfish(t.DefID) {
+		go g.tryGoldenJellyfishShock(p, t.InstanceID, t.X, t.Y)
+	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }

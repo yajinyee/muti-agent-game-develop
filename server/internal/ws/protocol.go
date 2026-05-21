@@ -384,6 +384,9 @@ const (
 	MsgChainLongWheelResult MessageType = "chainlong_wheel_result" // 輪盤結果（Server→Client，個人+全服）
 	MsgChainLongWheelStatus MessageType = "chainlong_wheel_status" // 冷卻狀態（Server→Client，個人）
 
+	// 黃金水母全場電擊系統（DAY-149）
+	MsgGoldenJellyfishShock MessageType = "golden_jellyfish_shock" // 全場電擊廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3123,4 +3126,31 @@ type ChainLongWheelResultPayload struct {
 type ChainLongWheelStatusPayload struct {
 	CooldownLeft int  `json:"cooldown_left"` // 冷卻剩餘秒數（0=可觸發）
 	HasActive    bool `json:"has_active"`    // 是否有活躍 session
+}
+
+// GoldenJellyfishShockEntry 黃金水母電擊單個目標的記錄
+type GoldenJellyfishShockEntry struct {
+	TargetInstanceID string  `json:"target_instance_id"`
+	TargetDefID      string  `json:"target_def_id"`
+	TargetName       string  `json:"target_name"`
+	Killed           bool    `json:"killed"`
+	Multiplier       float64 `json:"multiplier"`
+	Reward           int     `json:"reward"`
+	ShockIndex       int     `json:"shock_index"` // 第幾個被電擊（0-based）
+}
+
+// GoldenJellyfishShockPayload 黃金水母全場電擊廣播（Server → Client，全服，DAY-149）
+// Phase: "shock_start" → "shock_N"（逐一電擊）→ "result"
+type GoldenJellyfishShockPayload struct {
+	TriggerID    string                       `json:"trigger_id"`    // 觸發的 T113 InstanceID
+	TriggerX     float64                      `json:"trigger_x"`     // 觸發位置 X
+	TriggerY     float64                      `json:"trigger_y"`     // 觸發位置 Y
+	Phase        string                       `json:"phase"`         // "shock_start" / "shock" / "result"
+	KillerID     string                       `json:"killer_id"`     // 觸發玩家 ID
+	KillerName   string                       `json:"killer_name"`   // 觸發玩家名稱
+	Targets      []GoldenJellyfishShockEntry  `json:"targets"`       // 電擊目標列表
+	TotalKills   int                          `json:"total_kills"`   // 總擊破數（result 時）
+	TotalReward  int                          `json:"total_reward"`  // 總獎勵（result 時）
+	NewBalance   int                          `json:"new_balance"`   // 新餘額（result 時，個人）
+	Message      string                       `json:"message"`       // 廣播訊息
 }

@@ -237,6 +237,7 @@ func _ready() -> void:
 	_init_crocodile_panel()       # 巨型鹹水鱷魚獵魚面板（DAY-146）
 	_init_giant_prize_fish_panel() # 夢幻巨型獎勵魚面板（DAY-147）
 	_init_chainlong_wheel_panel()  # 千龍王強化輪盤面板（DAY-148）
+	_init_golden_jellyfish_panel() # 黃金水母全場電擊面板（DAY-149）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2948,3 +2949,27 @@ func _on_chainlong_wheel_result(data: Dictionary) -> void:
 		data.get("is_mega_win", false),
 		is_personal
 	)
+
+# ---- 黃金水母全場電擊面板（DAY-149）----
+
+const GoldenJellyfishPanelScript = preload("res://scripts/ui/GoldenJellyfishPanel.gd")
+var _golden_jellyfish_panel: Control = null
+
+func _init_golden_jellyfish_panel() -> void:
+	var panel = GoldenJellyfishPanelScript.new()
+	panel.name = "GoldenJellyfishPanel"
+	panel.z_index = 86  # 在 AnglerfishPanel(86) 同層，但黃金水母是不同系統
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_golden_jellyfish_panel = panel
+
+	# 連接黃金水母電擊訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm and gm.has_signal("golden_jellyfish_shock"):
+		gm.golden_jellyfish_shock.connect(_on_golden_jellyfish_shock)
+
+func _on_golden_jellyfish_shock(data: Dictionary) -> void:
+	if not is_instance_valid(_golden_jellyfish_panel):
+		return
+	_golden_jellyfish_panel.handle_shock_event(data)

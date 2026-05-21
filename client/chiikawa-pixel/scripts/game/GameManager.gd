@@ -171,6 +171,7 @@ signal crocodile_hunt(hunt_data: Dictionary)             # 鱷魚獵魚累積（
 signal giant_prize_fish(event_data: Dictionary)          # 夢幻巨型獎勵魚（DAY-147）
 signal chainlong_wheel_start(wheel_data: Dictionary)     # 千龍王輪盤開始（DAY-148）
 signal chainlong_wheel_result(result_data: Dictionary)   # 千龍王輪盤結果（DAY-148）
+signal golden_jellyfish_shock(shock_data: Dictionary)    # 黃金水母全場電擊（DAY-149）
 signal unlucky_bonus(bonus_data: Dictionary)           # 失敗補償觸發（DAY-135）
 signal speed_race_started(race_data: Dictionary)       # 競速獵殺開始（DAY-136）
 signal speed_race_ended(race_data: Dictionary)         # 競速獵殺結束（DAY-136）
@@ -461,6 +462,9 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_chainlong_wheel_result(payload)
 		"chainlong_wheel_status":
 			pass  # 冷卻狀態，目前不需要特別處理
+		# 黃金水母全場電擊系統（DAY-149）
+		"golden_jellyfish_shock":
+			emit_signal("golden_jellyfish_shock", payload)
 		"unlucky_bonus":
 			_handle_unlucky_bonus(payload)
 		"speed_race_start":
