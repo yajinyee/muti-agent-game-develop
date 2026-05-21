@@ -3186,3 +3186,18 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **解決：** `git config --global core.tmpdir "C:/Temp"` + 確保 `C:\Temp` 目錄存在
 - **注意：** 每次新的 PowerShell session 都需要確認 `C:\Temp` 存在
 - **教訓：** 大型二進位檔案（PNG/WAV）的 git add 要逐一執行，不要批次，避免一個失敗影響全部
+
+## 115. Streaks with Mercy 設計原則（DAY-120，2026-05-21）
+- **業界依據：** nowg.net（2026-05-21）確認「Streaks with Mercy」是 2026 年最有效的留存機制
+- **核心設計：** 連續記錄中斷時給予一次「寬限期」，讓玩家不會因為偶爾一天沒玩就失去所有連續獎勵
+- **寬限期條件：** 連續≥3天（值得保護）+ 中斷1-2天（不是長期不玩）+ 7天冷卻（防止濫用）
+- **懲罰設計：** 使用寬限期時獎勵減半，讓玩家感受到「有代價但不致命」
+- **登入時自動檢查：** 玩家上線時自動通知，不需要玩家主動操作
+- **教訓：** 「Mercy」機制的關鍵是「有條件的保護」，不是「無限保護」，否則連續記錄失去意義
+
+## 116. git CRLF/LF 問題導致 diff 為空（2026-05-21）
+- **問題：** 本地文件有修改（hash 不同），但 `git diff HEAD` 輸出為空
+- **原因：** `core.autocrlf=true` 讓 Windows CRLF 和 LF 在比較時被視為相同
+- **診斷方法：** `git hash-object <file>` 比較本地和 HEAD 的 hash
+- **解決：** 直接 `git add <file>` 強制加入，git 會處理 CRLF 轉換
+- **教訓：** Windows 上的 Go 文件可能有 CRLF 問題，不要依賴 `git diff` 判斷是否有修改

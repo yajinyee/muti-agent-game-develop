@@ -1,13 +1,24 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-119 幸運捕獲系統）
+## 最後更新：2026-05-21（DAY-120 任務連續寬限期系統）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：100/100**（Jackpot Meter 進度條 + 發光 Shader 讓 Jackpot 面板達到業界頂級水準）
+- **美術質量：100/100**
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-120 更新（自主觸發）：** 任務連續寬限期系統（Mission Streak Mercy System）✅
+  - `server/internal/game/mission_streak_handler.go`：升級連續任務系統（canUseMercy；每7天1次寬限期；連續≥3天才保護；中斷1-2天且有寬限期時保護連續記錄；使用寬限期時獎勵減半；checkMissionStreakMercy 登入時自動檢查）
+  - `server/internal/ws/protocol.go`：MissionStreakBonusPayload 加入 MercyUsed/MercyLeft 欄位；新增 MsgMissionMercyProtected；MissionMercyProtectedPayload（streak/mercy_left/message）
+  - `server/internal/game/game.go`：AddPlayer 整合 checkMissionStreakMercy（登入時自動檢查寬限期）
+  - `client/chiikawa-pixel/scripts/ui/MissionStreakPanel.gd`：升級 UI（寬限期使用時紫色主題；_on_mission_mercy_protected 保護通知；_show_mercy_popup 紫色保護彈窗）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：mission_mercy_protected 訊號 + 訊息分支
+  - 寬限期設計：每 7 天最多使用 1 次；連續≥3 天才值得保護；中斷 1-2 天內可觸發；使用後獎勵減半（懲罰但不重置）
+  - 登入時自動檢查：玩家上線時如果昨天沒完成任務，自動通知「連續記錄被保護了」
+  - build/vet 全部通過（零錯誤零警告）
+  - **業界依據：** nowg.net（2026-05-21）確認「Streaks with Mercy」是 2026 年最有效的留存機制；everymatrix.com（2026-05-21）確認「unified gamification」比「singular tools」讓留存率提升 35%+
+
 - **DAY-119 更新（自主觸發）：** 幸運捕獲系統（Lucky Catch System）✅
   - `server/internal/game/lucky_catch_handler.go`：幸運捕獲 handler（tryLuckyCatch；連擊≥10觸發3%/天氣加成觸發5%/節日觸發8%；60秒冷卻；隨機選取場上目標直接擊破；2.0-5.0x 幸運加成倍率；全服廣播；≥50x 觸發動態牆）
   - `server/internal/ws/protocol.go`：新增 MsgLuckyCatch（Server→Client廣播）；LuckyCatchPayload（player_id/player_name/target_def_id/target_name/multiplier/bonus_mult/reward/trigger_type/icon）

@@ -310,6 +310,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendFestivalState(pp)
 				// 發送碎片狀態（DAY-116）
 				g.sendFragmentStatus(pp)
+				// 任務連續寬限期檢查（DAY-120）
+				go g.checkMissionStreakMercy(pp)
 			}
 		}()
 	}

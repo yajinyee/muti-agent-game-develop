@@ -180,6 +180,8 @@ const (
 	MsgChallengeUnlocked MessageType = "challenge_unlocked" // 挑戰解鎖通知
 	// 每日任務連續完成獎勵（DAY-086）
 	MsgMissionStreakBonus MessageType = "mission_streak_bonus" // 連續完成獎勵通知
+	// 任務連續寬限期（DAY-120）
+	MsgMissionMercyProtected MessageType = "mission_mercy_protected" // 寬限期保護通知（Server→Client）
 	// 天氣系統（DAY-087）
 	MsgWeatherUpdate MessageType = "weather_update" // 天氣狀態更新
 	// 連鎖爆炸系統（DAY-088）
@@ -1317,6 +1319,8 @@ type MissionStreakBonusPayload struct {
 	Reward     int    `json:"reward"`      // 本次獎勵金幣
 	Label      string `json:"label"`       // 獎勵標籤（如「連續 7 天 🏆」）
 	NewBalance int    `json:"new_balance"` // 領取後餘額
+	MercyUsed  bool   `json:"mercy_used"`  // 是否使用了寬限期（DAY-120）
+	MercyLeft  int    `json:"mercy_left"`  // 本週剩餘寬限次數（DAY-120）
 }
 
 // ---- 天氣系統（DAY-087）----
@@ -2058,4 +2062,11 @@ type LuckyCatchPayload struct {
 	Reward      int     `json:"reward"`       // 最終獎勵金幣
 	TriggerType string  `json:"trigger_type"` // 觸發類型：streak/weather/festival
 	Icon        string  `json:"icon"`         // 顯示圖示
+}
+
+// MissionMercyProtectedPayload 任務連續寬限期保護通知（Server → Client）（DAY-120）
+type MissionMercyProtectedPayload struct {
+	Streak    int    `json:"streak"`     // 被保護的連續天數
+	MercyLeft int    `json:"mercy_left"` // 本週剩餘寬限次數（使用後）
+	Message   string `json:"message"`    // 顯示訊息
 }
