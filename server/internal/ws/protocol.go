@@ -198,6 +198,7 @@ const (
 	MsgGoldenTurtleTimeStop MessageType = "golden_turtle_time_stop" // 黃金海龜時間停止（DAY-159）
 	MsgLuckyStarFish        MessageType = "lucky_star_fish"         // 幸運星魚全場倍率翻倍（DAY-160）
 	MsgGoldenSharkBerserk   MessageType = "golden_shark_berserk"    // 黃金鯊魚全服狂暴模式（DAY-161）
+	MsgMoneyFishReward      MessageType = "money_fish_reward"       // 金幣魚王即時獎勵（DAY-162）
 	MsgRoyalChainLightning  MessageType = "royal_chain_lightning"  // 皇家閃電鰻持續連鎖電擊（DAY-156）
 	// 神秘寶箱系統（DAY-090）
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
@@ -3098,6 +3099,18 @@ type GoldenSharkBerserkPayload struct {
 	Phase        string  `json:"phase"`         // 當前階段：berserk_start / berserk_end
 	DurationSecs float64 `json:"duration_secs"` // 狂暴模式持續時間（秒）
 	MultBonus    float64 `json:"mult_bonus"`    // 倍率加成（1.5 = 全場 ×1.5）
+}
+
+// MoneyFishRewardPayload 金幣魚王即時獎勵廣播（Server → Client，DAY-162）
+type MoneyFishRewardPayload struct {
+	TriggerID     string  `json:"trigger_id"`     // 觸發的 T122 InstanceID
+	TriggerX      float64 `json:"trigger_x"`      // 觸發位置 X
+	TriggerY      float64 `json:"trigger_y"`      // 觸發位置 Y
+	KillerID      string  `json:"killer_id"`      // 擊破玩家 ID
+	KillerName    string  `json:"killer_name"`    // 擊破玩家名稱
+	InstantReward int     `json:"instant_reward"` // 即時獎勵金幣數
+	MultUsed      int     `json:"mult_used"`      // 使用的倍率（20-50）
+	BetLevel      int     `json:"bet_level"`      // 玩家當前 betLevel
 }
 
 // RoyalChainLightningEntry 皇家閃電鰻連鎖電擊的目標條目（DAY-156）

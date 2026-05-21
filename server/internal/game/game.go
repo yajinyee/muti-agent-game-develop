@@ -1309,6 +1309,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isGoldenShark(t.DefID) {
 		go g.tryGoldenSharkBerserk(p, t.InstanceID, t.X, t.Y)
 	}
+	// 金幣魚王即時獎勵：擊破 T122 時觸發（DAY-162）
+	if isMoneyFish(t.DefID) {
+		go g.notifyMoneyFishKill(p, t.InstanceID, t.X, t.Y)
+	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }

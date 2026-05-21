@@ -161,6 +161,11 @@ var Targets = map[string]*TargetDef{
 	// 設計：全服共享（不是個人），任何玩家擊破都讓全服受益，製造「全場爆發」的社交爽感
 	// 與幸運星魚（個人 ×2）不同：黃金鯊魚是全服 ×1.5，社交性更強
 	"T121": {ID: "T121", Name: "黃金鯊魚", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 80, HP: 100, SpawnWeight: 3, Speed: 55, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "golden_shark_berserk"},
+	// T122 金幣魚王（DAY-162）— 業界依據：King of Ocean 2026（Galaxsys）「Money Fish trigger instant payouts」
+	// 擊破後立即給予玩家一筆即時獎勵（betLevel × 20-50 隨機），不走正常 kill 倍率計算
+	// 是「保底即時獎勵」型特殊目標，讓玩家在任何 betLevel 都能獲得有感的即時金幣
+	// 設計：中等倍率（30-50x）+ 中等 HP（60）+ 中等生成權重（5）= 常見但有即時爆金幣效果
+	"T122": {ID: "T122", Name: "金幣魚王", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 60, SpawnWeight: 5, Speed: 50, Lifetime: 14, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "money_fish_instant"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
