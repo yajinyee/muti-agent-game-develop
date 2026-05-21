@@ -238,6 +238,7 @@ func _ready() -> void:
 	_init_giant_prize_fish_panel() # 夢幻巨型獎勵魚面板（DAY-147）
 	_init_chainlong_wheel_panel()  # 千龍王強化輪盤面板（DAY-148）
 	_init_golden_jellyfish_panel() # 黃金水母全場電擊面板（DAY-149）
+	_init_thunderbolt_lobster_panel() # 雷霆龍蝦免費射擊面板（DAY-150）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2973,3 +2974,42 @@ func _on_golden_jellyfish_shock(data: Dictionary) -> void:
 	if not is_instance_valid(_golden_jellyfish_panel):
 		return
 	_golden_jellyfish_panel.handle_shock_event(data)
+
+# ---- 雷霆龍蝦免費射擊面板（DAY-150）----
+
+const ThunderboltLobsterPanelScript = preload("res://scripts/ui/ThunderboltLobsterPanel.gd")
+var _thunderbolt_lobster_panel: Control = null
+
+func _init_thunderbolt_lobster_panel() -> void:
+	var panel = ThunderboltLobsterPanelScript.new()
+	panel.name = "ThunderboltLobsterPanel"
+	panel.z_index = 87  # 在 GoldenJellyfishPanel(86) 之上
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_thunderbolt_lobster_panel = panel
+
+	# 連接雷霆龍蝦訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("thunderbolt_lobster_activate"):
+			gm.thunderbolt_lobster_activate.connect(_on_thunderbolt_lobster_activate)
+		if gm.has_signal("thunderbolt_lobster_shot"):
+			gm.thunderbolt_lobster_shot.connect(_on_thunderbolt_lobster_shot)
+		if gm.has_signal("thunderbolt_lobster_end"):
+			gm.thunderbolt_lobster_end.connect(_on_thunderbolt_lobster_end)
+
+func _on_thunderbolt_lobster_activate(data: Dictionary) -> void:
+	if not is_instance_valid(_thunderbolt_lobster_panel):
+		return
+	_thunderbolt_lobster_panel.handle_activate(data)
+
+func _on_thunderbolt_lobster_shot(data: Dictionary) -> void:
+	if not is_instance_valid(_thunderbolt_lobster_panel):
+		return
+	_thunderbolt_lobster_panel.handle_shot(data)
+
+func _on_thunderbolt_lobster_end(data: Dictionary) -> void:
+	if not is_instance_valid(_thunderbolt_lobster_panel):
+		return
+	_thunderbolt_lobster_panel.handle_end(data)

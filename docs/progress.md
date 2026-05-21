@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-149 黃金水母全場電擊系統）
+## 最後更新：2026-05-22（DAY-150 雷霆龍蝦免費射擊系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-150 更新（自主觸發）：** 雷霆龍蝦免費射擊系統（Thunderbolt Lobster Free Shooting System）✅
+  - **業界依據：** royalfishingsite.com 2026「Thunderbolt Lobster feature — 15 seconds of free play followed by automatic shooting」— 擊破後觸發 15 秒免費自動射擊，所有子彈不扣費，Server 自動幫玩家以當前 betLevel 射擊，是 2026 年最新的「免費爽感」機制
+  - `server/internal/data/tables.go`：新增 T114 雷霆龍蝦（50-70x/HP70/SpawnWeight5/thunderbolt_lobster 行為）
+  - `server/internal/ws/protocol.go`：新增 MsgThunderboltLobsterActivate/MsgThunderboltLobsterShot/MsgThunderboltLobsterEnd；ThunderboltLobsterActivatePayload/ThunderboltLobsterShotPayload/ThunderboltLobsterEndPayload
+  - `server/internal/game/thunderbolt_lobster_handler.go`：thunderboltLobsterManager（session/cooldown 管理）；isThunderboltLobster 判斷；tryThunderboltLobster（觸發免費射擊/全服廣播/全服公告）；runThunderboltLobsterShots（15秒/30次/500ms間隔/優先高倍率目標/免費射擊不扣費）；selectThunderboltTarget（評分選擇最佳目標）；endThunderboltLobsterSession（結束/廣播結果/≥5個擊破全服公告）
+  - `server/internal/game/announce/announce.go`：新增 EventThunderboltLobster/EventThunderboltLobsterResult；buildContent 加入雷霆龍蝦公告（橙色，5秒，高優先）
+  - `server/internal/game/game.go`：Game struct 加入 ThunderboltLobster *thunderboltLobsterManager；NewGameWithStore 初始化；handleKill 加入 isThunderboltLobster 分支（goroutine）；RemovePlayer 清理
+  - `client/chiikawa-pixel/scripts/ui/ThunderboltLobsterPanel.gd`：雷霆龍蝦面板（橙紅電流主題；activate 橫幅滑入+倒數計時+進度條+全螢幕橙色閃光；shot 自動射擊計數器+小閃光；end 右側滑入彈窗含射擊統計+擊破率+獎勵；≥10個擊破雙閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：3個訊號（thunderbolt_lobster_activate/thunderbolt_lobster_shot/thunderbolt_lobster_end）+ 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 ThunderboltLobsterPanelScript（z_index=87）
+  - 免費射擊設計：15 秒持續時間；每 500ms 自動射擊一次；最多 30 次；優先選高倍率目標（評分：倍率×2 + 快要離開畫面+10）；從前 3 名中隨機選一個（避免總是打同一個目標）
+  - 冷卻設計：每個玩家 60 秒冷卻，防止頻繁觸發
+  - 獎勵設計：免費射擊期間所有擊破獎勵正常計算（不打折），但子彈完全免費，純賺
+  - 全服廣播：免費射擊開始/每次射擊/結束全服廣播，讓所有玩家看到「有人在免費狂射」
+  - 全服公告：擊破 ≥5 個目標時全服廣播，讓其他玩家看到「有人的雷霆龍蝦免費射擊大豐收」
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-149 更新（自主觸發）：** 黃金水母全場電擊系統（Golden Jellyfish Global Shock System）✅
   - **業界依據：** Ocean King 3 2026「Electric Jellyfish chain shocks across multiple targets. Devastating against clustered schools.」— 擊破後觸發全場電擊，對畫面上所有目標發動電擊，比閃電鰻（T103，200px 範圍跳躍 5 次）更強
   - `server/internal/data/tables.go`：新增 T113 黃金水母（60-80x/HP80/SpawnWeight3/golden_jellyfish 行為）

@@ -132,6 +132,7 @@ type Game struct {
 	MegaOctopus    *megaoctopus.Manager    // 巨型章魚轉盤系統管理器（DAY-144）
 	GiantPrizeFish *giantPrizeFishManager  // 夢幻巨型獎勵魚系統管理器（DAY-147）
 	ChainLongWheel *chainlongwheel.Manager // 千龍王強化輪盤系統管理器（DAY-148）
+	ThunderboltLobster *thunderboltLobsterManager // 雷霆龍蝦免費射擊系統管理器（DAY-150）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -244,6 +245,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		MegaOctopus:        megaoctopus.NewManager(),
 		GiantPrizeFish:     newGiantPrizeFishManager(),
 		ChainLongWheel:     chainlongwheel.New(),
+		ThunderboltLobster: newThunderboltLobsterManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -498,6 +500,10 @@ func (g *Game) RemovePlayer(playerID string) {
 		// 清理千龍王輪盤 session（DAY-148）
 		if g.ChainLongWheel != nil {
 			g.ChainLongWheel.RemovePlayer(playerID)
+		}
+		// 清理雷霆龍蝦免費射擊 session（DAY-150）
+		if g.ThunderboltLobster != nil {
+			g.ThunderboltLobster.RemovePlayer(playerID)
 		}
 		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
@@ -1229,6 +1235,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 黃金水母全場電擊：擊破 T113 時觸發（DAY-149）
 	if isGoldenJellyfish(t.DefID) {
 		go g.tryGoldenJellyfishShock(p, t.InstanceID, t.X, t.Y)
+	}
+	// 雷霆龍蝦免費射擊：擊破 T114 時觸發（DAY-150）
+	if isThunderboltLobster(t.DefID) {
+		go g.tryThunderboltLobster(p, t.InstanceID, t.X, t.Y)
 	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)

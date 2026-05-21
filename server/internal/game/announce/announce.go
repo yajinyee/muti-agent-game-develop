@@ -39,6 +39,8 @@ const (
 	EventMultStorm      EventType = "mult_storm"      // 倍率風暴觸發（DAY-138）
 	EventDualRoulette   EventType = "dual_roulette"   // 雙環輪盤高倍率（DAY-139）
 	EventMegaCatch      EventType = "mega_catch"      // Mega Catch 事件觸發（DAY-140）
+	EventThunderboltLobster       EventType = "thunderbolt_lobster"        // 雷霆龍蝦免費射擊觸發（DAY-150）
+	EventThunderboltLobsterResult EventType = "thunderbolt_lobster_result" // 雷霆龍蝦免費射擊結果（DAY-150）
 )
 
 // Priority 公告優先級
@@ -467,6 +469,27 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		priority = PriorityHigh
 		duration = 6000
 		_ = tierName // suppress unused warning
+
+	case EventThunderboltLobster:
+		title = "⚡ 雷霆龍蝦！"
+		message = fmt.Sprintf("⚡ %s 觸發了雷霆龍蝦！免費射擊 15 秒！", playerName)
+		icon = "⚡"
+		color = "#FF6600"
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventThunderboltLobsterResult:
+		title = "⚡ 雷霆龍蝦結果！"
+		message = fmt.Sprintf("⚡ %s 的雷霆龍蝦免費射擊擊破了 %d 個目標！獲得 %d 金幣！", playerName, amount, 0)
+		if extra != nil {
+			if reward, ok := extra["reward"]; ok {
+				message = fmt.Sprintf("⚡ %s 的雷霆龍蝦免費射擊擊破了 %d 個目標！獲得 %s 金幣！", playerName, amount, reward)
+			}
+		}
+		icon = "⚡"
+		color = "#FF9900"
+		priority = PriorityNormal
+		duration = 4000
 
 	default:
 		title = "📢 公告"

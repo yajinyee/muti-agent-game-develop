@@ -117,6 +117,12 @@ var Targets = map[string]*TargetDef{
 	// 比閃電鰻（T103，200px 範圍跳躍 5 次）更強：全場範圍，最多 8 個目標，40% 擊破機率
 	// 設計：中等倍率（60-80x）+ 中等 HP（80）+ 低生成權重（3）= 稀有但可遇到的強力目標
 	"T113": {ID: "T113", Name: "黃金水母", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 80, HP: 80, SpawnWeight: 3, Speed: 30, Lifetime: 12, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "golden_jellyfish"},
+	// T114 雷霆龍蝦（DAY-150）— 業界依據：royalfishingsite.com 2026「Thunderbolt Lobster feature —
+	// 15 seconds of free play followed by automatic shooting」
+	// 擊破後觸發「免費射擊模式」：15 秒內所有子彈不扣費，Server 自動幫玩家以當前 betLevel 射擊
+	// 每 0.5 秒自動射擊一次，優先選高倍率目標，讓玩家感受到「免費狂射」的爽感
+	// 設計：中等倍率（50-70x）+ 中等 HP（70）+ 中低生成權重（5）= 常見但有驚喜的特殊目標
+	"T114": {ID: "T114", Name: "雷霆龍蝦", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 70, HP: 70, SpawnWeight: 5, Speed: 40, Lifetime: 12, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "thunderbolt_lobster"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -387,6 +387,11 @@ const (
 	// 黃金水母全場電擊系統（DAY-149）
 	MsgGoldenJellyfishShock MessageType = "golden_jellyfish_shock" // 全場電擊廣播（Server→Client，全服）
 
+	// 雷霆龍蝦免費射擊系統（DAY-150）
+	MsgThunderboltLobsterActivate MessageType = "thunderbolt_lobster_activate" // 免費射擊模式開始（Server→Client，個人+全服）
+	MsgThunderboltLobsterShot     MessageType = "thunderbolt_lobster_shot"     // 自動射擊一次（Server→Client，全服）
+	MsgThunderboltLobsterEnd      MessageType = "thunderbolt_lobster_end"      // 免費射擊模式結束（Server→Client，個人+全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3153,4 +3158,43 @@ type GoldenJellyfishShockPayload struct {
 	TotalReward  int                          `json:"total_reward"`  // 總獎勵（result 時）
 	NewBalance   int                          `json:"new_balance"`   // 新餘額（result 時，個人）
 	Message      string                       `json:"message"`       // 廣播訊息
+}
+
+// ThunderboltLobsterActivatePayload 雷霆龍蝦免費射擊模式開始（Server → Client，個人+全服，DAY-150）
+type ThunderboltLobsterActivatePayload struct {
+	TriggerID    string `json:"trigger_id"`    // 觸發的 T114 InstanceID
+	TriggerX     float64 `json:"trigger_x"`   // 觸發位置 X
+	TriggerY     float64 `json:"trigger_y"`   // 觸發位置 Y
+	KillerID     string `json:"killer_id"`     // 觸發玩家 ID
+	KillerName   string `json:"killer_name"`   // 觸發玩家名稱
+	Duration     int    `json:"duration"`      // 免費射擊持續秒數（15）
+	ShotInterval int    `json:"shot_interval"` // 自動射擊間隔毫秒（500）
+	Message      string `json:"message"`       // 廣播訊息
+}
+
+// ThunderboltLobsterShotPayload 雷霆龍蝦自動射擊一次（Server → Client，全服，DAY-150）
+type ThunderboltLobsterShotPayload struct {
+	KillerID     string  `json:"killer_id"`     // 觸發玩家 ID
+	KillerName   string  `json:"killer_name"`   // 觸發玩家名稱
+	TargetID     string  `json:"target_id"`     // 被射擊的目標 InstanceID
+	TargetDefID  string  `json:"target_def_id"` // 目標 DefID
+	TargetName   string  `json:"target_name"`   // 目標名稱
+	TargetX      float64 `json:"target_x"`      // 目標位置 X
+	TargetY      float64 `json:"target_y"`      // 目標位置 Y
+	IsKill       bool    `json:"is_kill"`        // 是否擊破
+	Reward       int     `json:"reward"`         // 獎勵（擊破時）
+	Multiplier   float64 `json:"multiplier"`     // 目標倍率
+	ShotIndex    int     `json:"shot_index"`     // 第幾次射擊（0-based）
+	ShotsLeft    int     `json:"shots_left"`     // 剩餘射擊次數
+}
+
+// ThunderboltLobsterEndPayload 雷霆龍蝦免費射擊模式結束（Server → Client，個人+全服，DAY-150）
+type ThunderboltLobsterEndPayload struct {
+	KillerID     string `json:"killer_id"`     // 觸發玩家 ID
+	KillerName   string `json:"killer_name"`   // 觸發玩家名稱
+	TotalShots   int    `json:"total_shots"`   // 總射擊次數
+	TotalKills   int    `json:"total_kills"`   // 總擊破數
+	TotalReward  int    `json:"total_reward"`  // 總獎勵
+	NewBalance   int    `json:"new_balance"`   // 新餘額（個人）
+	Message      string `json:"message"`       // 廣播訊息
 }
