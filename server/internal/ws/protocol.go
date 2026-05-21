@@ -300,6 +300,13 @@ const (
 	MsgImmortalBossLeave  MessageType = "immortal_boss_leave"  // 不死 BOSS 離開（Server→Client，全服廣播）
 	MsgImmortalBossStatus MessageType = "immortal_boss_status" // 不死 BOSS 狀態（Server→Client，個人）
 
+	// 覺醒 BOSS 系統（DAY-130）
+	MsgAwakenBossSpawn   MessageType = "awaken_boss_spawn"   // 覺醒 BOSS 出現（Server→Client，全服廣播）
+	MsgAwakenBossHit     MessageType = "awaken_boss_hit"     // 命中覺醒 BOSS（Server→Client，全服廣播）
+	MsgAwakenBossPowerUp MessageType = "awaken_boss_powerup" // Power Up 觸發（Server→Client，全服廣播）
+	MsgAwakenBossLeave   MessageType = "awaken_boss_leave"   // 覺醒 BOSS 離開（Server→Client，全服廣播）
+	MsgAwakenBossStatus  MessageType = "awaken_boss_status"  // 覺醒 BOSS 狀態（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2442,4 +2449,80 @@ type ImmortalBossStatusPayload struct {
 	HitCount         int     `json:"hit_count"`         // 累計命中次數
 	TotalReward      int     `json:"total_reward"`      // 累計總獎勵
 	RemainingSeconds float64 `json:"remaining_seconds"` // 剩餘秒數
+}
+
+// ---- 覺醒 BOSS 系統 Payloads（DAY-130）----
+
+// AwakenBossSpawnPayload 覺醒 BOSS 出現廣播（Server → Client，全服）（DAY-130）
+type AwakenBossSpawnPayload struct {
+	InstanceID       string  `json:"instance_id"`         // BOSS 實例 ID
+	BossType         string  `json:"boss_type"`           // BOSS 類型
+	BossName         string  `json:"boss_name"`           // BOSS 名稱
+	BossIcon         string  `json:"boss_icon"`           // BOSS 圖示
+	BossColor        string  `json:"boss_color"`          // 顯示顏色
+	MinMult          float64 `json:"min_mult"`            // 基礎最小倍率
+	MaxMult          float64 `json:"max_mult"`            // 基礎最大倍率
+	PowerUpMinMult   float64 `json:"powerup_min_mult"`    // Power Up 最小加成
+	PowerUpMaxMult   float64 `json:"powerup_max_mult"`    // Power Up 最大加成
+	PowerUpThreshold int     `json:"powerup_threshold"`   // 觸發 Power Up 所需命中次數
+	DurationSeconds  float64 `json:"duration_seconds"`    // 在場時間
+	Message          string  `json:"message"`             // 公告訊息
+}
+
+// AwakenBossHitPayload 命中覺醒 BOSS 廣播（Server → Client，全服）（DAY-130）
+type AwakenBossHitPayload struct {
+	InstanceID      string  `json:"instance_id"`       // BOSS 實例 ID
+	PlayerID        string  `json:"player_id"`         // 命中玩家 ID
+	PlayerName      string  `json:"player_name"`       // 命中玩家名稱
+	Multiplier      float64 `json:"multiplier"`        // 本次倍率
+	Reward          int     `json:"reward"`            // 本次獎勵
+	NewBalance      int     `json:"new_balance"`       // 玩家新餘額（只發給命中者）
+	HitCount        int     `json:"hit_count"`         // 累計命中次數
+	PowerUpProgress float64 `json:"powerup_progress"`  // Power Up 進度（0.0-1.0）
+	TotalReward     int     `json:"total_reward"`      // 累計總獎勵
+}
+
+// AwakenBossPowerUpPayload Power Up 觸發廣播（Server → Client，全服）（DAY-130）
+type AwakenBossPowerUpPayload struct {
+	InstanceID   string  `json:"instance_id"`    // BOSS 實例 ID
+	BossName     string  `json:"boss_name"`      // BOSS 名稱
+	BossIcon     string  `json:"boss_icon"`      // BOSS 圖示
+	PlayerID     string  `json:"player_id"`      // 觸發玩家 ID
+	PlayerName   string  `json:"player_name"`    // 觸發玩家名稱
+	Multiplier   float64 `json:"multiplier"`     // Power Up 倍率
+	Reward       int     `json:"reward"`         // Power Up 獎勵
+	NewBalance   int     `json:"new_balance"`    // 玩家新餘額
+	PowerUpCount int     `json:"powerup_count"`  // 第幾次 Power Up
+	Message      string  `json:"message"`        // 廣播訊息
+}
+
+// AwakenBossLeavePayload 覺醒 BOSS 離開廣播（Server → Client，全服）（DAY-130）
+type AwakenBossLeavePayload struct {
+	InstanceID   string `json:"instance_id"`   // BOSS 實例 ID
+	BossName     string `json:"boss_name"`     // BOSS 名稱
+	BossIcon     string `json:"boss_icon"`     // BOSS 圖示
+	HitCount     int    `json:"hit_count"`     // 總命中次數
+	PowerUpCount int    `json:"powerup_count"` // 總 Power Up 次數
+	TotalReward  int    `json:"total_reward"`  // 總獎勵
+	Message      string `json:"message"`      // 離開訊息
+}
+
+// AwakenBossStatusPayload 覺醒 BOSS 狀態（Server → Client，個人）（DAY-130）
+type AwakenBossStatusPayload struct {
+	Active           bool    `json:"active"`             // 是否有活躍 BOSS
+	InstanceID       string  `json:"instance_id"`        // BOSS 實例 ID
+	BossType         string  `json:"boss_type"`          // BOSS 類型
+	BossName         string  `json:"boss_name"`          // BOSS 名稱
+	BossIcon         string  `json:"boss_icon"`          // BOSS 圖示
+	BossColor        string  `json:"boss_color"`         // 顯示顏色
+	MinMult          float64 `json:"min_mult"`           // 基礎最小倍率
+	MaxMult          float64 `json:"max_mult"`           // 基礎最大倍率
+	PowerUpMinMult   float64 `json:"powerup_min_mult"`   // Power Up 最小加成
+	PowerUpMaxMult   float64 `json:"powerup_max_mult"`   // Power Up 最大加成
+	PowerUpThreshold int     `json:"powerup_threshold"`  // 觸發 Power Up 所需命中次數
+	HitCount         int     `json:"hit_count"`          // 累計命中次數
+	PowerUpCount     int     `json:"powerup_count"`      // Power Up 次數
+	PowerUpProgress  float64 `json:"powerup_progress"`   // Power Up 進度
+	TotalReward      int     `json:"total_reward"`       // 累計總獎勵
+	RemainingSeconds float64 `json:"remaining_seconds"`  // 剩餘秒數
 }

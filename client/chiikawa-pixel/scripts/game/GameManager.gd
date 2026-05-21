@@ -87,6 +87,12 @@ signal immortal_boss_spawned(data: Dictionary)              # 不死 BOSS 出現
 signal immortal_boss_hit(data: Dictionary)                  # 命中不死 BOSS（全服廣播）
 signal immortal_boss_left(data: Dictionary)                 # 不死 BOSS 離開（全服廣播）
 signal immortal_boss_status(data: Dictionary)               # 不死 BOSS 狀態（個人）
+# 覺醒 BOSS 系統（DAY-130）
+signal awaken_boss_spawned(data: Dictionary)                # 覺醒 BOSS 出現（全服廣播）
+signal awaken_boss_hit(data: Dictionary)                    # 命中覺醒 BOSS（全服廣播）
+signal awaken_boss_powerup(data: Dictionary)                # Power Up 觸發（全服廣播）
+signal awaken_boss_left(data: Dictionary)                   # 覺醒 BOSS 離開（全服廣播）
+signal awaken_boss_status(data: Dictionary)                 # 覺醒 BOSS 狀態（個人）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -510,6 +516,17 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("immortal_boss_left", payload)
 		"immortal_boss_status":
 			emit_signal("immortal_boss_status", payload)
+		# 覺醒 BOSS 系統（DAY-130）
+		"awaken_boss_spawn":
+			emit_signal("awaken_boss_spawned", payload)
+		"awaken_boss_hit":
+			emit_signal("awaken_boss_hit", payload)
+		"awaken_boss_powerup":
+			emit_signal("awaken_boss_powerup", payload)
+		"awaken_boss_leave":
+			emit_signal("awaken_boss_left", payload)
+		"awaken_boss_status":
+			emit_signal("awaken_boss_status", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")

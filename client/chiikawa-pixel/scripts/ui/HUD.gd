@@ -220,6 +220,7 @@ func _ready() -> void:
 	_init_weather_surge_panel()   # 天氣湧現事件面板（DAY-127）
 	_init_dragon_wrath_panel()    # 龍怒蓄力大招面板（DAY-128）
 	_init_immortal_boss_panel()   # 不死 BOSS 連勝面板（DAY-129）
+	_init_awaken_boss_panel()     # 覺醒 BOSS 面板（DAY-130）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2600,3 +2601,22 @@ func _init_immortal_boss_panel() -> void:
 	GameManager.immortal_boss_hit.connect(func(data): panel.on_immortal_boss_hit(data))
 	GameManager.immortal_boss_left.connect(func(data): panel.on_immortal_boss_leave(data))
 	GameManager.immortal_boss_status.connect(func(data): panel.on_immortal_boss_status(data))
+
+# ---- 覺醒 BOSS 面板（DAY-130）----
+const AwakenBossPanelScript = preload("res://scripts/ui/AwakenBossPanel.gd")
+var _awaken_boss_panel: Control = null
+
+func _init_awaken_boss_panel() -> void:
+	var panel = AwakenBossPanelScript.new()
+	panel.name = "AwakenBossPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 69  # 比不死 BOSS 低一層（不死 BOSS z=70）
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_awaken_boss_panel = panel
+
+	GameManager.awaken_boss_spawned.connect(func(data): panel.on_awaken_boss_spawn(data))
+	GameManager.awaken_boss_hit.connect(func(data): panel.on_awaken_boss_hit(data))
+	GameManager.awaken_boss_powerup.connect(func(data): panel.on_awaken_boss_powerup(data))
+	GameManager.awaken_boss_left.connect(func(data): panel.on_awaken_boss_leave(data))
+	GameManager.awaken_boss_status.connect(func(data): panel.on_awaken_boss_status(data))

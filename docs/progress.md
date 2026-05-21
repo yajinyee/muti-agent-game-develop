@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-129 不死 BOSS 連勝系統）
+## 最後更新：2026-05-21（DAY-130 覺醒 BOSS 系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-130 更新（自主觸發）：** 覺醒 BOSS 系統（Awaken Boss System）✅
+  - **業界依據：** JILI Royal Fishing 2026 Awaken Boss — 「Awaken Bosses: 90x–200x, Power Up attacks multiply by 6x to 10x for devastating reward combinations」
+  - `server/internal/game/awakenboss/awakenboss.go`：覺醒 BOSS 管理器；2種 BOSS（覺醒龍 90-180x/冰鳳凰 120-300x）；Power Up 機制（每 5-8 次命中觸發，6x-10x 加成）；ShouldTrigger/StartSession/RecordHit（含 Power Up 判斷）/CheckExpiry/GetSnapshot/GetPowerUpProgress
+  - `server/internal/game/awakenboss/awakenboss_test.go`：14 個單元測試全部通過（New/ShouldTrigger_NoCooldown/ShouldTrigger_ActiveBoss/ShouldTrigger_Cooldown/StartSession/RecordHit_Basic/RecordHit_PowerUp/RecordHit_PowerUpMultiplier/RecordHit_WrongInstance/RecordHit_Expired/CheckExpiry/GetSnapshot_Active/PowerUpProgress/BossDefRanges）
+  - `server/internal/game/awakenboss_handler.go`：trySpawnAwakenBoss/tryAwakenBossHit（15-25% 命中機率）/notifyAwakenBossHit（普通命中廣播 + Power Up 特殊廣播）/tickAwakenBoss/sendAwakenBossStatus
+  - `server/internal/game/game.go`：整合 AwakenBoss *awakenboss.Manager；初始化/AddPlayer/handleAttack/spawnTarget/gameLoop 全部整合
+  - `server/internal/ws/protocol.go`：新增 MsgAwakenBossSpawn/MsgAwakenBossHit/MsgAwakenBossPowerUp/MsgAwakenBossLeave/MsgAwakenBossStatus；對應 Payload 定義
+  - `client/chiikawa-pixel/scripts/ui/AwakenBossPanel.gd`：覺醒 BOSS 面板（頂部橫幅；右側狀態面板含 Power Up 進度條；Power Up 爆發橙紅閃光；最後5秒紅色閃爍；離開淡出）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：5個訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 AwakenBossPanelScript（z_index=69）
+  - BOSS 設計：覺醒龍（🐉，90-180x，Power Up 5次觸發 6-10x，30秒，0.3%觸發率）/ 冰鳳凰（🦅，120-300x，Power Up 8次觸發 8-10x，25秒，0.1%觸發率）
+  - Power Up 機制：每 N 次命中觸發一次，倍率 = 基礎倍率 × Power Up 加成（最高 300x × 10x = 3000x 理論值）
+  - 命中機率：LV1-6 = 15%；LV7+ = 25%（比不死 BOSS 更難命中，但獎勵更高）
+  - 冷卻機制：5 分鐘冷卻（比不死 BOSS 更長）
+  - build/vet 全部通過（零錯誤零警告）；14/14 awakenboss 測試通過
+
 - **DAY-129 更新（自主觸發）：** 不死 BOSS 連勝系統（Immortal Boss Consecutive Win System）✅
   - **業界依據：** JILI Royal Fishing 2026 Immortal Boss — 「Golden Toad and Ancient Crocodile bosses appear randomly and award consecutive wins ranging from 50X to 150X until they leave the screen. This creates extended winning sequences impossible in standard fish games.」
   - `server/internal/game/immortalboss/immortalboss.go`：不死 BOSS 管理器；2種 BOSS 定義（金蟾蜍 50-120x/古鱷魚 60-150x）；ShouldTrigger（冷卻+活躍檢查+機率觸發）；StartSession（建立 session）；RecordHit（記錄命中/計算倍率/累積統計）；CheckExpiry（過期檢查）；GetSnapshot/IsActive/GetActiveInstanceID

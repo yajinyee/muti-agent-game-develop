@@ -15,6 +15,7 @@ import (
 	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/activityfeed"
 	"digital-twin/server/internal/game/achievement"
+	"digital-twin/server/internal/game/awakenboss"
 	"digital-twin/server/internal/game/chain"
 	"digital-twin/server/internal/game/challenge"
 	"digital-twin/server/internal/game/combat"
@@ -107,6 +108,7 @@ type Game struct {
 	GoldenTime     *goldentime.Manager     // 黃金時間管理器（DAY-125）
 	RareCatch      *rarecatch.Manager      // 稀有連擊累積倍率管理器（DAY-126）
 	ImmortalBoss   *immortalboss.Manager   // 不死 BOSS 連勝管理器（DAY-129）
+	AwakenBoss     *awakenboss.Manager     // 覺醒 BOSS 系統管理器（DAY-130）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -205,6 +207,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		GoldenTime:         goldentime.New(),
 		RareCatch:          rarecatch.New(),
 		ImmortalBoss:       immortalboss.New(),
+		AwakenBoss:         awakenboss.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -345,6 +348,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendWrathStatus(pp)
 				// 發送不死 BOSS 狀態（DAY-129）
 				g.sendImmortalBossStatus(pp)
+				// 發送覺醒 BOSS 狀態（DAY-130）
+				g.sendAwakenBossStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -663,6 +668,8 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	go g.notifyWrathShot(p)
 	// 不死 BOSS：每次射擊嘗試命中（DAY-129）
 	go g.tryImmortalBossHit(p)
+	// 覺醒 BOSS：每次射擊嘗試命中（DAY-130）
+	go g.tryAwakenBossHit(p)
 	// 異常偵測：記錄攻擊（DAY-105）
 	if alert := g.AntiCheat.RecordAttack(p.ID, betCost); alert != nil {
 		log.Printf("[AntiCheat] Alert triggered for player %s: %s", p.ID, alert.Message)
@@ -1317,6 +1324,8 @@ func (g *Game) updateNormalPlay() {
 	g.tickWeatherSurge()
 	// 不死 BOSS 過期檢查（每次 update，DAY-129）
 	go g.tickImmortalBoss()
+	// 覺醒 BOSS 過期檢查（每次 update，DAY-130）
+	go g.tickAwakenBoss()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }
@@ -1418,6 +1427,8 @@ func (g *Game) spawnTarget() {
 
 	// 不死 BOSS：每次生成目標時嘗試觸發（DAY-129）
 	go g.trySpawnImmortalBoss()
+	// 覺醒 BOSS：每次生成目標時嘗試觸發（DAY-130）
+	go g.trySpawnAwakenBoss()
 }
 
 // triggerSpecialEvent 觸發特殊目標事件（流星、金色雜草等）
