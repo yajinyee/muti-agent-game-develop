@@ -77,6 +77,11 @@ signal rare_catch_reset(data: Dictionary)                   # 稀有連擊重置
 # 天氣湧現事件（DAY-127）
 signal weather_surge_started(data: Dictionary)              # 天氣湧現開始（全服廣播）
 signal weather_surge_ended(data: Dictionary)                # 天氣湧現結束（全服廣播）
+
+# 龍怒蓄力大招系統（DAY-128）
+signal wrath_updated(data: Dictionary)                      # 怒氣值更新（個人）
+signal wrath_started(data: Dictionary)                      # 大招開始（全服廣播）
+signal wrath_result(data: Dictionary)                       # 大招結果（全服廣播）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -484,6 +489,13 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("weather_surge_started", payload)
 		"weather_surge_end":
 			emit_signal("weather_surge_ended", payload)
+		# 龍怒蓄力大招系統（DAY-128）
+		"wrath_update":
+			emit_signal("wrath_updated", payload)
+		"wrath_start":
+			emit_signal("wrath_started", payload)
+		"wrath_result":
+			emit_signal("wrath_result", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")

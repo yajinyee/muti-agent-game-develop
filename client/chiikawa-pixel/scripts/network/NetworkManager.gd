@@ -404,3 +404,7 @@ func send_get_player_card(target_player_id: String) -> void:
 ## 查詢寶藏地圖狀態（DAY-122）
 func send_get_treasure_map() -> void:
 	send("get_treasure_map", {})
+
+## 釋放龍怒大招（DAY-128）
+func send_use_wrath() -> void:
+	send("use_wrath", {})

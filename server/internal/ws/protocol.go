@@ -288,6 +288,12 @@ const (
 	MsgWeatherSurgeStart MessageType = "weather_surge_start" // 天氣湧現開始（Server→Client，全服廣播）
 	MsgWeatherSurgeEnd   MessageType = "weather_surge_end"   // 天氣湧現結束（Server→Client，全服廣播）
 
+	// 龍怒蓄力大招系統（DAY-128）
+	MsgWrathUpdate MessageType = "wrath_update" // 怒氣值更新（Server→Client，個人）
+	MsgWrathStart  MessageType = "wrath_start"  // 大招開始（Server→Client，全服廣播）
+	MsgWrathResult MessageType = "wrath_result" // 大招結果（Server→Client，全服廣播）
+	MsgUseWrath    MessageType = "use_wrath"    // 釋放大招（Client→Server）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2343,4 +2349,38 @@ type WeatherSurgeStartPayload struct {
 type WeatherSurgeEndPayload struct {
 	SurgeName string `json:"surge_name"` // 湧現名稱
 	Message   string `json:"message"`    // 結束訊息
+}
+
+// WrathUpdatePayload 怒氣值更新（Server → Client，個人）（DAY-128）
+type WrathUpdatePayload struct {
+	Charge    int  `json:"charge"`     // 當前怒氣值（0-100）
+	MaxCharge int  `json:"max_charge"` // 最大怒氣值（100）
+	IsReady   bool `json:"is_ready"`   // 是否可以釋放大招
+	Cooldown  int  `json:"cooldown"`   // 冷卻剩餘秒數（0 = 可用）
+}
+
+// WrathStartPayload 大招開始廣播（Server → Client，全服）（DAY-128）
+type WrathStartPayload struct {
+	PlayerID   string `json:"player_id"`   // 釋放大招的玩家 ID
+	PlayerName string `json:"player_name"` // 玩家名稱
+	Icon       string `json:"icon"`        // 圖示
+	Message    string `json:"message"`     // 廣播訊息
+}
+
+// WrathKillEntry 大招擊破的目標（DAY-128）
+type WrathKillEntry struct {
+	InstanceID string  `json:"instance_id"` // 目標實例 ID
+	DefID      string  `json:"def_id"`      // 目標定義 ID
+	Reward     int     `json:"reward"`      // 獎勵金幣
+	Multiplier float64 `json:"multiplier"`  // 目標倍率
+}
+
+// WrathResultPayload 大招結果（Server → Client，全服廣播）（DAY-128）
+type WrathResultPayload struct {
+	PlayerID    string          `json:"player_id"`    // 玩家 ID
+	PlayerName  string          `json:"player_name"`  // 玩家名稱
+	KilledCount int             `json:"killed_count"` // 擊破目標數
+	TotalReward int             `json:"total_reward"` // 總獎勵
+	NewBalance  int             `json:"new_balance"`  // 新金幣餘額
+	Targets     []WrathKillEntry `json:"targets"`     // 擊破的目標列表
 }

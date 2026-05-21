@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-127 天氣湧現事件系統）
+## 最後更新：2026-05-21（DAY-128 龍怒蓄力大招系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-127 更新（自主觸發）：** 天氣湧現事件系統（Weather Surge Event）✅
+- **DAY-128 更新（自主觸發）：** 龍怒蓄力大招系統（Dragon Wrath Charge System）✅
+  - **業界依據：** JILI Royal Fishing 2026 Dragon Wrath — 「Accumulate wrath value through shooting, then unleash devastating meteor strikes across the entire screen」
+  - `server/internal/player/player.go`：Player struct 加入 `WrathCharge int` / `LastWrathAt time.Time`；新增 `AddWrathCharge`（累積怒氣，回傳新值和是否剛滿）/ `GetWrathCharge`（thread-safe getter）/ `ConsumeWrath`（消耗怒氣，內部做滿值+冷卻檢查）/ `GetWrathCooldownSecs`（冷卻剩餘秒數）；常數 `WrathMaxCharge=100` / `WrathCooldownDuration=60s`
+  - `server/internal/game/dragonwrath_handler.go`：龍怒大招 handler；`notifyWrathShot`（每次射擊 +1 怒氣，每 10 點發送更新）；`notifyWrathKill`（擊破目標 +2~+10 怒氣，依倍率加成）；`handleUseWrath`（消耗怒氣/廣播大招開始/執行攻擊）；`executeWrathAttack`（全螢幕 30% 機率擊破，50ms 間隔製造連續感，廣播結果）；`sendWrathUpdate/sendWrathStatus`
+  - `server/internal/game/game.go`：HandleMessage 加入 `MsgUseWrath`；handleAttack 加入 `notifyWrathShot`；handleKill 加入 `notifyWrathKill`；AddPlayer 加入 `sendWrathStatus`（登入時恢復怒氣值）
+  - `server/internal/ws/protocol.go`：新增 `MsgWrathUpdate/MsgWrathStart/MsgWrathResult/MsgUseWrath`；`WrathUpdatePayload/WrathStartPayload/WrathKillEntry/WrathResultPayload`
+  - `client/chiikawa-pixel/scripts/ui/DragonWrathPanel.gd`：龍怒面板（左下角；怒氣條漸層藍→紫→紅；滿怒氣時按鈕閃爍；大招開始全螢幕紫紅閃光+頂部橫幅；大招結果彈出擊破數+獎勵）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`wrath_updated/wrath_started/wrath_result` 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 DragonWrathPanelScript preload + `_init_dragon_wrath_panel()`（左下角，z_index=9）
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：新增 `send_use_wrath()`
+  - 怒氣累積設計：每次射擊 +1；擊破目標 +2（基礎）+ multiplier×0.5（最多 +10）；高倍率目標讓怒氣累積更快，鼓勵玩家追求高價值目標
+  - 大招效果：全螢幕 30% 機率擊破所有目標；50ms 間隔連續擊破製造「掃場」視覺感；擊破 ≥5 個目標時廣播動態牆
+  - 冷卻機制：60 秒冷卻，防止連續釋放
+  - 全服廣播：大招開始和結果都廣播，讓全場感受到「有人釋放大招了」
+  - build/vet 全部通過（零錯誤零警告）
+
   - **規格缺口修復：** `spawnTarget` 整合天氣的 `RareChanceBonus` 和 `GoldFishBonus` — 天氣系統定義了稀有目標加成，但原本完全沒有傳入 `PickTargetDef`，現在正確整合
   - `server/internal/game/target/target.go`：`PickTargetDef` 新增 `rareBonus float64` 和 `goldFishBonus float64` 參數；整合天氣加成到 SpecialRatio/HighRatio；確保 BasicRatio 不低於 0.5
   - `server/internal/game/respin_handler.go`：更新 `PickTargetDef` 呼叫（新增 0.0, 0.0 參數）

@@ -218,6 +218,7 @@ func _ready() -> void:
 	_init_golden_time_panel()     # 黃金時間面板（DAY-125）
 	_init_rare_catch_panel()      # 稀有連擊面板（DAY-126）
 	_init_weather_surge_panel()   # 天氣湧現事件面板（DAY-127）
+	_init_dragon_wrath_panel()    # 龍怒蓄力大招面板（DAY-128）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2564,3 +2565,18 @@ func _init_weather_surge_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_weather_surge_panel = panel
+
+# ---- 龍怒蓄力大招面板（DAY-128）----
+
+const DragonWrathPanelScript = preload("res://scripts/ui/DragonWrathPanel.gd")
+var _dragon_wrath_panel: Control = null
+
+func _init_dragon_wrath_panel() -> void:
+	var panel = DragonWrathPanelScript.new()
+	panel.name = "DragonWrathPanel"
+	# 左下角，在特殊武器面板上方
+	panel.position = Vector2(8, 720 - 90)
+	panel.z_index = 9
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_dragon_wrath_panel = panel

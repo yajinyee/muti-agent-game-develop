@@ -79,6 +79,10 @@ type Player struct {
 
 	// 幸運捕獲系統（DAY-119）
 	LastLuckyCatchAt time.Time // 上次幸運捕獲時間（冷卻計時）
+
+	// 龍怒蓄力大招系統（DAY-128）
+	WrathCharge    int       // 當前怒氣值（0-100）
+	LastWrathAt    time.Time // 上次釋放大招時間（冷卻計時，60秒）
 }
 
 // NewPlayer 建立新玩家
@@ -556,3 +560,63 @@ func (p *Player) DeductCoins(amount int) (int, bool) {
 	p.Coins -= amount
 	return p.Coins, true
 }
+
+// ---- 龍怒蓄力大招系統（DAY-128）----
+
+// AddWrathCharge 增加怒氣值，回傳新的怒氣值和是否剛達到滿值
+func (p *Player) AddWrathCharge(amount int) (newCharge int, justFull bool) {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.WrathCharge >= WrathMaxCharge {
+		return p.WrathCharge, false
+	}
+	wasFull := p.WrathCharge >= WrathMaxCharge
+	p.WrathCharge += amount
+	if p.WrathCharge > WrathMaxCharge {
+		p.WrathCharge = WrathMaxCharge
+	}
+	justFull = !wasFull && p.WrathCharge >= WrathMaxCharge
+	return p.WrathCharge, justFull
+}
+
+// GetWrathCharge 取得當前怒氣值（thread-safe）
+func (p *Player) GetWrathCharge() int {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	return p.WrathCharge
+}
+
+// ConsumeWrath 消耗怒氣值（釋放大招），回傳是否成功
+func (p *Player) ConsumeWrath() bool {
+	p.mu.Lock()
+	defer p.mu.Unlock()
+	if p.WrathCharge < WrathMaxCharge {
+		return false
+	}
+	if !p.LastWrathAt.IsZero() && time.Since(p.LastWrathAt) < WrathCooldownDuration {
+		return false
+	}
+	p.WrathCharge = 0
+	p.LastWrathAt = time.Now()
+	return true
+}
+
+// GetWrathCooldownSecs 取得大招冷卻剩餘秒數（0 = 可用）
+func (p *Player) GetWrathCooldownSecs() int {
+	p.mu.RLock()
+	defer p.mu.RUnlock()
+	if p.LastWrathAt.IsZero() {
+		return 0
+	}
+	remaining := WrathCooldownDuration - time.Since(p.LastWrathAt)
+	if remaining <= 0 {
+		return 0
+	}
+	return int(remaining.Seconds())
+}
+
+// WrathMaxCharge 最大怒氣值（與 dragonwrath_handler.go 同步）
+const WrathMaxCharge = 100
+
+// WrathCooldownDuration 大招冷卻時間
+const WrathCooldownDuration = 60 * time.Second

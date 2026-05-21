@@ -338,6 +338,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendTreasureMapUpdate(pp)
 				// 發送黃金時間狀態（DAY-125）
 				g.handleGetGoldenTime(pp)
+				// 發送龍怒蓄力大招狀態（DAY-128）
+				g.sendWrathStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -614,6 +616,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 黃金時間系統（DAY-125）
 	case ws.MsgGetGoldenTime:
 		g.handleGetGoldenTime(p)
+	// 龍怒蓄力大招系統（DAY-128）
+	case ws.MsgUseWrath:
+		g.handleUseWrath(clientID)
 	}
 }
 
@@ -649,6 +654,8 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	g.notifyStatsShot(p, betCost)
 	// 多格式每日賽：記錄投注（DAY-111，投注競賽格式用）
 	go g.multiFormatMgr.RecordShot(p.ID, p.DisplayName, betCost)
+	// 龍怒蓄力大招：每次射擊累積怒氣（DAY-128）
+	go g.notifyWrathShot(p)
 	// 異常偵測：記錄攻擊（DAY-105）
 	if alert := g.AntiCheat.RecordAttack(p.ID, betCost); alert != nil {
 		log.Printf("[AntiCheat] Alert triggered for player %s: %s", p.ID, alert.Message)
@@ -815,6 +822,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if rareCatchMult > 1.0 {
 		finalReward = int(float64(finalReward) * rareCatchMult)
 	}
+	// 龍怒蓄力大招：擊破目標累積怒氣（DAY-128）
+	go g.notifyWrathKill(p, t.Multiplier)
 	rewardUnlocks := p.AddReward(finalReward)
 	killUnlocks := p.AddKill()
 
