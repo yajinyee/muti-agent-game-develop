@@ -3360,3 +3360,17 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **問題：** 從四武器（320px）升級到五武器（400px），MysteryBoxPanel 需要右移
 - **解法：** SpecialWeaponPanel 寬度 320→400，MysteryBoxPanel 位置 x=745→x=825
 - **教訓：** 每次擴展武器面板都要同步更新右側面板的 x 座標
+
+## 83. 炸彈蟹多波爆炸設計（DAY-143）
+- **業界依據：** royal-fishing.uk 2026「Worth 70x, explosive crustacean triggers multiple large-scale detonations. Each bomb creates expanding capture zones.」
+- **設計要點：** 3 波爆炸，每波半徑 150px，間隔 400ms；爆炸中心偏移製造擴散感
+- **RTP 平衡：** 連帶獎勵 × 0.50（比直接擊破低），防止 RTP 失控
+- **全服公告門檻：** ≥4 個目標（比鑽頭龍蝦的 ≥3 更嚴格，因為爆炸範圍更大）
+- **教訓：** 多波爆炸要有視覺差異（位置偏移），不能每波都在同一點
+
+## 84. 巨型章魚轉盤系統設計（DAY-144）
+- **業界依據：** JILI Mega Fishing「Mega Octopus Wheel – Defeat that giant octopus and enter the bonus wheel round where you have a chance to win massive guaranteed prizes up to 950x.」
+- **公平性設計：** 結果在 StartSession 時預先決定（加權隨機），玩家「停止」只是視覺互動，不影響結果（業界標準做法）
+- **轉盤格子：** 8格加權（50x×30/100x×25/150x×18/200x×12/300x×8/500x×4/750x×2/950x×1）
+- **命名衝突：** WheelSlotPayload 已存在（DAY-084 幸運轉盤），新的用 OctopusWheelSlotPayload
+- **教訓：** 新增 Payload 前先搜尋是否有同名結構，避免 redeclared 錯誤
