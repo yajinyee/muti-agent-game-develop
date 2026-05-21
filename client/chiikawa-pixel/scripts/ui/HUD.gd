@@ -227,6 +227,7 @@ func _ready() -> void:
 	_init_unlucky_bonus_panel()   # 失敗補償面板（DAY-135）
 	_init_speed_race_panel()      # 競速獵殺面板（DAY-136）
 	_init_bounty_panel()          # 全服目標懸賞面板（DAY-137）
+	_init_mult_storm_panel()      # 全服倍率風暴面板（DAY-138）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2733,3 +2734,19 @@ func _init_bounty_panel() -> void:
 	GameManager.bounty_claimed.connect(func(data): panel.on_bounty_claimed(data))
 	GameManager.bounty_killed.connect(func(data): panel.on_bounty_killed(data))
 	GameManager.bounty_expired.connect(func(data): panel.on_bounty_expired(data))
+
+# ---- 全服倍率風暴面板（DAY-138）----
+const MultStormPanelScript = preload("res://scripts/ui/MultStormPanel.gd")
+var _mult_storm_panel: Control = null
+
+func _init_mult_storm_panel() -> void:
+	var panel = MultStormPanelScript.new()
+	panel.name = "MultStormPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 81  # 在懸賞面板（80）之上
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_mult_storm_panel = panel
+
+	GameManager.mult_storm_started.connect(func(data): panel.on_storm_start(data))
+	GameManager.mult_storm_ended.connect(func(data): panel.on_storm_end(data))

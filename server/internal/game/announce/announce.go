@@ -36,6 +36,7 @@ const (
 	EventSpeedRaceWin   EventType = "speed_race_win"  // 競速獵殺第一名（DAY-136）
 	EventBountyPosted   EventType = "bounty_posted"   // 懸賞發布（DAY-137）
 	EventBountyClaimed  EventType = "bounty_claimed"  // 懸賞被領取（DAY-137）
+	EventMultStorm      EventType = "mult_storm"      // 倍率風暴觸發（DAY-138）
 )
 
 // Priority 公告優先級
@@ -391,6 +392,33 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = "#4CAF50"
 		priority = PriorityNormal
 		duration = 4000
+
+	case EventMultStorm:
+		tierName := "⚡ 倍率風暴"
+		tierIcon := "⚡"
+		multStr := "2"
+		durStr := "20"
+		if extra != nil {
+			if tn, ok := extra["tier_name"]; ok {
+				tierName = tn
+			}
+			if ti, ok := extra["tier_icon"]; ok {
+				tierIcon = ti
+			}
+			if ms, ok := extra["mult_boost"]; ok {
+				multStr = ms
+			}
+			if ds, ok := extra["duration"]; ok {
+				durStr = ds
+			}
+		}
+		title = tierIcon + " " + tierName + "！"
+		message = fmt.Sprintf("全場倍率 ×%s！持續 %s 秒！快速擊破！", multStr, durStr)
+		icon = tierIcon
+		color = "#FF69B4"
+		priority = PriorityHigh
+		duration = 6000
+		_ = tierName // suppress unused warning
 
 	default:
 		title = "📢 公告"

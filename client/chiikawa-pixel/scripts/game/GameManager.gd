@@ -170,6 +170,8 @@ signal bounty_posted(bounty_data: Dictionary)          # 懸賞發布廣播（DA
 signal bounty_claimed(claim_data: Dictionary)          # 懸賞個人領取通知（DAY-137）
 signal bounty_killed(kill_data: Dictionary)            # 懸賞目標擊破廣播（DAY-137）
 signal bounty_expired(expire_data: Dictionary)         # 懸賞過期通知（DAY-137）
+signal mult_storm_started(storm_data: Dictionary)      # 倍率風暴開始（DAY-138）
+signal mult_storm_ended(storm_data: Dictionary)        # 倍率風暴結束（DAY-138）
 signal mystery_box_updated(box_data: Dictionary)       # 神秘寶箱狀態更新（DAY-090）
 signal mystery_box_dropped(drop_data: Dictionary)      # 神秘寶箱掉落通知（DAY-090）
 signal mystery_box_opened(open_data: Dictionary)       # 神秘寶箱開箱結果（DAY-090）
@@ -440,6 +442,10 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_bounty_killed(payload)
 		"bounty_expired":
 			_handle_bounty_expired(payload)
+		"mult_storm_start":
+			_handle_mult_storm_start(payload)
+		"mult_storm_end":
+			_handle_mult_storm_end(payload)
 		"mystery_box_drop":
 			_handle_mystery_box_drop(payload)
 		"mystery_box_update":
@@ -1296,3 +1302,19 @@ func post_bounty(target_instance_id: String, amount: int) -> void:
 ## 查詢懸賞列表（DAY-137）
 func request_bounties() -> void:
 	NetworkManager.send_message("get_bounties", {})
+
+# ---- 全服倍率風暴系統（DAY-138）----
+
+## 處理倍率風暴開始廣播（DAY-138）
+func _handle_mult_storm_start(payload: Dictionary) -> void:
+	var tier_name: String = payload.get("tier_name", "⚡ 倍率風暴")
+	var mult_boost: float = payload.get("mult_boost", 2.0)
+	print("[GameManager] Mult Storm started: %s ×%.0f" % [tier_name, mult_boost])
+	emit_signal("mult_storm_started", payload)
+	if AudioManager != null:
+		AudioManager.play_sfx("bonus_ready")
+
+## 處理倍率風暴結束廣播（DAY-138）
+func _handle_mult_storm_end(payload: Dictionary) -> void:
+	print("[GameManager] Mult Storm ended")
+	emit_signal("mult_storm_ended", payload)

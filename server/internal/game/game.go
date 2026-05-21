@@ -59,6 +59,7 @@ import (
 	"digital-twin/server/internal/game/unlucky"
 	"digital-twin/server/internal/game/speedrace"
 	"digital-twin/server/internal/game/bounty"
+	"digital-twin/server/internal/game/multstorm"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -121,6 +122,7 @@ type Game struct {
 	UnluckyBonus   *unlucky.Manager        // 失敗補償系統管理器（DAY-135）
 	SpeedRace      *speedrace.Manager      // 競速獵殺系統管理器（DAY-136）
 	Bounty         *bounty.Manager         // 全服目標懸賞系統管理器（DAY-137）
+	MultStorm      *multstorm.Manager      // 全服倍率風暴系統管理器（DAY-138）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -226,6 +228,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		UnluckyBonus:       unlucky.NewDefault(),
 		SpeedRace:          speedrace.NewDefault(),
 		Bounty:             bounty.NewDefault(),
+		MultStorm:          multstorm.NewDefault(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -378,6 +381,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendSpeedRaceStatus(pp)
 				// 發送懸賞列表（DAY-137）
 				g.sendBountyStatus(pp)
+				// 發送倍率風暴狀態（DAY-138）
+				g.sendMultStormStatus(pp.ID)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -902,6 +907,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if speedRaceMult > 1.0 {
 		finalReward = int(float64(finalReward) * speedRaceMult)
 	}
+	// 套用倍率風暴加成（DAY-138）
+	stormMult := g.getMultStormBoost()
+	if stormMult > 1.0 {
+		finalReward = int(float64(finalReward) * stormMult)
+	}
 	// 懸賞領取：擊破懸賞目標獲得額外金幣（DAY-137）
 	go g.notifyBountyKill(p, t.InstanceID)
 	// 龍怒蓄力大招：擊破目標累積怒氣（DAY-128）
@@ -1414,6 +1424,10 @@ func (g *Game) updateNormalPlay() {
 	go g.tickSpeedRace()
 	// 懸賞過期檢查（每次 update，DAY-137）
 	go g.tickBountyExpiry()
+	// 倍率風暴 tick（每秒，DAY-138）
+	if now.Sub(g.lastRareCatchTickAt) >= 1*time.Second {
+		go g.tickMultStorm()
+	}
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }

@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-137 全服目標懸賞系統）
+## 最後更新：2026-05-21（DAY-138 全服倍率風暴系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -40,6 +40,21 @@
   - 退款機制：懸賞超時或目標消失時自動退款，讓玩家放心下懸賞
   - 多筆累加：同一目標可有多個玩家下懸賞，擊破者獲得全部懸賞金額
   - build/vet 全部通過（零錯誤零警告）；16/16 bounty 測試通過
+
+- **DAY-138 更新（自主觸發）：** 全服倍率風暴系統（Multiplier Storm System）✅
+  - **業界依據：** findingdulcinea.com 2026「admin events provide massive server-wide bonuses that can multiply your luck by thousands」— Fisch 2026 最新機制；Royal Fishing dual-ring roulette 確認倍率疊加是核心機制
+  - `server/internal/game/multstorm/multstorm.go`：倍率風暴管理器；3個等級（⚡閃電風暴×2.0/20s/0.8%、🌊海嘯風暴×3.0/15s/0.3%、🌈彩虹風暴×5.0/10s/0.1%）；TryTrigger（每秒機率觸發）；ForceStart（Prototype 展示用）；CheckExpiry（過期檢查）；GetMultBoost/IsActive/GetSnapshot
+  - `server/internal/game/multstorm/multstorm_test.go`：15 個單元測試全部通過（New/GetMultBoost_NoStorm/ForceStart_Basic/ForceStart_TierIndex/ForceStart_InvalidIndex/GetMultBoost_Active/IsActive/CheckExpiry_NotExpired/CheckExpiry_Expired/CheckExpiry_NoSession/GetSnapshot_NoStorm/GetSnapshot_Active/Cooldown/StormTiers_Count/StormTiers_MultBoosts）
+  - `server/internal/game/multstorm_handler.go`：tickMultStorm（每秒觸發嘗試+過期檢查+全服廣播）；sendMultStormStatus（登入時發送狀態）；getMultStormBoost（供 handleKill 使用）
+  - `server/internal/ws/protocol.go`：新增 MsgMultStormStart/MsgMultStormEnd；MultStormStartPayload/MultStormEndPayload
+  - `server/internal/game/announce/announce.go`：新增 EventMultStorm；buildContent 加入風暴公告（高優先，6秒）
+  - `server/internal/game/game.go`：Game struct 加入 MultStorm *multstorm.Manager；NewGameWithStore 初始化；AddPlayer 發送風暴狀態；handleKill 整合風暴倍率（在競速倍率之後）；updateNormalPlay 加入 tickMultStorm（每秒）
+  - `client/chiikawa-pixel/scripts/ui/MultStormPanel.gd`：倍率風暴面板（頂部橫幅滑入；左側倍率顯示；倒數計時；最後5秒紅色閃爍；全螢幕閃光依等級強度；彩虹風暴雙閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：2個訊號（mult_storm_started/mult_storm_ended）+ 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 MultStormPanelScript（z_index=81）
+  - 風暴設計：每秒機率觸發（閃電0.8%/海嘯0.3%/彩虹0.1%）；180秒冷卻防止頻繁觸發；風暴期間所有擊破獎勵疊加倍率
+  - 倍率疊加：風暴倍率在競速倍率之後套用，最大疊加：黃金時間×3.0 + 稀有連擊×15.0 + 競速×3.0 + 彩虹風暴×5.0 = 理論最大 675x
+  - build/vet 全部通過（零錯誤零警告）；15/15 multstorm 測試通過
 - **DAY-135 更新（自主觸發）：** 失敗補償系統（Unlucky Bonus System）✅
   - **業界依據：** Funrize 2026 的「Unlucky Bonus」— 連續花費超過一定金額但獲得低回報時，自動給予補償獎勵，防止玩家因為「運氣太差」而離開，是 2026 年業界最新的留存機制
   - `server/internal/game/unlucky/unlucky.go`：失敗補償管理器；UnluckyConfig（TrackingShots=30/SpendThreshold=3.0/MinSpend=200/CooldownSecs=120/BaseRewardMult=0.3/MaxRewardMult=0.5/MinReward=100）；環形緩衝追蹤最近 30 次射擊；RecordShot（記錄花費/回報，觸發判斷，補償計算）；GetSnapshot（進度快照）；RemovePlayer

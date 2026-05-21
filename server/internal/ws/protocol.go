@@ -342,6 +342,10 @@ const (
 	MsgBountyList    MessageType = "bounty_list"    // 懸賞列表回應（Server→Client，個人）
 	MsgBountyError   MessageType = "bounty_error"   // 懸賞操作失敗（Server→Client，個人）
 
+	// 全服倍率風暴系統（DAY-138）
+	MsgMultStormStart MessageType = "mult_storm_start" // 風暴開始廣播（Server→Client，全服）
+	MsgMultStormEnd   MessageType = "mult_storm_end"   // 風暴結束廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2807,4 +2811,21 @@ type BountyListPayload struct {
 type BountyErrorPayload struct {
 	Code    string `json:"code"`
 	Message string `json:"message"`
+}
+
+// ---- 全服倍率風暴系統 Payloads（DAY-138）----
+
+// MultStormStartPayload 風暴開始廣播（Server → Client，全服）
+type MultStormStartPayload struct {
+	TierName    string  `json:"tier_name"`    // 風暴等級名稱
+	TierIcon    string  `json:"tier_icon"`    // 圖示
+	TierColor   string  `json:"tier_color"`   // 顏色（hex）
+	MultBoost   float64 `json:"mult_boost"`   // 倍率加成（2.0/3.0/5.0）
+	SecondsLeft float64 `json:"seconds_left"` // 持續秒數
+	Message     string  `json:"message"`      // 顯示訊息
+}
+
+// MultStormEndPayload 風暴結束廣播（Server → Client，全服）
+type MultStormEndPayload struct {
+	Message string `json:"message"` // 顯示訊息
 }
