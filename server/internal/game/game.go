@@ -21,6 +21,7 @@ import (
 	"digital-twin/server/internal/game/dailyboss"
 	"digital-twin/server/internal/game/dm"
 	"digital-twin/server/internal/game/fragment"
+	"digital-twin/server/internal/game/flashchallenge"
 	"digital-twin/server/internal/game/mysterybox"
 	"digital-twin/server/internal/game/respin"
 	"digital-twin/server/internal/game/treasuremap"
@@ -99,6 +100,7 @@ type Game struct {
 	Fragment      *fragment.Manager      // 碎片收集大獎管理器（DAY-116）
 	RespinMgr     *respin.Manager        // Rapid Respin 管理器（DAY-121）
 	TreasureMap   *treasuremap.Manager   // 寶藏地圖管理器（DAY-122）
+	FlashChallenge *flashchallenge.Manager // 閃電挑戰管理器（DAY-123）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -184,6 +186,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Fragment:           fragment.New(),
 		RespinMgr:          respin.New(),
 		TreasureMap:        treasuremap.New(),
+		FlashChallenge:     flashchallenge.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -379,6 +382,7 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.RespinMgr.RemovePlayer(playerID)
 		// 清理寶藏地圖狀態（DAY-122）
 		g.TreasureMap.RemovePlayer(playerID)
+		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
 }
 
@@ -585,6 +589,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 寶藏地圖系統（DAY-122）
 	case ws.MsgGetTreasureMap:
 		g.handleGetTreasureMap(p)
+	// 閃電挑戰系統（DAY-123）
+	case ws.MsgGetFlashChallenge:
+		g.handleGetFlashChallenge(p)
 	}
 }
 
@@ -981,6 +988,12 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	go g.notifyRespinKill(p, finalReward)
 	// 寶藏地圖：記錄擊破（DAY-122）
 	go g.notifyTreasureMapKill(p, t.DefID)
+	// 閃電挑戰：記錄擊破（DAY-123）
+	streak := 0
+	if p.Streak != nil {
+		streak = p.Streak.GetSnapshot().Current
+	}
+	go g.notifyFlashChallengeKill(p, t.DefID, float64(t.Multiplier), streak)
 }
 
 // handleLock 處理鎖定
@@ -1243,6 +1256,8 @@ func (g *Game) updateNormalPlay() {
 	if shouldTickRaid {
 		go g.tickRaidUpdate()
 	}
+	// 閃電挑戰 tick（每次 update，DAY-123）
+	go g.tickFlashChallenge()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }

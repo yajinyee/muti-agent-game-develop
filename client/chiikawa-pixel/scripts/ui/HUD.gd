@@ -33,6 +33,7 @@ const FragmentPanelScript = preload("res://scripts/ui/FragmentPanel.gd")
 const LuckyCatchPanelScript = preload("res://scripts/ui/LuckyCatchPanel.gd")
 const RapidRespinPanelScript = preload("res://scripts/ui/RapidRespinPanel.gd")
 const TreasureMapPanelScript = preload("res://scripts/ui/TreasureMapPanel.gd")
+const FlashChallengePanelScript = preload("res://scripts/ui/FlashChallengePanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -212,6 +213,7 @@ func _ready() -> void:
 	_init_lucky_catch_panel()     # 幸運捕獲通知面板（DAY-119）
 	_init_rapid_respin_panel()    # Rapid Respin 通知面板（DAY-121）
 	_init_treasure_map_panel()    # 寶藏地圖面板（DAY-122）
+	_init_flash_challenge_panel() # 閃電挑戰面板（DAY-123）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2368,3 +2370,43 @@ func _init_treasure_map_panel() -> void:
 func show_treasure_map_panel() -> void:
 	if is_instance_valid(_treasure_map_panel_node):
 		_treasure_map_panel_node.show_panel()
+
+# ---- 閃電挑戰系統（DAY-123）----
+var _flash_challenge_panel_node = null
+
+func _init_flash_challenge_panel() -> void:
+	var panel = FlashChallengePanelScript.new()
+	panel.name = "FlashChallengePanel"
+	panel.z_index = 73
+	# 右側中間位置
+	panel.position = Vector2(1280 - 330, 200)
+	add_child(panel)
+	_flash_challenge_panel_node = panel
+	
+	# 連接 GameManager 訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("flash_challenge_started"):
+			gm.flash_challenge_started.connect(_on_flash_challenge_started)
+		if gm.has_signal("flash_challenge_updated"):
+			gm.flash_challenge_updated.connect(_on_flash_challenge_updated)
+		if gm.has_signal("flash_challenge_ended"):
+			gm.flash_challenge_ended.connect(_on_flash_challenge_ended)
+		if gm.has_signal("flash_challenge_reward"):
+			gm.flash_challenge_reward.connect(_on_flash_challenge_reward)
+
+func _on_flash_challenge_started(data: Dictionary) -> void:
+	if is_instance_valid(_flash_challenge_panel_node):
+		_flash_challenge_panel_node.on_flash_challenge_start(data)
+
+func _on_flash_challenge_updated(data: Dictionary) -> void:
+	if is_instance_valid(_flash_challenge_panel_node):
+		_flash_challenge_panel_node.on_flash_challenge_update(data)
+
+func _on_flash_challenge_ended(data: Dictionary) -> void:
+	if is_instance_valid(_flash_challenge_panel_node):
+		_flash_challenge_panel_node.on_flash_challenge_end(data)
+
+func _on_flash_challenge_reward(data: Dictionary) -> void:
+	if is_instance_valid(_flash_challenge_panel_node):
+		_flash_challenge_panel_node.on_flash_challenge_reward(data)

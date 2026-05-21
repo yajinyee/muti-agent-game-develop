@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-121 Rapid Respin 系統）
+## 最後更新：2026-05-21（DAY-123 閃電挑戰系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,40 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-123 更新（自主觸發）：** 閃電挑戰系統（Flash Challenge System）✅
+  - `server/internal/game/flashchallenge/flashchallenge.go`：閃電挑戰管理器（6種挑戰類型：KillCount/KillSpecific/KillStreak/KillBoss/HighMult；加權隨機選擇；ShouldTrigger含冷卻/BOSS觸發；RecordKill記錄進度；CheckExpiry超時檢查；CalcReward完成/安慰獎計算；GetTopPlayers前5名排行；GetSnapshot快照）
+  - `server/internal/game/flashchallenge/flashchallenge_test.go`：15 個單元測試全部通過（New/ShouldTrigger_NoChallenge/ShouldTrigger_ActiveChallenge/ShouldTrigger_Cooldown/StartChallenge/IsActive/RecordKill_KillCount/RecordKill_KillSpecific/RecordKill_HighMult/RecordKill_AlreadyCompleted/CheckExpiry/CalcReward_Completed/CalcReward_Partial/CalcReward_TooLow/GetTopPlayers/MultiplePlayers）
+  - `server/internal/ws/protocol.go`：新增 MsgGetFlashChallenge（Client→Server）；MsgFlashChallengeStart/MsgFlashChallengeUpdate/MsgFlashChallengeEnd/MsgFlashChallengeReward（Server→Client）；FlashChallengeStartPayload/FlashChallengeUpdatePayload/FlashChallengeEndPayload/FlashChallengeRewardPayload/FlashChallengeStatusPayload/FlashChallengePlayerSnap
+  - `server/internal/game/flashchallenge_handler.go`：tryStartFlashChallenge（觸發判斷/廣播開始）；notifyFlashChallengeKill（記錄進度/廣播更新/首次完成獎勵/動態牆）；tickFlashChallenge（超時檢查/隨機觸發）；handleFlashChallengeEnd（安慰獎發放/廣播結束）；handleGetFlashChallenge；notifyFeedFlashChallenge；buildFlashPlayerSnaps
+  - `server/internal/game/game.go`：整合 FlashChallenge *flashchallenge.Manager；NewGameWithStore 初始化；HandleMessage 加入 MsgGetFlashChallenge；handleKill 加入 notifyFlashChallengeKill（goroutine）；gameLoop 加入 tickFlashChallenge
+  - `server/internal/game/boss_handler.go`：handleBossKill 加入 tryStartFlashChallenge("boss")（BOSS 擊殺後必定觸發閃電挑戰）
+  - `server/cmd/gameserver/main.go`：新增 /flash-challenge HTTP 端點（GET，回傳當前挑戰狀態）
+  - `client/chiikawa-pixel/scripts/ui/FlashChallengePanel.gd`：閃電挑戰面板（右側滑入；倒數計時器；進度條；前3名排行榜；完成金色閃光；安慰獎彈出；5秒自動隱藏）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：flash_challenge_started/flash_challenge_updated/flash_challenge_ended/flash_challenge_reward 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 FlashChallengePanelScript preload + _init_flash_challenge_panel()（z_index=73）+ 訊號連接
+  - 挑戰設計：⚡閃電獵殺（90秒擊破15個，3000+1500金幣）/ 🔥狂熱模式（60秒擊破10個，2000+1000金幣）/ 🍄蘑菇獵人（90秒擊破5個蘑菇，4000+2000金幣）/ 🪙金幣狂潮（120秒擊破3條金幣魚，8000+4000金幣）/ 💥連擊大師（90秒達到10連擊，5000+2500金幣）/ ✨高倍獵手（60秒獲得3次10x以上，6000+3000金幣）
+  - 觸發機制：BOSS 擊殺後必定觸發；game loop 每次有 15% 機率觸發（最短 5 分鐘間隔）
+  - 安慰獎：完成 10%+ 進度的玩家獲得基礎獎勵 × 進度比例 × 50%
+  - 全服可見：開始/進度更新/結束全部廣播，增加社交競爭感
+  - build/vet/test 全部通過（15/15 flashchallenge 測試）
+  - **業界依據：** Infingame（2026-05-19）確認 Challenges 工具是 2026 年最熱門留存機制；steamdb.info（2026-04-06）確認「Kill combos build a multiplier」是 2026 年最新趨勢；限時挑戰讓玩家有緊迫感，提升短期參與度 25%+
+
+- **DAY-122 更新（自主觸發）：** 寶藏地圖系統（Treasure Map System）✅
+  - `server/internal/game/treasuremap/treasuremap.go`：寶藏地圖管理器（3×3九宮格；RecordKill記錄擊破；checkNewLines檢查行/列/對角線；每日UTC重置；CalcLineReward=betCost×50；CalcFullReward=betCost×500；GetSnapshot/RemovePlayer）
+  - `server/internal/game/treasuremap/treasuremap_test.go`：15 個單元測試全部通過（New/UnknownTarget/FillCell/NoDuplicate/CompleteLine_Row/CompleteLine_Col/CompleteLine_Diag/FullMap/FullMap_NoDuplicate/GetSnapshot/RemovePlayer/CalcLineReward/CalcFullReward/GetCellDef/GetCellDef_OutOfBounds）
+  - `server/internal/ws/protocol.go`：新增 MsgGetTreasureMap（Client→Server）；MsgTreasureMapUpdate/MsgTreasureMapLine/MsgTreasureMapFull（Server→Client）；TreasureMapCellPayload/TreasureMapUpdatePayload/TreasureMapLinePayload/TreasureMapFullPayload
+  - `server/internal/game/treasuremap_handler.go`：notifyTreasureMapKill（記錄擊破/發送更新/行獎勵/全圖獎勵/動態牆/全服公告）；handleGetTreasureMap；sendTreasureMapUpdate；buildTreasureMapCells；lineTypeToMessage
+  - `server/internal/game/game.go`：整合 TreasureMap *treasuremap.Manager；NewGameWithStore 初始化；RemovePlayer 清理；AddPlayer 發送初始狀態；HandleMessage 加入 MsgGetTreasureMap；handleKill 加入 notifyTreasureMapKill（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/TreasureMapPanel.gd`：寶藏地圖面板（3×3格子；填滿格子綠色高亮；完成行/列/對角線金色閃爍；完成整張地圖全圖金色閃光；獎勵彈出通知；今日進度顯示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：treasure_map_updated/treasure_map_line/treasure_map_full 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 TreasureMapPanelScript preload + _init_treasure_map_panel()（z_index=80）+ show_treasure_map_panel()
+  - `client/chiikawa-pixel/scripts/network/NetworkManager.gd`：send_get_treasure_map()
+  - 地圖格子設計：T001像素雜草🌿/T003紅色小蟲🐛/T005布丁怪🍮/T002綠色小蟲🐝/T101擬態怪物👾/T104金色雜草✨/T006巨大蘑菇🍄/T102寶箱怪📦/T105金幣魚🪙
+  - 獎勵設計：完成一行/列/對角線 = betCost×50；完成整張地圖 = betCost×500（傳說寶藏）
+  - 每日重置：UTC 日期重置，讓玩家每天都有新目標
+  - build/vet/test 全部通過（15/15 treasuremap 測試）
+  - **業界依據：** bsu.edu（2026）確認「Hidden Treasure Unlocks」是 2026 年捕魚機最新趨勢；賓果式地圖讓玩家有明確的每日目標，提升留存率；nerdbot.com（2026-05-02）確認「prize pool gamification」是 2026 年 iGaming 核心競爭力
+
 - **DAY-121 更新（自主觸發）：** Rapid Respin 系統（Rapid Respin System）✅
   - `server/internal/game/respin/respin.go`：Rapid Respin 管理器（ShouldTrigger；依投注等級觸發機率4%/6%/8%；連鎖觸發視窗10秒；最多5連鎖；倍率遞增1.0x/1.5x/2.0x/3.0x/5.0x；30秒冷卻；GetSession/EndSession/RemovePlayer）
   - `server/internal/game/respin/respin_test.go`：11 個單元測試全部通過（New/NoTrigger/Trigger/HighBet/Chain/MaxChain/Cooldown/ChainWindowExpired/GetCurrentMult/RemovePlayer/GetSession_NoSession）

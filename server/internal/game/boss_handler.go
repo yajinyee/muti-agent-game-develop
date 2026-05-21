@@ -239,6 +239,8 @@ func (g *Game) handleBossKill(p *player.Player, t *target.Target, result *combat
 	go g.notifyFeedBossKill(p, result.Reward)
 	// 全服公告：BOSS 擊殺（DAY-097）
 	g.announceBossKill(p.DisplayName, "BOSS", result.Reward)
+	// 閃電挑戰：BOSS 擊殺後觸發（DAY-123）
+	go g.tryStartFlashChallenge("boss")
 
 	g.transitionState(state.StateBossResult)
 	g.safeAfterFunc(3*time.Second, func() {

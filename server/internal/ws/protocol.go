@@ -264,6 +264,12 @@ const (
 	MsgTreasureMapFull   MessageType = "treasure_map_full"   // 完成整張地圖通知（Server→Client）
 	// 寶藏地圖系統（DAY-122）
 	MsgGetTreasureMap   MessageType = "get_treasure_map"   // 查詢寶藏地圖狀態（Client→Server）
+	// 閃電挑戰系統（DAY-123）
+	MsgGetFlashChallenge MessageType = "get_flash_challenge" // 查詢閃電挑戰狀態（Client→Server）
+	MsgFlashChallengeStart  MessageType = "flash_challenge_start"  // 閃電挑戰開始廣播（Server→Client）
+	MsgFlashChallengeUpdate MessageType = "flash_challenge_update" // 閃電挑戰進度更新（Server→Client）
+	MsgFlashChallengeEnd    MessageType = "flash_challenge_end"    // 閃電挑戰結束廣播（Server→Client）
+	MsgFlashChallengeReward MessageType = "flash_challenge_reward" // 閃電挑戰獎勵通知（Server→Client，個人）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -2132,4 +2138,80 @@ type TreasureMapFullPayload struct {
 	Reward     int    `json:"reward"`      // 傳說寶藏獎勵金幣
 	NewBalance int    `json:"new_balance"` // 新餘額
 	Message    string `json:"message"`     // 顯示訊息
+}
+
+// ---- 閃電挑戰系統（DAY-123）----
+
+// FlashChallengePlayerSnap 玩家進度快照
+type FlashChallengePlayerSnap struct {
+	PlayerID   string `json:"player_id"`
+	PlayerName string `json:"player_name"`
+	Progress   int    `json:"progress"`
+	Completed  bool   `json:"completed"`
+}
+
+// FlashChallengeStartPayload 閃電挑戰開始廣播（Server → Client）（DAY-123）
+type FlashChallengeStartPayload struct {
+	Type        string                      `json:"type"`
+	Title       string                      `json:"title"`
+	Description string                      `json:"description"`
+	Icon        string                      `json:"icon"`
+	Color       string                      `json:"color"`
+	Target      int                         `json:"target"`
+	TargetDefID string                      `json:"target_def_id"`
+	Duration    int                         `json:"duration"`
+	TimeLeft    int                         `json:"time_left"`
+	BaseReward  int                         `json:"base_reward"`
+	BonusReward int                         `json:"bonus_reward"`
+	TopPlayers  []FlashChallengePlayerSnap  `json:"top_players"`
+}
+
+// FlashChallengeUpdatePayload 閃電挑戰進度更新（Server → Client）（DAY-123）
+type FlashChallengeUpdatePayload struct {
+	PlayerID   string                     `json:"player_id"`
+	PlayerName string                     `json:"player_name"`
+	Progress   int                        `json:"progress"`
+	Target     int                        `json:"target"`
+	Completed  bool                       `json:"completed"`
+	TimeLeft   int                        `json:"time_left"`
+	TopPlayers []FlashChallengePlayerSnap `json:"top_players"`
+}
+
+// FlashChallengeEndPayload 閃電挑戰結束廣播（Server → Client）（DAY-123）
+type FlashChallengeEndPayload struct {
+	Success    bool                       `json:"success"`    // 是否有人完成
+	Title      string                     `json:"title"`
+	Icon       string                     `json:"icon"`
+	TopPlayers []FlashChallengePlayerSnap `json:"top_players"`
+	Message    string                     `json:"message"`
+}
+
+// FlashChallengeRewardPayload 閃電挑戰獎勵通知（Server → Client，個人）（DAY-123）
+type FlashChallengeRewardPayload struct {
+	PlayerID   string `json:"player_id"`
+	Progress   int    `json:"progress"`
+	Target     int    `json:"target"`
+	Completed  bool   `json:"completed"`
+	Reward     int    `json:"reward"`
+	NewBalance int    `json:"new_balance"`
+	Message    string `json:"message"`
+}
+
+// FlashChallengeStatusPayload 閃電挑戰狀態（Server → Client）（DAY-123）
+type FlashChallengeStatusPayload struct {
+	Active      bool                       `json:"active"`
+	Type        string                     `json:"type"`
+	Title       string                     `json:"title"`
+	Description string                     `json:"description"`
+	Icon        string                     `json:"icon"`
+	Color       string                     `json:"color"`
+	Target      int                        `json:"target"`
+	TargetDefID string                     `json:"target_def_id"`
+	Duration    int                        `json:"duration"`
+	TimeLeft    int                        `json:"time_left"`
+	BaseReward  int                        `json:"base_reward"`
+	BonusReward int                        `json:"bonus_reward"`
+	MyProgress  int                        `json:"my_progress"`
+	MyCompleted bool                       `json:"my_completed"`
+	TopPlayers  []FlashChallengePlayerSnap `json:"top_players"`
 }

@@ -1171,6 +1171,33 @@ func main() {
 		}
 	})
 
+	// 閃電挑戰端點（DAY-123）
+	// GET /flash-challenge — 取得當前閃電挑戰狀態
+	mux.HandleFunc("/flash-challenge", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.FlashChallenge.GetSnapshot()
+		if snap == nil {
+			json.NewEncoder(w).Encode(map[string]interface{}{"active": false})
+			return
+		}
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"active":       snap.State == "active",
+			"type":         snap.Type,
+			"title":        snap.Title,
+			"description":  snap.Description,
+			"icon":         snap.Icon,
+			"target":       snap.Target,
+			"duration":     snap.Duration,
+			"time_left":    snap.TimeLeft,
+			"base_reward":  snap.BaseReward,
+			"bonus_reward": snap.BonusReward,
+			"top_players":  snap.TopPlayers,
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	srv := &http.Server{
 		Addr:         ":" + cfg.Port,
 		Handler:      mux,
