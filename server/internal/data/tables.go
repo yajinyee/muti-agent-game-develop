@@ -145,6 +145,11 @@ var Targets = map[string]*TargetDef{
 	// 比 T103 閃電鰻（一次性 5 跳/200px/50%）更強，是升級版連鎖電擊
 	// 設計：中高倍率（40-60x）+ 中等 HP（90）+ 中等生成權重（4）= 稀有但連鎖效果強的特殊目標
 	"T118": {ID: "T118", Name: "皇家閃電鰻", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 60, HP: 90, SpawnWeight: 4, Speed: 50, Lifetime: 16, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "royal_chain_lightning"},
+	// T119 黃金海龜（DAY-159）— 業界依據：Ocean King 系列「Time Stop」機制
+	// 擊破後觸發「全場時間停止」8 秒，所有目標物暫停移動，玩家可以輕鬆瞄準
+	// 是「輔助型特殊目標」，不直接給高獎勵，但讓玩家在 8 秒內大量擊破其他目標
+	// 設計：中等倍率（30-50x）+ 中等 HP（60）+ 中等生成權重（5）= 常見但有輔助效果的特殊目標
+	"T119": {ID: "T119", Name: "黃金海龜", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 60, SpawnWeight: 5, Speed: 20, Lifetime: 15, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "golden_turtle"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

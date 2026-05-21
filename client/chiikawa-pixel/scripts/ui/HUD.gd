@@ -243,6 +243,7 @@ func _ready() -> void:
 	_init_vampire_panel()             # 吸血鬼成長倍率面板（DAY-152）
 	_init_crystal_dragon_panel()      # 水晶龍收集大獎面板（DAY-153）
 	_init_royal_chain_lightning_panel() # 皇家閃電鰻持續連鎖電擊面板（DAY-156）
+	_init_golden_turtle_panel()       # 黃金海龜時間停止面板（DAY-159）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3160,3 +3161,19 @@ func _init_royal_chain_lightning_panel() -> void:
 	if panel.has_method("setup"):
 		panel.setup(_pixel_font)
 	_royal_chain_lightning_panel = panel
+
+# ---- 黃金海龜時間停止面板（DAY-159）----
+
+const GoldenTurtlePanelScript = preload("res://scripts/ui/GoldenTurtlePanel.gd")
+var _golden_turtle_panel: Control = null
+
+func _init_golden_turtle_panel() -> void:
+	var panel = GoldenTurtlePanelScript.new()
+	panel.name = "GoldenTurtlePanel"
+	panel.z_index = 82  # 在 RoyalChainLightningPanel(83) 下方
+	panel.position = Vector2(640, 360)  # 畫面中心（面板內部用相對座標）
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	if panel.has_method("setup"):
+		panel.setup(_pixel_font)
+	_golden_turtle_panel = panel

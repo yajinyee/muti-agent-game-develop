@@ -195,6 +195,7 @@ const (
 	MsgDragonWrathResult    MessageType = "dragon_wrath_result"    // 龍怒流星雨結果（DAY-154）
 	MsgTorpedoResult        MessageType = "torpedo_result"         // 魚雷爆炸結果（DAY-155）
 	MsgRailgunResult        MessageType = "railgun_result"         // 軌道炮穿透結果（DAY-157）
+	MsgGoldenTurtleTimeStop MessageType = "golden_turtle_time_stop" // 黃金海龜時間停止（DAY-159）
 	MsgRoyalChainLightning  MessageType = "royal_chain_lightning"  // 皇家閃電鰻持續連鎖電擊（DAY-156）
 	// 神秘寶箱系統（DAY-090）
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
@@ -3057,6 +3058,18 @@ type RailgunResultPayload struct {
 	TotalReward int                `json:"total_reward"` // 總獎勵（result 時）
 	NewBalance  int                `json:"new_balance"`  // 結果後餘額（result 時，僅射擊者）
 	Cost        int                `json:"cost"`         // 軌道炮費用（15x betLevel）
+}
+
+// GoldenTurtleTimeStopPayload 黃金海龜時間停止廣播（Server → Client，DAY-159）
+// Phase: "time_stop_start" → "time_stop_end"
+type GoldenTurtleTimeStopPayload struct {
+	TriggerID    string  `json:"trigger_id"`    // 觸發的 T119 InstanceID
+	TriggerX     float64 `json:"trigger_x"`     // 觸發位置 X
+	TriggerY     float64 `json:"trigger_y"`     // 觸發位置 Y
+	KillerID     string  `json:"killer_id"`     // 擊破玩家 ID
+	KillerName   string  `json:"killer_name"`   // 擊破玩家名稱
+	Phase        string  `json:"phase"`         // 當前階段
+	DurationSecs float64 `json:"duration_secs"` // 停止時間（秒）
 }
 
 // RoyalChainLightningEntry 皇家閃電鰻連鎖電擊的目標條目（DAY-156）

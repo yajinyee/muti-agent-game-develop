@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-158 座頭鯨+傳說龍覺醒 BOSS 系統）
+## 最後更新：2026-05-22（DAY-159 黃金海龜時間停止系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,19 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-159 更新（自主觸發）：** 黃金海龜時間停止系統（Golden Sea Turtle Time Stop System）✅
+  - **業界依據：** Ocean King 系列「Time Stop」機制 — 擊破特殊目標後觸發全場時間停止，所有目標物暫停移動，玩家可以輕鬆瞄準並大量擊破，是業界經典的「輔助型特殊目標」機制
+  - `server/internal/data/tables.go`：新增 T119 黃金海龜（30-50x/HP60/SpawnWeight5/golden_turtle 行為）
+  - `server/internal/game/golden_turtle_handler.go`：goldenTurtleManager（isActive/cooldown 管理）；isGoldenTurtle 判斷；tryGoldenTurtleTimeStop（觸發時間停止/全服廣播/全服公告/8秒後廣播結束）；IsTimeStopActive（供其他系統查詢）
+  - `server/internal/ws/protocol.go`：新增 MsgGoldenTurtleTimeStop；GoldenTurtleTimeStopPayload（兩階段：time_stop_start/time_stop_end）
+  - `server/internal/game/game.go`：Game struct 加入 GoldenTurtle *goldenTurtleManager；NewGameWithStore 初始化；handleKill 加入 isGoldenTurtle 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/GoldenTurtlePanel.gd`：黃金海龜面板（金色主題；time_stop_start 全螢幕金色閃光+頂部橫幅滑入+右上角倒數計時器；time_stop_end 淡出所有 UI；_process 更新倒數計時）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：golden_turtle_time_stop 訊號 + _handle_golden_turtle_time_stop
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 GoldenTurtlePanelScript（z_index=82）
+  - 時間停止設計：8 秒持續時間；60 秒冷卻防止頻繁觸發；全服廣播讓所有玩家都能享受
+  - 輔助設計：黃金海龜本身倍率不高（30-50x），但觸發時間停止後玩家可以大量擊破其他目標，間接提升收益
+  - 視覺設計：全螢幕金色光暈（讓玩家感受到「時間停止了」）+ 倒數計時器（讓玩家知道還有多少時間）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-158 更新（自主觸發）：** 座頭鯨+傳說龍覺醒 BOSS 系統（Humpback Whale + Legend Dragon Awaken Boss）✅
   - **業界依據：** royal-fishing.uk 2026「Humpback Whale offers 90-150x with 15x base multiplier, whilst Legend Dragon reaches 120-200x from 20x base.」— 這兩個是 Royal Fishing 的標誌性覺醒 BOSS，比現有的覺醒龍（90-180x）和冰鳳凰（120-300x）更符合業界原版設計
   - `server/internal/game/awakenboss/awakenboss.go`：新增 BossHumpbackWhale（座頭鯨，90-150x，6-8x Power Up，6次觸發，35秒在場，0.2%觸發率，藍色）；新增 BossLegendDragon（傳說龍，120-200x，8-10x Power Up，10次觸發，20秒在場，0.08%觸發率，紫色）；ShouldTrigger bossList 加入兩個新 BOSS

@@ -135,6 +135,7 @@ type Game struct {
 	ChainLongWheel *chainlongwheel.Manager // 千龍王強化輪盤系統管理器（DAY-148）
 	ThunderboltLobster *thunderboltLobsterManager // 雷霆龍蝦免費射擊系統管理器（DAY-150）
 	RainbowPhoenix     *rainbowPhoenixManager     // 彩虹鳳凰 Power Up 系統管理器（DAY-151）
+	GoldenTurtle       *goldenTurtleManager       // 黃金海龜時間停止系統管理器（DAY-159）
 	CrystalDragon      *crystaldragon.Manager     // 水晶龍收集大獎系統管理器（DAY-153）
 
 	// 計時器
@@ -250,6 +251,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		ChainLongWheel:     chainlongwheel.New(),
 		ThunderboltLobster: newThunderboltLobsterManager(),
 		RainbowPhoenix:     newRainbowPhoenixManager(),
+		GoldenTurtle:       newGoldenTurtleManager(),
 		CrystalDragon:      crystaldragon.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
@@ -1280,6 +1282,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 皇家閃電鰻持續連鎖電擊：擊破 T118 時觸發（DAY-156）
 	if isRoyalChainLightning(t.DefID) {
 		go g.notifyRoyalChainLightningKill(p, t.InstanceID, t.X, t.Y)
+	}
+	// 黃金海龜時間停止：擊破 T119 時觸發（DAY-159）
+	if isGoldenTurtle(t.DefID) {
+		go g.tryGoldenTurtleTimeStop(p, t.InstanceID, t.X, t.Y)
 	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
