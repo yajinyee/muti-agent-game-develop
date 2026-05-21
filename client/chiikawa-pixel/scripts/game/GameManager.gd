@@ -175,6 +175,8 @@ signal golden_jellyfish_shock(shock_data: Dictionary)    # 黃金水母全場電
 signal thunderbolt_lobster_activate(event_data: Dictionary) # 雷霆龍蝦免費射擊開始（DAY-150）
 signal thunderbolt_lobster_shot(shot_data: Dictionary)      # 雷霆龍蝦自動射擊（DAY-150）
 signal thunderbolt_lobster_end(end_data: Dictionary)        # 雷霆龍蝦免費射擊結束（DAY-150）
+signal rainbow_phoenix_activate(event_data: Dictionary)     # 彩虹鳳凰 Power Up 開始（DAY-151）
+signal rainbow_phoenix_end(end_data: Dictionary)            # 彩虹鳳凰 Power Up 結束（DAY-151）
 signal unlucky_bonus(bonus_data: Dictionary)           # 失敗補償觸發（DAY-135）
 signal speed_race_started(race_data: Dictionary)       # 競速獵殺開始（DAY-136）
 signal speed_race_ended(race_data: Dictionary)         # 競速獵殺結束（DAY-136）
@@ -475,6 +477,13 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("thunderbolt_lobster_shot", payload)
 		"thunderbolt_lobster_end":
 			emit_signal("thunderbolt_lobster_end", payload)
+		# 彩虹鳳凰 Power Up 系統（DAY-151）
+		"rainbow_phoenix_activate":
+			emit_signal("rainbow_phoenix_activate", payload)
+		"rainbow_phoenix_end":
+			emit_signal("rainbow_phoenix_end", payload)
+		"rainbow_phoenix_status":
+			pass  # 狀態，目前不需要特別處理
 		"unlucky_bonus":
 			_handle_unlucky_bonus(payload)
 		"speed_race_start":

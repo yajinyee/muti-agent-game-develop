@@ -239,6 +239,7 @@ func _ready() -> void:
 	_init_chainlong_wheel_panel()  # 千龍王強化輪盤面板（DAY-148）
 	_init_golden_jellyfish_panel() # 黃金水母全場電擊面板（DAY-149）
 	_init_thunderbolt_lobster_panel() # 雷霆龍蝦免費射擊面板（DAY-150）
+	_init_rainbow_phoenix_panel()     # 彩虹鳳凰 Power Up 面板（DAY-151）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3013,3 +3014,35 @@ func _on_thunderbolt_lobster_end(data: Dictionary) -> void:
 	if not is_instance_valid(_thunderbolt_lobster_panel):
 		return
 	_thunderbolt_lobster_panel.handle_end(data)
+
+# ---- 彩虹鳳凰 Power Up 面板（DAY-151）----
+
+const RainbowPhoenixPanelScript = preload("res://scripts/ui/RainbowPhoenixPanel.gd")
+var _rainbow_phoenix_panel: Control = null
+
+func _init_rainbow_phoenix_panel() -> void:
+	var panel = RainbowPhoenixPanelScript.new()
+	panel.name = "RainbowPhoenixPanel"
+	panel.z_index = 88  # 在 ThunderboltLobsterPanel(87) 之上
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_rainbow_phoenix_panel = panel
+
+	# 連接彩虹鳳凰訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("rainbow_phoenix_activate"):
+			gm.rainbow_phoenix_activate.connect(_on_rainbow_phoenix_activate)
+		if gm.has_signal("rainbow_phoenix_end"):
+			gm.rainbow_phoenix_end.connect(_on_rainbow_phoenix_end)
+
+func _on_rainbow_phoenix_activate(data: Dictionary) -> void:
+	if not is_instance_valid(_rainbow_phoenix_panel):
+		return
+	_rainbow_phoenix_panel.handle_activate(data)
+
+func _on_rainbow_phoenix_end(data: Dictionary) -> void:
+	if not is_instance_valid(_rainbow_phoenix_panel):
+		return
+	_rainbow_phoenix_panel.handle_end(data)

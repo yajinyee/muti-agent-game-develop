@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-150 雷霆龍蝦免費射擊系統）
+## 最後更新：2026-05-22（DAY-151 彩虹鳳凰 Power Up 系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-151 更新（自主觸發）：** 彩虹鳳凰 Power Up 系統（Rainbow Phoenix Power Up System）✅
+  - **業界依據：** royal-fishing.co.uk 2026「Multicoloured phoenix (blue, pink, purple, orange) with magical aura. Awaken Boss with 30x basic multiplier. Power Up attack delivers 6x-10x boost for rewards up to 300 times bet.」— 擊破後觸發 Power Up 模式，玩家在 8 秒內所有攻擊獲得隨機 6x-10x 倍率加成，最高 300x
+  - `server/internal/data/tables.go`：新增 T115 彩虹鳳凰（80-120x/HP100/SpawnWeight3/rainbow_phoenix 行為）
+  - `server/internal/ws/protocol.go`：新增 MsgRainbowPhoenixActivate/MsgRainbowPhoenixEnd/MsgRainbowPhoenixStatus；RainbowPhoenixActivatePayload/RainbowPhoenixEndPayload/RainbowPhoenixStatusPayload
+  - `server/internal/game/rainbow_phoenix_handler.go`：rainbowPhoenixManager（session/cooldown 管理）；isRainbowPhoenix 判斷；tryRainbowPhoenix（觸發 Power Up/全服廣播/全服公告）；getRainbowPhoenixMult（供 handleKill 使用）；notifyRainbowPhoenixKill（記錄 Power Up 期間擊破）；endRainbowPhoenixSession（8秒後結束/廣播結果/≥3個擊破全服公告）；sendRainbowPhoenixStatus（登入時發送狀態）
+  - `server/internal/game/announce/announce.go`：新增 EventRainbowPhoenix/EventRainbowPhoenixResult；buildContent 加入彩虹鳳凰公告（紫色，5秒，高優先）
+  - `server/internal/game/game.go`：Game struct 加入 RainbowPhoenix *rainbowPhoenixManager；NewGameWithStore 初始化；handleKill 加入 isRainbowPhoenix 分支（goroutine）+ 套用 Power Up 倍率（在夢幻巨型獎勵魚之後）；RemovePlayer 清理；AddPlayer 發送狀態
+  - `client/chiikawa-pixel/scripts/ui/RainbowPhoenixPanel.gd`：彩虹鳳凰面板（彩虹漸層主題；activate 橫幅滑入+倒數計時+彩虹顏色循環動畫+全螢幕彩虹閃光；end 右側滑入彈窗含 Power Up 統計+擊破數+獎勵；≥5個擊破彩虹雙閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：2個訊號（rainbow_phoenix_activate/rainbow_phoenix_end）+ 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 RainbowPhoenixPanelScript（z_index=88）
+  - Power Up 設計：隨機決定倍率（6x/7x/8x/9x/10x，等機率）；8 秒持續時間；90 秒冷卻防止頻繁觸發
+  - 倍率疊加：Power Up 倍率在夢幻巨型獎勵魚之後套用（最後一層），最大化爽感
+  - 全服廣播：Power Up 開始/結束全服廣播，讓所有玩家看到「有人觸發了彩虹鳳凰 Power Up」
+  - 全服公告：Power Up 期間擊破 ≥3 個目標時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-150 更新（自主觸發）：** 雷霆龍蝦免費射擊系統（Thunderbolt Lobster Free Shooting System）✅
   - **業界依據：** royalfishingsite.com 2026「Thunderbolt Lobster feature — 15 seconds of free play followed by automatic shooting」— 擊破後觸發 15 秒免費自動射擊，所有子彈不扣費，Server 自動幫玩家以當前 betLevel 射擊，是 2026 年最新的「免費爽感」機制
   - `server/internal/data/tables.go`：新增 T114 雷霆龍蝦（50-70x/HP70/SpawnWeight5/thunderbolt_lobster 行為）

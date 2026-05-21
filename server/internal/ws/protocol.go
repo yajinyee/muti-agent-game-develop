@@ -392,6 +392,11 @@ const (
 	MsgThunderboltLobsterShot     MessageType = "thunderbolt_lobster_shot"     // 自動射擊一次（Server→Client，全服）
 	MsgThunderboltLobsterEnd      MessageType = "thunderbolt_lobster_end"      // 免費射擊模式結束（Server→Client，個人+全服）
 
+	// 彩虹鳳凰 Power Up 系統（DAY-151）
+	MsgRainbowPhoenixActivate MessageType = "rainbow_phoenix_activate" // Power Up 開始（Server→Client，個人+全服）
+	MsgRainbowPhoenixEnd      MessageType = "rainbow_phoenix_end"      // Power Up 結束（Server→Client，個人+全服）
+	MsgRainbowPhoenixStatus   MessageType = "rainbow_phoenix_status"   // Power Up 狀態（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3197,4 +3202,33 @@ type ThunderboltLobsterEndPayload struct {
 	TotalReward  int    `json:"total_reward"`  // 總獎勵
 	NewBalance   int    `json:"new_balance"`   // 新餘額（個人）
 	Message      string `json:"message"`       // 廣播訊息
+}
+
+// RainbowPhoenixActivatePayload 彩虹鳳凰 Power Up 開始（Server → Client，個人+全服，DAY-151）
+type RainbowPhoenixActivatePayload struct {
+	TriggerID   string  `json:"trigger_id"`    // 觸發的 T115 InstanceID
+	TriggerX    float64 `json:"trigger_x"`     // 觸發位置 X
+	TriggerY    float64 `json:"trigger_y"`     // 觸發位置 Y
+	KillerID    string  `json:"killer_id"`     // 觸發玩家 ID
+	KillerName  string  `json:"killer_name"`   // 觸發玩家名稱
+	PowerUpMult float64 `json:"power_up_mult"` // Power Up 倍率（6x-10x）
+	Duration    int     `json:"duration"`      // 持續秒數（8）
+	Message     string  `json:"message"`       // 廣播訊息
+}
+
+// RainbowPhoenixEndPayload 彩虹鳳凰 Power Up 結束（Server → Client，個人+全服，DAY-151）
+type RainbowPhoenixEndPayload struct {
+	KillerID    string  `json:"killer_id"`     // 觸發玩家 ID
+	KillerName  string  `json:"killer_name"`   // 觸發玩家名稱
+	PowerUpMult float64 `json:"power_up_mult"` // Power Up 倍率
+	TotalKills  int     `json:"total_kills"`   // Power Up 期間擊破數
+	TotalReward int     `json:"total_reward"`  // Power Up 期間總獎勵
+	NewBalance  int     `json:"new_balance"`   // 新餘額（個人）
+	Message     string  `json:"message"`       // 廣播訊息
+}
+
+// RainbowPhoenixStatusPayload 彩虹鳳凰 Power Up 狀態（Server → Client，個人，DAY-151）
+type RainbowPhoenixStatusPayload struct {
+	IsActive    bool    `json:"is_active"`     // 是否在 Power Up 模式中
+	PowerUpMult float64 `json:"power_up_mult"` // 當前 Power Up 倍率（0 = 無）
 }

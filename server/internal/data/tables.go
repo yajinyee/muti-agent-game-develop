@@ -123,6 +123,11 @@ var Targets = map[string]*TargetDef{
 	// 每 0.5 秒自動射擊一次，優先選高倍率目標，讓玩家感受到「免費狂射」的爽感
 	// 設計：中等倍率（50-70x）+ 中等 HP（70）+ 中低生成權重（5）= 常見但有驚喜的特殊目標
 	"T114": {ID: "T114", Name: "雷霆龍蝦", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 70, HP: 70, SpawnWeight: 5, Speed: 40, Lifetime: 12, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "thunderbolt_lobster"},
+	// T115 彩虹鳳凰（DAY-151）— 業界依據：royal-fishing.co.uk 2026「Multicoloured phoenix (blue, pink, purple, orange)
+	// with magical aura. Awaken Boss with 30x basic multiplier. Power Up attack delivers 6x-10x boost for rewards up to 300 times bet.」
+	// 擊破後觸發「Power Up 模式」：玩家在 8 秒內所有攻擊獲得隨機 6x-10x 倍率加成，最高 300x
+	// 設計：中高倍率（80-120x）+ 中等 HP（100）+ 低生成權重（3）= 稀有但令人興奮的特殊目標
+	"T115": {ID: "T115", Name: "彩虹鳳凰", Type: TargetTypeSpecial, MultiplierMin: 80, MultiplierMax: 120, HP: 100, SpawnWeight: 3, Speed: 35, Lifetime: 14, LaborGain: 16, DifficultyFactor: 16.0, SpecialBehavior: "rainbow_phoenix"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

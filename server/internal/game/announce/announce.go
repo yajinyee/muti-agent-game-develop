@@ -41,6 +41,8 @@ const (
 	EventMegaCatch      EventType = "mega_catch"      // Mega Catch 事件觸發（DAY-140）
 	EventThunderboltLobster       EventType = "thunderbolt_lobster"        // 雷霆龍蝦免費射擊觸發（DAY-150）
 	EventThunderboltLobsterResult EventType = "thunderbolt_lobster_result" // 雷霆龍蝦免費射擊結果（DAY-150）
+	EventRainbowPhoenix           EventType = "rainbow_phoenix"            // 彩虹鳳凰 Power Up 觸發（DAY-151）
+	EventRainbowPhoenixResult     EventType = "rainbow_phoenix_result"     // 彩虹鳳凰 Power Up 結果（DAY-151）
 )
 
 // Priority 公告優先級
@@ -488,6 +490,33 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		}
 		icon = "⚡"
 		color = "#FF9900"
+		priority = PriorityNormal
+		duration = 4000
+
+	case EventRainbowPhoenix:
+		multStr := fmt.Sprintf("%.0f", float64(amount))
+		title = "🌈 彩虹鳳凰 Power Up！"
+		message = fmt.Sprintf("🌈 %s 觸發彩虹鳳凰！Power Up %sx！持續 8 秒！", playerName, multStr)
+		icon = "🌈"
+		color = "#FF66FF"
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventRainbowPhoenixResult:
+		killsStr := "0"
+		multStr := "6"
+		if extra != nil {
+			if k, ok := extra["kills"]; ok {
+				killsStr = k
+			}
+			if m, ok := extra["mult"]; ok {
+				multStr = m
+			}
+		}
+		title = "🌈 彩虹鳳凰結果！"
+		message = fmt.Sprintf("🌈 %s 的彩虹鳳凰 Power Up %sx 擊破了 %s 個目標！獲得 %d 金幣！", playerName, multStr, killsStr, amount)
+		icon = "🌈"
+		color = "#CC44FF"
 		priority = PriorityNormal
 		duration = 4000
 

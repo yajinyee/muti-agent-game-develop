@@ -133,6 +133,7 @@ type Game struct {
 	GiantPrizeFish *giantPrizeFishManager  // 夢幻巨型獎勵魚系統管理器（DAY-147）
 	ChainLongWheel *chainlongwheel.Manager // 千龍王強化輪盤系統管理器（DAY-148）
 	ThunderboltLobster *thunderboltLobsterManager // 雷霆龍蝦免費射擊系統管理器（DAY-150）
+	RainbowPhoenix     *rainbowPhoenixManager     // 彩虹鳳凰 Power Up 系統管理器（DAY-151）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -246,6 +247,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		GiantPrizeFish:     newGiantPrizeFishManager(),
 		ChainLongWheel:     chainlongwheel.New(),
 		ThunderboltLobster: newThunderboltLobsterManager(),
+		RainbowPhoenix:     newRainbowPhoenixManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -410,6 +412,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendMegaOctopusStatus(pp)
 				// 發送千龍王輪盤狀態（DAY-148）
 				g.sendChainLongWheelStatus(pp)
+				// 發送彩虹鳳凰 Power Up 狀態（DAY-151）
+				g.sendRainbowPhoenixStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -504,6 +508,10 @@ func (g *Game) RemovePlayer(playerID string) {
 		// 清理雷霆龍蝦免費射擊 session（DAY-150）
 		if g.ThunderboltLobster != nil {
 			g.ThunderboltLobster.RemovePlayer(playerID)
+		}
+		// 清理彩虹鳳凰 Power Up session（DAY-151）
+		if g.RainbowPhoenix != nil {
+			g.RainbowPhoenix.RemovePlayer(playerID)
 		}
 		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
@@ -981,6 +989,13 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		// 記錄夢幻模式期間的擊破
 		go g.recordGiantPrizeFishKill(p.ID, finalReward)
 	}
+	// 套用彩虹鳳凰 Power Up 倍率（DAY-151）
+	rainbowPhoenixMult := g.getRainbowPhoenixMult(p.ID)
+	if rainbowPhoenixMult > 1.0 {
+		finalReward = int(float64(finalReward) * rainbowPhoenixMult)
+		// 記錄 Power Up 期間的擊破
+		go g.notifyRainbowPhoenixKill(p, finalReward)
+	}
 	// 雙環輪盤：擊破高倍率目標後嘗試觸發（DAY-139）
 	go g.tryDualRoulette(p, float64(t.Multiplier), finalReward)
 	// 懸賞領取：擊破懸賞目標獲得額外金幣（DAY-137）
@@ -1239,6 +1254,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 雷霆龍蝦免費射擊：擊破 T114 時觸發（DAY-150）
 	if isThunderboltLobster(t.DefID) {
 		go g.tryThunderboltLobster(p, t.InstanceID, t.X, t.Y)
+	}
+	// 彩虹鳳凰 Power Up：擊破 T115 時觸發（DAY-151）
+	if isRainbowPhoenix(t.DefID) {
+		go g.tryRainbowPhoenix(p, t.InstanceID, t.X, t.Y)
 	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
