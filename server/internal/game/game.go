@@ -139,6 +139,7 @@ type Game struct {
 	LuckyStarFish      *luckyStarFishManager      // 幸運星魚全場倍率翻倍管理器（DAY-160）
 	GoldenShark        *goldenSharkManager        // 黃金鯊魚全服狂暴模式管理器（DAY-161）
 	CaptainFish        *captainFishManager        // 船長魚全服競速模式管理器（DAY-163）
+	AbyssWhale         *abyssWhaleManager         // 深淵巨鯨全服 Boss 挑戰管理器（DAY-164）
 	CrystalDragon      *crystaldragon.Manager     // 水晶龍收集大獎系統管理器（DAY-153）
 
 	// 計時器
@@ -258,6 +259,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyStarFish:      newLuckyStarFishManager(),
 		GoldenShark:        newGoldenSharkManager(),
 		CaptainFish:        newCaptainFishManager(),
+		AbyssWhale:         newAbyssWhaleManager(),
 		CrystalDragon:      crystaldragon.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
@@ -898,6 +900,11 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 		go g.notifyVampireHit(p, t)
 	}
 
+	// 深淵巨鯨：命中時記錄傷害（DAY-164）
+	if result.IsHit && t != nil && isAbyssWhale(t.DefID) {
+		go g.notifyAbyssWhaleHit(p, t.InstanceID, betCost)
+	}
+
 	// BOSS 階段變化
 	if result.BossPhaseChanged {
 		g.Hub.Broadcast(&ws.Message{
@@ -1323,6 +1330,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isCaptainFish(t.DefID) {
 		go g.tryCaptainFishRace(p, t.InstanceID, t.X, t.Y)
 	}
+	// 深淵巨鯨全服 Boss 挑戰：擊破 T124 時觸發（DAY-164）
+	if isAbyssWhale(t.DefID) {
+		go g.notifyAbyssWhaleKill(p, t.InstanceID, t.X, t.Y)
+	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }
@@ -1738,6 +1749,10 @@ func (g *Game) spawnTarget() {
 	// 競速獵殺：高倍率目標生成時嘗試觸發（DAY-136）
 	if t.Multiplier >= 10.0 {
 		go g.tryStartSpeedRace(instanceID, def.ID, def.Name, t.Multiplier)
+	}
+	// 深淵巨鯨：T124 生成時通知全服（DAY-164）
+	if isAbyssWhale(def.ID) {
+		go g.notifyAbyssWhaleSpawn(instanceID, x, y)
 	}
 }
 

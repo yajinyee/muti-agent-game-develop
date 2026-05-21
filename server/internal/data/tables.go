@@ -171,6 +171,13 @@ var Targets = map[string]*TargetDef{
 	// 第一名獲得 betLevel × 30，第二名 × 15，第三名 × 8
 	// 設計：競技型社交機制（與水晶龍的合作型形成對比），製造「全服競爭」的緊張爽感
 	"T123": {ID: "T123", Name: "船長魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 60, HP: 80, SpawnWeight: 3, Speed: 40, Lifetime: 16, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "captain_fish_race"},
+	// T124 深淵巨鯨（DAY-164）— 業界依據：Fishing Frenzy Chapter 3 2026「Boss Fish as endgame content」
+	// + Ocean King 2026「Abyss Whale — massive HP boss requiring full server cooperation」
+	// 超高 HP（500），需要全服玩家合力攻擊才能擊破
+	// 擊破後觸發「深淵寶藏」，按傷害貢獻比例分配獎勵（最高 500x betLevel）
+	// 設計：合作型終局內容，與船長魚（競技型）形成對比，製造「全服合力打 Boss」的緊張爽感
+	// 注意：HP=500 是特殊 Boss 級別，遠高於普通特殊目標（60-120），需要多人合力
+	"T124": {ID: "T124", Name: "深淵巨鯨", Type: TargetTypeSpecial, MultiplierMin: 80, MultiplierMax: 120, HP: 500, SpawnWeight: 1, Speed: 15, Lifetime: 45, LaborGain: 20, DifficultyFactor: 16.0, SpecialBehavior: "abyss_whale_boss"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

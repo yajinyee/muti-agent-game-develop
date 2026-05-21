@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-163 船長魚全服競速模式）
+## 最後更新：2026-05-22（DAY-164 深淵巨鯨全服 Boss 挑戰系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-161 更新（自主觸發）：** 黃金鯊魚全服狂暴模式（Golden Shark Berserk Mode）✅
+- **DAY-164 更新（自主觸發）：** 深淵巨鯨全服 Boss 挑戰系統（Abyss Whale Global Boss Challenge）✅
+  - **業界依據：** Fishing Frenzy Chapter 3 2026（2026-05-14）「Boss Fish as endgame content for higher-level players」+ Ocean King 2026「Abyss Whale — massive HP boss requiring full server cooperation」— 超高 HP（500）的 Boss 級目標，需要全服玩家合力攻擊才能擊破，按傷害貢獻比例分配深淵寶藏（最高 500x betLevel）
+  - **設計差異：** 與船長魚（競技型，30秒競速）不同，深淵巨鯨是**合作型終局內容**（全服合力打 Boss），與水晶龍（合作收集）形成不同的合作體驗
+  - `server/internal/data/tables.go`：新增 T124 深淵巨鯨（80-120x/HP500/SpawnWeight1/Speed15/Lifetime45/abyss_whale_boss 行為）
+  - `server/internal/game/abyss_whale_handler.go`：abyssWhaleManager（全服共享 isActive/HP/contributions 管理）；isAbyssWhale 判斷；notifyAbyssWhaleSpawn（T124 生成時全服廣播）；notifyAbyssWhaleHit（命中時記錄傷害/節流廣播 HP 更新）；notifyAbyssWhaleKill（擊破時按貢獻比例分配獎勵/全服廣播）；distributeAbyssWhaleRewards（按比例計算獎勵/最高 500x betLevel/保底 1x betLevel）
+  - `server/internal/ws/protocol.go`：新增 MsgAbyssWhale；AbyssWhaleEntry（排名/玩家/傷害/比例/獎勵）；AbyssWhalePayload（多階段：whale_spawn/whale_hp_update/whale_killed/whale_reward）
+  - `server/internal/game/game.go`：Game struct 加入 AbyssWhale *abyssWhaleManager；NewGameWithStore 初始化；spawnTarget 加入 isAbyssWhale 分支（notifyAbyssWhaleSpawn）；handleAttack 加入 isAbyssWhale 命中分支（notifyAbyssWhaleHit）；handleKill 加入 isAbyssWhale 分支（notifyAbyssWhaleKill）
+  - `client/chiikawa-pixel/scripts/ui/AbyssWhalePanel.gd`：深淵巨鯨面板（深海藍黑主題；whale_spawn 全螢幕深藍閃光+頂部橫幅滑入+底部常駐 HP 進度條；whale_hp_update HP 條動態縮短+顏色漸變（藍→青→紅）+低血量閃爍警告+我的命中浮動文字；whale_killed 全螢幕金色爆炸閃光+右側滑入貢獻者排行榜；whale_reward 中央大獎彈窗含排名+貢獻比例+獎勵+彈跳動畫；高貢獻者雙閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：abyss_whale 訊號 + _handle_abyss_whale
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 AbyssWhalePanelScript（z_index=77）
+  - Boss 設計：HP=500（遠高於普通特殊目標 60-120）；SpawnWeight=1（極稀有）；Speed=15（移動慢，玩家有更多時間攻擊）；Lifetime=45秒（在場時間長）；180秒冷卻
+  - 傷害記錄：每次命中記錄 betCost 作為傷害值（高 betLevel 玩家貢獻更多，獲得更多獎勵）
+  - 獎勵設計：按貢獻比例分配（貢獻 50% 傷害 → 獲得 50% 獎勵）；最高 500x betLevel；保底 1x betLevel（確保每個參與者都有獎勵）
+  - HP 節流廣播：每 0.5 秒最多廣播一次 HP 更新（防止高頻攻擊造成廣播風暴）
+  - 社交設計：全服廣播 HP 進度，讓所有玩家看到「巨鯨快要死了！」；擊破後全服廣播貢獻排行榜
+  - build/vet 全部通過（零錯誤零警告）
+- **DAY-163 更新（自主觸發）：** 船長魚全服競速模式（Captain Fish Race Mode）✅
   - **業界依據：** King of Ocean 2026「sharks climb into x50-x300 zone」+ 捕魚機業界「rage/berserk mode」機制 — 擊破黃金鯊魚後觸發「全服狂暴模式」，全場所有目標物獎勵倍率 ×1.5，持續 12 秒，全服廣播
   - **設計差異：** 與幸運星魚（個人 ×2，10秒）不同，黃金鯊魚是**全服共享 ×1.5**（12秒），任何玩家擊破都讓全服受益，社交性更強
   - `server/internal/data/tables.go`：新增 T121 黃金鯊魚（50-80x/HP100/SpawnWeight3/golden_shark_berserk 行為）

@@ -200,6 +200,7 @@ const (
 	MsgGoldenSharkBerserk   MessageType = "golden_shark_berserk"    // 黃金鯊魚全服狂暴模式（DAY-161）
 	MsgMoneyFishReward      MessageType = "money_fish_reward"       // 金幣魚王即時獎勵（DAY-162）
 	MsgCaptainFishRace      MessageType = "captain_fish_race"       // 船長魚全服競速模式（DAY-163）
+	MsgAbyssWhale           MessageType = "abyss_whale"             // 深淵巨鯨全服 Boss 挑戰（DAY-164）
 	MsgRoyalChainLightning  MessageType = "royal_chain_lightning"  // 皇家閃電鰻持續連鎖電擊（DAY-156）
 	// 神秘寶箱系統（DAY-090）
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
@@ -3523,4 +3524,37 @@ type CrystalDragonStatusPayload struct {
 	Goal          int     `json:"goal"`           // 目標水晶數量
 	Progress      float64 `json:"progress"`       // 進度（0.0-1.0）
 	CooldownSecs  int     `json:"cooldown_secs"`  // 冷卻剩餘秒數
+}
+
+// ---- 深淵巨鯨全服 Boss 挑戰系統（DAY-164）----
+
+// AbyssWhaleEntry 深淵巨鯨貢獻者記錄
+type AbyssWhaleEntry struct {
+	Rank       int     `json:"rank"`        // 排名（1-based）
+	PlayerID   string  `json:"player_id"`   // 玩家 ID
+	PlayerName string  `json:"player_name"` // 玩家名稱
+	Damage     int     `json:"damage"`      // 累積傷害
+	Ratio      float64 `json:"ratio"`       // 貢獻比例（0.0-1.0）
+	Bonus      int     `json:"bonus"`       // 獲得獎勵
+}
+
+// AbyssWhalePayload 深淵巨鯨全服 Boss 挑戰廣播（Server → Client，DAY-164）
+// Phase: "whale_spawn" → "whale_hp_update"（多次）→ "whale_killed" → "whale_reward"（個人）
+type AbyssWhalePayload struct {
+	Phase       string            `json:"phase"`        // 當前階段
+	InstanceID  string            `json:"instance_id"`  // 深淵巨鯨 InstanceID
+	X           float64           `json:"x"`            // 位置 X
+	Y           float64           `json:"y"`            // 位置 Y
+	TotalHP     int               `json:"total_hp"`     // 總 HP（500）
+	CurrentHP   int               `json:"current_hp"`   // 當前 HP
+	HPPercent   float64           `json:"hp_percent"`   // HP 百分比（0.0-1.0）
+	AttackerID  string            `json:"attacker_id"`  // 最後攻擊者 ID（hp_update 時）
+	KillerID    string            `json:"killer_id"`    // 擊破玩家 ID（killed/reward 時）
+	KillerName  string            `json:"killer_name"`  // 擊破玩家名稱
+	Entries     []AbyssWhaleEntry `json:"entries"`      // 貢獻者列表（killed/reward 時）
+	TotalDamage int               `json:"total_damage"` // 總傷害（killed 時）
+	MyRank      int               `json:"my_rank"`      // 我的排名（reward 時）
+	MyBonus     int               `json:"my_bonus"`     // 我的獎勵（reward 時）
+	MyDamage    int               `json:"my_damage"`    // 我的傷害（reward 時）
+	MyRatio     float64           `json:"my_ratio"`     // 我的貢獻比例（reward 時）
 }

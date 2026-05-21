@@ -248,6 +248,7 @@ func _ready() -> void:
 	_init_golden_shark_panel()        # 黃金鯊魚全服狂暴模式面板（DAY-161）
 	_init_money_fish_panel()          # 金幣魚王即時獎勵面板（DAY-162）
 	_init_captain_fish_panel()        # 船長魚全服競速模式面板（DAY-163）
+	_init_abyss_whale_panel()         # 深淵巨鯨全服 Boss 挑戰面板（DAY-164）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3245,3 +3246,19 @@ func _init_captain_fish_panel() -> void:
 	if panel.has_method("setup"):
 		panel.setup(_pixel_font)
 	_captain_fish_panel = panel
+
+# ---- 深淵巨鯨全服 Boss 挑戰面板（DAY-164）----
+
+const AbyssWhalePanelScript = preload("res://scripts/ui/AbyssWhalePanel.gd")
+var _abyss_whale_panel: Control = null
+
+func _init_abyss_whale_panel() -> void:
+	var panel = AbyssWhalePanelScript.new()
+	panel.name = "AbyssWhalePanel"
+	panel.z_index = 77  # 在 CaptainFishPanel(78) 下方
+	panel.position = Vector2(640, 360)  # 畫面中心
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	if panel.has_method("setup"):
+		panel.setup(_pixel_font)
+	_abyss_whale_panel = panel
