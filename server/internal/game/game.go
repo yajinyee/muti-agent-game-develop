@@ -878,6 +878,9 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 				IsFleeing:  true,
 			},
 		})
+	} else if result.IsHit && t != nil && isVampire(t.DefID) {
+		// T116 吸血鬼：命中後倍率成長（DAY-152）
+		go g.notifyVampireHit(p, t)
 	}
 
 	// BOSS 階段變化
@@ -1258,6 +1261,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 彩虹鳳凰 Power Up：擊破 T115 時觸發（DAY-151）
 	if isRainbowPhoenix(t.DefID) {
 		go g.tryRainbowPhoenix(p, t.InstanceID, t.X, t.Y)
+	}
+	// 吸血鬼成長倍率：擊破 T116 時廣播最終結果（DAY-152）
+	if isVampire(t.DefID) {
+		go g.notifyVampireKill(p, t, finalReward)
 	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)

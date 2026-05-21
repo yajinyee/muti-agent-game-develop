@@ -128,6 +128,11 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「Power Up 模式」：玩家在 8 秒內所有攻擊獲得隨機 6x-10x 倍率加成，最高 300x
 	// 設計：中高倍率（80-120x）+ 中等 HP（100）+ 低生成權重（3）= 稀有但令人興奮的特殊目標
 	"T115": {ID: "T115", Name: "彩虹鳳凰", Type: TargetTypeSpecial, MultiplierMin: 80, MultiplierMax: 120, HP: 100, SpawnWeight: 3, Speed: 35, Lifetime: 14, LaborGain: 16, DifficultyFactor: 16.0, SpecialBehavior: "rainbow_phoenix"},
+	// T116 吸血鬼（DAY-152）— 業界依據：jiligames.com 2026「The explicit multiplier of vampires increases the more you fight,
+	// and there is a chance that you can enter the multiplier mode, up to X5.」
+	// 每次被命中倍率增加：5次→×2.0覺醒，10次→×3.5狂暴，15次→×5.0血月（全服廣播）
+	// 設計：基礎倍率（20-30x）+ 高 HP（120）+ 中等生成權重（6）= 需要多人合力打的成長型目標
+	"T116": {ID: "T116", Name: "吸血鬼", Type: TargetTypeSpecial, MultiplierMin: 20, MultiplierMax: 30, HP: 120, SpawnWeight: 6, Speed: 45, Lifetime: 18, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "vampire_grow"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

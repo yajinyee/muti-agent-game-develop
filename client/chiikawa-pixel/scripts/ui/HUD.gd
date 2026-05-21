@@ -240,6 +240,7 @@ func _ready() -> void:
 	_init_golden_jellyfish_panel() # 黃金水母全場電擊面板（DAY-149）
 	_init_thunderbolt_lobster_panel() # 雷霆龍蝦免費射擊面板（DAY-150）
 	_init_rainbow_phoenix_panel()     # 彩虹鳳凰 Power Up 面板（DAY-151）
+	_init_vampire_panel()             # 吸血鬼成長倍率面板（DAY-152）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3046,3 +3047,42 @@ func _on_rainbow_phoenix_end(data: Dictionary) -> void:
 	if not is_instance_valid(_rainbow_phoenix_panel):
 		return
 	_rainbow_phoenix_panel.handle_end(data)
+
+# ---- 吸血鬼成長倍率面板（DAY-152）----
+
+const VampirePanelScript = preload("res://scripts/ui/VampirePanel.gd")
+var _vampire_panel: Control = null
+
+func _init_vampire_panel() -> void:
+	var panel = VampirePanelScript.new()
+	panel.name = "VampirePanel"
+	panel.z_index = 85  # 在 BombCrabPanel(85) 同層，吸血鬼是不同系統
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_vampire_panel = panel
+
+	# 連接吸血鬼訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("vampire_grow"):
+			gm.vampire_grow.connect(_on_vampire_grow)
+		if gm.has_signal("vampire_blood_moon"):
+			gm.vampire_blood_moon.connect(_on_vampire_blood_moon)
+		if gm.has_signal("vampire_killed"):
+			gm.vampire_killed.connect(_on_vampire_killed)
+
+func _on_vampire_grow(data: Dictionary) -> void:
+	if not is_instance_valid(_vampire_panel):
+		return
+	_vampire_panel.handle_grow(data)
+
+func _on_vampire_blood_moon(data: Dictionary) -> void:
+	if not is_instance_valid(_vampire_panel):
+		return
+	_vampire_panel.handle_blood_moon(data)
+
+func _on_vampire_killed(data: Dictionary) -> void:
+	if not is_instance_valid(_vampire_panel):
+		return
+	_vampire_panel.handle_killed(data)

@@ -177,6 +177,9 @@ signal thunderbolt_lobster_shot(shot_data: Dictionary)      # 雷霆龍蝦自動
 signal thunderbolt_lobster_end(end_data: Dictionary)        # 雷霆龍蝦免費射擊結束（DAY-150）
 signal rainbow_phoenix_activate(event_data: Dictionary)     # 彩虹鳳凰 Power Up 開始（DAY-151）
 signal rainbow_phoenix_end(end_data: Dictionary)            # 彩虹鳳凰 Power Up 結束（DAY-151）
+signal vampire_grow(grow_data: Dictionary)                  # 吸血鬼倍率成長（DAY-152）
+signal vampire_blood_moon(moon_data: Dictionary)            # 吸血鬼血月模式（DAY-152）
+signal vampire_killed(kill_data: Dictionary)                # 吸血鬼被擊破（DAY-152）
 signal unlucky_bonus(bonus_data: Dictionary)           # 失敗補償觸發（DAY-135）
 signal speed_race_started(race_data: Dictionary)       # 競速獵殺開始（DAY-136）
 signal speed_race_ended(race_data: Dictionary)         # 競速獵殺結束（DAY-136）
@@ -484,6 +487,13 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("rainbow_phoenix_end", payload)
 		"rainbow_phoenix_status":
 			pass  # 狀態，目前不需要特別處理
+		# 吸血鬼成長倍率系統（DAY-152）
+		"vampire_grow":
+			emit_signal("vampire_grow", payload)
+		"vampire_blood_moon":
+			emit_signal("vampire_blood_moon", payload)
+		"vampire_killed":
+			emit_signal("vampire_killed", payload)
 		"unlucky_bonus":
 			_handle_unlucky_bonus(payload)
 		"speed_race_start":

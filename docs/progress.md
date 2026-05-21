@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-151 彩虹鳳凰 Power Up 系統）
+## 最後更新：2026-05-22（DAY-152 吸血鬼成長倍率系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,20 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-152 更新（自主觸發）：** 吸血鬼成長倍率系統（Vampire Growing Multiplier System）✅
+  - **業界依據：** jiligames.com 2026「The explicit multiplier of vampires increases the more you fight, and there is a chance that you can enter the multiplier mode, up to X5.」— 吸血鬼目標每次被命中倍率增加，達到閾值後進入「倍率模式」，最終擊破獲得最高倍率獎勵
+  - `server/internal/data/tables.go`：新增 T116 吸血鬼（20-30x基礎/HP120/SpawnWeight6/vampire_grow 行為）
+  - `server/internal/ws/protocol.go`：新增 MsgVampireGrow/MsgVampireBloodMoon/MsgVampireKilled；VampireGrowPayload/VampireBloodMoonPayload/VampireKilledPayload
+  - `server/internal/game/vampire_handler.go`：isVampire 判斷；getVampireMultBonus（命中次數→倍率加成）；getVampirePhaseName（階段名稱）；notifyVampireHit（命中時更新倍率/廣播成長/血月模式全服廣播+公告）；notifyVampireKill（擊破時廣播最終結果/血月模式全服公告）
+  - `server/internal/game/announce/announce.go`：新增 EventVampireBloodMoon/EventVampireKill；buildContent 加入吸血鬼公告（深紅色，4-5秒）
+  - `server/internal/game/game.go`：handleAttack 加入 isVampire 命中分支（notifyVampireHit）；handleKill 加入 isVampire 分支（notifyVampireKill）
+  - `client/chiikawa-pixel/scripts/ui/VampirePanel.gd`：吸血鬼面板（深紅血月主題；vampire_grow 浮動倍率文字+小閃光；vampire_blood_moon 橫幅滑入+全螢幕血紅閃光；vampire_killed 右側滑入彈窗含命中次數+階段+倍率+獎勵；血月模式擊破雙閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：3個訊號（vampire_grow/vampire_blood_moon/vampire_killed）+ 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 VampirePanelScript（z_index=85）
+  - 成長設計：命中 1-4 次→×1.0（沉睡）；5-9 次→×2.0（覺醒）；10-14 次→×3.5（狂暴）；≥15 次→×5.0（血月，全服廣播）
+  - 社交設計：血月模式觸發時全服廣播「誰能擊破它？」，激發玩家競爭搶殺
+  - 倍率設計：基礎倍率 20-30x × 成長加成 1.0-5.0x = 最高 150x，是「需要多人合力打」的社交目標
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-151 更新（自主觸發）：** 彩虹鳳凰 Power Up 系統（Rainbow Phoenix Power Up System）✅
   - **業界依據：** royal-fishing.co.uk 2026「Multicoloured phoenix (blue, pink, purple, orange) with magical aura. Awaken Boss with 30x basic multiplier. Power Up attack delivers 6x-10x boost for rewards up to 300 times bet.」— 擊破後觸發 Power Up 模式，玩家在 8 秒內所有攻擊獲得隨機 6x-10x 倍率加成，最高 300x
   - `server/internal/data/tables.go`：新增 T115 彩虹鳳凰（80-120x/HP100/SpawnWeight3/rainbow_phoenix 行為）

@@ -397,6 +397,11 @@ const (
 	MsgRainbowPhoenixEnd      MessageType = "rainbow_phoenix_end"      // Power Up 結束（Server→Client，個人+全服）
 	MsgRainbowPhoenixStatus   MessageType = "rainbow_phoenix_status"   // Power Up 狀態（Server→Client，個人）
 
+	// 吸血鬼成長倍率系統（DAY-152）
+	MsgVampireGrow      MessageType = "vampire_grow"       // 吸血鬼倍率成長（Server→Client，全服）
+	MsgVampireBloodMoon MessageType = "vampire_blood_moon" // 血月模式觸發（Server→Client，全服）
+	MsgVampireKilled    MessageType = "vampire_killed"     // 吸血鬼被擊破（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3231,4 +3236,36 @@ type RainbowPhoenixEndPayload struct {
 type RainbowPhoenixStatusPayload struct {
 	IsActive    bool    `json:"is_active"`     // 是否在 Power Up 模式中
 	PowerUpMult float64 `json:"power_up_mult"` // 當前 Power Up 倍率（0 = 無）
+}
+
+// VampireGrowPayload 吸血鬼倍率成長（Server → Client，全服，DAY-152）
+type VampireGrowPayload struct {
+	InstanceID   string  `json:"instance_id"`    // 吸血鬼 InstanceID
+	HitCount     int     `json:"hit_count"`      // 當前命中次數
+	MultBonus    float64 `json:"mult_bonus"`     // 當前倍率加成（1.0/2.0/3.5/5.0）
+	NewMult      float64 `json:"new_mult"`       // 當前實際倍率
+	PhaseName    string  `json:"phase_name"`     // 階段名稱（沉睡/覺醒/狂暴/血月）
+	PhaseChanged bool    `json:"phase_changed"`  // 是否剛進入新階段
+}
+
+// VampireBloodMoonPayload 血月模式觸發（Server → Client，全服，DAY-152）
+type VampireBloodMoonPayload struct {
+	InstanceID string  `json:"instance_id"` // 吸血鬼 InstanceID
+	HitCount   int     `json:"hit_count"`   // 當前命中次數
+	MultBonus  float64 `json:"mult_bonus"`  // 血月倍率加成（5.0）
+	NewMult    float64 `json:"new_mult"`    // 當前實際倍率
+	Message    string  `json:"message"`     // 廣播訊息
+}
+
+// VampireKilledPayload 吸血鬼被擊破（Server → Client，全服，DAY-152）
+type VampireKilledPayload struct {
+	InstanceID  string  `json:"instance_id"`   // 吸血鬼 InstanceID
+	KillerID    string  `json:"killer_id"`     // 擊破玩家 ID
+	KillerName  string  `json:"killer_name"`   // 擊破玩家名稱
+	HitCount    int     `json:"hit_count"`     // 最終命中次數
+	MultBonus   float64 `json:"mult_bonus"`    // 最終倍率加成
+	FinalMult   float64 `json:"final_mult"`    // 最終實際倍率
+	FinalReward int     `json:"final_reward"`  // 最終獎勵
+	PhaseName   string  `json:"phase_name"`    // 最終階段名稱
+	Message     string  `json:"message"`       // 廣播訊息
 }

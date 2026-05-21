@@ -43,6 +43,8 @@ const (
 	EventThunderboltLobsterResult EventType = "thunderbolt_lobster_result" // 雷霆龍蝦免費射擊結果（DAY-150）
 	EventRainbowPhoenix           EventType = "rainbow_phoenix"            // 彩虹鳳凰 Power Up 觸發（DAY-151）
 	EventRainbowPhoenixResult     EventType = "rainbow_phoenix_result"     // 彩虹鳳凰 Power Up 結果（DAY-151）
+	EventVampireBloodMoon         EventType = "vampire_blood_moon"         // 吸血鬼血月模式觸發（DAY-152）
+	EventVampireKill              EventType = "vampire_kill"               // 吸血鬼血月模式被擊破（DAY-152）
 )
 
 // Priority 公告優先級
@@ -517,6 +519,38 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		message = fmt.Sprintf("🌈 %s 的彩虹鳳凰 Power Up %sx 擊破了 %s 個目標！獲得 %d 金幣！", playerName, multStr, killsStr, amount)
 		icon = "🌈"
 		color = "#CC44FF"
+		priority = PriorityNormal
+		duration = 4000
+
+	case EventVampireBloodMoon:
+		multStr := "5"
+		if extra != nil {
+			if m, ok := extra["mult"]; ok {
+				multStr = m
+			}
+		}
+		title = "🩸 吸血鬼血月模式！"
+		message = fmt.Sprintf("🩸 吸血鬼進入血月模式！倍率 ×%s！誰能擊破它？", multStr)
+		icon = "🩸"
+		color = "#CC0000"
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventVampireKill:
+		hitsStr := "0"
+		multStr := "5"
+		if extra != nil {
+			if h, ok := extra["hits"]; ok {
+				hitsStr = h
+			}
+			if m, ok := extra["mult"]; ok {
+				multStr = m
+			}
+		}
+		title = "🦇 吸血鬼血月擊破！"
+		message = fmt.Sprintf("🦇 %s 擊破了血月吸血鬼！命中 %s 次，×%s 倍率！獲得 %d 金幣！", playerName, hitsStr, multStr, amount)
+		icon = "🦇"
+		color = "#880000"
 		priority = PriorityNormal
 		duration = 4000
 
