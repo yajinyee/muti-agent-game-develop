@@ -8,7 +8,7 @@
 extends Node2D
 
 # ---- 常數 ----
-const PANEL_WIDTH  := 480  # 六武器版本加寬（DAY-154）
+const PANEL_WIDTH  := 560  # 七武器版本加寬（DAY-155）
 const PANEL_HEIGHT := 90
 const BTN_WIDTH    := 72
 const BTN_HEIGHT   := 62
@@ -80,12 +80,23 @@ const WEAPONS = [
 		"charge_required": 60,
 		"desc": "流星雨\n全場打擊",
 		"purchasable": false
+	},
+	{
+		"type": "torpedo",
+		"name": "魚雷",
+		"icon": "🚀",
+		"color": Color(1.0, 0.84, 0.0),
+		"cost": -1,
+		"max_charges": 2,
+		"charge_required": 25,
+		"desc": "大範圍\n6x費用",
+		"purchasable": false
 	}
 ]
 
 # ---- 狀態 ----
-var _charges: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0, "dragon_wrath": 0}
-var _progress: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0, "dragon_wrath": 0}
+var _charges: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0, "dragon_wrath": 0, "torpedo": 0}
+var _progress: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0, "dragon_wrath": 0, "torpedo": 0}
 var _selected_weapon: String = ""
 var _pixel_font: Font = null
 var _buttons: Array = []
@@ -222,6 +233,8 @@ func _connect_signals() -> void:
 		GameManager.homing_missile_result.connect(_on_homing_missile_result)
 	if GameManager.has_signal("dragon_wrath_result"):
 		GameManager.dragon_wrath_result.connect(_on_dragon_wrath_result)
+	if GameManager.has_signal("torpedo_result"):
+		GameManager.torpedo_result.connect(_on_torpedo_result)
 
 # ---- 事件處理 ----
 
@@ -235,7 +248,7 @@ func _on_weapon_btn_pressed(wtype: String) -> void:
 			NetworkManager.send_use_special_weapon(wtype, 640.0, 360.0)
 			_set_selected("")
 		else:
-			# 炸彈/雷射：進入選擇模式，等待玩家點擊目標位置
+			# 炸彈/雷射/魚雷：進入選擇模式，等待玩家點擊目標位置
 			if _selected_weapon == wtype:
 				_set_selected("")  # 再次點擊取消選擇
 			else:
@@ -257,12 +270,14 @@ func _on_special_weapon_updated(data: Dictionary) -> void:
 	_charges["tornado"] = data.get("tornado_charges", 0)
 	_charges["homing"] = data.get("homing_charges", 0)
 	_charges["dragon_wrath"] = data.get("dragon_wrath_charges", 0)
+	_charges["torpedo"] = data.get("torpedo_charges", 0)
 	_progress["bomb"] = data.get("bomb_charge_progress", 0)
 	_progress["laser"] = data.get("laser_charge_progress", 0)
 	_progress["freeze"] = data.get("freeze_charge_progress", 0)
 	_progress["tornado"] = data.get("tornado_charge_progress", 0)
 	_progress["homing"] = data.get("homing_charge_progress", 0)
 	_progress["dragon_wrath"] = data.get("dragon_wrath_charge_progress", 0)
+	_progress["torpedo"] = data.get("torpedo_charge_progress", 0)
 	_update_charge_display()
 
 func _on_special_weapon_fired(data: Dictionary) -> void:
@@ -555,4 +570,59 @@ func _on_dragon_wrath_result(data: Dictionary) -> void:
 				flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.13, 0.0, 1.0), 0.08)
 				flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
 				flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.13, 0.0, 1.0), 0.08)
+				flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
+
+## 魚雷爆炸結果（DAY-155）
+func _on_torpedo_result(data: Dictionary) -> void:
+	var phase: String = data.get("phase", "")
+	var total_reward: int = data.get("total_reward", 0)
+	var shooter_id: String = data.get("shooter_id", "")
+	var cost: int = data.get("cost", 0)
+
+	# 只處理自己觸發的結果
+	if shooter_id != NetworkManager.get_player_id():
+		return
+
+	if phase == "result" and total_reward > 0:
+		# 顯示魚雷結果（金色彈窗）
+		var net_reward = total_reward - cost
+		var result_lbl := Label.new()
+		if net_reward > 0:
+			result_lbl.text = "🚀 +%d (費%d)" % [total_reward, cost]
+		else:
+			result_lbl.text = "🚀 %d (費%d)" % [total_reward, cost]
+		result_lbl.position = Vector2(PANEL_WIDTH / 2.0 - 70, -40)
+		result_lbl.size = Vector2(140, 20)
+		result_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var color = Color(1.0, 0.84, 0.0) if net_reward > 0 else Color(0.8, 0.4, 0.0)
+		result_lbl.add_theme_color_override("font_color", color)
+		result_lbl.add_theme_font_size_override("font_size", 12)
+		if _pixel_font:
+			result_lbl.add_theme_font_override("font", _pixel_font)
+
+		var result_bg := ColorRect.new()
+		result_bg.position = Vector2(PANEL_WIDTH / 2.0 - 72, -42)
+		result_bg.size = Vector2(144, 24)
+		result_bg.color = Color(0.1, 0.08, 0.0, 0.92)
+		add_child(result_bg)
+		add_child(result_lbl)
+
+		# 上浮淡出動畫
+		var tween = result_lbl.create_tween()
+		tween.tween_property(result_lbl, "position:y", result_lbl.position.y - 24, 1.2)
+		tween.parallel().tween_property(result_lbl, "modulate:a", 0.0, 1.2)
+		tween.tween_callback(func():
+			if is_instance_valid(result_lbl): result_lbl.queue_free()
+			if is_instance_valid(result_bg): result_bg.queue_free()
+		)
+
+		# 魚雷按鈕閃爍（金色）
+		var torpedo_idx = _get_weapon_index("torpedo")
+		if torpedo_idx >= 0 and torpedo_idx < _buttons.size():
+			var btn_bg = _buttons[torpedo_idx]
+			if is_instance_valid(btn_bg):
+				var flash_tween = btn_bg.create_tween()
+				flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.42, 0.0, 1.0), 0.08)
+				flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
+				flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.42, 0.0, 1.0), 0.08)
 				flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)

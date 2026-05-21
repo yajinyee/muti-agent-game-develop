@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-154 龍怒流星雨武器系統）
+## 最後更新：2026-05-22（DAY-155 魚雷武器系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-155 更新（自主觸發）：** 魚雷武器系統（Torpedo Weapon System）✅
+  - **業界依據：** jiligames.com 2026 Mega Fishing「With torpedoes and railgun, you can easily catch sea monsters.」+ megafishing.click「Special Weapons Railgun (15x stake), Torpedo (6x stake)」— 魚雷是 JILI Mega Fishing 的業界標準武器，費用 6x betLevel（動態費用），範圍 250px（比炸彈 150px 大），是「高費用高回報」的進階武器
+  - `server/internal/game/torpedo_handler.go`：新增魚雷 handler；handleTorpedoFire（費用 6x betLevel/範圍 250px/三階段廣播）；announceTorpedo（≥4個擊破全服公告）
+  - `server/internal/game/specialweapon/specialweapon.go`：新增 WeaponTorpedo 類型；魚雷定義（Cost=-1動態費用/MaxCharges=2/充能25次/🚀圖示/金色）；TorpedoRadius=250/TorpedoNormalKillChance=0.85/TorpedoSpecialKillChance=0.65/TorpedoBossKillChance=0.40/TorpedoCostMultiplier=6；CalcTorpedoTargets；BuyWeapon 修復（Cost<=0 不可購買，防止 Cost=-1 的魚雷被購買）；RecordKill 跳過 WeaponDragonWrath（龍怒由 RecordShot 累積）；PlayerWeaponState 加入 TorpedoCharges/TorpedoChargeProgress；所有 switch 分支加入 WeaponTorpedo 處理
+  - `server/internal/game/specialweapon_handler.go`：handleUseSpecialWeapon 加入 WeaponTorpedo 分支（直接呼叫 handleTorpedoFire）；sendSpecialWeaponUpdate 加入 TorpedoCharges/TorpedoChargeProgress
+  - `server/internal/ws/protocol.go`：新增 MsgTorpedoResult；TorpedoKillEntry/TorpedoResultPayload；SpecialWeaponUpdatePayload 加入 TorpedoCharges/TorpedoChargeProgress
+  - `client/chiikawa-pixel/scripts/ui/SpecialWeaponPanel.gd`：升級為七武器面板（寬度 480→560）；新增魚雷按鈕（金色邊框/🚀圖示）；_charges/_progress 加入 torpedo；_on_weapon_btn_pressed 魚雷走選擇目標模式（像炸彈）；_on_torpedo_result（結果彈窗顯示獎勵-費用+按鈕閃爍）；連接 torpedo_result 訊號
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：torpedo_result 訊號 + _handle_torpedo_result
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：MysteryBoxPanel 位置從 x=905 右移到 x=985（因 SpecialWeaponPanel 變寬）
+  - 費用設計：6x betLevel（動態費用）— LV1=6金幣/LV5=30金幣/LV10=60金幣，高 betLevel 玩家費用更高但回報也更高
+  - 範圍設計：250px（比炸彈 200px 大 25%），覆蓋更大範圍，適合打密集目標群
+  - 擊破機率：普通 85%（比炸彈高）/特殊 65%/BOSS 40%，整體比炸彈更強
+  - 獎勵設計：擊破獎勵 = 目標倍率 × betLevel × 0.75（比炸彈 0.65 高，平衡費用）
+  - 充能設計：擊破 25 個目標自動充能一發（介於炸彈 20 和雷射 30 之間）
+  - 全服公告：擊破 ≥4 個目標時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-154 更新（自主觸發）：** 龍怒流星雨武器系統（Dragon Wrath Meteor Shower Weapon System）✅
   - **業界依據：** royalfishing.co.uk 2026「Once the wrath meter fills, players unleash a massive meteorite attack across the centre screen, simultaneously targeting multiple fish including Immortal Bosses and the ChainLong King. The wrath value converts proportionally to your bet amount, meaning higher stakes generate faster charge rates.」— 每次射擊累積怒氣值（60次充滿），釋放 5 波流星雨打擊全場，可命中不死 BOSS 和千龍王
   - `server/internal/game/dragon_wrath_handler.go`：新增 DAY-154 龍怒流星雨武器 handler；notifyDragonWrathShot（每次射擊累積充能）；handleDragonWrathFire（觸發 5 波流星雨）；runDragonWrathMeteors（goroutine，5波/300ms間隔/200px半徑/不死BOSS特殊處理）；calcMeteorHitTargets（半徑命中計算）；announceDragonWrath（全服公告）

@@ -1,10 +1,11 @@
-// Package specialweapon 特殊武器系統（DAY-089，升級 DAY-134，DAY-141，DAY-154）
+// Package specialweapon 特殊武器系統（DAY-089，升級 DAY-134，DAY-141，DAY-154，DAY-155）
 // 業界依據：
 //   - Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是標配特殊武器
 //   - Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標
 //   - JILI 2026 Auto-Charge — 每次擊破目標自動累積充能，不需要花金幣
 //   - thechipotlemenu.com 2026 Automatic Target Locking Weapon — AI 自動追蹤最高倍率目標，100% 命中
 //   - royalfishing.co.uk 2026 Dragon Wrath — 累積怒氣值，釋放流星雨打擊全場（含 Immortal Boss 和 ChainLong King）
+//   - jiligames.com 2026 Mega Fishing Torpedo — 6x stake 費用，大範圍爆炸（250px），業界標準高費用高回報武器
 package specialweapon
 
 import (
@@ -22,6 +23,7 @@ const (
 	WeaponTornado WeaponType = "tornado"      // 龍捲風砲：全螢幕旋轉，50% 機率擊破所有目標（DAY-134）
 	WeaponHoming  WeaponType = "homing"       // 追蹤飛彈：自動追蹤倍率最高的目標，100% 命中（DAY-141）
 	WeaponDragonWrath WeaponType = "dragon_wrath" // 龍怒流星雨：累積怒氣值，釋放流星雨打擊全場（DAY-154）
+	WeaponTorpedo     WeaponType = "torpedo"      // 魚雷：大範圍爆炸（250px），費用 6x betLevel，業界標準高費用高回報武器（DAY-155）
 )
 
 // WeaponDef 特殊武器定義
@@ -105,6 +107,17 @@ var AvailableWeapons = []WeaponDef{
 		ChargeRequired: 60, // 射擊 60 次自動充能一發（每次射擊累積，不是擊破）
 		ChargePerKill:  1,  // 每次射擊 +1（由 RecordShot 呼叫，不是 RecordKill）
 	},
+	{
+		Type:           WeaponTorpedo,
+		Name:           "魚雷",
+		Description:    "大範圍爆炸（250px），費用6x投注額，業界標準高費用高回報武器",
+		Cost:           -1,   // 動態費用（6x betLevel），-1 表示由 Server 動態計算（DAY-155）
+		MaxCharges:     2,    // 最多持有 2 發
+		Icon:           "🚀",
+		Color:          "#FFD700",
+		ChargeRequired: 25, // 擊破 25 個目標自動充能一發（介於炸彈 20 和雷射 30 之間）
+		ChargePerKill:  1,
+	},
 }
 
 // PlayerWeaponState 玩家特殊武器狀態
@@ -115,6 +128,7 @@ type PlayerWeaponState struct {
 	TornadoCharges int `json:"tornado_charges"` // DAY-134
 	HomingCharges  int `json:"homing_charges"`  // DAY-141
 	DragonWrathCharges int `json:"dragon_wrath_charges"` // DAY-154
+	TorpedoCharges     int `json:"torpedo_charges"`      // DAY-155
 
 	// 自動充能進度（DAY-134）
 	BombChargeProgress    int `json:"bomb_charge_progress"`
@@ -123,6 +137,7 @@ type PlayerWeaponState struct {
 	TornadoChargeProgress int `json:"tornado_charge_progress"`
 	HomingChargeProgress  int `json:"homing_charge_progress"` // DAY-141
 	DragonWrathChargeProgress int `json:"dragon_wrath_charge_progress"` // DAY-154（每次射擊累積）
+	TorpedoChargeProgress     int `json:"torpedo_charge_progress"`      // DAY-155
 }
 
 // ChargeResult 充能結果（DAY-134）
@@ -175,8 +190,9 @@ func (m *Manager) BuyWeapon(playerID string, wtype WeaponType, currentCoins int)
 	if def == nil {
 		return false, 0
 	}
-	// 龍捲風砲不能購買，只能充能
-	if def.Cost == 0 {
+	// 龍捲風砲/追蹤飛彈/龍怒流星雨不能購買，只能充能
+	// 魚雷費用動態（Cost = -1），也不能用 BuyWeapon，只能充能或使用已有充能
+	if def.Cost <= 0 {
 		return false, 0
 	}
 	if currentCoins < def.Cost {
@@ -228,6 +244,10 @@ func (m *Manager) RecordKill(playerID string, multiplier float64) []ChargeResult
 
 	for _, def := range AvailableWeapons {
 		if def.ChargeRequired <= 0 {
+			continue
+		}
+		// 龍怒流星雨由 RecordShot 累積（每次射擊），不由 RecordKill 累積（DAY-154）
+		if def.Type == WeaponDragonWrath {
 			continue
 		}
 
@@ -392,6 +412,8 @@ func (m *Manager) getChargesLocked(s *PlayerWeaponState, wtype WeaponType) int {
 		return s.HomingCharges
 	case WeaponDragonWrath:
 		return s.DragonWrathCharges
+	case WeaponTorpedo:
+		return s.TorpedoCharges
 	}
 	return 0
 }
@@ -410,6 +432,8 @@ func (m *Manager) setChargesLocked(s *PlayerWeaponState, wtype WeaponType, v int
 		s.HomingCharges = v
 	case WeaponDragonWrath:
 		s.DragonWrathCharges = v
+	case WeaponTorpedo:
+		s.TorpedoCharges = v
 	}
 }
 
@@ -427,6 +451,8 @@ func (m *Manager) getProgressLocked(s *PlayerWeaponState, wtype WeaponType) int 
 		return s.HomingChargeProgress
 	case WeaponDragonWrath:
 		return s.DragonWrathChargeProgress
+	case WeaponTorpedo:
+		return s.TorpedoChargeProgress
 	}
 	return 0
 }
@@ -445,6 +471,8 @@ func (m *Manager) setProgressLocked(s *PlayerWeaponState, wtype WeaponType, v in
 		s.HomingChargeProgress = v
 	case WeaponDragonWrath:
 		s.DragonWrathChargeProgress = v
+	case WeaponTorpedo:
+		s.TorpedoChargeProgress = v
 	}
 }
 
@@ -547,6 +575,34 @@ func CalcDragonWrathTargets(targets []TargetPos, immortalBossID string) []string
 	// 不死 BOSS 也加入（如果有活躍的）
 	if immortalBossID != "" {
 		hit = append(hit, immortalBossID)
+	}
+	return hit
+}
+
+// TorpedoRadius 魚雷爆炸半徑（DAY-155）
+const TorpedoRadius = 250.0
+
+// TorpedoKillChance 魚雷擊破機率（DAY-155）
+// 普通目標 85%，特殊目標 65%，BOSS 類 40%
+const TorpedoNormalKillChance = 0.85
+const TorpedoSpecialKillChance = 0.65
+const TorpedoBossKillChance = 0.40
+
+// TorpedoCostMultiplier 魚雷費用倍率（DAY-155）
+// 費用 = betLevel × TorpedoCostMultiplier
+const TorpedoCostMultiplier = 6
+
+// CalcTorpedoTargets 計算魚雷命中的目標（DAY-155）
+// 以點擊位置為中心，半徑 250px 內所有目標
+func CalcTorpedoTargets(cx, cy float64, targets []TargetPos) []string {
+	var hit []string
+	for _, t := range targets {
+		dx := t.X - cx
+		dy := t.Y - cy
+		dist := math.Sqrt(dx*dx + dy*dy)
+		if dist <= TorpedoRadius {
+			hit = append(hit, t.InstanceID)
+		}
 	}
 	return hit
 }

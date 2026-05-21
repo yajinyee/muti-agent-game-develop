@@ -107,6 +107,12 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 		go g.handleDragonWrathFire(p)
 		g.sendSpecialWeaponUpdate(p, false)
 		return
+	case specialweapon.WeaponTorpedo:
+		// 魚雷：特殊處理，直接呼叫 handleTorpedoFire（DAY-155）
+		// 費用動態（6x betLevel），不走一般的 hitIDs 流程
+		go g.handleTorpedoFire(p, payload.ClickX, payload.ClickY)
+		g.sendSpecialWeaponUpdate(p, false)
+		return
 	}
 
 	// 處理命中目標
@@ -371,6 +377,7 @@ func (g *Game) sendSpecialWeaponUpdate(p *player.Player, withDefs bool) {
 		TornadoCharges:        snap.TornadoCharges,
 		HomingCharges:         snap.HomingCharges,
 		DragonWrathCharges:    snap.DragonWrathCharges,
+		TorpedoCharges:        snap.TorpedoCharges,
 		NewBalance:            p.Coins,
 		BombChargeProgress:    snap.BombChargeProgress,
 		LaserChargeProgress:   snap.LaserChargeProgress,
@@ -378,6 +385,7 @@ func (g *Game) sendSpecialWeaponUpdate(p *player.Player, withDefs bool) {
 		TornadoChargeProgress: snap.TornadoChargeProgress,
 		HomingChargeProgress:  snap.HomingChargeProgress,
 		DragonWrathChargeProgress: snap.DragonWrathChargeProgress,
+		TorpedoChargeProgress:     snap.TorpedoChargeProgress,
 	}
 
 	// 首次發送時附帶武器定義
