@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-156 皇家閃電鰻持續連鎖電擊系統）
+## 最後更新：2026-05-22（DAY-157 軌道炮武器系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-157 更新（自主觸發）：** 軌道炮武器系統（Railgun Weapon System）✅
+  - **業界依據：** megafishing.click 2026「Special Weapons Railgun (15x stake), Torpedo (6x stake)」+ jiligames.com 2026「With torpedoes and railgun, you can easily catch sea monsters.」— 軌道炮是 JILI Mega Fishing 的終極武器，費用 15x betLevel（比魚雷 6x 更貴），穿透全場高能光束，100% 擊破路徑上所有目標，是「終極清場武器」
+  - `server/internal/game/specialweapon/specialweapon.go`：新增 WeaponRailgun 類型；軌道炮定義（Cost=-1動態費用/MaxCharges=1/充能40次/🔫圖示/青色）；RailgunYRange=40/RailgunCostMultiplier=15/RailgunNormalKillChance=1.00/RailgunSpecialKillChance=0.90/RailgunBossKillChance=0.60；CalcRailgunTargets；PlayerWeaponState 加入 RailgunCharges/RailgunChargeProgress；所有 switch 分支加入 WeaponRailgun 處理
+  - `server/internal/game/railgun_handler.go`：新增軌道炮 handler；handleRailgunFire（費用 15x betLevel/Y軸±40px穿透/三階段廣播：railgun_charge→railgun_fire→result）；announceRailgun（≥3個擊破全服公告）
+  - `server/internal/game/specialweapon_handler.go`：handleUseSpecialWeapon 加入 WeaponRailgun 分支（直接呼叫 handleRailgunFire）；sendSpecialWeaponUpdate 加入 RailgunCharges/RailgunChargeProgress
+  - `server/internal/ws/protocol.go`：新增 MsgRailgunResult；RailgunKillEntry/RailgunResultPayload（三階段：railgun_charge/railgun_fire/result）；SpecialWeaponUpdatePayload 加入 RailgunCharges/RailgunChargeProgress
+  - `client/chiikawa-pixel/scripts/ui/SpecialWeaponPanel.gd`：升級為八武器面板（寬度 560→640）；新增軌道炮按鈕（青色邊框/🔫圖示）；_charges/_progress 加入 railgun；_on_weapon_btn_pressed 軌道炮走選擇目標模式（像炸彈，點擊 Y 座標決定光束位置）；_on_railgun_result（結果彈窗顯示獎勵-費用+按鈕閃爍）；連接 railgun_result 訊號
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：railgun_result 訊號 + _handle_railgun_result
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：MysteryBoxPanel 位置從 x=985 右移到 x=1065（因 SpecialWeaponPanel 變寬）
+  - 費用設計：15x betLevel（動態費用）— LV1=15金幣/LV5=75金幣/LV10=150金幣，是所有武器中費用最高的
+  - 穿透設計：Y 軸 ±40px 範圍（比雷射 ±60px 更窄，但 100% 擊破），玩家需要精準瞄準
+  - 擊破機率：普通 100%（保證擊破）/特殊 90%/BOSS 60%，整體比魚雷更強
+  - 獎勵設計：擊破獎勵 = 目標倍率 × betLevel × 0.80（比魚雷 0.75 高，平衡費用）
+  - 充能設計：擊破 40 個目標自動充能一發（比魚雷 25 更難充能，保持稀有感）；最多持有 1 發（終極武器，稀有）
+  - 全服公告：擊破 ≥3 個目標時全服廣播（比魚雷 4 個門檻低，因為軌道炮更難充能）
+  - 視覺設計：充能動畫（0.8s）→ 光束穿透動畫（0.4s）→ 結果廣播，製造「蓄力→釋放」的爽感
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-156 更新（自主觸發）：** 皇家閃電鰻持續連鎖電擊系統（Royal Chain Lightning System）✅
   - **業界依據：** royal-fishing.co.uk 2026「Creates chain lightning that shocks nearby fish consecutively until targeting turns off. Devastating against clustered schools.」+ royal-fishing.uk 2026「The 60x lightning eel creates chain reactions that jump between nearby fish. Once activated, electric shocks continue spreading until targeting disengages, creating cascading capture sequences across the underwater battlefield.」— 比 T103 閃電鰻（一次性 5 跳）更強的升級版，持續連鎖直到沒有目標或達到上限
   - `server/internal/data/tables.go`：新增 T118 皇家閃電鰻（40-60x/HP90/SpawnWeight4/royal_chain_lightning 行為）

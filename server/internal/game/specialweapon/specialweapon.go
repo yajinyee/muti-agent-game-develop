@@ -1,4 +1,4 @@
-// Package specialweapon 特殊武器系統（DAY-089，升級 DAY-134，DAY-141，DAY-154，DAY-155）
+// Package specialweapon 特殊武器系統（DAY-089，升級 DAY-134，DAY-141，DAY-154，DAY-155，DAY-157）
 // 業界依據：
 //   - Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是標配特殊武器
 //   - Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標
@@ -6,6 +6,7 @@
 //   - thechipotlemenu.com 2026 Automatic Target Locking Weapon — AI 自動追蹤最高倍率目標，100% 命中
 //   - royalfishing.co.uk 2026 Dragon Wrath — 累積怒氣值，釋放流星雨打擊全場（含 Immortal Boss 和 ChainLong King）
 //   - jiligames.com 2026 Mega Fishing Torpedo — 6x stake 費用，大範圍爆炸（250px），業界標準高費用高回報武器
+//   - megafishing.click 2026 Railgun (15x stake) — 穿透全場高能光束，100% 擊破路徑上所有目標，終極清場武器
 package specialweapon
 
 import (
@@ -24,6 +25,7 @@ const (
 	WeaponHoming  WeaponType = "homing"       // 追蹤飛彈：自動追蹤倍率最高的目標，100% 命中（DAY-141）
 	WeaponDragonWrath WeaponType = "dragon_wrath" // 龍怒流星雨：累積怒氣值，釋放流星雨打擊全場（DAY-154）
 	WeaponTorpedo     WeaponType = "torpedo"      // 魚雷：大範圍爆炸（250px），費用 6x betLevel，業界標準高費用高回報武器（DAY-155）
+	WeaponRailgun     WeaponType = "railgun"      // 軌道炮：穿透全場高能光束，費用 15x betLevel，100% 擊破路徑上所有目標（DAY-157）
 )
 
 // WeaponDef 特殊武器定義
@@ -118,6 +120,17 @@ var AvailableWeapons = []WeaponDef{
 		ChargeRequired: 25, // 擊破 25 個目標自動充能一發（介於炸彈 20 和雷射 30 之間）
 		ChargePerKill:  1,
 	},
+	{
+		Type:           WeaponRailgun,
+		Name:           "軌道炮",
+		Description:    "穿透全場高能光束，費用15x投注額，100%擊破路徑上所有目標，終極清場武器",
+		Cost:           -1,   // 動態費用（15x betLevel），-1 表示由 Server 動態計算（DAY-157）
+		MaxCharges:     1,    // 最多持有 1 發（終極武器，稀有）
+		Icon:           "🔫",
+		Color:          "#00FFFF",
+		ChargeRequired: 40, // 擊破 40 個目標自動充能一發（比魚雷 25 更難充能）
+		ChargePerKill:  1,
+	},
 }
 
 // PlayerWeaponState 玩家特殊武器狀態
@@ -129,6 +142,7 @@ type PlayerWeaponState struct {
 	HomingCharges  int `json:"homing_charges"`  // DAY-141
 	DragonWrathCharges int `json:"dragon_wrath_charges"` // DAY-154
 	TorpedoCharges     int `json:"torpedo_charges"`      // DAY-155
+	RailgunCharges     int `json:"railgun_charges"`      // DAY-157
 
 	// 自動充能進度（DAY-134）
 	BombChargeProgress    int `json:"bomb_charge_progress"`
@@ -138,6 +152,7 @@ type PlayerWeaponState struct {
 	HomingChargeProgress  int `json:"homing_charge_progress"` // DAY-141
 	DragonWrathChargeProgress int `json:"dragon_wrath_charge_progress"` // DAY-154（每次射擊累積）
 	TorpedoChargeProgress     int `json:"torpedo_charge_progress"`      // DAY-155
+	RailgunChargeProgress     int `json:"railgun_charge_progress"`      // DAY-157
 }
 
 // ChargeResult 充能結果（DAY-134）
@@ -414,6 +429,8 @@ func (m *Manager) getChargesLocked(s *PlayerWeaponState, wtype WeaponType) int {
 		return s.DragonWrathCharges
 	case WeaponTorpedo:
 		return s.TorpedoCharges
+	case WeaponRailgun:
+		return s.RailgunCharges
 	}
 	return 0
 }
@@ -434,6 +451,8 @@ func (m *Manager) setChargesLocked(s *PlayerWeaponState, wtype WeaponType, v int
 		s.DragonWrathCharges = v
 	case WeaponTorpedo:
 		s.TorpedoCharges = v
+	case WeaponRailgun:
+		s.RailgunCharges = v
 	}
 }
 
@@ -453,6 +472,8 @@ func (m *Manager) getProgressLocked(s *PlayerWeaponState, wtype WeaponType) int 
 		return s.DragonWrathChargeProgress
 	case WeaponTorpedo:
 		return s.TorpedoChargeProgress
+	case WeaponRailgun:
+		return s.RailgunChargeProgress
 	}
 	return 0
 }
@@ -473,6 +494,8 @@ func (m *Manager) setProgressLocked(s *PlayerWeaponState, wtype WeaponType, v in
 		s.DragonWrathChargeProgress = v
 	case WeaponTorpedo:
 		s.TorpedoChargeProgress = v
+	case WeaponRailgun:
+		s.RailgunChargeProgress = v
 	}
 }
 
@@ -601,6 +624,34 @@ func CalcTorpedoTargets(cx, cy float64, targets []TargetPos) []string {
 		dy := t.Y - cy
 		dist := math.Sqrt(dx*dx + dy*dy)
 		if dist <= TorpedoRadius {
+			hit = append(hit, t.InstanceID)
+		}
+	}
+	return hit
+}
+
+// ---- 軌道炮（DAY-157）----
+
+// RailgunYRange 軌道炮 Y 軸容差（px）— 比雷射 60px 更窄，但 100% 擊破
+// 業界依據：megafishing.click 2026「Railgun (15x stake)」— 高費用高精準，穿透全場
+const RailgunYRange = 40.0
+
+// RailgunCostMultiplier 軌道炮費用倍率（DAY-157）
+// 費用 = betLevel × RailgunCostMultiplier（15x，比魚雷 6x 更貴）
+const RailgunCostMultiplier = 15
+
+// RailgunNormalKillChance 軌道炮擊破機率（DAY-157）
+// 普通目標 100%，特殊目標 90%，BOSS 類 60%
+const RailgunNormalKillChance = 1.00
+const RailgunSpecialKillChance = 0.90
+const RailgunBossKillChance = 0.60
+
+// CalcRailgunTargets 計算軌道炮命中的目標（DAY-157）
+// 以點擊 Y 座標為中心，Y 軸 ±40px 範圍內所有目標（水平穿透全場）
+func CalcRailgunTargets(clickY float64, targets []TargetPos) []string {
+	var hit []string
+	for _, t := range targets {
+		if math.Abs(t.Y-clickY) <= RailgunYRange {
 			hit = append(hit, t.InstanceID)
 		}
 	}

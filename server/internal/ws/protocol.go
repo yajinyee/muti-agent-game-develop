@@ -194,6 +194,7 @@ const (
 	MsgDragonWrathCharge    MessageType = "dragon_wrath_charge"    // 龍怒怒氣值更新（DAY-154）
 	MsgDragonWrathResult    MessageType = "dragon_wrath_result"    // 龍怒流星雨結果（DAY-154）
 	MsgTorpedoResult        MessageType = "torpedo_result"         // 魚雷爆炸結果（DAY-155）
+	MsgRailgunResult        MessageType = "railgun_result"         // 軌道炮穿透結果（DAY-157）
 	MsgRoyalChainLightning  MessageType = "royal_chain_lightning"  // 皇家閃電鰻持續連鎖電擊（DAY-156）
 	// 神秘寶箱系統（DAY-090）
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
@@ -1559,6 +1560,7 @@ type SpecialWeaponUpdatePayload struct {
 	HomingCharges  int                `json:"homing_charges"`   // DAY-141
 	DragonWrathCharges int            `json:"dragon_wrath_charges"` // DAY-154
 	TorpedoCharges     int            `json:"torpedo_charges"`      // DAY-155
+	RailgunCharges     int            `json:"railgun_charges"`      // DAY-157
 	NewBalance     int                `json:"new_balance"`      // 購買後的新餘額（0=使用操作）
 	Definitions    []SpecialWeaponDef `json:"definitions"`      // 武器定義（首次發送時填入）
 	// 充能進度（DAY-134）
@@ -1569,6 +1571,7 @@ type SpecialWeaponUpdatePayload struct {
 	HomingChargeProgress  int `json:"homing_charge_progress"`       // DAY-141
 	DragonWrathChargeProgress int `json:"dragon_wrath_charge_progress"` // DAY-154
 	TorpedoChargeProgress     int `json:"torpedo_charge_progress"`      // DAY-155
+	RailgunChargeProgress     int `json:"railgun_charge_progress"`      // DAY-157
 }
 
 // SpecialWeaponChargedPayload 自動充能完成通知（Server → Client，DAY-134）
@@ -3031,6 +3034,29 @@ type TorpedoResultPayload struct {
 	TotalReward int                `json:"total_reward"` // 總獎勵（result 時）
 	NewBalance  int                `json:"new_balance"`  // 結果後餘額（result 時，僅射擊者）
 	Cost        int                `json:"cost"`         // 魚雷費用（6x betLevel）
+}
+
+// RailgunKillEntry 軌道炮穿透命中的目標條目（DAY-157）
+type RailgunKillEntry struct {
+	InstanceID string  `json:"instance_id"` // 目標 InstanceID
+	DefID      string  `json:"def_id"`      // 目標定義 ID
+	X          float64 `json:"x"`           // 目標 X 座標（用於排序穿透順序）
+	Multiplier float64 `json:"multiplier"`  // 目標倍率
+	Reward     int     `json:"reward"`      // 獎勵金幣
+	Killed     bool    `json:"killed"`      // 是否擊破
+}
+
+// RailgunResultPayload 軌道炮穿透結果廣播（Server → Client，DAY-157）
+// Phase: "railgun_charge" → "railgun_fire" → "result"
+type RailgunResultPayload struct {
+	ShooterID   string             `json:"shooter_id"`   // 射擊玩家 ID
+	ShooterName string             `json:"shooter_name"` // 射擊玩家名稱
+	Phase       string             `json:"phase"`        // 當前階段
+	TargetY     float64            `json:"target_y"`     // 光束 Y 座標
+	HitTargets  []RailgunKillEntry `json:"hit_targets"`  // 命中目標（result 時）
+	TotalReward int                `json:"total_reward"` // 總獎勵（result 時）
+	NewBalance  int                `json:"new_balance"`  // 結果後餘額（result 時，僅射擊者）
+	Cost        int                `json:"cost"`         // 軌道炮費用（15x betLevel）
 }
 
 // RoyalChainLightningEntry 皇家閃電鰻連鎖電擊的目標條目（DAY-156）

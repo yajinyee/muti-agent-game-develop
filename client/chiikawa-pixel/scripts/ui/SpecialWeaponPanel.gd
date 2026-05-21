@@ -1,14 +1,15 @@
-## SpecialWeaponPanel.gd — 特殊武器面板（DAY-089，升級 DAY-134，DAY-141）
-## 顯示五種特殊武器（炸彈/雷射/冰凍/龍捲風/追蹤飛彈），支援自動充能進度條
+## SpecialWeaponPanel.gd — 特殊武器面板（DAY-089，升級 DAY-134，DAY-141，DAY-157）
+## 顯示八種特殊武器（炸彈/雷射/冰凍/龍捲風/追蹤飛彈/龍怒/魚雷/軌道炮），支援自動充能進度條
 ## 業界依據：
 ##   - Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是標配特殊武器
 ##   - Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標
 ##   - JILI 2026 Auto-Charge — 每次擊破目標自動累積充能，不需要花金幣
 ##   - thechipotlemenu.com 2026 Automatic Target Locking Weapon — AI 自動追蹤最高倍率目標
+##   - megafishing.click 2026 Railgun (15x stake) — 穿透全場高能光束，終極清場武器
 extends Node2D
 
 # ---- 常數 ----
-const PANEL_WIDTH  := 560  # 七武器版本加寬（DAY-155）
+const PANEL_WIDTH  := 640  # 八武器版本加寬（DAY-157）
 const PANEL_HEIGHT := 90
 const BTN_WIDTH    := 72
 const BTN_HEIGHT   := 62
@@ -91,12 +92,23 @@ const WEAPONS = [
 		"charge_required": 25,
 		"desc": "大範圍\n6x費用",
 		"purchasable": false
+	},
+	{
+		"type": "railgun",
+		"name": "軌道炮",
+		"icon": "🔫",
+		"color": Color(0.0, 1.0, 1.0),
+		"cost": -1,
+		"max_charges": 1,
+		"charge_required": 40,
+		"desc": "穿透全場\n15x費用",
+		"purchasable": false
 	}
 ]
 
 # ---- 狀態 ----
-var _charges: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0, "dragon_wrath": 0, "torpedo": 0}
-var _progress: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0, "dragon_wrath": 0, "torpedo": 0}
+var _charges: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0, "dragon_wrath": 0, "torpedo": 0, "railgun": 0}
+var _progress: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0, "dragon_wrath": 0, "torpedo": 0, "railgun": 0}
 var _selected_weapon: String = ""
 var _pixel_font: Font = null
 var _buttons: Array = []
@@ -235,6 +247,8 @@ func _connect_signals() -> void:
 		GameManager.dragon_wrath_result.connect(_on_dragon_wrath_result)
 	if GameManager.has_signal("torpedo_result"):
 		GameManager.torpedo_result.connect(_on_torpedo_result)
+	if GameManager.has_signal("railgun_result"):
+		GameManager.railgun_result.connect(_on_railgun_result)
 
 # ---- 事件處理 ----
 
@@ -248,7 +262,7 @@ func _on_weapon_btn_pressed(wtype: String) -> void:
 			NetworkManager.send_use_special_weapon(wtype, 640.0, 360.0)
 			_set_selected("")
 		else:
-			# 炸彈/雷射/魚雷：進入選擇模式，等待玩家點擊目標位置
+			# 炸彈/雷射/魚雷/軌道炮：進入選擇模式，等待玩家點擊目標位置
 			if _selected_weapon == wtype:
 				_set_selected("")  # 再次點擊取消選擇
 			else:
@@ -271,6 +285,7 @@ func _on_special_weapon_updated(data: Dictionary) -> void:
 	_charges["homing"] = data.get("homing_charges", 0)
 	_charges["dragon_wrath"] = data.get("dragon_wrath_charges", 0)
 	_charges["torpedo"] = data.get("torpedo_charges", 0)
+	_charges["railgun"] = data.get("railgun_charges", 0)
 	_progress["bomb"] = data.get("bomb_charge_progress", 0)
 	_progress["laser"] = data.get("laser_charge_progress", 0)
 	_progress["freeze"] = data.get("freeze_charge_progress", 0)
@@ -278,6 +293,7 @@ func _on_special_weapon_updated(data: Dictionary) -> void:
 	_progress["homing"] = data.get("homing_charge_progress", 0)
 	_progress["dragon_wrath"] = data.get("dragon_wrath_charge_progress", 0)
 	_progress["torpedo"] = data.get("torpedo_charge_progress", 0)
+	_progress["railgun"] = data.get("railgun_charge_progress", 0)
 	_update_charge_display()
 
 func _on_special_weapon_fired(data: Dictionary) -> void:
@@ -625,4 +641,59 @@ func _on_torpedo_result(data: Dictionary) -> void:
 				flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.42, 0.0, 1.0), 0.08)
 				flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
 				flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.42, 0.0, 1.0), 0.08)
+				flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
+
+## 軌道炮穿透結果（DAY-157）
+func _on_railgun_result(data: Dictionary) -> void:
+	var phase: String = data.get("phase", "")
+	var total_reward: int = data.get("total_reward", 0)
+	var shooter_id: String = data.get("shooter_id", "")
+	var cost: int = data.get("cost", 0)
+
+	# 只處理自己觸發的結果
+	if shooter_id != NetworkManager.get_player_id():
+		return
+
+	if phase == "result" and total_reward > 0:
+		# 顯示軌道炮結果（青色彈窗）
+		var net_reward = total_reward - cost
+		var result_lbl := Label.new()
+		if net_reward > 0:
+			result_lbl.text = "🔫 +%d (費%d)" % [total_reward, cost]
+		else:
+			result_lbl.text = "🔫 %d (費%d)" % [total_reward, cost]
+		result_lbl.position = Vector2(PANEL_WIDTH / 2.0 - 70, -40)
+		result_lbl.size = Vector2(140, 20)
+		result_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		var color = Color(0.0, 1.0, 1.0) if net_reward > 0 else Color(0.0, 0.6, 0.6)
+		result_lbl.add_theme_color_override("font_color", color)
+		result_lbl.add_theme_font_size_override("font_size", 12)
+		if _pixel_font:
+			result_lbl.add_theme_font_override("font", _pixel_font)
+
+		var result_bg := ColorRect.new()
+		result_bg.position = Vector2(PANEL_WIDTH / 2.0 - 72, -42)
+		result_bg.size = Vector2(144, 24)
+		result_bg.color = Color(0.0, 0.08, 0.1, 0.92)
+		add_child(result_bg)
+		add_child(result_lbl)
+
+		# 上浮淡出動畫
+		var tween = result_lbl.create_tween()
+		tween.tween_property(result_lbl, "position:y", result_lbl.position.y - 24, 1.2)
+		tween.parallel().tween_property(result_lbl, "modulate:a", 0.0, 1.2)
+		tween.tween_callback(func():
+			if is_instance_valid(result_lbl): result_lbl.queue_free()
+			if is_instance_valid(result_bg): result_bg.queue_free()
+		)
+
+		# 軌道炮按鈕閃爍（青色）
+		var railgun_idx = _get_weapon_index("railgun")
+		if railgun_idx >= 0 and railgun_idx < _buttons.size():
+			var btn_bg = _buttons[railgun_idx]
+			if is_instance_valid(btn_bg):
+				var flash_tween = btn_bg.create_tween()
+				flash_tween.tween_property(btn_bg, "color", Color(0.0, 0.5, 0.5, 1.0), 0.08)
+				flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
+				flash_tween.tween_property(btn_bg, "color", Color(0.0, 0.5, 0.5, 1.0), 0.08)
 				flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
