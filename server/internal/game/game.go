@@ -137,6 +137,7 @@ type Game struct {
 	RainbowPhoenix     *rainbowPhoenixManager     // 彩虹鳳凰 Power Up 系統管理器（DAY-151）
 	GoldenTurtle       *goldenTurtleManager       // 黃金海龜時間停止系統管理器（DAY-159）
 	LuckyStarFish      *luckyStarFishManager      // 幸運星魚全場倍率翻倍管理器（DAY-160）
+	GoldenShark        *goldenSharkManager        // 黃金鯊魚全服狂暴模式管理器（DAY-161）
 	CrystalDragon      *crystaldragon.Manager     // 水晶龍收集大獎系統管理器（DAY-153）
 
 	// 計時器
@@ -254,6 +255,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		RainbowPhoenix:     newRainbowPhoenixManager(),
 		GoldenTurtle:       newGoldenTurtleManager(),
 		LuckyStarFish:      newLuckyStarFishManager(),
+		GoldenShark:        newGoldenSharkManager(),
 		CrystalDragon:      crystaldragon.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
@@ -1015,6 +1017,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if luckyStarMult > 1.0 {
 		finalReward = int(float64(finalReward) * luckyStarMult)
 	}
+	// 套用黃金鯊魚全服狂暴倍率（DAY-161）
+	goldenSharkMult := g.getGoldenSharkMult()
+	if goldenSharkMult > 1.0 {
+		finalReward = int(float64(finalReward) * goldenSharkMult)
+	}
 	// 雙環輪盤：擊破高倍率目標後嘗試觸發（DAY-139）
 	go g.tryDualRoulette(p, float64(t.Multiplier), finalReward)
 	// 懸賞領取：擊破懸賞目標獲得額外金幣（DAY-137）
@@ -1297,6 +1304,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運星魚全場倍率翻倍：擊破 T120 時觸發（DAY-160）
 	if isLuckyStarFish(t.DefID) {
 		go g.tryLuckyStarFish(p, t.InstanceID, t.X, t.Y)
+	}
+	// 黃金鯊魚全服狂暴模式：擊破 T121 時觸發（DAY-161）
+	if isGoldenShark(t.DefID) {
+		go g.tryGoldenSharkBerserk(p, t.InstanceID, t.X, t.Y)
 	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)

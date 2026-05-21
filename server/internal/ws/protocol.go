@@ -197,6 +197,7 @@ const (
 	MsgRailgunResult        MessageType = "railgun_result"         // 軌道炮穿透結果（DAY-157）
 	MsgGoldenTurtleTimeStop MessageType = "golden_turtle_time_stop" // 黃金海龜時間停止（DAY-159）
 	MsgLuckyStarFish        MessageType = "lucky_star_fish"         // 幸運星魚全場倍率翻倍（DAY-160）
+	MsgGoldenSharkBerserk   MessageType = "golden_shark_berserk"    // 黃金鯊魚全服狂暴模式（DAY-161）
 	MsgRoyalChainLightning  MessageType = "royal_chain_lightning"  // 皇家閃電鰻持續連鎖電擊（DAY-156）
 	// 神秘寶箱系統（DAY-090）
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
@@ -3084,6 +3085,19 @@ type LuckyStarFishPayload struct {
 	Phase        string  `json:"phase"`         // 當前階段
 	DurationSecs float64 `json:"duration_secs"` // 倍率翻倍時間（秒）
 	MultBonus    float64 `json:"mult_bonus"`    // 倍率加成（2.0 = 翻倍）
+}
+
+// GoldenSharkBerserkPayload 黃金鯊魚全服狂暴模式廣播（Server → Client，DAY-161）
+// Phase: "berserk_start" → "berserk_end"
+type GoldenSharkBerserkPayload struct {
+	TriggerID    string  `json:"trigger_id"`    // 觸發的 T121 InstanceID
+	TriggerX     float64 `json:"trigger_x"`     // 觸發位置 X
+	TriggerY     float64 `json:"trigger_y"`     // 觸發位置 Y
+	KillerID     string  `json:"killer_id"`     // 擊破玩家 ID
+	KillerName   string  `json:"killer_name"`   // 擊破玩家名稱
+	Phase        string  `json:"phase"`         // 當前階段：berserk_start / berserk_end
+	DurationSecs float64 `json:"duration_secs"` // 狂暴模式持續時間（秒）
+	MultBonus    float64 `json:"mult_bonus"`    // 倍率加成（1.5 = 全場 ×1.5）
 }
 
 // RoyalChainLightningEntry 皇家閃電鰻連鎖電擊的目標條目（DAY-156）

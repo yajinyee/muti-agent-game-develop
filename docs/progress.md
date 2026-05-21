@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-160 幸運星魚全場倍率翻倍系統）
+## 最後更新：2026-05-22（DAY-161 黃金鯊魚全服狂暴模式）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,20 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-161 更新（自主觸發）：** 黃金鯊魚全服狂暴模式（Golden Shark Berserk Mode）✅
+  - **業界依據：** King of Ocean 2026「sharks climb into x50-x300 zone」+ 捕魚機業界「rage/berserk mode」機制 — 擊破黃金鯊魚後觸發「全服狂暴模式」，全場所有目標物獎勵倍率 ×1.5，持續 12 秒，全服廣播
+  - **設計差異：** 與幸運星魚（個人 ×2，10秒）不同，黃金鯊魚是**全服共享 ×1.5**（12秒），任何玩家擊破都讓全服受益，社交性更強
+  - `server/internal/data/tables.go`：新增 T121 黃金鯊魚（50-80x/HP100/SpawnWeight3/golden_shark_berserk 行為）
+  - `server/internal/game/golden_shark_handler.go`：goldenSharkManager（全服共享 isActive/cooldown 管理）；isGoldenShark 判斷；getGoldenSharkMult（供 handleKill 使用，活躍時回傳 1.5）；tryGoldenSharkBerserk（觸發狂暴模式/全服廣播/全服公告/12秒後廣播結束）
+  - `server/internal/ws/protocol.go`：新增 MsgGoldenSharkBerserk；GoldenSharkBerserkPayload（兩階段：berserk_start/berserk_end）
+  - `server/internal/game/game.go`：Game struct 加入 GoldenShark *goldenSharkManager；NewGameWithStore 初始化；handleKill 加入 getGoldenSharkMult 倍率套用（在幸運星魚之後）+ isGoldenShark 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/GoldenSharkPanel.gd`：黃金鯊魚面板（橙紅主題；berserk_start 全螢幕橙色閃光+頂部橫幅滑入+右上角倒數計時器；自己觸發時中央大 ×1.5 標誌彈跳動畫；berserk_end 淡出所有 UI；_process 更新倒數計時）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：golden_shark_berserk 訊號 + _handle_golden_shark_berserk
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 GoldenSharkPanelScript（z_index=80）
+  - 狂暴設計：全服共享（不是個人）；12 秒持續時間；90 秒冷卻（全服共享，冷卻更長）；任何玩家擊破都觸發
+  - 倍率疊加：黃金鯊魚倍率在幸運星魚之後套用（最後一層），最大化爽感
+  - 視覺設計：橙紅主題（鯊魚狂暴感）；全服廣播讓所有玩家看到「有人觸發了黃金鯊魚狂暴模式」
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-160 更新（自主觸發）：** 幸運星魚全場倍率翻倍系統（Lucky Star Fish x2 Multiplier System）✅
   - **業界依據：** 捕魚機業界標準「倍率爆發」機制 — 擊破特殊目標後觸發短期倍率翻倍，讓玩家在有限時間內大量獲得高獎勵，製造「大豐收」的爽感
   - `server/internal/data/tables.go`：新增 T120 幸運星魚（40-60x/HP70/SpawnWeight4/lucky_star_fish 行為）
