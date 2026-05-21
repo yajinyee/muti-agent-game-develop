@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-126 稀有連擊累積倍率系統）
+## 最後更新：2026-05-21（DAY-127 天氣湧現事件系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-127 更新（自主觸發）：** 天氣湧現事件系統（Weather Surge Event）✅
+  - **規格缺口修復：** `spawnTarget` 整合天氣的 `RareChanceBonus` 和 `GoldFishBonus` — 天氣系統定義了稀有目標加成，但原本完全沒有傳入 `PickTargetDef`，現在正確整合
+  - `server/internal/game/target/target.go`：`PickTargetDef` 新增 `rareBonus float64` 和 `goldFishBonus float64` 參數；整合天氣加成到 SpecialRatio/HighRatio；確保 BasicRatio 不低於 0.5
+  - `server/internal/game/respin_handler.go`：更新 `PickTargetDef` 呼叫（新增 0.0, 0.0 參數）
+  - `server/internal/game/target/target_test.go`：更新測試呼叫（新增 0, 0 參數）
+  - `server/internal/game/weathersurge_handler.go`：天氣湧現事件 handler；4種天氣觸發定義（暴風湧現/黃金湧現/冰封湧現/迷霧湧現）；`tryTriggerWeatherSurge`（天氣切換時機率觸發）；`tickWeatherSurge`（過期檢查）；`announceWeatherSurge`（全服公告）；觸發時立即生成 3 個稀有目標（湧現感）
+  - `server/internal/game/game.go`：Game struct 加入 `weatherSurgeActive/weatherSurgeEndAt/weatherSurgeRareBonus/weatherSurgeGoldBonus/weatherSurgeName` 欄位；`spawnTarget` 整合天氣加成和湧現加成；gameLoop 加入 `tickWeatherSurge`
+  - `server/internal/game/weather_handler.go`：`tickAndBroadcastWeather` 天氣切換後呼叫 `tryTriggerWeatherSurge`
+  - `server/internal/game/announce/announce.go`：新增 `EventWeatherSurge` 事件類型；`buildContent` 加入湧現公告（高優先，6秒顯示）
+  - `server/internal/ws/protocol.go`：新增 `MsgWeatherSurgeStart/MsgWeatherSurgeEnd`；`WeatherSurgeStartPayload/WeatherSurgeEndPayload`
+  - `client/chiikawa-pixel/scripts/ui/WeatherSurgePanel.gd`：天氣湧現面板（頂部橫幅滑入；圖示+名稱+描述+倒數計時；右下角狀態指示器顯示稀有/金幣魚加成百分比；最後10秒紅色閃爍；全螢幕天藍色閃光；結束時滑出+指示器淡出）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`weather_surge_started/weather_surge_ended` 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 WeatherSurgePanelScript preload + `_init_weather_surge_panel()`（z_index=77）
+  - 湧現設計：暴風雨 → 暴風湧現（稀有+15%，金幣魚+5%，40秒，60%觸發率）；豔陽 → 黃金湧現（稀有+8%，金幣魚+20%，35秒，70%觸發率）；暴雪 → 冰封湧現（稀有+20%，金幣魚+10%，45秒，80%觸發率）；濃霧 → 迷霧湧現（稀有+12%，金幣魚+3%，30秒，50%觸發率）
+  - 晴天/下雨不觸發湧現（保持正常節奏）
+  - 湧現期間 `spawnTarget` 自動套用加成，無需額外邏輯
+  - build/vet 全部通過（零錯誤零警告）
+  - **業界依據：** Fisch（Roblox）2026-05-21 Sovereign Surge 確認「特殊天氣事件讓稀有目標群湧出現」是 2026 年最新趨勢；天氣湧現讓玩家有「把握時機」的緊迫感，提升短期參與度；與現有天氣系統無縫整合，不增加複雜度
+
 - **DAY-126 更新（自主觸發）：** 稀有連擊累積倍率系統（Rare Catch Cascade）✅
   - `server/internal/game/rarecatch/rarecatch.go`：稀有連擊管理器；IsRareTarget（T101-T105）；5級倍率：×2.0/×3.0/×5.0/×8.0/×15.0；90秒超時重置；RecordKill（累積/升級/廣播判斷）；GetMultBoost/GetSnapshot/CheckExpiry/RemovePlayer
   - `server/internal/game/rarecatch/rarecatch_test.go`：14 個單元測試（New/IsRareTarget/FirstKill/SecondKill/ThirdKill_Broadcast/MaxCap/Snapshot_Inactive/Snapshot_Active/CheckExpiry_NotExpired/CheckExpiry_Expired/RemovePlayer/MultiplePlayers/CascadeLevels_Complete/SessionExpiry）

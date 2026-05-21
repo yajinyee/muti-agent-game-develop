@@ -28,6 +28,7 @@ const (
 	EventBossWarning   EventType = "boss_warning"    // BOSS 即將出現
 	EventGrandJackpot  EventType = "grand_jackpot"   // Grand Jackpot 中獎（最高優先）
 	EventGoldenTime    EventType = "golden_time"     // 黃金時間開始（DAY-125）
+	EventWeatherSurge  EventType = "weather_surge"   // 天氣湧現事件（DAY-127）
 )
 
 // Priority 公告優先級
@@ -257,6 +258,24 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = "#FFD700"
 		priority = PriorityHigh
 		duration = 5000
+
+	case EventWeatherSurge:
+		surgeName := "天氣湧現"
+		surgeIcon := "🌊"
+		if extra != nil {
+			if sn, ok := extra["surge_name"]; ok {
+				surgeName = sn
+			}
+			if si, ok := extra["surge_icon"]; ok {
+				surgeIcon = si
+			}
+		}
+		title = surgeIcon + " " + surgeName + "！"
+		message = "稀有目標大量湧現！快來獵殺！"
+		icon = surgeIcon
+		color = "#4A90D9"
+		priority = PriorityHigh
+		duration = 6000
 
 	default:
 		title = "📢 公告"

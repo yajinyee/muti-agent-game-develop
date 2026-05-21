@@ -272,9 +272,33 @@ func GetSpawnWeights(betLevel int) SpawnWeights {
 // BasicRatio：基礎目標（T001-T006）
 // SpecialRatio：一般特殊目標（T101-T103）
 // HighRatio：高倍率特殊目標（T104 金色雜草 30x, T105 金幣魚 50x）
-func (s *SpawnSystem) PickTargetDef(betLevel int, bonusSpecialRatio float64) *data.TargetDef {
+// rareBonus：天氣稀有目標加成（0.0-1.0，加到 SpecialRatio）
+// goldFishBonus：天氣金幣魚加成（0.0-1.0，加到 HighRatio）
+func (s *SpawnSystem) PickTargetDef(betLevel int, bonusSpecialRatio float64, rareBonus float64, goldFishBonus float64) *data.TargetDef {
 	weights := GetSpawnWeights(betLevel)
 	weights.SpecialRatio += bonusSpecialRatio
+
+	// 整合天氣加成（DAY-127）
+	// rareBonus 提升稀有目標（T101-T103）出現率，從 BasicRatio 中扣除
+	// goldFishBonus 提升金幣魚（T104/T105）出現率，從 BasicRatio 中扣除
+	totalBonus := rareBonus + goldFishBonus
+	if totalBonus > 0 {
+		// 確保 BasicRatio 不低於 0.5（保持基礎目標的最低出現率）
+		maxDeduct := weights.BasicRatio - 0.5
+		if maxDeduct < 0 {
+			maxDeduct = 0
+		}
+		actualDeduct := totalBonus
+		if actualDeduct > maxDeduct {
+			actualDeduct = maxDeduct
+		}
+		// 按比例分配扣除量
+		if totalBonus > 0 {
+			weights.BasicRatio -= actualDeduct
+			weights.SpecialRatio += actualDeduct * (rareBonus / totalBonus)
+			weights.HighRatio += actualDeduct * (goldFishBonus / totalBonus)
+		}
+	}
 
 	r := s.rng.Float64()
 	if r < weights.BasicRatio {

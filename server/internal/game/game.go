@@ -135,6 +135,13 @@ type Game struct {
 	lastHighRewardAt time.Time
 	bonusSpecialBonus float64
 
+	// 天氣湧現事件（DAY-127）
+	weatherSurgeActive    bool      // 是否正在湧現
+	weatherSurgeEndAt     time.Time // 湧現結束時間
+	weatherSurgeRareBonus float64   // 稀有目標加成
+	weatherSurgeGoldBonus float64   // 金幣魚加成
+	weatherSurgeName      string    // 湧現名稱（用於廣播）
+
 	// Bonus 狀態
 	bonusScores map[string]int // playerID -> score
 	bonusEntryBet map[string]int // playerID -> entry bet cost
@@ -1290,6 +1297,8 @@ func (g *Game) updateNormalPlay() {
 		g.lastRareCatchTickAt = now
 		go g.tickRareCatchExpiry()
 	}
+	// 天氣湧現事件過期檢查（每次 update，DAY-127）
+	g.tickWeatherSurge()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }
@@ -1312,7 +1321,19 @@ func (g *Game) spawnTarget() {
 	bonusSpecial := g.bonusSpecialBonus
 	g.mu.RUnlock()
 
-	def := g.SpawnSys.PickTargetDef(betLevel, bonusSpecial)
+	// 整合天氣加成（DAY-127）
+	rareBonus := 0.0
+	goldFishBonus := 0.0
+	if g.Weather != nil {
+		rareBonus = g.Weather.GetRareChanceBonus()
+		goldFishBonus = g.Weather.GetGoldFishBonus()
+	}
+	// 天氣湧現事件加成（DAY-127）
+	if g.weatherSurgeActive {
+		rareBonus += g.weatherSurgeRareBonus
+		goldFishBonus += g.weatherSurgeGoldBonus
+	}
+	def := g.SpawnSys.PickTargetDef(betLevel, bonusSpecial, rareBonus, goldFishBonus)
 	instanceID := uuid.New().String()
 
 	// 隨機生成位置（畫面右側進入）

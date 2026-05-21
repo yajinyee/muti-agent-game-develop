@@ -217,6 +217,7 @@ func _ready() -> void:
 	_init_rare_target_alert()     # 傳說目標警報（DAY-124）
 	_init_golden_time_panel()     # 黃金時間面板（DAY-125）
 	_init_rare_catch_panel()      # 稀有連擊面板（DAY-126）
+	_init_weather_surge_panel()   # 天氣湧現事件面板（DAY-127）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2549,3 +2550,17 @@ func _on_rare_catch_broadcasted(data: Dictionary) -> void:
 func _on_rare_catch_reset_signal(data: Dictionary) -> void:
 	if is_instance_valid(_rare_catch_panel):
 		_rare_catch_panel.on_rare_catch_reset(data)
+
+# ---- 天氣湧現事件（DAY-127）----
+
+const WeatherSurgePanelScript = preload("res://scripts/ui/WeatherSurgePanel.gd")
+var _weather_surge_panel: Control = null
+
+func _init_weather_surge_panel() -> void:
+	var panel = WeatherSurgePanelScript.new()
+	panel.name = "WeatherSurgePanel"
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 77  # 在黃金時間面板（76）之上
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_weather_surge_panel = panel

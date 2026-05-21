@@ -283,6 +283,11 @@ const (
 	MsgRareCatchUpdate    MessageType = "rare_catch_update"    // 稀有連擊更新（Server→Client，個人）
 	MsgRareCatchBroadcast MessageType = "rare_catch_broadcast" // 稀有連擊廣播（Server→Client，全服）
 	MsgRareCatchReset     MessageType = "rare_catch_reset"     // 稀有連擊重置（Server→Client，個人）
+
+	// 天氣湧現事件（DAY-127）
+	MsgWeatherSurgeStart MessageType = "weather_surge_start" // 天氣湧現開始（Server→Client，全服廣播）
+	MsgWeatherSurgeEnd   MessageType = "weather_surge_end"   // 天氣湧現結束（Server→Client，全服廣播）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2321,4 +2326,21 @@ type RareCatchBroadcastPayload struct {
 type RareCatchResetPayload struct {
 	FinalCount int    `json:"final_count"` // 最終連擊數
 	Message    string `json:"message"`     // 重置訊息
+}
+
+// WeatherSurgeStartPayload 天氣湧現開始（Server → Client，全服廣播）（DAY-127）
+type WeatherSurgeStartPayload struct {
+	SurgeName    string  `json:"surge_name"`    // 湧現名稱（如「暴風湧現」）
+	SurgeIcon    string  `json:"surge_icon"`    // 圖示（emoji）
+	SurgeMessage string  `json:"surge_message"` // 廣播訊息
+	Duration     int     `json:"duration"`      // 持續秒數
+	RareBonus    float64 `json:"rare_bonus"`    // 稀有目標加成（0.0-1.0）
+	GoldBonus    float64 `json:"gold_bonus"`    // 金幣魚加成（0.0-1.0）
+	Color        string  `json:"color"`         // 橫幅顏色（hex）
+}
+
+// WeatherSurgeEndPayload 天氣湧現結束（Server → Client，全服廣播）（DAY-127）
+type WeatherSurgeEndPayload struct {
+	SurgeName string `json:"surge_name"` // 湧現名稱
+	Message   string `json:"message"`    // 結束訊息
 }

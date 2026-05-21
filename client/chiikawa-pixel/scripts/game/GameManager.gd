@@ -73,6 +73,10 @@ signal golden_time_status(data: Dictionary)                 # 黃金時間狀態
 signal rare_catch_updated(data: Dictionary)                 # 稀有連擊更新（個人）
 signal rare_catch_broadcasted(data: Dictionary)             # 稀有連擊廣播（全服）
 signal rare_catch_reset(data: Dictionary)                   # 稀有連擊重置（個人）
+
+# 天氣湧現事件（DAY-127）
+signal weather_surge_started(data: Dictionary)              # 天氣湧現開始（全服廣播）
+signal weather_surge_ended(data: Dictionary)                # 天氣湧現結束（全服廣播）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -475,6 +479,11 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("rare_catch_broadcasted", payload)
 		"rare_catch_reset":
 			emit_signal("rare_catch_reset", payload)
+		# 天氣湧現事件（DAY-127）
+		"weather_surge_start":
+			emit_signal("weather_surge_started", payload)
+		"weather_surge_end":
+			emit_signal("weather_surge_ended", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")

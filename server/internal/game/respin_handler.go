@@ -130,7 +130,7 @@ func (g *Game) executeRespin(p *player.Player, chainCount int, chainMult float64
 		}
 	}
 	for i := 0; i < spawnCount; i++ {
-		def := g.SpawnSys.PickTargetDef(betLevel, 0.1) // 稍微提高特殊目標機率
+		def := g.SpawnSys.PickTargetDef(betLevel, 0.1, 0.0, 0.0) // 稍微提高特殊目標機率
 		if def == nil {
 			continue
 		}

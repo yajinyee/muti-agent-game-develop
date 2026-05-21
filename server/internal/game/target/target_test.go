@@ -83,7 +83,7 @@ func TestPickTargetDef_HighBetLevel(t *testing.T) {
 	totalRuns := 10000
 
 	for i := 0; i < totalRuns; i++ {
-		def := s.PickTargetDef(10, 0) // LV10，無補償
+		def := s.PickTargetDef(10, 0, 0, 0) // LV10，無補償
 		if def.ID == "T104" || def.ID == "T105" {
 			highValueCount++
 		}
@@ -104,7 +104,7 @@ func TestPickTargetDef_LowBetLevel(t *testing.T) {
 	totalRuns := 10000
 
 	for i := 0; i < totalRuns; i++ {
-		def := s.PickTargetDef(1, 0) // LV1，無補償
+		def := s.PickTargetDef(1, 0, 0, 0) // LV1，無補償
 		if def.ID == "T104" || def.ID == "T105" {
 			highValueCount++
 		}

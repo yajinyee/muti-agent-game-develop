@@ -65,5 +65,7 @@ func (g *Game) tickAndBroadcastWeather() {
 		g.broadcastWeatherUpdate(true)
 		// 全服公告：天氣變化（DAY-097）
 		g.announceWeatherChange(snap.Name)
+		// 天氣湧現事件：特定天氣觸發稀有目標群湧（DAY-127）
+		go g.tryTriggerWeatherSurge(snap.Type)
 	}
 }
