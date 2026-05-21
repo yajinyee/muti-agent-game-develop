@@ -1409,7 +1409,7 @@ var _jackpot_panel_node: JackpotPanelScript = null  # 獨立面板節點
 func _init_jackpot_panel() -> void:
 	var panel = JackpotPanelScript.new()
 	panel.position = Vector2(320, 42)  # TopBar 下方，畫面中央
-	panel.size = Vector2(640, 36)
+	panel.size = Vector2(640, 66)  # DAY-118：高度從 36 → 66（加進度條）
 	panel.z_index = 10
 	add_child(panel)
 	panel.setup(_pixel_font)

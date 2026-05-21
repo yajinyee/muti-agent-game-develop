@@ -106,7 +106,7 @@ func (g *Game) handleJackpotWin(p *player.Player, win *jackpot.JackpotWin) {
 		p.ID, win.Level, win.Amount, displayName, isGrand)
 }
 
-// broadcastJackpot 廣播 Jackpot 池當前金額（每 5 秒，DAY-048，DAY-095 升級四層）
+// broadcastJackpot 廣播 Jackpot 池當前金額（每 5 秒，DAY-048，DAY-095 升級四層，DAY-118 加門檻）
 func (g *Game) broadcastJackpot() {
 	snap := g.jackpotMgr.GetSnapshot()
 	g.Hub.Broadcast(&ws.Message{
@@ -116,6 +116,11 @@ func (g *Game) broadcastJackpot() {
 			Minor: snap[jackpot.LevelMinor],
 			Major: snap[jackpot.LevelMajor],
 			Grand: snap[jackpot.LevelGrand],
+			// DAY-118：加入門檻資訊，讓 Client 能計算進度比例
+			MiniThreshold:  300,
+			MinorThreshold: 1000,
+			MajorThreshold: 3000,
+			GrandThreshold: 15000,
 		},
 	})
 }

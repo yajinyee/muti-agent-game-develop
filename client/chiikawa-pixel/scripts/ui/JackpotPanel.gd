@@ -1,6 +1,6 @@
 ## JackpotPanel.gd
-## Progressive Jackpot 面板（DAY-048，DAY-095 升級四層 + 動畫通知）
-## 顯示四個等級的 Jackpot 累積金額，中獎時全畫面慶祝特效
+## Progressive Jackpot 面板（DAY-048，DAY-095 升級四層 + 動畫通知，DAY-118 Meter 進度條）
+## 顯示四個等級的 Jackpot 累積金額 + 發光進度條，中獎時全畫面慶祝特效
 
 extends Control
 
@@ -8,8 +8,18 @@ extends Control
 var pixel_font: Font = null
 
 var _jackpot_labels: Dictionary = {}  # level -> Label
+var _jackpot_meters: Dictionary = {}  # level -> ColorRect（進度條填充）
+var _jackpot_meter_mats: Dictionary = {} # level -> ShaderMaterial
 var _jackpot_history: Array = []      # 最近 5 筆中獎記錄
 const MAX_JACKPOT_HISTORY = 5
+
+# Jackpot 門檻（對應 Server 端 jackpot.go）
+const JACKPOT_THRESHOLDS = {
+	"mini":  300,
+	"minor": 1000,
+	"major": 3000,
+	"grand": 15000,
+}
 
 # 四層等級定義（DAY-095）
 const JACKPOT_LEVELS = [
@@ -18,6 +28,8 @@ const JACKPOT_LEVELS = [
 	{"key": "major", "label": "MAJOR", "color": Color(1.0, 0.5, 0.1),    "icon": "🔥", "x": 320},
 	{"key": "grand", "label": "GRAND", "color": Color(1.0, 0.2, 0.6),    "icon": "👑", "x": 480},
 ]
+
+const METER_SHADER_PATH = "res://assets/shaders/jackpot_meter.gdshader"
 
 ## 初始化面板（由 HUD.gd 呼叫）
 func setup(font: Font) -> void:
@@ -47,7 +59,7 @@ func _build_panel() -> void:
 	for lvl in JACKPOT_LEVELS:
 		var container = Control.new()
 		container.position = Vector2(lvl["x"], 2)
-		container.size = Vector2(160, 32)
+		container.size = Vector2(160, 44)  # DAY-118：高度從 32 → 44（加進度條）
 		add_child(container)
 
 		# 等級標籤（含圖示）
@@ -74,10 +86,39 @@ func _build_panel() -> void:
 		container.add_child(amount_lbl)
 		_jackpot_labels[lvl["key"]] = amount_lbl
 
+		# ── DAY-118：Jackpot Meter 進度條 ──
+		# 進度條背景
+		var meter_bg = ColorRect.new()
+		meter_bg.name = "MeterBG_" + lvl["key"]
+		meter_bg.position = Vector2(2, 34)
+		meter_bg.size = Vector2(154, 8)
+		meter_bg.color = Color(0.05, 0.05, 0.1, 0.9)
+		container.add_child(meter_bg)
+
+		# 進度條填充（帶 Shader）
+		var meter_fill = ColorRect.new()
+		meter_fill.name = "MeterFill_" + lvl["key"]
+		meter_fill.position = Vector2(2, 34)
+		meter_fill.size = Vector2(0, 8)  # 初始寬度 0，由 _on_jackpot_updated 更新
+		meter_fill.color = lvl["color"]
+		container.add_child(meter_fill)
+		_jackpot_meters[lvl["key"]] = meter_fill
+
+		# 套用 Jackpot Meter Shader（如果存在）
+		if ResourceLoader.exists(METER_SHADER_PATH):
+			var mat = ShaderMaterial.new()
+			mat.shader = load(METER_SHADER_PATH)
+			mat.set_shader_parameter("bar_color", lvl["color"])
+			mat.set_shader_parameter("fill_ratio", 0.0)
+			mat.set_shader_parameter("glow_intensity", 0.8)
+			mat.set_shader_parameter("time_offset", lvl["x"] * 0.01)  # 各等級時間偏移不同
+			meter_fill.material = mat
+			_jackpot_meter_mats[lvl["key"]] = mat
+
 	# Jackpot 歷史 ticker（DAY-049）— 顯示最近中獎記錄
 	var ticker_bg = ColorRect.new()
 	ticker_bg.name = "TickerBG"
-	ticker_bg.position = Vector2(0, 36)
+	ticker_bg.position = Vector2(0, 48)  # DAY-118：位置下移
 	ticker_bg.size = Vector2(640, 18)
 	ticker_bg.color = Color(0.02, 0.01, 0.08, 0.75)
 	add_child(ticker_bg)
@@ -85,7 +126,7 @@ func _build_panel() -> void:
 	var ticker_lbl = Label.new()
 	ticker_lbl.name = "TickerLabel"
 	ticker_lbl.text = "✨ 等待 Jackpot 中獎..."
-	ticker_lbl.position = Vector2(8, 38)
+	ticker_lbl.position = Vector2(8, 50)  # DAY-118：位置下移
 	ticker_lbl.size = Vector2(624, 16)
 	ticker_lbl.add_theme_font_size_override("font_size", 10)
 	ticker_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8, 0.7))
@@ -93,11 +134,11 @@ func _build_panel() -> void:
 		ticker_lbl.add_theme_font_override("font", pixel_font)
 	add_child(ticker_lbl)
 
-	# 面板高度
+	# 面板高度（DAY-118：從 54 → 66）
 	var bg_node = get_node_or_null("JackpotBG")
 	if is_instance_valid(bg_node):
-		bg_node.size.y = 54
-	size.y = 54
+		bg_node.size.y = 66
+	size.y = 66
 
 ## Jackpot 池更新（每 5 秒收到一次，四層版本）
 func _on_jackpot_updated(data: Dictionary) -> void:
@@ -111,6 +152,34 @@ func _on_jackpot_updated(data: Dictionary) -> void:
 				var tween = create_tween()
 				tween.tween_property(lbl, "modulate:a", 0.5, 0.2)
 				tween.tween_property(lbl, "modulate:a", 1.0, 0.2)
+
+		# ── DAY-118：更新 Jackpot Meter 進度條 ──
+		var meter = _jackpot_meters.get(lvl["key"])
+		if is_instance_valid(meter):
+			var amount = data.get(lvl["key"], 0)
+			# 優先使用 Server 傳來的門檻，備用本地常數
+			var threshold_key = lvl["key"] + "_threshold"
+			var threshold = data.get(threshold_key, JACKPOT_THRESHOLDS.get(lvl["key"], 1000))
+			var ratio = clamp(float(amount) / float(threshold), 0.0, 1.0)
+			var target_width = 154.0 * ratio
+
+			# 平滑動畫更新進度條寬度
+			var tween = create_tween()
+			tween.tween_property(meter, "size:x", target_width, 0.4).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+			# 更新 Shader 參數
+			var mat = _jackpot_meter_mats.get(lvl["key"])
+			if is_instance_valid(mat):
+				mat.set_shader_parameter("fill_ratio", ratio)
+				# 接近觸發時（>80%）加強發光
+				var glow = 0.8 + ratio * 1.5
+				mat.set_shader_parameter("glow_intensity", glow)
+
+			# 接近觸發時（>90%）讓金額標籤閃爍
+			if ratio >= 0.9 and is_instance_valid(lbl):
+				var flash_tween = create_tween().set_loops(2)
+				flash_tween.tween_property(lbl, "modulate", Color(2.0, 2.0, 2.0), 0.12)
+				flash_tween.tween_property(lbl, "modulate", Color.WHITE, 0.12)
 
 ## Jackpot 觸發動畫通知（DAY-095）— 廣播給所有玩家
 func _on_jackpot_animation(data: Dictionary) -> void:

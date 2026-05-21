@@ -478,6 +478,11 @@ type JackpotUpdatePayload struct {
 	Minor int `json:"minor"` // Minor Jackpot 當前金額（DAY-095）
 	Major int `json:"major"` // Major Jackpot 當前金額
 	Grand int `json:"grand"` // Grand Jackpot 當前金額
+	// DAY-118：加入門檻資訊，讓 Client 能計算進度比例
+	MiniThreshold  int `json:"mini_threshold"`  // Mini 觸發門檻
+	MinorThreshold int `json:"minor_threshold"` // Minor 觸發門檻
+	MajorThreshold int `json:"major_threshold"` // Major 觸發門檻
+	GrandThreshold int `json:"grand_threshold"` // Grand 觸發門檻
 }
 
 // JackpotWinPayload Jackpot 中獎通知

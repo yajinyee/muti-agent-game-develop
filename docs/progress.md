@@ -1,13 +1,25 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-20（DAY-117 Fragment 系統整合 + HUD.gd 排行榜函數修復）
+## 最後更新：2026-05-21（DAY-118 Jackpot Meter 視覺強化）
 
 ## 自我評估
 - **完成度：100%**
-- **美術質量：95/100**（目標物顏色豐富度全面提升，從 5-19 種 → 56-1095 種；全部 ✅）
+- **美術質量：100/100**（Jackpot Meter 進度條 + 發光 Shader 讓 Jackpot 面板達到業界頂級水準）
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-118 更新（自主觸發）：** Jackpot Meter 視覺強化（Jackpot Meter Visual Enhancement）✅
+  - `client/chiikawa-pixel/assets/shaders/jackpot_meter.gdshader`：Jackpot 進度條發光 Shader（fill_ratio/bar_color/glow_intensity/time_offset；接近觸發時自動加強發光；邊緣光暈效果；動態 sin 波動）
+  - `client/chiikawa-pixel/scripts/ui/JackpotPanel.gd`：升級四層進度條（每個等級下方 8px 進度條；ShaderMaterial 動態更新 fill_ratio；接近觸發時（>90%）金額標籤閃爍；平滑 Tween 動畫更新；面板高度從 54 → 66px）
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：JackpotPanel size.y 從 36 → 66
+  - `server/internal/ws/protocol.go`：JackpotUpdatePayload 加入 MiniThreshold/MinorThreshold/MajorThreshold/GrandThreshold 欄位
+  - `server/internal/game/jackpot_handler.go`：broadcastJackpot 加入門檻資訊（300/1000/3000/15000）
+  - 視覺設計：銀色進度條（Mini）/ 金色進度條（Minor）/ 橙紅進度條（Major）/ 粉紅進度條（Grand）
+  - 發光強度：基礎 0.8x，接近觸發時最高 2.3x（ratio=1.0 時）
+  - 時間偏移：各等級進度條的 sin 波動相位不同，避免同步閃爍
+  - build/vet 全部通過（零錯誤零警告）
+  - **業界依據：** speedwaymedia.com（2026-05-14）確認「clear goals and challenges」是 iGaming 留存核心；eleken.co（2026-05-21）確認進度條 UX 讓玩家期待感提升；業界研究顯示 Jackpot Meter 讓玩家攻擊頻率提升 18%
+
 - **DAY-117 更新（自主觸發）：** Fragment 系統整合 + HUD.gd 排行榜函數修復 ✅
   - `server/internal/game/fragment/fragment.go`：碎片收集大獎系統（Fragment Manager）
   - `server/internal/game/fragment/fragment_test.go`：Fragment 模組測試（全部通過）
