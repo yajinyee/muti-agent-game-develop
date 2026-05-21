@@ -228,6 +228,7 @@ func _ready() -> void:
 	_init_speed_race_panel()      # 競速獵殺面板（DAY-136）
 	_init_bounty_panel()          # 全服目標懸賞面板（DAY-137）
 	_init_mult_storm_panel()      # 全服倍率風暴面板（DAY-138）
+	_init_dual_roulette_panel()   # 雙環輪盤面板（DAY-139）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2750,3 +2751,34 @@ func _init_mult_storm_panel() -> void:
 
 	GameManager.mult_storm_started.connect(func(data): panel.on_storm_start(data))
 	GameManager.mult_storm_ended.connect(func(data): panel.on_storm_end(data))
+
+# ---- 雙環輪盤面板（DAY-139）----
+const DualRoulettePanelScript = preload("res://scripts/ui/DualRoulettePanel.gd")
+var _dual_roulette_panel: Control = null
+
+func _init_dual_roulette_panel() -> void:
+	var panel = DualRoulettePanelScript.new()
+	panel.name = "DualRoulettePanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 82  # 在倍率風暴面板（81）之上
+	add_child(panel)
+	_dual_roulette_panel = panel
+
+	GameManager.dual_roulette_started.connect(func(data):
+		panel.show_roulette(
+			data.get("target_mult", 30.0),
+			data.get("base_reward", 0),
+			data.get("spin_duration", 3.0),
+			data.get("inner_ring", [2.0, 3.0, 5.0, 8.0, 10.0]),
+			data.get("outer_ring", [2.0, 3.0, 5.0, 7.0, 10.0, 15.0])
+		)
+	)
+	GameManager.dual_roulette_result.connect(func(data):
+		panel.show_result(
+			data.get("inner_result", 1.0),
+			data.get("outer_result", 1.0),
+			data.get("combined", 1.0),
+			data.get("bonus_reward", 0),
+			data.get("new_balance", 0)
+		)
+	)

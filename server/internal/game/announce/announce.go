@@ -37,6 +37,7 @@ const (
 	EventBountyPosted   EventType = "bounty_posted"   // 懸賞發布（DAY-137）
 	EventBountyClaimed  EventType = "bounty_claimed"  // 懸賞被領取（DAY-137）
 	EventMultStorm      EventType = "mult_storm"      // 倍率風暴觸發（DAY-138）
+	EventDualRoulette   EventType = "dual_roulette"   // 雙環輪盤高倍率（DAY-139）
 )
 
 // Priority 公告優先級
@@ -419,6 +420,25 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		priority = PriorityHigh
 		duration = 6000
 		_ = tierName // suppress unused warning
+
+	case EventDualRoulette:
+		playerName := name
+		combinedStr := "50"
+		bonusStr := "0"
+		if extra != nil {
+			if cs, ok := extra["combined"]; ok {
+				combinedStr = cs
+			}
+			if bs, ok := extra["bonus_reward"]; ok {
+				bonusStr = bs
+			}
+		}
+		title = "🎡 雙環輪盤大獎！"
+		message = fmt.Sprintf("%s 觸發 %sx 雙環輪盤，獲得 %s 金幣！", playerName, combinedStr, bonusStr)
+		icon = "🎡"
+		color = "#FFD700"
+		priority = PriorityHigh
+		duration = 5000
 
 	default:
 		title = "📢 公告"

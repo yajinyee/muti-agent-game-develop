@@ -60,6 +60,7 @@ import (
 	"digital-twin/server/internal/game/speedrace"
 	"digital-twin/server/internal/game/bounty"
 	"digital-twin/server/internal/game/multstorm"
+	"digital-twin/server/internal/game/dualroulette"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -123,6 +124,7 @@ type Game struct {
 	SpeedRace      *speedrace.Manager      // 競速獵殺系統管理器（DAY-136）
 	Bounty         *bounty.Manager         // 全服目標懸賞系統管理器（DAY-137）
 	MultStorm      *multstorm.Manager      // 全服倍率風暴系統管理器（DAY-138）
+	DualRoulette   *dualroulette.Manager   // 雙環輪盤系統管理器（DAY-139）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -229,6 +231,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		SpeedRace:          speedrace.NewDefault(),
 		Bounty:             bounty.NewDefault(),
 		MultStorm:          multstorm.NewDefault(),
+		DualRoulette:       dualroulette.NewDefault(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -383,6 +386,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendBountyStatus(pp)
 				// 發送倍率風暴狀態（DAY-138）
 				g.sendMultStormStatus(pp.ID)
+				// 發送雙環輪盤狀態（DAY-139）
+				g.sendDualRouletteStatus(pp.ID)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -461,6 +466,10 @@ func (g *Game) RemovePlayer(playerID string) {
 		// 清理失敗補償記錄（DAY-135）
 		if g.UnluckyBonus != nil {
 			g.UnluckyBonus.RemovePlayer(playerID)
+		}
+		// 清理雙環輪盤 session（DAY-139）
+		if g.DualRoulette != nil {
+			g.DualRoulette.RemovePlayer(playerID)
 		}
 		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
@@ -683,6 +692,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handlePostBounty(p, msg)
 	case ws.MsgGetBounties:
 		g.sendBountyStatus(p)
+	// 雙環輪盤系統（DAY-139）
+	case ws.MsgDualRouletteStop:
+		g.handleDualRouletteStop(clientID)
 	}
 }
 
@@ -912,6 +924,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if stormMult > 1.0 {
 		finalReward = int(float64(finalReward) * stormMult)
 	}
+	// 雙環輪盤：擊破高倍率目標後嘗試觸發（DAY-139）
+	go g.tryDualRoulette(p, float64(t.Multiplier), finalReward)
 	// 懸賞領取：擊破懸賞目標獲得額外金幣（DAY-137）
 	go g.notifyBountyKill(p, t.InstanceID)
 	// 龍怒蓄力大招：擊破目標累積怒氣（DAY-128）
@@ -1428,6 +1442,8 @@ func (g *Game) updateNormalPlay() {
 	if now.Sub(g.lastRareCatchTickAt) >= 1*time.Second {
 		go g.tickMultStorm()
 	}
+	// 雙環輪盤超時自動停止（每次 update，DAY-139）
+	go g.tickDualRoulette()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }

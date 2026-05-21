@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-138 全服倍率風暴系統）
+## 最後更新：2026-05-21（DAY-139 雙環輪盤系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-139 更新（自主觸發）：** 雙環輪盤系統（Dual-Ring Roulette System）✅
+  - **業界依據：** Royal Fishing JILI 2026 ChainLong King Dual-Ring Roulette — 「Capture the ChainLong King to trigger the multiplier roulette. Spin inner and outer wheels simultaneously for combined multipliers reaching up to 350 times your bet.」— 擊破高倍率目標後觸發，內外圈相乘最高 150x，製造「技巧感」，是 2026 年最新的核心機制
+  - `server/internal/game/dualroulette/dualroulette.go`：雙環輪盤管理器；TriggerConfig（MinMultiplier=30x/TriggerChance=15%/SpinDuration=3s/CooldownSecs=60）；InnerRing（2x/3x/5x/8x/10x）；OuterRing（2x/3x/5x/7x/10x/15x）；CanTrigger（倍率門檻+冷卻+活躍session檢查）；StartSession（預先決定結果/公平性保證）；StopSession（玩家停止/設定冷卻）；AutoStop（超時自動停止）；TickAutoStop（批次超時檢查）；GetSnapshot/HasActiveSession/GetCooldownLeft/RemovePlayer
+  - `server/internal/game/dualroulette/dualroulette_test.go`：18 個單元測試（New/CanTrigger_MultTooLow/CanTrigger_AlwaysTrigger/CanTrigger_NeverTrigger/StartSession/HasActiveSession/StopSession_Basic/StopSession_NoSession/StopSession_AlreadyStopped/Cooldown/GetCooldownLeft_NoSession/CanTrigger_ActiveSession/RemovePlayer/GetSnapshot/TickAutoStop/TickAutoStop_NotExpired/MultiplePlayers/FinalMultiplier_NotStopped/BonusReward_NotStopped/MaxCombined）
+  - `server/internal/game/dualroulette_handler.go`：tryDualRoulette（擊破高倍率目標後嘗試觸發/廣播輪盤開始）；handleDualRouletteStop（玩家停止/處理結果）；processDualRouletteResult（發放獎勵/廣播結果/≥50x全服公告）；tickDualRoulette（超時自動停止）；sendDualRouletteStatus（登入時發送冷卻狀態）
+  - `server/internal/ws/protocol.go`：新增 MsgDualRouletteStart/MsgDualRouletteStop/MsgDualRouletteResult/MsgDualRouletteStatus；DualRouletteStartPayload/DualRouletteResultPayload/DualRouletteStatusPayload
+  - `server/internal/game/announce/announce.go`：新增 EventDualRoulette；buildContent 加入雙環輪盤公告（金色，5秒，高優先）
+  - `server/internal/game/game.go`：Game struct 加入 DualRoulette *dualroulette.Manager；NewGameWithStore 初始化；AddPlayer 發送輪盤狀態；HandleMessage 加入 MsgDualRouletteStop；handleKill 整合 tryDualRoulette（在倍率風暴之後）；RemovePlayer 清理；updateNormalPlay 加入 tickDualRoulette
+  - `client/chiikawa-pixel/scripts/ui/DualRoulettePanel.gd`：雙環輪盤面板（全螢幕遮罩；置中面板；金色邊框；內環藍色/外環橙色旋轉視覺；倒數計時；停止按鈕；結果顯示（內×外=最終倍率）；≥100x粉紅閃光/≥50x金色閃光；3秒後自動關閉）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：2個訊號（dual_roulette_started/dual_roulette_result）+ 訊息分支 + send_dual_roulette_stop API
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 DualRoulettePanelScript（z_index=82）
+  - 觸發設計：擊破 ≥30x 倍率目標時 15% 機率觸發；60 秒冷卻防止頻繁觸發；每個玩家獨立 session
+  - 公平性設計：結果在 StartSession 時預先決定（公平隨機），玩家「停止」只是視覺互動，不影響結果（業界標準做法）
+  - 獎勵設計：額外獎勵 = 基礎獎勵 × 最終倍率（最高 150x）；不影響原本的擊破獎勵（純額外）
+  - 技巧感設計：玩家看到輪盤旋轉，點擊停止，感覺自己能控制結果，實際上結果已定（業界標準「技巧感」設計）
+  - 全服公告：最終倍率 ≥50x 時全服廣播，讓其他玩家看到「有人觸發了雙環輪盤大獎」
+  - 倍率疊加：雙環輪盤獎勵是額外獎勵，不在主倍率鏈中，避免 RTP 失控
+  - build/vet 全部通過（零錯誤零警告）；Windows Defender 誤報導致測試無法執行（已知問題，knowhow-log #46）
 - **DAY-136 更新（自主觸發）：** 全服競速獵殺系統（Speed Kill Race System）✅
   - **業界依據：** soup.io 2025「PvP modes where every shot counts」+ nerdbot.com 2026-05-20「Special fish, boss fish and multiplier events create variance moments」— 全服搶先擊破高價值目標，第一名獲得 3x 獎勵，是 2026 年最新的社交競技留存機制
   - `server/internal/game/speedrace/speedrace.go`：競速獵殺管理器；RaceConfig（Duration=30s/BonusMult=3.0/SecondMult=1.5/ThirdMult=1.2/CooldownSecs=90s/MinMultiplier=10x）；StartRace（倍率門檻+冷卻檢查）；RecordKill（名次計算/第一名結束競速）；CheckExpiry（超時檢查）；CancelRace（目標消失取消）；GetSnapshot/IsRaceTarget

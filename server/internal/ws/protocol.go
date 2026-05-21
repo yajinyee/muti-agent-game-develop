@@ -346,6 +346,12 @@ const (
 	MsgMultStormStart MessageType = "mult_storm_start" // 風暴開始廣播（Server→Client，全服）
 	MsgMultStormEnd   MessageType = "mult_storm_end"   // 風暴結束廣播（Server→Client，全服）
 
+	// 雙環輪盤系統（DAY-139）
+	MsgDualRouletteStart  MessageType = "dual_roulette_start"  // 輪盤開始（Server→Client，個人）
+	MsgDualRouletteStop   MessageType = "dual_roulette_stop"   // 玩家停止輪盤（Client→Server）
+	MsgDualRouletteResult MessageType = "dual_roulette_result" // 輪盤結果（Server→Client，個人）
+	MsgDualRouletteStatus MessageType = "dual_roulette_status" // 輪盤狀態（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2828,4 +2834,31 @@ type MultStormStartPayload struct {
 // MultStormEndPayload 風暴結束廣播（Server → Client，全服）
 type MultStormEndPayload struct {
 	Message string `json:"message"` // 顯示訊息
+}
+
+// ---- 雙環輪盤系統 Payloads（DAY-139）----
+
+// DualRouletteStartPayload 輪盤開始（Server → Client，個人）
+type DualRouletteStartPayload struct {
+	PlayerID     string    `json:"player_id"`     // 觸發玩家 ID
+	TargetMult   float64   `json:"target_mult"`   // 觸發目標倍率
+	BaseReward   int       `json:"base_reward"`   // 基礎獎勵（輪盤加成的基礎）
+	SpinDuration float64   `json:"spin_duration"` // 旋轉持續秒數
+	InnerRing    []float64 `json:"inner_ring"`    // 內環倍率選項
+	OuterRing    []float64 `json:"outer_ring"`    // 外環倍率選項
+}
+
+// DualRouletteResultPayload 輪盤結果（Server → Client，個人）
+type DualRouletteResultPayload struct {
+	PlayerID    string  `json:"player_id"`    // 玩家 ID
+	InnerResult float64 `json:"inner_result"` // 內環停止結果
+	OuterResult float64 `json:"outer_result"` // 外環停止結果
+	Combined    float64 `json:"combined"`     // 最終倍率 = 內 × 外
+	BonusReward int     `json:"bonus_reward"` // 額外獎勵金幣
+	NewBalance  int     `json:"new_balance"`  // 新餘額
+}
+
+// DualRouletteStatusPayload 輪盤狀態（Server → Client，個人）
+type DualRouletteStatusPayload struct {
+	CooldownLeft int `json:"cooldown_left"` // 冷卻剩餘秒數（0 = 可觸發）
 }
