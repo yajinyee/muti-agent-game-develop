@@ -790,6 +790,8 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	go g.multiFormatMgr.RecordShot(p.ID, p.DisplayName, betCost)
 	// 龍怒蓄力大招：每次射擊累積怒氣（DAY-128）
 	go g.notifyWrathShot(p)
+	// 龍怒流星雨武器：每次射擊累積充能（DAY-154）
+	go g.notifyDragonWrathShot(p)
 	// 不死 BOSS：每次射擊嘗試命中（DAY-129）
 	go g.tryImmortalBossHit(p)
 	// 覺醒 BOSS：每次射擊嘗試命中（DAY-130）

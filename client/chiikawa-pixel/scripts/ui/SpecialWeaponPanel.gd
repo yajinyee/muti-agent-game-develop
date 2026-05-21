@@ -8,7 +8,7 @@
 extends Node2D
 
 # ---- 常數 ----
-const PANEL_WIDTH  := 400  # 五武器版本加寬（DAY-141）
+const PANEL_WIDTH  := 480  # 六武器版本加寬（DAY-154）
 const PANEL_HEIGHT := 90
 const BTN_WIDTH    := 72
 const BTN_HEIGHT   := 62
@@ -69,12 +69,23 @@ const WEAPONS = [
 		"charge_required": 35,
 		"desc": "AI追蹤\n×1.5獎勵",
 		"purchasable": false
+	},
+	{
+		"type": "dragon_wrath",
+		"name": "龍怒雨",
+		"icon": "🐉",
+		"color": Color(1.0, 0.27, 0.0),
+		"cost": 0,
+		"max_charges": 1,
+		"charge_required": 60,
+		"desc": "流星雨\n全場打擊",
+		"purchasable": false
 	}
 ]
 
 # ---- 狀態 ----
-var _charges: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0}
-var _progress: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0}
+var _charges: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0, "dragon_wrath": 0}
+var _progress: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0, "dragon_wrath": 0}
 var _selected_weapon: String = ""
 var _pixel_font: Font = null
 var _buttons: Array = []
@@ -209,6 +220,8 @@ func _connect_signals() -> void:
 		GameManager.special_weapon_charged.connect(_on_special_weapon_charged)
 	if GameManager.has_signal("homing_missile_result"):
 		GameManager.homing_missile_result.connect(_on_homing_missile_result)
+	if GameManager.has_signal("dragon_wrath_result"):
+		GameManager.dragon_wrath_result.connect(_on_dragon_wrath_result)
 
 # ---- 事件處理 ----
 
@@ -217,8 +230,8 @@ func _on_weapon_btn_pressed(wtype: String) -> void:
 
 	if charges > 0:
 		# 有充能：進入「選擇目標」模式（或直接使用全場武器）
-		if wtype == "freeze" or wtype == "tornado" or wtype == "homing":
-			# 冰凍砲/龍捲風砲/追蹤飛彈：直接使用（全畫面效果或自動追蹤，不需要選擇目標）
+		if wtype == "freeze" or wtype == "tornado" or wtype == "homing" or wtype == "dragon_wrath":
+			# 冰凍砲/龍捲風砲/追蹤飛彈/龍怒流星雨：直接使用（全畫面效果或自動追蹤，不需要選擇目標）
 			NetworkManager.send_use_special_weapon(wtype, 640.0, 360.0)
 			_set_selected("")
 		else:
@@ -243,11 +256,13 @@ func _on_special_weapon_updated(data: Dictionary) -> void:
 	_charges["freeze"] = data.get("freeze_charges", 0)
 	_charges["tornado"] = data.get("tornado_charges", 0)
 	_charges["homing"] = data.get("homing_charges", 0)
+	_charges["dragon_wrath"] = data.get("dragon_wrath_charges", 0)
 	_progress["bomb"] = data.get("bomb_charge_progress", 0)
 	_progress["laser"] = data.get("laser_charge_progress", 0)
 	_progress["freeze"] = data.get("freeze_charge_progress", 0)
 	_progress["tornado"] = data.get("tornado_charge_progress", 0)
 	_progress["homing"] = data.get("homing_charge_progress", 0)
+	_progress["dragon_wrath"] = data.get("dragon_wrath_charge_progress", 0)
 	_update_charge_display()
 
 func _on_special_weapon_fired(data: Dictionary) -> void:
@@ -492,3 +507,52 @@ func _on_homing_missile_result(data: Dictionary) -> void:
 			flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
 			flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.0, 0.25, 1.0), 0.08)
 			flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
+
+## 龍怒流星雨結果（DAY-154）
+func _on_dragon_wrath_result(data: Dictionary) -> void:
+	var phase: String = data.get("phase", "")
+	var total_reward: int = data.get("total_reward", 0)
+	var killer_id: String = data.get("killer_id", "")
+
+	# 只處理自己觸發的結果
+	if killer_id != NetworkManager.get_player_id():
+		return
+
+	if phase == "result" and total_reward > 0:
+		# 顯示龍怒流星雨結果（橙紅色彈窗）
+		var result_lbl := Label.new()
+		result_lbl.text = "🐉 流星雨 +%d" % total_reward
+		result_lbl.position = Vector2(PANEL_WIDTH / 2.0 - 70, -40)
+		result_lbl.size = Vector2(140, 20)
+		result_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		result_lbl.add_theme_color_override("font_color", Color(1.0, 0.4, 0.0))
+		result_lbl.add_theme_font_size_override("font_size", 13)
+		if _pixel_font:
+			result_lbl.add_theme_font_override("font", _pixel_font)
+
+		var result_bg := ColorRect.new()
+		result_bg.position = Vector2(PANEL_WIDTH / 2.0 - 72, -42)
+		result_bg.size = Vector2(144, 24)
+		result_bg.color = Color(0.15, 0.05, 0.0, 0.92)
+		add_child(result_bg)
+		add_child(result_lbl)
+
+		# 上浮淡出動畫
+		var tween = result_lbl.create_tween()
+		tween.tween_property(result_lbl, "position:y", result_lbl.position.y - 24, 1.2)
+		tween.parallel().tween_property(result_lbl, "modulate:a", 0.0, 1.2)
+		tween.tween_callback(func():
+			if is_instance_valid(result_lbl): result_lbl.queue_free()
+			if is_instance_valid(result_bg): result_bg.queue_free()
+		)
+
+		# 龍怒按鈕閃爍（橙紅色）
+		var dw_idx = _get_weapon_index("dragon_wrath")
+		if dw_idx >= 0 and dw_idx < _buttons.size():
+			var btn_bg = _buttons[dw_idx]
+			if is_instance_valid(btn_bg):
+				var flash_tween = btn_bg.create_tween()
+				flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.13, 0.0, 1.0), 0.08)
+				flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
+				flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.13, 0.0, 1.0), 0.08)
+				flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)

@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-153 水晶龍收集大獎系統）
+## 最後更新：2026-05-22（DAY-154 龍怒流星雨武器系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-154 更新（自主觸發）：** 龍怒流星雨武器系統（Dragon Wrath Meteor Shower Weapon System）✅
+  - **業界依據：** royalfishing.co.uk 2026「Once the wrath meter fills, players unleash a massive meteorite attack across the centre screen, simultaneously targeting multiple fish including Immortal Bosses and the ChainLong King. The wrath value converts proportionally to your bet amount, meaning higher stakes generate faster charge rates.」— 每次射擊累積怒氣值（60次充滿），釋放 5 波流星雨打擊全場，可命中不死 BOSS 和千龍王
+  - `server/internal/game/dragon_wrath_handler.go`：新增 DAY-154 龍怒流星雨武器 handler；notifyDragonWrathShot（每次射擊累積充能）；handleDragonWrathFire（觸發 5 波流星雨）；runDragonWrathMeteors（goroutine，5波/300ms間隔/200px半徑/不死BOSS特殊處理）；calcMeteorHitTargets（半徑命中計算）；announceDragonWrath（全服公告）
+  - `server/internal/game/specialweapon/specialweapon.go`：新增 WeaponDragonWrath 類型；龍怒流星雨定義（充能60次/最多1發/不可購買/🐉圖示/橙紅色）；DragonWrathNormalKillChance=0.70/DragonWrathSpecialKillChance=0.50/DragonWrathBossKillChance=0.30；CalcDragonWrathTargets；修復多餘 `}` 語法錯誤
+  - `server/internal/game/specialweapon_handler.go`：handleUseSpecialWeapon 加入 WeaponDragonWrath 分支（直接呼叫 handleDragonWrathFire）；sendSpecialWeaponUpdate 加入 DragonWrathCharges/DragonWrathChargeProgress
+  - `server/internal/ws/protocol.go`：新增 MsgDragonWrathCharge/MsgDragonWrathResult；DragonWrathChargePayload/DragonWrathMeteorEntry/DragonWrathResultPayload；SpecialWeaponUpdatePayload 加入 DragonWrathCharges/DragonWrathChargeProgress
+  - `server/internal/game/game.go`：handleAttack 加入 notifyDragonWrathShot（每次射擊累積充能）
+  - `client/chiikawa-pixel/scripts/ui/SpecialWeaponPanel.gd`：升級為六武器面板（寬度 400→480）；新增龍怒流星雨按鈕（橙紅色邊框/🐉圖示）；_charges/_progress 加入 dragon_wrath；_on_weapon_btn_pressed 加入 dragon_wrath 直接使用分支；_on_dragon_wrath_result（結果彈窗+按鈕閃爍）；連接 dragon_wrath_result 訊號
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：2個訊號（dragon_wrath_charge/dragon_wrath_result）+ 訊息分支 + _handle_dragon_wrath_charge/_handle_dragon_wrath_result
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：MysteryBoxPanel 位置從 x=825 右移到 x=905（因 SpecialWeaponPanel 變寬）
+  - 充能設計：每次射擊累積 1 點怒氣；60 次充滿一發；最多 1 發（使用後需重新充能）
+  - 流星雨設計：5 波流星雨；每波半徑 200px；每波間隔 300ms；落點分散在畫面中央（中/左上/右上/左下/右下）
+  - 命中設計：普通目標 70% 擊破機率；特殊目標（≥30x）50%；BOSS 類 30%；不死 BOSS 每次命中給獎勵（不死，不擊破）
+  - 獎勵設計：擊破獎勵 = 目標倍率 × betLevel × 0.65（範圍武器比直接擊破低，平衡 RTP）
+  - 全服公告：擊破 ≥5 個目標或命中不死 BOSS ≥2 次時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-153 更新（自主觸發）：** 水晶龍收集大獎系統（Crystal Dragon Collect Grand Prize System）✅
   - **業界依據：** jiligames.com JILI Flying Dragon 2026「collect crystals to get the grand prize! Kill the Underworld Dragon and win the prize!」— 擊破水晶龍後掉落水晶碎片，全服玩家共同收集水晶（目標 50 個），達到目標後觸發「地獄龍大獎」，按貢獻比例分配獎勵
   - `server/internal/data/tables.go`：新增 T117 水晶龍（30-50x/HP80/SpawnWeight5/crystal_dragon 行為）

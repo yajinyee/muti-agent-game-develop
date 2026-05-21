@@ -186,11 +186,13 @@ const (
 	MsgWeatherUpdate MessageType = "weather_update" // 天氣狀態更新
 	// 連鎖爆炸系統（DAY-088）
 	MsgChainExplosion MessageType = "chain_explosion" // 連鎖爆炸通知
-	// 特殊武器系統（DAY-089，升級 DAY-134）
+	// 特殊武器系統（DAY-089，升級 DAY-134，DAY-154）
 	MsgSpecialWeaponUpdate  MessageType = "special_weapon_update"  // 特殊武器狀態更新
 	MsgSpecialWeaponFired   MessageType = "special_weapon_fired"   // 特殊武器發射廣播（所有玩家可見）
 	MsgSpecialWeaponCharged MessageType = "special_weapon_charged" // 自動充能完成通知（DAY-134）
 	MsgHomingMissileResult  MessageType = "homing_missile_result"  // 追蹤飛彈命中結果（DAY-141）
+	MsgDragonWrathCharge    MessageType = "dragon_wrath_charge"    // 龍怒怒氣值更新（DAY-154）
+	MsgDragonWrathResult    MessageType = "dragon_wrath_result"    // 龍怒流星雨結果（DAY-154）
 	// 神秘寶箱系統（DAY-090）
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
 	MsgMysteryBoxUpdate  MessageType = "mystery_box_update"  // 持有寶箱狀態更新
@@ -1553,6 +1555,7 @@ type SpecialWeaponUpdatePayload struct {
 	FreezeCharges  int                `json:"freeze_charges"`
 	TornadoCharges int                `json:"tornado_charges"`  // DAY-134
 	HomingCharges  int                `json:"homing_charges"`   // DAY-141
+	DragonWrathCharges int            `json:"dragon_wrath_charges"` // DAY-154
 	NewBalance     int                `json:"new_balance"`      // 購買後的新餘額（0=使用操作）
 	Definitions    []SpecialWeaponDef `json:"definitions"`      // 武器定義（首次發送時填入）
 	// 充能進度（DAY-134）
@@ -1560,7 +1563,8 @@ type SpecialWeaponUpdatePayload struct {
 	LaserChargeProgress   int `json:"laser_charge_progress"`
 	FreezeChargeProgress  int `json:"freeze_charge_progress"`
 	TornadoChargeProgress int `json:"tornado_charge_progress"`
-	HomingChargeProgress  int `json:"homing_charge_progress"` // DAY-141
+	HomingChargeProgress  int `json:"homing_charge_progress"`       // DAY-141
+	DragonWrathChargeProgress int `json:"dragon_wrath_charge_progress"` // DAY-154
 }
 
 // SpecialWeaponChargedPayload 自動充能完成通知（Server → Client，DAY-134）
@@ -2962,6 +2966,44 @@ type HomingMissileResultPayload struct {
 	NewBalance int     `json:"new_balance"` // 命中後餘額
 	Killed     bool    `json:"killed"`      // 是否擊破（100% 命中，但不一定擊破）
 	Message    string  `json:"message"`     // 顯示訊息
+}
+
+// DragonWrathChargePayload 龍怒怒氣值更新（Server → Client，DAY-154）
+// 每次射擊後發送，讓 Client 更新怒氣條
+type DragonWrathChargePayload struct {
+	PlayerID    string `json:"player_id"`    // 玩家 ID
+	Progress    int    `json:"progress"`     // 當前怒氣進度（0-60）
+	Required    int    `json:"required"`     // 充滿所需（60）
+	Charges     int    `json:"charges"`      // 當前持有發數
+	MaxCharges  int    `json:"max_charges"`  // 最大持有發數（1）
+	JustCharged bool   `json:"just_charged"` // 是否剛充滿一發
+}
+
+// DragonWrathMeteorEntry 龍怒流星雨命中的目標條目（DAY-154）
+type DragonWrathMeteorEntry struct {
+	InstanceID  string  `json:"instance_id"`  // 目標 InstanceID
+	DefID       string  `json:"def_id"`       // 目標定義 ID
+	Multiplier  float64 `json:"multiplier"`   // 目標倍率
+	Reward      int     `json:"reward"`       // 獎勵
+	Killed      bool    `json:"killed"`       // 是否擊破
+	IsImmortal  bool    `json:"is_immortal"`  // 是否是不死 BOSS
+	IsBoss      bool    `json:"is_boss"`      // 是否是 BOSS
+}
+
+// DragonWrathResultPayload 龍怒流星雨結果廣播（Server → Client，DAY-154）
+// Phase: "wrath_start" → "meteor_N" → "result"
+type DragonWrathResultPayload struct {
+	KillerID      string                   `json:"killer_id"`      // 觸發玩家 ID
+	KillerName    string                   `json:"killer_name"`    // 觸發玩家名稱
+	Phase         string                   `json:"phase"`          // 當前階段
+	MeteorIndex   int                      `json:"meteor_index"`   // 流星序號（meteor_N 時）
+	MeteorX       float64                  `json:"meteor_x"`       // 流星落點 X
+	MeteorY       float64                  `json:"meteor_y"`       // 流星落點 Y
+	HitTargets    []DragonWrathMeteorEntry `json:"hit_targets"`    // 命中目標（result 時）
+	TotalReward   int                      `json:"total_reward"`   // 總獎勵（result 時）
+	NewBalance    int                      `json:"new_balance"`    // 結果後餘額（result 時，僅觸發者）
+	ImmortalHits  int                      `json:"immortal_hits"`  // 命中不死 BOSS 次數
+	ImmortalReward int                     `json:"immortal_reward"` // 不死 BOSS 獎勵
 }
 
 // DrillKillEntry 鑽頭連帶擊破的目標條目（DAY-142）

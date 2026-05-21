@@ -1,9 +1,10 @@
-// Package specialweapon 特殊武器系統（DAY-089，升級 DAY-134，DAY-141）
+// Package specialweapon 特殊武器系統（DAY-089，升級 DAY-134，DAY-141，DAY-154）
 // 業界依據：
 //   - Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是標配特殊武器
 //   - Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標
 //   - JILI 2026 Auto-Charge — 每次擊破目標自動累積充能，不需要花金幣
 //   - thechipotlemenu.com 2026 Automatic Target Locking Weapon — AI 自動追蹤最高倍率目標，100% 命中
+//   - royalfishing.co.uk 2026 Dragon Wrath — 累積怒氣值，釋放流星雨打擊全場（含 Immortal Boss 和 ChainLong King）
 package specialweapon
 
 import (
@@ -15,11 +16,12 @@ import (
 type WeaponType string
 
 const (
-	WeaponBomb    WeaponType = "bomb"    // 炸彈砲：範圍爆炸，命中半徑 200px 內所有目標
-	WeaponLaser   WeaponType = "laser"   // 雷射砲：穿透，命中一條線上所有目標（Y 軸 ±60px）
-	WeaponFreeze  WeaponType = "freeze"  // 冰凍砲：全畫面減速所有目標 5 秒
-	WeaponTornado WeaponType = "tornado" // 龍捲風砲：全螢幕旋轉，50% 機率擊破所有目標（DAY-134）
-	WeaponHoming  WeaponType = "homing"  // 追蹤飛彈：自動追蹤倍率最高的目標，100% 命中（DAY-141）
+	WeaponBomb    WeaponType = "bomb"         // 炸彈砲：範圍爆炸，命中半徑 200px 內所有目標
+	WeaponLaser   WeaponType = "laser"        // 雷射砲：穿透，命中一條線上所有目標（Y 軸 ±60px）
+	WeaponFreeze  WeaponType = "freeze"       // 冰凍砲：全畫面減速所有目標 5 秒
+	WeaponTornado WeaponType = "tornado"      // 龍捲風砲：全螢幕旋轉，50% 機率擊破所有目標（DAY-134）
+	WeaponHoming  WeaponType = "homing"       // 追蹤飛彈：自動追蹤倍率最高的目標，100% 命中（DAY-141）
+	WeaponDragonWrath WeaponType = "dragon_wrath" // 龍怒流星雨：累積怒氣值，釋放流星雨打擊全場（DAY-154）
 )
 
 // WeaponDef 特殊武器定義
@@ -92,6 +94,17 @@ var AvailableWeapons = []WeaponDef{
 		ChargeRequired: 35, // 擊破 35 個目標自動充能一發
 		ChargePerKill:  1,
 	},
+	{
+		Type:           WeaponDragonWrath,
+		Name:           "龍怒流星雨",
+		Description:    "累積怒氣值，釋放流星雨打擊全場，可命中不死BOSS和千龍王",
+		Cost:           0,    // 只能透過射擊累積怒氣，不能購買（DAY-154）
+		MaxCharges:     1,    // 最多持有 1 發（稀有武器）
+		Icon:           "🐉",
+		Color:          "#FF4500",
+		ChargeRequired: 60, // 射擊 60 次自動充能一發（每次射擊累積，不是擊破）
+		ChargePerKill:  1,  // 每次射擊 +1（由 RecordShot 呼叫，不是 RecordKill）
+	},
 }
 
 // PlayerWeaponState 玩家特殊武器狀態
@@ -101,6 +114,7 @@ type PlayerWeaponState struct {
 	FreezeCharges  int `json:"freeze_charges"`
 	TornadoCharges int `json:"tornado_charges"` // DAY-134
 	HomingCharges  int `json:"homing_charges"`  // DAY-141
+	DragonWrathCharges int `json:"dragon_wrath_charges"` // DAY-154
 
 	// 自動充能進度（DAY-134）
 	BombChargeProgress    int `json:"bomb_charge_progress"`
@@ -108,6 +122,7 @@ type PlayerWeaponState struct {
 	FreezeChargeProgress  int `json:"freeze_charge_progress"`
 	TornadoChargeProgress int `json:"tornado_charge_progress"`
 	HomingChargeProgress  int `json:"homing_charge_progress"` // DAY-141
+	DragonWrathChargeProgress int `json:"dragon_wrath_charge_progress"` // DAY-154（每次射擊累積）
 }
 
 // ChargeResult 充能結果（DAY-134）
@@ -375,6 +390,8 @@ func (m *Manager) getChargesLocked(s *PlayerWeaponState, wtype WeaponType) int {
 		return s.TornadoCharges
 	case WeaponHoming:
 		return s.HomingCharges
+	case WeaponDragonWrath:
+		return s.DragonWrathCharges
 	}
 	return 0
 }
@@ -391,6 +408,8 @@ func (m *Manager) setChargesLocked(s *PlayerWeaponState, wtype WeaponType, v int
 		s.TornadoCharges = v
 	case WeaponHoming:
 		s.HomingCharges = v
+	case WeaponDragonWrath:
+		s.DragonWrathCharges = v
 	}
 }
 
@@ -406,6 +425,8 @@ func (m *Manager) getProgressLocked(s *PlayerWeaponState, wtype WeaponType) int 
 		return s.TornadoChargeProgress
 	case WeaponHoming:
 		return s.HomingChargeProgress
+	case WeaponDragonWrath:
+		return s.DragonWrathChargeProgress
 	}
 	return 0
 }
@@ -422,6 +443,8 @@ func (m *Manager) setProgressLocked(s *PlayerWeaponState, wtype WeaponType, v in
 		s.TornadoChargeProgress = v
 	case WeaponHoming:
 		s.HomingChargeProgress = v
+	case WeaponDragonWrath:
+		s.DragonWrathChargeProgress = v
 	}
 }
 
@@ -465,4 +488,65 @@ func clampCharges(v, max int) int {
 		return max
 	}
 	return v
+}
+
+// RecordShot 記錄射擊，累積龍怒充能進度（DAY-154）
+// 龍怒武器是每次射擊累積，不是擊破累積
+// 回傳是否剛充滿一發
+func (m *Manager) RecordShot(playerID string) (chargeUnlocked bool, newCharges int, newProgress int) {
+	m.mu.Lock()
+	defer m.mu.Unlock()
+
+	s := m.getOrCreateLocked(playerID)
+	def := getWeaponDef(WeaponDragonWrath)
+	if def == nil {
+		return false, 0, 0
+	}
+
+	charges := m.getChargesLocked(s, WeaponDragonWrath)
+	// 已達上限，不再累積
+	if charges >= def.MaxCharges {
+		return false, charges, m.getProgressLocked(s, WeaponDragonWrath)
+	}
+
+	progress := m.getProgressLocked(s, WeaponDragonWrath)
+	progress++
+
+	if progress >= def.ChargeRequired {
+		progress = 0
+		charges++
+		if charges > def.MaxCharges {
+			charges = def.MaxCharges
+		}
+		m.setChargesLocked(s, WeaponDragonWrath, charges)
+		m.setProgressLocked(s, WeaponDragonWrath, progress)
+		return true, charges, progress
+	}
+
+	m.setProgressLocked(s, WeaponDragonWrath, progress)
+	return false, charges, progress
+}
+
+// DragonWrathMeteorKillChance 龍怒流星雨擊破機率（DAY-154）
+// 普通目標 70%，特殊目標 50%，BOSS 類 30%
+const DragonWrathNormalKillChance = 0.70
+const DragonWrathSpecialKillChance = 0.50
+const DragonWrathBossKillChance = 0.30
+
+// CalcDragonWrathTargets 計算龍怒流星雨命中的目標（DAY-154）
+// 流星雨打擊畫面中央區域（X: 200-1080，Y: 100-620），可以命中所有目標包括 BOSS
+// 回傳命中目標列表（包含 BOSS 和 ChainLong King）
+func CalcDragonWrathTargets(targets []TargetPos, immortalBossID string) []string {
+	var hit []string
+	for _, t := range targets {
+		// 流星雨打擊中央區域（比炸彈更大的範圍）
+		if t.X >= 150 && t.X <= 1130 && t.Y >= 80 && t.Y <= 640 {
+			hit = append(hit, t.InstanceID)
+		}
+	}
+	// 不死 BOSS 也加入（如果有活躍的）
+	if immortalBossID != "" {
+		hit = append(hit, immortalBossID)
+	}
+	return hit
 }

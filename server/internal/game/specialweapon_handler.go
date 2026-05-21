@@ -101,6 +101,12 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 		if bestID != "" {
 			hitIDs = []string{bestID}
 		}
+	case specialweapon.WeaponDragonWrath:
+		// 龍怒流星雨：特殊處理，直接呼叫 handleDragonWrathFire（DAY-154）
+		// 不走一般的 hitIDs 流程
+		go g.handleDragonWrathFire(p)
+		g.sendSpecialWeaponUpdate(p, false)
+		return
 	}
 
 	// 處理命中目標
@@ -364,12 +370,14 @@ func (g *Game) sendSpecialWeaponUpdate(p *player.Player, withDefs bool) {
 		FreezeCharges:         snap.FreezeCharges,
 		TornadoCharges:        snap.TornadoCharges,
 		HomingCharges:         snap.HomingCharges,
+		DragonWrathCharges:    snap.DragonWrathCharges,
 		NewBalance:            p.Coins,
 		BombChargeProgress:    snap.BombChargeProgress,
 		LaserChargeProgress:   snap.LaserChargeProgress,
 		FreezeChargeProgress:  snap.FreezeChargeProgress,
 		TornadoChargeProgress: snap.TornadoChargeProgress,
 		HomingChargeProgress:  snap.HomingChargeProgress,
+		DragonWrathChargeProgress: snap.DragonWrathChargeProgress,
 	}
 
 	// 首次發送時附帶武器定義

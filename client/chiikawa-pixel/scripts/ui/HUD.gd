@@ -1958,7 +1958,8 @@ func _init_mystery_box_panel() -> void:
 	# 放在 SpecialWeaponPanel 右側（x=420 寬400，所以 MysteryBox 在 x=825）
 	# DAY-134：SpecialWeaponPanel 寬度從 240 升級到 320，MysteryBox 右移 80px
 	# DAY-141：SpecialWeaponPanel 寬度從 320 升級到 400，MysteryBox 再右移 80px
-	panel.position = Vector2(825, 540)
+	# DAY-154：SpecialWeaponPanel 寬度從 400 升級到 480，MysteryBox 再右移 80px
+	panel.position = Vector2(905, 540)
 	panel.z_index = 8
 	add_child(panel)
 	panel.setup(_pixel_font)
