@@ -3273,3 +3273,19 @@ contribution_per_shot = betCost × 0.005 × level_share
   4. 全服廣播讓所有玩家都知道湧現開始，增加緊迫感
   5. 右下角指示器顯示加成百分比，讓玩家知道當前有多少加成
 - **教訓：** 天氣湧現是「天氣系統的延伸」，不是獨立系統，整合成本低但效果顯著
+
+## 85. player.mu 是 unexported，game 包不能直接存取（DAY-128）
+- **問題：** `dragonwrath_handler.go` 直接用 `p.mu.Lock()` 報錯 `p.mu undefined (cannot refer to unexported field mu)`
+- **根本原因：** `player.Player` 的 `mu sync.RWMutex` 是 unexported，game 包（不同 package）不能直接存取
+- **解決：** 在 player 包中加入對應的 getter/setter 方法（`AddWrathCharge`/`GetWrathCharge`/`ConsumeWrath`/`GetWrathCooldownSecs`），game 包通過方法操作
+- **教訓：** 跨 package 操作 struct 欄位時，必須通過 exported 方法，不能直接存取 unexported 欄位
+
+## 86. 龍怒蓄力大招設計原則（DAY-128）
+- **業界依據：** JILI Royal Fishing 2026 Dragon Wrath — 累積怒氣值釋放全螢幕大招
+- **設計要點：**
+  1. 怒氣累積要有兩個來源（射擊 +1，擊破 +2~+10），讓玩家感受到「越打越強」
+  2. 高倍率目標讓怒氣累積更快，鼓勵玩家追求高價值目標（策略深度）
+  3. 大招效果要有「掃場感」— 50ms 間隔連續擊破，不是瞬間全部消失
+  4. 全服廣播讓其他玩家也能感受到大招的震撼
+  5. 60 秒冷卻防止濫用，但不要太長（玩家等不及）
+- **教訓：** 蓄力大招是「技能感」的核心，讓玩家有「我在成長」的感覺，比純粹的隨機獎勵更有成就感

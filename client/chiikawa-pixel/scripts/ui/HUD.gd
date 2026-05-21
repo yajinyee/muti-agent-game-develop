@@ -219,6 +219,7 @@ func _ready() -> void:
 	_init_rare_catch_panel()      # 稀有連擊面板（DAY-126）
 	_init_weather_surge_panel()   # 天氣湧現事件面板（DAY-127）
 	_init_dragon_wrath_panel()    # 龍怒蓄力大招面板（DAY-128）
+	_init_immortal_boss_panel()   # 不死 BOSS 連勝面板（DAY-129）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2580,3 +2581,22 @@ func _init_dragon_wrath_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_dragon_wrath_panel = panel
+
+# ---- 不死 BOSS 連勝面板（DAY-129）----
+const ImmortalBossPanelScript = preload("res://scripts/ui/ImmortalBossPanel.gd")
+var _immortal_boss_panel: Control = null
+
+func _init_immortal_boss_panel() -> void:
+	var panel = ImmortalBossPanelScript.new()
+	panel.name = "ImmortalBossPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 70
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_immortal_boss_panel = panel
+
+	# 連接 GameManager 訊號
+	GameManager.immortal_boss_spawned.connect(func(data): panel.on_immortal_boss_spawn(data))
+	GameManager.immortal_boss_hit.connect(func(data): panel.on_immortal_boss_hit(data))
+	GameManager.immortal_boss_left.connect(func(data): panel.on_immortal_boss_leave(data))
+	GameManager.immortal_boss_status.connect(func(data): panel.on_immortal_boss_status(data))

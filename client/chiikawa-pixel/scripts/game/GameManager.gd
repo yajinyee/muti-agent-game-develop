@@ -82,6 +82,11 @@ signal weather_surge_ended(data: Dictionary)                # 天氣湧現結束
 signal wrath_updated(data: Dictionary)                      # 怒氣值更新（個人）
 signal wrath_started(data: Dictionary)                      # 大招開始（全服廣播）
 signal wrath_result(data: Dictionary)                       # 大招結果（全服廣播）
+# 不死 BOSS 連勝系統（DAY-129）
+signal immortal_boss_spawned(data: Dictionary)              # 不死 BOSS 出現（全服廣播）
+signal immortal_boss_hit(data: Dictionary)                  # 命中不死 BOSS（全服廣播）
+signal immortal_boss_left(data: Dictionary)                 # 不死 BOSS 離開（全服廣播）
+signal immortal_boss_status(data: Dictionary)               # 不死 BOSS 狀態（個人）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -496,6 +501,15 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("wrath_started", payload)
 		"wrath_result":
 			emit_signal("wrath_result", payload)
+		# 不死 BOSS 連勝系統（DAY-129）
+		"immortal_boss_spawn":
+			emit_signal("immortal_boss_spawned", payload)
+		"immortal_boss_hit":
+			emit_signal("immortal_boss_hit", payload)
+		"immortal_boss_leave":
+			emit_signal("immortal_boss_left", payload)
+		"immortal_boss_status":
+			emit_signal("immortal_boss_status", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")

@@ -294,6 +294,12 @@ const (
 	MsgWrathResult MessageType = "wrath_result" // 大招結果（Server→Client，全服廣播）
 	MsgUseWrath    MessageType = "use_wrath"    // 釋放大招（Client→Server）
 
+	// 不死 BOSS 連勝系統（DAY-129）
+	MsgImmortalBossSpawn  MessageType = "immortal_boss_spawn"  // 不死 BOSS 出現（Server→Client，全服廣播）
+	MsgImmortalBossHit    MessageType = "immortal_boss_hit"    // 命中不死 BOSS（Server→Client，全服廣播）
+	MsgImmortalBossLeave  MessageType = "immortal_boss_leave"  // 不死 BOSS 離開（Server→Client，全服廣播）
+	MsgImmortalBossStatus MessageType = "immortal_boss_status" // 不死 BOSS 狀態（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2383,4 +2389,57 @@ type WrathResultPayload struct {
 	TotalReward int             `json:"total_reward"` // 總獎勵
 	NewBalance  int             `json:"new_balance"`  // 新金幣餘額
 	Targets     []WrathKillEntry `json:"targets"`     // 擊破的目標列表
+}
+
+// ---- 不死 BOSS 連勝系統 Payloads（DAY-129）----
+
+// ImmortalBossSpawnPayload 不死 BOSS 出現廣播（Server → Client，全服）（DAY-129）
+type ImmortalBossSpawnPayload struct {
+	InstanceID       string  `json:"instance_id"`        // BOSS 實例 ID
+	BossType         string  `json:"boss_type"`          // BOSS 類型（golden_toad/ancient_crocodile）
+	BossName         string  `json:"boss_name"`          // BOSS 名稱
+	BossIcon         string  `json:"boss_icon"`          // BOSS 圖示
+	BossColor        string  `json:"boss_color"`         // 顯示顏色
+	MinMult          float64 `json:"min_mult"`           // 最小倍率
+	MaxMult          float64 `json:"max_mult"`           // 最大倍率
+	DurationSeconds  float64 `json:"duration_seconds"`   // 在場時間（秒）
+	Message          string  `json:"message"`            // 公告訊息
+}
+
+// ImmortalBossHitPayload 命中不死 BOSS 廣播（Server → Client，全服）（DAY-129）
+type ImmortalBossHitPayload struct {
+	InstanceID  string  `json:"instance_id"`  // BOSS 實例 ID
+	PlayerID    string  `json:"player_id"`    // 命中玩家 ID
+	PlayerName  string  `json:"player_name"`  // 命中玩家名稱
+	Multiplier  float64 `json:"multiplier"`   // 本次倍率
+	Reward      int     `json:"reward"`       // 本次獎勵
+	NewBalance  int     `json:"new_balance"`  // 玩家新餘額（只發給命中者）
+	HitCount    int     `json:"hit_count"`    // 累計命中次數
+	TotalReward int     `json:"total_reward"` // 累計總獎勵
+	IsHighMult  bool    `json:"is_high_mult"` // 是否高倍率（≥100x）
+}
+
+// ImmortalBossLeavePayload 不死 BOSS 離開廣播（Server → Client，全服）（DAY-129）
+type ImmortalBossLeavePayload struct {
+	InstanceID  string `json:"instance_id"`  // BOSS 實例 ID
+	BossName    string `json:"boss_name"`    // BOSS 名稱
+	BossIcon    string `json:"boss_icon"`    // BOSS 圖示
+	HitCount    int    `json:"hit_count"`    // 總命中次數
+	TotalReward int    `json:"total_reward"` // 總獎勵
+	Message     string `json:"message"`     // 離開訊息
+}
+
+// ImmortalBossStatusPayload 不死 BOSS 狀態（Server → Client，個人）（DAY-129）
+type ImmortalBossStatusPayload struct {
+	Active           bool    `json:"active"`            // 是否有活躍 BOSS
+	InstanceID       string  `json:"instance_id"`       // BOSS 實例 ID
+	BossType         string  `json:"boss_type"`         // BOSS 類型
+	BossName         string  `json:"boss_name"`         // BOSS 名稱
+	BossIcon         string  `json:"boss_icon"`         // BOSS 圖示
+	BossColor        string  `json:"boss_color"`        // 顯示顏色
+	MinMult          float64 `json:"min_mult"`          // 最小倍率
+	MaxMult          float64 `json:"max_mult"`          // 最大倍率
+	HitCount         int     `json:"hit_count"`         // 累計命中次數
+	TotalReward      int     `json:"total_reward"`      // 累計總獎勵
+	RemainingSeconds float64 `json:"remaining_seconds"` // 剩餘秒數
 }

@@ -23,6 +23,7 @@ import (
 	"digital-twin/server/internal/game/fragment"
 	"digital-twin/server/internal/game/flashchallenge"
 	"digital-twin/server/internal/game/goldentime"
+	"digital-twin/server/internal/game/immortalboss"
 	"digital-twin/server/internal/game/mysterybox"
 	"digital-twin/server/internal/game/rarecatch"
 	"digital-twin/server/internal/game/respin"
@@ -105,6 +106,7 @@ type Game struct {
 	FlashChallenge *flashchallenge.Manager // 閃電挑戰管理器（DAY-123）
 	GoldenTime     *goldentime.Manager     // 黃金時間管理器（DAY-125）
 	RareCatch      *rarecatch.Manager      // 稀有連擊累積倍率管理器（DAY-126）
+	ImmortalBoss   *immortalboss.Manager   // 不死 BOSS 連勝管理器（DAY-129）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -202,6 +204,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		FlashChallenge:     flashchallenge.New(),
 		GoldenTime:         goldentime.New(),
 		RareCatch:          rarecatch.New(),
+		ImmortalBoss:       immortalboss.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -340,6 +343,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.handleGetGoldenTime(pp)
 				// 發送龍怒蓄力大招狀態（DAY-128）
 				g.sendWrathStatus(pp)
+				// 發送不死 BOSS 狀態（DAY-129）
+				g.sendImmortalBossStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -656,6 +661,8 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	go g.multiFormatMgr.RecordShot(p.ID, p.DisplayName, betCost)
 	// 龍怒蓄力大招：每次射擊累積怒氣（DAY-128）
 	go g.notifyWrathShot(p)
+	// 不死 BOSS：每次射擊嘗試命中（DAY-129）
+	go g.tryImmortalBossHit(p)
 	// 異常偵測：記錄攻擊（DAY-105）
 	if alert := g.AntiCheat.RecordAttack(p.ID, betCost); alert != nil {
 		log.Printf("[AntiCheat] Alert triggered for player %s: %s", p.ID, alert.Message)
@@ -1308,6 +1315,8 @@ func (g *Game) updateNormalPlay() {
 	}
 	// 天氣湧現事件過期檢查（每次 update，DAY-127）
 	g.tickWeatherSurge()
+	// 不死 BOSS 過期檢查（每次 update，DAY-129）
+	go g.tickImmortalBoss()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }
@@ -1406,6 +1415,9 @@ func (g *Game) spawnTarget() {
 			},
 		})
 	}
+
+	// 不死 BOSS：每次生成目標時嘗試觸發（DAY-129）
+	go g.trySpawnImmortalBoss()
 }
 
 // triggerSpecialEvent 觸發特殊目標事件（流星、金色雜草等）

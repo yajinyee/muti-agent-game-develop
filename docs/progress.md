@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-128 龍怒蓄力大招系統）
+## 最後更新：2026-05-21（DAY-129 不死 BOSS 連勝系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-129 更新（自主觸發）：** 不死 BOSS 連勝系統（Immortal Boss Consecutive Win System）✅
+  - **業界依據：** JILI Royal Fishing 2026 Immortal Boss — 「Golden Toad and Ancient Crocodile bosses appear randomly and award consecutive wins ranging from 50X to 150X until they leave the screen. This creates extended winning sequences impossible in standard fish games.」
+  - `server/internal/game/immortalboss/immortalboss.go`：不死 BOSS 管理器；2種 BOSS 定義（金蟾蜍 50-120x/古鱷魚 60-150x）；ShouldTrigger（冷卻+活躍檢查+機率觸發）；StartSession（建立 session）；RecordHit（記錄命中/計算倍率/累積統計）；CheckExpiry（過期檢查）；GetSnapshot/IsActive/GetActiveInstanceID
+  - `server/internal/game/immortalboss/immortalboss_test.go`：14 個單元測試全部通過（New/ShouldTrigger_NoCooldown/ShouldTrigger_ActiveBoss/ShouldTrigger_Cooldown/StartSession/RecordHit/RecordHit_WrongInstance/RecordHit_Expired/CheckExpiry/CheckExpiry_NotExpired/GetSnapshot_Inactive/GetSnapshot_Active/MultipleHits/BossDefRanges）
+  - `server/internal/game/immortalboss_handler.go`：trySpawnImmortalBoss（spawnTarget 時機率觸發/廣播出現/全服公告）；tryImmortalBossHit（每次射擊 25-35% 機率命中/依投注等級）；notifyImmortalBossHit（發放獎勵/廣播命中/高倍率公告/動態牆）；tickImmortalBoss（過期檢查/廣播離開）；sendImmortalBossStatus（登入時恢復狀態）
+  - `server/internal/game/game.go`：Game struct 加入 `ImmortalBoss *immortalboss.Manager`；NewGameWithStore 初始化；AddPlayer 加入 `sendImmortalBossStatus`；handleAttack 加入 `tryImmortalBossHit`（goroutine）；spawnTarget 加入 `trySpawnImmortalBoss`（goroutine）；gameLoop 加入 `tickImmortalBoss`（goroutine）
+  - `server/internal/ws/protocol.go`：新增 `MsgImmortalBossSpawn/MsgImmortalBossHit/MsgImmortalBossLeave/MsgImmortalBossStatus`；`ImmortalBossSpawnPayload/ImmortalBossHitPayload/ImmortalBossLeavePayload/ImmortalBossStatusPayload`
+  - `client/chiikawa-pixel/scripts/ui/ImmortalBossPanel.gd`：不死 BOSS 面板（頂部橫幅滑入；右側狀態面板顯示 BOSS 圖示/名稱/倍率範圍/倒數計時/命中次數；命中閃光效果；最後5秒紅色閃爍；離開時淡出）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：`immortal_boss_spawned/immortal_boss_hit/immortal_boss_left/immortal_boss_status` 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 ImmortalBossPanelScript preload + `_init_immortal_boss_panel()`（z_index=70）+ 訊號連接
+  - BOSS 設計：金蟾蜍（🐸，50-120x，25秒，0.8%觸發率，金色）/ 古鱷魚（🐊，60-150x，20秒，0.5%觸發率，深綠色）
+  - 命中機率：LV1-6 = 25%；LV7+ = 35%（高投注玩家更容易命中，符合業界設計）
+  - 冷卻機制：3 分鐘冷卻，防止連續觸發
+  - 廣播機制：出現/命中/離開全部廣播，讓全場感受到不死 BOSS 的存在
+  - 高倍率（≥100x）命中時全服公告 + 動態牆，製造「傳說時刻」
+  - build/vet 全部通過（零錯誤零警告）；14/14 immortalboss 測試通過
+
 - **DAY-128 更新（自主觸發）：** 龍怒蓄力大招系統（Dragon Wrath Charge System）✅
   - **業界依據：** JILI Royal Fishing 2026 Dragon Wrath — 「Accumulate wrath value through shooting, then unleash devastating meteor strikes across the entire screen」
   - `server/internal/player/player.go`：Player struct 加入 `WrathCharge int` / `LastWrathAt time.Time`；新增 `AddWrathCharge`（累積怒氣，回傳新值和是否剛滿）/ `GetWrathCharge`（thread-safe getter）/ `ConsumeWrath`（消耗怒氣，內部做滿值+冷卻檢查）/ `GetWrathCooldownSecs`（冷卻剩餘秒數）；常數 `WrathMaxCharge=100` / `WrathCooldownDuration=60s`
