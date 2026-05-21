@@ -44,6 +44,7 @@ import (
 	"digital-twin/server/internal/game/festival"
 	"digital-twin/server/internal/game/halloffame"
 	"digital-twin/server/internal/game/roulette"
+	raidboss "digital-twin/server/internal/game/raidBoss"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -91,6 +92,7 @@ type Game struct {
 	HallOfFame    *halloffame.Manager    // 全服名人堂管理器（DAY-110）
 	ActivityFeed  *activityfeed.Manager  // 成就動態牆管理器（DAY-112）
 	Roulette      *roulette.Manager      // 雙層倍率輪盤管理器（DAY-113）
+	RaidBoss      *raidboss.Manager      // Co-op Boss Raid 管理器（DAY-115）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -113,6 +115,7 @@ type Game struct {
 	lastEventAt        time.Time  // 限時活動廣播計時（每 30 秒一次，DAY-079）
 	lastWeatherAt      time.Time  // 天氣廣播計時（每 30 秒一次，DAY-087）
 	lastAutoSaveAt     time.Time  // 玩家資料定期自動儲存計時（每 60 秒，DAY-099）
+	lastRaidTickAt     time.Time  // Co-op Raid 狀態廣播計時（每 3 秒，DAY-115）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -171,6 +174,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		HallOfFame:         halloffame.New(),
 		ActivityFeed:       activityfeed.New(),
 		Roulette:           roulette.NewManager(),
+		RaidBoss:           raidboss.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -382,6 +386,12 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.triggerBoss()
 	case ws.MsgTriggerBonus:
 		g.triggerBonusReady()
+	case ws.MsgTriggerRaid:
+		// Co-op Boss Raid 手動觸發（Prototype 展示用，DAY-115）
+		go g.triggerRaid()
+	case ws.MsgGetRaidStatus:
+		// 查詢討伐狀態（DAY-115）
+		g.handleGetRaidStatus(p)
 	case ws.MsgSetDisplayName:
 		g.handleSetDisplayName(p, msg)
 	case ws.MsgPing:
@@ -545,6 +555,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		g.handleBuyBonus(p, msg)
 	case ws.MsgGetBuyBonusStatus:
 		g.handleGetBuyBonusStatus(p)
+	// 新手引導系統（DAY-115）
+	case ws.MsgTutorialAction, ws.MsgSkipTutorial:
+		g.handleTutorialAction(p, msg)
 	}
 }
 
@@ -902,6 +915,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	g.notifyWheelKill(p, t.DefID, finalReward)
 	// 雙層倍率輪盤：擊破 BOSS/特殊目標後觸發（DAY-113）
 	go g.notifyRouletteKill(p, t.DefID, finalReward)
+	// Co-op Boss Raid：記錄傷害貢獻（DAY-115）
+	go g.notifyRaidKill(p, finalReward)
 	// 隱藏挑戰：記錄擊破事件（DAY-085）
 	g.notifyChallengeKill(p, t.DefID, result.Multiplier, finalReward)
 	// 連鎖爆炸：擊破後嘗試觸發連鎖（DAY-088）
@@ -1134,6 +1149,11 @@ func (g *Game) updateNormalPlay() {
 	if shouldAutoSave {
 		g.lastAutoSaveAt = now
 	}
+	// Co-op Boss Raid tick（每 3 秒，DAY-115）
+	shouldTickRaid := now.Sub(g.lastRaidTickAt) >= 3*time.Second
+	if shouldTickRaid {
+		g.lastRaidTickAt = now
+	}
 	g.mu.Unlock()
 
 	if shouldBroadcastLeaderboard {
@@ -1177,6 +1197,10 @@ func (g *Game) updateNormalPlay() {
 	// 玩家資料定期自動儲存（每 60 秒，DAY-099）
 	if shouldAutoSave {
 		go g.autoSaveAllPlayers()
+	}
+	// Co-op Boss Raid tick（每 3 秒，DAY-115）
+	if shouldTickRaid {
+		go g.tickRaidUpdate()
 	}
 }
 

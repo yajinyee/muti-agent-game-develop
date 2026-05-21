@@ -82,6 +82,12 @@ const (
 	// Buy Bonus 系統（DAY-114）
 	MsgBuyBonus          MessageType = "buy_bonus"           // 購買 Bonus 觸發（Client→Server）
 	MsgGetBuyBonusStatus MessageType = "get_buy_bonus_status" // 查詢今日購買狀態（Client→Server）
+	// 新手引導系統（DAY-115）
+	MsgTutorialAction    MessageType = "tutorial_action"     // 玩家完成引導步驟（Client→Server）
+	MsgSkipTutorial      MessageType = "skip_tutorial"       // 跳過引導（Client→Server）
+	// Co-op Boss Raid 系統（DAY-115）
+	MsgGetRaidStatus     MessageType = "get_raid_status"     // 查詢討伐狀態（Client→Server）
+	MsgTriggerRaid       MessageType = "trigger_raid"        // 手動觸發討伐（Prototype 展示用）
 )
 
 // Server → Client
@@ -231,6 +237,14 @@ const (
 	MsgBuyBonusSuccess  MessageType = "buy_bonus_success"  // 購買成功，Bonus 即將開始（Server→Client）
 	MsgBuyBonusError    MessageType = "buy_bonus_error"    // 購買失敗（Server→Client）
 	MsgBuyBonusStatus   MessageType = "buy_bonus_status"   // 今日購買狀態（Server→Client）
+	// 新手引導系統（DAY-115）
+	MsgTutorialStep     MessageType = "tutorial_step"      // 引導步驟（Server→Client）
+	// Co-op Boss Raid 系統（DAY-115）
+	MsgRaidWarning      MessageType = "raid_warning"       // 討伐警告廣播（Server→Client）
+	MsgRaidStart        MessageType = "raid_start"         // 討伐開始廣播（Server→Client）
+	MsgRaidUpdate       MessageType = "raid_update"        // 討伐狀態更新廣播（Server→Client，每 3 秒）
+	MsgRaidResult       MessageType = "raid_result"        // 討伐結算廣播（Server→Client）
+	MsgRaidStatus       MessageType = "raid_status"        // 討伐狀態回應（Server→Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1902,4 +1916,86 @@ type BuyBonusStatusPayload struct {
 	StandardCost  int  `json:"standard_cost"`  // 標準 Bonus 費用
 	TNTCost       int  `json:"tnt_cost"`       // TNT Bonus 費用
 	CanBuy        bool `json:"can_buy"`        // 是否可以購買（未達上限且遊戲狀態正常）
+}
+
+// ---- 新手引導系統（DAY-115）----
+
+// TutorialStepPayload 引導步驟（Server → Client）
+type TutorialStepPayload struct {
+	Step      int     `json:"step"`       // 當前步驟（1-4）
+	TotalStep int     `json:"total_step"` // 總步驟數（3）
+	Title     string  `json:"title"`      // 步驟標題
+	Desc      string  `json:"desc"`       // 步驟說明
+	Highlight string  `json:"highlight"`  // 高亮區域（"game_area"/"bet_buttons"/"labor_bar"/"none"）
+	Action    string  `json:"action"`     // 期望動作（"shoot"/"bet_change"/"bonus"/"complete"）
+	ArrowX    float64 `json:"arrow_x"`    // 引導箭頭 X 座標
+	ArrowY    float64 `json:"arrow_y"`    // 引導箭頭 Y 座標
+}
+
+// TutorialActionPayload 玩家完成引導步驟（Client → Server）
+type TutorialActionPayload struct {
+	Action string `json:"action"` // "shoot_done"/"bet_done"/"bonus_done"/"skip"
+}
+
+// ---- Co-op Boss Raid 系統（DAY-115）----
+
+// RaidContributorPayload 貢獻者資料
+type RaidContributorPayload struct {
+	PlayerID    string `json:"player_id"`
+	DisplayName string `json:"display_name"`
+	Damage      int    `json:"damage"`
+	Reward      int    `json:"reward"`   // 結算後才有值
+	Rank        int    `json:"rank"`
+}
+
+// RaidWarningPayload 討伐警告廣播（Server → Client）
+type RaidWarningPayload struct {
+	RaidID    string `json:"raid_id"`
+	BossName  string `json:"boss_name"`
+	MaxHP     int    `json:"max_hp"`
+	RewardPool int   `json:"reward_pool"`
+	StartsIn  int    `json:"starts_in"` // 幾秒後開始（30）
+}
+
+// RaidStartPayload 討伐開始廣播（Server → Client）
+type RaidStartPayload struct {
+	RaidID     string `json:"raid_id"`
+	BossName   string `json:"boss_name"`
+	HP         int    `json:"hp"`
+	MaxHP      int    `json:"max_hp"`
+	RewardPool int    `json:"reward_pool"`
+	Duration   int    `json:"duration"` // 討伐持續秒數（300）
+}
+
+// RaidUpdatePayload 討伐狀態更新廣播（Server → Client，每 3 秒）
+type RaidUpdatePayload struct {
+	RaidID       string                   `json:"raid_id"`
+	HP           int                      `json:"hp"`
+	MaxHP        int                      `json:"max_hp"`
+	TimeLeft     float64                  `json:"time_left"`
+	Contributors []*RaidContributorPayload `json:"contributors"`
+}
+
+// RaidResultPayload 討伐結算廣播（Server → Client）
+type RaidResultPayload struct {
+	RaidID       string                   `json:"raid_id"`
+	BossName     string                   `json:"boss_name"`
+	Defeated     bool                     `json:"defeated"`     // true=擊殺，false=超時
+	RewardPool   int                      `json:"reward_pool"`
+	Contributors []*RaidContributorPayload `json:"contributors"` // 含個人獎勵
+	MyReward     int                      `json:"my_reward"`    // 本玩家獎勵（0=未參與）
+	MyRank       int                      `json:"my_rank"`      // 本玩家排名（0=未參與）
+}
+
+// RaidStatusPayload 討伐狀態回應（Server → Client）
+type RaidStatusPayload struct {
+	State        string                   `json:"state"`         // "idle"/"warning"/"active"/"result"
+	RaidID       string                   `json:"raid_id"`
+	BossName     string                   `json:"boss_name"`
+	HP           int                      `json:"hp"`
+	MaxHP        int                      `json:"max_hp"`
+	RewardPool   int                      `json:"reward_pool"`
+	TimeLeft     float64                  `json:"time_left"`
+	Contributors []*RaidContributorPayload `json:"contributors"`
+	CanTrigger   bool                     `json:"can_trigger"` // 今日是否可觸發
 }

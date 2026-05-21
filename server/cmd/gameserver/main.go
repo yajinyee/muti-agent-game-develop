@@ -436,10 +436,31 @@ func main() {
 		}
 	})
 
+	// Co-op Boss Raid 端點（DAY-115）
+	// GET /raid — 取得當前討伐狀態快照
+	mux.HandleFunc("/raid", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		snap := g.RaidBoss.GetSnapshot()
+		todayDate := time.Now().Format("2006-01-02")
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"state":        string(snap.State),
+			"raid_id":      snap.RaidID,
+			"boss_name":    snap.BossName,
+			"hp":           snap.HP,
+			"max_hp":       snap.MaxHP,
+			"reward_pool":  snap.RewardPool,
+			"time_left":    snap.TimeLeft,
+			"contributors": snap.Contributors,
+			"can_trigger":  g.RaidBoss.CanTrigger(todayDate),
+		}); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
 	// 商店端點（DAY-094）
 	// GET /shop — 取得商店快照
-	mux.HandleFunc("/shop", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+	mux.HandleFunc("/shop", func(w http.ResponseWriter, r *http.Request) {		w.Header().Set("Content-Type", "application/json")
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		snap := g.GetShopSnapshot()
 		if err := json.NewEncoder(w).Encode(snap); err != nil {

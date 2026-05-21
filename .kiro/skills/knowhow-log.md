@@ -3099,3 +3099,22 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **影響：** 只影響測試執行，不影響 build 和 vet
 - **解決：** 已知問題，不需要修復，其他所有測試正常通過
 - **教訓：** Windows Defender 對某些 Go 測試 binary 有誤報，不是真正的安全問題
+
+## 83. Co-op Boss Raid 傷害機制設計（2026-05-21）
+- **設計原則：** 用「擊破獎勵值」作為傷害，而不是固定傷害值
+- **原因：** 高投注玩家的獎勵更高，自然貢獻更多傷害，符合業界公平性設計
+- **獎勵分配：** 依傷害比例分配（A打60%傷害→得60%獎勵），最後一名拿剩餘（避免浮點誤差）
+- **每日限制：** 用 `lastRaidDate` 字串（YYYY-MM-DD）防止同一天重複觸發
+- **教訓：** Co-op 系統的傷害機制要和遊戲核心機制掛鉤，不要另外設計傷害值
+
+## 84. Go package 名稱 vs 目錄名稱（2026-05-21）
+- **問題：** 目錄名稱 `raidBoss`（camelCase），但 Go package 名稱是 `raidboss`（全小寫）
+- **原因：** Go package 名稱慣例是全小寫，目錄名稱可以是任意大小寫
+- **解決：** import 時用 alias：`raidboss "digital-twin/server/internal/game/raidBoss"`
+- **教訓：** Go 目錄名稱和 package 名稱不一定相同，import 時要確認 package 宣告
+
+## 85. tutorial_handler.go notifyFeedMilestone 參數錯誤（2026-05-21）
+- **問題：** `notifyFeedMilestone(p, "tutorial_complete", "完成新手引導", TutorialReward)` 傳了 4 個參數
+- **正確簽名：** `notifyFeedMilestone(p *player.Player, days int, milestoneName string)` — 只接受 3 個
+- **修復：** 改用 `notifyFeedAchievement(p, "完成新手引導", "🎓", "common")`
+- **教訓：** 新增動態牆整合時，要確認目標函數的簽名，不能假設參數順序

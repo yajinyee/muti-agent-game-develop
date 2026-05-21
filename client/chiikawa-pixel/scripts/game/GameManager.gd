@@ -38,6 +38,11 @@ signal roulette_result(result_data: Dictionary)             # 雙層輪盤結果
 signal buy_bonus_status(status_data: Dictionary)            # Buy Bonus 狀態（DAY-114）
 signal buy_bonus_success(success_data: Dictionary)          # Buy Bonus 購買成功（DAY-114）
 signal buy_bonus_error(error_data: Dictionary)              # Buy Bonus 購買失敗（DAY-114）
+# Co-op Boss Raid 系統（DAY-115）
+signal raid_warning(raid_data: Dictionary)                  # 討伐警告廣播
+signal raid_started(raid_data: Dictionary)                  # 討伐開始廣播
+signal raid_updated(raid_data: Dictionary)                  # 討伐狀態更新
+signal raid_result(result_data: Dictionary)                 # 討伐結算廣播
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -223,6 +228,15 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("buy_bonus_error", payload)
 		"buy_bonus_status":
 			emit_signal("buy_bonus_status", payload)
+		# Co-op Boss Raid 系統（DAY-115）
+		"raid_warning":
+			emit_signal("raid_warning", payload)
+		"raid_start":
+			emit_signal("raid_started", payload)
+		"raid_update":
+			emit_signal("raid_updated", payload)
+		"raid_result":
+			emit_signal("raid_result", payload)
 		"title_unlocked":
 			_handle_title_unlocked(payload)
 		"skin_update":

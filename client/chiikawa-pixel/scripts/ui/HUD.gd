@@ -28,6 +28,7 @@ const ChallengePanelScript = preload("res://scripts/ui/ChallengePanel.gd")
 const MissionStreakPanelScript = preload("res://scripts/ui/MissionStreakPanel.gd")
 const RoulettePanelScript = preload("res://scripts/ui/RoulettePanel.gd")
 const BuyBonusPanelScript = preload("res://scripts/ui/BuyBonusPanel.gd")
+const RaidPanelScript = preload("res://scripts/ui/RaidPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -202,6 +203,7 @@ func _ready() -> void:
 	_init_player_journey_panel()  # 玩家旅程儀表板（DAY-108）
 	_init_roulette_panel()        # 雙層倍率輪盤面板（DAY-113）
 	_init_buy_bonus_panel()       # Buy Bonus 面板（DAY-114）
+	_init_raid_panel()            # Co-op Boss Raid 面板（DAY-115）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2275,3 +2277,23 @@ func _init_buy_bonus_panel() -> void:
 func _on_buy_bonus_btn_pressed() -> void:
 	if is_instance_valid(_buy_bonus_panel_node):
 		_buy_bonus_panel_node.show_panel()
+
+## Co-op Boss Raid 面板（DAY-115）
+## 位置：全螢幕覆蓋，z_index=68（在 BuyBonus 之上）
+func _init_raid_panel() -> void:
+	var panel = RaidPanelScript.new()
+	panel.z_index = 68
+	add_child(panel)
+
+	# 連接 GameManager 訊號
+	if GameManager.has_signal("raid_warning"):
+		GameManager.raid_warning.connect(func(data): panel.show_warning(data))
+	if GameManager.has_signal("raid_started"):
+		GameManager.raid_started.connect(func(data): panel.show_raid_start(data))
+	if GameManager.has_signal("raid_updated"):
+		GameManager.raid_updated.connect(func(data): panel.update_raid(data))
+	if GameManager.has_signal("raid_result"):
+		GameManager.raid_result.connect(func(data):
+			var my_id = GameManager.get_player_id() if GameManager.has_method("get_player_id") else ""
+			panel.show_result(data, my_id)
+		)

@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-114 Buy Bonus 系統）
+## 最後更新：2026-05-21（DAY-115 Co-op Boss Raid 系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-115 更新（自主觸發）：** Co-op Boss Raid 系統（Co-op Boss Raid System）✅
+  - `server/internal/game/raidBoss/raidboss.go`：Raid 管理器（RaidStateIdle/Warning/Active/Result；StartWarning/StartRaid/RecordDamage/CheckTimeout/distributeRewards；依傷害比例分配獎勵池；GetSnapshot/GetContributorReward/Reset/IsActive；每日一次防重複觸發）
+  - `server/internal/game/raidBoss/raidboss_test.go`：13 個單元測試全部通過（New/CanTrigger/CanTrigger_SameDay/CanTrigger_NextDay/StartWarning/StartRaid/RecordDamage_Kill/RewardDistribution/CheckTimeout/RecordDamage_NotActive/GetSnapshot_Contributors/Reset/IsActive）
+  - `server/internal/ws/protocol.go`：新增 MsgGetRaidStatus/MsgTriggerRaid（Client→Server）；MsgRaidWarning/MsgRaidStart/MsgRaidUpdate/MsgRaidResult/MsgRaidStatus（Server→Client）；RaidContributorPayload/RaidWarningPayload/RaidStartPayload/RaidUpdatePayload/RaidResultPayload/RaidStatusPayload
+  - `server/internal/game/raid_handler.go`：triggerRaid（警告→30秒後開始）/startRaid/notifyRaidKill（擊破目標造成傷害）/handleRaidKill（擊殺結算+發放獎勵）/handleRaidTimeout（超時結算）/tickRaidUpdate（每3秒廣播狀態）/handleGetRaidStatus/buildRaidContributorPayloads
+  - `server/internal/game/game.go`：整合 RaidBoss *raidboss.Manager；HandleMessage 加入 MsgTriggerRaid/MsgGetRaidStatus；handleKill 加入 notifyRaidKill（goroutine）；gameLoop 每 3 秒 tickRaidUpdate；lastRaidTickAt 計時器
+  - `server/cmd/gameserver/main.go`：新增 /raid HTTP 端點（GET，回傳當前討伐狀態快照）
+  - `client/chiikawa-pixel/scripts/ui/RaidPanel.gd`：討伐面板（警告倒數30秒/討伐進行HP條+倒數計時+貢獻排名/結算顯示個人獎勵+最終排名；10秒自動關閉；閃爍警告動畫；最後30秒計時器變紅）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：raid_warning/raid_started/raid_updated/raid_result 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 RaidPanelScript preload + _init_raid_panel()（z_index=68）+ 訊號連接
+  - 同時修復：tutorial_handler.go 的 notifyFeedMilestone 參數錯誤（改用 notifyFeedAchievement）
+  - BOSS 設計：吉伊卡哇大魔王（HP=50,000，獎勵池=200,000金幣，持續5分鐘）
+  - 傷害機制：用擊破獎勵值作為傷害（高投注玩家貢獻更多，符合業界設計）
+  - 獎勵分配：依傷害比例分配（A打60%傷害→得60%獎勵），確保公平
+  - 觸發機制：每日一次（UTC日期防重複），可手動觸發（Prototype展示用）
+  - 廣播機制：警告/開始/每3秒更新/結算 全部廣播給所有玩家
+  - build/vet/test 全部通過（13/13 raidboss 測試）
+  - **業界依據：** Fishing Frenzy Chapter 3（2026-05-14）加入 Guild Wars 合作機制；accio.com（2026-04）確認多人合作是 2026 年捕魚機最熱門趨勢；co-optimus.com（2026-04）確認社交合作元素讓玩家留存率提升 35%+
+
 - **DAY-114 更新（自主觸發）：** Buy Bonus 系統（Buy Bonus System）✅
   - `server/internal/game/buy_bonus_handler.go`：Buy Bonus 管理器（標準Bonus=BetCost×100/TNT Bonus=BetCost×150+1.5x倍率加成；每日上限3次；跨日自動重置；handleBuyBonus/handleGetBuyBonusStatus/getBuyBonusTNTMult；金幣不足/每日上限/遊戲忙碌三種錯誤處理）
   - `server/internal/ws/protocol.go`：新增 MsgBuyBonus/MsgGetBuyBonusStatus（Client→Server）；MsgBuyBonusSuccess/MsgBuyBonusError/MsgBuyBonusStatus（Server→Client）；BuyBonusPayload/BuyBonusSuccessPayload/BuyBonusErrorPayload/BuyBonusStatusPayload
