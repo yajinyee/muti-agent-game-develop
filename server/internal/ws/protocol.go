@@ -372,6 +372,9 @@ const (
 	// 巨型鮟鱇魚電擊寶箱系統（DAY-145）
 	MsgAnglerfishShock MessageType = "anglerfish_shock" // 電擊開寶箱廣播（Server→Client，全服）
 
+	// 巨型鹹水鱷魚獵魚累積系統（DAY-146）
+	MsgCrocodileHunt MessageType = "crocodile_hunt" // 鱷魚獵魚廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3029,4 +3032,33 @@ type AnglerfishShockPayload struct {
 	TotalReward  int                    `json:"total_reward"`  // 總獎勵（result 時）
 	KillerID     string                 `json:"killer_id"`     // 觸發玩家 ID
 	KillerName   string                 `json:"killer_name"`   // 觸發玩家名稱
+}
+
+// ---- 巨型鹹水鱷魚獵魚累積系統（DAY-146）----
+
+// CrocodileHuntEntry 鱷魚獵殺記錄
+type CrocodileHuntEntry struct {
+	InstanceID string  `json:"instance_id"` // 被獵殺的目標 InstanceID
+	DefID      string  `json:"def_id"`      // 目標定義 ID
+	Multiplier float64 `json:"multiplier"`  // 目標倍率
+	Reward     int     `json:"reward"`      // 獎勵金幣
+	HuntIndex  int     `json:"hunt_index"`  // 第幾次獵殺（0-5）
+}
+
+// CrocodileHuntPayload 鱷魚獵魚廣播（Server → Client，DAY-146）
+// Phase: "awaken" → "hunt"（×N次）→ "result"
+type CrocodileHuntPayload struct {
+	TriggerID     string               `json:"trigger_id"`     // 觸發的 T110 InstanceID
+	TriggerX      float64              `json:"trigger_x"`      // 觸發位置 X
+	TriggerY      float64              `json:"trigger_y"`      // 觸發位置 Y
+	Phase         string               `json:"phase"`          // 當前階段
+	HuntDuration  int                  `json:"hunt_duration"`  // 獵魚持續時間（秒）
+	MaxHunts      int                  `json:"max_hunts"`      // 最多獵殺數
+	HuntIndex     int                  `json:"hunt_index"`     // 當前獵殺次數（hunt 階段）
+	HuntedID      string               `json:"hunted_id"`      // 本次獵殺的目標 ID（hunt 階段）
+	HuntReward    int                  `json:"hunt_reward"`    // 本次獵殺獎勵（hunt 階段）
+	HuntedTargets []CrocodileHuntEntry `json:"hunted_targets"` // 所有獵殺記錄（result 時）
+	TotalReward   int                  `json:"total_reward"`   // 總獎勵（result 時）
+	KillerID      string               `json:"killer_id"`      // 觸發玩家 ID
+	KillerName    string               `json:"killer_name"`    // 觸發玩家名稱
 }

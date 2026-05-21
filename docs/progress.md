@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-145 巨型鮟鱇魚電擊寶箱系統）
+## 最後更新：2026-05-21（DAY-146 巨型鹹水鱷魚獵魚累積系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,19 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-146 更新（自主觸發）：** 巨型鹹水鱷魚獵魚累積系統（Giant Saltwater Crocodile Hunt System）✅
+  - **業界依據：** jiligames.com 2026「giant crocodiles awaken to hunt fish on the fish farm to accumulate big prizes!」+ megafishinggame.top「Giant Saltwater Crocodile」— 擊破後觸發鱷魚獵魚模式，8 秒內自動獵殺普通目標累積獎勵，是 JILI Mega Fishing 2026 的核心特殊目標機制
+  - `server/internal/data/tables.go`：新增 T110 巨型鹹水鱷魚（100-150x/HP150/SpawnWeight2/crocodile_hunt 行為）
+  - `server/internal/game/crocodile_handler.go`：isCrocodile/isBasicTarget 判斷；tryCrocodileHunt（8秒/最多6次/800ms間隔/隨機選普通目標/全服廣播）；announceCrocodileHunt（≥4個目標全服公告）
+  - `server/internal/ws/protocol.go`：新增 MsgCrocodileHunt；CrocodileHuntEntry；CrocodileHuntPayload（三階段：awaken/hunt×N/result）
+  - `server/internal/game/game.go`：handleKill 加入 isCrocodile 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/CrocodilePanel.gd`：鱷魚面板（深綠主題；awaken 橫幅+進度條+全螢幕綠色閃光；hunt 進度更新+浮動獎勵文字；result 右側滑入彈窗含獵殺列表+獎勵；自己觸發時綠色閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：crocodile_hunt 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 CrocodilePanelScript（layer=87）
+  - 獵魚設計：每 800ms 隨機選一個普通目標（T001-T006）獵殺；最多 6 次；8 秒超時
+  - 獎勵設計：獵殺獎勵 = 目標倍率 × betLevel × 0.30（鱷魚獵魚是「額外獎勵」，比直接擊破低）
+  - 全服公告：獵殺 ≥4 個目標時全服廣播，讓其他玩家看到「有人的鱷魚在獵魚」
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-145 更新（自主觸發）：** 巨型鮟鱇魚電擊寶箱系統（Giant Anglerfish Electric Chest System）✅
   - **業界依據：** jiligames.com 2026「Giant Anglerfish can shoot electricity to open treasure chests」— 擊破巨型鮟鱇魚後觸發電擊，電流傳導到附近的寶箱目標（T102），強制開啟寶箱獲得額外獎勵，是 JILI Mega Fishing 2026 的新機制
   - `server/internal/data/tables.go`：新增 T109 巨型鮟鱇魚（70-90x/HP90/SpawnWeight4/anglerfish_shock 行為）

@@ -98,6 +98,10 @@ var Targets = map[string]*TargetDef{
 	// T109 巨型鮟鱇魚（DAY-145）— 業界依據：jiligames.com 2026「Giant Anglerfish can shoot electricity to open treasure chests」
 	// 擊破後觸發電擊，電流傳導到附近的寶箱目標（T102），強制開啟寶箱獲得額外獎勵
 	"T109": {ID: "T109", Name: "巨型鮟鱇魚", Type: TargetTypeSpecial, MultiplierMin: 70, MultiplierMax: 90, HP: 90, SpawnWeight: 4, Speed: 25, Lifetime: 14, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "anglerfish_shock"},
+	// T110 巨型鹹水鱷魚（DAY-146）— 業界依據：jiligames.com 2026「giant crocodiles awaken to hunt fish on the fish farm to accumulate big prizes!」
+	// + megafishinggame.top「Giant Saltwater Crocodile」
+	// 擊破後觸發「鱷魚獵魚」模式：鱷魚在 8 秒內自動獵殺場上的普通目標（T001-T006），累積獎勵給觸發玩家
+	"T110": {ID: "T110", Name: "巨型鹹水鱷魚", Type: TargetTypeSpecial, MultiplierMin: 100, MultiplierMax: 150, HP: 150, SpawnWeight: 2, Speed: 20, Lifetime: 18, LaborGain: 18, DifficultyFactor: 16.0, SpecialBehavior: "crocodile_hunt"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

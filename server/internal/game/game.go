@@ -1193,6 +1193,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isAnglerfish(t.DefID) {
 		go g.tryAnglerfishShock(p, t.InstanceID, t.X, t.Y)
 	}
+	// 巨型鹹水鱷魚獵魚：擊破 T110 時觸發（DAY-146）
+	if isCrocodile(t.DefID) {
+		go g.tryCrocodileHunt(p, t.InstanceID, t.X, t.Y)
+	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }

@@ -1,0 +1,265 @@
+## CrocodilePanel.gd
+## 巨型鹹水鱷魚獵魚累積面板（DAY-146）
+## 業界依據：jiligames.com 2026「giant crocodiles awaken to hunt fish on the fish farm to accumulate big prizes!」
+## 擊破 T110 後觸發鱷魚獵魚模式，8 秒內自動獵殺普通目標，累積獎勵
+
+extends Control
+
+var pixel_font: Font = null
+
+# 鱷魚主題顏色（深綠色）
+const COLOR_CROC_GREEN  = Color(0.13, 0.55, 0.13)
+const COLOR_CROC_DARK   = Color(0.05, 0.25, 0.05)
+const COLOR_CROC_YELLOW = Color(0.8, 0.9, 0.1)
+const COLOR_GOLD        = Color(1.0, 0.85, 0.0)
+const COLOR_WHITE       = Color(1.0, 1.0, 1.0)
+
+# 獵魚進度追蹤
+var _hunt_count: int = 0
+var _max_hunts: int = 6
+var _total_reward: int = 0
+var _banner: Control = null
+var _progress_bar: ColorRect = null
+var _hunt_label: Label = null
+
+## 初始化（由 HUD.gd 呼叫）
+func setup(font: Font) -> void:
+	pixel_font = font
+	GameManager.crocodile_hunt.connect(_on_crocodile_hunt)
+
+## 處理鱷魚獵魚訊息
+func _on_crocodile_hunt(data: Dictionary) -> void:
+	var phase = data.get("phase", "")
+	match phase:
+		"awaken":
+			_show_awaken(data)
+		"hunt":
+			_show_hunt(data)
+		"result":
+			_show_result(data)
+
+## 鱷魚覺醒（awaken 階段）
+func _show_awaken(data: Dictionary) -> void:
+	_hunt_count = 0
+	_max_hunts = data.get("max_hunts", 6)
+	_total_reward = 0
+
+	var canvas_layer = get_parent()
+	if not is_instance_valid(canvas_layer):
+		return
+
+	# 頂部橫幅（深綠色）
+	_banner = Control.new()
+	_banner.name = "CrocodileBanner"
+	_banner.position = Vector2(0, -60)
+	_banner.size = Vector2(1280, 56)
+	_banner.z_index = 87
+	canvas_layer.add_child(_banner)
+
+	var bg = ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.05, 0.2, 0.05, 0.92)
+	_banner.add_child(bg)
+
+	# 標題
+	var title_lbl = Label.new()
+	title_lbl.text = "🐊 巨型鱷魚覺醒！開始獵魚！"
+	title_lbl.position = Vector2(0, 4)
+	title_lbl.size = Vector2(1280, 28)
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.add_theme_font_size_override("font_size", 20)
+	title_lbl.add_theme_color_override("font_color", COLOR_CROC_YELLOW)
+	if is_instance_valid(pixel_font):
+		title_lbl.add_theme_font_override("font", pixel_font)
+	_banner.add_child(title_lbl)
+
+	# 獵魚進度標籤
+	_hunt_label = Label.new()
+	_hunt_label.name = "HuntLabel"
+	_hunt_label.text = "獵殺進度：0 / %d" % _max_hunts
+	_hunt_label.position = Vector2(0, 32)
+	_hunt_label.size = Vector2(1280, 20)
+	_hunt_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_hunt_label.add_theme_font_size_override("font_size", 12)
+	_hunt_label.add_theme_color_override("font_color", COLOR_WHITE)
+	if is_instance_valid(pixel_font):
+		_hunt_label.add_theme_font_override("font", pixel_font)
+	_banner.add_child(_hunt_label)
+
+	# 進度條背景
+	var bar_bg = ColorRect.new()
+	bar_bg.position = Vector2(440, 50)
+	bar_bg.size = Vector2(400, 6)
+	bar_bg.color = Color(0.1, 0.1, 0.1, 0.8)
+	_banner.add_child(bar_bg)
+
+	# 進度條填充
+	_progress_bar = ColorRect.new()
+	_progress_bar.name = "ProgressBar"
+	_progress_bar.position = Vector2(440, 50)
+	_progress_bar.size = Vector2(0, 6)
+	_progress_bar.color = COLOR_CROC_GREEN
+	_banner.add_child(_progress_bar)
+
+	# 滑入動畫
+	var tween = _banner.create_tween()
+	tween.tween_property(_banner, "position:y", 0.0, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	# 全螢幕綠色閃光
+	var flash = ColorRect.new()
+	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	flash.color = Color(COLOR_CROC_GREEN.r, COLOR_CROC_GREEN.g, COLOR_CROC_GREEN.b, 0.0)
+	flash.z_index = 86
+	canvas_layer.add_child(flash)
+	var flash_tween = flash.create_tween()
+	flash_tween.tween_property(flash, "color:a", 0.25, 0.08)
+	flash_tween.tween_property(flash, "color:a", 0.0, 0.3)
+	flash_tween.tween_callback(flash.queue_free)
+
+## 鱷魚獵殺（hunt 階段）
+func _show_hunt(data: Dictionary) -> void:
+	_hunt_count += 1
+	var hunt_reward = data.get("hunt_reward", 0)
+	_total_reward += hunt_reward
+
+	# 更新進度條
+	if is_instance_valid(_progress_bar) and _max_hunts > 0:
+		var ratio = float(_hunt_count) / float(_max_hunts)
+		var tween = _progress_bar.create_tween()
+		tween.tween_property(_progress_bar, "size:x", 400.0 * ratio, 0.2).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
+	# 更新進度標籤
+	if is_instance_valid(_hunt_label):
+		_hunt_label.text = "獵殺進度：%d / %d  累積：🪙%d" % [_hunt_count, _max_hunts, _total_reward]
+
+	# 獵殺浮動文字
+	var canvas_layer = get_parent()
+	if is_instance_valid(canvas_layer) and hunt_reward > 0:
+		var float_lbl = Label.new()
+		float_lbl.text = "+%d" % hunt_reward
+		float_lbl.position = Vector2(
+			randf_range(400, 880),
+			randf_range(200, 500)
+		)
+		float_lbl.size = Vector2(100, 24)
+		float_lbl.add_theme_font_size_override("font_size", 14)
+		float_lbl.add_theme_color_override("font_color", COLOR_CROC_YELLOW)
+		if is_instance_valid(pixel_font):
+			float_lbl.add_theme_font_override("font", pixel_font)
+		float_lbl.z_index = 88
+		canvas_layer.add_child(float_lbl)
+
+		var tween = float_lbl.create_tween()
+		tween.tween_property(float_lbl, "position:y", float_lbl.position.y - 40, 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(float_lbl, "modulate:a", 0.0, 0.6)
+		tween.tween_callback(float_lbl.queue_free)
+
+## 顯示結果（result 階段）
+func _show_result(data: Dictionary) -> void:
+	var total_reward = data.get("total_reward", 0)
+	var killer_id = data.get("killer_id", "")
+	var killer_name = data.get("killer_name", "")
+	var hunted_targets = data.get("hunted_targets", [])
+	var is_self = killer_id == NetworkManager.get_player_id()
+
+	# 關閉橫幅
+	if is_instance_valid(_banner):
+		var tween = _banner.create_tween()
+		tween.tween_property(_banner, "position:y", -60.0, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+		tween.tween_callback(_banner.queue_free)
+	_banner = null
+
+	if total_reward <= 0:
+		return
+
+	var canvas_layer = get_parent()
+	if not is_instance_valid(canvas_layer):
+		return
+
+	# 結果彈窗（右側滑入）
+	var panel = Control.new()
+	panel.name = "CrocodileResult"
+	panel.position = Vector2(1280, 80)
+	panel.size = Vector2(280, 160)
+	panel.z_index = 88
+	canvas_layer.add_child(panel)
+
+	var bg = ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.03, 0.12, 0.03, 0.92)
+	panel.add_child(bg)
+
+	# 綠色頂部邊框
+	var top_border = ColorRect.new()
+	top_border.size = Vector2(280, 2)
+	top_border.color = COLOR_CROC_GREEN
+	panel.add_child(top_border)
+
+	# 標題
+	var title_lbl = Label.new()
+	title_lbl.text = "🐊 鱷魚獵魚完成！" if is_self else "🐊 %s 的鱷魚！" % killer_name
+	title_lbl.position = Vector2(8, 8)
+	title_lbl.size = Vector2(264, 22)
+	title_lbl.add_theme_font_size_override("font_size", 13)
+	title_lbl.add_theme_color_override("font_color", COLOR_CROC_YELLOW)
+	if is_instance_valid(pixel_font):
+		title_lbl.add_theme_font_override("font", pixel_font)
+	panel.add_child(title_lbl)
+
+	# 獵殺數
+	var hunt_lbl = Label.new()
+	hunt_lbl.text = "獵殺目標：%d 個" % len(hunted_targets)
+	hunt_lbl.position = Vector2(8, 34)
+	hunt_lbl.size = Vector2(264, 18)
+	hunt_lbl.add_theme_font_size_override("font_size", 11)
+	hunt_lbl.add_theme_color_override("font_color", COLOR_WHITE)
+	if is_instance_valid(pixel_font):
+		hunt_lbl.add_theme_font_override("font", pixel_font)
+	panel.add_child(hunt_lbl)
+
+	# 獵殺列表（最多顯示 3 個）
+	var display_count = min(len(hunted_targets), 3)
+	for i in display_count:
+		var entry = hunted_targets[i]
+		var item_lbl = Label.new()
+		item_lbl.text = "  🐟 ×%.0f → +%d" % [entry.get("multiplier", 0), entry.get("reward", 0)]
+		item_lbl.position = Vector2(8, 54 + i * 16)
+		item_lbl.size = Vector2(264, 16)
+		item_lbl.add_theme_font_size_override("font_size", 10)
+		item_lbl.add_theme_color_override("font_color", COLOR_CROC_YELLOW)
+		if is_instance_valid(pixel_font):
+			item_lbl.add_theme_font_override("font", pixel_font)
+		panel.add_child(item_lbl)
+
+	# 總獎勵
+	var reward_lbl = Label.new()
+	reward_lbl.text = "🪙 +%d" % total_reward
+	reward_lbl.position = Vector2(8, 112)
+	reward_lbl.size = Vector2(264, 32)
+	reward_lbl.add_theme_font_size_override("font_size", 22)
+	reward_lbl.add_theme_color_override("font_color", COLOR_GOLD)
+	if is_instance_valid(pixel_font):
+		reward_lbl.add_theme_font_override("font", pixel_font)
+	panel.add_child(reward_lbl)
+
+	# 自己觸發時加綠色閃光
+	if is_self:
+		var flash = ColorRect.new()
+		flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		flash.color = Color(COLOR_CROC_GREEN.r, COLOR_CROC_GREEN.g, COLOR_CROC_GREEN.b, 0.0)
+		flash.z_index = 1
+		panel.add_child(flash)
+		var flash_tween = flash.create_tween()
+		flash_tween.tween_property(flash, "color:a", 0.4, 0.1)
+		flash_tween.tween_property(flash, "color:a", 0.0, 0.3)
+		flash_tween.tween_callback(flash.queue_free)
+
+		if AudioManager != null:
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+
+	# 滑入動畫
+	var tween = panel.create_tween()
+	tween.tween_property(panel, "position:x", 990.0, 0.35).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_interval(3.5)
+	tween.tween_property(panel, "position:x", 1280.0, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_callback(panel.queue_free)

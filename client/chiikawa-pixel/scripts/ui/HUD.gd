@@ -234,6 +234,7 @@ func _ready() -> void:
 	_init_bomb_crab_panel()       # 炸彈蟹連環爆炸面板（DAY-143）
 	_init_mega_octopus_panel()    # 巨型章魚轉盤面板（DAY-144）
 	_init_anglerfish_panel()      # 巨型鮟鱇魚電擊寶箱面板（DAY-145）
+	_init_crocodile_panel()       # 巨型鹹水鱷魚獵魚面板（DAY-146）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2857,3 +2858,16 @@ func _init_anglerfish_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_anglerfish_panel = panel
+
+# ---- 巨型鹹水鱷魚獵魚面板（DAY-146）----
+
+const CrocodilePanelScript = preload("res://scripts/ui/CrocodilePanel.gd")
+var _crocodile_panel: Control = null
+
+func _init_crocodile_panel() -> void:
+	var panel = CrocodilePanelScript.new()
+	panel.name = "CrocodilePanel"
+	panel.layer = 87  # 在 AnglerfishPanel(86) 之上
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_crocodile_panel = panel
