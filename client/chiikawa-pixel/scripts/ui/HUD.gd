@@ -223,6 +223,7 @@ func _ready() -> void:
 	_init_awaken_boss_panel()     # 覺醒 BOSS 面板（DAY-130）
 	_init_win_streak_panel()      # 連勝獎勵面板（DAY-131）
 	_init_lightning_eel_panel()   # 閃電鰻連鎖攻擊面板（DAY-132）
+	_init_fever_mode_panel()      # 狂熱模式面板（DAY-133）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2659,3 +2660,23 @@ func _init_lightning_eel_panel() -> void:
 
 	GameManager.lightning_eel_chain.connect(func(data): panel.show_chain_result(data))
 	GameManager.lightning_eel_status.connect(func(data): panel.update_status(data))
+
+# ---- 狂熱模式面板（DAY-133）----
+const FeverModePanelScript = preload("res://scripts/ui/FeverModePanel.gd")
+var _fever_mode_panel: Control = null
+
+func _init_fever_mode_panel() -> void:
+	var panel = FeverModePanelScript.new()
+	panel.name = "FeverModePanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 65
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_fever_mode_panel = panel
+
+	if GameManager.local_player_id != "":
+		panel.set_player_id(GameManager.local_player_id)
+
+	GameManager.fever_mode_started.connect(func(data): panel.on_fever_start(data))
+	GameManager.fever_mode_ended.connect(func(data): panel.on_fever_end(data))
+	GameManager.fever_mode_status.connect(func(data): panel.on_fever_status(data))

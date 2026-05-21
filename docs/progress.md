@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-132 閃電鰻連鎖攻擊系統）
+## 最後更新：2026-05-21（DAY-133 狂熱模式系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-132 更新（自主觸發）：** 閃電鰻連鎖攻擊系統（Lightning Eel Chain Attack System）✅
+- **DAY-133 更新（自主觸發）：** 狂熱模式系統（Fever Mode System）✅
+  - **業界依據：** Fire Kirin / Ocean King 系列的 Fever Mode — 連續快速擊破觸發狂熱模式，全場獎勵倍率提升，製造「停不下來」的爽感，是業界最經典的短期留存機制之一
+  - `server/internal/game/fevermode/fevermode.go`：狂熱模式管理器；FeverConfig（TriggerKills=5/TriggerWindow=5s/BaseDuration=15s/MaxDuration=30s/ExtendPerKill=1s/MultBoost=1.5/CooldownSecs=20）；RecordKill（觸發判斷/延長時間/冷卻管理）；GetMultBoost/CheckExpiry/TickExpiry/GetSnapshot/RemovePlayer
+  - `server/internal/game/fevermode/fevermode_test.go`：15 個單元測試全部通過（New/RecordKill_NoTrigger/RecordKill_Trigger/RecordKill_ExtendDuringFever/GetMultBoost_Active/GetMultBoost_Idle/GetSnapshot_Idle/GetSnapshot_Active/GetSnapshot_KillProgress/CheckExpiry/TickExpiry/RemovePlayer/MultiplePlayers/CooldownAfterFever/TotalFevered/WindowExpiry）
+  - `server/internal/game/fevermode_handler.go`：notifyFeverModeKill（觸發廣播/延長通知/進度更新）；tickFeverModeExpiry（過期檢查/結束通知）；sendFeverModeStatus（登入時發送狀態）；announceFeverMode；notifyFeedFeverMode
+  - `server/internal/game/game.go`：整合 FeverMode *fevermode.Manager；NewGameWithStore 初始化；RemovePlayer 清理；AddPlayer 發送狀態；handleKill 整合 notifyFeverModeKill（在稀有連擊倍率之後）；gameLoop 加入 tickFeverModeExpiry
+  - `server/internal/ws/protocol.go`：新增 MsgFeverModeStart/MsgFeverModeEnd/MsgFeverModeStatus；FeverModeStartPayload/FeverModeEndPayload/FeverModeStatusPayload
+  - `server/internal/game/announce/announce.go`：新增 EventFeverMode；buildContent 加入狂熱模式公告（4秒顯示，普通優先）
+  - `server/internal/game/activityfeed/activityfeed.go`：新增 EventFeverMode 事件類型
+  - `client/chiikawa-pixel/scripts/ui/FeverModePanel.gd`：狂熱模式面板（全螢幕橙紅閃光；頂部橫幅滑入；左下角進度條（0/5→5/5）；狂熱中倒數計時；最後5秒紅色閃爍；倍率顯示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：3個訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 FeverModePanelScript（z_index=65）
+  - 觸發設計：5 秒內擊破 5 個目標觸發；狂熱持續 15 秒；狂熱中每次擊破延長 1 秒（最多 30 秒）；結束後 20 秒冷卻
+  - 倍率設計：狂熱中所有獎勵 ×1.5（在稀有連擊倍率之後疊加）
+  - 廣播機制：觸發時全服廣播（讓所有玩家看到誰進入了狂熱模式）；結束時個人通知
+  - 進度條：顯示 0/5 → 5/5 的觸發進度，讓玩家有明確目標
+  - build/vet 全部通過（零錯誤零警告）；15/15 fevermode 測試通過
+
+
   - **業界依據：** JILI Royal Fishing 2026 — 「The 60x lightning eel creates chain reactions that jump between nearby fish. Once activated, electric shocks continue spreading until targeting disengages, creating cascading capture sequences.」
   - `server/internal/game/lightningeel/lightningeel.go`：閃電鰻連鎖管理器；ChainConfig（MaxJumps=5/JumpKillChance=45%/JumpMultMod=0.6/JumpRangeUnits=200/CooldownSecs=8）；ExecuteChain（收集附近目標/逐一跳躍/45%擊破機率/獎勵=目標倍率×0.6×betCost）；CanTrigger/CooldownLeft/RemovePlayer/GetSnapshot
   - `server/internal/game/lightningeel/lightningeel_test.go`：15 個單元測試全部通過（New/CanTrigger_NewPlayer/CanTrigger_AfterChain/CooldownLeft/CooldownLeft_NewPlayer/ExecuteChain_Basic/ExecuteChain_MaxJumps/ExecuteChain_NoTargets/ExecuteChain_NoDuplicateJumps/ExecuteChain_RewardCalc/ExecuteChain_JumpIndex/RemovePlayer/GetSnapshot/GetSnapshot_AfterChain/MultiplePlayers/CanTrigger_AfterCooldown）

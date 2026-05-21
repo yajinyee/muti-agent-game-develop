@@ -100,6 +100,10 @@ signal win_streak_reset(data: Dictionary)                   # 連勝重置（個
 # 閃電鰻連鎖攻擊系統（DAY-132）
 signal lightning_eel_chain(data: Dictionary)                # 連鎖攻擊結果廣播（全服）
 signal lightning_eel_status(data: Dictionary)               # 閃電鰻冷卻狀態（個人）
+# 狂熱模式系統（DAY-133）
+signal fever_mode_started(data: Dictionary)                 # 狂熱模式開始（全服廣播）
+signal fever_mode_ended(data: Dictionary)                   # 狂熱模式結束（個人）
+signal fever_mode_status(data: Dictionary)                  # 狂熱模式狀態更新（個人）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -546,6 +550,13 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("lightning_eel_chain", payload)
 		"lightning_eel_status":
 			emit_signal("lightning_eel_status", payload)
+		# 狂熱模式系統（DAY-133）
+		"fever_mode_start":
+			emit_signal("fever_mode_started", payload)
+		"fever_mode_end":
+			emit_signal("fever_mode_ended", payload)
+		"fever_mode_status":
+			emit_signal("fever_mode_status", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")

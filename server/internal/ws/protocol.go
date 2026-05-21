@@ -316,6 +316,11 @@ const (
 	MsgLightningEelChain  MessageType = "lightning_eel_chain"  // 連鎖攻擊結果廣播（Server→Client，全服）
 	MsgLightningEelStatus MessageType = "lightning_eel_status" // 閃電鰻冷卻狀態（Server→Client，個人）
 
+	// 狂熱模式系統（DAY-133）
+	MsgFeverModeStart  MessageType = "fever_mode_start"  // 狂熱模式開始（Server→Client，全服廣播）
+	MsgFeverModeEnd    MessageType = "fever_mode_end"    // 狂熱模式結束（Server→Client，個人）
+	MsgFeverModeStatus MessageType = "fever_mode_status" // 狂熱模式狀態（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2598,4 +2603,34 @@ type LightningEelStatusPayload struct {
 	CooldownLeft int    `json:"cooldown_left"`  // 冷卻剩餘秒數（0 = 可觸發）
 	MaxJumps     int    `json:"max_jumps"`      // 最大跳躍次數
 	JumpRange    float64 `json:"jump_range"`   // 跳躍範圍（Client 用於視覺）
+}
+
+// ---- 狂熱模式系統 Payloads（DAY-133）----
+
+// FeverModeStartPayload 狂熱模式開始廣播（Server → Client，全服）（DAY-133）
+type FeverModeStartPayload struct {
+	PlayerID    string  `json:"player_id"`    // 觸發玩家 ID
+	PlayerName  string  `json:"player_name"`  // 觸發玩家名稱
+	SecondsLeft int     `json:"seconds_left"` // 剩餘秒數
+	MultBoost   float64 `json:"mult_boost"`   // 倍率加成（1.5）
+	IsSelf      bool    `json:"is_self"`      // 是否為自己觸發（Client 端填充）
+}
+
+// FeverModeEndPayload 狂熱模式結束（Server → Client，個人）（DAY-133）
+type FeverModeEndPayload struct {
+	PlayerID     string `json:"player_id"`     // 玩家 ID
+	TotalFevered int    `json:"total_fevered"` // 本 session 觸發次數
+	CooldownLeft int    `json:"cooldown_left"` // 冷卻剩餘秒數
+}
+
+// FeverModeStatusPayload 狂熱模式狀態（Server → Client，個人）（DAY-133）
+type FeverModeStatusPayload struct {
+	PlayerID     string  `json:"player_id"`     // 玩家 ID
+	IsActive     bool    `json:"is_active"`     // 是否正在狂熱中
+	SecondsLeft  int     `json:"seconds_left"`  // 剩餘秒數（0 = 未觸發）
+	CooldownLeft int     `json:"cooldown_left"` // 冷卻剩餘秒數（0 = 可觸發）
+	MultBoost    float64 `json:"mult_boost"`    // 當前倍率加成
+	KillProgress int     `json:"kill_progress"` // 觸發進度（0-5）
+	TriggerKills int     `json:"trigger_kills"` // 觸發所需擊破數（5）
+	TotalFevered int     `json:"total_fevered"` // 本 session 觸發次數
 }

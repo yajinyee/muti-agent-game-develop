@@ -30,6 +30,7 @@ const (
 	EventGoldenTime    EventType = "golden_time"     // 黃金時間開始（DAY-125）
 	EventWeatherSurge  EventType = "weather_surge"   // 天氣湧現事件（DAY-127）
 	EventLightningChain EventType = "lightning_chain" // 閃電鰻連鎖擊破（DAY-132）
+	EventFeverMode      EventType = "fever_mode"      // 狂熱模式觸發（DAY-133）
 )
 
 // Priority 公告優先級
@@ -293,6 +294,20 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		message = fmt.Sprintf("%s 閃電連鎖擊破 %s 個目標！獲得 🪙%s！", name, kills, reward)
 		icon = "⚡"
 		color = "#FFE066"
+		priority = PriorityNormal
+		duration = 4000
+
+	case EventFeverMode:
+		mult := "1.5"
+		if extra != nil {
+			if m, ok := extra["mult"]; ok {
+				mult = m
+			}
+		}
+		title = "🔥 狂熱模式！"
+		message = fmt.Sprintf("%s 進入狂熱模式！獎勵 ×%s！", name, mult)
+		icon = "🔥"
+		color = "#FF4500"
 		priority = PriorityNormal
 		duration = 4000
 

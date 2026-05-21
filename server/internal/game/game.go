@@ -50,6 +50,7 @@ import (
 	"digital-twin/server/internal/game/wheel"
 	"digital-twin/server/internal/game/winstreak"
 	"digital-twin/server/internal/game/lightningeel"
+	"digital-twin/server/internal/game/fevermode"
 	"digital-twin/server/internal/anticheat"
 	"digital-twin/server/internal/game/festival"
 	"digital-twin/server/internal/game/halloffame"
@@ -113,6 +114,7 @@ type Game struct {
 	AwakenBoss     *awakenboss.Manager     // 覺醒 BOSS 系統管理器（DAY-130）
 	WinStreak      *winstreak.Manager      // 連勝獎勵系統管理器（DAY-131）
 	LightningEel   *lightningeel.Manager   // 閃電鰻連鎖攻擊管理器（DAY-132）
+	FeverMode      *fevermode.Manager      // 狂熱模式管理器（DAY-133）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -214,6 +216,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		AwakenBoss:         awakenboss.New(),
 		WinStreak:          winstreak.New(),
 		LightningEel:       lightningeel.New(),
+		FeverMode:          fevermode.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -358,6 +361,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendAwakenBossStatus(pp)
 				// 發送閃電鰻冷卻狀態（DAY-132）
 				g.sendLightningEelStatus(pp)
+				// 發送狂熱模式狀態（DAY-133）
+				g.sendFeverModeStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -428,6 +433,10 @@ func (g *Game) RemovePlayer(playerID string) {
 		// 清理閃電鰻冷卻記錄（DAY-132）
 		if g.LightningEel != nil {
 			g.LightningEel.RemovePlayer(playerID)
+		}
+		// 清理狂熱模式記錄（DAY-133）
+		if g.FeverMode != nil {
+			g.FeverMode.RemovePlayer(playerID)
 		}
 		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
@@ -851,6 +860,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	rareCatchMult := g.notifyRareCatchKill(p, t.DefID)
 	if rareCatchMult > 1.0 {
 		finalReward = int(float64(finalReward) * rareCatchMult)
+	}
+	// 套用狂熱模式倍率（DAY-133）
+	feverMult := g.notifyFeverModeKill(p)
+	if feverMult > 1.0 {
+		finalReward = int(float64(finalReward) * feverMult)
 	}
 	// 龍怒蓄力大招：擊破目標累積怒氣（DAY-128）
 	go g.notifyWrathKill(p, t.Multiplier)
@@ -1350,6 +1364,8 @@ func (g *Game) updateNormalPlay() {
 	go g.tickAwakenBoss()
 	// 連勝超時檢查（每次 update，DAY-131）
 	go g.tickWinStreakExpiry()
+	// 狂熱模式過期檢查（每次 update，DAY-133）
+	go g.tickFeverModeExpiry()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }

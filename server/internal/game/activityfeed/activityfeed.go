@@ -22,6 +22,7 @@ const (
 	EventSeasonLevel  EventType = "season_level"   // 賽季升級
 	EventMilestone    EventType = "milestone"      // 登入里程碑
 	EventLightningChain EventType = "lightning_chain" // 閃電鰻連鎖擊破（DAY-132）
+	EventFeverMode      EventType = "fever_mode"      // 狂熱模式觸發（DAY-133）
 )
 
 // Rarity 事件稀有度（影響 UI 顯示顏色）
