@@ -17,6 +17,8 @@ type BossType string
 const (
 	BossAwakenDragon  BossType = "awaken_dragon"  // 覺醒龍：90x-180x
 	BossIcePhoenix    BossType = "ice_phoenix"     // 冰鳳凰：120x-300x（最高倍率）
+	BossHumpbackWhale BossType = "humpback_whale"  // 座頭鯨：90x-150x（DAY-158，業界依據：royal-fishing.uk 2026）
+	BossLegendDragon  BossType = "legend_dragon"   // 傳說龍：120x-200x（DAY-158，業界依據：royal-fishing.uk 2026）
 )
 
 // BossDef 覺醒 BOSS 定義
@@ -61,6 +63,36 @@ var BossDefs = map[BossType]*BossDef{
 		Duration:        25.0,
 		TriggerRate:     0.001, // 0.1% 機率觸發（稀有）
 		Color:           "#00BFFF",
+	},
+	// DAY-158：座頭鯨（業界依據：royal-fishing.uk 2026「Humpback Whale offers 90-150x with 15x base multiplier」）
+	// 座頭鯨是 Royal Fishing 的標誌性覺醒 BOSS，15x 基礎倍率，Power Up 後最高 150x
+	BossHumpbackWhale: {
+		ID:              BossHumpbackWhale,
+		Name:            "座頭鯨",
+		Icon:            "🐋",
+		MinMult:         90.0,
+		MaxMult:         150.0,
+		PowerUpMinMult:  6.0,
+		PowerUpMaxMult:  8.0,
+		PowerUpThreshold: 6, // 6 次命中觸發 Power Up
+		Duration:        35.0, // 在場時間較長（鯨魚移動慢）
+		TriggerRate:     0.002, // 0.2% 機率觸發
+		Color:           "#4169E1",
+	},
+	// DAY-158：傳說龍（業界依據：royal-fishing.uk 2026「Legend Dragon reaches 120-200x from 20x base」）
+	// 傳說龍是 Royal Fishing 最強的覺醒 BOSS，20x 基礎倍率，Power Up 後最高 200x
+	BossLegendDragon: {
+		ID:              BossLegendDragon,
+		Name:            "傳說龍",
+		Icon:            "🐲",
+		MinMult:         120.0,
+		MaxMult:         200.0,
+		PowerUpMinMult:  8.0,
+		PowerUpMaxMult:  10.0,
+		PowerUpThreshold: 10, // 10 次命中觸發 Power Up（最難但最強）
+		Duration:        20.0, // 在場時間較短（稀有感）
+		TriggerRate:     0.0008, // 0.08% 機率觸發（最稀有）
+		Color:           "#9400D3",
 	},
 }
 
@@ -162,8 +194,8 @@ func (m *Manager) ShouldTrigger() (bool, *BossDef) {
 		return false, nil
 	}
 
-	// 隨機選擇 BOSS 類型
-	bossList := []*BossDef{BossDefs[BossAwakenDragon], BossDefs[BossIcePhoenix]}
+	// 隨機選擇 BOSS 類型（DAY-158：加入座頭鯨和傳說龍）
+	bossList := []*BossDef{BossDefs[BossAwakenDragon], BossDefs[BossIcePhoenix], BossDefs[BossHumpbackWhale], BossDefs[BossLegendDragon]}
 	rand.Shuffle(len(bossList), func(i, j int) { bossList[i], bossList[j] = bossList[j], bossList[i] })
 
 	for _, def := range bossList {

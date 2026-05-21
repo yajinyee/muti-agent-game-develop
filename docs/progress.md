@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-157 軌道炮武器系統）
+## 最後更新：2026-05-22（DAY-158 座頭鯨+傳說龍覺醒 BOSS 系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,12 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-158 更新（自主觸發）：** 座頭鯨+傳說龍覺醒 BOSS 系統（Humpback Whale + Legend Dragon Awaken Boss）✅
+  - **業界依據：** royal-fishing.uk 2026「Humpback Whale offers 90-150x with 15x base multiplier, whilst Legend Dragon reaches 120-200x from 20x base.」— 這兩個是 Royal Fishing 的標誌性覺醒 BOSS，比現有的覺醒龍（90-180x）和冰鳳凰（120-300x）更符合業界原版設計
+  - `server/internal/game/awakenboss/awakenboss.go`：新增 BossHumpbackWhale（座頭鯨，90-150x，6-8x Power Up，6次觸發，35秒在場，0.2%觸發率，藍色）；新增 BossLegendDragon（傳說龍，120-200x，8-10x Power Up，10次觸發，20秒在場，0.08%觸發率，紫色）；ShouldTrigger bossList 加入兩個新 BOSS
+  - 座頭鯨設計：在場時間 35 秒（鯨魚移動慢，玩家有更多時間命中）；6 次命中觸發 Power Up；藍色主題（海洋感）
+  - 傳說龍設計：在場時間 20 秒（稀有感）；10 次命中觸發 Power Up（最難但最強）；紫色主題（傳說感）；0.08% 觸發率（最稀有的覺醒 BOSS）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-157 更新（自主觸發）：** 軌道炮武器系統（Railgun Weapon System）✅
   - **業界依據：** megafishing.click 2026「Special Weapons Railgun (15x stake), Torpedo (6x stake)」+ jiligames.com 2026「With torpedoes and railgun, you can easily catch sea monsters.」— 軌道炮是 JILI Mega Fishing 的終極武器，費用 15x betLevel（比魚雷 6x 更貴），穿透全場高能光束，100% 擊破路徑上所有目標，是「終極清場武器」
   - `server/internal/game/specialweapon/specialweapon.go`：新增 WeaponRailgun 類型；軌道炮定義（Cost=-1動態費用/MaxCharges=1/充能40次/🔫圖示/青色）；RailgunYRange=40/RailgunCostMultiplier=15/RailgunNormalKillChance=1.00/RailgunSpecialKillChance=0.90/RailgunBossKillChance=0.60；CalcRailgunTargets；PlayerWeaponState 加入 RailgunCharges/RailgunChargeProgress；所有 switch 分支加入 WeaponRailgun 處理
