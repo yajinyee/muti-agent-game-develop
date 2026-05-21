@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-164 深淵巨鯨全服 Boss 挑戰系統）
+## 最後更新：2026-05-22（DAY-165 S-Rank 傳說召喚深淵巨鯨系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,14 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-165 更新（自主觸發）：** S-Rank 傳說召喚深淵巨鯨系統（Legendary Summon Abyss Whale）✅
+  - **業界依據：** Fishing Frenzy Chapter 3 2026（2026-05-14）「Boss Fish encounters can be summoned by sacrificing an S-rank fish and 1,000 gold」— 擊破傳說品質（Legendary）目標後，有 15% 機率觸發「深淵召喚」，立即在場上生成 T124 深淵巨鯨
+  - **設計意圖：** 讓傳說品質目標更有價值（不只是倍率加成，還有機率召喚 Boss）；讓深淵巨鯨的出現更有戲劇性（「有人的傳說目標召喚了巨鯨！」）
+  - `server/internal/game/abyss_whale_handler.go`：新增 tryLegendarySummonWhale（15% 機率/檢查冷卻/生成 T124/廣播 spawn+whale_spawn+傳說召喚公告）；加入 uuid/data/target/math/rand import
+  - `server/internal/game/game.go`：handleKill 加入傳說品質目標分支（t.Quality == QualityLegendary && !isAbyssWhale → tryLegendarySummonWhale）
+  - 召喚設計：15% 機率（不太頻繁，保持稀有感）；需要巨鯨不在場且不在冷卻中；在畫面右側隨機位置生成
+  - 公告設計：特別公告「✨ XXX 擊破傳說目標，召喚了深淵巨鯨！」（金色，優先級 7，最高）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-164 更新（自主觸發）：** 深淵巨鯨全服 Boss 挑戰系統（Abyss Whale Global Boss Challenge）✅
   - **業界依據：** Fishing Frenzy Chapter 3 2026（2026-05-14）「Boss Fish as endgame content for higher-level players」+ Ocean King 2026「Abyss Whale — massive HP boss requiring full server cooperation」— 超高 HP（500）的 Boss 級目標，需要全服玩家合力攻擊才能擊破，按傷害貢獻比例分配深淵寶藏（最高 500x betLevel）
   - **設計差異：** 與船長魚（競技型，30秒競速）不同，深淵巨鯨是**合作型終局內容**（全服合力打 Boss），與水晶龍（合作收集）形成不同的合作體驗

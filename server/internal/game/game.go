@@ -1334,6 +1334,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isAbyssWhale(t.DefID) {
 		go g.notifyAbyssWhaleKill(p, t.InstanceID, t.X, t.Y)
 	}
+	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
+	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
+		go g.tryLegendarySummonWhale(p, t.X, t.Y)
+	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }

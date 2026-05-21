@@ -9,10 +9,14 @@ package game
 import (
 	"fmt"
 	"log"
+	"math/rand"
 	"sort"
 	"sync"
 	"time"
 
+	"github.com/google/uuid"
+	"digital-twin/server/internal/data"
+	"digital-twin/server/internal/game/target"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/ws"
 )
@@ -313,4 +317,85 @@ func (g *Game) distributeAbyssWhaleRewards(contribs []*whaleContribution, totalD
 		}
 	}
 	return entries
+}
+
+// tryLegendarySummonWhale S-Rank 傳說目標擊破後嘗試召喚深淵巨鯨（DAY-165）
+// 業界依據：Fishing Frenzy Chapter 3 2026「Boss Fish can be summoned by sacrificing an S-rank fish」
+// 擊破傳說品質目標後，有 15% 機率觸發「深淵召喚」，立即生成 T124 深淵巨鯨
+func (g *Game) tryLegendarySummonWhale(p *player.Player, x, y float64) {
+	if g.AbyssWhale == nil {
+		return
+	}
+
+	// 15% 機率觸發
+	if rand.Float64() >= 0.15 {
+		return
+	}
+
+	// 檢查是否已有巨鯨在場或在冷卻中
+	g.AbyssWhale.mu.Lock()
+	if g.AbyssWhale.isActive {
+		g.AbyssWhale.mu.Unlock()
+		return
+	}
+	if time.Now().Before(g.AbyssWhale.cooldownEnd) {
+		g.AbyssWhale.mu.Unlock()
+		return
+	}
+	g.AbyssWhale.mu.Unlock()
+
+	// 生成 T124 深淵巨鯨（在觸發位置附近）
+	whaleDef := data.Targets["T124"]
+	if whaleDef == nil {
+		return
+	}
+
+	instanceID := uuid.New().String()
+	// 在觸發位置右側生成（從畫面右側進入）
+	spawnX := 1280.0 + rand.Float64()*100
+	spawnY := 100.0 + rand.Float64()*500
+
+	t := target.NewTarget(instanceID, whaleDef, spawnX, spawnY)
+
+	g.mu.Lock()
+	g.Targets[instanceID] = t
+	g.mu.Unlock()
+
+	log.Printf("[AbyssWhale] Legendary summon by player=%s triggered whale spawn!", p.ID)
+
+	// 廣播目標生成（標準 spawn 訊息）
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgTargetSpawn,
+		Payload: ws.TargetSpawnPayload{
+			InstanceID:   instanceID,
+			DefID:        whaleDef.ID,
+			Name:         whaleDef.Name,
+			Type:         string(whaleDef.Type),
+			X:            spawnX,
+			Y:            spawnY,
+			HP:           whaleDef.HP,
+			MaxHP:        whaleDef.HP,
+			Speed:        whaleDef.Speed,
+			Lifetime:     whaleDef.Lifetime,
+			Behavior:     whaleDef.SpecialBehavior,
+			Multiplier:   t.Multiplier,
+			Quality:      string(t.Quality),
+			QualityColor: t.QualityColor,
+		},
+	})
+
+	// 觸發深淵巨鯨出現通知（全服廣播 + 公告）
+	g.notifyAbyssWhaleSpawn(instanceID, spawnX, spawnY)
+
+	// 特別公告：傳說召喚
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgAnnouncement,
+		Payload: map[string]interface{}{
+			"event_type": "legendary_summon_whale",
+			"message":    fmt.Sprintf("✨ %s 擊破傳說目標，召喚了深淵巨鯨！全服合力擊破！", p.DisplayName),
+			"color":      "#FFD700",
+			"duration":   5.0,
+			"priority":   7,
+		},
+	})
 }
