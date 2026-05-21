@@ -3289,3 +3289,21 @@ contribution_per_shot = betCost × 0.005 × level_share
   4. 全服廣播讓其他玩家也能感受到大招的震撼
   5. 60 秒冷卻防止濫用，但不要太長（玩家等不及）
 - **教訓：** 蓄力大招是「技能感」的核心，讓玩家有「我在成長」的感覺，比純粹的隨機獎勵更有成就感
+
+## 83. git add 失敗：unable to create temporary file（2026-05-21）
+- **問題：** `git add .` 報 `error: unable to create temporary file: No such file or directory`
+- **根本原因：** `core.tempdir=C:/Temp/git-tmp` 路徑不存在，且 global config 設定了錯誤路徑
+- **解決：** 
+  1. `New-Item -ItemType Directory -Path "C:\Temp\git-tmp" -Force` 建立目錄
+  2. `git config --global core.tempdir "C:/Temp/git-tmp"` 確保 global config 正確
+- **教訓：** git temp 目錄被刪除後 git add 會失敗，每次遇到此問題先建立目錄再設定 global config
+
+## 84. JILI Royal Fishing 2026 完整功能架構（業界研究）
+- **Immortal Boss（不死 BOSS）：** 50x-150x，隨機出現，每次命中給獎勵，直到離開
+- **Awaken Boss（覺醒 BOSS）：** 90x-200x，有 Power Up 機制（6x-10x 加成）
+- **Ice Phoenix（冰鳳凰）：** 120x-300x，最高倍率的覺醒 BOSS
+- **Dragon Wrath（龍怒）：** 蓄力大招，全螢幕攻擊
+- **ChainLong King Wheel：** 雙層輪盤，最高 1000x
+- **三個廳：** Joy Hall（低投注）/ Fortune Hall（中投注）/ Royal Hall（高投注）
+- **設計原則：** 每個廳有不同的 BOSS 組合，讓玩家有「升廳」的目標感
+- **教訓：** 不死 BOSS 和覺醒 BOSS 是 2026 年捕魚機最核心的差異化功能，必須實作

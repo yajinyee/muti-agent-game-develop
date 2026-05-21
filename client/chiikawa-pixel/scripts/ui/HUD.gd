@@ -221,6 +221,7 @@ func _ready() -> void:
 	_init_dragon_wrath_panel()    # 龍怒蓄力大招面板（DAY-128）
 	_init_immortal_boss_panel()   # 不死 BOSS 連勝面板（DAY-129）
 	_init_awaken_boss_panel()     # 覺醒 BOSS 面板（DAY-130）
+	_init_win_streak_panel()      # 連勝獎勵面板（DAY-131）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2620,3 +2621,20 @@ func _init_awaken_boss_panel() -> void:
 	GameManager.awaken_boss_powerup.connect(func(data): panel.on_awaken_boss_powerup(data))
 	GameManager.awaken_boss_left.connect(func(data): panel.on_awaken_boss_leave(data))
 	GameManager.awaken_boss_status.connect(func(data): panel.on_awaken_boss_status(data))
+
+# ---- 連勝獎勵面板（DAY-131）----
+const WinStreakPanelScript = preload("res://scripts/ui/WinStreakPanel.gd")
+var _win_streak_panel: Control = null
+
+func _init_win_streak_panel() -> void:
+	var panel = WinStreakPanelScript.new()
+	panel.name = "WinStreakPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 67
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_win_streak_panel = panel
+
+	GameManager.win_streak_updated.connect(func(data): panel.on_win_streak_update(data))
+	GameManager.win_streak_milestone.connect(func(data): panel.on_win_streak_milestone(data))
+	GameManager.win_streak_reset.connect(func(data): panel.on_win_streak_reset(data))

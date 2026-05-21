@@ -48,6 +48,7 @@ import (
 	"digital-twin/server/internal/game/referral"
 	"digital-twin/server/internal/game/weather"
 	"digital-twin/server/internal/game/wheel"
+	"digital-twin/server/internal/game/winstreak"
 	"digital-twin/server/internal/anticheat"
 	"digital-twin/server/internal/game/festival"
 	"digital-twin/server/internal/game/halloffame"
@@ -109,6 +110,7 @@ type Game struct {
 	RareCatch      *rarecatch.Manager      // 稀有連擊累積倍率管理器（DAY-126）
 	ImmortalBoss   *immortalboss.Manager   // 不死 BOSS 連勝管理器（DAY-129）
 	AwakenBoss     *awakenboss.Manager     // 覺醒 BOSS 系統管理器（DAY-130）
+	WinStreak      *winstreak.Manager      // 連勝獎勵系統管理器（DAY-131）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -208,6 +210,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		RareCatch:          rarecatch.New(),
 		ImmortalBoss:       immortalboss.New(),
 		AwakenBoss:         awakenboss.New(),
+		WinStreak:          winstreak.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -413,6 +416,10 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.TreasureMap.RemovePlayer(playerID)
 		// 清理稀有連擊 session（DAY-126）
 		g.RareCatch.RemovePlayer(playerID)
+		// 清理連勝記錄（DAY-131）
+		if g.WinStreak != nil {
+			g.WinStreak.RemovePlayer(playerID)
+		}
 		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
 }
@@ -838,6 +845,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	}
 	// 龍怒蓄力大招：擊破目標累積怒氣（DAY-128）
 	go g.notifyWrathKill(p, t.Multiplier)
+	// 連勝獎勵：記錄擊破（DAY-131）
+	go g.notifyWinStreakKill(p)
 	rewardUnlocks := p.AddReward(finalReward)
 	killUnlocks := p.AddKill()
 
@@ -1326,6 +1335,8 @@ func (g *Game) updateNormalPlay() {
 	go g.tickImmortalBoss()
 	// 覺醒 BOSS 過期檢查（每次 update，DAY-130）
 	go g.tickAwakenBoss()
+	// 連勝超時檢查（每次 update，DAY-131）
+	go g.tickWinStreakExpiry()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }

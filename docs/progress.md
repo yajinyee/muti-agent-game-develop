@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-130 覺醒 BOSS 系統）
+## 最後更新：2026-05-21（DAY-131 連勝獎勵系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-131 更新（自主觸發）：** 連勝獎勵系統（Win Streak Bonus System）✅
+  - **業界依據：** BGaming Fishing Club 2026 Best Win/Best Catch 里程碑；連勝系統讓玩家有「保持節奏」的動力，提升短期留存率
+  - `server/internal/game/winstreak/winstreak.go`：連勝管理器；4個里程碑（銅牌10次/銀牌25次/金牌50次/傳說100次）；30秒超時重置；RecordKill（累積/里程碑判斷/重置檢查）；GetProgressToNext/GetSnapshot/CheckExpiry/RemovePlayer
+  - `server/internal/game/winstreak/winstreak_test.go`：12 個單元測試全部通過（New/RecordKill_Basic/RecordKill_BronzeMilestone/RecordKill_SilverMilestone/RecordKill_NoDuplicateMilestone/RecordKill_Expiry/CheckExpiry/GetSnapshot/GetProgressToNext/RemovePlayer/MultiplePlayers/MilestoneReset_AfterExpiry）
+  - `server/internal/game/winstreak_handler.go`：notifyWinStreakKill（記錄擊破/發送更新/里程碑獎勵/全服廣播）；tickWinStreakExpiry（超時重置通知）
+  - `server/internal/game/game.go`：整合 WinStreak *winstreak.Manager；初始化/RemovePlayer/handleKill/gameLoop 全部整合
+  - `server/internal/ws/protocol.go`：新增 MsgWinStreakUpdate/MsgWinStreakMilestone/MsgWinStreakReset；對應 Payload 定義
+  - `client/chiikawa-pixel/scripts/ui/WinStreakPanel.gd`：連勝面板（左下角；連勝次數+進度條+超時倒數；里程碑達成彈窗（縮放動畫）；金牌/傳說全服廣播橫幅）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：3個訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 WinStreakPanelScript（z_index=67）
+  - 里程碑設計：🥉銅牌（10次，×20 betCost）/ 🥈銀牌（25次，×50 betCost）/ 🥇金牌（50次，×100 betCost，全服廣播）/ 🏆傳說（100次，×300 betCost，全服廣播+動態牆）
+  - 超時機制：30 秒未擊破則重置，讓玩家有「保持節奏」的緊迫感
+  - 里程碑重置：超時後里程碑重置，讓玩家可以再次達成
+  - build/vet 全部通過（零錯誤零警告）；12/12 winstreak 測試通過
+
 - **DAY-130 更新（自主觸發）：** 覺醒 BOSS 系統（Awaken Boss System）✅
   - **業界依據：** JILI Royal Fishing 2026 Awaken Boss — 「Awaken Bosses: 90x–200x, Power Up attacks multiply by 6x to 10x for devastating reward combinations」
   - `server/internal/game/awakenboss/awakenboss.go`：覺醒 BOSS 管理器；2種 BOSS（覺醒龍 90-180x/冰鳳凰 120-300x）；Power Up 機制（每 5-8 次命中觸發，6x-10x 加成）；ShouldTrigger/StartSession/RecordHit（含 Power Up 判斷）/CheckExpiry/GetSnapshot/GetPowerUpProgress

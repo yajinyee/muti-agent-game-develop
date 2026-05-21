@@ -307,6 +307,11 @@ const (
 	MsgAwakenBossLeave   MessageType = "awaken_boss_leave"   // 覺醒 BOSS 離開（Server→Client，全服廣播）
 	MsgAwakenBossStatus  MessageType = "awaken_boss_status"  // 覺醒 BOSS 狀態（Server→Client，個人）
 
+	// 連勝獎勵系統（DAY-131）
+	MsgWinStreakUpdate    MessageType = "win_streak_update"    // 連勝更新（Server→Client，個人）
+	MsgWinStreakMilestone MessageType = "win_streak_milestone" // 里程碑達成（Server→Client，個人/全服）
+	MsgWinStreakReset     MessageType = "win_streak_reset"     // 連勝重置（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2525,4 +2530,36 @@ type AwakenBossStatusPayload struct {
 	PowerUpProgress  float64 `json:"powerup_progress"`   // Power Up 進度
 	TotalReward      int     `json:"total_reward"`       // 累計總獎勵
 	RemainingSeconds float64 `json:"remaining_seconds"`  // 剩餘秒數
+}
+
+// ---- 連勝獎勵系統 Payloads（DAY-131）----
+
+// WinStreakUpdatePayload 連勝更新（Server → Client，個人）（DAY-131）
+type WinStreakUpdatePayload struct {
+	Current           int     `json:"current"`             // 當前連勝次數
+	MaxStreak         int     `json:"max_streak"`          // 本 session 最高連勝
+	NextMilestone     int     `json:"next_milestone"`      // 下一個里程碑次數
+	NextMilestoneName string  `json:"next_milestone_name"` // 下一個里程碑名稱
+	ProgressToNext    float64 `json:"progress_to_next"`    // 到下一個里程碑的進度
+	SecondsToExpiry   float64 `json:"seconds_to_expiry"`   // 超時倒數（秒）
+}
+
+// WinStreakMilestonePayload 里程碑達成（Server → Client）（DAY-131）
+type WinStreakMilestonePayload struct {
+	PlayerID    string  `json:"player_id"`    // 玩家 ID
+	PlayerName  string  `json:"player_name"`  // 玩家名稱
+	Streak      int     `json:"streak"`       // 達成的連勝次數
+	Level       int     `json:"level"`        // 里程碑等級
+	LevelName   string  `json:"level_name"`   // 里程碑名稱
+	Icon        string  `json:"icon"`         // 圖示
+	Color       string  `json:"color"`        // 顏色
+	BonusReward int     `json:"bonus_reward"` // 額外獎勵
+	NewBalance  int     `json:"new_balance"`  // 新餘額
+	Broadcast   bool    `json:"broadcast"`    // 是否全服廣播
+}
+
+// WinStreakResetPayload 連勝重置（Server → Client，個人）（DAY-131）
+type WinStreakResetPayload struct {
+	FinalStreak int `json:"final_streak"` // 最終連勝次數
+	MaxStreak   int `json:"max_streak"`   // 本 session 最高連勝
 }
