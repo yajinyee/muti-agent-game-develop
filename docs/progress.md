@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-155 魚雷武器系統）
+## 最後更新：2026-05-22（DAY-156 皇家閃電鰻持續連鎖電擊系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,20 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-156 更新（自主觸發）：** 皇家閃電鰻持續連鎖電擊系統（Royal Chain Lightning System）✅
+  - **業界依據：** royal-fishing.co.uk 2026「Creates chain lightning that shocks nearby fish consecutively until targeting turns off. Devastating against clustered schools.」+ royal-fishing.uk 2026「The 60x lightning eel creates chain reactions that jump between nearby fish. Once activated, electric shocks continue spreading until targeting disengages, creating cascading capture sequences across the underwater battlefield.」— 比 T103 閃電鰻（一次性 5 跳）更強的升級版，持續連鎖直到沒有目標或達到上限
+  - `server/internal/data/tables.go`：新增 T118 皇家閃電鰻（40-60x/HP90/SpawnWeight4/royal_chain_lightning 行為）
+  - `server/internal/game/royal_chain_lightning_handler.go`：isRoyalChainLightning 判斷；notifyRoyalChainLightningKill（擊破後觸發）；runRoyalChainLightning（goroutine，最多15跳/200ms間隔/300px範圍/60%擊破機率/每跳廣播）；announceRoyalChainLightning（≥6跳或≥4個擊破全服公告）
+  - `server/internal/ws/protocol.go`：新增 MsgRoyalChainLightning；RoyalChainLightningEntry/RoyalChainLightningPayload（三階段：chain_start/jump_N/result）
+  - `server/internal/game/game.go`：handleKill 加入 isRoyalChainLightning 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/RoyalChainLightningPanel.gd`：皇家閃電鰻面板（電藍主題；chain_start 橫幅滑入+全螢幕電藍閃光；jump_N 電擊閃光+浮動獎勵文字+跳數計數器；result 右側滑入彈窗含跳數/擊破數/獎勵；≥8跳雙閃光傳說連鎖）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：royal_chain_lightning 訊號 + _handle_royal_chain_lightning
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 RoyalChainLightningPanelScript（z_index=83）
+  - 連鎖設計：最多 15 跳（比 T103 的 5 跳多 3 倍）；每跳 300px 範圍（比 T103 的 200px 大 50%）；60% 擊破機率（比 T103 的 50% 高）；每跳 200ms 間隔（比 T103 的 150ms 慢，讓玩家看清楚每一跳）
+  - 獎勵設計：擊破獎勵 = 目標倍率 × betLevel × 0.60（連鎖電擊是連帶效果，比直接擊破低）
+  - 視覺設計：每跳廣播讓所有玩家看到「電擊在連鎖跳躍」，製造「連鎖不斷」的視覺爽感
+  - 全服公告：≥6 跳或 ≥4 個擊破時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-155 更新（自主觸發）：** 魚雷武器系統（Torpedo Weapon System）✅
   - **業界依據：** jiligames.com 2026 Mega Fishing「With torpedoes and railgun, you can easily catch sea monsters.」+ megafishing.click「Special Weapons Railgun (15x stake), Torpedo (6x stake)」— 魚雷是 JILI Mega Fishing 的業界標準武器，費用 6x betLevel（動態費用），範圍 250px（比炸彈 150px 大），是「高費用高回報」的進階武器
   - `server/internal/game/torpedo_handler.go`：新增魚雷 handler；handleTorpedoFire（費用 6x betLevel/範圍 250px/三階段廣播）；announceTorpedo（≥4個擊破全服公告）

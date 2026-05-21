@@ -1277,6 +1277,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isCrystalDragon(t.DefID) {
 		go g.notifyCrystalDragonKill(p, t)
 	}
+	// 皇家閃電鰻持續連鎖電擊：擊破 T118 時觸發（DAY-156）
+	if isRoyalChainLightning(t.DefID) {
+		go g.notifyRoyalChainLightningKill(p, t.InstanceID, t.X, t.Y)
+	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }

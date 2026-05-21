@@ -139,6 +139,12 @@ var Targets = map[string]*TargetDef{
 	// 按貢獻比例分配獎勵（最高 200x betLevel），全服廣播，增加社交合作感
 	// 設計：中等倍率（30-50x）+ 中等 HP（80）+ 中等生成權重（5）= 常見但有合作感的特殊目標
 	"T117": {ID: "T117", Name: "水晶龍", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 80, SpawnWeight: 5, Speed: 38, Lifetime: 15, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "crystal_dragon"},
+	// T118 皇家閃電鰻（DAY-156）— 業界依據：royal-fishing.co.uk 2026「Creates chain lightning that shocks nearby fish
+	// consecutively until targeting turns off. Devastating against clustered schools.」
+	// 擊破後觸發持續連鎖電擊，每 200ms 跳一次（最多 15 跳），每跳 300px 範圍，60% 擊破機率
+	// 比 T103 閃電鰻（一次性 5 跳/200px/50%）更強，是升級版連鎖電擊
+	// 設計：中高倍率（40-60x）+ 中等 HP（90）+ 中等生成權重（4）= 稀有但連鎖效果強的特殊目標
+	"T118": {ID: "T118", Name: "皇家閃電鰻", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 60, HP: 90, SpawnWeight: 4, Speed: 50, Lifetime: 16, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "royal_chain_lightning"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

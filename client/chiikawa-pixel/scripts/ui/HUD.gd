@@ -242,6 +242,7 @@ func _ready() -> void:
 	_init_rainbow_phoenix_panel()     # 彩虹鳳凰 Power Up 面板（DAY-151）
 	_init_vampire_panel()             # 吸血鬼成長倍率面板（DAY-152）
 	_init_crystal_dragon_panel()      # 水晶龍收集大獎面板（DAY-153）
+	_init_royal_chain_lightning_panel() # 皇家閃電鰻持續連鎖電擊面板（DAY-156）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3142,3 +3143,19 @@ func _on_crystal_dragon_status(data: Dictionary) -> void:
 		data.get("goal", 50),
 		data.get("progress", 0.0)
 	)
+
+# ---- 皇家閃電鰻持續連鎖電擊面板（DAY-156）----
+
+const RoyalChainLightningPanelScript = preload("res://scripts/ui/RoyalChainLightningPanel.gd")
+var _royal_chain_lightning_panel: Control = null
+
+func _init_royal_chain_lightning_panel() -> void:
+	var panel = RoyalChainLightningPanelScript.new()
+	panel.name = "RoyalChainLightningPanel"
+	panel.z_index = 83  # 在 CrystalDragonPanel(84) 下方
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	if panel.has_method("setup"):
+		panel.setup(_pixel_font)
+	_royal_chain_lightning_panel = panel

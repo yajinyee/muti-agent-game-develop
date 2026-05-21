@@ -194,6 +194,7 @@ const (
 	MsgDragonWrathCharge    MessageType = "dragon_wrath_charge"    // 龍怒怒氣值更新（DAY-154）
 	MsgDragonWrathResult    MessageType = "dragon_wrath_result"    // 龍怒流星雨結果（DAY-154）
 	MsgTorpedoResult        MessageType = "torpedo_result"         // 魚雷爆炸結果（DAY-155）
+	MsgRoyalChainLightning  MessageType = "royal_chain_lightning"  // 皇家閃電鰻持續連鎖電擊（DAY-156）
 	// 神秘寶箱系統（DAY-090）
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
 	MsgMysteryBoxUpdate  MessageType = "mystery_box_update"  // 持有寶箱狀態更新
@@ -3030,6 +3031,36 @@ type TorpedoResultPayload struct {
 	TotalReward int                `json:"total_reward"` // 總獎勵（result 時）
 	NewBalance  int                `json:"new_balance"`  // 結果後餘額（result 時，僅射擊者）
 	Cost        int                `json:"cost"`         // 魚雷費用（6x betLevel）
+}
+
+// RoyalChainLightningEntry 皇家閃電鰻連鎖電擊的目標條目（DAY-156）
+type RoyalChainLightningEntry struct {
+	InstanceID string  `json:"instance_id"` // 目標 InstanceID
+	DefID      string  `json:"def_id"`      // 目標定義 ID
+	Multiplier float64 `json:"multiplier"`  // 目標倍率
+	Reward     int     `json:"reward"`      // 獎勵金幣
+	Killed     bool    `json:"killed"`      // 是否擊破
+	JumpIndex  int     `json:"jump_index"`  // 第幾跳（1-15）
+	FromX      float64 `json:"from_x"`      // 電擊起點 X（上一個目標位置）
+	FromY      float64 `json:"from_y"`      // 電擊起點 Y
+	ToX        float64 `json:"to_x"`        // 電擊終點 X（本目標位置）
+	ToY        float64 `json:"to_y"`        // 電擊終點 Y
+}
+
+// RoyalChainLightningPayload 皇家閃電鰻持續連鎖電擊廣播（Server → Client，DAY-156）
+// Phase: "chain_start" → "jump_N"（每跳一次）→ "result"
+type RoyalChainLightningPayload struct {
+	TriggerID     string                     `json:"trigger_id"`     // 觸發的 T118 InstanceID
+	TriggerX      float64                    `json:"trigger_x"`      // 觸發位置 X
+	TriggerY      float64                    `json:"trigger_y"`      // 觸發位置 Y
+	KillerID      string                     `json:"killer_id"`      // 擊破玩家 ID
+	KillerName    string                     `json:"killer_name"`    // 擊破玩家名稱
+	Phase         string                     `json:"phase"`          // 當前階段
+	JumpIndex     int                        `json:"jump_index"`     // 當前跳數（jump_N 時）
+	JumpEntry     *RoyalChainLightningEntry  `json:"jump_entry"`     // 本跳命中目標（jump_N 時）
+	AllEntries    []RoyalChainLightningEntry `json:"all_entries"`    // 所有命中目標（result 時）
+	TotalReward   int                        `json:"total_reward"`   // 總獎勵（result 時）
+	TotalJumps    int                        `json:"total_jumps"`    // 總跳數（result 時）
 }
 
 // DrillKillEntry 鑽頭連帶擊破的目標條目（DAY-142）
