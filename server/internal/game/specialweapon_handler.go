@@ -1,9 +1,15 @@
-// specialweapon_handler.go — 特殊武器系統 handler（DAY-089）
-// 業界依據：Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是標配特殊武器
+// specialweapon_handler.go — 特殊武器系統 handler（DAY-089，升級 DAY-134）
+// 業界依據：
+//   - Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是標配特殊武器
+//   - Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標
+//   - JILI 2026 Auto-Charge — 每次擊破目標自動累積充能，不需要花金幣
 package game
 
 import (
+	"fmt"
 	"log"
+	"math/rand"
+	"time"
 
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/specialweapon"
@@ -21,10 +27,10 @@ func (g *Game) handleBuySpecialWeapon(p *player.Player, msg *ws.Message) {
 	wtype := specialweapon.WeaponType(payload.WeaponType)
 	ok, cost := g.SpecialWeapon.BuyWeapon(p.ID, wtype, p.Coins)
 	if !ok {
-		// 金幣不足或已達上限
+		// 金幣不足、已達上限、或不可購買（龍捲風砲）
 		g.Hub.Send(p.ID, &ws.Message{
 			Type:    ws.MsgError,
-			Payload: ws.ErrorPayload{Code: "buy_weapon_failed", Message: "購買失敗（金幣不足或已達上限）"},
+			Payload: ws.ErrorPayload{Code: "buy_weapon_failed", Message: "購買失敗（金幣不足、已達上限或此武器不可購買）"},
 		})
 		return
 	}
@@ -85,6 +91,9 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 	case specialweapon.WeaponFreeze:
 		hitIDs = specialweapon.CalcFreezeTargets(targets)
 		freezeTime = 5.0 // 冰凍 5 秒
+	case specialweapon.WeaponTornado:
+		// 龍捲風：全螢幕，50% 機率擊破每個目標（DAY-134）
+		hitIDs = specialweapon.CalcTornadoTargets(targets)
 	}
 
 	// 處理命中目標
@@ -104,11 +113,28 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 			Multiplier: t.Multiplier,
 		}
 
-		if wtype == specialweapon.WeaponFreeze {
+		switch wtype {
+		case specialweapon.WeaponFreeze:
 			// 冰凍：不擊破，只減速（Client 端處理視覺）
 			entry.Killed = false
 			entry.Reward = 0
-		} else {
+
+		case specialweapon.WeaponTornado:
+			// 龍捲風：50% 機率擊破（DAY-134）
+			if rand.Float64() < specialweapon.TornadoKillChance {
+				entry.Killed = true
+				// 龍捲風獎勵 = 基礎獎勵 × 0.6（比炸彈稍高，因為是全螢幕）
+				baseReward := int(float64(p.BetLevel) * t.Multiplier * 0.6)
+				if baseReward < 1 {
+					baseReward = 1
+				}
+				entry.Reward = baseReward
+				totalReward += baseReward
+				t.HP = 0
+				delete(g.Targets, id)
+			}
+
+		default:
 			// 炸彈/雷射：嘗試擊破（使用基礎命中率）
 			req := combat.AttackRequest{
 				PlayerID: p.ID,
@@ -127,7 +153,6 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 				}
 				entry.Reward = baseReward
 				totalReward += baseReward
-				// 擊破目標
 				t.HP = 0
 				delete(g.Targets, id)
 			}
@@ -144,6 +169,13 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 		}
 	}
 
+	// 龍捲風：延遲廣播製造「旋轉掃場」的連續感（DAY-134）
+	if wtype == specialweapon.WeaponTornado {
+		go g.broadcastTornadoEffect(p, hitEntries, totalReward)
+		g.sendSpecialWeaponUpdate(p, false)
+		return
+	}
+
 	// 廣播特殊武器發射效果給所有玩家
 	g.Hub.Broadcast(&ws.Message{
 		Type: ws.MsgSpecialWeaponFired,
@@ -154,7 +186,7 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 			ClickY:      payload.ClickY,
 			HitTargets:  hitEntries,
 			TotalReward: totalReward,
-			NewBalance:  p.Coins, // 只有發射者有值（Client 端只更新自己的餘額）
+			NewBalance:  p.Coins,
 			FreezeTime:  freezeTime,
 		},
 	})
@@ -181,6 +213,114 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 		p.ID, wtype, len(hitEntries), countKilled(hitEntries), totalReward)
 }
 
+// broadcastTornadoEffect 龍捲風效果：分批廣播擊破，製造旋轉掃場的連續感（DAY-134）
+func (g *Game) broadcastTornadoEffect(p *player.Player, hitEntries []ws.SpecialWeaponHitEntry, totalReward int) {
+	killedCount := countKilled(hitEntries)
+
+	// 先廣播龍捲風開始（全螢幕旋轉動畫）
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgSpecialWeaponFired,
+		Payload: ws.SpecialWeaponFiredPayload{
+			PlayerID:    p.ID,
+			WeaponType:  string(specialweapon.WeaponTornado),
+			ClickX:      0,
+			ClickY:      0,
+			HitTargets:  nil, // 先不帶目標，讓 Client 播放旋轉動畫
+			TotalReward: 0,
+			NewBalance:  0,
+			FreezeTime:  0,
+		},
+	})
+
+	// 等待旋轉動畫開始（0.5 秒）
+	time.Sleep(500 * time.Millisecond)
+
+	// 分批廣播擊破（每 80ms 一批，製造連續掃場感）
+	batchSize := 3
+	for i := 0; i < len(hitEntries); i += batchSize {
+		end := i + batchSize
+		if end > len(hitEntries) {
+			end = len(hitEntries)
+		}
+		batch := hitEntries[i:end]
+
+		for _, entry := range batch {
+			if entry.Killed {
+				g.Hub.Broadcast(&ws.Message{
+					Type: ws.MsgTargetKill,
+					Payload: ws.TargetKillPayload{
+						InstanceID: entry.InstanceID,
+						KillerID:   p.ID,
+						Reward:     entry.Reward,
+						Multiplier: entry.Multiplier,
+					},
+				})
+			}
+		}
+		time.Sleep(80 * time.Millisecond)
+	}
+
+	// 最後廣播龍捲風結果
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgSpecialWeaponFired,
+		Payload: ws.SpecialWeaponFiredPayload{
+			PlayerID:    p.ID,
+			WeaponType:  string(specialweapon.WeaponTornado),
+			ClickX:      -1, // -1 表示結果廣播
+			ClickY:      -1,
+			HitTargets:  hitEntries,
+			TotalReward: totalReward,
+			NewBalance:  p.Coins,
+			FreezeTime:  0,
+		},
+	})
+
+	log.Printf("[SpecialWeapon] player=%s tornado hit=%d killed=%d reward=%d",
+		p.ID, len(hitEntries), killedCount, totalReward)
+}
+
+// notifySpecialWeaponCharge 擊破目標後累積充能，若充滿則通知玩家（DAY-134）
+// 由 handleKill 呼叫
+func (g *Game) notifySpecialWeaponCharge(p *player.Player, multiplier float64) {
+	if g.SpecialWeapon == nil {
+		return
+	}
+
+	results := g.SpecialWeapon.RecordKill(p.ID, multiplier)
+
+	// 檢查是否有武器充滿
+	hasNewCharge := false
+	for _, r := range results {
+		if r.ChargeUnlocked {
+			hasNewCharge = true
+			// 找到武器定義取得名稱和圖示
+			weaponName, weaponIcon := getWeaponNameIcon(r.WeaponType)
+
+			// 通知玩家充能完成
+			if err := g.Hub.Send(p.ID, &ws.Message{
+				Type: ws.MsgSpecialWeaponCharged,
+				Payload: ws.SpecialWeaponChargedPayload{
+					PlayerID:   p.ID,
+					WeaponType: string(r.WeaponType),
+					WeaponName: weaponName,
+					WeaponIcon: weaponIcon,
+					NewCharges: r.NewCharges,
+					Message:    fmt.Sprintf("%s %s 充能完成！可以使用了！", weaponIcon, weaponName),
+				},
+			}); err != nil {
+				log.Printf("[SpecialWeapon] send charge notify error: %v", err)
+			}
+
+			log.Printf("[SpecialWeapon] player=%s %s charged! charges=%d", p.ID, r.WeaponType, r.NewCharges)
+		}
+	}
+
+	// 如果有新充能，更新武器狀態
+	if hasNewCharge {
+		g.sendSpecialWeaponUpdate(p, false)
+	}
+}
+
 // handleGetSpecialWeapons 查詢特殊武器狀態（Client → Server）
 func (g *Game) handleGetSpecialWeapons(p *player.Player) {
 	g.sendSpecialWeaponUpdate(p, false)
@@ -191,11 +331,16 @@ func (g *Game) sendSpecialWeaponUpdate(p *player.Player, withDefs bool) {
 	snap := g.SpecialWeapon.GetSnapshot(p.ID)
 
 	payload := ws.SpecialWeaponUpdatePayload{
-		PlayerID:      p.ID,
-		BombCharges:   snap.BombCharges,
-		LaserCharges:  snap.LaserCharges,
-		FreezeCharges: snap.FreezeCharges,
-		NewBalance:    p.Coins,
+		PlayerID:              p.ID,
+		BombCharges:           snap.BombCharges,
+		LaserCharges:          snap.LaserCharges,
+		FreezeCharges:         snap.FreezeCharges,
+		TornadoCharges:        snap.TornadoCharges,
+		NewBalance:            p.Coins,
+		BombChargeProgress:    snap.BombChargeProgress,
+		LaserChargeProgress:   snap.LaserChargeProgress,
+		FreezeChargeProgress:  snap.FreezeChargeProgress,
+		TornadoChargeProgress: snap.TornadoChargeProgress,
 	}
 
 	// 首次發送時附帶武器定義
@@ -232,4 +377,14 @@ func countKilled(entries []ws.SpecialWeaponHitEntry) int {
 		}
 	}
 	return n
+}
+
+// getWeaponNameIcon 取得武器名稱和圖示
+func getWeaponNameIcon(wtype specialweapon.WeaponType) (name, icon string) {
+	for _, d := range specialweapon.AvailableWeapons {
+		if d.Type == wtype {
+			return d.Name, d.Icon
+		}
+	}
+	return string(wtype), "🔫"
 }

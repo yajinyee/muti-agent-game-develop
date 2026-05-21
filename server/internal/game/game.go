@@ -1085,6 +1085,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isLightningEel(t.DefID) {
 		go g.tryLightningEelChain(p, t.InstanceID, t.X, t.Y)
 	}
+	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
+	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }
 
 // handleLock 處理鎖定

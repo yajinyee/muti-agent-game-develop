@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-133 狂熱模式系統）
+## 最後更新：2026-05-21（DAY-134 龍捲風武器 + 特殊武器自動充能系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-133 更新（自主觸發）：** 狂熱模式系統（Fever Mode System）✅
+- **DAY-134 更新（自主觸發）：** 龍捲風武器 + 特殊武器自動充能系統（Tornado Weapon + Auto-Charge System）✅
+  - **業界依據：** Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標；JILI 2026 Auto-Charge — 每次擊破目標自動累積充能，不需要花金幣，讓玩家更頻繁使用特殊武器，提升爽感和留存率
+  - `server/internal/game/specialweapon/specialweapon.go`：升級特殊武器系統；新增 WeaponTornado（龍捲風砲，全螢幕50%擊破，充能50次獲得，最多2發）；新增 ChargeRequired/ChargePerKill 欄位；新增 ChargeResult 結構；新增 RecordKill（每次擊破累積充能，高倍率目標給更多充能：≥10x給2點/≥30x給3點）；充能滿自動解鎖一發；進度 carry over（超出部分保留）；龍捲風砲不可購買（Cost=0）
+  - `server/internal/game/specialweapon/specialweapon_test.go`：20 個單元測試全部通過（原有9個 + 新增11個：TornadoNotBuyable/CalcTornadoTargets/RecordKill_BasicCharge/RecordKill_HighMultiplierBonus/RecordKill_VeryHighMultiplierBonus/RecordKill_FreezeChargeUnlock/RecordKill_BombChargeUnlock/RecordKill_TornadoChargeUnlock/RecordKill_MaxChargesNoProgress/RecordKill_ProgressCarryOver/RecordKill_MultiplePlayers）
+  - `server/internal/game/specialweapon_handler.go`：升級 handler；handleBuySpecialWeapon 加入龍捲風不可購買判斷；handleUseSpecialWeapon 加入龍捲風分支（50%機率擊破，獎勵×0.6）；新增 broadcastTornadoEffect（分批廣播，0.5s旋轉動畫→每80ms一批擊破→最終結果廣播）；新增 notifySpecialWeaponCharge（由 handleKill 呼叫，累積充能，充滿時發送 MsgSpecialWeaponCharged）；sendSpecialWeaponUpdate 加入 TornadoCharges 和充能進度欄位
+  - `server/internal/ws/protocol.go`：新增 MsgSpecialWeaponCharged；SpecialWeaponUpdatePayload 加入 TornadoCharges/充能進度欄位；新增 SpecialWeaponChargedPayload（player_id/weapon_type/weapon_name/weapon_icon/new_charges/message）
+  - `server/internal/game/game.go`：handleKill 加入 `go g.notifySpecialWeaponCharge(p, t.Multiplier)`（DAY-134）
+  - `client/chiikawa-pixel/scripts/ui/SpecialWeaponPanel.gd`：升級為四武器面板（寬度 240→320）；新增龍捲風砲按鈕（紫色邊框）；每個武器底部加充能進度條（彩色，接近充滿時閃爍）；龍捲風砲點擊時直接使用（全場效果）；充能完成時按鈕金色閃爍+縮放彈跳+頂部橫幅提示；不可購買武器點擊時顯示充能進度提示
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：新增 special_weapon_charged 訊號 + _handle_special_weapon_charged 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：MysteryBoxPanel 位置從 x=665 右移到 x=745（因 SpecialWeaponPanel 變寬）
+  - 充能設計：炸彈砲（20次充能1發）/ 雷射砲（30次充能1發）/ 冰凍砲（15次充能1發，最容易）/ 龍捲風砲（50次充能1發，最難，最強）
+  - 倍率加成：≥10x目標給2點充能；≥30x目標給3點充能（鼓勵玩家追求高價值目標）
+  - 龍捲風效果：全螢幕50%機率擊破所有目標；分批廣播製造「旋轉掃場」連續感；獎勵×0.6（平衡性）
+  - 購買制保留：炸彈/雷射/冰凍仍可花金幣購買（加速充能）；龍捲風只能充能獲得（稀有感）
+  - build/vet 全部通過（零錯誤零警告）；20/20 specialweapon 測試通過
+
+
   - **業界依據：** Fire Kirin / Ocean King 系列的 Fever Mode — 連續快速擊破觸發狂熱模式，全場獎勵倍率提升，製造「停不下來」的爽感，是業界最經典的短期留存機制之一
   - `server/internal/game/fevermode/fevermode.go`：狂熱模式管理器；FeverConfig（TriggerKills=5/TriggerWindow=5s/BaseDuration=15s/MaxDuration=30s/ExtendPerKill=1s/MultBoost=1.5/CooldownSecs=20）；RecordKill（觸發判斷/延長時間/冷卻管理）；GetMultBoost/CheckExpiry/TickExpiry/GetSnapshot/RemovePlayer
   - `server/internal/game/fevermode/fevermode_test.go`：15 個單元測試全部通過（New/RecordKill_NoTrigger/RecordKill_Trigger/RecordKill_ExtendDuringFever/GetMultBoost_Active/GetMultBoost_Idle/GetSnapshot_Idle/GetSnapshot_Active/GetSnapshot_KillProgress/CheckExpiry/TickExpiry/RemovePlayer/MultiplePlayers/CooldownAfterFever/TotalFevered/WindowExpiry）

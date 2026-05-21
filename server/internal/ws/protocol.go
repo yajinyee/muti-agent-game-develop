@@ -186,9 +186,10 @@ const (
 	MsgWeatherUpdate MessageType = "weather_update" // 天氣狀態更新
 	// 連鎖爆炸系統（DAY-088）
 	MsgChainExplosion MessageType = "chain_explosion" // 連鎖爆炸通知
-	// 特殊武器系統（DAY-089）
-	MsgSpecialWeaponUpdate MessageType = "special_weapon_update" // 特殊武器狀態更新
-	MsgSpecialWeaponFired  MessageType = "special_weapon_fired"  // 特殊武器發射廣播（所有玩家可見）
+	// 特殊武器系統（DAY-089，升級 DAY-134）
+	MsgSpecialWeaponUpdate  MessageType = "special_weapon_update"  // 特殊武器狀態更新
+	MsgSpecialWeaponFired   MessageType = "special_weapon_fired"   // 特殊武器發射廣播（所有玩家可見）
+	MsgSpecialWeaponCharged MessageType = "special_weapon_charged" // 自動充能完成通知（DAY-134）
 	// 神秘寶箱系統（DAY-090）
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
 	MsgMysteryBoxUpdate  MessageType = "mystery_box_update"  // 持有寶箱狀態更新
@@ -1460,12 +1461,29 @@ type SpecialWeaponDef struct {
 // SpecialWeaponUpdatePayload 特殊武器狀態更新（Server → Client）
 // 玩家加入、購買、使用後發送
 type SpecialWeaponUpdatePayload struct {
-	PlayerID      string             `json:"player_id"`
-	BombCharges   int                `json:"bomb_charges"`
-	LaserCharges  int                `json:"laser_charges"`
-	FreezeCharges int                `json:"freeze_charges"`
-	NewBalance    int                `json:"new_balance"`    // 購買後的新餘額（0=使用操作）
-	Definitions   []SpecialWeaponDef `json:"definitions"`    // 武器定義（首次發送時填入）
+	PlayerID       string             `json:"player_id"`
+	BombCharges    int                `json:"bomb_charges"`
+	LaserCharges   int                `json:"laser_charges"`
+	FreezeCharges  int                `json:"freeze_charges"`
+	TornadoCharges int                `json:"tornado_charges"`  // DAY-134
+	NewBalance     int                `json:"new_balance"`      // 購買後的新餘額（0=使用操作）
+	Definitions    []SpecialWeaponDef `json:"definitions"`      // 武器定義（首次發送時填入）
+	// 充能進度（DAY-134）
+	BombChargeProgress    int `json:"bomb_charge_progress"`
+	LaserChargeProgress   int `json:"laser_charge_progress"`
+	FreezeChargeProgress  int `json:"freeze_charge_progress"`
+	TornadoChargeProgress int `json:"tornado_charge_progress"`
+}
+
+// SpecialWeaponChargedPayload 自動充能完成通知（Server → Client，DAY-134）
+// 擊破目標累積充能滿時發送
+type SpecialWeaponChargedPayload struct {
+	PlayerID   string `json:"player_id"`
+	WeaponType string `json:"weapon_type"` // "bomb" / "laser" / "freeze" / "tornado"
+	WeaponName string `json:"weapon_name"`
+	WeaponIcon string `json:"weapon_icon"`
+	NewCharges int    `json:"new_charges"` // 充能後的發數
+	Message    string `json:"message"`
 }
 
 // SpecialWeaponHitEntry 特殊武器命中的目標條目
