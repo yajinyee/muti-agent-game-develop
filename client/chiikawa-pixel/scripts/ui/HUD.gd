@@ -2881,7 +2881,9 @@ var _giant_prize_fish_panel: Control = null
 func _init_giant_prize_fish_panel() -> void:
 	var panel = GiantPrizeFishPanelScript.new()
 	panel.name = "GiantPrizeFishPanel"
-	panel.layer = 88  # 在 CrocodilePanel(87) 之上
+	panel.z_index = 88  # 在 CrocodilePanel(87) 之上
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_giant_prize_fish_panel = panel

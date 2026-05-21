@@ -3374,3 +3374,39 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **轉盤格子：** 8格加權（50x×30/100x×25/150x×18/200x×12/300x×8/500x×4/750x×2/950x×1）
 - **命名衝突：** WheelSlotPayload 已存在（DAY-084 幸運轉盤），新的用 OctopusWheelSlotPayload
 - **教訓：** 新增 Payload 前先搜尋是否有同名結構，避免 redeclared 錯誤
+
+## 83. GDScript Control vs CanvasLayer 的 layer 屬性（2026-05-21 DAY-147）
+- **問題：** HUD.gd 中對 `Control` 節點設定 `panel.layer = 88`，但 `layer` 是 `CanvasLayer` 的屬性
+- **症狀：** 不會報錯，但 layer 設定無效，節點的渲染層次不受控制
+- **正確做法：** `Control` 節點用 `z_index` 控制渲染順序；`CanvasLayer` 節點用 `layer`
+- **修正：** `panel.layer = 88` → `panel.z_index = 88` + `panel.set_anchors_preset(Control.PRESET_FULL_RECT)` + `panel.mouse_filter = Control.MOUSE_FILTER_IGNORE`
+- **教訓：** 新建 Panel 時，如果繼承 `Control`，一律用 `z_index`；如果繼承 `CanvasLayer`，用 `layer`
+
+## 84. 捕魚機 2026 業界機制研究總結（2026-05-21）
+- **來源：** jiligames.com, royalfishing.co.uk, royal-fishing.uk, nerdbot.com（2026-05-20）
+- **已實作的 2026 核心機制：**
+  - Dragon Wrath（蓄力大招）✅ DAY-128
+  - Immortal Boss（不死 BOSS 連勝）✅ DAY-129
+  - Awaken Boss + Power Up（覺醒 BOSS）✅ DAY-130
+  - ChainLong King Wheel（雙環輪盤）✅ DAY-139
+  - Mega Octopus Wheel（巨型章魚轉盤）✅ DAY-144
+  - Giant Anglerfish Electric Chest（鮟鱇魚電擊寶箱）✅ DAY-145
+  - Giant Saltwater Crocodile Hunt（鱷魚獵魚）✅ DAY-146
+  - Giant Prize Fish 5x（夢幻巨型獎勵魚）✅ DAY-147
+- **業界核心設計原則（nerdbot.com 2026-05-20）：** 「Special fish, boss fish and multiplier events create variance moments that make extended sessions unpredictable」
+- **教訓：** 捕魚機的留存核心是「不可預測的高峰體驗」，每個特殊目標都要有獨特的視覺和獎勵機制
+
+## 85. 輕量 session 管理器設計模式（2026-05-21 DAY-147）
+- **場景：** 需要追蹤每個玩家的短期狀態（如夢幻模式 10 秒），但不值得建立獨立套件
+- **做法：** 在 handler 檔案中直接定義 struct + manager，不建立獨立套件
+  ```go
+  type giantPrizeFishSession struct { ... }
+  type giantPrizeFishManager struct {
+      mu       sync.RWMutex
+      sessions map[string]*giantPrizeFishSession
+      cooldown map[string]time.Time
+  }
+  ```
+- **優點：** 程式碼集中、不增加套件複雜度、適合生命週期短的功能
+- **缺點：** 無法獨立測試（需要整合測試）
+- **教訓：** 功能複雜度 < 50 行的 session 管理，直接在 handler 中定義；> 100 行才考慮獨立套件

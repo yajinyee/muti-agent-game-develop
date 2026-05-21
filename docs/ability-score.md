@@ -1632,3 +1632,41 @@ RTP 95.87%，build/vet/test 全部通過。
 1. Jackpot Meter 視覺化進度條（讓玩家看到 Jackpot 累積進度）
 2. 搜尋「fish shooting game 2026 jackpot meter visual design」
 3. 考慮加入「每日任務連鎖」機制（完成 A 任務解鎖 B 任務）
+
+---
+
+## 評估 #最新 — 2026-05-21（DAY-147，夢幻巨型獎勵魚 + 業界深度研究）
+
+### 這次學到了什麼
+1. **業界最新機制研究**：jiligames.com 2026 確認「Giant Prize Fish 5x multipliers」是 Mega Fishing 的新特殊目標機制，屬於「容易觸發的短期爆發」設計
+2. **nerdbot.com 2026-05-20 業界分析**：捕魚機的核心設計原則是「Special fish, boss fish and multiplier events create variance moments that make extended sessions unpredictable」— 這正是我們一直在做的方向
+3. **Royal Fishing 2026 完整機制確認**：Dragon Wrath（蓄力大招）+ Immortal Boss（不死 BOSS）+ ChainLong King Wheel（雙環輪盤）+ Awaken Boss（覺醒 BOSS）— 全部已實作
+4. **GDScript Control vs CanvasLayer**：`layer` 屬性只對 `CanvasLayer` 有效，`Control` 節點應使用 `z_index`。修正了 GiantPrizeFishPanel 的 HUD 整合
+5. **輕量 session 管理器設計**：不需要獨立套件的小型系統可以直接在 handler 檔案中定義 struct + manager，保持程式碼簡潔
+
+### 進步說明
+- DAY-147 夢幻巨型獎勵魚系統完整實作（Server + Client）
+- 修正 GiantPrizeFishPanel 的 HUD 整合（layer → z_index）
+- 業界研究確認遊戲機制方向正確
+- build/vet 零錯誤零警告
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 98 | → | 穩定，輕量 session 管理器設計乾淨 |
+| Godot GDScript | 98 | +1 | 修正 Control vs CanvasLayer 的 layer/z_index 差異 |
+| 像素美術生成 | 95 | → | 穩定 |
+| 遊戲數值設計 | 90 | +2 | 業界研究確認倍率疊加設計符合 2026 標準 |
+| WebSocket 通訊 | 95 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100%，DAY-147 完成 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，DAY-147 夢幻巨型獎勵魚系統增加「容易觸發的短期爆發」機制。
+今日完成：DAY-147 夢幻巨型獎勵魚 + HUD 修正 + 業界研究 + GitHub 同步。
+美術質量：100/100（維持）。
+
+### 下一步學習目標
+1. 研究 KA Gaming Mermaid Royale 的特殊機制
+2. 搜尋「fish shooting game 2026 new special target mechanic」
+3. 考慮加入「全服倒數計時大獎魚」— 限時出現，全服搶先擊破獲得大獎
