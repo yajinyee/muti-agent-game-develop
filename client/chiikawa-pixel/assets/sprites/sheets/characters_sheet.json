@@ -2,89 +2,60 @@
   "cell_size": 96,
   "cols": 3,
   "rows": 3,
-  "layout": "row=character, col=state",
-  "characters": [
-    "chiikawa",
-    "hachiware",
-    "usagi"
-  ],
-  "states": [
-    "idle",
-    "attack",
-    "bigwin"
-  ],
   "sprites": {
     "chiikawa_idle": {
       "x": 0,
       "y": 0,
       "w": 96,
-      "h": 96,
-      "row": 0,
-      "col": 0
+      "h": 96
     },
     "chiikawa_attack": {
       "x": 96,
       "y": 0,
       "w": 96,
-      "h": 96,
-      "row": 0,
-      "col": 1
+      "h": 96
     },
     "chiikawa_bigwin": {
       "x": 192,
       "y": 0,
       "w": 96,
-      "h": 96,
-      "row": 0,
-      "col": 2
+      "h": 96
     },
     "hachiware_idle": {
       "x": 0,
       "y": 96,
       "w": 96,
-      "h": 96,
-      "row": 1,
-      "col": 0
+      "h": 96
     },
     "hachiware_attack": {
       "x": 96,
       "y": 96,
       "w": 96,
-      "h": 96,
-      "row": 1,
-      "col": 1
+      "h": 96
     },
     "hachiware_bigwin": {
       "x": 192,
       "y": 96,
       "w": 96,
-      "h": 96,
-      "row": 1,
-      "col": 2
+      "h": 96
     },
     "usagi_idle": {
       "x": 0,
       "y": 192,
       "w": 96,
-      "h": 96,
-      "row": 2,
-      "col": 0
+      "h": 96
     },
     "usagi_attack": {
       "x": 96,
       "y": 192,
       "w": 96,
-      "h": 96,
-      "row": 2,
-      "col": 1
+      "h": 96
     },
     "usagi_bigwin": {
       "x": 192,
       "y": 192,
       "w": 96,
-      "h": 96,
-      "row": 2,
-      "col": 2
+      "h": 96
     }
   }
 }

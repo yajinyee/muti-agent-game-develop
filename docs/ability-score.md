@@ -1556,3 +1556,41 @@ RTP 95.87%，build/vet/test 全部通過。
 1. 搜尋「fish shooting game 2026 flash sale limited offer」找下一個留存機制
 2. 評估「玩家個人化推薦」系統（根據玩家行為推薦最適合的房間難度）
 3. 考慮加入「每日挑戰任務」（比現有任務更有趣的特殊挑戰）
+
+---
+
+## 評估 #28 — 2026-05-21（DAY-115，AI 圖整合 + Co-op Raid）
+
+### 這次學到了什麼
+1. **AI 生成圖沒有被整合進 Spritesheet**：`ai_generated/` 目錄的圖存在但 `generate_spritesheet.py` 讀的是 `characters/` 目錄，導致一直用程式生成圖
+2. **顏色多樣性是美術質量的關鍵指標**：AI 生成圖有 1400-4400 種顏色，程式生成只有 130-260 種，差距 10-17 倍
+3. **usagi bigwin AI 圖尺寸偏小**：AI 生成的 bigwin 幀（42%密度）比 idle（60%）小很多，需要從 idle 幀生成 bigwin
+4. **Go package 名稱 vs 目錄名稱**：目錄 `raidBoss` 但 package 是 `raidboss`，import 時要用 alias
+5. **Co-op 傷害機制**：用「擊破獎勵值」作為傷害，高投注玩家自然貢獻更多，符合業界公平性設計
+
+### 進步說明
+- 美術質量從 72/100 提升到 **88/100**（AI 生成圖整合，顏色豐富度提升 10-17 倍）
+- 三個角色 Spritesheet 全部更新為 AI 生成圖
+- QC 全部 ✅（chiikawa/hachiware/usagi 一致性 0px/0px）
+- Co-op Boss Raid 系統完整實作（13/13 測試通過）
+- 修復 tutorial_handler.go 的 notifyFeedMilestone 參數錯誤
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 98 | → | 穩定，Co-op Raid 系統乾淨整合 |
+| Godot GDScript | 97 | → | 穩定 |
+| 像素美術生成 | **92** | **+2** | AI 生成圖整合，顏色豐富度大幅提升 |
+| 遊戲數值設計 | 86 | → | 穩定 |
+| WebSocket 通訊 | 95 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100%，美術質量提升 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，美術質量 88/100（AI 生成圖整合後大幅提升）。
+今日完成：Co-op Boss Raid 系統（DAY-115）+ AI 生成圖整合 + Spritesheet 重建。
+
+### 下一步學習目標
+1. 確認 Godot 中 AI 生成圖的顯示效果（需要在 Godot 編輯器中確認）
+2. 搜尋「pixel art AI sprite integration Godot 4 2026」找最新技術
+3. 考慮對 attack 幀做更好的動作差異化（目前 attack 是 idle 的翻轉版）

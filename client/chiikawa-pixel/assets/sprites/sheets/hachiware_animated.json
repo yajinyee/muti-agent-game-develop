@@ -1,23 +1,23 @@
 {
   "char": "hachiware",
   "frame_size": 96,
-  "cols": 8,
+  "cols": 4,
   "rows": 3,
   "animations": {
     "idle": {
       "row": 0,
-      "frames": 8,
-      "fps": 8.0
+      "frames": 4,
+      "fps": 4
     },
     "attack": {
       "row": 1,
-      "frames": 4,
-      "fps": 10.0
+      "frames": 3,
+      "fps": 8
     },
     "bigwin": {
       "row": 2,
       "frames": 4,
-      "fps": 6.0
+      "fps": 6
     }
   }
 }
