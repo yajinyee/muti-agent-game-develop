@@ -251,6 +251,8 @@ const (
 	MsgFragmentDrop     MessageType = "fragment_drop"      // 碎片掉落通知（Server→Client）
 	MsgFragmentComplete MessageType = "fragment_complete"  // 集齊碎片大獎通知（Server→Client，廣播）
 	MsgFragmentStatus   MessageType = "fragment_status"    // 碎片狀態回應（Server→Client）
+	// 幸運捕獲系統（DAY-119）
+	MsgLuckyCatch       MessageType = "lucky_catch"        // 幸運捕獲觸發廣播（Server→Client，廣播）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -2043,4 +2045,17 @@ type FragmentStatusPayload struct {
 	Silver   int `json:"silver"`    // 目前銀碎片數量
 	Gold     int `json:"gold"`      // 目前金碎片數量
 	Required int `json:"required"`  // 集齊需要數量（固定 5）
+}
+
+// LuckyCatchPayload 幸運捕獲廣播（Server → Client，廣播）（DAY-119）
+type LuckyCatchPayload struct {
+	PlayerID    string  `json:"player_id"`    // 觸發玩家 ID
+	PlayerName  string  `json:"player_name"`  // 觸發玩家名稱
+	TargetDefID string  `json:"target_def_id"` // 被捕獲的目標物定義 ID
+	TargetName  string  `json:"target_name"`  // 目標物名稱
+	Multiplier  float64 `json:"multiplier"`   // 目標物倍率
+	BonusMult   float64 `json:"bonus_mult"`   // 幸運加成倍率（2.0-5.0x）
+	Reward      int     `json:"reward"`       // 最終獎勵金幣
+	TriggerType string  `json:"trigger_type"` // 觸發類型：streak/weather/festival
+	Icon        string  `json:"icon"`         // 顯示圖示
 }

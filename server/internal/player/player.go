@@ -76,6 +76,9 @@ type Player struct {
 
 	// 新手引導系統（DAY-115）
 	TutorialCompleted bool // 是否已完成新手引導
+
+	// 幸運捕獲系統（DAY-119）
+	LastLuckyCatchAt time.Time // 上次幸運捕獲時間（冷卻計時）
 }
 
 // NewPlayer 建立新玩家

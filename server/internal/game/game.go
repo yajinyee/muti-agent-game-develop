@@ -952,6 +952,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	go g.notifyFestivalKill(p, t.DefID)
 	// 名人堂：倍率和金幣記錄（DAY-110）
 	go g.notifyHallOfFameKill(p, float64(t.Multiplier), finalReward)
+	// 幸運捕獲：天氣加成期間觸發（DAY-119）
+	if g.Weather.GetRewardMult() > 1.0 {
+		go g.tryLuckyCatch(p, "weather")
+	}
+	// 幸運捕獲：節日期間觸發（DAY-119）
+	if g.getFestivalRewardMult() > 1.0 {
+		go g.tryLuckyCatch(p, "festival")
+	}
 }
 
 // handleLock 處理鎖定

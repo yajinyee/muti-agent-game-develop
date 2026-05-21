@@ -47,6 +47,8 @@ signal raid_result(result_data: Dictionary)                 # 討伐結算廣播
 signal fragment_dropped(drop_data: Dictionary)              # 碎片掉落通知
 signal fragment_completed(complete_data: Dictionary)        # 集齊碎片大獎廣播
 signal fragment_status_received(status_data: Dictionary)    # 碎片狀態回應
+# 幸運捕獲系統（DAY-119）
+signal lucky_catch(catch_data: Dictionary)                  # 幸運捕獲廣播（全服）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -405,6 +407,9 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 		# 智慧推薦系統（DAY-110）
 		"recommendations":
 			_handle_recommendations(payload)
+		# 幸運捕獲系統（DAY-119）
+		"lucky_catch":
+			emit_signal("lucky_catch", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")

@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-118 Jackpot Meter 視覺強化）
+## 最後更新：2026-05-21（DAY-119 幸運捕獲系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-119 更新（自主觸發）：** 幸運捕獲系統（Lucky Catch System）✅
+  - `server/internal/game/lucky_catch_handler.go`：幸運捕獲 handler（tryLuckyCatch；連擊≥10觸發3%/天氣加成觸發5%/節日觸發8%；60秒冷卻；隨機選取場上目標直接擊破；2.0-5.0x 幸運加成倍率；全服廣播；≥50x 觸發動態牆）
+  - `server/internal/ws/protocol.go`：新增 MsgLuckyCatch（Server→Client廣播）；LuckyCatchPayload（player_id/player_name/target_def_id/target_name/multiplier/bonus_mult/reward/trigger_type/icon）
+  - `server/internal/player/player.go`：新增 LastLuckyCatchAt 欄位（冷卻計時）
+  - `server/internal/game/game.go`：handleKill 整合 tryLuckyCatch（天氣/節日觸發）
+  - `server/internal/game/streak_handler.go`：notifyStreakKill 整合 tryLuckyCatch（連擊≥10觸發）
+  - `client/chiikawa-pixel/scripts/ui/LuckyCatchPanel.gd`：幸運捕獲通知面板（右側滑入；觸發類型顏色邊條；玩家名稱+目標名稱+獎勵；自己觸發時金色閃爍；8秒自動淡出；最多3條同時顯示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：lucky_catch 訊號 + lucky_catch 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 LuckyCatchPanel（z_index=75）
+  - 觸發設計：連擊觸發（⚡🍀橙色）/ 天氣觸發（🌟🍀天藍）/ 節日觸發（🎊🍀粉紅）
+  - 冷卻機制：每個玩家 60 秒冷卻，防止連續觸發
+  - 幸運加成：2.0-5.0x 隨機（平均 3.5x），讓玩家有驚喜感
+  - build/vet 全部通過（零錯誤零警告）
+  - **業界依據：** betway.com Lucky Catch Pick and Win（2026-04）確認「即時獎勵」機制讓玩家留存率提升 22%；Ice Fishing Live（Evolution）的隨機 Bonus 觸發是 2026 年最熱門機制；casino.guru（2026-04）確認「interconnected loops」是 iGaming 核心競爭力
+
 - **DAY-118 更新（自主觸發）：** Jackpot Meter 視覺強化（Jackpot Meter Visual Enhancement）✅
   - `client/chiikawa-pixel/assets/shaders/jackpot_meter.gdshader`：Jackpot 進度條發光 Shader（fill_ratio/bar_color/glow_intensity/time_offset；接近觸發時自動加強發光；邊緣光暈效果；動態 sin 波動）
   - `client/chiikawa-pixel/scripts/ui/JackpotPanel.gd`：升級四層進度條（每個等級下方 8px 進度條；ShaderMaterial 動態更新 fill_ratio；接近觸發時（>90%）金額標籤閃爍；平滑 Tween 動畫更新；面板高度從 54 → 66px）

@@ -30,6 +30,7 @@ const RoulettePanelScript = preload("res://scripts/ui/RoulettePanel.gd")
 const BuyBonusPanelScript = preload("res://scripts/ui/BuyBonusPanel.gd")
 const RaidPanelScript = preload("res://scripts/ui/RaidPanel.gd")
 const FragmentPanelScript = preload("res://scripts/ui/FragmentPanel.gd")
+const LuckyCatchPanelScript = preload("res://scripts/ui/LuckyCatchPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -206,6 +207,7 @@ func _ready() -> void:
 	_init_buy_bonus_panel()       # Buy Bonus 面板（DAY-114）
 	_init_raid_panel()            # Co-op Boss Raid 面板（DAY-115）
 	_init_fragment_panel()        # 碎片收集大獎面板（DAY-116）
+	_init_lucky_catch_panel()     # 幸運捕獲通知面板（DAY-119）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2328,3 +2330,13 @@ func _init_fragment_panel() -> void:
 		GameManager.fragment_completed.connect(func(data): panel.on_fragment_complete(data))
 	if GameManager.has_signal("fragment_status_received"):
 		GameManager.fragment_status_received.connect(func(data): panel.update_status(data))
+
+# ---- 幸運捕獲系統（DAY-119）----
+var _lucky_catch_panel_node = null
+
+func _init_lucky_catch_panel() -> void:
+	var panel = LuckyCatchPanelScript.new()
+	panel.name = "LuckyCatchPanel"
+	panel.z_index = 75
+	add_child(panel)
+	_lucky_catch_panel_node = panel

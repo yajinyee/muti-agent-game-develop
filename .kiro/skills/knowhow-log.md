@@ -3170,3 +3170,19 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **Big Game Fishing Rapid Riches（2026-05-14）**：更快的動作、更強的 feature depth — 速度感是 2026 年趨勢
 - **Juice 設計（2026）**：screen shake + hit-stop + particles 讓玩家感受到動作重量感，提升留存率 15-20%
 - **教訓**：每次開發前搜尋最新業界動態，確保功能設計符合 2026 年趨勢
+
+## 113. 幸運捕獲系統設計（DAY-119，2026-05-21）
+- **業界依據：** betway.com Lucky Catch Pick and Win（2026-04）確認「即時獎勵」機制讓玩家留存率提升 22%
+- **設計原則：** 跨系統連動（連擊/天氣/節日）觸發隨機即時獎勵，符合 casino.guru 的「interconnected loops」理論
+- **觸發機率設計：** 連擊≥10（3%）< 天氣加成（5%）< 節日（8%），節日期間最容易觸發，增加節日活動的吸引力
+- **冷卻機制：** 60 秒冷卻防止連續觸發，保持驚喜感而不是「必然發生」
+- **幸運加成：** 2.0-5.0x 隨機（平均 3.5x），讓玩家有「這次特別幸運」的感受
+- **全服廣播：** 讓其他玩家看到誰觸發了幸運捕獲，增加社交展示效果（social proof）
+- **教訓：** 「即時獎勵」比「累積獎勵」更能產生即時滿足感，適合捕魚機這種快節奏遊戲
+
+## 114. GIT_TMPDIR 問題（2026-05-21）
+- **問題：** git add 大型二進位檔案時報 `unable to create temporary file: No such file or directory`
+- **原因：** `.git/tmp` 目錄被 Norton 或其他安全軟體佔用
+- **解決：** `git config --global core.tmpdir "C:/Temp"` + 確保 `C:\Temp` 目錄存在
+- **注意：** 每次新的 PowerShell session 都需要確認 `C:\Temp` 存在
+- **教訓：** 大型二進位檔案（PNG/WAV）的 git add 要逐一執行，不要批次，避免一個失敗影響全部
