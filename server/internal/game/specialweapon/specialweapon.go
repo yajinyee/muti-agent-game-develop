@@ -1,8 +1,9 @@
-// Package specialweapon 特殊武器系統（DAY-089，升級 DAY-134）
+// Package specialweapon 特殊武器系統（DAY-089，升級 DAY-134，DAY-141）
 // 業界依據：
 //   - Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是標配特殊武器
 //   - Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標
 //   - JILI 2026 Auto-Charge — 每次擊破目標自動累積充能，不需要花金幣
+//   - thechipotlemenu.com 2026 Automatic Target Locking Weapon — AI 自動追蹤最高倍率目標，100% 命中
 package specialweapon
 
 import (
@@ -18,6 +19,7 @@ const (
 	WeaponLaser   WeaponType = "laser"   // 雷射砲：穿透，命中一條線上所有目標（Y 軸 ±60px）
 	WeaponFreeze  WeaponType = "freeze"  // 冰凍砲：全畫面減速所有目標 5 秒
 	WeaponTornado WeaponType = "tornado" // 龍捲風砲：全螢幕旋轉，50% 機率擊破所有目標（DAY-134）
+	WeaponHoming  WeaponType = "homing"  // 追蹤飛彈：自動追蹤倍率最高的目標，100% 命中（DAY-141）
 )
 
 // WeaponDef 特殊武器定義
@@ -79,6 +81,17 @@ var AvailableWeapons = []WeaponDef{
 		ChargeRequired: 50, // 擊破 50 個目標自動充能一發（最難充能，最強效果）
 		ChargePerKill:  1,
 	},
+	{
+		Type:           WeaponHoming,
+		Name:           "追蹤飛彈",
+		Description:    "AI 自動追蹤倍率最高的目標，100%命中，獎勵×1.5",
+		Cost:           0,    // 只能透過充能獲得，不能購買（DAY-141）
+		MaxCharges:     3,    // 最多持有 3 發
+		Icon:           "🎯",
+		Color:          "#FF0080",
+		ChargeRequired: 35, // 擊破 35 個目標自動充能一發
+		ChargePerKill:  1,
+	},
 }
 
 // PlayerWeaponState 玩家特殊武器狀態
@@ -87,12 +100,14 @@ type PlayerWeaponState struct {
 	LaserCharges   int `json:"laser_charges"`
 	FreezeCharges  int `json:"freeze_charges"`
 	TornadoCharges int `json:"tornado_charges"` // DAY-134
+	HomingCharges  int `json:"homing_charges"`  // DAY-141
 
 	// 自動充能進度（DAY-134）
 	BombChargeProgress    int `json:"bomb_charge_progress"`
 	LaserChargeProgress   int `json:"laser_charge_progress"`
 	FreezeChargeProgress  int `json:"freeze_charge_progress"`
 	TornadoChargeProgress int `json:"tornado_charge_progress"`
+	HomingChargeProgress  int `json:"homing_charge_progress"` // DAY-141
 }
 
 // ChargeResult 充能結果（DAY-134）
@@ -309,6 +324,25 @@ func CalcTornadoTargets(targets []TargetPos) []string {
 	return ids
 }
 
+// HomingRewardMult 追蹤飛彈獎勵倍率（DAY-141）
+const HomingRewardMult = 1.5
+
+// CalcHomingTarget 追蹤飛彈選擇倍率最高的目標（DAY-141）
+// 回傳倍率最高的目標 ID，若無目標則回傳空字串
+// 業界依據：thechipotlemenu.com 2026「AI technology, locking onto highest-value target」
+func CalcHomingTarget(targets []TargetPos) string {
+	if len(targets) == 0 {
+		return ""
+	}
+	best := targets[0]
+	for _, t := range targets[1:] {
+		if t.Multiplier > best.Multiplier {
+			best = t
+		}
+	}
+	return best.InstanceID
+}
+
 // ---- 內部輔助函數 ----
 
 func getWeaponDef(wtype WeaponType) *WeaponDef {
@@ -339,6 +373,8 @@ func (m *Manager) getChargesLocked(s *PlayerWeaponState, wtype WeaponType) int {
 		return s.FreezeCharges
 	case WeaponTornado:
 		return s.TornadoCharges
+	case WeaponHoming:
+		return s.HomingCharges
 	}
 	return 0
 }
@@ -353,6 +389,8 @@ func (m *Manager) setChargesLocked(s *PlayerWeaponState, wtype WeaponType, v int
 		s.FreezeCharges = v
 	case WeaponTornado:
 		s.TornadoCharges = v
+	case WeaponHoming:
+		s.HomingCharges = v
 	}
 }
 
@@ -366,6 +404,8 @@ func (m *Manager) getProgressLocked(s *PlayerWeaponState, wtype WeaponType) int 
 		return s.FreezeChargeProgress
 	case WeaponTornado:
 		return s.TornadoChargeProgress
+	case WeaponHoming:
+		return s.HomingChargeProgress
 	}
 	return 0
 }
@@ -380,6 +420,8 @@ func (m *Manager) setProgressLocked(s *PlayerWeaponState, wtype WeaponType, v in
 		s.FreezeChargeProgress = v
 	case WeaponTornado:
 		s.TornadoChargeProgress = v
+	case WeaponHoming:
+		s.HomingChargeProgress = v
 	}
 }
 

@@ -3344,3 +3344,19 @@ contribution_per_shot = betCost × 0.005 × level_share
   }
   ```
 - **教訓：** 環形緩衝比 deque 更省記憶體，適合固定大小的滑動窗口
+
+## 83. 追蹤飛彈武器設計原則（DAY-141）
+- **業界依據：** thechipotlemenu.com 2026「Automatic Target Locking Weapon — AI technology, locking onto more than 10 consecutive targets in one minute」
+- **設計要點：**
+  1. 自動選擇倍率最高的目標（CalcHomingTarget）
+  2. 100% 命中（不受 RNG 影響，讓玩家感受到「精準感」）
+  3. 獎勵 ×1.5（比直接擊破高 50%，補償「不需要技巧」的設計）
+  4. 只能充能獲得（不可購買），保持稀有感
+  5. 充能 35 次（介於龍捲風 50 次和雷射 30 次之間）
+- **視覺設計：** 0.8 秒追蹤飛行動畫 → 命中爆炸 → 個人結果彈窗
+- **教訓：** 「自動追蹤」武器要有明確的視覺反饋（飛行動畫），讓玩家感受到「AI 在幫我瞄準」
+
+## 84. 五武器面板佈局（DAY-141）
+- **問題：** 從四武器（320px）升級到五武器（400px），MysteryBoxPanel 需要右移
+- **解法：** SpecialWeaponPanel 寬度 320→400，MysteryBoxPanel 位置 x=745→x=825
+- **教訓：** 每次擴展武器面板都要同步更新右側面板的 x 座標

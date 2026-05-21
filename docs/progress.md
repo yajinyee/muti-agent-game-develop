@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-140 全服 Mega Catch 事件系統）
+## 最後更新：2026-05-21（DAY-141 追蹤飛彈武器系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,20 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-141 更新（自主觸發）：** 追蹤飛彈武器系統（Homing Missile Weapon System）✅
+  - **業界依據：** thechipotlemenu.com 2026「Automatic Target Locking Weapon — AI technology, locking onto more than 10 consecutive targets in one minute, saving players time and increasing efficiency」— 自動追蹤倍率最高的目標，100% 命中，獎勵 ×1.5，是 2026 年最新的 AI 輔助武器，讓玩家感受到「科技感」和「精準感」
+  - `server/internal/game/specialweapon/specialweapon.go`：新增 WeaponHoming 類型；追蹤飛彈定義（充能 35 次/最多 3 發/不可購買/🎯圖示/粉紅色）；新增 HomingRewardMult=1.5；新增 CalcHomingTarget（選擇倍率最高的目標）；PlayerWeaponState 加入 HomingCharges/HomingChargeProgress；所有 switch 分支加入 WeaponHoming 處理
+  - `server/internal/game/specialweapon/specialweapon_test.go`：新增 7 個測試（HomingNotBuyable/CalcHomingTarget_Empty/CalcHomingTarget_SingleTarget/CalcHomingTarget_SelectsHighestMultiplier/CalcHomingTarget_EqualMultiplier/RecordKill_HomingChargeUnlock/HomingRewardMult）
+  - `server/internal/game/specialweapon_handler.go`：handleUseSpecialWeapon 加入 WeaponHoming 分支（100% 命中，獎勵 ×1.5）；新增 broadcastHomingMissileEffect（0.8s 追蹤飛行動畫 → 命中爆炸 → 個人結果通知）；新增 announceHomingMissileHit（≥20x 全服公告）；sendSpecialWeaponUpdate 加入 HomingCharges/HomingChargeProgress
+  - `server/internal/ws/protocol.go`：新增 MsgHomingMissileResult；SpecialWeaponUpdatePayload 加入 HomingCharges/HomingChargeProgress；新增 HomingMissileResultPayload
+  - `client/chiikawa-pixel/scripts/ui/SpecialWeaponPanel.gd`：升級為五武器面板（寬度 320→400）；新增追蹤飛彈按鈕（粉紅色邊框）；_charges/_progress 加入 homing；_on_special_weapon_updated 加入 homing 欄位；_on_weapon_btn_pressed 加入 homing 直接使用分支；新增 _on_homing_missile_result（命中結果彈窗 + 按鈕閃爍）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：新增 homing_missile_result 訊號 + _handle_homing_missile_result 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：MysteryBoxPanel 位置從 x=745 右移到 x=825（因 SpecialWeaponPanel 變寬）
+  - 充能設計：擊破 35 個目標自動充能一發（介於龍捲風 50 次和雷射 30 次之間）；高倍率目標給更多充能（≥10x 給 2 點/≥30x 給 3 點）
+  - 命中設計：自動選擇畫面上倍率最高的目標；100% 命中（不受 RNG 影響）；獎勵 = 目標倍率 × betLevel × 1.5（比直接擊破高 50%）
+  - 視覺設計：0.8 秒追蹤飛行動畫（讓所有玩家看到飛彈追蹤）→ 命中爆炸 → 個人結果彈窗（粉紅色）
+  - 全服公告：命中 ≥20x 目標時全服廣播，讓其他玩家看到「有人用追蹤飛彈精準命中了高倍率目標」
+  - build/vet 全部通過（零錯誤零警告）；7/7 homing 測試通過
 - **DAY-140 更新（自主觸發）：** 全服 Mega Catch 事件系統（Mega Catch Event System）✅
   - **業界依據：** Ocean King 系列「Mega Catch」— 全場高倍率目標湧現 + 獎勵翻倍，BOSS 擊殺後 60% 機率觸發，是業界最經典的「全場事件」機制，讓玩家在 BOSS 擊殺後立刻感受到「全場瘋狂搶魚」的高峰體驗
   - `server/internal/game/megacatch/megacatch.go`：Mega Catch 管理器；3個等級（🎣大豐收×1.5/12s、🌟超級豐收×2.0/10s、💎傳說豐收×3.0/8s）；TryTriggerBossKill（BOSS擊殺後60%觸發）；TryTriggerRandom（每分鐘5%隨機觸發）；ForceStart（Prototype展示用）；CheckExpiry（過期檢查）；GetRewardBoost/GetSpawnBoost/GetSnapshot/CanTrigger/GetCooldownLeft

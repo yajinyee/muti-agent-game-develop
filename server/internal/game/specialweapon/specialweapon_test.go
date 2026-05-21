@@ -298,3 +298,84 @@ func TestRecordKill_MultiplePlayers(t *testing.T) {
 		t.Fatalf("p2: expected FreezeCharges=0, got %d", snap2.FreezeCharges)
 	}
 }
+
+// ---- DAY-141 追蹤飛彈測試 ----
+
+func TestBuyWeapon_HomingNotBuyable(t *testing.T) {
+	// 追蹤飛彈不能購買（DAY-141）
+	m := New()
+	ok, _ := m.BuyWeapon("p1", WeaponHoming, 99999)
+	if ok {
+		t.Fatal("expected homing buy failure (not purchasable)")
+	}
+}
+
+func TestCalcHomingTarget_Empty(t *testing.T) {
+	// 無目標時回傳空字串
+	result := CalcHomingTarget([]TargetPos{})
+	if result != "" {
+		t.Fatalf("expected empty string for no targets, got %q", result)
+	}
+}
+
+func TestCalcHomingTarget_SingleTarget(t *testing.T) {
+	targets := []TargetPos{
+		{InstanceID: "t1", X: 100, Y: 100, Multiplier: 5.0},
+	}
+	result := CalcHomingTarget(targets)
+	if result != "t1" {
+		t.Fatalf("expected t1, got %q", result)
+	}
+}
+
+func TestCalcHomingTarget_SelectsHighestMultiplier(t *testing.T) {
+	targets := []TargetPos{
+		{InstanceID: "t1", X: 100, Y: 100, Multiplier: 5.0},
+		{InstanceID: "t2", X: 200, Y: 200, Multiplier: 30.0}, // 最高倍率
+		{InstanceID: "t3", X: 300, Y: 300, Multiplier: 10.0},
+	}
+	result := CalcHomingTarget(targets)
+	if result != "t2" {
+		t.Fatalf("expected t2 (highest multiplier 30x), got %q", result)
+	}
+}
+
+func TestCalcHomingTarget_EqualMultiplier(t *testing.T) {
+	// 相同倍率時選第一個
+	targets := []TargetPos{
+		{InstanceID: "t1", X: 100, Y: 100, Multiplier: 10.0},
+		{InstanceID: "t2", X: 200, Y: 200, Multiplier: 10.0},
+	}
+	result := CalcHomingTarget(targets)
+	if result != "t1" {
+		t.Fatalf("expected t1 (first with equal multiplier), got %q", result)
+	}
+}
+
+func TestRecordKill_HomingChargeUnlock(t *testing.T) {
+	m := New()
+	// 追蹤飛彈需要 35 次
+	var unlocked bool
+	for i := 0; i < 35; i++ {
+		results := m.RecordKill("p1", 2.0)
+		for _, r := range results {
+			if r.WeaponType == WeaponHoming && r.ChargeUnlocked {
+				unlocked = true
+			}
+		}
+	}
+	if !unlocked {
+		t.Fatal("expected homing charge to unlock after 35 kills")
+	}
+	snap := m.GetSnapshot("p1")
+	if snap.HomingCharges != 1 {
+		t.Fatalf("expected HomingCharges=1, got %d", snap.HomingCharges)
+	}
+}
+
+func TestHomingRewardMult(t *testing.T) {
+	// 追蹤飛彈獎勵倍率應為 1.5
+	if HomingRewardMult != 1.5 {
+		t.Fatalf("expected HomingRewardMult=1.5, got %f", HomingRewardMult)
+	}
+}

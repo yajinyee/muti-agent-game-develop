@@ -190,6 +190,7 @@ const (
 	MsgSpecialWeaponUpdate  MessageType = "special_weapon_update"  // 特殊武器狀態更新
 	MsgSpecialWeaponFired   MessageType = "special_weapon_fired"   // 特殊武器發射廣播（所有玩家可見）
 	MsgSpecialWeaponCharged MessageType = "special_weapon_charged" // 自動充能完成通知（DAY-134）
+	MsgHomingMissileResult  MessageType = "homing_missile_result"  // 追蹤飛彈命中結果（DAY-141）
 	// 神秘寶箱系統（DAY-090）
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
 	MsgMysteryBoxUpdate  MessageType = "mystery_box_update"  // 持有寶箱狀態更新
@@ -1501,6 +1502,7 @@ type SpecialWeaponUpdatePayload struct {
 	LaserCharges   int                `json:"laser_charges"`
 	FreezeCharges  int                `json:"freeze_charges"`
 	TornadoCharges int                `json:"tornado_charges"`  // DAY-134
+	HomingCharges  int                `json:"homing_charges"`   // DAY-141
 	NewBalance     int                `json:"new_balance"`      // 購買後的新餘額（0=使用操作）
 	Definitions    []SpecialWeaponDef `json:"definitions"`      // 武器定義（首次發送時填入）
 	// 充能進度（DAY-134）
@@ -1508,6 +1510,7 @@ type SpecialWeaponUpdatePayload struct {
 	LaserChargeProgress   int `json:"laser_charge_progress"`
 	FreezeChargeProgress  int `json:"freeze_charge_progress"`
 	TornadoChargeProgress int `json:"tornado_charge_progress"`
+	HomingChargeProgress  int `json:"homing_charge_progress"` // DAY-141
 }
 
 // SpecialWeaponChargedPayload 自動充能完成通知（Server → Client，DAY-134）
@@ -2895,4 +2898,18 @@ type MegaCatchStatusPayload struct {
 	RewardBoost float64 `json:"reward_boost"` // 獎勵倍率加成
 	SpawnBoost  float64 `json:"spawn_boost"`  // 稀有目標生成加成
 	SecondsLeft float64 `json:"seconds_left"` // 剩餘秒數
+}
+
+// HomingMissileResultPayload 追蹤飛彈命中結果（Server → Client，DAY-141）
+// 追蹤飛彈自動鎖定倍率最高的目標，100% 命中，獎勵 ×1.5
+type HomingMissileResultPayload struct {
+	PlayerID   string  `json:"player_id"`   // 使用者 ID
+	TargetID   string  `json:"target_id"`   // 命中的目標 InstanceID
+	DefID      string  `json:"def_id"`      // 目標定義 ID
+	Multiplier float64 `json:"multiplier"`  // 目標倍率
+	BaseReward int     `json:"base_reward"` // 基礎獎勵
+	FinalReward int    `json:"final_reward"` // 最終獎勵（×1.5）
+	NewBalance int     `json:"new_balance"` // 命中後餘額
+	Killed     bool    `json:"killed"`      // 是否擊破（100% 命中，但不一定擊破）
+	Message    string  `json:"message"`     // 顯示訊息
 }

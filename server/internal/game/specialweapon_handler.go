@@ -1,8 +1,9 @@
-// specialweapon_handler.go — 特殊武器系統 handler（DAY-089，升級 DAY-134）
+// specialweapon_handler.go — 特殊武器系統 handler（DAY-089，升級 DAY-134，DAY-141）
 // 業界依據：
 //   - Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是標配特殊武器
 //   - Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標
 //   - JILI 2026 Auto-Charge — 每次擊破目標自動累積充能，不需要花金幣
+//   - thechipotlemenu.com 2026 Automatic Target Locking Weapon — AI 自動追蹤最高倍率目標，100% 命中
 package game
 
 import (
@@ -94,6 +95,12 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 	case specialweapon.WeaponTornado:
 		// 龍捲風：全螢幕，50% 機率擊破每個目標（DAY-134）
 		hitIDs = specialweapon.CalcTornadoTargets(targets)
+	case specialweapon.WeaponHoming:
+		// 追蹤飛彈：自動追蹤倍率最高的目標（DAY-141）
+		bestID := specialweapon.CalcHomingTarget(targets)
+		if bestID != "" {
+			hitIDs = []string{bestID}
+		}
 	}
 
 	// 處理命中目標
@@ -134,6 +141,19 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 				delete(g.Targets, id)
 			}
 
+		case specialweapon.WeaponHoming:
+			// 追蹤飛彈：100% 命中，獎勵 ×1.5（DAY-141）
+			entry.Killed = true
+			baseReward := int(float64(p.BetLevel) * t.Multiplier)
+			if baseReward < 1 {
+				baseReward = 1
+			}
+			finalReward := int(float64(baseReward) * specialweapon.HomingRewardMult)
+			entry.Reward = finalReward
+			totalReward += finalReward
+			t.HP = 0
+			delete(g.Targets, id)
+
 		default:
 			// 炸彈/雷射：嘗試擊破（使用基礎命中率）
 			req := combat.AttackRequest{
@@ -172,6 +192,13 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 	// 龍捲風：延遲廣播製造「旋轉掃場」的連續感（DAY-134）
 	if wtype == specialweapon.WeaponTornado {
 		go g.broadcastTornadoEffect(p, hitEntries, totalReward)
+		g.sendSpecialWeaponUpdate(p, false)
+		return
+	}
+
+	// 追蹤飛彈：廣播鎖定追蹤效果（DAY-141）
+	if wtype == specialweapon.WeaponHoming {
+		go g.broadcastHomingMissileEffect(p, hitEntries, totalReward)
 		g.sendSpecialWeaponUpdate(p, false)
 		return
 	}
@@ -336,11 +363,13 @@ func (g *Game) sendSpecialWeaponUpdate(p *player.Player, withDefs bool) {
 		LaserCharges:          snap.LaserCharges,
 		FreezeCharges:         snap.FreezeCharges,
 		TornadoCharges:        snap.TornadoCharges,
+		HomingCharges:         snap.HomingCharges,
 		NewBalance:            p.Coins,
 		BombChargeProgress:    snap.BombChargeProgress,
 		LaserChargeProgress:   snap.LaserChargeProgress,
 		FreezeChargeProgress:  snap.FreezeChargeProgress,
 		TornadoChargeProgress: snap.TornadoChargeProgress,
+		HomingChargeProgress:  snap.HomingChargeProgress,
 	}
 
 	// 首次發送時附帶武器定義
@@ -387,4 +416,102 @@ func getWeaponNameIcon(wtype specialweapon.WeaponType) (name, icon string) {
 		}
 	}
 	return string(wtype), "🔫"
+}
+
+// broadcastHomingMissileEffect 追蹤飛彈效果廣播（DAY-141）
+// 追蹤飛彈自動鎖定倍率最高的目標，100% 命中，獎勵 ×1.5
+// 廣播鎖定動畫（0.8s 追蹤飛行）→ 命中爆炸 → 結果通知
+func (g *Game) broadcastHomingMissileEffect(p *player.Player, hitEntries []ws.SpecialWeaponHitEntry, totalReward int) {
+	if len(hitEntries) == 0 {
+		// 無目標，廣播空結果
+		g.Hub.Send(p.ID, &ws.Message{
+			Type: ws.MsgHomingMissileResult,
+			Payload: ws.HomingMissileResultPayload{
+				PlayerID:    p.ID,
+				TargetID:    "",
+				Killed:      false,
+				FinalReward: 0,
+				NewBalance:  p.Coins,
+				Message:     "🎯 沒有可追蹤的目標",
+			},
+		})
+		return
+	}
+
+	entry := hitEntries[0] // 追蹤飛彈只命中一個目標
+
+	// 先廣播追蹤飛彈發射（讓所有玩家看到飛彈追蹤動畫）
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgSpecialWeaponFired,
+		Payload: ws.SpecialWeaponFiredPayload{
+			PlayerID:    p.ID,
+			WeaponType:  string(specialweapon.WeaponHoming),
+			ClickX:      0,
+			ClickY:      0,
+			HitTargets:  nil, // 先不帶目標，讓 Client 播放追蹤動畫
+			TotalReward: 0,
+			NewBalance:  0,
+			FreezeTime:  0,
+		},
+	})
+
+	// 等待追蹤飛行動畫（0.8 秒）
+	time.Sleep(800 * time.Millisecond)
+
+	// 廣播命中爆炸
+	if entry.Killed {
+		g.Hub.Broadcast(&ws.Message{
+			Type: ws.MsgTargetKill,
+			Payload: ws.TargetKillPayload{
+				InstanceID: entry.InstanceID,
+				KillerID:   p.ID,
+				Reward:     entry.Reward,
+				Multiplier: entry.Multiplier,
+			},
+		})
+	}
+
+	// 發送個人結果通知
+	baseReward := int(float64(entry.Reward) / specialweapon.HomingRewardMult)
+	msg := fmt.Sprintf("🎯 追蹤飛彈命中 ×%.0f 目標！獎勵 ×1.5 = %d 金幣", entry.Multiplier, entry.Reward)
+	if !entry.Killed {
+		msg = "🎯 追蹤飛彈命中但未擊破目標"
+	}
+
+	g.Hub.Send(p.ID, &ws.Message{
+		Type: ws.MsgHomingMissileResult,
+		Payload: ws.HomingMissileResultPayload{
+			PlayerID:    p.ID,
+			TargetID:    entry.InstanceID,
+			DefID:       entry.DefID,
+			Multiplier:  entry.Multiplier,
+			BaseReward:  baseReward,
+			FinalReward: entry.Reward,
+			NewBalance:  p.Coins,
+			Killed:      entry.Killed,
+			Message:     msg,
+		},
+	})
+
+	// 全服公告：高倍率目標被追蹤飛彈命中（≥20x）
+	if entry.Multiplier >= 20 && entry.Killed {
+		g.announceHomingMissileHit(p.DisplayName, entry.Multiplier, entry.Reward)
+	}
+
+	log.Printf("[HomingMissile] player=%s hit target=%s mult=%.0f reward=%d",
+		p.ID, entry.InstanceID, entry.Multiplier, entry.Reward)
+}
+
+// announceHomingMissileHit 全服公告追蹤飛彈命中高倍率目標（DAY-141）
+func (g *Game) announceHomingMissileHit(playerName string, multiplier float64, reward int) {
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgAnnouncement,
+		Payload: map[string]interface{}{
+			"event_type": "homing_missile_hit",
+			"message":    fmt.Sprintf("🎯 %s 的追蹤飛彈精準命中 ×%.0f 目標，獲得 %d 金幣！", playerName, multiplier, reward),
+			"color":      "#FF0080",
+			"duration":   3.5,
+			"priority":   2,
+		},
+	})
 }

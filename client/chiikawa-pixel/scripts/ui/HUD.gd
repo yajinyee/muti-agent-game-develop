@@ -1922,6 +1922,7 @@ func _init_special_weapon_panel() -> void:
 	panel.name = "SpecialWeaponPanel"
 	# 放在 WeaponPanel 右側（WeaponPanel x=10 寬200，SkinPanel x=215 寬200，SpecialWeapon x=420）
 	# DAY-134：面板寬度從 240 升級到 320（加入龍捲風砲）
+	# DAY-141：面板寬度從 320 升級到 400（加入追蹤飛彈）
 	panel.position = Vector2(420, 540)
 	panel.z_index = 8
 	add_child(panel)
@@ -1942,9 +1943,10 @@ var _mystery_box_panel: Control = null
 func _init_mystery_box_panel() -> void:
 	var panel = MysteryBoxPanelScript.new()
 	panel.name = "MysteryBoxPanel"
-	# 放在 SpecialWeaponPanel 右側（x=420 寬320，所以 MysteryBox 在 x=745）
+	# 放在 SpecialWeaponPanel 右側（x=420 寬400，所以 MysteryBox 在 x=825）
 	# DAY-134：SpecialWeaponPanel 寬度從 240 升級到 320，MysteryBox 右移 80px
-	panel.position = Vector2(745, 540)
+	# DAY-141：SpecialWeaponPanel 寬度從 320 升級到 400，MysteryBox 再右移 80px
+	panel.position = Vector2(825, 540)
 	panel.z_index = 8
 	add_child(panel)
 	panel.setup(_pixel_font)

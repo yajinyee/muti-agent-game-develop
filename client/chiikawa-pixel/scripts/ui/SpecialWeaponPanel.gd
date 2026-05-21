@@ -1,13 +1,14 @@
-## SpecialWeaponPanel.gd — 特殊武器面板（DAY-089，升級 DAY-134）
-## 顯示四種特殊武器（炸彈/雷射/冰凍/龍捲風），支援自動充能進度條
+## SpecialWeaponPanel.gd — 特殊武器面板（DAY-089，升級 DAY-134，DAY-141）
+## 顯示五種特殊武器（炸彈/雷射/冰凍/龍捲風/追蹤飛彈），支援自動充能進度條
 ## 業界依據：
 ##   - Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是標配特殊武器
 ##   - Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標
 ##   - JILI 2026 Auto-Charge — 每次擊破目標自動累積充能，不需要花金幣
+##   - thechipotlemenu.com 2026 Automatic Target Locking Weapon — AI 自動追蹤最高倍率目標
 extends Node2D
 
 # ---- 常數 ----
-const PANEL_WIDTH  := 320
+const PANEL_WIDTH  := 400  # 五武器版本加寬（DAY-141）
 const PANEL_HEIGHT := 90
 const BTN_WIDTH    := 72
 const BTN_HEIGHT   := 62
@@ -57,12 +58,23 @@ const WEAPONS = [
 		"charge_required": 50,
 		"desc": "全場掃除\n充能獲得",
 		"purchasable": false
+	},
+	{
+		"type": "homing",
+		"name": "追蹤彈",
+		"icon": "🎯",
+		"color": Color(1.0, 0.0, 0.5),
+		"cost": 0,
+		"max_charges": 3,
+		"charge_required": 35,
+		"desc": "AI追蹤\n×1.5獎勵",
+		"purchasable": false
 	}
 ]
 
 # ---- 狀態 ----
-var _charges: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0}
-var _progress: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0}
+var _charges: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0}
+var _progress: Dictionary = {"bomb": 0, "laser": 0, "freeze": 0, "tornado": 0, "homing": 0}
 var _selected_weapon: String = ""
 var _pixel_font: Font = null
 var _buttons: Array = []
@@ -195,6 +207,8 @@ func _connect_signals() -> void:
 		GameManager.special_weapon_fired.connect(_on_special_weapon_fired)
 	if GameManager.has_signal("special_weapon_charged"):
 		GameManager.special_weapon_charged.connect(_on_special_weapon_charged)
+	if GameManager.has_signal("homing_missile_result"):
+		GameManager.homing_missile_result.connect(_on_homing_missile_result)
 
 # ---- 事件處理 ----
 
@@ -203,8 +217,8 @@ func _on_weapon_btn_pressed(wtype: String) -> void:
 
 	if charges > 0:
 		# 有充能：進入「選擇目標」模式（或直接使用全場武器）
-		if wtype == "freeze" or wtype == "tornado":
-			# 冰凍砲/龍捲風砲：直接使用（全畫面效果，不需要選擇目標）
+		if wtype == "freeze" or wtype == "tornado" or wtype == "homing":
+			# 冰凍砲/龍捲風砲/追蹤飛彈：直接使用（全畫面效果或自動追蹤，不需要選擇目標）
 			NetworkManager.send_use_special_weapon(wtype, 640.0, 360.0)
 			_set_selected("")
 		else:
@@ -220,7 +234,7 @@ func _on_weapon_btn_pressed(wtype: String) -> void:
 			# 可購買的武器：購買
 			NetworkManager.send_buy_special_weapon(wtype)
 		else:
-			# 不可購買（龍捲風）：顯示充能提示
+			# 不可購買（龍捲風/追蹤飛彈）：顯示充能提示
 			_show_charge_hint(wtype)
 
 func _on_special_weapon_updated(data: Dictionary) -> void:
@@ -228,10 +242,12 @@ func _on_special_weapon_updated(data: Dictionary) -> void:
 	_charges["laser"] = data.get("laser_charges", 0)
 	_charges["freeze"] = data.get("freeze_charges", 0)
 	_charges["tornado"] = data.get("tornado_charges", 0)
+	_charges["homing"] = data.get("homing_charges", 0)
 	_progress["bomb"] = data.get("bomb_charge_progress", 0)
 	_progress["laser"] = data.get("laser_charge_progress", 0)
 	_progress["freeze"] = data.get("freeze_charge_progress", 0)
 	_progress["tornado"] = data.get("tornado_charge_progress", 0)
+	_progress["homing"] = data.get("homing_charge_progress", 0)
 	_update_charge_display()
 
 func _on_special_weapon_fired(data: Dictionary) -> void:
@@ -428,3 +444,51 @@ func _get_weapon_index(wtype: String) -> int:
 		if WEAPONS[i]["type"] == wtype:
 			return i
 	return -1
+
+## 追蹤飛彈命中結果（DAY-141）
+func _on_homing_missile_result(data: Dictionary) -> void:
+	var killed: bool = data.get("killed", false)
+	var multiplier: float = data.get("multiplier", 0.0)
+	var final_reward: int = data.get("final_reward", 0)
+	var message: String = data.get("message", "")
+
+	if not killed or final_reward <= 0:
+		return
+
+	# 顯示追蹤飛彈命中結果（粉紅色彈窗）
+	var result_lbl := Label.new()
+	result_lbl.text = "🎯 ×%.0f → +%d" % [multiplier, final_reward]
+	result_lbl.position = Vector2(PANEL_WIDTH / 2.0 - 60, -40)
+	result_lbl.size = Vector2(120, 20)
+	result_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	result_lbl.add_theme_color_override("font_color", Color(1.0, 0.0, 0.5))
+	result_lbl.add_theme_font_size_override("font_size", 13)
+	if _pixel_font:
+		result_lbl.add_theme_font_override("font", _pixel_font)
+
+	var result_bg := ColorRect.new()
+	result_bg.position = Vector2(PANEL_WIDTH / 2.0 - 62, -42)
+	result_bg.size = Vector2(124, 24)
+	result_bg.color = Color(0.1, 0.0, 0.08, 0.92)
+	add_child(result_bg)
+	add_child(result_lbl)
+
+	# 上浮淡出動畫
+	var tween = result_lbl.create_tween()
+	tween.tween_property(result_lbl, "position:y", result_lbl.position.y - 20, 1.0)
+	tween.parallel().tween_property(result_lbl, "modulate:a", 0.0, 1.0)
+	tween.tween_callback(func():
+		if is_instance_valid(result_lbl): result_lbl.queue_free()
+		if is_instance_valid(result_bg): result_bg.queue_free()
+	)
+
+	# 追蹤飛彈按鈕閃爍（粉紅色）
+	var homing_idx = _get_weapon_index("homing")
+	if homing_idx >= 0 and homing_idx < _buttons.size():
+		var btn_bg = _buttons[homing_idx]
+		if is_instance_valid(btn_bg):
+			var flash_tween = btn_bg.create_tween()
+			flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.0, 0.25, 1.0), 0.08)
+			flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
+			flash_tween.tween_property(btn_bg, "color", Color(0.5, 0.0, 0.25, 1.0), 0.08)
+			flash_tween.tween_property(btn_bg, "color", Color(0.1, 0.15, 0.3, 0.95), 0.08)
