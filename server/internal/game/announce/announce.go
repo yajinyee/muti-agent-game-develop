@@ -31,6 +31,7 @@ const (
 	EventWeatherSurge  EventType = "weather_surge"   // 天氣湧現事件（DAY-127）
 	EventLightningChain EventType = "lightning_chain" // 閃電鰻連鎖擊破（DAY-132）
 	EventFeverMode      EventType = "fever_mode"      // 狂熱模式觸發（DAY-133）
+	EventUnluckyBonus   EventType = "unlucky_bonus"   // 失敗補償觸發（DAY-135）
 )
 
 // Priority 公告優先級
@@ -310,6 +311,14 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = "#FF4500"
 		priority = PriorityNormal
 		duration = 4000
+
+	case EventUnluckyBonus:
+		title = "🍀 運氣補償！"
+		message = fmt.Sprintf("%s 獲得運氣補償 🪙%d！繼續加油！", name, amount)
+		icon = "🍀"
+		color = "#4CAF50"
+		priority = PriorityNormal
+		duration = 3500
 
 	default:
 		title = "📢 公告"

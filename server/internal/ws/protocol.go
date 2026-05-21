@@ -322,6 +322,10 @@ const (
 	MsgFeverModeEnd    MessageType = "fever_mode_end"    // 狂熱模式結束（Server→Client，個人）
 	MsgFeverModeStatus MessageType = "fever_mode_status" // 狂熱模式狀態（Server→Client，個人）
 
+	// 失敗補償系統（DAY-135）
+	MsgUnluckyBonus       MessageType = "unlucky_bonus"        // 失敗補償觸發（Server→Client，個人）
+	MsgUnluckyBonusStatus MessageType = "unlucky_bonus_status" // 失敗補償狀態（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2651,4 +2655,25 @@ type FeverModeStatusPayload struct {
 	KillProgress int     `json:"kill_progress"` // 觸發進度（0-5）
 	TriggerKills int     `json:"trigger_kills"` // 觸發所需擊破數（5）
 	TotalFevered int     `json:"total_fevered"` // 本 session 觸發次數
+}
+
+// ---- 失敗補償系統（DAY-135）----
+
+// UnluckyBonusPayload 失敗補償觸發通知（Server → Client，個人）
+type UnluckyBonusPayload struct {
+	PlayerID    string `json:"player_id"`
+	BonusAmount int    `json:"bonus_amount"` // 補償金額
+	NewBalance  int    `json:"new_balance"`  // 補償後餘額
+	Message     string `json:"message"`      // 顯示訊息
+}
+
+// UnluckyBonusStatusPayload 失敗補償狀態（Server → Client，個人）
+type UnluckyBonusStatusPayload struct {
+	PlayerID     string `json:"player_id"`
+	ShotCount    int    `json:"shot_count"`    // 已追蹤射擊次數
+	TrackingMax  int    `json:"tracking_max"`  // 最大追蹤次數
+	NetLoss      int    `json:"net_loss"`       // 淨虧損
+	RatioPercent int    `json:"ratio_percent"` // 花費/回報百分比
+	CooldownLeft int    `json:"cooldown_left"` // 冷卻剩餘秒數
+	BonusCount   int    `json:"bonus_count"`   // 累計補償次數
 }

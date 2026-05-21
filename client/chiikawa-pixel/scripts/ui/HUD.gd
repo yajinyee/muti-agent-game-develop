@@ -224,6 +224,7 @@ func _ready() -> void:
 	_init_win_streak_panel()      # 連勝獎勵面板（DAY-131）
 	_init_lightning_eel_panel()   # 閃電鰻連鎖攻擊面板（DAY-132）
 	_init_fever_mode_panel()      # 狂熱模式面板（DAY-133）
+	_init_unlucky_bonus_panel()   # 失敗補償面板（DAY-135）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2682,3 +2683,15 @@ func _init_fever_mode_panel() -> void:
 	GameManager.fever_mode_started.connect(func(data): panel.on_fever_start(data))
 	GameManager.fever_mode_ended.connect(func(data): panel.on_fever_end(data))
 	GameManager.fever_mode_status.connect(func(data): panel.on_fever_status(data))
+
+# ---- 失敗補償面板（DAY-135）----
+const UnluckyBonusPanelScript = preload("res://scripts/ui/UnluckyBonusPanel.gd")
+var _unlucky_bonus_panel: Control = null
+
+func _init_unlucky_bonus_panel() -> void:
+	var panel = UnluckyBonusPanelScript.new()
+	panel.name = "UnluckyBonusPanel"
+	panel.z_index = 78
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_unlucky_bonus_panel = panel

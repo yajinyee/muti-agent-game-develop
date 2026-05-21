@@ -56,6 +56,7 @@ import (
 	"digital-twin/server/internal/game/halloffame"
 	"digital-twin/server/internal/game/roulette"
 	raidboss "digital-twin/server/internal/game/raidBoss"
+	"digital-twin/server/internal/game/unlucky"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -115,6 +116,7 @@ type Game struct {
 	WinStreak      *winstreak.Manager      // 連勝獎勵系統管理器（DAY-131）
 	LightningEel   *lightningeel.Manager   // 閃電鰻連鎖攻擊管理器（DAY-132）
 	FeverMode      *fevermode.Manager      // 狂熱模式管理器（DAY-133）
+	UnluckyBonus   *unlucky.Manager        // 失敗補償系統管理器（DAY-135）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -217,6 +219,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		WinStreak:          winstreak.New(),
 		LightningEel:       lightningeel.New(),
 		FeverMode:          fevermode.New(),
+		UnluckyBonus:       unlucky.NewDefault(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -363,6 +366,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendLightningEelStatus(pp)
 				// 發送狂熱模式狀態（DAY-133）
 				g.sendFeverModeStatus(pp)
+				// 發送失敗補償狀態（DAY-135）
+				g.sendUnluckyBonusStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -437,6 +442,10 @@ func (g *Game) RemovePlayer(playerID string) {
 		// 清理狂熱模式記錄（DAY-133）
 		if g.FeverMode != nil {
 			g.FeverMode.RemovePlayer(playerID)
+		}
+		// 清理失敗補償記錄（DAY-135）
+		if g.UnluckyBonus != nil {
+			g.UnluckyBonus.RemovePlayer(playerID)
 		}
 		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
@@ -770,6 +779,8 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 
 	if result.IsKill && t != nil {
 		g.handleKill(p, t, result)
+		// 失敗補償：記錄射擊（有擊破，reward > 0）（DAY-135）
+		go g.notifyUnluckyShot(p, betCost, result.Reward)
 	} else if result.IsHit && t != nil && t.DefID == "T102" && !t.IsFleeing {
 		// T102 寶箱怪：受擊後加速逃跑（規格書 26.2）
 		t.IsFleeing = true
@@ -796,6 +807,11 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 				MaxHP:      t.MaxHP,
 			},
 		})
+	}
+
+	// 失敗補償：未擊破時記錄（spend=betCost, reward=0）（DAY-135）
+	if !result.IsKill {
+		go g.notifyUnluckyShot(p, betCost, 0)
 	}
 
 	// 更新玩家狀態

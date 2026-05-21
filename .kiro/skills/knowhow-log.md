@@ -3321,3 +3321,26 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **解法：** 用 `create_tween().tween_property(prog_fill, "size:x", target_width, 0.15)` 做平滑動畫
 - **接近充滿時閃爍：** `if ratio > 0.8: prog_fill.modulate = Color(1.5, 1.5, 0.5)` — 超過1.0的 modulate 值讓顏色更亮
 - **教訓：** 進度條動畫要用 Tween，不要直接設定 size，視覺上更流暢
+
+## 85. 失敗補償系統設計（DAY-135）
+- **業界依據：** Funrize 2026 的「Unlucky Bonus」
+- **環形緩衝設計：** 只追蹤最近 N 次射擊，舊記錄自動替換，讓玩家不需要等太久才能觸發補償
+- **觸發條件：** 花費/回報比例 ≥ 3.0（花了 3 倍才回收 1 倍）且總花費 ≥ MinSpend，防止低投注玩家頻繁觸發
+- **補償計算：** 淨虧損 × 30%（最高 50%），讓玩家感覺「有被照顧到」但不會破壞 RTP
+- **冷卻機制：** 120 秒冷卻，防止連續觸發（但環形緩衝重置讓玩家可以繼續累積）
+- **教訓：** 失敗補償是 2026 年業界最有效的留存機制之一，讓玩家在「運氣差」時不會直接離開
+
+## 86. Go 環形緩衝實作技巧（DAY-135）
+- **問題：** 追蹤最近 N 次記錄，需要高效的插入和刪除
+- **解法：** 使用 slice + 索引，前 N 次用 append，之後用索引替換
+  ```go
+  if len(s.Shots) < m.cfg.TrackingShots {
+      s.Shots = append(s.Shots, record)
+  } else {
+      old := s.Shots[s.ShotIdx]
+      s.TotalSpend -= old.Spend
+      s.Shots[s.ShotIdx] = record
+      s.ShotIdx = (s.ShotIdx + 1) % m.cfg.TrackingShots
+  }
+  ```
+- **教訓：** 環形緩衝比 deque 更省記憶體，適合固定大小的滑動窗口

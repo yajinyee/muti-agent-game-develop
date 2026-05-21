@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-134 龍捲風武器 + 特殊武器自動充能系統）
+## 最後更新：2026-05-21（DAY-135 失敗補償系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-135 更新（自主觸發）：** 失敗補償系統（Unlucky Bonus System）✅
+  - **業界依據：** Funrize 2026 的「Unlucky Bonus」— 連續花費超過一定金額但獲得低回報時，自動給予補償獎勵，防止玩家因為「運氣太差」而離開，是 2026 年業界最新的留存機制
+  - `server/internal/game/unlucky/unlucky.go`：失敗補償管理器；UnluckyConfig（TrackingShots=30/SpendThreshold=3.0/MinSpend=200/CooldownSecs=120/BaseRewardMult=0.3/MaxRewardMult=0.5/MinReward=100）；環形緩衝追蹤最近 30 次射擊；RecordShot（記錄花費/回報，觸發判斷，補償計算）；GetSnapshot（進度快照）；RemovePlayer
+  - `server/internal/game/unlucky/unlucky_test.go`：19 個單元測試全部通過（New/NotEnoughShots/LowSpend/GoodRTP/BadRTP_Trigger/ZeroReward_Trigger/BonusCalc/Cooldown/CooldownExpired/GetSnapshot_Initial/GetSnapshot_Progress/GetSnapshot_CooldownLeft/RemovePlayer/MultiplePlayers/BonusCount/RingBuffer_OldRecordsRemoved/MinReward/CooldownLeft_NoBonusYet/ResetAfterTrigger）
+  - `server/internal/game/unlucky_handler.go`：notifyUnluckyShot（記錄射擊，觸發時發放補償，≥500金幣時全服公告）；sendUnluckyBonusStatus（登入時發送狀態）
+  - `server/internal/ws/protocol.go`：新增 MsgUnluckyBonus/MsgUnluckyBonusStatus；UnluckyBonusPayload/UnluckyBonusStatusPayload
+  - `server/internal/game/announce/announce.go`：新增 EventUnluckyBonus；buildContent 加入補償公告（綠色，3.5秒）
+  - `server/internal/game/game.go`：Game struct 加入 UnluckyBonus *unlucky.Manager；NewGameWithStore 初始化；RemovePlayer 清理；AddPlayer 發送狀態；handleAttack 整合（擊破時記錄 spend+reward，未擊破時記錄 spend+0）
+  - `client/chiikawa-pixel/scripts/ui/UnluckyBonusPanel.gd`：失敗補償面板（螢幕中央偏下；綠色主題；四葉草圖示；補償金額；從下方滑入；全螢幕綠色閃光；2.5秒後淡出；佇列機制防止重疊）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：unlucky_bonus 訊號 + _handle_unlucky_bonus 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 UnluckyBonusPanelScript（z_index=78）
+  - 觸發設計：追蹤最近 30 次射擊；花費/回報比例 ≥ 3.0（花了 3 倍才回收 1 倍）且總花費 ≥ 200 時觸發；補償 = 淨虧損 × 30%（最高 50%）；最低補償 100 金幣；120 秒冷卻
+  - 環形緩衝：只追蹤最近 30 次，舊記錄自動替換，讓玩家不需要等太久
+  - 全服公告：補償金額 ≥ 500 時全服廣播（讓其他玩家看到「有人獲得補償了」，增加社交感）
+  - build/vet 全部通過（零錯誤零警告）；19/19 unlucky 測試通過
+
 - **DAY-134 更新（自主觸發）：** 龍捲風武器 + 特殊武器自動充能系統（Tornado Weapon + Auto-Charge System）✅
   - **業界依據：** Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標；JILI 2026 Auto-Charge — 每次擊破目標自動累積充能，不需要花金幣，讓玩家更頻繁使用特殊武器，提升爽感和留存率
   - `server/internal/game/specialweapon/specialweapon.go`：升級特殊武器系統；新增 WeaponTornado（龍捲風砲，全螢幕50%擊破，充能50次獲得，最多2發）；新增 ChargeRequired/ChargePerKill 欄位；新增 ChargeResult 結構；新增 RecordKill（每次擊破累積充能，高倍率目標給更多充能：≥10x給2點/≥30x給3點）；充能滿自動解鎖一發；進度 carry over（超出部分保留）；龍捲風砲不可購買（Cost=0）
