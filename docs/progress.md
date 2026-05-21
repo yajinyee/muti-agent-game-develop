@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-144 巨型章魚轉盤系統）
+## 最後更新：2026-05-21（DAY-145 巨型鮟鱇魚電擊寶箱系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,19 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-145 更新（自主觸發）：** 巨型鮟鱇魚電擊寶箱系統（Giant Anglerfish Electric Chest System）✅
+  - **業界依據：** jiligames.com 2026「Giant Anglerfish can shoot electricity to open treasure chests」— 擊破巨型鮟鱇魚後觸發電擊，電流傳導到附近的寶箱目標（T102），強制開啟寶箱獲得額外獎勵，是 JILI Mega Fishing 2026 的新機制
+  - `server/internal/data/tables.go`：新增 T109 巨型鮟鱇魚（70-90x/HP90/SpawnWeight4/anglerfish_shock 行為）
+  - `server/internal/game/anglerfish_handler.go`：isAnglerfish/isChestTarget 判斷；tryAnglerfishShock（250px 半徑收集 T102/逐一電擊 120ms 間隔/全服廣播）；announceAnglerfishShock（≥2 個寶箱全服公告）
+  - `server/internal/ws/protocol.go`：新增 MsgAnglerfishShock；AnglerfishChestEntry；AnglerfishShockPayload（兩階段：shock_start/result）
+  - `server/internal/game/game.go`：handleKill 加入 isAnglerfish 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/AnglerfishPanel.gd`：鮟鱇魚面板（藍白電流主題；shock_start 橫幅+電擊閃光+電流粒子；result 右側滑入彈窗含寶箱列表+獎勵；自己觸發時電藍閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：anglerfish_shock 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 AnglerfishPanelScript（layer=86）
+  - 電擊設計：250px 半徑內的所有 T102 寶箱都會被電擊開啟；每 120ms 一個，製造電流跳躍感
+  - 獎勵設計：強制開啟獎勵 = 目標倍率 × betLevel × 0.80（比直接擊破略低，平衡 RTP）
+  - 全服公告：開啟 ≥2 個寶箱時全服廣播，讓其他玩家看到「有人用鮟鱇魚電擊開了寶箱」
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-144 更新（自主觸發）：** 巨型章魚轉盤系統（Mega Octopus Wheel System）✅
   - **業界依據：** JILI Mega Fishing「Mega Octopus Wheel – Defeat that giant octopus and enter the bonus wheel round where you have a chance to win massive guaranteed prizes up to 950x.」+ jiligames.com「Mega Octopus continuously spin the reel」— 擊破巨型章魚後觸發個人轉盤，最高 950x，是 JILI Mega Fishing 的核心機制
   - `server/internal/data/tables.go`：新增 T108 巨型章魚（80-120x/HP120/SpawnWeight3/mega_octopus 行為）

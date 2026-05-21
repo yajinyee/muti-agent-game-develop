@@ -369,6 +369,9 @@ const (
 	MsgMegaOctopusWheelStop   MessageType = "mega_octopus_wheel_stop"   // 玩家停止轉盤（Client→Server）
 	MsgMegaOctopusWheelResult MessageType = "mega_octopus_wheel_result" // 轉盤結果（Server→Client，個人）
 
+	// 巨型鮟鱇魚電擊寶箱系統（DAY-145）
+	MsgAnglerfishShock MessageType = "anglerfish_shock" // 電擊開寶箱廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3001,4 +3004,29 @@ type MegaOctopusWheelResultPayload struct {
 	NewBalance  int    `json:"new_balance"`  // 新餘額
 	SlotLabel   string `json:"slot_label"`   // 格子文字（如 "950x 👑"）
 	SlotColor   string `json:"slot_color"`   // 格子顏色
+}
+
+// ---- 巨型鮟鱇魚電擊寶箱系統（DAY-145）----
+
+// AnglerfishChestEntry 電擊開啟的寶箱記錄
+type AnglerfishChestEntry struct {
+	InstanceID string  `json:"instance_id"` // 寶箱 InstanceID
+	Multiplier float64 `json:"multiplier"`  // 寶箱倍率
+	Reward     int     `json:"reward"`      // 獎勵金幣
+	X          float64 `json:"x"`           // 寶箱位置 X
+	Y          float64 `json:"y"`           // 寶箱位置 Y
+}
+
+// AnglerfishShockPayload 鮟鱇魚電擊廣播（Server → Client，DAY-145）
+// Phase: "shock_start" → "result"
+type AnglerfishShockPayload struct {
+	TriggerID    string                 `json:"trigger_id"`    // 觸發的 T109 InstanceID
+	TriggerX     float64                `json:"trigger_x"`     // 觸發位置 X
+	TriggerY     float64                `json:"trigger_y"`     // 觸發位置 Y
+	Phase        string                 `json:"phase"`         // 當前階段
+	ChestIDs     []string               `json:"chest_ids"`     // 電擊範圍內的寶箱 ID
+	OpenedChests []AnglerfishChestEntry `json:"opened_chests"` // 開啟的寶箱（result 時）
+	TotalReward  int                    `json:"total_reward"`  // 總獎勵（result 時）
+	KillerID     string                 `json:"killer_id"`     // 觸發玩家 ID
+	KillerName   string                 `json:"killer_name"`   // 觸發玩家名稱
 }

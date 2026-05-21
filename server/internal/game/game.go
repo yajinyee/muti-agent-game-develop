@@ -1189,6 +1189,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isMegaOctopus(t.DefID) {
 		go g.tryMegaOctopusWheel(p, t.InstanceID)
 	}
+	// 巨型鮟鱇魚電擊寶箱：擊破 T109 時觸發（DAY-145）
+	if isAnglerfish(t.DefID) {
+		go g.tryAnglerfishShock(p, t.InstanceID, t.X, t.Y)
+	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }

@@ -95,6 +95,9 @@ var Targets = map[string]*TargetDef{
 	// the bonus wheel round where you have a chance to win massive guaranteed prizes up to 950x.」
 	// 擊破後觸發個人轉盤（8格：50x-950x），玩家點擊停止，結果預先決定（公平性保證）
 	"T108": {ID: "T108", Name: "巨型章魚", Type: TargetTypeSpecial, MultiplierMin: 80, MultiplierMax: 120, HP: 120, SpawnWeight: 3, Speed: 30, Lifetime: 15, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "mega_octopus"},
+	// T109 巨型鮟鱇魚（DAY-145）— 業界依據：jiligames.com 2026「Giant Anglerfish can shoot electricity to open treasure chests」
+	// 擊破後觸發電擊，電流傳導到附近的寶箱目標（T102），強制開啟寶箱獲得額外獎勵
+	"T109": {ID: "T109", Name: "巨型鮟鱇魚", Type: TargetTypeSpecial, MultiplierMin: 70, MultiplierMax: 90, HP: 90, SpawnWeight: 4, Speed: 25, Lifetime: 14, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "anglerfish_shock"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
