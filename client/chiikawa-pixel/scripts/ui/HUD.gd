@@ -216,6 +216,7 @@ func _ready() -> void:
 	_init_flash_challenge_panel() # 閃電挑戰面板（DAY-123）
 	_init_rare_target_alert()     # 傳說目標警報（DAY-124）
 	_init_golden_time_panel()     # 黃金時間面板（DAY-125）
+	_init_rare_catch_panel()      # 稀有連擊面板（DAY-126）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2506,3 +2507,45 @@ func _on_golden_time_ended(data: Dictionary) -> void:
 func _on_golden_time_status(data: Dictionary) -> void:
 	if is_instance_valid(_golden_time_panel):
 		_golden_time_panel.update_status(data)
+
+# ---- 稀有連擊累積倍率系統（DAY-126）----
+
+const RareCatchPanelScript = preload("res://scripts/ui/RareCatchPanel.gd")
+var _rare_catch_panel: Control = null
+
+func _init_rare_catch_panel() -> void:
+	var panel = RareCatchPanelScript.new()
+	panel.name = "RareCatchPanel"
+	panel.z_index = 74
+	# 右下角，在 ActivityFeed 上方
+	panel.position = Vector2(1280 - 200, 720 - 200)
+	add_child(panel)
+	_rare_catch_panel = panel
+
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("rare_catch_updated"):
+			gm.rare_catch_updated.connect(_on_rare_catch_updated)
+		if gm.has_signal("rare_catch_broadcasted"):
+			gm.rare_catch_broadcasted.connect(_on_rare_catch_broadcasted)
+		if gm.has_signal("rare_catch_reset"):
+			gm.rare_catch_reset.connect(_on_rare_catch_reset_signal)
+
+func _on_rare_catch_updated(data: Dictionary) -> void:
+	if is_instance_valid(_rare_catch_panel):
+		_rare_catch_panel.on_rare_catch_update(data)
+
+func _on_rare_catch_broadcasted(data: Dictionary) -> void:
+	# 全服廣播：顯示頂部小橫幅
+	var player_name: String = data.get("player_name", "玩家")
+	var icon: String = data.get("icon", "💎")
+	var level_name: String = data.get("level_name", "稀有連擊")
+	var color_str: String = data.get("color", "#00BFFF")
+	var mult_boost: float = data.get("mult_boost", 5.0)
+	var mult_str := "%.0f" % mult_boost
+	var msg := icon + " " + player_name + " 達成 " + level_name + " ×" + mult_str + "！"
+	_show_rare_target_banner(icon, msg, Color(color_str), false)
+
+func _on_rare_catch_reset_signal(data: Dictionary) -> void:
+	if is_instance_valid(_rare_catch_panel):
+		_rare_catch_panel.on_rare_catch_reset(data)

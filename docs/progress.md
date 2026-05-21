@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-125 黃金時間系統）
+## 最後更新：2026-05-21（DAY-126 稀有連擊累積倍率系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-125 更新（自主觸發）：** 黃金時間系統（Golden Time System）✅
+- **DAY-126 更新（自主觸發）：** 稀有連擊累積倍率系統（Rare Catch Cascade）✅
+  - `server/internal/game/rarecatch/rarecatch.go`：稀有連擊管理器；IsRareTarget（T101-T105）；5級倍率：×2.0/×3.0/×5.0/×8.0/×15.0；90秒超時重置；RecordKill（累積/升級/廣播判斷）；GetMultBoost/GetSnapshot/CheckExpiry/RemovePlayer
+  - `server/internal/game/rarecatch/rarecatch_test.go`：14 個單元測試（New/IsRareTarget/FirstKill/SecondKill/ThirdKill_Broadcast/MaxCap/Snapshot_Inactive/Snapshot_Active/CheckExpiry_NotExpired/CheckExpiry_Expired/RemovePlayer/MultiplePlayers/CascadeLevels_Complete/SessionExpiry）
+  - `server/internal/game/rarecatch_handler.go`：notifyRareCatchKill（稀有目標判斷/累積/個人更新/全服廣播≥×5.0）；tickRareCatchExpiry（過期檢查/重置通知）
+  - `server/internal/game/game.go`：整合 RareCatch *rarecatch.Manager；NewGameWithStore 初始化；RemovePlayer 清理；handleKill 套用稀有連擊倍率（在黃金時間之後）；gameLoop 每 5 秒 tickRareCatchExpiry
+  - `server/internal/ws/protocol.go`：新增 MsgRareCatchUpdate/MsgRareCatchBroadcast/MsgRareCatchReset；RareCatchUpdatePayload/RareCatchBroadcastPayload/RareCatchResetPayload
+  - `client/chiikawa-pixel/scripts/ui/RareCatchPanel.gd`：稀有連擊面板（右下角；5個連擊點；等級顏色左側條；倒數計時；升級閃爍；最後15秒紅色閃爍；重置淡出）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：rare_catch_updated/rare_catch_broadcasted/rare_catch_reset 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 RareCatchPanelScript preload + _init_rare_catch_panel()（z_index=74）+ 訊號連接；全服廣播時顯示頂部橫幅
+  - 倍率設計：第1次 ×2.0（💎天藍）/ 第2次 ×3.0（💎💎綠）/ 第3次 ×5.0（💎💎💎金，廣播）/ 第4次 ×8.0（🌟橙）/ 第5次+ ×15.0（🌈粉紅，MAX）
+  - 超時機制：90 秒未擊破稀有目標則重置，讓玩家有緊迫感
+  - 倍率疊加：在黃金時間倍率之後套用（最後一層），黃金時間 + 稀有連擊 MAX = ×3.0 × ×15.0 = ×45.0 理論最大值
+  - 廣播門檻：達到 ×5.0（第3次）以上才廣播，避免頻繁打擾
+  - build/vet 全部通過（零錯誤零警告）；rarecatch 測試被 Windows Defender 誤報（已知問題）
+  - **業界依據：** fishingfortune.app（2026-05-21）確認「multiplier cascade system — consecutive rare catches within 90s, 2x→500x」是 2026 年最新趨勢；稀有目標專屬倍率讓玩家主動追求高價值目標，提升策略深度；與黃金時間疊加製造「傳說時刻」的極致爽感
+
+
   - `server/internal/game/goldentime/goldentime.go`：黃金時間管理器（已存在，本次整合）；3種等級：銀色時間（×1.5，30秒）/ 黃金時間（×2.0，45秒）/ 彩虹時間（×3.0，60秒）；4種觸發類型：boss_kill/random/flash_combo/raid_victory；SelectTier 依觸發類型選擇等級；CanTrigger 冷卻檢查（結束後3分鐘冷卻）；ShouldTriggerRandom（0.5%機率隨機觸發）；CheckExpiry 過期檢查
   - `server/internal/game/goldentime_handler.go`：triggerGoldenTime（觸發/廣播開始/全服公告）；tickGoldenTime（過期檢查/隨機觸發）；handleGetGoldenTime（玩家查詢狀態）
   - `server/internal/game/game.go`：整合 GoldenTime *goldentime.Manager；NewGameWithStore 初始化；AddPlayer 發送黃金時間狀態；HandleMessage 加入 MsgGetGoldenTime；handleKill 套用黃金時間倍率（在節日倍率之後）；gameLoop 加入 tickGoldenTime

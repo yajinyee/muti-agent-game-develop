@@ -279,6 +279,10 @@ const (
 	MsgGoldenTimeStart  MessageType = "golden_time_start"  // 黃金時間開始廣播（Server→Client）
 	MsgGoldenTimeEnd    MessageType = "golden_time_end"    // 黃金時間結束廣播（Server→Client）
 	MsgGoldenTimeStatus MessageType = "golden_time_status" // 黃金時間狀態回應（Server→Client，個人）
+	// 稀有連擊累積倍率系統（DAY-126）
+	MsgRareCatchUpdate    MessageType = "rare_catch_update"    // 稀有連擊更新（Server→Client，個人）
+	MsgRareCatchBroadcast MessageType = "rare_catch_broadcast" // 稀有連擊廣播（Server→Client，全服）
+	MsgRareCatchReset     MessageType = "rare_catch_reset"     // 稀有連擊重置（Server→Client，個人）
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2285,4 +2289,36 @@ type GoldenTimeStatusPayload struct {
 	Color       string  `json:"color"`        // 主色
 	BgColor     string  `json:"bg_color"`     // 背景色
 	TriggerType string  `json:"trigger_type"` // 觸發類型
+}
+
+// ---- 稀有連擊累積倍率系統（DAY-126）----
+
+// RareCatchUpdatePayload 稀有連擊更新（Server → Client，個人）（DAY-126）
+type RareCatchUpdatePayload struct {
+	Count       int     `json:"count"`        // 當前連擊數
+	MultBoost   float64 `json:"mult_boost"`   // 當前倍率加成
+	LevelName   string  `json:"level_name"`   // 等級名稱
+	Icon        string  `json:"icon"`         // 圖示
+	Color       string  `json:"color"`        // 顏色（hex）
+	SecondsLeft int     `json:"seconds_left"` // 距離超時的剩餘秒數
+	IsLevelUp   bool    `json:"is_level_up"`  // 是否升級
+}
+
+// RareCatchBroadcastPayload 稀有連擊廣播（Server → Client，全服）（DAY-126）
+// 達到 ×5.0 以上時廣播，讓全場玩家知道有人在連擊稀有目標
+type RareCatchBroadcastPayload struct {
+	PlayerID   string  `json:"player_id"`   // 玩家 ID
+	PlayerName string  `json:"player_name"` // 玩家名稱
+	Count      int     `json:"count"`       // 連擊數
+	MultBoost  float64 `json:"mult_boost"`  // 倍率加成
+	LevelName  string  `json:"level_name"`  // 等級名稱
+	Icon       string  `json:"icon"`        // 圖示
+	Color      string  `json:"color"`       // 顏色
+	Message    string  `json:"message"`     // 廣播訊息
+}
+
+// RareCatchResetPayload 稀有連擊重置（Server → Client，個人）（DAY-126）
+type RareCatchResetPayload struct {
+	FinalCount int    `json:"final_count"` // 最終連擊數
+	Message    string `json:"message"`     // 重置訊息
 }

@@ -24,6 +24,7 @@ import (
 	"digital-twin/server/internal/game/flashchallenge"
 	"digital-twin/server/internal/game/goldentime"
 	"digital-twin/server/internal/game/mysterybox"
+	"digital-twin/server/internal/game/rarecatch"
 	"digital-twin/server/internal/game/respin"
 	"digital-twin/server/internal/game/treasuremap"
 	"digital-twin/server/internal/game/specialweapon"
@@ -103,6 +104,7 @@ type Game struct {
 	TreasureMap   *treasuremap.Manager   // 寶藏地圖管理器（DAY-122）
 	FlashChallenge *flashchallenge.Manager // 閃電挑戰管理器（DAY-123）
 	GoldenTime     *goldentime.Manager     // 黃金時間管理器（DAY-125）
+	RareCatch      *rarecatch.Manager      // 稀有連擊累積倍率管理器（DAY-126）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -127,6 +129,7 @@ type Game struct {
 	lastAutoSaveAt     time.Time  // 玩家資料定期自動儲存計時（每 60 秒，DAY-099）
 	lastRaidTickAt     time.Time  // Co-op Raid 狀態廣播計時（每 3 秒，DAY-115）
 	lastGoldenTimeTickAt time.Time // 黃金時間 tick 計時（每秒，DAY-125）
+	lastRareCatchTickAt  time.Time // 稀有連擊過期檢查計時（每 5 秒，DAY-126）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -191,6 +194,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		TreasureMap:        treasuremap.New(),
 		FlashChallenge:     flashchallenge.New(),
 		GoldenTime:         goldentime.New(),
+		RareCatch:          rarecatch.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -388,6 +392,8 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.RespinMgr.RemovePlayer(playerID)
 		// 清理寶藏地圖狀態（DAY-122）
 		g.TreasureMap.RemovePlayer(playerID)
+		// 清理稀有連擊 session（DAY-126）
+		g.RareCatch.RemovePlayer(playerID)
 		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
 }
@@ -796,6 +802,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	goldenTimeMult := g.GoldenTime.GetMultBoost()
 	if goldenTimeMult > 1.0 {
 		finalReward = int(float64(finalReward) * goldenTimeMult)
+	}
+	// 套用稀有連擊倍率（DAY-126）
+	rareCatchMult := g.notifyRareCatchKill(p, t.DefID)
+	if rareCatchMult > 1.0 {
+		finalReward = int(float64(finalReward) * rareCatchMult)
 	}
 	rewardUnlocks := p.AddReward(finalReward)
 	killUnlocks := p.AddKill()
@@ -1274,6 +1285,11 @@ func (g *Game) updateNormalPlay() {
 	go g.tickFlashChallenge()
 	// 黃金時間 tick（每次 update，DAY-125）
 	go g.tickGoldenTime()
+	// 稀有連擊過期檢查（每 5 秒，DAY-126）
+	if now.Sub(g.lastRareCatchTickAt) >= 5*time.Second {
+		g.lastRareCatchTickAt = now
+		go g.tickRareCatchExpiry()
+	}
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }
