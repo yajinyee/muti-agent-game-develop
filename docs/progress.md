@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-123 閃電挑戰系統）
+## 最後更新：2026-05-21（DAY-124 傳說目標警報系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,16 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-124 更新（自主觸發）：** 傳說目標警報系統（Legendary Target Alert System）✅
+  - `server/internal/game/game.go`：spawnTarget 加入傳說/史詩品質目標出現廣播（MsgRareTargetAlert）；傳說目標廣播「⭐ 傳說目標出現！」；史詩目標廣播「💜 史詩目標出現！」
+  - `server/internal/ws/protocol.go`：新增 MsgRareTargetAlert（Server→Client廣播）；RareTargetAlertPayload（instance_id/def_id/name/quality/multiplier/icon/message/color）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：rare_target_alerted 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：_init_rare_target_alert()（連接訊號）；_on_rare_target_alerted()；_show_rare_target_banner()（頂部橫幅滑入；傳說品質金色閃爍；3秒自動滑出）
+  - 警報設計：傳說品質（2%機率）→ 金色橫幅 + 雙閃爍；史詩品質（8%機率）→ 紫色橫幅
+  - 全服廣播：所有玩家都能看到稀有目標出現，增加集中火力的社交競爭感
+  - build/vet 全部通過（零錯誤零警告）
+  - **業界依據：** Fishing Frenzy Chapter 3（2026-05-14）確認「quality values」讓每次擊破更有差異感；稀有目標公告讓玩家有「搶先擊破」的緊迫感，提升短期參與度
+
 - **DAY-123 更新（自主觸發）：** 閃電挑戰系統（Flash Challenge System）✅
   - `server/internal/game/flashchallenge/flashchallenge.go`：閃電挑戰管理器（6種挑戰類型：KillCount/KillSpecific/KillStreak/KillBoss/HighMult；加權隨機選擇；ShouldTrigger含冷卻/BOSS觸發；RecordKill記錄進度；CheckExpiry超時檢查；CalcReward完成/安慰獎計算；GetTopPlayers前5名排行；GetSnapshot快照）
   - `server/internal/game/flashchallenge/flashchallenge_test.go`：15 個單元測試全部通過（New/ShouldTrigger_NoChallenge/ShouldTrigger_ActiveChallenge/ShouldTrigger_Cooldown/StartChallenge/IsActive/RecordKill_KillCount/RecordKill_KillSpecific/RecordKill_HighMult/RecordKill_AlreadyCompleted/CheckExpiry/CalcReward_Completed/CalcReward_Partial/CalcReward_TooLow/GetTopPlayers/MultiplePlayers）

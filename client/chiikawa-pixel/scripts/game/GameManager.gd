@@ -63,6 +63,8 @@ signal flash_challenge_started(data: Dictionary)            # 閃電挑戰開始
 signal flash_challenge_updated(data: Dictionary)            # 閃電挑戰進度更新
 signal flash_challenge_ended(data: Dictionary)              # 閃電挑戰結束廣播
 signal flash_challenge_reward(data: Dictionary)             # 閃電挑戰獎勵通知（個人）
+# 傳說目標警報系統（DAY-124）
+signal rare_target_alerted(data: Dictionary)                # 稀有/傳說目標出現廣播
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -448,6 +450,9 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("flash_challenge_ended", payload)
 		"flash_challenge_reward":
 			emit_signal("flash_challenge_reward", payload)
+		# 傳說目標警報系統（DAY-124）
+		"rare_target_alert":
+			emit_signal("rare_target_alerted", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")

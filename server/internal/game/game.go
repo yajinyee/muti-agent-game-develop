@@ -1313,6 +1313,37 @@ func (g *Game) spawnTarget() {
 			QualityColor: t.QualityColor,
 		},
 	})
+
+	// 傳說/史詩品質目標出現公告（DAY-124）
+	if t.Quality == target.QualityLegendary {
+		g.Hub.Broadcast(&ws.Message{
+			Type: ws.MsgRareTargetAlert,
+			Payload: ws.RareTargetAlertPayload{
+				InstanceID: instanceID,
+				DefID:      def.ID,
+				Name:       def.Name,
+				Quality:    string(t.Quality),
+				Multiplier: int(t.Multiplier),
+				Icon:       "⭐",
+				Message:    "傳說目標出現！" + def.Name + "（×" + fmt.Sprintf("%.0f", t.Multiplier) + "）",
+				Color:      "#FFD700",
+			},
+		})
+	} else if t.Quality == target.QualityEpic {
+		g.Hub.Broadcast(&ws.Message{
+			Type: ws.MsgRareTargetAlert,
+			Payload: ws.RareTargetAlertPayload{
+				InstanceID: instanceID,
+				DefID:      def.ID,
+				Name:       def.Name,
+				Quality:    string(t.Quality),
+				Multiplier: int(t.Multiplier),
+				Icon:       "💜",
+				Message:    "史詩目標出現！" + def.Name + "（×" + fmt.Sprintf("%.0f", t.Multiplier) + "）",
+				Color:      "#9B59B6",
+			},
+		})
+	}
 }
 
 // triggerSpecialEvent 觸發特殊目標事件（流星、金色雜草等）

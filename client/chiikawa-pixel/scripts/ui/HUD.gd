@@ -214,6 +214,7 @@ func _ready() -> void:
 	_init_rapid_respin_panel()    # Rapid Respin 通知面板（DAY-121）
 	_init_treasure_map_panel()    # 寶藏地圖面板（DAY-122）
 	_init_flash_challenge_panel() # 閃電挑戰面板（DAY-123）
+	_init_rare_target_alert()     # 傳說目標警報（DAY-124）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2410,3 +2411,64 @@ func _on_flash_challenge_ended(data: Dictionary) -> void:
 func _on_flash_challenge_reward(data: Dictionary) -> void:
 	if is_instance_valid(_flash_challenge_panel_node):
 		_flash_challenge_panel_node.on_flash_challenge_reward(data)
+
+# ---- 傳說目標警報系統（DAY-124）----
+
+func _init_rare_target_alert() -> void:
+	var gm = get_node_or_null("/root/GameManager")
+	if gm and gm.has_signal("rare_target_alerted"):
+		gm.rare_target_alerted.connect(_on_rare_target_alerted)
+
+func _on_rare_target_alerted(data: Dictionary) -> void:
+	var quality: String = data.get("quality", "epic")
+	var message: String = data.get("message", "")
+	var color_str: String = data.get("color", "#FFD700")
+	var icon: String = data.get("icon", "⭐")
+	
+	# 顯示頂部橫幅警報
+	_show_rare_target_banner(icon, message, Color(color_str), quality == "legendary")
+
+func _show_rare_target_banner(icon: String, message: String, color: Color, is_legendary: bool) -> void:
+	# 建立橫幅
+	var banner := PanelContainer.new()
+	banner.z_index = 95
+	
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.05, 0.1, 0.9)
+	style.border_color = color
+	style.border_width_top = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	banner.add_theme_stylebox_override("panel", style)
+	
+	var label := Label.new()
+	label.text = icon + " " + message
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_constant_override("outline_size", 2)
+	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	banner.add_child(label)
+	
+	# 置中頂部
+	banner.position = Vector2(640 - 200, -50)
+	banner.size = Vector2(400, 36)
+	add_child(banner)
+	
+	# 滑入動畫
+	var tween := create_tween()
+	tween.tween_property(banner, "position:y", 10, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	
+	# 傳說品質：金色閃爍
+	if is_legendary:
+		tween.parallel().tween_property(banner, "modulate", Color(2.0, 1.8, 0.5, 1.0), 0.15)
+		tween.tween_property(banner, "modulate", Color.WHITE, 0.15)
+		tween.tween_property(banner, "modulate", Color(2.0, 1.8, 0.5, 1.0), 0.15)
+		tween.tween_property(banner, "modulate", Color.WHITE, 0.15)
+	
+	# 3 秒後滑出
+	tween.tween_interval(3.0)
+	tween.tween_property(banner, "position:y", -50, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_callback(banner.queue_free)

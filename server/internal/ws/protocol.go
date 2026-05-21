@@ -270,6 +270,8 @@ const (
 	MsgFlashChallengeUpdate MessageType = "flash_challenge_update" // 閃電挑戰進度更新（Server→Client）
 	MsgFlashChallengeEnd    MessageType = "flash_challenge_end"    // 閃電挑戰結束廣播（Server→Client）
 	MsgFlashChallengeReward MessageType = "flash_challenge_reward" // 閃電挑戰獎勵通知（Server→Client，個人）
+	// 傳說目標警報系統（DAY-124）
+	MsgRareTargetAlert MessageType = "rare_target_alert" // 稀有/傳說目標出現廣播（Server→Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -2214,4 +2216,18 @@ type FlashChallengeStatusPayload struct {
 	MyProgress  int                        `json:"my_progress"`
 	MyCompleted bool                       `json:"my_completed"`
 	TopPlayers  []FlashChallengePlayerSnap `json:"top_players"`
+}
+
+// ---- 傳說目標警報系統（DAY-124）----
+
+// RareTargetAlertPayload 稀有/傳說目標出現廣播（Server → Client）（DAY-124）
+type RareTargetAlertPayload struct {
+	InstanceID string `json:"instance_id"` // 目標實例 ID
+	DefID      string `json:"def_id"`      // 目標定義 ID
+	Name       string `json:"name"`        // 目標名稱
+	Quality    string `json:"quality"`     // 品質等級（epic/legendary）
+	Multiplier int    `json:"multiplier"`  // 倍率
+	Icon       string `json:"icon"`        // 圖示（⭐/💜）
+	Message    string `json:"message"`     // 顯示訊息
+	Color      string `json:"color"`       // 顏色（hex）
 }
