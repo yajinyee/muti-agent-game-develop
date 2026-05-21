@@ -32,6 +32,7 @@ const RaidPanelScript = preload("res://scripts/ui/RaidPanel.gd")
 const FragmentPanelScript = preload("res://scripts/ui/FragmentPanel.gd")
 const LuckyCatchPanelScript = preload("res://scripts/ui/LuckyCatchPanel.gd")
 const RapidRespinPanelScript = preload("res://scripts/ui/RapidRespinPanel.gd")
+const TreasureMapPanelScript = preload("res://scripts/ui/TreasureMapPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -210,6 +211,7 @@ func _ready() -> void:
 	_init_fragment_panel()        # 碎片收集大獎面板（DAY-116）
 	_init_lucky_catch_panel()     # 幸運捕獲通知面板（DAY-119）
 	_init_rapid_respin_panel()    # Rapid Respin 通知面板（DAY-121）
+	_init_treasure_map_panel()    # 寶藏地圖面板（DAY-122）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2352,3 +2354,17 @@ func _init_rapid_respin_panel() -> void:
 	panel.z_index = 71
 	add_child(panel)
 	_rapid_respin_panel_node = panel
+
+# ---- 寶藏地圖系統（DAY-122）----
+var _treasure_map_panel_node = null
+
+func _init_treasure_map_panel() -> void:
+	var panel = TreasureMapPanelScript.new()
+	panel.name = "TreasureMapPanel"
+	panel.z_index = 80
+	add_child(panel)
+	_treasure_map_panel_node = panel
+
+func show_treasure_map_panel() -> void:
+	if is_instance_valid(_treasure_map_panel_node):
+		_treasure_map_panel_node.show_panel()

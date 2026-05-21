@@ -23,6 +23,7 @@ import (
 	"digital-twin/server/internal/game/fragment"
 	"digital-twin/server/internal/game/mysterybox"
 	"digital-twin/server/internal/game/respin"
+	"digital-twin/server/internal/game/treasuremap"
 	"digital-twin/server/internal/game/specialweapon"
 	"digital-twin/server/internal/game/dailyspin"
 	"digital-twin/server/internal/game/event"
@@ -97,6 +98,7 @@ type Game struct {
 	RaidBoss      *raidboss.Manager      // Co-op Boss Raid 管理器（DAY-115）
 	Fragment      *fragment.Manager      // 碎片收集大獎管理器（DAY-116）
 	RespinMgr     *respin.Manager        // Rapid Respin 管理器（DAY-121）
+	TreasureMap   *treasuremap.Manager   // 寶藏地圖管理器（DAY-122）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -181,6 +183,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		RaidBoss:           raidboss.New(),
 		Fragment:           fragment.New(),
 		RespinMgr:          respin.New(),
+		TreasureMap:        treasuremap.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -313,6 +316,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendFestivalState(pp)
 				// 發送碎片狀態（DAY-116）
 				g.sendFragmentStatus(pp)
+				// 發送寶藏地圖狀態（DAY-122）
+				g.sendTreasureMapUpdate(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -372,6 +377,8 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.Fragment.RemovePlayer(playerID)
 		// 清理 Rapid Respin session（DAY-121）
 		g.RespinMgr.RemovePlayer(playerID)
+		// 清理寶藏地圖狀態（DAY-122）
+		g.TreasureMap.RemovePlayer(playerID)
 	}
 }
 
@@ -575,6 +582,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 碎片收集大獎系統（DAY-116）
 	case ws.MsgGetFragments:
 		g.handleGetFragments(p)
+	// 寶藏地圖系統（DAY-122）
+	case ws.MsgGetTreasureMap:
+		g.handleGetTreasureMap(p)
 	}
 }
 
@@ -969,6 +979,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	}
 	// Rapid Respin：擊破後嘗試觸發（DAY-121）
 	go g.notifyRespinKill(p, finalReward)
+	// 寶藏地圖：記錄擊破（DAY-122）
+	go g.notifyTreasureMapKill(p, t.DefID)
 }
 
 // handleLock 處理鎖定

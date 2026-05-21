@@ -258,6 +258,12 @@ const (
 	// Rapid Respin 系統（DAY-121）
 	MsgRapidRespin      MessageType = "rapid_respin"       // Rapid Respin 觸發廣播（Server→Client，廣播）
 	MsgRapidRespinEnd   MessageType = "rapid_respin_end"   // Rapid Respin 連鎖結束通知（Server→Client）
+	// 寶藏地圖系統（DAY-122）
+	MsgTreasureMapUpdate MessageType = "treasure_map_update" // 寶藏地圖狀態更新（Server→Client）
+	MsgTreasureMapLine   MessageType = "treasure_map_line"   // 完成一行/列/對角線通知（Server→Client）
+	MsgTreasureMapFull   MessageType = "treasure_map_full"   // 完成整張地圖通知（Server→Client）
+	// 寶藏地圖系統（DAY-122）
+	MsgGetTreasureMap   MessageType = "get_treasure_map"   // 查詢寶藏地圖狀態（Client→Server）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -2090,4 +2096,40 @@ type RapidRespinEndPayload struct {
 	PlayerID   string `json:"player_id"`   // 觸發玩家 ID
 	PlayerName string `json:"player_name"` // 觸發玩家名稱
 	TotalChain int    `json:"total_chain"` // 總連鎖次數
+}
+
+// ---- 寶藏地圖系統（DAY-122）----
+
+// TreasureMapCellPayload 地圖格子狀態
+type TreasureMapCellPayload struct {
+	Row    int    `json:"row"`
+	Col    int    `json:"col"`
+	DefID  string `json:"def_id"`  // 對應目標物 ID
+	Name   string `json:"name"`    // 顯示名稱
+	Icon   string `json:"icon"`    // 顯示圖示
+	Filled bool   `json:"filled"`  // 是否已填滿
+}
+
+// TreasureMapUpdatePayload 寶藏地圖狀態更新（Server → Client）（DAY-122）
+type TreasureMapUpdatePayload struct {
+	Cells       []TreasureMapCellPayload `json:"cells"`        // 所有格子狀態
+	FilledCount int                      `json:"filled_count"` // 已填滿格子數
+	LinesCount  int                      `json:"lines_count"`  // 已完成行/列/對角線數
+	FullDone    bool                     `json:"full_done"`    // 是否已完成整張地圖
+	Date        string                   `json:"date"`         // 今日日期（YYYY-MM-DD）
+}
+
+// TreasureMapLinePayload 完成一行/列/對角線通知（Server → Client）（DAY-122）
+type TreasureMapLinePayload struct {
+	LineType   string `json:"line_type"`  // "row0"/"row1"/"row2"/"col0"/"col1"/"col2"/"diag0"/"diag1"
+	Reward     int    `json:"reward"`     // 獎勵金幣
+	NewBalance int    `json:"new_balance"` // 新餘額
+	Message    string `json:"message"`    // 顯示訊息
+}
+
+// TreasureMapFullPayload 完成整張地圖通知（Server → Client）（DAY-122）
+type TreasureMapFullPayload struct {
+	Reward     int    `json:"reward"`      // 傳說寶藏獎勵金幣
+	NewBalance int    `json:"new_balance"` // 新餘額
+	Message    string `json:"message"`     // 顯示訊息
 }

@@ -54,6 +54,10 @@ signal mission_mercy_protected(mercy_data: Dictionary)      # 寬限期保護通
 # Rapid Respin 系統（DAY-121）
 signal rapid_respin(respin_data: Dictionary)                # Rapid Respin 觸發廣播（全服）
 signal rapid_respin_end(end_data: Dictionary)               # Rapid Respin 連鎖結束通知
+# 寶藏地圖系統（DAY-122）
+signal treasure_map_updated(map_data: Dictionary)           # 寶藏地圖狀態更新
+signal treasure_map_line(line_data: Dictionary)             # 完成一行/列/對角線通知
+signal treasure_map_full(full_data: Dictionary)             # 完成整張地圖通知
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -423,6 +427,13 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("rapid_respin", payload)
 		"rapid_respin_end":
 			emit_signal("rapid_respin_end", payload)
+		# 寶藏地圖系統（DAY-122）
+		"treasure_map_update":
+			emit_signal("treasure_map_updated", payload)
+		"treasure_map_line":
+			emit_signal("treasure_map_line", payload)
+		"treasure_map_full":
+			emit_signal("treasure_map_full", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")
