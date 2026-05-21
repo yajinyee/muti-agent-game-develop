@@ -20,6 +20,7 @@ import (
 	"digital-twin/server/internal/game/combat"
 	"digital-twin/server/internal/game/dailyboss"
 	"digital-twin/server/internal/game/dm"
+	"digital-twin/server/internal/game/fragment"
 	"digital-twin/server/internal/game/mysterybox"
 	"digital-twin/server/internal/game/specialweapon"
 	"digital-twin/server/internal/game/dailyspin"
@@ -93,6 +94,7 @@ type Game struct {
 	ActivityFeed  *activityfeed.Manager  // 成就動態牆管理器（DAY-112）
 	Roulette      *roulette.Manager      // 雙層倍率輪盤管理器（DAY-113）
 	RaidBoss      *raidboss.Manager      // Co-op Boss Raid 管理器（DAY-115）
+	Fragment      *fragment.Manager      // 碎片收集大獎管理器（DAY-116）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -175,6 +177,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		ActivityFeed:       activityfeed.New(),
 		Roulette:           roulette.NewManager(),
 		RaidBoss:           raidboss.New(),
+		Fragment:           fragment.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -305,6 +308,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.handleGetLoginProgress(pp)
 				// 發送節日狀態（DAY-109）
 				g.sendFestivalState(pp)
+				// 發送碎片狀態（DAY-116）
+				g.sendFragmentStatus(pp)
 			}
 		}()
 	}
@@ -358,6 +363,8 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.Festival.RemovePlayer(playerID)
 		// 清理輪盤 session（DAY-113）
 		g.Roulette.CancelSession(playerID)
+		// 清理碎片狀態（DAY-116）
+		g.Fragment.RemovePlayer(playerID)
 	}
 }
 
@@ -558,6 +565,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 新手引導系統（DAY-115）
 	case ws.MsgTutorialAction, ws.MsgSkipTutorial:
 		g.handleTutorialAction(p, msg)
+	// 碎片收集大獎系統（DAY-116）
+	case ws.MsgGetFragments:
+		g.handleGetFragments(p)
 	}
 }
 
@@ -924,6 +934,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 神秘寶箱：擊破後嘗試掉落（DAY-090）
 	isBoss := t.DefID == "B001"
 	go g.notifyMysteryBoxKill(p, t.X, t.Y, isBoss)
+	// 碎片收集：擊破後嘗試掉落（DAY-116）
+	go g.notifyFragmentKill(p, t.DefID, t.X, t.Y, isBoss)
 	// 玩家統計：記錄擊破（DAY-096）
 	g.notifyStatsKill(p, result.Multiplier, finalReward)
 	// 全服公告：大獎（DAY-097，≥20x 才公告）

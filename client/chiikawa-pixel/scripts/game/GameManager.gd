@@ -43,6 +43,10 @@ signal raid_warning(raid_data: Dictionary)                  # 討伐警告廣播
 signal raid_started(raid_data: Dictionary)                  # 討伐開始廣播
 signal raid_updated(raid_data: Dictionary)                  # 討伐狀態更新
 signal raid_result(result_data: Dictionary)                 # 討伐結算廣播
+# 碎片收集大獎系統（DAY-116）
+signal fragment_dropped(drop_data: Dictionary)              # 碎片掉落通知
+signal fragment_completed(complete_data: Dictionary)        # 集齊碎片大獎廣播
+signal fragment_status_received(status_data: Dictionary)    # 碎片狀態回應
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -237,6 +241,16 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("raid_updated", payload)
 		"raid_result":
 			emit_signal("raid_result", payload)
+		# 碎片收集大獎系統（DAY-116）
+		"fragment_drop":
+			emit_signal("fragment_dropped", payload)
+		"fragment_complete":
+			# 廣播時 Client 端判斷是否為自己
+			var my_id = get_player_id() if has_method("get_player_id") else ""
+			payload["is_self"] = (payload.get("player_id", "") == my_id)
+			emit_signal("fragment_completed", payload)
+		"fragment_status":
+			emit_signal("fragment_status_received", payload)
 		"title_unlocked":
 			_handle_title_unlocked(payload)
 		"skin_update":

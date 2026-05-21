@@ -88,6 +88,8 @@ const (
 	// Co-op Boss Raid 系統（DAY-115）
 	MsgGetRaidStatus     MessageType = "get_raid_status"     // 查詢討伐狀態（Client→Server）
 	MsgTriggerRaid       MessageType = "trigger_raid"        // 手動觸發討伐（Prototype 展示用）
+	// 碎片收集大獎系統（DAY-116）
+	MsgGetFragments      MessageType = "get_fragments"       // 查詢碎片狀態（Client→Server）
 )
 
 // Server → Client
@@ -245,6 +247,10 @@ const (
 	MsgRaidUpdate       MessageType = "raid_update"        // 討伐狀態更新廣播（Server→Client，每 3 秒）
 	MsgRaidResult       MessageType = "raid_result"        // 討伐結算廣播（Server→Client）
 	MsgRaidStatus       MessageType = "raid_status"        // 討伐狀態回應（Server→Client）
+	// 碎片收集大獎系統（DAY-116）
+	MsgFragmentDrop     MessageType = "fragment_drop"      // 碎片掉落通知（Server→Client）
+	MsgFragmentComplete MessageType = "fragment_complete"  // 集齊碎片大獎通知（Server→Client，廣播）
+	MsgFragmentStatus   MessageType = "fragment_status"    // 碎片狀態回應（Server→Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -1998,4 +2004,38 @@ type RaidStatusPayload struct {
 	TimeLeft     float64                  `json:"time_left"`
 	Contributors []*RaidContributorPayload `json:"contributors"`
 	CanTrigger   bool                     `json:"can_trigger"` // 今日是否可觸發
+}
+
+// ---- 碎片收集大獎系統（DAY-116）----
+
+// FragmentDropPayload 碎片掉落通知（Server → Client）
+// 擊破目標後有機率掉落碎片，飛向收集槽
+type FragmentDropPayload struct {
+	FragmentType string `json:"fragment_type"` // "bronze"/"silver"/"gold"
+	Label        string `json:"label"`         // 顯示名稱（如「銅碎片」）
+	Color        string `json:"color"`         // 顯示顏色（hex）
+	NewCount     int    `json:"new_count"`     // 目前持有數量
+	Required     int    `json:"required"`      // 集齊需要數量
+	DropX        float64 `json:"drop_x"`      // 掉落位置 X（動畫起點）
+	DropY        float64 `json:"drop_y"`      // 掉落位置 Y（動畫起點）
+}
+
+// FragmentCompletePayload 集齊碎片大獎通知（Server → Client，廣播給所有玩家）
+type FragmentCompletePayload struct {
+	PlayerID     string `json:"player_id"`
+	DisplayName  string `json:"display_name"`
+	FragmentType string `json:"fragment_type"` // "bronze"/"silver"/"gold"
+	Label        string `json:"label"`         // 大獎名稱（如「金碎片大獎」）
+	Color        string `json:"color"`         // 顯示顏色
+	Reward       int    `json:"reward"`        // 獲得金幣
+	NewBalance   int    `json:"new_balance"`   // 中獎後餘額（只對觸發玩家有意義）
+	IsSelf       bool   `json:"is_self"`       // 是否為自己觸發
+}
+
+// FragmentStatusPayload 碎片狀態回應（Server → Client）
+type FragmentStatusPayload struct {
+	Bronze   int `json:"bronze"`    // 目前銅碎片數量
+	Silver   int `json:"silver"`    // 目前銀碎片數量
+	Gold     int `json:"gold"`      // 目前金碎片數量
+	Required int `json:"required"`  // 集齊需要數量（固定 5）
 }

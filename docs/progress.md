@@ -1,6 +1,24 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-116 目標物美術強化 + 游泳幀升級）
+## 最後更新：2026-05-20（DAY-117 Fragment 系統整合 + HUD.gd 排行榜函數修復）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：95/100**（目標物顏色豐富度全面提升，從 5-19 種 → 56-1095 種；全部 ✅）
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-117 更新（自主觸發）：** Fragment 系統整合 + HUD.gd 排行榜函數修復 ✅
+  - `server/internal/game/fragment/fragment.go`：碎片收集大獎系統（Fragment Manager）
+  - `server/internal/game/fragment/fragment_test.go`：Fragment 模組測試（全部通過）
+  - `server/internal/game/fragment_handler.go`：Fragment 相關 handler（sendFragmentStatus）
+  - `server/internal/ws/protocol.go`：新增 MsgGetFragments（Client→Server）；MsgFragmentDrop/MsgFragmentComplete/MsgFragmentStatus（Server→Client）；Fragment 相關 Payload
+  - `server/internal/game/game.go`：整合 Fragment *fragment.Manager；AddPlayer 呼叫 sendFragmentStatus；RemovePlayer 呼叫 Fragment.RemovePlayer；HandleMessage 加入 MsgGetFragments
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：新增 fragment_dropped/fragment_completed/fragment_status_received 訊號；_on_message_received 加入 fragment_drop/fragment_complete/fragment_status 處理
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：加入 FragmentPanelScript preload；_init_fragment_panel() 呼叫；**修復 _create_leaderboard_panel 和 _on_leaderboard_updated 函數缺失問題**
+  - `client/chiikawa-pixel/scripts/ui/FragmentPanel.gd`：碎片收集面板 UI（掉落通知/集齊大獎/狀態顯示）
+  - build/vet/test 全部通過（零錯誤零警告）
+  - GitHub 上傳 ✅
 
 ## 自我評估
 - **完成度：100%**

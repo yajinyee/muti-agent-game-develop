@@ -21,6 +21,7 @@ import (
 	"digital-twin/server/internal/analytics"
 	"digital-twin/server/internal/config"
 	"digital-twin/server/internal/game"
+	"digital-twin/server/internal/game/fragment"
 	"digital-twin/server/internal/game/roulette"
 	"digital-twin/server/internal/room"
 	"digital-twin/server/internal/store"
@@ -464,6 +465,36 @@ func main() {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		snap := g.GetShopSnapshot()
 		if err := json.NewEncoder(w).Encode(snap); err != nil {
+			http.Error(w, "encode error", http.StatusInternalServerError)
+		}
+	})
+
+	// 碎片收集大獎端點（DAY-116）
+	// GET /fragment/defs — 取得碎片獎勵定義
+	mux.HandleFunc("/fragment/defs", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		defs := fragment.GetAllRewardDefs()
+		type DefEntry struct {
+			Type       string `json:"type"`
+			Required   int    `json:"required"`
+			RewardMult int    `json:"reward_mult"`
+			Label      string `json:"label"`
+			Color      string `json:"color"`
+		}
+		result := make([]DefEntry, 0, 3)
+		for _, d := range defs {
+			result = append(result, DefEntry{
+				Type:       string(d.Type),
+				Required:   d.Required,
+				RewardMult: d.RewardMult,
+				Label:      d.Label,
+				Color:      d.Color,
+			})
+		}
+		if err := json.NewEncoder(w).Encode(map[string]interface{}{
+			"defs": result,
+		}); err != nil {
 			http.Error(w, "encode error", http.StatusInternalServerError)
 		}
 	})

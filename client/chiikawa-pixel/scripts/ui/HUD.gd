@@ -29,6 +29,7 @@ const MissionStreakPanelScript = preload("res://scripts/ui/MissionStreakPanel.gd
 const RoulettePanelScript = preload("res://scripts/ui/RoulettePanel.gd")
 const BuyBonusPanelScript = preload("res://scripts/ui/BuyBonusPanel.gd")
 const RaidPanelScript = preload("res://scripts/ui/RaidPanel.gd")
+const FragmentPanelScript = preload("res://scripts/ui/FragmentPanel.gd")
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
 @onready var bet_label: Label = $TopBar/BetLabel
@@ -204,6 +205,7 @@ func _ready() -> void:
 	_init_roulette_panel()        # 雙層倍率輪盤面板（DAY-113）
 	_init_buy_bonus_panel()       # Buy Bonus 面板（DAY-114）
 	_init_raid_panel()            # Co-op Boss Raid 面板（DAY-115）
+	_init_fragment_panel()        # 碎片收集大獎面板（DAY-116）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1414,6 +1416,22 @@ func _init_jackpot_panel() -> void:
 	_jackpot_panel_node = panel
 
 
+
+
+# ── 排行榜面板（DAY-058 拆分到 LeaderboardPanel.gd）──────────────────────────
+
+var _leaderboard_node = null  # LeaderboardPanelScript 實例
+
+## 初始化排行榜面板（委派給 LeaderboardPanel.gd）
+func _create_leaderboard_panel() -> void:
+	_leaderboard_node = LeaderboardPanelScript.new()
+	_leaderboard_node.setup(self, _pixel_font)
+
+## 排行榜更新事件（委派給 LeaderboardPanel.gd）
+func _on_leaderboard_updated(entries: Array) -> void:
+	if _leaderboard_node:
+		_leaderboard_node.update(entries, GameManager.get_player_id())
+
 # ── ESC 快捷鍵（DAY-049，DAY-053 更新）──────────────────────────
 
 ## 覆寫 _input 處理 ESC 快捷鍵
@@ -2297,3 +2315,16 @@ func _init_raid_panel() -> void:
 			var my_id = GameManager.get_player_id() if GameManager.has_method("get_player_id") else ""
 			panel.show_result(data, my_id)
 		)
+
+func _init_fragment_panel() -> void:
+	var panel = FragmentPanelScript.new()
+	panel.z_index = 62
+	add_child(panel)
+
+	# 連接 GameManager 訊號
+	if GameManager.has_signal("fragment_dropped"):
+		GameManager.fragment_dropped.connect(func(data): panel.on_fragment_drop(data))
+	if GameManager.has_signal("fragment_completed"):
+		GameManager.fragment_completed.connect(func(data): panel.on_fragment_complete(data))
+	if GameManager.has_signal("fragment_status_received"):
+		GameManager.fragment_status_received.connect(func(data): panel.update_status(data))
