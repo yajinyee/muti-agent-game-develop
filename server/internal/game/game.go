@@ -129,6 +129,7 @@ type Game struct {
 	DualRoulette   *dualroulette.Manager   // 雙環輪盤系統管理器（DAY-139）
 	MegaCatch      *megacatch.Manager      // 全服 Mega Catch 事件系統管理器（DAY-140）
 	MegaOctopus    *megaoctopus.Manager    // 巨型章魚轉盤系統管理器（DAY-144）
+	GiantPrizeFish *giantPrizeFishManager  // 夢幻巨型獎勵魚系統管理器（DAY-147）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -239,6 +240,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		DualRoulette:       dualroulette.NewDefault(),
 		MegaCatch:          megacatch.NewDefault(),
 		MegaOctopus:        megaoctopus.NewManager(),
+		GiantPrizeFish:     newGiantPrizeFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -954,6 +956,13 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if megaCatchMult > 1.0 {
 		finalReward = int(float64(finalReward) * megaCatchMult)
 	}
+	// 套用夢幻巨型獎勵魚倍率（DAY-147）
+	giantPrizeMult := g.getGiantPrizeFishMult(p.ID)
+	if giantPrizeMult > 1.0 {
+		finalReward = int(float64(finalReward) * giantPrizeMult)
+		// 記錄夢幻模式期間的擊破
+		go g.recordGiantPrizeFishKill(p.ID, finalReward)
+	}
 	// 雙環輪盤：擊破高倍率目標後嘗試觸發（DAY-139）
 	go g.tryDualRoulette(p, float64(t.Multiplier), finalReward)
 	// 懸賞領取：擊破懸賞目標獲得額外金幣（DAY-137）
@@ -1196,6 +1205,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 巨型鹹水鱷魚獵魚：擊破 T110 時觸發（DAY-146）
 	if isCrocodile(t.DefID) {
 		go g.tryCrocodileHunt(p, t.InstanceID, t.X, t.Y)
+	}
+	// 夢幻巨型獎勵魚：擊破 T111 時觸發夢幻獎勵模式（DAY-147）
+	if isGiantPrizeFish(t.DefID) {
+		go g.tryGiantPrizeFish(p, t.InstanceID, t.X, t.Y)
 	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)

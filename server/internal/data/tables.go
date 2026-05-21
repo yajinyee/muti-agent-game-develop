@@ -102,6 +102,10 @@ var Targets = map[string]*TargetDef{
 	// + megafishinggame.top「Giant Saltwater Crocodile」
 	// 擊破後觸發「鱷魚獵魚」模式：鱷魚在 8 秒內自動獵殺場上的普通目標（T001-T006），累積獎勵給觸發玩家
 	"T110": {ID: "T110", Name: "巨型鹹水鱷魚", Type: TargetTypeSpecial, MultiplierMin: 100, MultiplierMax: 150, HP: 150, SpawnWeight: 2, Speed: 20, Lifetime: 18, LaborGain: 18, DifficultyFactor: 16.0, SpecialBehavior: "crocodile_hunt"},
+	// T111 夢幻巨型獎勵魚（DAY-147）— 業界依據：jiligames.com 2026「The dreamy Giant Prize Fish lets you easily win great prizes, with the chance for 5x multipliers」
+	// 擊破後觸發「夢幻獎勵模式」：觸發玩家在 10 秒內所有擊破獎勵 ×5，讓玩家感受到「夢幻大獎」的爽感
+	// 設計：低 HP（容易擊破）+ 中等倍率（40-60x）+ 觸發後 10 秒 5x 加成，是「容易觸發的短期爆發」機制
+	"T111": {ID: "T111", Name: "夢幻巨型獎勵魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 60, HP: 80, SpawnWeight: 4, Speed: 35, Lifetime: 12, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "giant_prize_fish"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

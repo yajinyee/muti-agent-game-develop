@@ -235,6 +235,7 @@ func _ready() -> void:
 	_init_mega_octopus_panel()    # 巨型章魚轉盤面板（DAY-144）
 	_init_anglerfish_panel()      # 巨型鮟鱇魚電擊寶箱面板（DAY-145）
 	_init_crocodile_panel()       # 巨型鹹水鱷魚獵魚面板（DAY-146）
+	_init_giant_prize_fish_panel() # 夢幻巨型獎勵魚面板（DAY-147）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2871,3 +2872,16 @@ func _init_crocodile_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_crocodile_panel = panel
+
+# ---- 夢幻巨型獎勵魚面板（DAY-147）----
+
+const GiantPrizeFishPanelScript = preload("res://scripts/ui/GiantPrizeFishPanel.gd")
+var _giant_prize_fish_panel: Control = null
+
+func _init_giant_prize_fish_panel() -> void:
+	var panel = GiantPrizeFishPanelScript.new()
+	panel.name = "GiantPrizeFishPanel"
+	panel.layer = 88  # 在 CrocodilePanel(87) 之上
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_giant_prize_fish_panel = panel

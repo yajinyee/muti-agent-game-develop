@@ -375,6 +375,9 @@ const (
 	// 巨型鹹水鱷魚獵魚累積系統（DAY-146）
 	MsgCrocodileHunt MessageType = "crocodile_hunt" // 鱷魚獵魚廣播（Server→Client，全服）
 
+	// 夢幻巨型獎勵魚系統（DAY-147）
+	MsgGiantPrizeFish MessageType = "giant_prize_fish" // 夢幻獎勵模式廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3061,4 +3064,20 @@ type CrocodileHuntPayload struct {
 	TotalReward   int                  `json:"total_reward"`   // 總獎勵（result 時）
 	KillerID      string               `json:"killer_id"`      // 觸發玩家 ID
 	KillerName    string               `json:"killer_name"`    // 觸發玩家名稱
+}
+
+// GiantPrizeFishPayload 夢幻巨型獎勵魚廣播（Server → Client，DAY-147）
+// Phase: "activate" → "end"
+// 觸發玩家在 10 秒內所有擊破獎勵 ×5
+type GiantPrizeFishPayload struct {
+	TriggerID    string  `json:"trigger_id"`    // 觸發的 T111 InstanceID
+	TriggerX     float64 `json:"trigger_x"`     // 觸發位置 X
+	TriggerY     float64 `json:"trigger_y"`     // 觸發位置 Y
+	Phase        string  `json:"phase"`         // "activate" 或 "end"
+	MultBonus    float64 `json:"mult_bonus"`    // 倍率加成（5.0）
+	Duration     int     `json:"duration"`      // 持續時間（秒，10）
+	KillerID     string  `json:"killer_id"`     // 觸發玩家 ID
+	KillerName   string  `json:"killer_name"`   // 觸發玩家名稱
+	TotalReward  int     `json:"total_reward"`  // 夢幻模式期間總獎勵（end 時）
+	KillCount    int     `json:"kill_count"`    // 夢幻模式期間擊破數（end 時）
 }

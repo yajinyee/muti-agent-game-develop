@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-146 巨型鹹水鱷魚獵魚累積系統）
+## 最後更新：2026-05-21（DAY-147 夢幻巨型獎勵魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,20 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-147 更新（自主觸發）：** 夢幻巨型獎勵魚系統（Giant Prize Fish System）✅
+  - **業界依據：** jiligames.com 2026「The dreamy Giant Prize Fish lets you easily win great prizes, with the chance for 5x multipliers」— 擊破後觸發「夢幻獎勵模式」，觸發玩家在 10 秒內所有擊破獎勵 ×5，是 JILI Mega Fishing 2026 的「容易觸發的短期爆發」機制
+  - `server/internal/data/tables.go`：新增 T111 夢幻巨型獎勵魚（40-60x/HP80/SpawnWeight4/giant_prize_fish 行為）
+  - `server/internal/ws/protocol.go`：新增 MsgGiantPrizeFish；GiantPrizeFishPayload（兩階段：activate/end）
+  - `server/internal/game/giant_prize_fish_handler.go`：isGiantPrizeFish 判斷；giantPrizeFishManager（session/cooldown 管理）；tryGiantPrizeFish（觸發夢幻模式/全服廣播/10秒後廣播結束）；getGiantPrizeFishMult（供 handleKill 使用）；recordGiantPrizeFishKill（記錄夢幻模式期間擊破）；announceGiantPrizeFish（≥5個擊破全服公告）
+  - `server/internal/game/game.go`：Game struct 加入 GiantPrizeFish *giantPrizeFishManager；NewGameWithStore 初始化；handleKill 加入夢幻倍率套用（在 Mega Catch 之後）+ isGiantPrizeFish 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/GiantPrizeFishPanel.gd`：夢幻獎勵魚面板（粉紅夢幻主題；activate 橫幅滑入+倒數計時+進度條+全螢幕粉紅閃光+星星粒子；end 橫幅滑出+右側結果彈窗含擊破數+倍率說明+獎勵；自己觸發時更強烈閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：giant_prize_fish 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 GiantPrizeFishPanelScript（layer=88）
+  - 夢幻模式設計：觸發玩家在 10 秒內所有擊破獎勵 ×5；60 秒冷卻防止頻繁觸發；每個玩家獨立 session
+  - 倍率疊加：夢幻倍率在 Mega Catch 之後套用（最後一層），最大化爽感
+  - 全服廣播：夢幻模式開始/結束全服廣播，讓所有玩家看到「有人觸發了夢幻獎勵魚」
+  - 全服公告：夢幻模式期間擊破 ≥5 個目標時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-146 更新（自主觸發）：** 巨型鹹水鱷魚獵魚累積系統（Giant Saltwater Crocodile Hunt System）✅
   - **業界依據：** jiligames.com 2026「giant crocodiles awaken to hunt fish on the fish farm to accumulate big prizes!」+ megafishinggame.top「Giant Saltwater Crocodile」— 擊破後觸發鱷魚獵魚模式，8 秒內自動獵殺普通目標累積獎勵，是 JILI Mega Fishing 2026 的核心特殊目標機制
   - `server/internal/data/tables.go`：新增 T110 巨型鹹水鱷魚（100-150x/HP150/SpawnWeight2/crocodile_hunt 行為）
