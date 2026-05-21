@@ -361,6 +361,9 @@ const (
 	// 鑽頭龍蝦連帶效果系統（DAY-142）
 	MsgDrillLobsterChain MessageType = "drill_lobster_chain" // 鑽頭連帶效果廣播（Server→Client，全服）
 
+	// 炸彈蟹連環爆炸系統（DAY-143）
+	MsgBombCrabChain MessageType = "bomb_crab_chain" // 炸彈蟹連環爆炸廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2939,4 +2942,31 @@ type DrillLobsterChainPayload struct {
 	TotalReward   int             `json:"total_reward"`  // 總獎勵（result 時）
 	KillerID      string          `json:"killer_id"`     // 觸發玩家 ID
 	KillerName    string          `json:"killer_name"`   // 觸發玩家名稱
+}
+
+// ---- 炸彈蟹連環爆炸系統（DAY-143）----
+
+// BombCrabKillEntry 炸彈蟹連帶擊破記錄
+type BombCrabKillEntry struct {
+	InstanceID string  `json:"instance_id"` // 被擊破的目標 InstanceID
+	DefID      string  `json:"def_id"`      // 目標定義 ID
+	Multiplier float64 `json:"multiplier"`  // 目標倍率
+	Reward     int     `json:"reward"`      // 獎勵金幣
+	WaveIndex  int     `json:"wave_index"`  // 第幾波爆炸（0/1/2）
+}
+
+// BombCrabChainPayload 炸彈蟹連環爆炸廣播（Server → Client，DAY-143）
+// Phase: "bomb_start" → "explosion"（×3波）→ "result"
+type BombCrabChainPayload struct {
+	TriggerID     string              `json:"trigger_id"`     // 觸發的 T107 InstanceID
+	TriggerX      float64             `json:"trigger_x"`      // 觸發位置 X
+	TriggerY      float64             `json:"trigger_y"`      // 觸發位置 Y
+	Phase         string              `json:"phase"`          // 當前階段
+	WaveIndex     int                 `json:"wave_index"`     // 當前波次（0/1/2）
+	TotalWaves    int                 `json:"total_waves"`    // 總波數（3）
+	ExplodeIDs    []string            `json:"explode_ids"`    // 本波爆炸範圍內的目標 ID
+	KilledTargets []BombCrabKillEntry `json:"killed_targets"` // 所有被擊破的目標（result 時）
+	TotalReward   int                 `json:"total_reward"`   // 總獎勵（result 時）
+	KillerID      string              `json:"killer_id"`      // 觸發玩家 ID
+	KillerName    string              `json:"killer_name"`    // 觸發玩家名稱
 }

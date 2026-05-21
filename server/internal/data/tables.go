@@ -84,6 +84,10 @@ var Targets = map[string]*TargetDef{
 	// T106 鑽頭龍蝦（DAY-142）— 業界依據：Royal Fishing JILI 2026「Drill Bit Lobster (80X) — penetrating drill through multiple fish, self-detonates at end of trajectory」
 	// 擊破後觸發穿透鑽頭，沿水平方向穿透所有目標，到達邊緣後爆炸，連帶擊破爆炸範圍內目標
 	"T106": {ID: "T106", Name: "鑽頭龍蝦", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 80, HP: 60, SpawnWeight: 6, Speed: 45, Lifetime: 10, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "drill_lobster"},
+	// T107 炸彈蟹（DAY-143）— 業界依據：royal-fishing.uk 2026「Worth 70x, this explosive crustacean triggers multiple large-scale detonations.
+	// Each bomb creates expanding capture zones for massive multi-target eliminations.」
+	// 擊破後觸發 3 波爆炸，每波爆炸半徑 150px，每波間隔 400ms，連帶擊破爆炸範圍內所有目標
+	"T107": {ID: "T107", Name: "炸彈蟹", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 70, HP: 70, SpawnWeight: 5, Speed: 35, Lifetime: 12, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "bomb_crab"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

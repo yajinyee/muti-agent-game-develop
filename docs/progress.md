@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-142 鑽頭龍蝦特殊目標物）
+## 最後更新：2026-05-21（DAY-143 炸彈蟹特殊目標物）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,19 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-143 更新（自主觸發）：** 炸彈蟹特殊目標物（Bomb Crab Target）✅
+  - **業界依據：** royal-fishing.uk 2026「Worth 70x, this explosive crustacean triggers multiple large-scale detonations. Each bomb creates expanding capture zones for massive multi-target eliminations.」— 擊破後觸發 3 波爆炸，每波爆炸半徑 150px，每波間隔 400ms，連帶擊破爆炸範圍內所有目標，是 2026 年最新的「多波連環爆炸」機制
+  - `server/internal/data/tables.go`：新增 T107 炸彈蟹（60-70x/HP70/SpawnWeight5/bomb_crab 行為）
+  - `server/internal/game/bomb_crab_handler.go`：isBombCrab 判斷；tryBombCrabChain（3波爆炸/每波150px半徑/400ms間隔/分批廣播/全服廣播）；announceBombCrabChain（≥4個目標全服公告）
+  - `server/internal/ws/protocol.go`：新增 MsgBombCrabChain；BombCrabKillEntry；BombCrabChainPayload（四階段：bomb_start/explosion×3/result）
+  - `server/internal/game/game.go`：handleKill 加入 isBombCrab 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/BombCrabPanel.gd`：炸彈蟹面板（橙紅主題；bomb_start 橫幅滑入；explosion 爆炸圓圈+粒子+波次標示；result 右側滑入彈窗含波次分布+獎勵；自己觸發時金色閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：bomb_crab_chain 訊號 + _handle_bomb_crab_chain 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 BombCrabPanelScript（layer=85）
+  - 爆炸設計：3 波爆炸，每波半徑 150px；第一波在觸發點，第二波右偏 120px，第三波左偏 120px（製造擴散感）
+  - 獎勵設計：連帶擊破獎勵 = 目標倍率 × betLevel × 0.50（比直接擊破低，平衡 RTP）
+  - 全服公告：連帶擊破 ≥4 個目標時全服廣播，讓其他玩家看到「有人觸發了炸彈蟹連環爆炸」
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-142 更新（自主觸發）：** 鑽頭龍蝦特殊目標物（Drill Lobster Target）✅
   - **業界依據：** Royal Fishing JILI 2026「Drill Bit Lobster (80X) — fires a penetrating drill through multiple fish before self-detonating, capturing everything in blast radius」— 擊破後觸發穿透鑽頭，沿水平方向穿透所有目標，到達邊緣後爆炸，連帶擊破爆炸範圍內目標，是 2026 年最新的「連帶效果」機制
   - `server/internal/data/tables.go`：新增 T106 鑽頭龍蝦（60-80x/HP60/SpawnWeight6/drill_lobster 行為）

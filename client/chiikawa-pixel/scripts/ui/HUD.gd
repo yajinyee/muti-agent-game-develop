@@ -231,6 +231,7 @@ func _ready() -> void:
 	_init_dual_roulette_panel()   # 雙環輪盤面板（DAY-139）
 	_init_mega_catch_panel()      # Mega Catch 事件面板（DAY-140）
 	_init_drill_lobster_panel()   # 鑽頭龍蝦連帶效果面板（DAY-142）
+	_init_bomb_crab_panel()       # 炸彈蟹連環爆炸面板（DAY-143）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2815,3 +2816,16 @@ func _init_drill_lobster_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_drill_lobster_panel = panel
+
+# ---- 炸彈蟹連環爆炸面板（DAY-143）----
+
+const BombCrabPanelScript = preload("res://scripts/ui/BombCrabPanel.gd")
+var _bomb_crab_panel: Control = null
+
+func _init_bomb_crab_panel() -> void:
+	var panel = BombCrabPanelScript.new()
+	panel.name = "BombCrabPanel"
+	panel.layer = 85  # 在 DrillLobsterPanel(84) 之上
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_bomb_crab_panel = panel

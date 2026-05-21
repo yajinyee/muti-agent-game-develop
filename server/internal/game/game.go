@@ -1162,6 +1162,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isDrillLobster(t.DefID) {
 		go g.tryDrillLobsterChain(p, t.InstanceID, t.X, t.Y)
 	}
+	// 炸彈蟹連環爆炸：擊破 T107 時觸發（DAY-143）
+	if isBombCrab(t.DefID) {
+		go g.tryBombCrabChain(p, t.InstanceID, t.X, t.Y)
+	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }
