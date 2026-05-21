@@ -73,6 +73,9 @@ type Player struct {
 	// Super Bonus 系統（DAY-108）
 	BonusCombo     int       // 連續 Bonus 次數（用於觸發 Super Bonus）
 	LastBonusAt    time.Time // 上次 Bonus 時間（24小時內才算連續）
+
+	// 新手引導系統（DAY-115）
+	TutorialCompleted bool // 是否已完成新手引導
 }
 
 // NewPlayer 建立新玩家

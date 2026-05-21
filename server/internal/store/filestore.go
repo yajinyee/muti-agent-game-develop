@@ -78,6 +78,9 @@ type FullPlayerState struct {
 	StatsTotalBonuses    int     `json:"stats_total_bonuses"`
 	StatsTotalBossKills  int     `json:"stats_total_boss_kills"`
 	StatsBestMultiplier  float64 `json:"stats_best_multiplier"`
+
+	// 新手引導系統（DAY-115）
+	TutorialCompleted bool `json:"tutorial_completed"`
 	StatsBestStreak      int     `json:"stats_best_streak"`
 	StatsBestSession     int     `json:"stats_best_session"`
 	StatsBestBonus       int     `json:"stats_best_bonus"`
