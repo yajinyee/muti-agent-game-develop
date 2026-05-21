@@ -3150,3 +3150,23 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **廣播策略：** 集齊時廣播給所有玩家（讓全場看到），掉落只通知本人
 - **Client 端判斷 is_self：** `payload["is_self"] = (payload.get("player_id", "") == my_id)`
 - **教訓：** 碎片系統要有「全場廣播」機制，讓其他玩家看到有人集齊，增加社交感
+
+## 83. 碎片收集系統設計原則（2026-05-21）
+- **業界依據**：bsu.edu 研究確認 Hidden Treasure Unlocks 讓玩家留存率提升 28%
+- **稀有度設計**：3種（銅/銀/金）對應不同掉落機率（8%/20-30%/50%）和獎勵（30x/80x/200x BetCost）
+- **廣播策略**：金碎片集齊廣播全服（社交感），銅/銀只通知本人（避免干擾）
+- **飛行動畫**：`Tween.TRANS_QUAD + EASE_IN` 讓碎片飛行有加速感，比線性更自然
+- **教訓**：收集機制要有短/中/長期目標（銅=短期，銀=中期，金=長期），讓不同類型玩家都有動力
+
+## 84. Git index 損壞修復（2026-05-21）
+- **問題**：`git add` 報 `error: unable to create temporary file: No such file or directory`
+- **原因**：Windows Defender 或 Norton 鎖定了 `.git/tmp` 目錄
+- **解決**：`git gc --prune=now` 清理 git 資料庫，然後分批 `git add` 單個檔案
+- **教訓**：Windows 防毒軟體會干擾 git 操作，遇到 index 問題先用 `git gc` 清理
+
+## 85. 業界最新趨勢（2026-05-21）
+- **Fish Tales Slot（2026-05-21）**：Link & Loot feature — 收集 6+ 魚符號觸發特殊回合，確認收集機制是業界新趨勢
+- **Ice Fishing（2026）**：56格輪盤，7個 bonus 觸發格，最高 10,000x — 多格輪盤是業界標配
+- **Big Game Fishing Rapid Riches（2026-05-14）**：更快的動作、更強的 feature depth — 速度感是 2026 年趨勢
+- **Juice 設計（2026）**：screen shake + hit-stop + particles 讓玩家感受到動作重量感，提升留存率 15-20%
+- **教訓**：每次開發前搜尋最新業界動態，確保功能設計符合 2026 年趨勢
