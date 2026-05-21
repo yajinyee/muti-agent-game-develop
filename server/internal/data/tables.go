@@ -166,6 +166,11 @@ var Targets = map[string]*TargetDef{
 	// 是「保底即時獎勵」型特殊目標，讓玩家在任何 betLevel 都能獲得有感的即時金幣
 	// 設計：中等倍率（30-50x）+ 中等 HP（60）+ 中等生成權重（5）= 常見但有即時爆金幣效果
 	"T122": {ID: "T122", Name: "金幣魚王", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 60, SpawnWeight: 5, Speed: 50, Lifetime: 14, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "money_fish_instant"},
+	// T123 船長魚（DAY-163）— 業界依據：King of Ocean 2026（Galaxsys）「Captain Fish trigger bonus rounds」
+	// 擊破後觸發「全服競速模式」，30 秒內全服玩家競爭擊破最多目標
+	// 第一名獲得 betLevel × 30，第二名 × 15，第三名 × 8
+	// 設計：競技型社交機制（與水晶龍的合作型形成對比），製造「全服競爭」的緊張爽感
+	"T123": {ID: "T123", Name: "船長魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 60, HP: 80, SpawnWeight: 3, Speed: 40, Lifetime: 16, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "captain_fish_race"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

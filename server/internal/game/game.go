@@ -138,6 +138,7 @@ type Game struct {
 	GoldenTurtle       *goldenTurtleManager       // 黃金海龜時間停止系統管理器（DAY-159）
 	LuckyStarFish      *luckyStarFishManager      // 幸運星魚全場倍率翻倍管理器（DAY-160）
 	GoldenShark        *goldenSharkManager        // 黃金鯊魚全服狂暴模式管理器（DAY-161）
+	CaptainFish        *captainFishManager        // 船長魚全服競速模式管理器（DAY-163）
 	CrystalDragon      *crystaldragon.Manager     // 水晶龍收集大獎系統管理器（DAY-153）
 
 	// 計時器
@@ -256,6 +257,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		GoldenTurtle:       newGoldenTurtleManager(),
 		LuckyStarFish:      newLuckyStarFishManager(),
 		GoldenShark:        newGoldenSharkManager(),
+		CaptainFish:        newCaptainFishManager(),
 		CrystalDragon:      crystaldragon.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
@@ -1022,6 +1024,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if goldenSharkMult > 1.0 {
 		finalReward = int(float64(finalReward) * goldenSharkMult)
 	}
+	// 船長魚競速：記錄擊破（DAY-163）
+	if g.IsCaptainRaceActive() {
+		go g.recordCaptainRaceKill(p, finalReward)
+	}
 	// 雙環輪盤：擊破高倍率目標後嘗試觸發（DAY-139）
 	go g.tryDualRoulette(p, float64(t.Multiplier), finalReward)
 	// 懸賞領取：擊破懸賞目標獲得額外金幣（DAY-137）
@@ -1312,6 +1318,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 金幣魚王即時獎勵：擊破 T122 時觸發（DAY-162）
 	if isMoneyFish(t.DefID) {
 		go g.notifyMoneyFishKill(p, t.InstanceID, t.X, t.Y)
+	}
+	// 船長魚全服競速：擊破 T123 時觸發（DAY-163）
+	if isCaptainFish(t.DefID) {
+		go g.tryCaptainFishRace(p, t.InstanceID, t.X, t.Y)
 	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)

@@ -247,6 +247,7 @@ func _ready() -> void:
 	_init_lucky_star_fish_panel()     # 幸運星魚全場倍率翻倍面板（DAY-160）
 	_init_golden_shark_panel()        # 黃金鯊魚全服狂暴模式面板（DAY-161）
 	_init_money_fish_panel()          # 金幣魚王即時獎勵面板（DAY-162）
+	_init_captain_fish_panel()        # 船長魚全服競速模式面板（DAY-163）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3228,3 +3229,19 @@ func _init_money_fish_panel() -> void:
 	if panel.has_method("setup"):
 		panel.setup(_pixel_font)
 	_money_fish_panel = panel
+
+# ---- 船長魚全服競速模式面板（DAY-163）----
+
+const CaptainFishPanelScript = preload("res://scripts/ui/CaptainFishPanel.gd")
+var _captain_fish_panel: Control = null
+
+func _init_captain_fish_panel() -> void:
+	var panel = CaptainFishPanelScript.new()
+	panel.name = "CaptainFishPanel"
+	panel.z_index = 78  # 在 MoneyFishPanel(79) 下方
+	panel.position = Vector2(640, 360)  # 畫面中心
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	if panel.has_method("setup"):
+		panel.setup(_pixel_font)
+	_captain_fish_panel = panel

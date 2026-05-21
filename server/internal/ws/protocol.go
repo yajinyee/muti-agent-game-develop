@@ -199,6 +199,7 @@ const (
 	MsgLuckyStarFish        MessageType = "lucky_star_fish"         // 幸運星魚全場倍率翻倍（DAY-160）
 	MsgGoldenSharkBerserk   MessageType = "golden_shark_berserk"    // 黃金鯊魚全服狂暴模式（DAY-161）
 	MsgMoneyFishReward      MessageType = "money_fish_reward"       // 金幣魚王即時獎勵（DAY-162）
+	MsgCaptainFishRace      MessageType = "captain_fish_race"       // 船長魚全服競速模式（DAY-163）
 	MsgRoyalChainLightning  MessageType = "royal_chain_lightning"  // 皇家閃電鰻持續連鎖電擊（DAY-156）
 	// 神秘寶箱系統（DAY-090）
 	MsgMysteryBoxDrop    MessageType = "mystery_box_drop"    // 寶箱掉落通知（擊破目標後）
@@ -3111,6 +3112,32 @@ type MoneyFishRewardPayload struct {
 	InstantReward int     `json:"instant_reward"` // 即時獎勵金幣數
 	MultUsed      int     `json:"mult_used"`      // 使用的倍率（20-50）
 	BetLevel      int     `json:"bet_level"`      // 玩家當前 betLevel
+}
+
+// CaptainRaceEntry 船長魚競速排名條目（DAY-163）
+type CaptainRaceEntry struct {
+	Rank        int    `json:"rank"`         // 排名（1-based）
+	PlayerID    string `json:"player_id"`    // 玩家 ID
+	PlayerName  string `json:"player_name"`  // 玩家名稱
+	KillCount   int    `json:"kill_count"`   // 擊破數
+	TotalReward int    `json:"total_reward"` // 累積獎勵
+}
+
+// CaptainFishRacePayload 船長魚全服競速模式廣播（Server → Client，DAY-163）
+// Phase: "race_start" → "race_update" → "race_end" → "race_reward"（個人）
+type CaptainFishRacePayload struct {
+	TriggerID     string             `json:"trigger_id"`     // 觸發的 T123 InstanceID
+	TriggerX      float64            `json:"trigger_x"`      // 觸發位置 X
+	TriggerY      float64            `json:"trigger_y"`      // 觸發位置 Y
+	KillerID      string             `json:"killer_id"`      // 擊破玩家 ID
+	KillerName    string             `json:"killer_name"`    // 擊破玩家名稱
+	Phase         string             `json:"phase"`          // 當前階段
+	DurationSecs  float64            `json:"duration_secs"`  // 競速持續時間（秒）
+	RemainingTime float64            `json:"remaining_time"` // 剩餘時間（秒）
+	Entries       []CaptainRaceEntry `json:"entries"`        // 排名列表
+	MyRank        int                `json:"my_rank"`        // 我的排名（race_reward 時）
+	MyBonus       int                `json:"my_bonus"`       // 我的獎勵（race_reward 時）
+	MyKillCount   int                `json:"my_kill_count"`  // 我的擊破數（race_reward 時）
 }
 
 // RoyalChainLightningEntry 皇家閃電鰻連鎖電擊的目標條目（DAY-156）
