@@ -17,6 +17,18 @@ const TARGET_SPRITES = {
 	"T103": "res://assets/sprites/targets/T103_meteor.png",
 	"T104": "res://assets/sprites/targets/T104_gold_grass.png",
 	"T105": "res://assets/sprites/targets/T105_coin_fish.png",
+	"T106": "res://assets/sprites/targets/T106_drill_lobster.png",
+	"T107": "res://assets/sprites/targets/T107_bomb_crab.png",
+	"T108": "res://assets/sprites/targets/T108_mega_octopus.png",
+	"T109": "res://assets/sprites/targets/T109_anglerfish.png",
+	"T110": "res://assets/sprites/targets/T110_crocodile.png",
+	"T111": "res://assets/sprites/targets/T111_prize_fish.png",
+	"T112": "res://assets/sprites/targets/T112_chainlong.png",
+	"T113": "res://assets/sprites/targets/T113_jellyfish.png",
+	"T114": "res://assets/sprites/targets/T114_thunder_lobster.png",
+	"T115": "res://assets/sprites/targets/T115_rainbow_phoenix.png",
+	"T116": "res://assets/sprites/targets/T116_vampire.png",
+	"T117": "res://assets/sprites/targets/T117_crystal_dragon.png",
 	"B001": "res://assets/sprites/targets/B001_boss.png",
 }
 
@@ -24,7 +36,9 @@ const TARGET_SPRITES = {
 # 幀0：向上彎曲，幀1：向下彎曲，4fps 交替
 const SWIM_SHEET_TARGETS = [
 	"T001", "T002", "T003", "T004", "T005", "T006",
-	"T101", "T102", "T103", "T104", "T105"
+	"T101", "T102", "T103", "T104", "T105",
+	"T106", "T107", "T108", "T109", "T110",
+	"T111", "T112", "T113", "T114", "T115", "T116", "T117"
 ]
 const SWIM_ANIM_FPS: float = 4.0  # 每 0.25 秒切換一幀
 
@@ -50,6 +64,18 @@ const SHEET_REGIONS = {
 	"T103": Rect2(0, 128, 64, 64),
 	"T104": Rect2(64, 128, 64, 64),
 	"T105": Rect2(128, 128, 64, 64),
+	"T106": Rect2(192, 128, 64, 64),
+	"T107": Rect2(0, 192, 64, 64),
+	"T108": Rect2(64, 192, 64, 64),
+	"T109": Rect2(128, 192, 64, 64),
+	"T110": Rect2(192, 192, 64, 64),
+	"T111": Rect2(0, 256, 64, 64),
+	"T112": Rect2(64, 256, 64, 64),
+	"T113": Rect2(128, 256, 64, 64),
+	"T114": Rect2(192, 256, 64, 64),
+	"T115": Rect2(0, 320, 64, 64),
+	"T116": Rect2(64, 320, 64, 64),
+	"T117": Rect2(128, 320, 64, 64),
 }
 
 # 命中特效 Sprite
