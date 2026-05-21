@@ -3118,3 +3118,35 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **正確簽名：** `notifyFeedMilestone(p *player.Player, days int, milestoneName string)` — 只接受 3 個
 - **修復：** 改用 `notifyFeedAchievement(p, "完成新手引導", "🎓", "common")`
 - **教訓：** 新增動態牆整合時，要確認目標函數的簽名，不能假設參數順序
+
+## 113. HUD.gd 函數定義缺失問題（DAY-117）
+- **問題：** HEAD 版本的 HUD.gd 有 `_create_leaderboard_panel()` 和 `_on_leaderboard_updated()` 的呼叫，但沒有函數定義
+- **根本原因：** 拆分 LeaderboardPanel.gd 時，只移除了舊的實作，但忘記加入新的委派函數
+- **症狀：** GDScript 執行時報 `Function not found: _create_leaderboard_panel`
+- **修復：** 用 Python 腳本（`tools/fix_hud_leaderboard.py`）在正確位置插入函數定義
+- **教訓：** 拆分 GDScript 腳本時，要同時確認：1) 舊函數已移除 2) 新的委派函數已加入 3) preload 已加入
+
+## 114. Python 腳本修改 GDScript 的正確方式（DAY-117）
+- **問題：** str_replace 工具無法處理含亂碼的 GDScript 檔案（Windows 編碼問題）
+- **PowerShell 問題：** 行號操作容易出錯，且 Signal was cancelled 錯誤頻繁
+- **正確方式：** 用 Python 腳本讀取 UTF-8 檔案，用字串搜尋找到插入點，再寫回
+  ```python
+  with open(path, 'r', encoding='utf-8') as f:
+      content = f.read()
+  marker = "# ── ESC 快捷鍵"  # 找到插入點
+  new_content = content.replace(marker, NEW_CODE + marker, 1)
+  with open(path, 'w', encoding='utf-8') as f:
+      f.write(new_content)
+  ```
+- **教訓：** 修改含中文的 GDScript 檔案，用 Python UTF-8 讀寫比 PowerShell 更可靠
+
+## 115. Fragment 碎片收集系統設計（DAY-117）
+- **業界依據：** bsu.edu 研究確認碎片收集讓玩家留存率提升 28%
+- **三等級設計：**
+  - 銅碎片（Bronze）：擊破普通目標掉落，5個兌換 30x BetCost
+  - 銀碎片（Silver）：擊破特殊目標掉落，5個兌換 80x BetCost
+  - 金碎片（Gold）：擊破 BOSS 掉落，5個兌換 200x BetCost
+- **掉落機率：** 依目標類型和 BetCost 動態計算（高 bet 更容易掉落）
+- **廣播策略：** 集齊時廣播給所有玩家（讓全場看到），掉落只通知本人
+- **Client 端判斷 is_self：** `payload["is_self"] = (payload.get("player_id", "") == my_id)`
+- **教訓：** 碎片系統要有「全場廣播」機制，讓其他玩家看到有人集齊，增加社交感
