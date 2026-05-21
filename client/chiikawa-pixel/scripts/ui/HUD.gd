@@ -229,6 +229,7 @@ func _ready() -> void:
 	_init_bounty_panel()          # 全服目標懸賞面板（DAY-137）
 	_init_mult_storm_panel()      # 全服倍率風暴面板（DAY-138）
 	_init_dual_roulette_panel()   # 雙環輪盤面板（DAY-139）
+	_init_mega_catch_panel()      # Mega Catch 事件面板（DAY-140）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2782,3 +2783,19 @@ func _init_dual_roulette_panel() -> void:
 			data.get("new_balance", 0)
 		)
 	)
+
+# ---- Mega Catch 事件面板（DAY-140）----
+const MegaCatchPanelScript = preload("res://scripts/ui/MegaCatchPanel.gd")
+var _mega_catch_panel: Control = null
+
+func _init_mega_catch_panel() -> void:
+	var panel = MegaCatchPanelScript.new()
+	panel.name = "MegaCatchPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 83  # 在雙環輪盤面板（82）之上
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_mega_catch_panel = panel
+
+	GameManager.mega_catch_started.connect(func(data): panel.on_mega_catch_start(data))
+	GameManager.mega_catch_ended.connect(func(data): panel.on_mega_catch_end(data))

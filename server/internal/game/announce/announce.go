@@ -38,6 +38,7 @@ const (
 	EventBountyClaimed  EventType = "bounty_claimed"  // 懸賞被領取（DAY-137）
 	EventMultStorm      EventType = "mult_storm"      // 倍率風暴觸發（DAY-138）
 	EventDualRoulette   EventType = "dual_roulette"   // 雙環輪盤高倍率（DAY-139）
+	EventMegaCatch      EventType = "mega_catch"      // Mega Catch 事件觸發（DAY-140）
 )
 
 // Priority 公告優先級
@@ -439,6 +440,33 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = "#FFD700"
 		priority = PriorityHigh
 		duration = 5000
+
+	case EventMegaCatch:
+		tierName := "🎣 大豐收"
+		tierIcon := "🎣"
+		rewardStr := "1.5"
+		durStr := "12"
+		if extra != nil {
+			if tn, ok := extra["tier_name"]; ok {
+				tierName = tn
+			}
+			if ti, ok := extra["tier_icon"]; ok {
+				tierIcon = ti
+			}
+			if rs, ok := extra["reward_boost"]; ok {
+				rewardStr = rs
+			}
+			if ds, ok := extra["duration"]; ok {
+				durStr = ds
+			}
+		}
+		title = tierIcon + " " + tierName + "！"
+		message = fmt.Sprintf("全場獎勵 ×%s！高倍率目標大量湧現！持續 %s 秒！", rewardStr, durStr)
+		icon = tierIcon
+		color = "#66CCFF"
+		priority = PriorityHigh
+		duration = 6000
+		_ = tierName // suppress unused warning
 
 	default:
 		title = "📢 公告"

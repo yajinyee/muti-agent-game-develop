@@ -61,6 +61,7 @@ import (
 	"digital-twin/server/internal/game/bounty"
 	"digital-twin/server/internal/game/multstorm"
 	"digital-twin/server/internal/game/dualroulette"
+	"digital-twin/server/internal/game/megacatch"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -125,6 +126,7 @@ type Game struct {
 	Bounty         *bounty.Manager         // 全服目標懸賞系統管理器（DAY-137）
 	MultStorm      *multstorm.Manager      // 全服倍率風暴系統管理器（DAY-138）
 	DualRoulette   *dualroulette.Manager   // 雙環輪盤系統管理器（DAY-139）
+	MegaCatch      *megacatch.Manager      // 全服 Mega Catch 事件系統管理器（DAY-140）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -150,6 +152,7 @@ type Game struct {
 	lastRaidTickAt     time.Time  // Co-op Raid 狀態廣播計時（每 3 秒，DAY-115）
 	lastGoldenTimeTickAt time.Time // 黃金時間 tick 計時（每秒，DAY-125）
 	lastRareCatchTickAt  time.Time // 稀有連擊過期檢查計時（每 5 秒，DAY-126）
+	lastMegaCatchTickAt  time.Time // Mega Catch 隨機觸發計時（每 60 秒，DAY-140）
 
 	// 補償機制
 	lastHighRewardAt time.Time
@@ -232,6 +235,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Bounty:             bounty.NewDefault(),
 		MultStorm:          multstorm.NewDefault(),
 		DualRoulette:       dualroulette.NewDefault(),
+		MegaCatch:          megacatch.NewDefault(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -388,6 +392,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendMultStormStatus(pp.ID)
 				// 發送雙環輪盤狀態（DAY-139）
 				g.sendDualRouletteStatus(pp.ID)
+				// 發送 Mega Catch 狀態（DAY-140）
+				g.sendMegaCatchStatus(pp.ID)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -924,6 +930,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if stormMult > 1.0 {
 		finalReward = int(float64(finalReward) * stormMult)
 	}
+	// 套用 Mega Catch 獎勵倍率（DAY-140）
+	megaCatchMult := g.getMegaCatchRewardBoost()
+	if megaCatchMult > 1.0 {
+		finalReward = int(float64(finalReward) * megaCatchMult)
+	}
 	// 雙環輪盤：擊破高倍率目標後嘗試觸發（DAY-139）
 	go g.tryDualRoulette(p, float64(t.Multiplier), finalReward)
 	// 懸賞領取：擊破懸賞目標獲得額外金幣（DAY-137）
@@ -1423,8 +1434,7 @@ func (g *Game) updateNormalPlay() {
 	if now.Sub(g.lastRareCatchTickAt) >= 5*time.Second {
 		g.lastRareCatchTickAt = now
 		go g.tickRareCatchExpiry()
-	}
-	// 天氣湧現事件過期檢查（每次 update，DAY-127）
+	}	// 天氣湧現事件過期檢查（每次 update，DAY-127）
 	g.tickWeatherSurge()
 	// 不死 BOSS 過期檢查（每次 update，DAY-129）
 	go g.tickImmortalBoss()
@@ -1444,6 +1454,13 @@ func (g *Game) updateNormalPlay() {
 	}
 	// 雙環輪盤超時自動停止（每次 update，DAY-139）
 	go g.tickDualRoulette()
+	// Mega Catch 過期檢查（每次 update，DAY-140）
+	go g.tickMegaCatch()
+	// Mega Catch 每分鐘隨機觸發（DAY-140）
+	if now.Sub(g.lastMegaCatchTickAt) >= 60*time.Second {
+		g.lastMegaCatchTickAt = now
+		go g.tryMegaCatchRandom()
+	}
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }
@@ -1478,6 +1495,8 @@ func (g *Game) spawnTarget() {
 		rareBonus += g.weatherSurgeRareBonus
 		goldFishBonus += g.weatherSurgeGoldBonus
 	}
+	// Mega Catch 生成加成（DAY-140）
+	rareBonus += g.getMegaCatchSpawnBoost()
 	def := g.SpawnSys.PickTargetDef(betLevel, bonusSpecial, rareBonus, goldFishBonus)
 	instanceID := uuid.New().String()
 

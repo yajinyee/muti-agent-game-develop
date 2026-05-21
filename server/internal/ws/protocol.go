@@ -352,6 +352,11 @@ const (
 	MsgDualRouletteResult MessageType = "dual_roulette_result" // 輪盤結果（Server→Client，個人）
 	MsgDualRouletteStatus MessageType = "dual_roulette_status" // 輪盤狀態（Server→Client，個人）
 
+	// 全服 Mega Catch 事件系統（DAY-140）
+	MsgMegaCatchStart  MessageType = "mega_catch_start"  // 事件開始廣播（Server→Client，全服）
+	MsgMegaCatchEnd    MessageType = "mega_catch_end"    // 事件結束廣播（Server→Client，全服）
+	MsgMegaCatchStatus MessageType = "mega_catch_status" // 事件狀態（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2861,4 +2866,33 @@ type DualRouletteResultPayload struct {
 // DualRouletteStatusPayload 輪盤狀態（Server → Client，個人）
 type DualRouletteStatusPayload struct {
 	CooldownLeft int `json:"cooldown_left"` // 冷卻剩餘秒數（0 = 可觸發）
+}
+
+// ---- 全服 Mega Catch 事件系統 Payloads（DAY-140）----
+
+// MegaCatchStartPayload 事件開始廣播（Server → Client，全服）
+type MegaCatchStartPayload struct {
+	TierName    string  `json:"tier_name"`    // 等級名稱
+	TierIcon    string  `json:"tier_icon"`    // 圖示
+	TierColor   string  `json:"tier_color"`   // 顏色
+	RewardBoost float64 `json:"reward_boost"` // 獎勵倍率加成
+	SpawnBoost  float64 `json:"spawn_boost"`  // 稀有目標生成加成
+	Duration    float64 `json:"duration"`     // 持續秒數
+	SecondsLeft float64 `json:"seconds_left"` // 剩餘秒數
+}
+
+// MegaCatchEndPayload 事件結束廣播（Server → Client，全服）
+type MegaCatchEndPayload struct {
+	Message string `json:"message"` // 顯示訊息
+}
+
+// MegaCatchStatusPayload 事件狀態（Server → Client，個人）
+type MegaCatchStatusPayload struct {
+	IsActive    bool    `json:"is_active"`    // 是否活躍
+	TierName    string  `json:"tier_name"`    // 等級名稱
+	TierIcon    string  `json:"tier_icon"`    // 圖示
+	TierColor   string  `json:"tier_color"`   // 顏色
+	RewardBoost float64 `json:"reward_boost"` // 獎勵倍率加成
+	SpawnBoost  float64 `json:"spawn_boost"`  // 稀有目標生成加成
+	SecondsLeft float64 `json:"seconds_left"` // 剩餘秒數
 }

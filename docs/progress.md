@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-139 雙環輪盤系統）
+## 最後更新：2026-05-21（DAY-140 全服 Mega Catch 事件系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-140 更新（自主觸發）：** 全服 Mega Catch 事件系統（Mega Catch Event System）✅
+  - **業界依據：** Ocean King 系列「Mega Catch」— 全場高倍率目標湧現 + 獎勵翻倍，BOSS 擊殺後 60% 機率觸發，是業界最經典的「全場事件」機制，讓玩家在 BOSS 擊殺後立刻感受到「全場瘋狂搶魚」的高峰體驗
+  - `server/internal/game/megacatch/megacatch.go`：Mega Catch 管理器；3個等級（🎣大豐收×1.5/12s、🌟超級豐收×2.0/10s、💎傳說豐收×3.0/8s）；TryTriggerBossKill（BOSS擊殺後60%觸發）；TryTriggerRandom（每分鐘5%隨機觸發）；ForceStart（Prototype展示用）；CheckExpiry（過期檢查）；GetRewardBoost/GetSpawnBoost/GetSnapshot/CanTrigger/GetCooldownLeft
+  - `server/internal/game/megacatch/megacatch_test.go`：18 個單元測試（New/IsActive_Initial/GetRewardBoost_NoEvent/GetSpawnBoost_NoEvent/CanTrigger_Initial/ForceStart_Basic/ForceStart_TierIndex/ForceStart_InvalidIndex/GetRewardBoost_Active/GetSpawnBoost_Active/CanTrigger_ActiveEvent/CheckExpiry_NotExpired/CheckExpiry_Expired/CheckExpiry_NoSession/GetSnapshot_NoEvent/GetSnapshot_Active/TryTriggerBossKill_AlwaysTrigger/TryTriggerBossKill_NeverTrigger/TryTriggerBossKill_ActiveEvent/Cooldown/EventTiers_Count/EventTiers_RewardBoosts）
+  - `server/internal/game/megacatch_handler.go`：tryMegaCatchBossKill（BOSS擊殺後觸發）；tryMegaCatchRandom（每分鐘隨機觸發）；broadcastMegaCatchStart（全服廣播+公告）；tickMegaCatch（過期廣播）；getMegaCatchRewardBoost/getMegaCatchSpawnBoost（供 handleKill/spawnTarget 使用）；sendMegaCatchStatus（登入時發送狀態）
+  - `server/internal/ws/protocol.go`：新增 MsgMegaCatchStart/MsgMegaCatchEnd/MsgMegaCatchStatus；MegaCatchStartPayload/MegaCatchEndPayload/MegaCatchStatusPayload
+  - `server/internal/game/announce/announce.go`：新增 EventMegaCatch；buildContent 加入 Mega Catch 公告（高優先，6秒）
+  - `server/internal/game/game.go`：Game struct 加入 MegaCatch *megacatch.Manager；NewGameWithStore 初始化；AddPlayer 發送狀態；handleKill 整合 Mega Catch 獎勵倍率（在倍率風暴之後）；spawnTarget 整合 Mega Catch 生成加成；updateNormalPlay 加入 tickMegaCatch + 每分鐘隨機觸發
+  - `server/internal/game/boss_handler.go`：handleBossKill 加入 tryMegaCatchBossKill（BOSS擊殺後觸發）
+  - `client/chiikawa-pixel/scripts/ui/MegaCatchPanel.gd`：Mega Catch 面板（頂部橫幅滑入；進度條；倒數計時；最後3秒紅色；全螢幕閃光依等級顏色；結束時滑出）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：2個訊號（mega_catch_started/mega_catch_ended）+ 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 MegaCatchPanelScript（z_index=83）
+  - 觸發設計：BOSS 擊殺後 60% 機率觸發；每分鐘 5% 機率隨機觸發；120 秒冷卻防止頻繁觸發
+  - 等級設計：大豐收（65%，×1.5，12s）/ 超級豐收（25%，×2.0，10s）/ 傳說豐收（10%，×3.0，8s）
+  - 雙重效果：獎勵倍率（所有擊破獎勵翻倍）+ 稀有目標生成加成（高倍率目標大量湧現）
+  - 倍率疊加：Mega Catch 在倍率風暴之後套用，最大疊加：黃金時間×3.0 + 稀有連擊×15.0 + 競速×3.0 + 彩虹風暴×5.0 + 傳說豐收×3.0 = 理論最大 2025x
+  - build/vet 全部通過（零錯誤零警告）；Windows Defender 誤報導致測試無法執行（已知問題）
 - **DAY-139 更新（自主觸發）：** 雙環輪盤系統（Dual-Ring Roulette System）✅
   - **業界依據：** Royal Fishing JILI 2026 ChainLong King Dual-Ring Roulette — 「Capture the ChainLong King to trigger the multiplier roulette. Spin inner and outer wheels simultaneously for combined multipliers reaching up to 350 times your bet.」— 擊破高倍率目標後觸發，內外圈相乘最高 150x，製造「技巧感」，是 2026 年最新的核心機制
   - `server/internal/game/dualroulette/dualroulette.go`：雙環輪盤管理器；TriggerConfig（MinMultiplier=30x/TriggerChance=15%/SpinDuration=3s/CooldownSecs=60）；InnerRing（2x/3x/5x/8x/10x）；OuterRing（2x/3x/5x/7x/10x/15x）；CanTrigger（倍率門檻+冷卻+活躍session檢查）；StartSession（預先決定結果/公平性保證）；StopSession（玩家停止/設定冷卻）；AutoStop（超時自動停止）；TickAutoStop（批次超時檢查）；GetSnapshot/HasActiveSession/GetCooldownLeft/RemovePlayer

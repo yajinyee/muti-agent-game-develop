@@ -174,6 +174,8 @@ signal mult_storm_started(storm_data: Dictionary)      # 倍率風暴開始（DA
 signal mult_storm_ended(storm_data: Dictionary)        # 倍率風暴結束（DAY-138）
 signal dual_roulette_started(roulette_data: Dictionary) # 雙環輪盤開始（DAY-139）
 signal dual_roulette_result(result_data: Dictionary)    # 雙環輪盤結果（DAY-139）
+signal mega_catch_started(event_data: Dictionary)       # Mega Catch 事件開始（DAY-140）
+signal mega_catch_ended(event_data: Dictionary)         # Mega Catch 事件結束（DAY-140）
 signal mystery_box_updated(box_data: Dictionary)       # 神秘寶箱狀態更新（DAY-090）
 signal mystery_box_dropped(drop_data: Dictionary)      # 神秘寶箱掉落通知（DAY-090）
 signal mystery_box_opened(open_data: Dictionary)       # 神秘寶箱開箱結果（DAY-090）
@@ -454,6 +456,12 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_dual_roulette_result(payload)
 		"dual_roulette_status":
 			pass  # 冷卻狀態，目前不需要特別處理
+		"mega_catch_start":
+			_handle_mega_catch_start(payload)
+		"mega_catch_end":
+			_handle_mega_catch_end(payload)
+		"mega_catch_status":
+			pass  # 登入時狀態，由 MegaCatchPanel 處理
 		"mystery_box_drop":
 			_handle_mystery_box_drop(payload)
 		"mystery_box_update":
@@ -1349,3 +1357,17 @@ func _handle_dual_roulette_result(payload: Dictionary) -> void:
 func send_dual_roulette_stop() -> void:
 	if NetworkManager != null:
 		NetworkManager.send_message({"type": "dual_roulette_stop", "payload": {}})
+
+## 處理 Mega Catch 事件開始（DAY-140）
+func _handle_mega_catch_start(payload: Dictionary) -> void:
+	var tier_name: String = payload.get("tier_name", "🎣 大豐收")
+	var reward_boost: float = payload.get("reward_boost", 1.5)
+	print("[GameManager] Mega Catch started: %s ×%.0f" % [tier_name, reward_boost])
+	emit_signal("mega_catch_started", payload)
+	if AudioManager != null:
+		AudioManager.play_sfx("bonus_ready")
+
+## 處理 Mega Catch 事件結束（DAY-140）
+func _handle_mega_catch_end(payload: Dictionary) -> void:
+	print("[GameManager] Mega Catch ended")
+	emit_signal("mega_catch_ended", payload)
