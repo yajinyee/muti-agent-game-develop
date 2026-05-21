@@ -3201,3 +3201,15 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **診斷方法：** `git hash-object <file>` 比較本地和 HEAD 的 hash
 - **解決：** 直接 `git add <file>` 強制加入，git 會處理 CRLF 轉換
 - **教訓：** Windows 上的 Go 文件可能有 CRLF 問題，不要依賴 `git diff` 判斷是否有修改
+
+## 83. Rapid Respin 系統設計（DAY-121）
+- **業界依據：** Reflex Gaming Big Game Fishing Rapid Riches（2026-05-14）加入 Rapid Respins 機制
+- **核心設計：** 擊破目標後有機率觸發「場上目標全部重新整理」，連鎖觸發最多 5 次，倍率遞增
+- **觸發機率：** LV1-4 = 4%，LV5-7 = 6%，LV8-10 = 8%；連鎖觸發機率翻倍
+- **連鎖視窗：** 10 秒內再次擊破可連鎖；超過視窗自動結束 session
+- **倍率遞增：** 1.0x → 1.5x → 2.0x → 3.0x → 5.0x（最多 5 連鎖）
+- **冷卻機制：** session 結束後 30 秒冷卻，防止連續觸發
+- **Respin 效果：** 清除場上所有非BOSS目標 → 延遲 300ms → 廣播清除 → 延遲 200ms → 生成新目標
+- **新目標數量：** 6 + chainCount × 2（最多 14 個），連鎖越多目標越多
+- **倍率加成：** 新生成目標的倍率 × chainMult（讓玩家感受到連鎖的價值）
+- **教訓：** Respin 系統要有「清除 → 等待 → 生成」三段節奏，讓 Client 有時間播放動畫

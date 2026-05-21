@@ -255,6 +255,9 @@ const (
 	MsgFragmentStatus   MessageType = "fragment_status"    // 碎片狀態回應（Server→Client）
 	// 幸運捕獲系統（DAY-119）
 	MsgLuckyCatch       MessageType = "lucky_catch"        // 幸運捕獲觸發廣播（Server→Client，廣播）
+	// Rapid Respin 系統（DAY-121）
+	MsgRapidRespin      MessageType = "rapid_respin"       // Rapid Respin 觸發廣播（Server→Client，廣播）
+	MsgRapidRespinEnd   MessageType = "rapid_respin_end"   // Rapid Respin 連鎖結束通知（Server→Client）
 	MsgError        MessageType = "error"
 	MsgPong         MessageType = "pong"
 )
@@ -2069,4 +2072,22 @@ type MissionMercyProtectedPayload struct {
 	Streak    int    `json:"streak"`     // 被保護的連續天數
 	MercyLeft int    `json:"mercy_left"` // 本週剩餘寬限次數（使用後）
 	Message   string `json:"message"`    // 顯示訊息
+}
+
+// RapidRespinPayload Rapid Respin 觸發廣播（Server → Client，廣播）（DAY-121）
+type RapidRespinPayload struct {
+	PlayerID    string  `json:"player_id"`    // 觸發玩家 ID
+	PlayerName  string  `json:"player_name"`  // 觸發玩家名稱
+	ChainCount  int     `json:"chain_count"`  // 當前連鎖次數（0=第一次，1=第二次...）
+	ChainMult   float64 `json:"chain_mult"`   // 當前連鎖倍率（1.0/1.5/2.0/3.0/5.0）
+	IsChain     bool    `json:"is_chain"`     // 是否為連鎖觸發
+	MaxChain    int     `json:"max_chain"`    // 最大連鎖次數（5）
+	Icon        string  `json:"icon"`         // 顯示圖示（⚡🔄）
+}
+
+// RapidRespinEndPayload Rapid Respin 連鎖結束通知（Server → Client）（DAY-121）
+type RapidRespinEndPayload struct {
+	PlayerID   string `json:"player_id"`   // 觸發玩家 ID
+	PlayerName string `json:"player_name"` // 觸發玩家名稱
+	TotalChain int    `json:"total_chain"` // 總連鎖次數
 }

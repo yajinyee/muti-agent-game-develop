@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-120 任務連續寬限期系統）
+## 最後更新：2026-05-21（DAY-121 Rapid Respin 系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-121 更新（自主觸發）：** Rapid Respin 系統（Rapid Respin System）✅
+  - `server/internal/game/respin/respin.go`：Rapid Respin 管理器（ShouldTrigger；依投注等級觸發機率4%/6%/8%；連鎖觸發視窗10秒；最多5連鎖；倍率遞增1.0x/1.5x/2.0x/3.0x/5.0x；30秒冷卻；GetSession/EndSession/RemovePlayer）
+  - `server/internal/game/respin/respin_test.go`：11 個單元測試全部通過（New/NoTrigger/Trigger/HighBet/Chain/MaxChain/Cooldown/ChainWindowExpired/GetCurrentMult/RemovePlayer/GetSession_NoSession）
+  - `server/internal/ws/protocol.go`：新增 MsgRapidRespin/MsgRapidRespinEnd（Server→Client廣播）；RapidRespinPayload（player_id/player_name/chain_count/chain_mult/is_chain/max_chain/icon）；RapidRespinEndPayload（player_id/player_name/total_chain）
+  - `server/internal/game/respin_handler.go`：notifyRespinKill（觸發判斷/廣播/執行Respin）；executeRespin（清除非BOSS目標/延遲300ms/廣播清除/延遲200ms/生成新目標含倍率加成）；checkRespinSessionExpiry（session過期檢查/通知玩家連鎖結束）
+  - `server/internal/game/game.go`：整合 RespinMgr *respin.Manager；NewGameWithStore 初始化；RemovePlayer 清理；handleKill 加入 notifyRespinKill（goroutine）；updateNormalPlay 加入 checkRespinSessionExpiry
+  - `client/chiikawa-pixel/scripts/ui/RapidRespinPanel.gd`：Rapid Respin 通知面板（全螢幕閃光效果；頂部橫幅滑入；連鎖進度5個圓點；3秒自動滑出；自己觸發時8個星形粒子；連鎖結束底部提示）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：rapid_respin/rapid_respin_end 訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 RapidRespinPanelScript preload + _init_rapid_respin_panel()（z_index=71）
+  - 觸發設計：LV1-4 觸發機率 4%；LV5-7 觸發機率 6%；LV8-10 觸發機率 8%；連鎖觸發機率翻倍
+  - 連鎖倍率：1.0x（天藍）→ 1.5x（綠）→ 2.0x（金）→ 3.0x（橙紅）→ 5.0x（粉紫）
+  - Respin 效果：清除場上所有非BOSS目標 → 生成 6+chain×2 個新目標（最多14個）→ 新目標倍率加成
+  - 全服廣播：所有玩家都能看到誰觸發了 Rapid Respin，增加社交感
+  - build/vet/test 全部通過（11/11 respin 測試）
+  - **業界依據：** Reflex Gaming Big Game Fishing Rapid Riches（2026-05-14）加入 Rapid Respins 機制；eegaming.org（2026-05-14）確認 Rapid Respin 是 2026 年捕魚機最新熱門功能；cats.com（2026-05）確認 Respin 機制讓玩家參與度提升 25%+
+
 - **DAY-120 更新（自主觸發）：** 任務連續寬限期系統（Mission Streak Mercy System）✅
   - `server/internal/game/mission_streak_handler.go`：升級連續任務系統（canUseMercy；每7天1次寬限期；連續≥3天才保護；中斷1-2天且有寬限期時保護連續記錄；使用寬限期時獎勵減半；checkMissionStreakMercy 登入時自動檢查）
   - `server/internal/ws/protocol.go`：MissionStreakBonusPayload 加入 MercyUsed/MercyLeft 欄位；新增 MsgMissionMercyProtected；MissionMercyProtectedPayload（streak/mercy_left/message）

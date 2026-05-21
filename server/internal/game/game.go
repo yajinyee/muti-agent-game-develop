@@ -22,6 +22,7 @@ import (
 	"digital-twin/server/internal/game/dm"
 	"digital-twin/server/internal/game/fragment"
 	"digital-twin/server/internal/game/mysterybox"
+	"digital-twin/server/internal/game/respin"
 	"digital-twin/server/internal/game/specialweapon"
 	"digital-twin/server/internal/game/dailyspin"
 	"digital-twin/server/internal/game/event"
@@ -95,6 +96,7 @@ type Game struct {
 	Roulette      *roulette.Manager      // 雙層倍率輪盤管理器（DAY-113）
 	RaidBoss      *raidboss.Manager      // Co-op Boss Raid 管理器（DAY-115）
 	Fragment      *fragment.Manager      // 碎片收集大獎管理器（DAY-116）
+	RespinMgr     *respin.Manager        // Rapid Respin 管理器（DAY-121）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -178,6 +180,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Roulette:           roulette.NewManager(),
 		RaidBoss:           raidboss.New(),
 		Fragment:           fragment.New(),
+		RespinMgr:          respin.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -367,6 +370,8 @@ func (g *Game) RemovePlayer(playerID string) {
 		g.Roulette.CancelSession(playerID)
 		// 清理碎片狀態（DAY-116）
 		g.Fragment.RemovePlayer(playerID)
+		// 清理 Rapid Respin session（DAY-121）
+		g.RespinMgr.RemovePlayer(playerID)
 	}
 }
 
@@ -962,6 +967,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if g.getFestivalRewardMult() > 1.0 {
 		go g.tryLuckyCatch(p, "festival")
 	}
+	// Rapid Respin：擊破後嘗試觸發（DAY-121）
+	go g.notifyRespinKill(p, finalReward)
 }
 
 // handleLock 處理鎖定
@@ -1224,6 +1231,8 @@ func (g *Game) updateNormalPlay() {
 	if shouldTickRaid {
 		go g.tickRaidUpdate()
 	}
+	// Rapid Respin session 過期檢查（每次 update，DAY-121）
+	g.checkRespinSessionExpiry()
 }
 
 // spawnTarget 生成目標

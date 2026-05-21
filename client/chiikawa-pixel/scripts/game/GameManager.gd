@@ -51,6 +51,9 @@ signal fragment_status_received(status_data: Dictionary)    # 碎片狀態回應
 signal lucky_catch(catch_data: Dictionary)                  # 幸運捕獲廣播（全服）
 # 任務連續寬限期（DAY-120）
 signal mission_mercy_protected(mercy_data: Dictionary)      # 寬限期保護通知
+# Rapid Respin 系統（DAY-121）
+signal rapid_respin(respin_data: Dictionary)                # Rapid Respin 觸發廣播（全服）
+signal rapid_respin_end(end_data: Dictionary)               # Rapid Respin 連鎖結束通知
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -415,6 +418,11 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 		# 任務連續寬限期（DAY-120）
 		"mission_mercy_protected":
 			emit_signal("mission_mercy_protected", payload)
+		# Rapid Respin 系統（DAY-121）
+		"rapid_respin":
+			emit_signal("rapid_respin", payload)
+		"rapid_respin_end":
+			emit_signal("rapid_respin_end", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")
