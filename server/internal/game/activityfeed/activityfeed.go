@@ -21,6 +21,7 @@ const (
 	EventHallOfFame   EventType = "hall_of_fame"   // 名人堂新記錄
 	EventSeasonLevel  EventType = "season_level"   // 賽季升級
 	EventMilestone    EventType = "milestone"      // 登入里程碑
+	EventLightningChain EventType = "lightning_chain" // 閃電鰻連鎖擊破（DAY-132）
 )
 
 // Rarity 事件稀有度（影響 UI 顯示顏色）

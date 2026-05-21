@@ -29,6 +29,7 @@ const (
 	EventGrandJackpot  EventType = "grand_jackpot"   // Grand Jackpot 中獎（最高優先）
 	EventGoldenTime    EventType = "golden_time"     // 黃金時間開始（DAY-125）
 	EventWeatherSurge  EventType = "weather_surge"   // 天氣湧現事件（DAY-127）
+	EventLightningChain EventType = "lightning_chain" // 閃電鰻連鎖擊破（DAY-132）
 )
 
 // Priority 公告優先級
@@ -276,6 +277,24 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = "#4A90D9"
 		priority = PriorityHigh
 		duration = 6000
+
+	case EventLightningChain:
+		kills := ""
+		reward := ""
+		if extra != nil {
+			if k, ok := extra["kills"]; ok {
+				kills = k
+			}
+			if r, ok := extra["reward"]; ok {
+				reward = r
+			}
+		}
+		title = "⚡ 閃電連鎖！"
+		message = fmt.Sprintf("%s 閃電連鎖擊破 %s 個目標！獲得 🪙%s！", name, kills, reward)
+		icon = "⚡"
+		color = "#FFE066"
+		priority = PriorityNormal
+		duration = 4000
 
 	default:
 		title = "📢 公告"

@@ -222,6 +222,7 @@ func _ready() -> void:
 	_init_immortal_boss_panel()   # 不死 BOSS 連勝面板（DAY-129）
 	_init_awaken_boss_panel()     # 覺醒 BOSS 面板（DAY-130）
 	_init_win_streak_panel()      # 連勝獎勵面板（DAY-131）
+	_init_lightning_eel_panel()   # 閃電鰻連鎖攻擊面板（DAY-132）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2638,3 +2639,23 @@ func _init_win_streak_panel() -> void:
 	GameManager.win_streak_updated.connect(func(data): panel.on_win_streak_update(data))
 	GameManager.win_streak_milestone.connect(func(data): panel.on_win_streak_milestone(data))
 	GameManager.win_streak_reset.connect(func(data): panel.on_win_streak_reset(data))
+
+# ---- 閃電鰻連鎖攻擊面板（DAY-132）----
+const LightningEelPanelScript = preload("res://scripts/ui/LightningEelPanel.gd")
+var _lightning_eel_panel: Control = null
+
+func _init_lightning_eel_panel() -> void:
+	var panel = LightningEelPanelScript.new()
+	panel.name = "LightningEelPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 66
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_lightning_eel_panel = panel
+
+	# 設定玩家 ID（用於判斷是否為自己觸發）
+	if GameManager.local_player_id != "":
+		panel.set_player_id(GameManager.local_player_id)
+
+	GameManager.lightning_eel_chain.connect(func(data): panel.show_chain_result(data))
+	GameManager.lightning_eel_status.connect(func(data): panel.update_status(data))

@@ -97,6 +97,9 @@ signal awaken_boss_status(data: Dictionary)                 # 覺醒 BOSS 狀態
 signal win_streak_updated(data: Dictionary)                 # 連勝更新（個人）
 signal win_streak_milestone(data: Dictionary)               # 里程碑達成（個人/全服）
 signal win_streak_reset(data: Dictionary)                   # 連勝重置（個人）
+# 閃電鰻連鎖攻擊系統（DAY-132）
+signal lightning_eel_chain(data: Dictionary)                # 連鎖攻擊結果廣播（全服）
+signal lightning_eel_status(data: Dictionary)               # 閃電鰻冷卻狀態（個人）
 signal title_unlocked(title_data: Dictionary)          # 稱號解鎖通知（DAY-068）
 signal skin_updated(skin_data: Dictionary)             # 砲台外觀更新（DAY-071）
 signal season_updated(season_data: Dictionary)         # 賽季通行證更新（DAY-072）
@@ -538,6 +541,11 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			emit_signal("win_streak_milestone", payload)
 		"win_streak_reset":
 			emit_signal("win_streak_reset", payload)
+		# 閃電鰻連鎖攻擊系統（DAY-132）
+		"lightning_eel_chain":
+			emit_signal("lightning_eel_chain", payload)
+		"lightning_eel_status":
+			emit_signal("lightning_eel_status", payload)
 
 func _handle_game_state(payload: Dictionary) -> void:
 	var new_state = payload.get("state", "")

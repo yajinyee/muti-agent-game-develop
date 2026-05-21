@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-131 連勝獎勵系統）
+## 最後更新：2026-05-21（DAY-132 閃電鰻連鎖攻擊系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-131 更新（自主觸發）：** 連勝獎勵系統（Win Streak Bonus System）✅
+- **DAY-132 更新（自主觸發）：** 閃電鰻連鎖攻擊系統（Lightning Eel Chain Attack System）✅
+  - **業界依據：** JILI Royal Fishing 2026 — 「The 60x lightning eel creates chain reactions that jump between nearby fish. Once activated, electric shocks continue spreading until targeting disengages, creating cascading capture sequences.」
+  - `server/internal/game/lightningeel/lightningeel.go`：閃電鰻連鎖管理器；ChainConfig（MaxJumps=5/JumpKillChance=45%/JumpMultMod=0.6/JumpRangeUnits=200/CooldownSecs=8）；ExecuteChain（收集附近目標/逐一跳躍/45%擊破機率/獎勵=目標倍率×0.6×betCost）；CanTrigger/CooldownLeft/RemovePlayer/GetSnapshot
+  - `server/internal/game/lightningeel/lightningeel_test.go`：15 個單元測試全部通過（New/CanTrigger_NewPlayer/CanTrigger_AfterChain/CooldownLeft/CooldownLeft_NewPlayer/ExecuteChain_Basic/ExecuteChain_MaxJumps/ExecuteChain_NoTargets/ExecuteChain_NoDuplicateJumps/ExecuteChain_RewardCalc/ExecuteChain_JumpIndex/RemovePlayer/GetSnapshot/GetSnapshot_AfterChain/MultiplePlayers/CanTrigger_AfterCooldown）
+  - `server/internal/game/lightningeel_handler.go`：tryLightningEelChain（收集 200 單位範圍內目標/執行連鎖/擊破目標廣播/全服廣播連鎖結果/≥3個擊破全服公告/≥4個擊破動態牆）；sendLightningEelStatus（登入時發送冷卻狀態）；announceLightningChain；notifyFeedLightningChain
+  - `server/internal/game/game.go`：整合 LightningEel *lightningeel.Manager；NewGameWithStore 初始化；RemovePlayer 清理；AddPlayer 發送狀態；handleKill 整合 tryLightningEelChain（T103 擊破時觸發）
+  - `server/internal/ws/protocol.go`：新增 MsgLightningEelChain/MsgLightningEelStatus；LightningEelJumpEntry/LightningEelChainPayload/LightningEelStatusPayload
+  - `server/internal/game/announce/announce.go`：新增 EventLightningChain；buildContent 加入閃電連鎖公告（4秒顯示，普通優先）
+  - `server/internal/game/activityfeed/activityfeed.go`：新增 EventLightningChain 事件類型
+  - `client/chiikawa-pixel/scripts/ui/LightningEelPanel.gd`：閃電鰻面板（全螢幕閃電閃光；頂部橫幅滑入；個人結果彈窗右側滑入含跳躍列表；自己觸發時金色主題；他人觸發時白色主題）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：2個訊號 + 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 LightningEelPanelScript（z_index=66）
+  - 連鎖設計：T103 閃電鰻擊破後觸發；200 單位範圍內目標都可能被連鎖；最多跳 5 次；每次跳躍 45% 擊破機率；跳躍獎勵 = 目標倍率 × 0.6 × betCost（略低於直接擊破，平衡性考量）
+  - 冷卻機制：8 秒冷卻（每個玩家獨立），防止連續觸發
+  - 廣播機制：連鎖結果全服廣播（讓所有玩家看到閃電效果）；≥3個擊破全服公告；≥4個擊破動態牆
+  - 無附近目標時不消耗冷卻（讓玩家可以立即再試）
+  - build/vet 全部通過（零錯誤零警告）；15/15 lightningeel 測試通過
+
+
   - **業界依據：** BGaming Fishing Club 2026 Best Win/Best Catch 里程碑；連勝系統讓玩家有「保持節奏」的動力，提升短期留存率
   - `server/internal/game/winstreak/winstreak.go`：連勝管理器；4個里程碑（銅牌10次/銀牌25次/金牌50次/傳說100次）；30秒超時重置；RecordKill（累積/里程碑判斷/重置檢查）；GetProgressToNext/GetSnapshot/CheckExpiry/RemovePlayer
   - `server/internal/game/winstreak/winstreak_test.go`：12 個單元測試全部通過（New/RecordKill_Basic/RecordKill_BronzeMilestone/RecordKill_SilverMilestone/RecordKill_NoDuplicateMilestone/RecordKill_Expiry/CheckExpiry/GetSnapshot/GetProgressToNext/RemovePlayer/MultiplePlayers/MilestoneReset_AfterExpiry）

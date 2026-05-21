@@ -312,6 +312,10 @@ const (
 	MsgWinStreakMilestone MessageType = "win_streak_milestone" // 里程碑達成（Server→Client，個人/全服）
 	MsgWinStreakReset     MessageType = "win_streak_reset"     // 連勝重置（Server→Client，個人）
 
+	// 閃電鰻連鎖攻擊系統（DAY-132）
+	MsgLightningEelChain  MessageType = "lightning_eel_chain"  // 連鎖攻擊結果廣播（Server→Client，全服）
+	MsgLightningEelStatus MessageType = "lightning_eel_status" // 閃電鰻冷卻狀態（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2562,4 +2566,36 @@ type WinStreakMilestonePayload struct {
 type WinStreakResetPayload struct {
 	FinalStreak int `json:"final_streak"` // 最終連勝次數
 	MaxStreak   int `json:"max_streak"`   // 本 session 最高連勝
+}
+
+// ---- 閃電鰻連鎖攻擊系統 Payloads（DAY-132）----
+
+// LightningEelJumpEntry 單次跳躍結果
+type LightningEelJumpEntry struct {
+	TargetInstanceID string  `json:"target_instance_id"` // 被跳躍的目標 instance ID
+	TargetDefID      string  `json:"target_def_id"`      // 目標定義 ID
+	TargetName       string  `json:"target_name"`        // 目標名稱
+	Killed           bool    `json:"killed"`             // 是否擊破
+	Multiplier       float64 `json:"multiplier"`         // 目標原始倍率
+	Reward           int64   `json:"reward"`             // 實際獎勵（Killed 才有）
+	JumpIndex        int     `json:"jump_index"`         // 第幾次跳躍（1-based）
+}
+
+// LightningEelChainPayload 連鎖攻擊結果廣播（Server → Client，全服）（DAY-132）
+type LightningEelChainPayload struct {
+	PlayerID        string                  `json:"player_id"`         // 觸發玩家 ID
+	PlayerName      string                  `json:"player_name"`       // 觸發玩家名稱
+	TriggerTargetID string                  `json:"trigger_target_id"` // 觸發連鎖的閃電鰻 instance ID
+	Jumps           []LightningEelJumpEntry `json:"jumps"`             // 所有跳躍結果
+	TotalKills      int                     `json:"total_kills"`       // 總擊破數
+	TotalReward     int64                   `json:"total_reward"`      // 總獎勵
+	NewBalance      int64                   `json:"new_balance"`       // 觸發玩家新餘額
+}
+
+// LightningEelStatusPayload 閃電鰻冷卻狀態（Server → Client，個人）（DAY-132）
+type LightningEelStatusPayload struct {
+	PlayerID     string `json:"player_id"`      // 玩家 ID
+	CooldownLeft int    `json:"cooldown_left"`  // 冷卻剩餘秒數（0 = 可觸發）
+	MaxJumps     int    `json:"max_jumps"`      // 最大跳躍次數
+	JumpRange    float64 `json:"jump_range"`   // 跳躍範圍（Client 用於視覺）
 }

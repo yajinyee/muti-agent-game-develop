@@ -49,6 +49,7 @@ import (
 	"digital-twin/server/internal/game/weather"
 	"digital-twin/server/internal/game/wheel"
 	"digital-twin/server/internal/game/winstreak"
+	"digital-twin/server/internal/game/lightningeel"
 	"digital-twin/server/internal/anticheat"
 	"digital-twin/server/internal/game/festival"
 	"digital-twin/server/internal/game/halloffame"
@@ -111,6 +112,7 @@ type Game struct {
 	ImmortalBoss   *immortalboss.Manager   // 不死 BOSS 連勝管理器（DAY-129）
 	AwakenBoss     *awakenboss.Manager     // 覺醒 BOSS 系統管理器（DAY-130）
 	WinStreak      *winstreak.Manager      // 連勝獎勵系統管理器（DAY-131）
+	LightningEel   *lightningeel.Manager   // 閃電鰻連鎖攻擊管理器（DAY-132）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -211,6 +213,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		ImmortalBoss:       immortalboss.New(),
 		AwakenBoss:         awakenboss.New(),
 		WinStreak:          winstreak.New(),
+		LightningEel:       lightningeel.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -353,6 +356,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendImmortalBossStatus(pp)
 				// 發送覺醒 BOSS 狀態（DAY-130）
 				g.sendAwakenBossStatus(pp)
+				// 發送閃電鰻冷卻狀態（DAY-132）
+				g.sendLightningEelStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -419,6 +424,10 @@ func (g *Game) RemovePlayer(playerID string) {
 		// 清理連勝記錄（DAY-131）
 		if g.WinStreak != nil {
 			g.WinStreak.RemovePlayer(playerID)
+		}
+		// 清理閃電鰻冷卻記錄（DAY-132）
+		if g.LightningEel != nil {
+			g.LightningEel.RemovePlayer(playerID)
 		}
 		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
@@ -1058,6 +1067,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		streak = p.Streak.GetSnapshot().Current
 	}
 	go g.notifyFlashChallengeKill(p, t.DefID, float64(t.Multiplier), streak)
+	// 閃電鰻連鎖攻擊：擊破 T103 時觸發（DAY-132）
+	if isLightningEel(t.DefID) {
+		go g.tryLightningEelChain(p, t.InstanceID, t.X, t.Y)
+	}
 }
 
 // handleLock 處理鎖定
