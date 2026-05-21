@@ -232,6 +232,7 @@ func _ready() -> void:
 	_init_mega_catch_panel()      # Mega Catch 事件面板（DAY-140）
 	_init_drill_lobster_panel()   # 鑽頭龍蝦連帶效果面板（DAY-142）
 	_init_bomb_crab_panel()       # 炸彈蟹連環爆炸面板（DAY-143）
+	_init_mega_octopus_panel()    # 巨型章魚轉盤面板（DAY-144）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2829,3 +2830,16 @@ func _init_bomb_crab_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_bomb_crab_panel = panel
+
+# ---- 巨型章魚轉盤面板（DAY-144）----
+
+const MegaOctopusPanelScript = preload("res://scripts/ui/MegaOctopusPanel.gd")
+var _mega_octopus_panel: Control = null
+
+func _init_mega_octopus_panel() -> void:
+	var panel = MegaOctopusPanelScript.new()
+	panel.name = "MegaOctopusPanel"
+	panel.layer = 89  # 在 BombCrabPanel(85) 之上，轉盤需要高層級
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_mega_octopus_panel = panel

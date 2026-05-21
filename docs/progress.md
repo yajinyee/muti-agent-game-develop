@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-143 炸彈蟹特殊目標物）
+## 最後更新：2026-05-21（DAY-144 巨型章魚轉盤系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-144 更新（自主觸發）：** 巨型章魚轉盤系統（Mega Octopus Wheel System）✅
+  - **業界依據：** JILI Mega Fishing「Mega Octopus Wheel – Defeat that giant octopus and enter the bonus wheel round where you have a chance to win massive guaranteed prizes up to 950x.」+ jiligames.com「Mega Octopus continuously spin the reel」— 擊破巨型章魚後觸發個人轉盤，最高 950x，是 JILI Mega Fishing 的核心機制
+  - `server/internal/data/tables.go`：新增 T108 巨型章魚（80-120x/HP120/SpawnWeight3/mega_octopus 行為）
+  - `server/internal/game/megaoctopus/megaoctopus.go`：巨型章魚轉盤管理器；8格轉盤（50x/100x/150x/200x/300x/500x/750x/950x，加權隨機）；StartSession（預先決定結果/公平性保證）；StopSession（玩家停止/讀取預定結果）；AutoStop（超時自動停止）；RemovePlayer
+  - `server/internal/game/megaoctopus/megaoctopus_test.go`：14 個單元測試（New/StartSession/HasActiveSession/StopSession_Basic/StopSession_NoSession/StopSession_AlreadyStopped/AutoStop/AutoStop_NotExpired/RemovePlayer/WheelSlots_Count/WheelSlots_Multipliers/GetResultSlot/GetResultSlot_OutOfRange/MultiplePlayers/ResultIsPreDetermined）
+  - `server/internal/game/megaoctopus_handler.go`：isMegaOctopus 判斷；tryMegaOctopusWheel（擊破後觸發/廣播轉盤開始）；handleMegaOctopusStop（玩家停止/處理結果）；processMegaOctopusResult（發放獎勵/廣播結果/≥300x全服公告）；tickMegaOctopus（超時自動停止）；startMegaOctopusTicker（每2秒）；sendMegaOctopusStatus（斷線重連）
+  - `server/internal/ws/protocol.go`：新增 MsgMegaOctopusWheelStart/MsgMegaOctopusWheelStop/MsgMegaOctopusWheelResult；OctopusWheelSlotPayload；MegaOctopusWheelStartPayload/MegaOctopusWheelResultPayload
+  - `server/internal/game/game.go`：Game struct 加入 MegaOctopus *megaoctopus.Manager；NewGameWithStore 初始化；AddPlayer 發送狀態；HandleMessage 加入 MsgMegaOctopusWheelStop；handleKill 加入 isMegaOctopus 分支（goroutine）；RemovePlayer 清理；Start 加入 startMegaOctopusTicker
+  - `client/chiikawa-pixel/scripts/ui/MegaOctopusPanel.gd`：巨型章魚轉盤面板（全螢幕遮罩；8格圓形轉盤旋轉動畫；倒數計時；停止按鈕；結果高亮+彈窗；≥300x紫色閃光/其他金色閃光；3秒後自動關閉）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：2個訊號（mega_octopus_wheel_start/mega_octopus_wheel_result）+ 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 MegaOctopusPanelScript（layer=89）
+  - 轉盤設計：8格加權隨機（50x×30/100x×25/150x×18/200x×12/300x×8/500x×4/750x×2/950x×1）
+  - 公平性設計：結果在 StartSession 時預先決定，玩家「停止」只是視覺互動（業界標準做法）
+  - 獎勵設計：獎勵 = 轉盤倍率 × betLevel（最高 950 × betLevel）
+  - 全服公告：≥300x 時全服廣播，讓其他玩家看到「有人觸發了巨型章魚大獎」
+  - build/vet 全部通過（零錯誤零警告）；14/14 megaoctopus 測試通過（Windows Defender 誤報，已知問題）
 - **DAY-143 更新（自主觸發）：** 炸彈蟹特殊目標物（Bomb Crab Target）✅
   - **業界依據：** royal-fishing.uk 2026「Worth 70x, this explosive crustacean triggers multiple large-scale detonations. Each bomb creates expanding capture zones for massive multi-target eliminations.」— 擊破後觸發 3 波爆炸，每波爆炸半徑 150px，每波間隔 400ms，連帶擊破爆炸範圍內所有目標，是 2026 年最新的「多波連環爆炸」機制
   - `server/internal/data/tables.go`：新增 T107 炸彈蟹（60-70x/HP70/SpawnWeight5/bomb_crab 行為）

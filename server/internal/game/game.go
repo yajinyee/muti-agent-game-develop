@@ -62,6 +62,7 @@ import (
 	"digital-twin/server/internal/game/multstorm"
 	"digital-twin/server/internal/game/dualroulette"
 	"digital-twin/server/internal/game/megacatch"
+	"digital-twin/server/internal/game/megaoctopus"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -127,6 +128,7 @@ type Game struct {
 	MultStorm      *multstorm.Manager      // 全服倍率風暴系統管理器（DAY-138）
 	DualRoulette   *dualroulette.Manager   // 雙環輪盤系統管理器（DAY-139）
 	MegaCatch      *megacatch.Manager      // 全服 Mega Catch 事件系統管理器（DAY-140）
+	MegaOctopus    *megaoctopus.Manager    // 巨型章魚轉盤系統管理器（DAY-144）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -236,6 +238,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		MultStorm:          multstorm.NewDefault(),
 		DualRoulette:       dualroulette.NewDefault(),
 		MegaCatch:          megacatch.NewDefault(),
+		MegaOctopus:        megaoctopus.NewManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -272,6 +275,8 @@ func (g *Game) Start() {
 	g.startStreakTicker()
 	// 啟動好友挑戰結算計時器（DAY-102）
 	g.startChallengeTicker()
+	// 啟動巨型章魚轉盤超時計時器（DAY-144）
+	g.startMegaOctopusTicker()
 	go g.gameLoop()
 }
 
@@ -394,6 +399,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendDualRouletteStatus(pp.ID)
 				// 發送 Mega Catch 狀態（DAY-140）
 				g.sendMegaCatchStatus(pp.ID)
+				// 發送巨型章魚轉盤狀態（DAY-144）
+				g.sendMegaOctopusStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -476,6 +483,10 @@ func (g *Game) RemovePlayer(playerID string) {
 		// 清理雙環輪盤 session（DAY-139）
 		if g.DualRoulette != nil {
 			g.DualRoulette.RemovePlayer(playerID)
+		}
+		// 清理巨型章魚轉盤 session（DAY-144）
+		if g.MegaOctopus != nil {
+			g.MegaOctopus.RemovePlayer(playerID)
 		}
 		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
@@ -701,6 +712,14 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 雙環輪盤系統（DAY-139）
 	case ws.MsgDualRouletteStop:
 		g.handleDualRouletteStop(clientID)
+	// 巨型章魚轉盤系統（DAY-144）
+	case ws.MsgMegaOctopusWheelStop:
+		g.mu.RLock()
+		p, ok := g.Players[clientID]
+		g.mu.RUnlock()
+		if ok {
+			g.handleMegaOctopusStop(p)
+		}
 	}
 }
 
@@ -1165,6 +1184,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 炸彈蟹連環爆炸：擊破 T107 時觸發（DAY-143）
 	if isBombCrab(t.DefID) {
 		go g.tryBombCrabChain(p, t.InstanceID, t.X, t.Y)
+	}
+	// 巨型章魚轉盤：擊破 T108 時觸發（DAY-144）
+	if isMegaOctopus(t.DefID) {
+		go g.tryMegaOctopusWheel(p, t.InstanceID)
 	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)

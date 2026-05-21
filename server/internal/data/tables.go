@@ -87,7 +87,14 @@ var Targets = map[string]*TargetDef{
 	// T107 炸彈蟹（DAY-143）— 業界依據：royal-fishing.uk 2026「Worth 70x, this explosive crustacean triggers multiple large-scale detonations.
 	// Each bomb creates expanding capture zones for massive multi-target eliminations.」
 	// 擊破後觸發 3 波爆炸，每波爆炸半徑 150px，每波間隔 400ms，連帶擊破爆炸範圍內所有目標
+	// T107 炸彈蟹（DAY-143）— 業界依據：royal-fishing.uk 2026「Worth 70x, this explosive crustacean triggers multiple large-scale detonations.
+	// Each bomb creates expanding capture zones for massive multi-target eliminations.」
+	// 擊破後觸發 3 波爆炸，每波爆炸半徑 150px，每波間隔 400ms，連帶擊破爆炸範圍內所有目標
 	"T107": {ID: "T107", Name: "炸彈蟹", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 70, HP: 70, SpawnWeight: 5, Speed: 35, Lifetime: 12, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "bomb_crab"},
+	// T108 巨型章魚（DAY-144）— 業界依據：JILI Mega Fishing「Mega Octopus Wheel – Defeat that giant octopus and enter
+	// the bonus wheel round where you have a chance to win massive guaranteed prizes up to 950x.」
+	// 擊破後觸發個人轉盤（8格：50x-950x），玩家點擊停止，結果預先決定（公平性保證）
+	"T108": {ID: "T108", Name: "巨型章魚", Type: TargetTypeSpecial, MultiplierMin: 80, MultiplierMax: 120, HP: 120, SpawnWeight: 3, Speed: 30, Lifetime: 15, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "mega_octopus"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

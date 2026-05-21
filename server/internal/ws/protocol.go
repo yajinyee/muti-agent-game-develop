@@ -364,6 +364,11 @@ const (
 	// 炸彈蟹連環爆炸系統（DAY-143）
 	MsgBombCrabChain MessageType = "bomb_crab_chain" // 炸彈蟹連環爆炸廣播（Server→Client，全服）
 
+	// 巨型章魚轉盤系統（DAY-144）
+	MsgMegaOctopusWheelStart  MessageType = "mega_octopus_wheel_start"  // 轉盤開始（Server→Client，個人）
+	MsgMegaOctopusWheelStop   MessageType = "mega_octopus_wheel_stop"   // 玩家停止轉盤（Client→Server）
+	MsgMegaOctopusWheelResult MessageType = "mega_octopus_wheel_result" // 轉盤結果（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2969,4 +2974,31 @@ type BombCrabChainPayload struct {
 	TotalReward   int                 `json:"total_reward"`   // 總獎勵（result 時）
 	KillerID      string              `json:"killer_id"`      // 觸發玩家 ID
 	KillerName    string              `json:"killer_name"`    // 觸發玩家名稱
+}
+
+// ---- 巨型章魚轉盤系統（DAY-144）----
+
+// OctopusWheelSlotPayload 巨型章魚轉盤格子資訊
+type OctopusWheelSlotPayload struct {
+	Index      int    `json:"index"`      // 格子索引（0-7）
+	Multiplier int    `json:"multiplier"` // 倍率
+	Color      string `json:"color"`      // 顯示顏色（hex）
+	Label      string `json:"label"`      // 顯示文字
+}
+
+// MegaOctopusWheelStartPayload 轉盤開始通知（Server → Client，個人）
+type MegaOctopusWheelStartPayload struct {
+	TriggerID    string                    `json:"trigger_id"`    // 觸發的 T108 InstanceID
+	SpinDuration int                       `json:"spin_duration"` // 旋轉時間（秒）
+	Slots        []OctopusWheelSlotPayload `json:"slots"`         // 轉盤格子定義
+}
+
+// MegaOctopusWheelResultPayload 轉盤結果（Server → Client，個人）
+type MegaOctopusWheelResultPayload struct {
+	ResultIndex int    `json:"result_index"` // 結果格子索引
+	Multiplier  int    `json:"multiplier"`   // 獲得倍率
+	Reward      int    `json:"reward"`       // 獲得金幣
+	NewBalance  int    `json:"new_balance"`  // 新餘額
+	SlotLabel   string `json:"slot_label"`   // 格子文字（如 "950x 👑"）
+	SlotColor   string `json:"slot_color"`   // 格子顏色
 }
