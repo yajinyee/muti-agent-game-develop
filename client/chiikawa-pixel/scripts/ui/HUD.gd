@@ -236,6 +236,7 @@ func _ready() -> void:
 	_init_anglerfish_panel()      # 巨型鮟鱇魚電擊寶箱面板（DAY-145）
 	_init_crocodile_panel()       # 巨型鹹水鱷魚獵魚面板（DAY-146）
 	_init_giant_prize_fish_panel() # 夢幻巨型獎勵魚面板（DAY-147）
+	_init_chainlong_wheel_panel()  # 千龍王強化輪盤面板（DAY-148）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2887,3 +2888,63 @@ func _init_giant_prize_fish_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_giant_prize_fish_panel = panel
+
+# ---- 千龍王強化輪盤面板（DAY-148）----
+
+const ChainLongWheelPanelScript = preload("res://scripts/ui/ChainLongWheelPanel.gd")
+var _chainlong_wheel_panel: Control = null
+
+func _init_chainlong_wheel_panel() -> void:
+	var panel = ChainLongWheelPanelScript.new()
+	panel.name = "ChainLongWheelPanel"
+	panel.z_index = 90  # 在 GiantPrizeFishPanel(88) 之上，是最高優先級的個人機制
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_chainlong_wheel_panel = panel
+
+	# 連接千龍王輪盤訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("chainlong_wheel_start"):
+			gm.chainlong_wheel_start.connect(_on_chainlong_wheel_start)
+		if gm.has_signal("chainlong_wheel_result"):
+			gm.chainlong_wheel_result.connect(_on_chainlong_wheel_result)
+
+func _on_chainlong_wheel_start(data: Dictionary) -> void:
+	if not is_instance_valid(_chainlong_wheel_panel):
+		return
+	var my_id = ""
+	var gm = get_node_or_null("/root/GameManager")
+	if gm and gm.has_method("get_player_id"):
+		my_id = gm.get_player_id()
+	var killer_id: String = data.get("killer_id", "")
+	var is_personal: bool = (killer_id == my_id)
+	_chainlong_wheel_panel.show_wheel(
+		data.get("killer_name", ""),
+		data.get("target_mult", 500.0),
+		data.get("base_reward", 0),
+		data.get("spin_secs", 4.0),
+		data.get("inner_slots", [5.0, 10.0, 20.0, 30.0, 50.0]),
+		data.get("outer_slots", [2.0, 3.0, 5.0, 7.0, 10.0, 20.0]),
+		is_personal
+	)
+
+func _on_chainlong_wheel_result(data: Dictionary) -> void:
+	if not is_instance_valid(_chainlong_wheel_panel):
+		return
+	var my_id = ""
+	var gm = get_node_or_null("/root/GameManager")
+	if gm and gm.has_method("get_player_id"):
+		my_id = gm.get_player_id()
+	var killer_id: String = data.get("killer_id", "")
+	var is_personal: bool = (killer_id == my_id)
+	_chainlong_wheel_panel.show_result(
+		data.get("inner_result", 5.0),
+		data.get("outer_result", 2.0),
+		data.get("combined", 10.0),
+		data.get("bonus_reward", 0),
+		data.get("new_balance", 0),
+		data.get("is_mega_win", false),
+		is_personal
+	)

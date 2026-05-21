@@ -106,6 +106,12 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「夢幻獎勵模式」：觸發玩家在 10 秒內所有擊破獎勵 ×5，讓玩家感受到「夢幻大獎」的爽感
 	// 設計：低 HP（容易擊破）+ 中等倍率（40-60x）+ 觸發後 10 秒 5x 加成，是「容易觸發的短期爆發」機制
 	"T111": {ID: "T111", Name: "夢幻巨型獎勵魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 60, HP: 80, SpawnWeight: 4, Speed: 35, Lifetime: 12, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "giant_prize_fish"},
+	// T112 千龍王（DAY-148）— 業界依據：Royal Fishing JILI 2026「ChainLong King — capture this golden dragon to trigger
+	// the dual-ring roulette. The ChainLong King itself can award up to 1000X mega wins.」
+	// 擊破後觸發「千龍王強化輪盤」：內環（5x-50x）× 外環（2x-20x）= 最高 1000x
+	// 設計：超高倍率（150-1000x）+ 超高 HP（300）+ 極低生成權重（1）= 終極稀有目標
+	// 千龍王是全遊戲最高倍率目標，擊破後觸發專屬強化輪盤，最高 1000x 是業界最高水準
+	"T112": {ID: "T112", Name: "千龍王", Type: TargetTypeSpecial, MultiplierMin: 150, MultiplierMax: 1000, HP: 300, SpawnWeight: 1, Speed: 15, Lifetime: 20, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "chainlong_king"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

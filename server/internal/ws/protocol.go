@@ -378,6 +378,12 @@ const (
 	// 夢幻巨型獎勵魚系統（DAY-147）
 	MsgGiantPrizeFish MessageType = "giant_prize_fish" // 夢幻獎勵模式廣播（Server→Client，全服）
 
+	// 千龍王強化輪盤系統（DAY-148）
+	MsgChainLongWheelStart  MessageType = "chainlong_wheel_start"  // 輪盤開始（Server→Client，個人）
+	MsgChainLongWheelStop   MessageType = "chainlong_wheel_stop"   // 玩家停止輪盤（Client→Server）
+	MsgChainLongWheelResult MessageType = "chainlong_wheel_result" // 輪盤結果（Server→Client，個人+全服）
+	MsgChainLongWheelStatus MessageType = "chainlong_wheel_status" // 冷卻狀態（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3080,4 +3086,41 @@ type GiantPrizeFishPayload struct {
 	KillerName   string  `json:"killer_name"`   // 觸發玩家名稱
 	TotalReward  int     `json:"total_reward"`  // 夢幻模式期間總獎勵（end 時）
 	KillCount    int     `json:"kill_count"`    // 夢幻模式期間擊破數（end 時）
+}
+
+// ChainLongWheelStartPayload 千龍王輪盤開始（Server → Client，個人，DAY-148）
+// 觸發玩家看到全螢幕輪盤，其他玩家看到廣播通知
+type ChainLongWheelStartPayload struct {
+	InstanceID  string  `json:"instance_id"`  // 千龍王 InstanceID
+	KillerID    string  `json:"killer_id"`    // 觸發玩家 ID
+	KillerName  string  `json:"killer_name"`  // 觸發玩家名稱
+	TargetMult  float64 `json:"target_mult"`  // 千龍王本身的倍率
+	BaseReward  int     `json:"base_reward"`  // 千龍王擊破的基礎獎勵
+	InnerSlots  []float64 `json:"inner_slots"` // 內環選項（5x/10x/20x/30x/50x）
+	OuterSlots  []float64 `json:"outer_slots"` // 外環選項（2x/3x/5x/7x/10x/20x）
+	SpinSecs    float64 `json:"spin_secs"`    // 旋轉持續秒數
+	Message     string  `json:"message"`      // 廣播訊息
+}
+
+// ChainLongWheelResultPayload 千龍王輪盤結果（Server → Client，DAY-148）
+// 個人：完整結果；全服：只顯示玩家名稱和最終倍率
+type ChainLongWheelResultPayload struct {
+	KillerID    string  `json:"killer_id"`    // 觸發玩家 ID
+	KillerName  string  `json:"killer_name"`  // 觸發玩家名稱
+	TargetMult  float64 `json:"target_mult"`  // 千龍王本身的倍率
+	InnerResult float64 `json:"inner_result"` // 內環結果
+	OuterResult float64 `json:"outer_result"` // 外環結果
+	Combined    float64 `json:"combined"`     // 最終倍率（內 × 外）
+	BaseReward  int     `json:"base_reward"`  // 基礎獎勵
+	BonusReward int     `json:"bonus_reward"` // 額外獎勵（基礎 × 最終倍率）
+	NewBalance  int     `json:"new_balance"`  // 新餘額（個人）
+	IsMegaWin   bool    `json:"is_mega_win"`  // 是否大獎（≥200x）
+	IsPersonal  bool    `json:"is_personal"`  // 是否為觸發玩家（個人通知）
+	Message     string  `json:"message"`      // 廣播訊息
+}
+
+// ChainLongWheelStatusPayload 千龍王輪盤冷卻狀態（Server → Client，個人，DAY-148）
+type ChainLongWheelStatusPayload struct {
+	CooldownLeft int  `json:"cooldown_left"` // 冷卻剩餘秒數（0=可觸發）
+	HasActive    bool `json:"has_active"`    // 是否有活躍 session
 }

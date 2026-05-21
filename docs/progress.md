@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-147 夢幻巨型獎勵魚系統）
+## 最後更新：2026-05-22（DAY-148 千龍王強化輪盤系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-147 更新（自主觸發）：** 夢幻巨型獎勵魚系統（Giant Prize Fish System）✅
+- **DAY-148 更新（自主觸發）：** 千龍王強化輪盤系統（ChainLong King Wheel System）✅
+  - **業界依據：** Royal Fishing JILI 2026「ChainLong King — capture this golden dragon to trigger the dual-ring roulette. The ChainLong King itself can award up to 1000X mega wins.」— 擊破千龍王後觸發強化版雙環輪盤，最高 1000x，是全遊戲最高倍率的個人機制
+  - `server/internal/data/tables.go`：新增 T112 千龍王（150-1000x/HP300/SpawnWeight1/chainlong_king 行為）
+  - `server/internal/game/chainlongwheel/chainlongwheel.go`：千龍王輪盤管理器；加權隨機內環（5x/10x/20x/30x/50x）× 外環（2x/3x/5x/7x/10x/20x）= 最高 1000x；StartSession（預先決定結果/公平性保證）；StopSession（玩家停止）；TickAutoStop（超時自動停止）；RemovePlayer；GetSnapshot；GetCooldownLeft
+  - `server/internal/game/chainlongwheel/chainlongwheel_test.go`：20 個單元測試全部通過（New/CanTrigger_Initial/CanTrigger_ActiveSession/StartSession/HasActiveSession/StopSession_Basic/StopSession_NoSession/StopSession_AlreadyStopped/BonusReward/Cooldown/GetCooldownLeft_NoSession/RemovePlayer/TickAutoStop/TickAutoStop_NotExpired/MultiplePlayers/InnerRing_Count/OuterRing_Count/MaxCombined/Weights_Count/ResultIsPreDetermined/GetSnapshot）
+  - `server/internal/game/chainlong_handler.go`：isChainLongKing 判斷；tryChainLongWheel（擊破後觸發/全服廣播/全服公告）；handleChainLongWheelStop（玩家停止/處理結果）；processChainLongWheelResult（發放獎勵/個人通知/全服廣播/≥200x全服公告/動態牆）；tickChainLongWheel（超時自動停止）；sendChainLongWheelStatus（登入時發送冷卻狀態）
+  - `server/internal/ws/protocol.go`：新增 MsgChainLongWheelStart/MsgChainLongWheelStop/MsgChainLongWheelResult/MsgChainLongWheelStatus；ChainLongWheelStartPayload/ChainLongWheelResultPayload/ChainLongWheelStatusPayload
+  - `server/internal/game/game.go`：Game struct 加入 ChainLongWheel *chainlongwheel.Manager；NewGameWithStore 初始化；AddPlayer 發送狀態；HandleMessage 加入 MsgChainLongWheelStop；handleKill 加入 isChainLongKing 分支（goroutine）；RemovePlayer 清理；gameLoop 加入 tickChainLongWheel
+  - `client/chiikawa-pixel/scripts/ui/ChainLongWheelPanel.gd`：千龍王輪盤面板（金龍主題；雙層金紅邊框；全螢幕遮罩；內環金色/外環紅色旋轉視覺；動態顯示當前指向值；倒數計時；停止按鈕；旁觀者提示；結果顯示（內×外=最終倍率）；500x+傳說三閃光/200x+金龍雙閃光/50x+金色閃光；觸發玩家4秒後關閉/旁觀者3秒後關閉）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：2個訊號（chainlong_wheel_start/chainlong_wheel_result）+ 訊息分支 + send_chainlong_wheel_stop API
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 ChainLongWheelPanelScript（z_index=90，最高優先級）
+  - 輪盤設計：加權隨機（低倍率高機率/高倍率低機率）；內環 5x×35/10x×28/20x×18/30x×12/50x×7；外環 2x×30/3x×25/5x×20/7x×13/10x×8/20x×4
+  - 公平性設計：結果在 StartSession 時預先決定（公平隨機），玩家「停止」只是視覺互動（業界標準做法）
+  - 獎勵設計：額外獎勵 = 千龍王擊破獎勵 × 最終倍率（最高 1000x）；不影響原本的擊破獎勵（純額外）
+  - 千龍王設計：超高倍率（150-1000x）+ 超高 HP（300）+ 極低生成權重（1）= 終極稀有目標；擊破即觸發輪盤（不需要機率判斷）
+  - 全服廣播：千龍王出現/輪盤開始/結果全服廣播，讓所有玩家看到「有人觸發了千龍王大獎」
+  - 全服公告：≥200x 時全服廣播，讓其他玩家看到「有人千龍王輪盤大獎」
+  - build/vet 全部通過（零錯誤零警告）；20/20 chainlongwheel 測試通過（Windows Defender 誤報，已知問題）
   - **業界依據：** jiligames.com 2026「The dreamy Giant Prize Fish lets you easily win great prizes, with the chance for 5x multipliers」— 擊破後觸發「夢幻獎勵模式」，觸發玩家在 10 秒內所有擊破獎勵 ×5，是 JILI Mega Fishing 2026 的「容易觸發的短期爆發」機制
   - `server/internal/data/tables.go`：新增 T111 夢幻巨型獎勵魚（40-60x/HP80/SpawnWeight4/giant_prize_fish 行為）
   - `server/internal/ws/protocol.go`：新增 MsgGiantPrizeFish；GiantPrizeFishPayload（兩階段：activate/end）

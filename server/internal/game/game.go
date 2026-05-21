@@ -63,6 +63,7 @@ import (
 	"digital-twin/server/internal/game/dualroulette"
 	"digital-twin/server/internal/game/megacatch"
 	"digital-twin/server/internal/game/megaoctopus"
+	"digital-twin/server/internal/game/chainlongwheel"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -130,6 +131,7 @@ type Game struct {
 	MegaCatch      *megacatch.Manager      // 全服 Mega Catch 事件系統管理器（DAY-140）
 	MegaOctopus    *megaoctopus.Manager    // 巨型章魚轉盤系統管理器（DAY-144）
 	GiantPrizeFish *giantPrizeFishManager  // 夢幻巨型獎勵魚系統管理器（DAY-147）
+	ChainLongWheel *chainlongwheel.Manager // 千龍王強化輪盤系統管理器（DAY-148）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -241,6 +243,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		MegaCatch:          megacatch.NewDefault(),
 		MegaOctopus:        megaoctopus.NewManager(),
 		GiantPrizeFish:     newGiantPrizeFishManager(),
+		ChainLongWheel:     chainlongwheel.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -403,6 +406,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendMegaCatchStatus(pp.ID)
 				// 發送巨型章魚轉盤狀態（DAY-144）
 				g.sendMegaOctopusStatus(pp)
+				// 發送千龍王輪盤狀態（DAY-148）
+				g.sendChainLongWheelStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -489,6 +494,10 @@ func (g *Game) RemovePlayer(playerID string) {
 		// 清理巨型章魚轉盤 session（DAY-144）
 		if g.MegaOctopus != nil {
 			g.MegaOctopus.RemovePlayer(playerID)
+		}
+		// 清理千龍王輪盤 session（DAY-148）
+		if g.ChainLongWheel != nil {
+			g.ChainLongWheel.RemovePlayer(playerID)
 		}
 		// FlashChallenge 不需要清理（進度保留到挑戰結束）
 	}
@@ -722,6 +731,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		if ok {
 			g.handleMegaOctopusStop(p)
 		}
+	// 千龍王強化輪盤系統（DAY-148）
+	case ws.MsgChainLongWheelStop:
+		g.handleChainLongWheelStop(clientID)
 	}
 }
 
@@ -1210,6 +1222,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isGiantPrizeFish(t.DefID) {
 		go g.tryGiantPrizeFish(p, t.InstanceID, t.X, t.Y)
 	}
+	// 千龍王強化輪盤：擊破 T112 時觸發（DAY-148）
+	if isChainLongKing(t.DefID) {
+		go g.tryChainLongWheel(p, t.InstanceID, finalReward, t.Multiplier)
+	}
 	// 特殊武器自動充能：每次擊破累積充能進度（DAY-134）
 	go g.notifySpecialWeaponCharge(p, t.Multiplier)
 }
@@ -1513,6 +1529,8 @@ func (g *Game) updateNormalPlay() {
 		g.lastMegaCatchTickAt = now
 		go g.tryMegaCatchRandom()
 	}
+	// 千龍王輪盤超時自動停止（每次 update，DAY-148）
+	go g.tickChainLongWheel()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }
