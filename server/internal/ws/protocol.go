@@ -326,6 +326,12 @@ const (
 	MsgUnluckyBonus       MessageType = "unlucky_bonus"        // 失敗補償觸發（Server→Client，個人）
 	MsgUnluckyBonusStatus MessageType = "unlucky_bonus_status" // 失敗補償狀態（Server→Client，個人）
 
+	// 競速獵殺系統（DAY-136）
+	MsgSpeedRaceStart  MessageType = "speed_race_start"  // 競速開始廣播（Server→Client，全服）
+	MsgSpeedRaceEnd    MessageType = "speed_race_end"    // 競速結束廣播（Server→Client，全服）
+	MsgSpeedRaceCancel MessageType = "speed_race_cancel" // 競速取消廣播（Server→Client，全服）
+	MsgSpeedRaceResult MessageType = "speed_race_result" // 競速個人結果（Server→Client，個人）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -2676,4 +2682,44 @@ type UnluckyBonusStatusPayload struct {
 	RatioPercent int    `json:"ratio_percent"` // 花費/回報百分比
 	CooldownLeft int    `json:"cooldown_left"` // 冷卻剩餘秒數
 	BonusCount   int    `json:"bonus_count"`   // 累計補償次數
+}
+
+// ---- 競速獵殺系統 Payloads（DAY-136）----
+
+// SpeedRaceStartPayload 競速獵殺開始廣播（Server → Client，全服）
+type SpeedRaceStartPayload struct {
+	TargetInstanceID string  `json:"target_instance_id"` // 競速目標 instanceID
+	TargetDefID      string  `json:"target_def_id"`      // 目標定義 ID
+	TargetName       string  `json:"target_name"`        // 目標名稱
+	TargetMult       float64 `json:"target_mult"`        // 目標倍率
+	SecondsLeft      float64 `json:"seconds_left"`       // 競速剩餘秒數
+	BonusMult        float64 `json:"bonus_mult"`         // 第一名獎勵倍率（3.0）
+	Message          string  `json:"message"`            // 顯示訊息
+}
+
+// SpeedRaceEndPayload 競速獵殺結束廣播（Server → Client，全服）
+type SpeedRaceEndPayload struct {
+	WinnerID    string  `json:"winner_id"`    // 第一名玩家 ID
+	WinnerName  string  `json:"winner_name"`  // 第一名玩家名稱
+	TargetName  string  `json:"target_name"`  // 競速目標名稱
+	TargetMult  float64 `json:"target_mult"`  // 競速目標倍率
+	BonusMult   float64 `json:"bonus_mult"`   // 第一名獎勵倍率
+	Message     string  `json:"message"`      // 顯示訊息
+}
+
+// SpeedRaceCancelPayload 競速獵殺取消廣播（Server → Client，全服）
+type SpeedRaceCancelPayload struct {
+	TargetInstanceID string `json:"target_instance_id"` // 競速目標 instanceID
+	TargetName       string `json:"target_name"`        // 目標名稱
+	Message          string `json:"message"`            // 顯示訊息
+}
+
+// SpeedRaceResultPayload 競速個人結果（Server → Client，個人）
+type SpeedRaceResultPayload struct {
+	PlayerID    string  `json:"player_id"`    // 玩家 ID
+	DisplayName string  `json:"display_name"` // 玩家名稱
+	Rank        int     `json:"rank"`         // 名次（1/2/3）
+	BonusMult   float64 `json:"bonus_mult"`   // 獎勵倍率
+	RankIcon    string  `json:"rank_icon"`    // 名次圖示（🥇/🥈/🥉）
+	Message     string  `json:"message"`      // 顯示訊息
 }

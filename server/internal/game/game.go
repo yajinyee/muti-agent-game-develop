@@ -57,6 +57,7 @@ import (
 	"digital-twin/server/internal/game/roulette"
 	raidboss "digital-twin/server/internal/game/raidBoss"
 	"digital-twin/server/internal/game/unlucky"
+	"digital-twin/server/internal/game/speedrace"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -117,6 +118,7 @@ type Game struct {
 	LightningEel   *lightningeel.Manager   // 閃電鰻連鎖攻擊管理器（DAY-132）
 	FeverMode      *fevermode.Manager      // 狂熱模式管理器（DAY-133）
 	UnluckyBonus   *unlucky.Manager        // 失敗補償系統管理器（DAY-135）
+	SpeedRace      *speedrace.Manager      // 競速獵殺系統管理器（DAY-136）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -220,6 +222,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LightningEel:       lightningeel.New(),
 		FeverMode:          fevermode.New(),
 		UnluckyBonus:       unlucky.NewDefault(),
+		SpeedRace:          speedrace.NewDefault(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -368,6 +371,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendFeverModeStatus(pp)
 				// 發送失敗補償狀態（DAY-135）
 				g.sendUnluckyBonusStatus(pp)
+				// 發送競速獵殺狀態（DAY-136）
+				g.sendSpeedRaceStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -882,6 +887,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if feverMult > 1.0 {
 		finalReward = int(float64(finalReward) * feverMult)
 	}
+	// 套用競速獵殺倍率（DAY-136）
+	speedRaceMult := g.notifySpeedRaceKill(p, t.InstanceID)
+	if speedRaceMult > 1.0 {
+		finalReward = int(float64(finalReward) * speedRaceMult)
+	}
 	// 龍怒蓄力大招：擊破目標累積怒氣（DAY-128）
 	go g.notifyWrathKill(p, t.Multiplier)
 	// 連勝獎勵：記錄擊破（DAY-131）
@@ -1207,6 +1217,8 @@ func (g *Game) updateNormalPlay() {
 	for id, t := range g.Targets {
 		if t.IsExpired() || !t.IsAlive {
 			delete(g.Targets, id)
+			// 競速獵殺：目標消失時取消競速（DAY-136）
+			go g.cancelSpeedRaceIfTarget(id)
 		}
 	}
 	targetCount := len(g.Targets)
@@ -1384,6 +1396,8 @@ func (g *Game) updateNormalPlay() {
 	go g.tickWinStreakExpiry()
 	// 狂熱模式過期檢查（每次 update，DAY-133）
 	go g.tickFeverModeExpiry()
+	// 競速獵殺超時檢查（每次 update，DAY-136）
+	go g.tickSpeedRace()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }
@@ -1487,6 +1501,10 @@ func (g *Game) spawnTarget() {
 	go g.trySpawnImmortalBoss()
 	// 覺醒 BOSS：每次生成目標時嘗試觸發（DAY-130）
 	go g.trySpawnAwakenBoss()
+	// 競速獵殺：高倍率目標生成時嘗試觸發（DAY-136）
+	if t.Multiplier >= 10.0 {
+		go g.tryStartSpeedRace(instanceID, def.ID, def.Name, t.Multiplier)
+	}
 }
 
 // triggerSpecialEvent 觸發特殊目標事件（流星、金色雜草等）

@@ -32,6 +32,8 @@ const (
 	EventLightningChain EventType = "lightning_chain" // 閃電鰻連鎖擊破（DAY-132）
 	EventFeverMode      EventType = "fever_mode"      // 狂熱模式觸發（DAY-133）
 	EventUnluckyBonus   EventType = "unlucky_bonus"   // 失敗補償觸發（DAY-135）
+	EventSpeedRace      EventType = "speed_race"      // 競速獵殺開始（DAY-136）
+	EventSpeedRaceWin   EventType = "speed_race_win"  // 競速獵殺第一名（DAY-136）
 )
 
 // Priority 公告優先級
@@ -319,6 +321,42 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = "#4CAF50"
 		priority = PriorityNormal
 		duration = 3500
+
+	case EventSpeedRace:
+		targetName := "目標"
+		multStr := "?"
+		if extra != nil {
+			if tn, ok := extra["target_name"]; ok {
+				targetName = tn
+			}
+			if ms, ok := extra["mult"]; ok {
+				multStr = ms
+			}
+		}
+		title = "🏆 競速獵殺！"
+		message = fmt.Sprintf("搶先擊破【%s】(×%s) 獲得 3x 獎勵！", targetName, multStr)
+		icon = "🏆"
+		color = "#FFD700"
+		priority = PriorityHigh
+		duration = 4000
+
+	case EventSpeedRaceWin:
+		targetName := "目標"
+		multStr := "3.0"
+		if extra != nil {
+			if tn, ok := extra["target_name"]; ok {
+				targetName = tn
+			}
+			if ms, ok := extra["bonus_mult"]; ok {
+				multStr = ms
+			}
+		}
+		title = "🥇 競速第一！"
+		message = fmt.Sprintf("%s 搶先擊破【%s】！獲得 ×%s 獎勵！", name, targetName, multStr)
+		icon = "🥇"
+		color = "#FFD700"
+		priority = PriorityHigh
+		duration = 5000
 
 	default:
 		title = "📢 公告"

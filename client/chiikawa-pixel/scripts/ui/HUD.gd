@@ -225,6 +225,7 @@ func _ready() -> void:
 	_init_lightning_eel_panel()   # 閃電鰻連鎖攻擊面板（DAY-132）
 	_init_fever_mode_panel()      # 狂熱模式面板（DAY-133）
 	_init_unlucky_bonus_panel()   # 失敗補償面板（DAY-135）
+	_init_speed_race_panel()      # 競速獵殺面板（DAY-136）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -2695,3 +2696,21 @@ func _init_unlucky_bonus_panel() -> void:
 	add_child(panel)
 	panel.setup(_pixel_font)
 	_unlucky_bonus_panel = panel
+
+# ---- 競速獵殺面板（DAY-136）----
+const SpeedRacePanelScript = preload("res://scripts/ui/SpeedRacePanel.gd")
+var _speed_race_panel: Control = null
+
+func _init_speed_race_panel() -> void:
+	var panel = SpeedRacePanelScript.new()
+	panel.name = "SpeedRacePanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 79  # 在失敗補償面板（78）之上
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_speed_race_panel = panel
+
+	GameManager.speed_race_started.connect(func(data): panel.on_speed_race_start(data))
+	GameManager.speed_race_ended.connect(func(data): panel.on_speed_race_end(data))
+	GameManager.speed_race_cancelled.connect(func(data): panel.on_speed_race_cancel(data))
+	GameManager.speed_race_result.connect(func(data): panel.on_speed_race_result(data))

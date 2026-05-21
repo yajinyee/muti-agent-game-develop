@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-21（DAY-135 失敗補償系統）
+## 最後更新：2026-05-21（DAY-136 全服競速獵殺系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-136 更新（自主觸發）：** 全服競速獵殺系統（Speed Kill Race System）✅
+  - **業界依據：** soup.io 2025「PvP modes where every shot counts」+ nerdbot.com 2026-05-20「Special fish, boss fish and multiplier events create variance moments」— 全服搶先擊破高價值目標，第一名獲得 3x 獎勵，是 2026 年最新的社交競技留存機制
+  - `server/internal/game/speedrace/speedrace.go`：競速獵殺管理器；RaceConfig（Duration=30s/BonusMult=3.0/SecondMult=1.5/ThirdMult=1.2/CooldownSecs=90s/MinMultiplier=10x）；StartRace（倍率門檻+冷卻檢查）；RecordKill（名次計算/第一名結束競速）；CheckExpiry（超時檢查）；CancelRace（目標消失取消）；GetSnapshot/IsRaceTarget
+  - `server/internal/game/speedrace/speedrace_test.go`：16 個單元測試全部通過（New/StartRace_Basic/StartRace_MultTooLow/StartRace_AlreadyActive/RecordKill_NotRaceTarget/RecordKill_FirstPlace/RecordKill_FirstPlaceEndsRace/RecordKill_NoActiveRace/CheckExpiry/CheckExpiry_NotExpired/CancelRace/CancelRace_WrongInstance/Cooldown/GetSnapshot_NoRace/GetSnapshot_Active/IsRaceTarget/MultiplePlayers）
+  - `server/internal/game/speedrace_handler.go`：tryStartSpeedRace（高倍率目標生成時嘗試觸發/全服廣播/全服公告）；notifySpeedRaceKill（名次計算/個人結果/第一名全服廣播+公告）；tickSpeedRace（超時廣播取消）；cancelSpeedRaceIfTarget（目標消失取消）；sendSpeedRaceStatus（登入時發送狀態）
+  - `server/internal/ws/protocol.go`：新增 MsgSpeedRaceStart/MsgSpeedRaceEnd/MsgSpeedRaceCancel/MsgSpeedRaceResult；SpeedRaceStartPayload/SpeedRaceEndPayload/SpeedRaceCancelPayload/SpeedRaceResultPayload
+  - `server/internal/game/announce/announce.go`：新增 EventSpeedRace/EventSpeedRaceWin；buildContent 加入競速公告（金色，4-5秒，高優先）
+  - `server/internal/game/game.go`：Game struct 加入 SpeedRace *speedrace.Manager；NewGameWithStore 初始化；AddPlayer 發送競速狀態；handleKill 整合競速倍率（在狂熱模式之後）；spawnTarget 整合競速觸發（≥10x 目標）；updateNormalPlay 加入 tickSpeedRace + cancelSpeedRaceIfTarget
+  - `client/chiikawa-pixel/scripts/ui/SpeedRacePanel.gd`：競速獵殺面板（頂部橫幅滑入；倒數計時；最後10秒紅色閃爍；全螢幕金色閃光；個人結果彈窗右側滑入；名次顏色：金/銀/銅；第一名更強烈閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：4個訊號（speed_race_started/speed_race_ended/speed_race_cancelled/speed_race_result）+ 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 SpeedRacePanelScript（z_index=79）
+  - 競速設計：≥10x 倍率目標生成時有機會觸發競速；30 秒倒數；第一名擊破獲得 3x 獎勵；90 秒冷卻防止頻繁觸發
+  - 獎勵設計：第一名 ×3.0（金色）/ 第二名 ×1.5（銀色）/ 第三名 ×1.2（銅色）
+  - 社交設計：競速開始/結束全服廣播，讓所有玩家都能看到「有人搶先擊破了」，增加競爭感
+  - 倍率疊加：競速倍率在狂熱模式倍率之後套用（最後一層），最大化爽感
+  - build/vet 全部通過（零錯誤零警告）；16/16 speedrace 測試通過
 - **DAY-135 更新（自主觸發）：** 失敗補償系統（Unlucky Bonus System）✅
   - **業界依據：** Funrize 2026 的「Unlucky Bonus」— 連續花費超過一定金額但獲得低回報時，自動給予補償獎勵，防止玩家因為「運氣太差」而離開，是 2026 年業界最新的留存機制
   - `server/internal/game/unlucky/unlucky.go`：失敗補償管理器；UnluckyConfig（TrackingShots=30/SpendThreshold=3.0/MinSpend=200/CooldownSecs=120/BaseRewardMult=0.3/MaxRewardMult=0.5/MinReward=100）；環形緩衝追蹤最近 30 次射擊；RecordShot（記錄花費/回報，觸發判斷，補償計算）；GetSnapshot（進度快照）；RemovePlayer
