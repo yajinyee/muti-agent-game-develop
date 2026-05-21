@@ -26,6 +26,7 @@ type PlayerStats struct {
 	BestStreak      int     `json:"best_streak"`       // 最高連擊數
 	BestSessionScore int    `json:"best_session_score"` // 單場最高得分
 	BestBonusReward int     `json:"best_bonus_reward"` // 單次 Bonus 最高獎勵
+	BestSingleReward int    `json:"best_single_reward"` // 單次擊破最高獎勵（DAY-125）
 	MaxCoins        int     `json:"max_coins"`         // 歷史最高金幣
 
 	// Jackpot 統計
@@ -86,15 +87,24 @@ func (s *PlayerStats) RecordShot(betCost int) {
 }
 
 // RecordKill 記錄一次擊破
-func (s *PlayerStats) RecordKill(multiplier float64, reward int) {
+// 回傳：(是否打破最高倍率記錄, 是否打破最高獎勵記錄)
+func (s *PlayerStats) RecordKill(multiplier float64, reward int) (bool, bool) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	s.TotalKills++
 	s.TotalReward += reward
 	s.HitCount++
+	newBestMult := false
+	newBestReward := false
 	if multiplier > s.BestMultiplier {
 		s.BestMultiplier = multiplier
+		newBestMult = true
 	}
+	if reward > s.BestSingleReward {
+		s.BestSingleReward = reward
+		newBestReward = true
+	}
+	return newBestMult, newBestReward
 }
 
 // RecordMiss 記錄一次未命中（攻擊但目標未死）
@@ -105,12 +115,15 @@ func (s *PlayerStats) RecordMiss() {
 }
 
 // RecordStreak 記錄連擊數
-func (s *PlayerStats) RecordStreak(streak int) {
+// 回傳：是否打破最高連擊記錄
+func (s *PlayerStats) RecordStreak(streak int) bool {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	if streak > s.BestStreak {
 		s.BestStreak = streak
+		return true
 	}
+	return false
 }
 
 // RecordBonus 記錄 Bonus 觸發
