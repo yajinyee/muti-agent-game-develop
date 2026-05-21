@@ -3257,3 +3257,19 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **理論最大值：** 黃金時間 ×3.0 × 稀有連擊 ×15.0 = ×45.0（彩虹時間 + MAX 連擊）
 - **教訓：** 稀有目標專屬倍率比全局倍率更有策略深度，讓玩家主動選擇目標
 - **業界依據：** fishingfortune.app（2026-05-21）multiplier cascade system
+
+## 83. 天氣加成未整合到 spawnTarget 的規格缺口（DAY-127）
+- **問題：** `weather.go` 定義了 `RareChanceBonus`（稀有目標加成）和 `GoldFishBonus`（金幣魚加成），但 `spawnTarget` 呼叫 `PickTargetDef` 時完全沒有傳入這些值
+- **根本原因：** `PickTargetDef` 原本只接受 `bonusSpecialRatio` 一個加成參數，天氣系統後來加入但沒有同步更新呼叫端
+- **修復：** `PickTargetDef` 新增 `rareBonus` 和 `goldFishBonus` 參數；`spawnTarget` 從 `g.Weather` 取得加成後傳入；湧現事件的加成也在此疊加
+- **教訓：** 新增系統時要同時確認所有呼叫端都有整合，不能只定義 getter 就算完成
+
+## 84. 天氣湧現事件設計原則（DAY-127）
+- **業界依據：** Fisch（Roblox）2026-05-21 Sovereign Surge — 特殊天氣事件讓稀有目標群湧出現
+- **設計要點：**
+  1. 只有特定天氣觸發（暴風雨/豔陽/暴雪/濃霧），晴天/下雨不觸發（保持正常節奏）
+  2. 觸發時立即生成 3 個稀有目標（製造「湧現感」）
+  3. 湧現加成疊加在天氣加成之上（不是替換）
+  4. 全服廣播讓所有玩家都知道湧現開始，增加緊迫感
+  5. 右下角指示器顯示加成百分比，讓玩家知道當前有多少加成
+- **教訓：** 天氣湧現是「天氣系統的延伸」，不是獨立系統，整合成本低但效果顯著
