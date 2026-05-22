@@ -264,6 +264,7 @@ func _ready() -> void:
 	_init_mermaid_healing_panel()     # 美人魚治癒面板（DAY-178）
 	_init_lucky_clover_panel()        # 幸運草魚面板（DAY-179）
 	_init_rainbow_shark_panel()       # 彩虹鯊魚爆發面板（DAY-180）
+	_init_thunder_shark_panel()       # 雷霆鯊魚連鎖閃電面板（DAY-181）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3486,4 +3487,21 @@ func _init_rainbow_shark_panel() -> void:
 		GameManager.rainbow_shark_burst.connect(func(data):
 			if is_instance_valid(_rainbow_shark_panel):
 				_rainbow_shark_panel.handle_rainbow_shark(data)
+		)
+
+## ---- 雷霆鯊魚連鎖閃電面板（DAY-181）----
+const ThunderSharkPanelScript = preload("res://scripts/ui/ThunderSharkPanel.gd")
+var _thunder_shark_panel: Control = null
+
+func _init_thunder_shark_panel() -> void:
+	var panel = ThunderSharkPanelScript.new()
+	panel.name = "ThunderSharkPanel"
+	panel.z_index = 64
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_thunder_shark_panel = panel
+	if GameManager.has_signal("thunder_shark_chain"):
+		GameManager.thunder_shark_chain.connect(func(data):
+			if is_instance_valid(_thunder_shark_panel):
+				_thunder_shark_panel.handle_thunder_shark(data)
 		)

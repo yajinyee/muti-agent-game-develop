@@ -156,6 +156,7 @@ type Game struct {
 	Mermaid            *mermaidManager            // 美人魚治癒系統管理器（DAY-178）
 	LuckyClover        *luckyCloverManager        // 幸運草魚系統管理器（DAY-179）
 	RainbowShark       *rainbowSharkManager       // 彩虹鯊魚爆發系統管理器（DAY-180）
+	// DAY-181 雷霆鯊魚連鎖閃電系統：無需管理器（stateless，每次擊破獨立觸發）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -1470,6 +1471,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 彩虹鯊魚：擊破 T138 時觸發（DAY-180）
 	if isRainbowShark(t.DefID) {
 		go g.tryRainbowSharkBurst(p, t.InstanceID)
+	}
+	// 雷霆鯊魚：擊破 T139 時觸發（DAY-181）
+	if isThunderShark(t.DefID) {
+		go g.tryThunderSharkChain(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

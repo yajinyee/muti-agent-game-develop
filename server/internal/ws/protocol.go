@@ -466,6 +466,9 @@ const (
 	// 彩虹鯊魚爆發系統（DAY-180）
 	MsgRainbowSharkBurst MessageType = "rainbow_shark_burst" // 彩虹鯊魚爆發廣播（Server→Client，全服）
 
+	// 雷霆鯊魚連鎖閃電系統（DAY-181）
+	MsgThunderSharkChain MessageType = "thunder_shark_chain" // 雷霆鯊魚連鎖閃電廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3960,4 +3963,24 @@ type RainbowSharkBurstPayload struct {
 	TriggerName     string                              `json:"trigger_name"`      // 觸發玩家名稱
 	MarkedTargets   []RainbowSharkMarkedTargetPayload   `json:"marked_targets"`    // 標記目標列表
 	DurationSec     int                                 `json:"duration_sec"`      // 持續時間（秒）
+}
+
+// ---- 雷霆鯊魚連鎖閃電系統（DAY-181）----
+
+// ThunderSharkChainPayload 雷霆鯊魚連鎖閃電廣播（Server → Client，DAY-181）
+// Phase: "chain_start" → "jump_N"（每跳）→ "result"
+type ThunderSharkChainPayload struct {
+	Phase       string  `json:"phase"`        // 當前階段
+	TriggerID   string  `json:"trigger_id"`   // 觸發目標 ID
+	TriggerX    float64 `json:"trigger_x"`    // 觸發位置 X
+	TriggerY    float64 `json:"trigger_y"`    // 觸發位置 Y
+	JumpTarget  string  `json:"jump_target"`  // 跳躍目標 ID（jump_N 時）
+	JumpX       float64 `json:"jump_x"`       // 跳躍目標位置 X
+	JumpY       float64 `json:"jump_y"`       // 跳躍目標位置 Y
+	JumpNum     int     `json:"jump_num"`     // 當前跳數（jump_N 時）
+	TotalJumps  int     `json:"total_jumps"`  // 總跳數（result 時）
+	TotalKills  int     `json:"total_kills"`  // 總擊破數（result 時）
+	TotalReward int     `json:"total_reward"` // 總獎勵（result 時）
+	KillerID    string  `json:"killer_id"`    // 觸發玩家 ID
+	KillerName  string  `json:"killer_name"`  // 觸發玩家名稱
 }

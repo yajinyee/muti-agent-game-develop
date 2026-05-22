@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-180 彩虹鯊魚爆發系統）
+## 最後更新：2026-05-22（DAY-181 雷霆鯊魚連鎖閃電系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-181 更新（自主觸發）：** 雷霆鯊魚連鎖閃電系統（Thunder Shark Chain Lightning）✅
+  - **業界依據：** JILI Jackpot Fishing「Thunder Shark brings unique abilities — chain lightning that jumps between nearby fish, with no distance limit」— 擊破 T139 後觸發「雷霆連鎖閃電」：全場隨機跳躍（不限距離），最多 20 跳，每跳 75% 擊破機率，獎勵 0.65x 倍率
+  - **設計差異：** 與 T103 閃電鰻（5跳/200px範圍/50%機率）和 T118 皇家閃電鰻（15跳/300px範圍/60%機率）不同，雷霆鯊魚是「全場無限距離隨機跳躍」（20跳/75%機率），讓玩家看到閃電在全場「隨機亂跳」的混亂爽感
+  - server/internal/game/thunder_shark_handler.go：isThunderShark 判斷；tryThunderSharkChain（擊破後觸發/全場隨機跳躍/每跳廣播/結果廣播）；announceThunderSharkChain（全服公告≥10跳）
+  - server/internal/data/tables.go：新增 T139 雷霆鯊魚（60-80x/HP85/SpawnWeight3/thunder_shark_chain）
+  - server/internal/ws/protocol.go：新增 MsgThunderSharkChain；ThunderSharkChainPayload（chain_start/jump_N/result）
+  - server/internal/game/game.go：handleKill 加入 isThunderShark 分支（goroutine）
+  - client/chiikawa-pixel/scripts/ui/ThunderSharkPanel.gd：雷霆鯊魚面板（電黃主題；chain_start 全螢幕黃色閃光+頂部橫幅；jump_N 小閃光+目標位置⚡符號+跳數計數器更新；result 右側滑入結果彈窗（跳數/擊破/獎勵）；≥10跳橙色閃光；≥15跳金色強閃光）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：thunder_shark_chain 訊號 + _handle_thunder_shark_chain
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 ThunderSharkPanelScript（z_index=64）
+  - 連鎖設計：最多 20 跳（比皇家閃電鰻 15 跳多 33%）；全場隨機跳躍（不限距離）；75% 擊破機率（比皇家閃電鰻 60% 高）；每跳 150ms 間隔
+  - 獎勵設計：擊破獎勵 = 目標倍率 × betLevel × 0.65（連鎖電擊是連帶效果，比直接擊破低）
+  - 全服廣播：每跳廣播讓所有玩家看到「閃電在全場跳躍」，製造「全場混亂」的視覺爽感
+  - 全服公告：≥10 跳時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-180 更新（自主觸發）：** 彩虹鯊魚爆發系統（Rainbow Shark Burst）✅
   - **業界依據：** JILI 2026 新特性「Rainbow Shark — triggers a rainbow burst that randomly assigns 1.5x-3x multiplier bonuses to all targets on screen for 10 seconds」— 擊破 T138 後觸發彩虹爆發，場上所有存活目標隨機獲得 1.5x/2.0x/2.5x/3.0x 倍率加成標記，持續 10 秒
   - **設計差異：** 與黃金鯊魚（全服固定 ×1.5）不同，彩虹鯊魚是「每個目標倍率不同」（1.5x-3x），製造「哪個目標倍率最高？快去打！」的策略感；與幸運星魚（個人 ×2）不同，彩虹鯊魚是全服共享，讓所有玩家都能受益

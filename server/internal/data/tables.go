@@ -274,6 +274,13 @@ var Targets = map[string]*TargetDef{
 	// 製造「哪個目標倍率最高？快去打！」的策略感；與幸運星魚（個人 ×2）不同，彩虹鯊魚是全服共享
 	// 設計：中高倍率（55-75x）+ 中等 HP（80）+ 稀有生成權重（3）= 稀有且有「彩虹策略感」的特殊目標
 	"T138": {ID: "T138", Name: "彩虹鯊魚", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 75, HP: 80, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "rainbow_shark_burst"},
+	// T139 雷霆鯊魚（DAY-181）— 業界依據：JILI Jackpot Fishing「Thunder Shark brings unique abilities —
+	// chain lightning that jumps between nearby fish, with no distance limit」
+	// 擊破後觸發「雷霆連鎖閃電」：全場隨機跳躍（不限距離），最多 20 跳，每跳 75% 擊破機率
+	// 設計差異：與 T103 閃電鰻（5跳/200px範圍）和 T118 皇家閃電鰻（15跳/300px範圍）不同，
+	// 雷霆鯊魚是「全場無限距離隨機跳躍」，讓玩家看到閃電在全場「隨機亂跳」的混亂爽感
+	// 設計：高倍率（60-80x）+ 中等 HP（85）+ 稀有生成權重（3）= 稀有且有「全場閃電」爽感的特殊目標
+	"T139": {ID: "T139", Name: "雷霆鯊魚", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 80, HP: 85, SpawnWeight: 3, Speed: 55, Lifetime: 14, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "thunder_shark_chain"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
