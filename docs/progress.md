@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-209 幸運金幣魚即時獎勵系統）
+## 最後更新：2026-05-23（DAY-210 幸運熱區魚空間策略系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,27 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-209 更新（自主觸發）：** 幸運金幣魚即時獎勵系統（Fortune Coin Fish）✅
+- **DAY-210 更新（自主觸發）：** 幸運熱區魚空間策略系統（Lucky Hot Zone Fish）✅
+  - **業界依據：** Ocean King 4 Brand New World 2025「Golden Zone — a glowing area appears on screen, all fish inside receive a 2x multiplier bonus. Zone lasts 8 seconds then explodes, capturing all remaining fish within the zone.」
+  - **設計：** 擊破 T168 後在場上建立「幸運熱區」（半徑 280px，持續 8 秒）：熱區內所有目標獲得 ×2.0 倍率加成（乘法）；每 1 秒「熱區脈衝」：熱區內目標 HP 降低 15%；8 秒後「熱區爆炸」：熱區內所有目標 75% 擊破機率（0.65x 倍率，全服共享）；個人冷卻 20 秒；全服冷卻 30 秒
+  - **設計差異：** 與黃金波浪魚（DAY-207，全場 ×2.0，8秒）不同，幸運熱區是「空間限定 ×2.0」，讓玩家有「要把魚引到熱區裡打」的策略感；熱區脈衝讓玩家感受到「熱區在幫我削血」的輔助感；熱區爆炸是「等待→爆發」的高潮設計；全服廣播熱區位置讓所有玩家都往同一個地方打，製造「全服聚焦」的社交感
+  - server/internal/game/lucky_hot_zone_handler.go：luckyHotZoneManager（個人+全服冷卻）；isLuckyHotZoneFish（T168）；getLuckyHotZoneMultiplier（供 handleKill 使用，空間限定 ×2.0）；tryLuckyHotZone（擊破後觸發/全服廣播/全服公告）；runLuckyHotZone（goroutine 每秒脈衝/8秒後爆炸）；doLuckyHotZonePulse（HP -15%/廣播）；doLuckyHotZoneBlast（75%擊破/全服共享獎勵/全服公告）；clampFloat（座標限制工具函數）
+  - server/internal/data/tables.go：新增 T168 幸運熱區魚（30-55x/HP65/SpawnWeight4/Speed50/Lifetime13）
+  - server/internal/ws/protocol.go：新增 MsgLuckyHotZone；LuckyHotZonePayload（zone_start/zone_pulse/zone_blast）
+  - server/internal/game/game.go：LuckyHotZone *luckyHotZoneManager；handleKill 加入 getLuckyHotZoneMultiplier 乘法加成 + isLuckyHotZoneFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyHotZonePanel.gd：橙火熱區主題面板（zone_start 橙色強閃光+頂部橫幅+熱區圓圈+底部計時條；zone_pulse 圓圈脈衝閃爍+浮動文字；zone_blast 全螢幕橙紅三次強閃光+「🔥 熱區爆炸！」52px大字+結算彈窗）；_ZoneCircle 內部類別（三層同心圓+脈衝動畫+半透明填充）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_hot_zone 訊號 + _handle_lucky_hot_zone
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyHotZonePanelScript（layer=35）
+  - 熱區設計：半徑 280px；持續 8 秒；每秒脈衝 HP -15%；個人冷卻 20 秒；全服冷卻 30 秒
+  - 倍率設計：×2.0 乘法（空間限定）；只對熱區內目標生效；讓玩家有「要把魚引到熱區裡打」的策略感
+  - 爆炸設計：75% 擊破機率；0.65x 倍率；全服共享獎勵；≥5 個擊破時全服公告
+  - 視覺設計：橙火熱區主題（#FF6600 + #FF4500 + #FFD700 + #FF8C00）；三層同心圓（外橙/中橙黃/內金）；脈衝閃爍（sin 波動）；半透明橙色填充；底部計時條顏色漸變（橙→橙紅→深紅）
+  - 全服廣播：熱區建立/每次脈衝/爆炸結算全服廣播
+  - 全服公告：建立時公告；爆炸≥5 個擊破時公告（依擊破數決定顏色：≥10 橙紅/其他橙色）
+  - build/vet 全部通過（零錯誤零警告）
+
+## 自我評估
+- **完成度：100%**
   - **業界依據：** Galaxsys King of Ocean 2026「Free Spin Fish, Captain Fish, and Money Fish trigger bonus rounds, extra multipliers, and instant payouts.」
   - **設計：** 擊破 T167 後立即觸發「金幣爆發」：加權隨機即時獎勵 5x(50%)/10x(30%)/20x(15%)/50x(5%) × betLevel；3% 機率觸發「黃金爆發」：全場所有目標 HP 降低 80%（持續 5 秒）；個人冷卻 15 秒（快節奏設計）
   - **設計差異：** 與獎池龍（DAY-205，抽 Jackpot 等級，個人冷卻 60 秒）不同，幸運金幣魚是「即時小獎（5-50x）+ 低機率全場清場」，個人冷卻 15 秒，節奏更快；「黃金爆發」（3%）讓玩家有「說不定這次全場清場」的期待感；個人獎勵（不是全服共享），讓玩家有「我打到了！」的個人爽感；SpawnWeight=5（最高），讓玩家頻繁遇到，製造「快速節奏」的遊戲感

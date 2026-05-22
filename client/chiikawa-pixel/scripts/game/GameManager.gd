@@ -211,6 +211,7 @@ signal comet_fish(data: Dictionary)                   # 彗星魚連鎖爆炸（
 signal golden_wave_fish(data: Dictionary)             # 黃金波浪魚全場倍率衝擊（DAY-207）
 signal dragon_king(data: Dictionary)                  # 深海龍王全服合力蓄力（DAY-208）
 signal fortune_coin_fish(data: Dictionary)            # 幸運金幣魚即時獎勵（DAY-209）
+signal lucky_hot_zone(data: Dictionary)               # 幸運熱區魚空間策略（DAY-210）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -606,6 +607,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_dragon_king(payload)
 		"fortune_coin_fish":
 			_handle_fortune_coin_fish(payload)
+		"lucky_hot_zone":
+			_handle_lucky_hot_zone(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2418,6 +2421,26 @@ func _handle_fortune_coin_fish(payload: Dictionary) -> void:
 			print("[GameManager] Fortune Coin Golden Burst: affected=%d, %ds" % [affected, burst_sec])
 		"golden_burst_end":
 			print("[GameManager] Fortune Coin Golden Burst ended")
+
+## 處理幸運熱區魚空間策略（DAY-210）
+func _handle_lucky_hot_zone(payload: Dictionary) -> void:
+	emit_signal("lucky_hot_zone", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"zone_start":
+			var player_name: String = payload.get("player_name", "")
+			var zone_x: float = payload.get("zone_x", 640.0)
+			var zone_y: float = payload.get("zone_y", 360.0)
+			var duration: int = payload.get("duration_sec", 8)
+			print("[GameManager] Lucky Hot Zone start: %s at (%.0f,%.0f) %ds" % [player_name, zone_x, zone_y, duration])
+		"zone_pulse":
+			var affected: int = payload.get("affected_count", 0)
+			var remaining: int = payload.get("remaining_sec", 0)
+			print("[GameManager] Lucky Hot Zone pulse: affected=%d remaining=%ds" % [affected, remaining])
+		"zone_blast":
+			var killed: int = payload.get("killed_count", 0)
+			var reward_per: int = payload.get("reward_per_player", 0)
+			print("[GameManager] Lucky Hot Zone blast: killed=%d reward_per=%d" % [killed, reward_per])
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:

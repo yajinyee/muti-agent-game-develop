@@ -293,6 +293,7 @@ func _ready() -> void:
 	_init_golden_wave_fish_panel()      # 黃金波浪魚全場倍率衝擊面板（DAY-207）
 	_init_dragon_king_panel()           # 深海龍王全服合力蓄力面板（DAY-208）
 	_init_fortune_coin_fish_panel()     # 幸運金幣魚即時獎勵面板（DAY-209）
+	_init_lucky_hot_zone_panel()        # 幸運熱區魚空間策略面板（DAY-210）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3997,3 +3998,20 @@ func _init_fortune_coin_fish_panel() -> void:
 func _on_fortune_coin_fish(data: Dictionary) -> void:
 	if is_instance_valid(_fortune_coin_fish_panel):
 		_fortune_coin_fish_panel.handle_fortune_coin_fish(data)
+
+# ── DAY-210 幸運熱區魚空間策略面板 ──────────────────────────────────────────
+const LuckyHotZonePanelScript = preload("res://scripts/ui/LuckyHotZonePanel.gd")
+var _lucky_hot_zone_panel = null
+
+func _init_lucky_hot_zone_panel() -> void:
+	var panel = LuckyHotZonePanelScript.new()
+	panel.name = "LuckyHotZonePanel"
+	panel.layer = 35
+	add_child(panel)
+	_lucky_hot_zone_panel = panel
+	if GameManager.has_signal("lucky_hot_zone"):
+		GameManager.lucky_hot_zone.connect(_on_lucky_hot_zone)
+
+func _on_lucky_hot_zone(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_hot_zone_panel):
+		_lucky_hot_zone_panel.handle_lucky_hot_zone(data)

@@ -547,6 +547,7 @@ const (
 	MsgGoldenWaveFish MessageType = "golden_wave_fish" // 黃金波浪魚廣播（Server→Client，全服）
 	MsgDragonKing     MessageType = "dragon_king"      // 深海龍王全服合力蓄力廣播（Server→Client，全服，DAY-208）
 	MsgFortuneCoinFish MessageType = "fortune_coin_fish" // 幸運金幣魚即時獎勵廣播（Server→Client，DAY-209）
+	MsgLuckyHotZone   MessageType = "lucky_hot_zone"    // 幸運熱區魚空間策略廣播（Server→Client，DAY-210）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4636,4 +4637,26 @@ type FortuneCoinFishPayload struct {
 	Label         string `json:"label,omitempty"`
 	AffectedCount int    `json:"affected_count,omitempty"`
 	BurstSec      int    `json:"burst_sec,omitempty"`
+}
+
+// LuckyHotZonePayload 幸運熱區魚空間策略廣播（Server → Client，DAY-210）
+// Events:
+//   "zone_start"  — 熱區建立（全服廣播，帶位置/半徑/持續時間/倍率）
+//   "zone_pulse"  — 熱區脈衝（全服廣播，每 1-2 秒，帶受影響目標數/剩餘時間）
+//   "zone_blast"  — 熱區爆炸（全服廣播，帶擊破數/總獎勵/每人獎勵）
+type LuckyHotZonePayload struct {
+	Event           string  `json:"event"`
+	PlayerID        string  `json:"player_id,omitempty"`
+	PlayerName      string  `json:"player_name,omitempty"`
+	ZoneX           float64 `json:"zone_x,omitempty"`
+	ZoneY           float64 `json:"zone_y,omitempty"`
+	Radius          float64 `json:"radius,omitempty"`
+	DurationSec     int     `json:"duration_sec,omitempty"`
+	Multiplier      float64 `json:"multiplier,omitempty"`
+	PulseNum        int     `json:"pulse_num,omitempty"`
+	AffectedCount   int     `json:"affected_count,omitempty"`
+	RemainingSec    int     `json:"remaining_sec,omitempty"`
+	KilledCount     int     `json:"killed_count,omitempty"`
+	TotalReward     int     `json:"total_reward,omitempty"`
+	RewardPerPlayer int     `json:"reward_per_player,omitempty"`
 }

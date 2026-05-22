@@ -462,6 +462,15 @@ var Targets = map[string]*TargetDef{
 	// 擊破後立即觸發「金幣爆發」：加權隨機即時獎勵 5x(50%)/10x(30%)/20x(15%)/50x(5%) × betLevel
 	// 3% 機率觸發「黃金爆發」：全場所有目標 HP 降低 80%（持續 5 秒）；個人冷卻 15 秒
 	"T167": {ID: "T167", Name: "幸運金幣魚", Type: TargetTypeSpecial, MultiplierMin: 20, MultiplierMax: 50, HP: 50, SpawnWeight: 5, Speed: 55, Lifetime: 12, LaborGain: 8, DifficultyFactor: 16.0, SpecialBehavior: "fortune_coin_burst"},
+	// T168 幸運熱區魚（DAY-210）— 業界依據：Ocean King 4 Brand New World 2025
+	// 「Golden Zone — a glowing area appears on screen, all fish inside receive a 2x multiplier bonus.
+	//  Zone lasts 8 seconds then explodes, capturing all remaining fish within the zone.」
+	// 擊破後在場上建立「幸運熱區」（半徑 280px，持續 8 秒）：
+	//   1. 熱區內所有目標獲得 ×2.0 倍率加成（乘法）
+	//   2. 每 1 秒「熱區脈衝」：熱區內目標 HP 降低 15%
+	//   3. 8 秒後「熱區爆炸」：熱區內所有目標 75% 擊破機率（0.65x 倍率，全服共享）
+	//   4. 個人冷卻 20 秒；全服冷卻 30 秒
+	"T168": {ID: "T168", Name: "幸運熱區魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 50, Lifetime: 13, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "lucky_hot_zone"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
