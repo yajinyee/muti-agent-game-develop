@@ -153,6 +153,8 @@ type Game struct {
 	LuckyDice          *luckyDiceManager          // 幸運骰子魚系統管理器（DAY-175）
 	FireStorm          *fireStormManager          // 火焰風暴魚系統管理器（DAY-176）
 	GoldenTreasure     *goldenTreasureManager     // 黃金寶藏魚系統管理器（DAY-177）
+	Mermaid            *mermaidManager            // 美人魚治癒系統管理器（DAY-178）
+	LuckyClover        *luckyCloverManager        // 幸運草魚系統管理器（DAY-179）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -283,6 +285,8 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyDice:          newLuckyDiceManager(),
 		FireStorm:          newFireStormManager(),
 		GoldenTreasure:     newGoldenTreasureManager(),
+		Mermaid:            newMermaidManager(),
+		LuckyClover:        newLuckyCloverManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1089,6 +1093,16 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if goldenTreasureMult > 1.0 {
 		finalReward = int(float64(finalReward) * goldenTreasureMult)
 	}
+	// 套用美人魚幸運加成（DAY-178，+20% 加法）
+	mermaidBoost := g.getMermaidLuckBoost()
+	if mermaidBoost > 0.0 {
+		finalReward = finalReward + int(float64(finalReward)*mermaidBoost)
+	}
+	// 套用幸運草魚加成（DAY-179，+50% 加法，全服共享）
+	cloverBoost := g.getLuckyCloverBoost()
+	if cloverBoost > 0.0 {
+		finalReward = finalReward + int(float64(finalReward)*cloverBoost)
+	}
 	// 船長魚競速：記錄擊破（DAY-163）
 	if g.IsCaptainRaceActive() {
 		go g.recordCaptainRaceKill(p, finalReward)
@@ -1435,6 +1449,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 黃金寶藏魚：擊破 T135 時觸發（DAY-177）
 	if isGoldenTreasureFish(t.DefID) {
 		go g.tryGoldenTreasureFish(p)
+	}
+	// 美人魚：擊破 T136 時觸發（DAY-178）
+	if isMermaid(t.DefID) {
+		go g.tryMermaidHealing(p)
+	}
+	// 幸運草魚：擊破 T137 時觸發（DAY-179）
+	if isLuckyCloverFish(t.DefID) {
+		go g.tryLuckyCloverFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

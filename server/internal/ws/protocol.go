@@ -457,6 +457,12 @@ const (
 	MsgGoldenTreasureFish    MessageType = "golden_treasure_fish"      // 黃金寶藏魚廣播（Server→Client）
 	MsgGoldenTreasureOpen    MessageType = "golden_treasure_open"      // 玩家開箱請求（Client→Server）
 
+	// 美人魚治癒系統（DAY-178）
+	MsgMermaidHealing MessageType = "mermaid_healing" // 美人魚治癒廣播（Server→Client）
+
+	// 幸運草魚系統（DAY-179）
+	MsgLuckyCloverFish MessageType = "lucky_clover_fish" // 幸運草魚廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3900,4 +3906,34 @@ type GoldenTreasureFishPayload struct {
 // GoldenTreasureOpenPayload 玩家開箱請求（Client → Server，DAY-177）
 type GoldenTreasureOpenPayload struct {
 	ChestID int `json:"chest_id"` // 箱子編號（0-2）
+}
+
+// ---- 美人魚治癒系統（DAY-178）----
+
+// MermaidHealingPayload 美人魚治癒廣播（Server → Client，DAY-178）
+// Phase: "heal_start"（個人）→ "heal_broadcast"（全服）
+//        → "luck_start"（全服）→ "luck_end"（全服）
+type MermaidHealingPayload struct {
+	Phase                string  `json:"phase"`                  // 當前階段
+	PlayerID             string  `json:"player_id"`              // 觸發玩家 ID
+	PlayerName           string  `json:"player_name"`            // 觸發玩家名稱
+	HealAmount           int     `json:"heal_amount"`            // 治癒金幣數（heal_start 時）
+	NewBalance           int     `json:"new_balance"`            // 新餘額（heal_start 時）
+	LuckBoostPercent     float64 `json:"luck_boost_percent"`     // 幸運加成比例（luck_start 時）
+	LuckBoostDurationSec int     `json:"luck_boost_duration_sec"` // 幸運加成持續時間（luck_start 時）
+}
+
+// ---- 幸運草魚系統（DAY-179）----
+
+// LuckyCloverFishPayload 幸運草魚廣播（Server → Client，DAY-179）
+// Phase: "clover_start"（全服）→ "clover_gift"（個人）→ "clover_end"（全服）
+type LuckyCloverFishPayload struct {
+	Phase            string  `json:"phase"`              // 當前階段
+	PlayerID         string  `json:"player_id"`          // 觸發玩家 ID
+	PlayerName       string  `json:"player_name"`        // 觸發玩家名稱
+	BoostPercent     float64 `json:"boost_percent"`      // 加成比例（clover_start 時）
+	BoostDurationSec int     `json:"boost_duration_sec"` // 加成持續時間（clover_start 時）
+	GiftAmount       int     `json:"gift_amount"`        // 幸運草金幣數（clover_gift 時）
+	GiftMult         int     `json:"gift_mult"`          // 幸運草金幣倍率（clover_gift 時）
+	NewBalance       int     `json:"new_balance"`        // 新餘額（clover_gift 時）
 }

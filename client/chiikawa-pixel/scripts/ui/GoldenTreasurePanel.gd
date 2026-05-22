@@ -195,8 +195,7 @@ func handle_golden_treasure(payload: Dictionary) -> void:
 ## _on_treasure_start — 寶藏箱出現（個人）
 func _on_treasure_start(payload: Dictionary) -> void:
 	_is_my_session = true
-	_timeout_sec = payload.get("timeout_sec", 12)
-	_elapsed = 0.0
+	_timeout_sec = payload.get("timeout_sec", 12)	_elapsed = 0.0
 	_session_active = true
 	_opened_chests.clear()
 
@@ -315,14 +314,11 @@ func _on_chest_pressed(chest_id: int) -> void:
 		return
 	if chest_id in _opened_chests:
 		return
-	# 發送開箱請求
+	# 發送開箱請求（優先透過 GameManager）
 	if GameManager.has_method("send_golden_treasure_open"):
 		GameManager.send_golden_treasure_open(chest_id)
-	else:
-		# 直接透過 NetworkManager 發送
-		var msg := {"type": "golden_treasure_open", "payload": {"chest_id": chest_id}}
-		if NetworkManager.has_method("send_json"):
-			NetworkManager.send_json(msg)
+	elif NetworkManager.has_method("send"):
+		NetworkManager.send("golden_treasure_open", {"chest_id": chest_id})
 
 ## _show_broadcast_banner — 顯示全服廣播橫幅（短暫）
 func _show_broadcast_banner(text: String) -> void:

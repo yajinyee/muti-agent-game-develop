@@ -179,6 +179,8 @@ signal sea_anemone(data: Dictionary)                   # 海葵觸手攻擊（DA
 signal lucky_dice_fish(data: Dictionary)               # 幸運骰子魚（DAY-175）
 signal fire_storm_fish(data: Dictionary)               # 火焰風暴魚（DAY-176）
 signal golden_treasure_fish(data: Dictionary)          # 黃金寶藏魚（DAY-177）
+signal mermaid_healing(data: Dictionary)               # 美人魚治癒（DAY-178）
+signal lucky_clover_fish(data: Dictionary)             # 幸運草魚（DAY-179）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -510,6 +512,10 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_fire_storm_fish(payload)
 		"golden_treasure_fish":
 			_handle_golden_treasure_fish(payload)
+		"mermaid_healing":
+			_handle_mermaid_healing(payload)
+		"lucky_clover_fish":
+			_handle_lucky_clover_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -1441,8 +1447,34 @@ func _handle_golden_treasure_fish(payload: Dictionary) -> void:
 
 ## send_golden_treasure_open — 發送開箱請求（DAY-177）
 func send_golden_treasure_open(chest_id: int) -> void:
-	var msg := {"type": "golden_treasure_open", "payload": {"chest_id": chest_id}}
-	NetworkManager.send_json(msg)
+	NetworkManager.send("golden_treasure_open", {"chest_id": chest_id})
+
+## 處理美人魚治癒（DAY-178）
+func _handle_mermaid_healing(payload: Dictionary) -> void:
+	emit_signal("mermaid_healing", payload)
+	var phase: String = payload.get("phase", "")
+	match phase:
+		"heal_start":
+			var heal_amount: int = payload.get("heal_amount", 0)
+			print("[GameManager] Mermaid heal_start: amount=%d" % heal_amount)
+		"luck_start":
+			print("[GameManager] Mermaid luck_start: +20%% boost")
+		"luck_end":
+			print("[GameManager] Mermaid luck_end")
+
+## 處理幸運草魚（DAY-179）
+func _handle_lucky_clover_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_clover_fish", payload)
+	var phase: String = payload.get("phase", "")
+	match phase:
+		"clover_start":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Lucky Clover clover_start: player=%s" % player_name)
+		"clover_gift":
+			var gift_amount: int = payload.get("gift_amount", 0)
+			print("[GameManager] Lucky Clover clover_gift: amount=%d" % gift_amount)
+		"clover_end":
+			print("[GameManager] Lucky Clover clover_end")
 
 ## 處理黃金海龜時間停止（DAY-159）
 func _handle_golden_turtle_time_stop(payload: Dictionary) -> void:

@@ -251,6 +251,22 @@ var Targets = map[string]*TargetDef{
 	// 製造「我選擇開哪個箱子」的互動感；寶藏箱在場上可見，讓其他玩家也能看到「有人觸發了寶藏」
 	// 設計：高倍率（70-100x）+ 較高 HP（95）+ 低生成權重（3）= 稀有且有「寶藏期待感」的特殊目標
 	"T135": {ID: "T135", Name: "黃金寶藏魚", Type: TargetTypeSpecial, MultiplierMin: 70, MultiplierMax: 100, HP: 95, SpawnWeight: 3, Speed: 40, Lifetime: 15, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "golden_treasure_fish"},
+	// T136 美人魚（DAY-178）— 業界依據：Ocean King 3 Plus「The Mermaid feature — catching the Mermaid
+	// triggers a healing event, restoring coins to the player and granting a brief luck boost」
+	// 擊破後觸發「美人魚治癒」：為觸發玩家恢復 betLevel × 15 金幣（治癒機制），
+	// 同時全服廣播「美人魚降臨」，讓其他玩家也能看到；觸發後 20 秒內擊破獎勵 +20% 幸運加成
+	// 設計差異：與所有「攻擊型/倍率型」特殊目標不同，美人魚是唯一的「治癒型」目標，
+	// 讓玩家在連續失敗後有「回血」的機會，製造「美人魚救了我」的情感連結
+	// 設計：中倍率（45-65x）+ 中等 HP（70）+ 中等生成權重（4）= 常見且有「治癒期待感」的特殊目標
+	"T136": {ID: "T136", Name: "美人魚", Type: TargetTypeSpecial, MultiplierMin: 45, MultiplierMax: 65, HP: 70, SpawnWeight: 4, Speed: 35, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "mermaid_healing"},
+	// T137 幸運草魚（DAY-179）— 業界依據：Ocean King 3 Plus「Lucky Shamrock Leprechaun Boss」
+	// + Fisch Roblox 2026「Lucky Gold Pool — rainbow event triggers lucky fish spawns」
+	// 擊破後觸發「幸運草爆發」：場上所有目標物獎勵 +50% 持續 10 秒（全服共享），
+	// 同時隨機為 1-3 個玩家發放「幸運草金幣」（betLevel × 10-30x）
+	// 設計差異：與黃金鯊魚（全服 ×1.5，12秒）不同，幸運草是「+50% 加成」（不是倍率乘法），
+	// 且有「隨機發放金幣給玩家」的社交機制，讓被選中的玩家感到「幸運」
+	// 設計：中高倍率（50-70x）+ 中等 HP（75）+ 中等生成權重（4）= 常見且有「幸運期待感」的特殊目標
+	"T137": {ID: "T137", Name: "幸運草魚", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 70, HP: 75, SpawnWeight: 4, Speed: 45, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_clover_fish"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

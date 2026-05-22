@@ -261,6 +261,8 @@ func _ready() -> void:
 	_init_lucky_dice_panel()          # 幸運骰子魚面板（DAY-175）
 	_init_fire_storm_panel()          # 火焰風暴魚面板（DAY-176）
 	_init_golden_treasure_panel()     # 黃金寶藏魚面板（DAY-177）
+	_init_mermaid_healing_panel()     # 美人魚治癒面板（DAY-178）
+	_init_lucky_clover_panel()        # 幸運草魚面板（DAY-179）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3432,4 +3434,38 @@ func _init_golden_treasure_panel() -> void:
 		GameManager.golden_treasure_fish.connect(func(data):
 			if is_instance_valid(_golden_treasure_panel):
 				_golden_treasure_panel.handle_golden_treasure(data)
+		)
+
+## ---- 美人魚治癒面板（DAY-178）----
+const MermaidHealingPanelScript = preload("res://scripts/ui/MermaidHealingPanel.gd")
+var _mermaid_healing_panel: Control = null
+
+func _init_mermaid_healing_panel() -> void:
+	var panel = MermaidHealingPanelScript.new()
+	panel.name = "MermaidHealingPanel"
+	panel.z_index = 66
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_mermaid_healing_panel = panel
+	if GameManager.has_signal("mermaid_healing"):
+		GameManager.mermaid_healing.connect(func(data):
+			if is_instance_valid(_mermaid_healing_panel):
+				_mermaid_healing_panel.handle_mermaid_healing(data)
+		)
+
+## ---- 幸運草魚面板（DAY-179）----
+const LuckyCloverPanelScript = preload("res://scripts/ui/LuckyCloverPanel.gd")
+var _lucky_clover_panel: Control = null
+
+func _init_lucky_clover_panel() -> void:
+	var panel = LuckyCloverPanelScript.new()
+	panel.name = "LuckyCloverPanel"
+	panel.z_index = 65
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_lucky_clover_panel = panel
+	if GameManager.has_signal("lucky_clover_fish"):
+		GameManager.lucky_clover_fish.connect(func(data):
+			if is_instance_valid(_lucky_clover_panel):
+				_lucky_clover_panel.handle_lucky_clover(data)
 		)

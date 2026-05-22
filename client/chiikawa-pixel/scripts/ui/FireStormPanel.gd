@@ -121,7 +121,7 @@ func _on_fire_start(payload: Dictionary) -> void:
 	var my_id : String = ""
 	if GameManager.has_method("get_player_id"):
 		my_id = GameManager.get_player_id()
-	_is_my_trigger = (payload.get("player_id", "") == my_id)
+	_is_my_trigger = (payload.get("player_id", "") == my_id and my_id != "")
 
 	show()
 
