@@ -383,6 +383,14 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「八波龍息攻擊」：每波隨機選 3-5 個目標（65% 擊破機率，0.55x 倍率）
 	// 第 8 波「龍怒爆發」：全場所有目標（85% 擊破機率，0.70x 倍率）；全服共享獎勵
 	"T155": {ID: "T155", Name: "神秘龍魚", Type: TargetTypeSpecial, MultiplierMin: 65, MultiplierMax: 90, HP: 95, SpawnWeight: 2, Speed: 35, Lifetime: 20, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "mystic_dragon_waves"},
+	// T156 幽靈魚真身（DAY-198）— 原創設計，靈感來自 Fisch Phantom Mutation（4x 倍率）
+	// 生成時同時在場上生成 2-3 個「幻影分身」（T156C，HP=1）
+	// 擊破真身觸發「幽靈爆發」：所有幻影分身同時爆炸（50% 擊破機率，0.50x 倍率）
+	// 擊破幻影分身：給 1x betLevel 安慰獎
+	"T156": {ID: "T156", Name: "幽靈魚", Type: TargetTypeSpecial, MultiplierMin: 45, MultiplierMax: 70, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 18, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "ghost_fish_phantom"},
+	// T156C 幽靈魚幻影分身（DAY-198）— 由 T156 生成時自動創建，HP=1，外觀與 T156 相同
+	// 擊破給 1x betLevel 安慰獎；真身被擊破時同時爆炸
+	"T156C": {ID: "T156C", Name: "幽靈魚（幻影）", Type: TargetTypeSpecial, MultiplierMin: 1, MultiplierMax: 1, HP: 1, SpawnWeight: 0, Speed: 45, Lifetime: 18, LaborGain: 0, DifficultyFactor: 16.0, SpecialBehavior: "ghost_fish_clone"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

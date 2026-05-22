@@ -171,6 +171,7 @@ type Game struct {
 	DrillLobster       *drillLobsterManager       // 鑽頭龍蝦穿透爆炸系統管理器（DAY-195）
 	AnglerfishElectric *anglerfishManager         // 巨型鮟鱇魚電擊寶箱系統管理器（DAY-196）
 	MysticDragon       *mysticDragonManager       // 神秘龍魚八波攻擊系統管理器（DAY-197）
+	GhostFish          *ghostFishManager          // 幽靈魚分身系統管理器（DAY-198）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -318,6 +319,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		DrillLobster:       newDrillLobsterManager(),
 		AnglerfishElectric: newAnglerfishManager(),
 		MysticDragon:       newMysticDragonManager(),
+		GhostFish:          newGhostFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1601,6 +1603,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isMysticDragon(t.DefID) {
 		go g.tryMysticDragonWaves(p, t.InstanceID)
 	}
+	// 幽靈魚真身：擊破 T156 時觸發幻影爆炸（DAY-198）
+	if isGhostFish(t.DefID) {
+		go g.notifyGhostFishRealKill(p, t.InstanceID, t.Multiplier)
+	}
+	// 幽靈魚幻影分身：擊破 T156C 時給安慰獎（DAY-198）
+	if isGhostFishClone(t.DefID) {
+		go g.notifyGhostFishCloneKill(p, t.InstanceID)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)
@@ -1726,6 +1736,10 @@ func (g *Game) updateNormalPlay() {
 			// 巨型鮟鱇魚：離開畫面時廣播結算（DAY-196）
 			if isAnglerfishElectric(t.DefID) {
 				go g.onAnglerfishLeave(id, "timeout")
+			}
+			// 幽靈魚真身：離開畫面時移除所有幻影分身（DAY-198）
+			if isGhostFish(t.DefID) {
+				go g.onGhostFishLeave(id)
 			}
 		}
 	}
@@ -2054,6 +2068,10 @@ func (g *Game) spawnTarget() {
 	// 巨型鮟鱇魚：T154 生成時觸發電擊模式（DAY-196）
 	if isAnglerfishElectric(def.ID) {
 		go g.notifyAnglerfishSpawn(instanceID)
+	}
+	// 幽靈魚：T156 生成時觸發幻影分身（DAY-198）
+	if isGhostFish(def.ID) {
+		go g.notifyGhostFishSpawn(instanceID, x, y, t.Multiplier)
 	}
 }
 

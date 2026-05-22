@@ -516,6 +516,9 @@ const (
 	// 神秘龍魚八波攻擊系統（DAY-197）
 	MsgMysticDragon MessageType = "mystic_dragon" // 神秘龍魚八波龍息攻擊廣播（Server→Client，全服）
 
+	// 幽靈魚分身系統（DAY-198）
+	MsgGhostFish MessageType = "ghost_fish" // 幽靈魚分身廣播（Server→Client，全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4372,4 +4375,19 @@ type MysticDragonPayload struct {
 	TotalKills  int    `json:"total_kills,omitempty"`  // 累計擊破數
 	TotalReward int    `json:"total_reward,omitempty"` // 累計獎勵
 	IsFinalWave bool   `json:"is_final_wave,omitempty"` // 是否為第 8 波（龍怒爆發）
+}
+
+// GhostFishPayload 幽靈魚分身廣播（Server → Client，DAY-198）
+// Phase: "ghost_appear" → "phantom_vanish"（幻影被擊破）/ "real_found"（真身被找到）→ "ghost_explode" → "ghost_escape"（逃跑）
+type GhostFishPayload struct {
+	Phase         string   `json:"phase"`                    // 當前階段
+	RealID        string   `json:"real_id,omitempty"`        // 真身 InstanceID
+	CloneIDs      []string `json:"clone_ids,omitempty"`      // 幻影分身 InstanceID 列表
+	CloneID       string   `json:"clone_id,omitempty"`       // 被擊破的幻影分身 ID（phantom_vanish 時）
+	CloneCount    int      `json:"clone_count,omitempty"`    // 幻影分身數量（ghost_appear 時）
+	KillerID      string   `json:"killer_id,omitempty"`      // 擊破玩家 ID
+	KillerName    string   `json:"killer_name,omitempty"`    // 擊破玩家名稱
+	Reward        int      `json:"reward,omitempty"`         // 安慰獎（phantom_vanish 時）
+	ExplodeKills  int      `json:"explode_kills,omitempty"`  // 幻影爆炸擊破數（ghost_explode 時）
+	ExplodeReward int      `json:"explode_reward,omitempty"` // 幻影爆炸獎勵（ghost_explode 時）
 }

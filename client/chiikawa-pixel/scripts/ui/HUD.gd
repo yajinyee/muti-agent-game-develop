@@ -281,6 +281,7 @@ func _ready() -> void:
 	_init_drill_lobster_panel()         # 鑽頭龍蝦穿透爆炸面板（DAY-195）
 	_init_anglerfish_electric_panel()   # 巨型鮟鱇魚電擊寶箱面板（DAY-196）
 	_init_mystic_dragon_panel()         # 神秘龍魚八波攻擊面板（DAY-197）
+	_init_ghost_fish_panel()            # 幽靈魚分身面板（DAY-198）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3781,3 +3782,20 @@ func _init_mystic_dragon_panel() -> void:
 func _on_mystic_dragon(data: Dictionary) -> void:
 	if is_instance_valid(_mystic_dragon_panel):
 		_mystic_dragon_panel.handle_mystic_dragon(data)
+
+## ---- 幽靈魚分身面板（DAY-198）----
+const GhostFishPanelScript = preload("res://scripts/ui/GhostFishPanel.gd")
+var _ghost_fish_panel = null
+
+func _init_ghost_fish_panel() -> void:
+	var panel = GhostFishPanelScript.new()
+	panel.name = "GhostFishPanel"
+	panel.layer = 47
+	add_child(panel)
+	_ghost_fish_panel = panel
+	if GameManager.has_signal("ghost_fish"):
+		GameManager.ghost_fish.connect(_on_ghost_fish)
+
+func _on_ghost_fish(data: Dictionary) -> void:
+	if is_instance_valid(_ghost_fish_panel):
+		_ghost_fish_panel.handle_ghost_fish(data)

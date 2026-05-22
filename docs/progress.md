@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-197 神秘龍魚八波攻擊系統）
+## 最後更新：2026-05-22（DAY-198 幽靈魚分身系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-197 更新（自主觸發）：** 神秘龍魚八波攻擊系統（Mystic Dragon 8-Wave Attack）✅
+- **DAY-198 更新（自主觸發）：** 幽靈魚分身系統（Ghost Fish Phantom Clone）✅
+  - **業界靈感：** Fisch Phantom Mutation（4x 倍率）+ 業界「分身」概念原創設計
+  - **設計：** T156 幽靈魚出現時，同時在場上生成 2-3 個「幻影分身」（T156C，HP=1）；擊破幻影分身給 1x betLevel 安慰獎；擊破真身觸發「幽靈爆發」：所有幻影分身同時爆炸（50% 擊破機率，0.50x 倍率）；全服廣播幽靈魚出現（不告訴玩家哪個是真身）
+  - **設計差異：** 與普通目標（直接擊破）不同，幽靈魚製造「哪條是真的？」的懸疑感；幻影分身的安慰獎讓玩家不會完全空手，但真身的爆炸獎勵更豐厚；全服廣播讓所有玩家都在「找真身」，製造競爭感
+  - server/internal/game/ghost_fish_handler.go：ghostFishManager；isGhostFish（T156）；isGhostFishClone（T156C）；notifyGhostFishSpawn（生成時創建幻影分身）；notifyGhostFishCloneKill（幻影被擊破/安慰獎）；notifyGhostFishRealKill（真身被擊破/幻影爆炸）；onGhostFishLeave（逃跑/移除所有幻影）
+  - server/internal/data/tables.go：新增 T156 幽靈魚（45-70x/HP80/SpawnWeight3）；T156C 幽靈魚幻影分身（HP=1/SpawnWeight=0）
+  - server/internal/ws/protocol.go：新增 MsgGhostFish；GhostFishPayload（ghost_appear/phantom_vanish/real_found/ghost_explode/ghost_escape）
+  - server/internal/game/game.go：GhostFish *ghostFishManager；spawnTarget 加入 isGhostFish 分支；handleKill 加入 isGhostFish/isGhostFishClone 分支；gameLoop 加入 isGhostFish 離開分支
+  - client/chiikawa-pixel/scripts/ui/GhostFishPanel.gd：幽靈白藍主題面板（ghost_appear 白色閃光+橫幅閃爍；phantom_vanish 幻影消散浮動文字；real_found 金色強閃光+「找到真身！」大字；ghost_explode 白色爆炸圓圈+結算彈窗；ghost_escape 淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：ghost_fish 訊號 + _handle_ghost_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 GhostFishPanelScript（layer=47）
+  - 分身設計：2-3 個幻影分身；HP=1（一擊即破）；安慰獎 1x betLevel；全服冷卻 35 秒
+  - 爆炸設計：真身被擊破後 300ms 延遲；所有幻影分身同時爆炸；50% 擊破機率；0.50x 倍率
+  - 懸疑設計：全服廣播不告訴玩家哪個是真身；讓玩家自己判斷（HP 條是線索）
+  - build/vet 全部通過（零錯誤零警告）
   - **業界依據：** Ocean King 3「Mystic Dragon — Catch this fish to get 8 waves and have more chances to kill any fish on the screen.」
   - **設計：** 擊破 T155 後觸發「八波龍息攻擊」：每波（共 8 波）隨機選 3-5 個目標（65% 擊破機率，0.55x 倍率）；每波間隔 800ms；第 8 波「龍怒爆發」全場所有目標（85% 擊破機率，0.70x 倍率）；全服共享獎勵
   - **設計差異：** 與閃電魚自動連鎖（每 0.5 秒單目標，8 秒）不同，神秘龍魚是「每波多目標」（3-5 個），讓玩家感受到「龍息是面狀攻擊」；與鳳凰魚涅槃（一次性全場爆炸）不同，神秘龍魚是「8 波漸進式攻擊」，有節奏感；第 8 波「龍怒爆發」是全場清場，製造「最後一波最爽」的高潮設計
