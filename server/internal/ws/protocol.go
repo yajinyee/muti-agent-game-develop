@@ -196,6 +196,10 @@ const (
 	MsgTorpedoResult        MessageType = "torpedo_result"         // 魚雷爆炸結果（DAY-155）
 	MsgRailgunResult        MessageType = "railgun_result"         // 軌道炮穿透結果（DAY-157）
 	MsgBlackHoleResult      MessageType = "black_hole_result"      // 黑洞漩渦爆炸結果（DAY-166）
+	MsgRouletteCrabStart    MessageType = "roulette_crab_start"    // 黃金輪盤螃蟹開始（DAY-167）
+	MsgRouletteCrabStop     MessageType = "roulette_crab_stop"     // 黃金輪盤螃蟹停止（DAY-167）
+	MsgRouletteCrabResult   MessageType = "roulette_crab_result"   // 黃金輪盤螃蟹結果（DAY-167）
+	MsgRouletteCrabStatus   MessageType = "roulette_crab_status"   // 黃金輪盤螃蟹冷卻狀態（DAY-167）
 	MsgGoldenTurtleTimeStop MessageType = "golden_turtle_time_stop" // 黃金海龜時間停止（DAY-159）
 	MsgLuckyStarFish        MessageType = "lucky_star_fish"         // 幸運星魚全場倍率翻倍（DAY-160）
 	MsgGoldenSharkBerserk   MessageType = "golden_shark_berserk"    // 黃金鯊魚全服狂暴模式（DAY-161）
@@ -3092,6 +3096,39 @@ type BlackHoleResultPayload struct {
 	TotalReward int                  `json:"total_reward"` // 總獎勵（result 時）
 	NewBalance  int                  `json:"new_balance"`  // 結果後餘額（result 時，僅放置者）
 	Cost        int                  `json:"cost"`         // 黑洞費用（10x betLevel）
+}
+
+// ---- 黃金輪盤螃蟹（DAY-167）----
+
+// RouletteCrabStartPayload 黃金輪盤螃蟹開始廣播（Server → Client，DAY-167）
+// 擊破 T125 後觸發，廣播給所有玩家（旁觀者看到輪盤旋轉）
+type RouletteCrabStartPayload struct {
+	PlayerID    string  `json:"player_id"`    // 觸發玩家 ID
+	PlayerName  string  `json:"player_name"`  // 觸發玩家名稱
+	TargetMult  float64 `json:"target_mult"`  // 螃蟹本身的倍率
+	BaseReward  int     `json:"base_reward"`  // 螃蟹擊破的基礎獎勵
+	SpinSecs    float64 `json:"spin_secs"`    // 旋轉持續秒數（4 秒）
+	WheelSlots  []float64 `json:"wheel_slots"` // 輪盤格子（8格）
+}
+
+// RouletteCrabResultPayload 黃金輪盤螃蟹結果廣播（Server → Client，DAY-167）
+// 玩家停止或超時後廣播
+type RouletteCrabResultPayload struct {
+	PlayerID    string  `json:"player_id"`    // 觸發玩家 ID
+	PlayerName  string  `json:"player_name"`  // 觸發玩家名稱
+	WheelResult float64 `json:"wheel_result"` // 輪盤結果倍率（10x-200x）
+	SlotIndex   int     `json:"slot_index"`   // 輪盤格子索引（0-7，用於 Client 動畫定位）
+	BaseReward  int     `json:"base_reward"`  // 螃蟹擊破的基礎獎勵
+	BonusReward int     `json:"bonus_reward"` // 輪盤額外獎勵（基礎獎勵 × 輪盤倍率）
+	NewBalance  int     `json:"new_balance"`  // 結果後餘額（僅觸發玩家有值）
+	IsAutoStop  bool    `json:"is_auto_stop"` // 是否超時自動停止
+}
+
+// RouletteCrabStatusPayload 黃金輪盤螃蟹冷卻狀態（Server → Client，DAY-167）
+// 玩家登入時發送
+type RouletteCrabStatusPayload struct {
+	PlayerID     string `json:"player_id"`
+	CooldownLeft int    `json:"cooldown_left"` // 冷卻剩餘秒數（0=可觸發）
 }
 
 // GoldenTurtleTimeStopPayload 黃金海龜時間停止廣播（Server → Client，DAY-159）

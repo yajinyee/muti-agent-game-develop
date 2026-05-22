@@ -178,6 +178,12 @@ var Targets = map[string]*TargetDef{
 	// 設計：合作型終局內容，與船長魚（競技型）形成對比，製造「全服合力打 Boss」的緊張爽感
 	// 注意：HP=500 是特殊 Boss 級別，遠高於普通特殊目標（60-120），需要多人合力
 	"T124": {ID: "T124", Name: "深淵巨鯨", Type: TargetTypeSpecial, MultiplierMin: 80, MultiplierMax: 120, HP: 500, SpawnWeight: 1, Speed: 15, Lifetime: 45, LaborGain: 20, DifficultyFactor: 16.0, SpecialBehavior: "abyss_whale_boss"},
+	// T125 黃金輪盤螃蟹（DAY-167）— 業界依據：King of Treasures Plus 2026「Roulette Crab — triggers Golden Roulette
+	// bonus game, player hits SHOOT to stop wheel, wins the amount listed where it stops.」
+	// 擊破後觸發個人黃金輪盤（8格：10x-200x），玩家點擊停止，結果預先決定（公平性保證）
+	// 與千龍王輪盤（雙環，最高 1000x）不同：輪盤螃蟹是單環輪盤，更簡單直接，適合中等 betLevel 玩家
+	// 設計：中等倍率（20-40x）+ 低 HP（50）+ 中高生成權重（6）= 常見且有輪盤爽感的特殊目標
+	"T125": {ID: "T125", Name: "黃金輪盤螃蟹", Type: TargetTypeSpecial, MultiplierMin: 20, MultiplierMax: 40, HP: 50, SpawnWeight: 6, Speed: 45, Lifetime: 12, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "roulette_crab"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -250,6 +250,7 @@ func _ready() -> void:
 	_init_captain_fish_panel()        # 船長魚全服競速模式面板（DAY-163）
 	_init_abyss_whale_panel()         # 深淵巨鯨全服 Boss 挑戰面板（DAY-164）
 	_init_black_hole_panel()          # 黑洞漩渦武器視覺效果面板（DAY-166）
+	_init_roulette_crab_panel()       # 黃金輪盤螃蟹面板（DAY-167）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3277,3 +3278,16 @@ func _init_black_hole_panel() -> void:
 	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
 	add_child(panel)
 	_black_hole_panel = panel
+
+# ---- 黃金輪盤螃蟹面板（DAY-167）----
+
+const RouletteCrabPanelScript = preload("res://scripts/ui/RouletteCrabPanel.gd")
+var _roulette_crab_panel: Control = null
+
+func _init_roulette_crab_panel() -> void:
+	var panel = RouletteCrabPanelScript.new()
+	panel.name = "RouletteCrabPanel"
+	panel.z_index = 75  # 在 BlackHolePanel(76) 下方
+	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
+	add_child(panel)
+	_roulette_crab_panel = panel

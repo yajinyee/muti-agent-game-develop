@@ -65,6 +65,7 @@ import (
 	"digital-twin/server/internal/game/megaoctopus"
 	"digital-twin/server/internal/game/chainlongwheel"
 	"digital-twin/server/internal/game/crystaldragon"
+	"digital-twin/server/internal/game/roulettecrab"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/store"
 	"digital-twin/server/internal/ws"
@@ -140,6 +141,7 @@ type Game struct {
 	GoldenShark        *goldenSharkManager        // 黃金鯊魚全服狂暴模式管理器（DAY-161）
 	CaptainFish        *captainFishManager        // 船長魚全服競速模式管理器（DAY-163）
 	AbyssWhale         *abyssWhaleManager         // 深淵巨鯨全服 Boss 挑戰管理器（DAY-164）
+	RouletteCrab       *roulettecrab.Manager      // 黃金輪盤螃蟹系統管理器（DAY-167）
 	CrystalDragon      *crystaldragon.Manager     // 水晶龍收集大獎系統管理器（DAY-153）
 
 	// 計時器
@@ -260,6 +262,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		GoldenShark:        newGoldenSharkManager(),
 		CaptainFish:        newCaptainFishManager(),
 		AbyssWhale:         newAbyssWhaleManager(),
+		RouletteCrab:       roulettecrab.New(),
 		CrystalDragon:      crystaldragon.New(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
@@ -429,6 +432,8 @@ func (g *Game) AddPlayer(playerID string) {
 				g.sendRainbowPhoenixStatus(pp)
 				// 發送水晶龍收集進度狀態（DAY-153）
 				g.sendCrystalDragonStatus(pp)
+				// 發送輪盤螃蟹冷卻狀態（DAY-167）
+				g.sendRouletteCrabStatus(pp)
 				// 任務連續寬限期檢查（DAY-120）
 				go g.checkMissionStreakMercy(pp)
 			}
@@ -763,6 +768,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 千龍王強化輪盤系統（DAY-148）
 	case ws.MsgChainLongWheelStop:
 		g.handleChainLongWheelStop(clientID)
+	// 黃金輪盤螃蟹系統（DAY-167）
+	case ws.MsgRouletteCrabStop:
+		g.handleRouletteCrabWheelStop(p)
 	}
 }
 
@@ -1334,6 +1342,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isAbyssWhale(t.DefID) {
 		go g.notifyAbyssWhaleKill(p, t.InstanceID, t.X, t.Y)
 	}
+	// 黃金輪盤螃蟹：擊破 T125 時觸發（DAY-167）
+	if isRouletteCrab(t.DefID) {
+		go g.tryRouletteCrabWheel(p, t.Multiplier, finalReward)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)
@@ -1645,6 +1657,8 @@ func (g *Game) updateNormalPlay() {
 	go g.tickChainLongWheel()
 	// 水晶龍水晶衰減檢查（每次 update，DAY-153）
 	go g.tickCrystalDragonDecay()
+	// 輪盤螃蟹超時檢查（每次 update，DAY-167）
+	go g.tickRouletteCrabWheel()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
 }

@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-166 黑洞漩渦武器系統）
+## 最後更新：2026-05-22（DAY-167 黃金輪盤螃蟹系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-167 更新（自主觸發）：** 黃金輪盤螃蟹系統（Roulette Crab Golden Wheel）✅
+  - **業界依據：** King of Treasures Plus 2026「Roulette Crab — triggers Golden Roulette bonus game, player hits SHOOT to stop wheel, wins the amount listed where it stops.」— 擊破 T125 後觸發個人黃金輪盤（8格：10x-200x），玩家點擊停止，結果預先決定（公平性保證）
+  - **設計差異：** 與千龍王輪盤（雙環，最高 1000x）不同，輪盤螃蟹是**單環輪盤**，更簡單直接，適合中等 betLevel 玩家；T125 HP=50（容易擊破）+ SpawnWeight=6（常見），讓玩家頻繁體驗輪盤爽感
+  - `server/internal/game/roulettecrab/roulettecrab.go`：輪盤螃蟹管理器（WheelSlots 8格/WheelWeights 加權/StartSession/StopSession/TickAutoStop/GetCooldownLeft）；結果預先決定（公平性保證）；20 秒冷卻
+  - `server/internal/data/tables.go`：新增 T125 黃金輪盤螃蟹（20-40x/HP50/SpawnWeight6/roulette_crab 行為）
+  - `server/internal/game/roulette_crab_handler.go`：isRouletteCrab 判斷；tryRouletteCrabWheel（擊破後觸發/全服廣播/全服公告）；handleRouletteCrabWheelStop（玩家停止/處理結果）；processRouletteCrabResult（發放獎勵/全服廣播/≥100x全服公告/≥150x動態牆）；tickRouletteCrabWheel（超時自動停止）；sendRouletteCrabStatus（登入時發送冷卻狀態）
+  - `server/internal/ws/protocol.go`：新增 MsgRouletteCrabStart/MsgRouletteCrabStop/MsgRouletteCrabResult/MsgRouletteCrabStatus；RouletteCrabStartPayload/RouletteCrabResultPayload/RouletteCrabStatusPayload
+  - `server/internal/game/game.go`：Game struct 加入 RouletteCrab *roulettecrab.Manager；NewGameWithStore 初始化；AddPlayer 發送狀態；HandleMessage 加入 MsgRouletteCrabStop；handleKill 加入 isRouletteCrab 分支；gameLoop 加入 tickRouletteCrabWheel
+  - `client/chiikawa-pixel/scripts/ui/RouletteCrabPanel.gd`：黃金輪盤螃蟹面板（金色主題；roulette_crab_start 全螢幕金色閃光+中央輪盤 UI（8格旋轉）+倒數計時+停止按鈕；_stop_wheel_at_slot 緩停動畫指向結果格；result 結果彈窗含倍率+獎勵；≥100x 雙閃光；≥150x 彩虹三閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：2個訊號（roulette_crab_start/roulette_crab_result）+ 訊息分支
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 RouletteCrabPanelScript（z_index=75）
+  - 輪盤設計：8格（10x/20x/30x/50x/80x/100x/150x/200x）；加權隨機（低倍率高機率）；4 秒旋轉時間；20 秒冷卻
+  - 公平性設計：結果在 StartSession 時預先決定（公平隨機），玩家「停止」只是視覺互動（業界標準做法）
+  - 獎勵設計：額外獎勵 = 螃蟹擊破獎勵 × 輪盤倍率（最高 200x）；不影響原本的擊破獎勵（純額外）
+  - 全服廣播：輪盤開始/結果全服廣播，讓所有玩家看到「有人觸發了黃金輪盤螃蟹」
+  - 全服公告：≥100x 時全服廣播，讓其他玩家看到「有人輪盤螃蟹大獎」
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-166 更新（自主觸發）：** 黑洞漩渦武器系統（Black Hole Vortex Weapon）✅
   - **業界依據：** Ocean King 3 2026 Vortex 機制 + Black Hole Fishing 2026（Steam，2026-04-07 發布）— 放置後吸引周圍 300px 目標向中心移動，3 秒後爆炸擊破，費用 10x betLevel（介於魚雷 6x 和軌道炮 15x 之間）
   - **設計差異：** 與炸彈（即時爆炸）不同，黑洞有「吸引期」（1.5s）+ 「爆炸期」（1.5s），讓玩家看到目標被吸入的過程，製造「漩渦吸入→爆炸」的戲劇感；吸引半徑 300px（比炸彈 200px 大 50%）
