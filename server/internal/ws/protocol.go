@@ -507,6 +507,9 @@ const (
 	MsgChainLongKing     MessageType = "chainlong_king"      // 長龍王雙環輪盤廣播（Server→Client，個人+全服）
 	MsgChainLongKingStop MessageType = "chainlong_king_stop" // 玩家停止輪盤（Client→Server）
 
+	// 鑽頭龍蝦穿透爆炸系統（DAY-195）
+	MsgDrillLobster MessageType = "drill_lobster" // 鑽頭龍蝦穿透爆炸廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4292,4 +4295,31 @@ type ChainLongKingPayload struct {
 // ChainLongKingStopPayload 玩家停止輪盤（Client → Server，DAY-194）
 type ChainLongKingStopPayload struct {
 	InstanceID string `json:"instance_id"` // 輪盤 InstanceID（防止重複停止）
+}
+
+// DrillLobsterPayload 鑽頭龍蝦穿透爆炸廣播（Server → Client，DAY-195）
+// Phase: "drill_start" → "drill_1"..."drill_5" → "drill_explode" → "drill_result"
+type DrillLobsterPayload struct {
+	Phase          string  `json:"phase"`                     // 當前階段
+	TriggerID      string  `json:"trigger_id,omitempty"`      // 觸發的鑽頭龍蝦 InstanceID
+	KillerID       string  `json:"killer_id,omitempty"`       // 觸發玩家 ID
+	KillerName     string  `json:"killer_name,omitempty"`     // 觸發玩家名稱
+	StartX         float64 `json:"start_x,omitempty"`         // 鑽頭出發 X
+	StartY         float64 `json:"start_y,omitempty"`         // 鑽頭出發 Y
+	DirX           float64 `json:"dir_x,omitempty"`           // 鑽頭方向 X（單位向量）
+	DirY           float64 `json:"dir_y,omitempty"`           // 鑽頭方向 Y（單位向量）
+	StepIndex      int     `json:"step_index,omitempty"`      // 當前步驟序號（1-5）
+	CurX           float64 `json:"cur_x,omitempty"`           // 當前位置 X
+	CurY           float64 `json:"cur_y,omitempty"`           // 當前位置 Y
+	IsKill         bool    `json:"is_kill,omitempty"`         // 本步是否擊破目標
+	KilledID       string  `json:"killed_id,omitempty"`       // 被擊破目標 InstanceID
+	KilledName     string  `json:"killed_name,omitempty"`     // 被擊破目標名稱
+	KilledMult     float64 `json:"killed_mult,omitempty"`     // 被擊破目標倍率
+	StepReward     int     `json:"step_reward,omitempty"`     // 本步獎勵
+	TotalKills     int     `json:"total_kills,omitempty"`     // 累計擊破數
+	ExplodeRadius  float64 `json:"explode_radius,omitempty"`  // 爆炸半徑
+	ExplodeKills   int     `json:"explode_kills,omitempty"`   // 爆炸擊破數
+	ExplodeReward  int     `json:"explode_reward,omitempty"`  // 爆炸獎勵
+	PenetrateCount int     `json:"penetrate_count,omitempty"` // 穿透命中目標數
+	TotalReward    int     `json:"total_reward,omitempty"`    // 總獎勵
 }

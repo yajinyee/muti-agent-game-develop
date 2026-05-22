@@ -278,6 +278,7 @@ func _ready() -> void:
 	_init_rock_skeleton_concert_panel() # 搖滾骷髏演唱會面板（DAY-192）
 	_init_electric_jellyfish_panel()    # 電流水母電流網路面板（DAY-193）
 	_init_chainlong_king_panel()        # 長龍王雙環輪盤面板（DAY-194）
+	_init_drill_lobster_panel()         # 鑽頭龍蝦穿透爆炸面板（DAY-195）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3727,3 +3728,20 @@ func _on_chainlong_king(data: Dictionary) -> void:
 
 func _on_chainlong_king_stop_pressed(instance_id: String) -> void:
 	GameManager.send_chainlong_king_stop(instance_id)
+
+## ---- 鑽頭龍蝦穿透爆炸面板（DAY-195）----
+const DrillLobsterPanelScript = preload("res://scripts/ui/DrillLobsterPanel.gd")
+var _drill_lobster_panel = null
+
+func _init_drill_lobster_panel() -> void:
+	var panel = DrillLobsterPanelScript.new()
+	panel.name = "DrillLobsterPanel"
+	panel.layer = 50
+	add_child(panel)
+	_drill_lobster_panel = panel
+	if GameManager.has_signal("drill_lobster"):
+		GameManager.drill_lobster.connect(_on_drill_lobster)
+
+func _on_drill_lobster(data: Dictionary) -> void:
+	if is_instance_valid(_drill_lobster_panel):
+		_drill_lobster_panel.handle_drill_lobster(data)

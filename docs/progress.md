@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-194 長龍王雙環輪盤系統）
+## 最後更新：2026-05-22（DAY-195 鑽頭龍蝦穿透爆炸系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,19 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-195 更新（自主觸發）：** 鑽頭龍蝦穿透爆炸系統（Drill Bit Lobster Penetrating Explosion）✅
+  - **業界依據：** Royal Fishing JILI「Drill Bit Lobster (80X) — fires a penetrating drill that passes through multiple fish before self-detonating, capturing everything in the explosion radius. Mechanical marvel with penetrating drill projectiles.」
+  - **設計：** 擊破 T153 後發射「穿透鑽頭」：沿隨機 8 方向移動，每步 120px/150ms，穿透最多 5 個目標（80% 擊破機率，0.70x 倍率）；穿透結束後在終點「自爆」（300px 半徑，75% 擊破機率，0.65x 倍率）
+  - **設計差異：** 與連鎖爆炸魚（靜態爆炸，BFS 擴散）不同，鑽頭龍蝦是「動態移動的穿透彈」；與隕石魚（從天而降）不同，鑽頭龍蝦是「從擊破點出發沿路徑穿透」；穿透+爆炸雙段式設計製造「一路收割→最後清場」的高潮感
+  - **額外修復：** 同時修復了 DAY-142 T106 鑽頭龍蝦的 isDrillLobster/tryDrillLobsterChain 函數缺失 bug
+  - server/internal/game/drill_lobster_handler.go：drillLobsterManager；isDrillBitLobster（T153）；isDrillLobster（T106 修復）；tryDrillLobsterChain（T106）；tryDrillLobsterPenetrate（T153 隨機方向穿透爆炸）；doDrillLobsterExplosion
+  - server/internal/data/tables.go：新增 T153 鑽頭龍蝦（60-80x/HP90/SpawnWeight3/Speed40/Lifetime15）
+  - server/internal/ws/protocol.go：新增 MsgDrillLobster；DrillLobsterPayload
+  - server/internal/game/game.go：DrillLobster *drillLobsterManager；handleKill 加入 isDrillBitLobster 分支
+  - client/chiikawa-pixel/scripts/ui/DrillLobsterPanel.gd：機械橙色主題面板
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：drill_lobster 訊號
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 DrillLobsterPanelScript（layer=50）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-194 更新（自主觸發）：** 長龍王雙環輪盤系統（ChainLong King Dual Ring Roulette）✅
   - **業界依據：** Royal Fishing JILI「ChainLong King — dual-ring roulette activates when captured. You control when the pointer stops, multiplying inner and outer ring values together. Maximum combination delivers 350X, whilst the ChainLong King itself can award up to 1000X mega wins.」
   - **設計：** 擊破 T152 後觸發「雙環輪盤」互動（個人）：內環 5x/10x/20x/50x（玩家點擊停止）× 外環 1x/2x/3x/5x/7x（玩家點擊停止）= 最高 350x；特殊：1% 機率觸發「千倍大獎」（1000x），跳過輪盤直接給獎

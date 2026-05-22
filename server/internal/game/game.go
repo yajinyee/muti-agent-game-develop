@@ -168,6 +168,7 @@ type Game struct {
 	SchoolPanic        *schoolPanicManager        // 魚群驚嚇連帶系統管理器（DAY-191）
 	RockSkeleton       *rockSkeletonManager       // 搖滾骷髏演唱會系統管理器（DAY-192）
 	ChainLongKing      *chainLongKingManager      // 長龍王雙環輪盤系統管理器（DAY-194）
+	DrillLobster       *drillLobsterManager       // 鑽頭龍蝦穿透爆炸系統管理器（DAY-195）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -312,6 +313,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		SchoolPanic:        newSchoolPanicManager(),
 		RockSkeleton:       newRockSkeletonManager(),
 		ChainLongKing:      newChainLongKingManager(),
+		DrillLobster:       newDrillLobsterManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1582,6 +1584,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 長龍王：擊破 T152 時觸發雙環輪盤（DAY-194）
 	if isChainLongKingFish(t.DefID) {
 		go g.tryChainLongKingRoulette(p, t.InstanceID)
+	}
+	// 鑽頭龍蝦：擊破 T153 時觸發穿透爆炸（DAY-195）
+	if isDrillBitLobster(t.DefID) {
+		go g.tryDrillLobsterPenetrate(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

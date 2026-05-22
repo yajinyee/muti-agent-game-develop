@@ -367,6 +367,12 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「雙環輪盤」互動（個人）：內環 5x/10x/20x/50x × 外環 1x/2x/3x/5x/7x = 最高 350x
 	// 特殊：1% 機率觸發「千倍大獎」（1000x），跳過輪盤直接給獎
 	"T152": {ID: "T152", Name: "長龍王", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 100, HP: 100, SpawnWeight: 2, Speed: 35, Lifetime: 18, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "chainlong_king_roulette"},
+	// T153 鑽頭龍蝦（DAY-195）— 業界依據：Royal Fishing JILI「Drill Bit Lobster (80X) — fires a penetrating drill
+	// that passes through multiple fish before self-detonating, capturing everything in the explosion radius.
+	// Mechanical marvel with penetrating drill projectiles.」
+	// 擊破後發射「穿透鑽頭」：沿隨機方向穿透最多 5 個目標（80% 擊破機率，0.70x 倍率）
+	// 穿透結束後在終點「自爆」（300px 半徑，75% 擊破機率，0.65x 倍率）
+	"T153": {ID: "T153", Name: "鑽頭龍蝦", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 80, HP: 90, SpawnWeight: 3, Speed: 40, Lifetime: 15, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "drill_lobster_penetrate"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

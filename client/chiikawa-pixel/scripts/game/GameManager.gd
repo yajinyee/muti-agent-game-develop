@@ -196,6 +196,7 @@ signal school_panic(data: Dictionary)                  # 魚群驚嚇連帶（DA
 signal rock_skeleton_concert(data: Dictionary)         # 搖滾骷髏演唱會（DAY-192）
 signal electric_jellyfish(data: Dictionary)            # 電流水母電流網路（DAY-193）
 signal chainlong_king(data: Dictionary)                # 長龍王雙環輪盤（DAY-194）
+signal drill_lobster(data: Dictionary)                 # 鑽頭龍蝦穿透爆炸（DAY-195）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -561,6 +562,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_electric_jellyfish(payload)
 		"chainlong_king":
 			_handle_chainlong_king(payload)
+		"drill_lobster":
+			_handle_drill_lobster(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2151,3 +2154,16 @@ func _handle_chainlong_king(payload: Dictionary) -> void:
 ## 發送長龍王停止輪盤訊息（DAY-194）
 func send_chainlong_king_stop(instance_id: String) -> void:
 	_send_message("chainlong_king_stop", {"instance_id": instance_id})
+
+## 處理鑽頭龍蝦穿透爆炸（DAY-195）
+func _handle_drill_lobster(payload: Dictionary) -> void:
+	emit_signal("drill_lobster", payload)
+	var phase: String = payload.get("phase", "")
+	match phase:
+		"drill_start":
+			var killer_name: String = payload.get("killer_name", "")
+			print("[GameManager] Drill Lobster started by %s" % killer_name)
+		"drill_result":
+			var total_kills: int = payload.get("total_kills", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Drill Lobster result: kills=%d reward=%d" % [total_kills, total_reward])
