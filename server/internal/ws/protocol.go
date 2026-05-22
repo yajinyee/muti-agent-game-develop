@@ -444,6 +444,9 @@ const (
 	// 彩虹幸運魚系統（DAY-173）
 	MsgRainbowLuckyFish MessageType = "rainbow_lucky_fish" // 彩虹幸運魚廣播（Server→Client，全服）
 
+	// 海葵觸手攻擊系統（DAY-174）
+	MsgSeaAnemone MessageType = "sea_anemone" // 海葵觸手攻擊廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3782,4 +3785,43 @@ type RainbowLuckyFishPayload struct {
 	KillBoost   float64 `json:"kill_boost"`   // 擊破機率加成（0.20 = +20%，lucky_start 時）
 	TriggerX    float64 `json:"trigger_x"`    // 觸發位置 X（lucky_start 時）
 	TriggerY    float64 `json:"trigger_y"`    // 觸發位置 Y（lucky_start 時）
+}
+
+// ---- 海葵觸手攻擊系統（DAY-174）----
+
+// SeaAnemoneHitEntry 觸手命中記錄
+type SeaAnemoneHitEntry struct {
+	InstanceID string  `json:"instance_id"` // 被命中目標 ID
+	DefID      string  `json:"def_id"`      // 目標定義 ID
+	X          float64 `json:"x"`           // 目標位置 X
+	Y          float64 `json:"y"`           // 目標位置 Y
+	Multiplier float64 `json:"multiplier"`  // 目標倍率
+	Direction  int     `json:"direction"`   // 觸手方向（0-7）
+	Angle      float64 `json:"angle"`       // 觸手角度（度）
+	IsKill     bool    `json:"is_kill"`     // 是否擊破
+	Reward     int     `json:"reward"`      // 獎勵金幣
+}
+
+// SeaAnemonePayload 海葵觸手攻擊廣播（Server → Client，DAY-174）
+// Phase: "tentacle_start"（全服）→ "tentacle_hit"/"tentacle_miss"（全服，每個方向）
+//        → "tentacle_result"（全服）
+type SeaAnemonePayload struct {
+	Phase       string               `json:"phase"`        // 當前階段
+	TriggerID   string               `json:"trigger_id"`   // 觸發目標 ID
+	TriggerX    float64              `json:"trigger_x"`    // 觸發位置 X
+	TriggerY    float64              `json:"trigger_y"`    // 觸發位置 Y
+	KillerID    string               `json:"killer_id"`    // 觸發玩家 ID
+	KillerName  string               `json:"killer_name"`  // 觸發玩家名稱
+	Directions  int                  `json:"directions"`   // 觸手方向數（tentacle_start 時）
+	Direction   int                  `json:"direction"`    // 當前觸手方向（tentacle_hit/miss 時）
+	Angle       float64              `json:"angle"`        // 當前觸手角度（度）
+	HitID       string               `json:"hit_id"`       // 命中目標 ID（tentacle_hit 時）
+	HitX        float64              `json:"hit_x"`        // 命中目標位置 X
+	HitY        float64              `json:"hit_y"`        // 命中目標位置 Y
+	IsKill      bool                 `json:"is_kill"`      // 是否擊破（tentacle_hit 時）
+	Reward      int                  `json:"reward"`       // 獎勵金幣（tentacle_hit 時）
+	Multiplier  float64              `json:"multiplier"`   // 目標倍率（tentacle_hit 時）
+	HitEntries  []SeaAnemoneHitEntry `json:"hit_entries"`  // 所有命中記錄（tentacle_result 時）
+	KillCount   int                  `json:"kill_count"`   // 擊破數（tentacle_result 時）
+	TotalReward int                  `json:"total_reward"` // 總獎勵（tentacle_result 時）
 }

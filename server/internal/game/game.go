@@ -149,6 +149,7 @@ type Game struct {
 	IceFishing         *iceFishingManager         // 冰釣幸運輪盤系統管理器（DAY-171）
 	LuckyEgg           *luckyEggManager           // 幸運彩蛋魚系統管理器（DAY-172）
 	RainbowLucky       *rainbowLuckyManager       // 彩虹幸運魚系統管理器（DAY-173）
+	// DAY-174 海葵觸手攻擊系統：無需管理器（stateless，每次擊破獨立觸發）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -1401,6 +1402,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 彩虹幸運魚：擊破 T131 時觸發（DAY-173）
 	if isRainbowLuckyFish(t.DefID) {
 		go g.tryRainbowLuckyFish(p.DisplayName, t.X, t.Y)
+	}
+	// 海葵觸手攻擊：擊破 T132 時觸發（DAY-174）
+	if isSeaAnemone(t.DefID) {
+		go g.trySeaAnemone(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

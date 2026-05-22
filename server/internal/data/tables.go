@@ -221,6 +221,13 @@ var Targets = map[string]*TargetDef{
 	// 設計差異：與幸運星魚（個人 ×2 倍率）不同，彩虹幸運魚是**全服共享的擊破機率加成**，製造「全服一起爽」的社交感
 	// 設計：中高倍率（55-75x）+ 中等 HP（85）+ 稀有生成權重（3）= 稀有且有「全服幸運」社交感的特殊目標
 	"T131": {ID: "T131", Name: "彩虹幸運魚", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 75, HP: 85, SpawnWeight: 3, Speed: 55, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "rainbow_lucky_fish"},
+	// T132 海葵（DAY-174）— 業界依據：JILI Jackpot Fishing「Sea Anemone introduces unique effects —
+	// tentacle attacks that spread to nearby fish」jackpotfishing-game.com 2026「Sea Anemone introduce
+	// unique effects, such as chain lightning or explosive torpedoes, adding layers of strategy and excitement」
+	// 擊破後觸手向 8 個方向延伸，每個方向命中最近的目標（300px 範圍），命中目標有 70% 機率擊破
+	// 設計差異：與閃電鰻（連鎖跳躍，隨機目標）不同，海葵是「方向性觸手」（8方向固定延伸），更有視覺衝擊感
+	// 設計：中高倍率（55-80x）+ 中等 HP（90）+ 稀有生成權重（3）= 稀有且有「觸手蔓延」視覺爽感的特殊目標
+	"T132": {ID: "T132", Name: "海葵", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 80, HP: 90, SpawnWeight: 3, Speed: 40, Lifetime: 15, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "sea_anemone"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

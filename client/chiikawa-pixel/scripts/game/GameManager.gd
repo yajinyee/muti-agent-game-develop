@@ -175,6 +175,7 @@ signal freeze_bomb(data: Dictionary)                   # 冰凍炸彈魚（DAY-1
 signal ice_fishing_wheel(data: Dictionary)             # 冰釣幸運輪盤（DAY-171）
 signal lucky_egg_fish(data: Dictionary)                # 幸運彩蛋魚（DAY-172）
 signal rainbow_lucky_fish(data: Dictionary)            # 彩虹幸運魚（DAY-173）
+signal sea_anemone(data: Dictionary)                   # 海葵觸手攻擊（DAY-174）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -498,6 +499,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_egg_fish(payload)
 		"rainbow_lucky_fish":
 			_handle_rainbow_lucky_fish(payload)
+		"sea_anemone":
+			_handle_sea_anemone(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -1361,6 +1364,24 @@ func _handle_rainbow_lucky_fish(payload: Dictionary) -> void:
 			print("[GameManager] Rainbow Lucky Fish lucky_start: player=%s duration=%ds boost=+%.0f%%" % [player_name, duration_sec, kill_boost * 100])
 		"lucky_end":
 			print("[GameManager] Rainbow Lucky Fish lucky_end")
+
+## 處理海葵觸手攻擊（DAY-174）
+func _handle_sea_anemone(payload: Dictionary) -> void:
+	emit_signal("sea_anemone", payload)
+	var phase: String = payload.get("phase", "")
+	var killer_name: String = payload.get("killer_name", "")
+	match phase:
+		"tentacle_start":
+			print("[GameManager] Sea Anemone tentacle_start: player=%s" % killer_name)
+		"tentacle_hit":
+			var direction: int = payload.get("direction", 0)
+			var is_kill: bool = payload.get("is_kill", false)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Sea Anemone tentacle_hit[%d]: kill=%s reward=%d" % [direction, is_kill, reward])
+		"tentacle_result":
+			var kill_count: int = payload.get("kill_count", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Sea Anemone tentacle_result: kills=%d reward=%d" % [kill_count, total_reward])
 
 ## 處理黃金海龜時間停止（DAY-159）
 func _handle_golden_turtle_time_stop(payload: Dictionary) -> void:
