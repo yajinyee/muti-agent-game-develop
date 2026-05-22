@@ -265,6 +265,7 @@ func _ready() -> void:
 	_init_lucky_clover_panel()        # 幸運草魚面板（DAY-179）
 	_init_rainbow_shark_panel()       # 彩虹鯊魚爆發面板（DAY-180）
 	_init_thunder_shark_panel()       # 雷霆鯊魚連鎖閃電面板（DAY-181）
+	_init_vampire_fish_panel()        # 吸血鬼魚累積倍率面板（DAY-182）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3504,4 +3505,22 @@ func _init_thunder_shark_panel() -> void:
 		GameManager.thunder_shark_chain.connect(func(data):
 			if is_instance_valid(_thunder_shark_panel):
 				_thunder_shark_panel.handle_thunder_shark(data)
+		)
+
+## ---- 吸血鬼魚累積倍率面板（DAY-182）----
+const VampireFishPanelScript = preload("res://scripts/ui/VampireFishPanel.gd")
+var _vampire_fish_panel: Control = null
+
+func _init_vampire_fish_panel() -> void:
+	var panel = VampireFishPanelScript.new()
+	panel.name = "VampireFishPanel"
+	panel.z_index = 63
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_vampire_fish_panel = panel
+	if GameManager.has_signal("vampire_fish"):
+		GameManager.vampire_fish.connect(func(data):
+			if is_instance_valid(_vampire_fish_panel):
+				var my_id: String = GameManager.get("_player_id") if GameManager.get("_player_id") != null else ""
+				_vampire_fish_panel.handle_vampire_fish(data, my_id)
 		)

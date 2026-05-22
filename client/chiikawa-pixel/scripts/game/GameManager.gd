@@ -183,6 +183,7 @@ signal mermaid_healing(data: Dictionary)               # 美人魚治癒（DAY-1
 signal lucky_clover_fish(data: Dictionary)             # 幸運草魚（DAY-179）
 signal rainbow_shark_burst(data: Dictionary)           # 彩虹鯊魚爆發（DAY-180）
 signal thunder_shark_chain(data: Dictionary)           # 雷霆鯊魚連鎖閃電（DAY-181）
+signal vampire_fish(data: Dictionary)                  # 吸血鬼魚累積倍率（DAY-182）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -522,6 +523,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_rainbow_shark_burst(payload)
 		"thunder_shark_chain":
 			_handle_thunder_shark_chain(payload)
+		"vampire_fish":
+			_handle_vampire_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -1900,3 +1903,19 @@ func _handle_thunder_shark_chain(payload: Dictionary) -> void:
 		var total_jumps: int = payload.get("total_jumps", 0)
 		var total_kills: int = payload.get("total_kills", 0)
 		print("[GameManager] Thunder Shark result: jumps=%d kills=%d" % [total_jumps, total_kills])
+
+## 處理吸血鬼魚累積倍率（DAY-182）
+func _handle_vampire_fish(payload: Dictionary) -> void:
+	emit_signal("vampire_fish", payload)
+	var phase: String = payload.get("phase", "")
+	match phase:
+		"vampire_start":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Vampire Fish vampire_start: player=%s" % player_name)
+		"mult_update":
+			var current_mult: float = payload.get("current_mult", 1.0)
+			print("[GameManager] Vampire Fish mult_update: mult=%.1f" % current_mult)
+		"vampire_end":
+			var final_mult: float = payload.get("current_mult", 1.0)
+			var kill_count: int = payload.get("kill_count", 0)
+			print("[GameManager] Vampire Fish vampire_end: finalMult=%.1f kills=%d" % [final_mult, kill_count])

@@ -281,6 +281,13 @@ var Targets = map[string]*TargetDef{
 	// 雷霆鯊魚是「全場無限距離隨機跳躍」，讓玩家看到閃電在全場「隨機亂跳」的混亂爽感
 	// 設計：高倍率（60-80x）+ 中等 HP（85）+ 稀有生成權重（3）= 稀有且有「全場閃電」爽感的特殊目標
 	"T139": {ID: "T139", Name: "雷霆鯊魚", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 80, HP: 85, SpawnWeight: 3, Speed: 55, Lifetime: 14, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "thunder_shark_chain"},
+	// T140 吸血鬼魚（DAY-182）— 業界依據：JILI 2026「The explicit multiplier of vampires increases
+	// the more you fight, and there is a chance that you can enter the multiplier mode, up to X5」
+	// 擊破後觸發「吸血鬼模式」：玩家每擊破一個目標，倍率累積 +0.1x（從 1.0x 開始），最高 5.0x，持續 15 秒
+	// 設計差異：與幸運星魚（固定 ×2，10秒）不同，吸血鬼魚是「累積型倍率」（越打越高），
+	// 製造「越打越爽」的正向反饋；玩家需要在 15 秒內盡量多打目標
+	// 設計：高倍率（65-85x）+ 中等 HP（90）+ 稀有生成權重（3）= 稀有且有「累積爽感」的特殊目標
+	"T140": {ID: "T140", Name: "吸血鬼魚", Type: TargetTypeSpecial, MultiplierMin: 65, MultiplierMax: 85, HP: 90, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "vampire_fish_escalating"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

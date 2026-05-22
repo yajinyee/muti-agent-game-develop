@@ -157,6 +157,7 @@ type Game struct {
 	LuckyClover        *luckyCloverManager        // 幸運草魚系統管理器（DAY-179）
 	RainbowShark       *rainbowSharkManager       // 彩虹鯊魚爆發系統管理器（DAY-180）
 	// DAY-181 雷霆鯊魚連鎖閃電系統：無需管理器（stateless，每次擊破獨立觸發）
+	VampireFish        *vampireFishManager        // 吸血鬼魚累積倍率系統管理器（DAY-182）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -290,6 +291,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		Mermaid:            newMermaidManager(),
 		LuckyClover:        newLuckyCloverManager(),
 		RainbowShark:       newRainbowSharkManager(),
+		VampireFish:        newVampireFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1113,6 +1115,12 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		// 移除已擊破的彩虹標記
 		g.removeRainbowSharkMark(t.InstanceID)
 	}
+	// 套用吸血鬼魚累積倍率（DAY-182，乘法，個人，越打越高）
+	// 注意：先記錄擊破（累積倍率），再套用新倍率
+	vampireMult := g.recordVampireKill(p)
+	if vampireMult > 1.0 {
+		finalReward = int(float64(finalReward) * vampireMult)
+	}
 	// 船長魚競速：記錄擊破（DAY-163）
 	if g.IsCaptainRaceActive() {
 		go g.recordCaptainRaceKill(p, finalReward)
@@ -1475,6 +1483,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 雷霆鯊魚：擊破 T139 時觸發（DAY-181）
 	if isThunderShark(t.DefID) {
 		go g.tryThunderSharkChain(p, t.InstanceID, t.X, t.Y)
+	}
+	// 吸血鬼魚：擊破 T140 時觸發（DAY-182）
+	if isVampireFish(t.DefID) {
+		go g.tryVampireFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

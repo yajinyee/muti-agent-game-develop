@@ -469,6 +469,9 @@ const (
 	// 雷霆鯊魚連鎖閃電系統（DAY-181）
 	MsgThunderSharkChain MessageType = "thunder_shark_chain" // 雷霆鯊魚連鎖閃電廣播（Server→Client，全服）
 
+	// 吸血鬼魚累積倍率系統（DAY-182）
+	MsgVampireFish MessageType = "vampire_fish" // 吸血鬼魚倍率廣播（Server→Client）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3983,4 +3986,18 @@ type ThunderSharkChainPayload struct {
 	TotalReward int     `json:"total_reward"` // 總獎勵（result 時）
 	KillerID    string  `json:"killer_id"`    // 觸發玩家 ID
 	KillerName  string  `json:"killer_name"`  // 觸發玩家名稱
+}
+
+// ---- 吸血鬼魚累積倍率系統（DAY-182）----
+
+// VampireFishPayload 吸血鬼魚倍率廣播（Server → Client，DAY-182）
+// Phase: "vampire_start"（個人）→ "vampire_broadcast"（全服）→ "mult_update"（個人）→ "vampire_end"（個人）
+type VampireFishPayload struct {
+	Phase       string  `json:"phase"`        // 當前階段
+	PlayerID    string  `json:"player_id"`    // 玩家 ID
+	PlayerName  string  `json:"player_name"`  // 玩家名稱
+	CurrentMult float64 `json:"current_mult"` // 當前倍率
+	MaxMult     float64 `json:"max_mult"`     // 最高倍率（vampire_start 時）
+	DurationSec int     `json:"duration_sec"` // 持續時間（vampire_start 時）
+	KillCount   int     `json:"kill_count"`   // 擊破數（vampire_end 時）
 }

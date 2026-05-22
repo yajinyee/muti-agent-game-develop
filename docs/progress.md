@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-181 雷霆鯊魚連鎖閃電系統）
+## 最後更新：2026-05-22（DAY-182 吸血鬼魚累積倍率系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-182 更新（自主觸發）：** 吸血鬼魚累積倍率系統（Vampire Fish Escalating Multiplier）✅
+  - **業界依據：** JILI 2026「The explicit multiplier of vampires increases the more you fight, and there is a chance that you can enter the multiplier mode, up to X5」— 擊破 T140 後觸發「吸血鬼模式」：玩家每擊破一個目標，倍率累積 +0.1x（從 1.0x 開始），最高 5.0x，持續 15 秒
+  - **設計差異：** 與幸運星魚（固定 ×2，10秒）不同，吸血鬼魚是「累積型倍率」（越打越高），製造「越打越爽」的正向反饋；玩家需要在 15 秒內盡量多打目標，每次擊破都讓倍率更高
+  - server/internal/game/vampire_fish_handler.go：vampireFishManager（per-player session/cooldown 管理）；isVampireFish 判斷；activate（激活吸血鬼模式）；recordKill（累積倍率 +0.1x）；getVampireMult（供 handleKill 使用）；deactivate（結束模式）；tryVampireFish（擊破後觸發/全服廣播/15秒後廣播結果）；recordVampireKill（每次擊破累積倍率+廣播更新）；announceVampireFish（全服公告≥3.0x）
+  - server/internal/data/tables.go：新增 T140 吸血鬼魚（65-85x/HP90/SpawnWeight3/vampire_fish_escalating）
+  - server/internal/ws/protocol.go：新增 MsgVampireFish；VampireFishPayload（vampire_start/vampire_broadcast/mult_update/vampire_end）
+  - server/internal/game/game.go：VampireFish *vampireFishManager；handleKill 加入 recordVampireKill 倍率套用（乘法，個人累積）+ isVampireFish 分支
+  - client/chiikawa-pixel/scripts/ui/VampireFishPanel.gd：吸血鬼魚面板（深紅主題；vampire_start 全螢幕深紅閃光+頂部橫幅+中央大倍率顯示（×1.0）+倒數計時；mult_update 倍率彈跳動畫+顏色漸變（越高越紅）+≥3.0x 閃光+≥5.0x 金色；vampire_end 右側滑入結果彈窗（最終倍率/擊破數）；vampire_broadcast 其他玩家看到橫幅）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：vampire_fish 訊號 + _handle_vampire_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 VampireFishPanelScript（z_index=63）
+  - 倍率設計：初始 1.0x，每次擊破 +0.1x，最高 5.0x；個人冷卻 35 秒；持續 15 秒
+  - 正向反饋：倍率越高，顏色越紅（視覺反饋）；達到 5.0x 時金色特效（最高成就感）
+  - 全服廣播：激活時全服廣播，讓其他玩家看到「有人進入吸血鬼模式」
+  - 全服公告：達到 3.0x 時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-181 更新（自主觸發）：** 雷霆鯊魚連鎖閃電系統（Thunder Shark Chain Lightning）✅
   - **業界依據：** JILI Jackpot Fishing「Thunder Shark brings unique abilities — chain lightning that jumps between nearby fish, with no distance limit」— 擊破 T139 後觸發「雷霆連鎖閃電」：全場隨機跳躍（不限距離），最多 20 跳，每跳 75% 擊破機率，獎勵 0.65x 倍率
   - **設計差異：** 與 T103 閃電鰻（5跳/200px範圍/50%機率）和 T118 皇家閃電鰻（15跳/300px範圍/60%機率）不同，雷霆鯊魚是「全場無限距離隨機跳躍」（20跳/75%機率），讓玩家看到閃電在全場「隨機亂跳」的混亂爽感
