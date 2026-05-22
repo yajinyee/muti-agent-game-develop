@@ -489,6 +489,13 @@ var Targets = map[string]*TargetDef{
 	//   3. 凍結結束後「解凍爆炸」：所有被命中過的目標 HP -50% + 60% 擊破機率
 	//   個人冷卻 20 秒；全服冷卻 35 秒
 	"T170": {ID: "T170", Name: "時間凍結魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 52, Lifetime: 13, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "time_freeze"},
+	// T171 彩虹稜鏡魚（DAY-213）— 業界依據：Dive Down 2026「Rainbow is the strongest mutation with 3.0x multiplier」
+	// 業界原創「稜鏡折射染色」機制：擊破後隨機選場上最多 5 個目標染色（紅/橙/黃/綠/藍）
+	// 每種顏色對應不同倍率加成（×1.5/×2.0/×2.5/×3.0/×5.0）；染色持續 10 秒
+	// 染色期間擊破對應顏色目標獲得對應倍率加成（乘法）
+	// 10 秒後「彩虹爆炸」：所有仍存活的染色目標同時爆炸（70% 擊破機率，0.65x 倍率）
+	// 個人冷卻 25 秒；全服廣播染色開始/爆炸結算
+	"T171": {ID: "T171", Name: "彩虹稜鏡魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "rainbow_prism"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -214,6 +214,7 @@ signal fortune_coin_fish(data: Dictionary)            # 幸運金幣魚即時獎
 signal lucky_hot_zone(data: Dictionary)               # 幸運熱區魚空間策略（DAY-210）
 signal lucky_trident(data: Dictionary)               # 幸運三叉魚互動三轉盤（DAY-211）
 signal time_freeze_fish(data: Dictionary)            # 時間凍結魚系統（DAY-212）
+signal rainbow_prism(data: Dictionary)              # 彩虹稜鏡魚系統（DAY-213）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -615,6 +616,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_trident(payload)
 		"time_freeze_fish":
 			_handle_time_freeze_fish(payload)
+		"rainbow_prism":
+			_handle_rainbow_prism(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2485,6 +2488,20 @@ func _handle_time_freeze_fish(payload: Dictionary) -> void:
 			var killed: int = payload.get("killed_count", 0)
 			var reward_per: int = payload.get("reward_per_player", 0)
 			print("[GameManager] Time Freeze thaw blast: killed=%d reward_per=%d" % [killed, reward_per])
+
+## 處理彩虹稜鏡魚系統（DAY-213）
+func _handle_rainbow_prism(payload: Dictionary) -> void:
+	emit_signal("rainbow_prism", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"prism_start":
+			var trigger_player: String = payload.get("trigger_player", "")
+			var count: int = payload.get("colored_targets", []).size()
+			print("[GameManager] Rainbow Prism start: player=%s colored=%d" % [trigger_player, count])
+		"prism_blast":
+			var kills: int = payload.get("blast_kills", 0)
+			var reward: int = payload.get("blast_reward", 0)
+			print("[GameManager] Rainbow Prism blast: kills=%d reward=%d" % [kills, reward])
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:

@@ -550,7 +550,8 @@ const (
 	MsgLuckyHotZone   MessageType = "lucky_hot_zone"    // 幸運熱區魚空間策略廣播（Server→Client，DAY-210）
 	MsgLuckyTrident   MessageType = "lucky_trident"     // 幸運三叉魚互動三轉盤廣播（Server→Client，DAY-211）
 	MsgLuckyTridentStop MessageType = "lucky_trident_stop" // 玩家停止轉盤（Client→Server，DAY-211）
-	MsgTimeFreezeFish MessageType = "time_freeze_fish" // 時間凍結魚廣播（Server→Client，DAY-212）
+	MsgTimeFreezeFish  MessageType = "time_freeze_fish"  // 時間凍結魚廣播（Server→Client，DAY-212）
+	MsgRainbowPrism    MessageType = "rainbow_prism"     // 彩虹稜鏡魚廣播（Server→Client，DAY-213）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4710,4 +4711,27 @@ type TimeFreezeFishPayload struct {
 	KilledCount     int     `json:"killed_count,omitempty"`
 	TotalReward     int     `json:"total_reward,omitempty"`
 	RewardPerPlayer int     `json:"reward_per_player,omitempty"`
+}
+
+// PrismColoredTargetInfo 稜鏡染色目標資訊（DAY-213）
+type PrismColoredTargetInfo struct {
+	TargetID  string  `json:"target_id"`
+	ColorName string  `json:"color_name"` // red/orange/yellow/green/blue
+	ColorHex  string  `json:"color_hex"`  // #RRGGBB
+	MultBonus float64 `json:"mult_bonus"` // 倍率加成（乘法）
+}
+
+// RainbowPrismPayload 彩虹稜鏡魚廣播（Server → Client，DAY-213）
+//
+// Events:
+//
+//	"prism_start" — 稜鏡折射開始（全服廣播，帶染色目標列表）
+//	"prism_blast" — 彩虹爆炸結算（全服廣播，帶擊破數/總獎勵）
+type RainbowPrismPayload struct {
+	Event          string                   `json:"event"`
+	TriggerPlayer  string                   `json:"trigger_player,omitempty"`
+	ColoredTargets []PrismColoredTargetInfo `json:"colored_targets,omitempty"`
+	Duration       int                      `json:"duration,omitempty"`    // 染色持續秒數
+	BlastKills     int                      `json:"blast_kills,omitempty"` // 彩虹爆炸擊破數
+	BlastReward    int                      `json:"blast_reward,omitempty"` // 彩虹爆炸總獎勵
 }

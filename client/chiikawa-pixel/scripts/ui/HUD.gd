@@ -296,6 +296,7 @@ func _ready() -> void:
 	_init_lucky_hot_zone_panel()        # 幸運熱區魚空間策略面板（DAY-210）
 	_init_lucky_trident_panel()         # 幸運三叉魚互動三轉盤面板（DAY-211）
 	_init_time_freeze_panel()           # 時間凍結魚系統面板（DAY-212）
+	_init_rainbow_prism_panel()         # 彩虹稜鏡魚系統面板（DAY-213）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4051,3 +4052,21 @@ func _init_time_freeze_panel() -> void:
 func _on_time_freeze_fish(data: Dictionary) -> void:
 	if is_instance_valid(_time_freeze_panel):
 		_time_freeze_panel.handle_time_freeze(data)
+
+# ─── 彩虹稜鏡魚系統面板（DAY-213）───────────────────────────────────────────
+const RainbowPrismPanelScript = preload("res://scripts/ui/RainbowPrismPanel.gd")
+
+var _rainbow_prism_panel = null
+
+func _init_rainbow_prism_panel() -> void:
+	var panel = RainbowPrismPanelScript.new()
+	panel.name = "RainbowPrismPanel"
+	panel.layer = 32
+	add_child(panel)
+	_rainbow_prism_panel = panel
+	if GameManager.has_signal("rainbow_prism"):
+		GameManager.rainbow_prism.connect(_on_rainbow_prism)
+
+func _on_rainbow_prism(data: Dictionary) -> void:
+	if is_instance_valid(_rainbow_prism_panel):
+		_rainbow_prism_panel.handle_rainbow_prism(data)

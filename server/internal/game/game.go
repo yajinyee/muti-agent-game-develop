@@ -186,6 +186,7 @@ type Game struct {
 	LuckyHotZone       *luckyHotZoneManager        // 幸運熱區魚空間策略系統管理器（DAY-210）
 	LuckyTrident       *luckyTridentManager        // 幸運三叉魚互動三轉盤系統管理器（DAY-211）
 	TimeFreeze         *timeFreezeManager          // 時間凍結魚系統管理器（DAY-212）
+	RainbowPrism       *rainbowPrismManager        // 彩虹稜鏡魚系統管理器（DAY-213）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -348,6 +349,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyHotZone:       newLuckyHotZoneManager(),
 		LuckyTrident:       newLuckyTridentManager(),
 		TimeFreeze:         newTimeFreezeManager(),
+		RainbowPrism:       newRainbowPrismManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1220,6 +1222,13 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if tridentMult > 1.0 {
 		finalReward = int(float64(finalReward) * tridentMult)
 	}
+	// 套用彩虹稜鏡魚倍率加成（DAY-213，×1.5-5.0 乘法，目標染色，10 秒）
+	prismMult := g.getRainbowPrismMultiplier(t.InstanceID)
+	if prismMult > 1.0 {
+		finalReward = int(float64(finalReward) * prismMult)
+		// 移除已擊破的染色標記
+		g.removeRainbowPrismColor(t.InstanceID)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1719,6 +1728,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 時間凍結魚：擊破 T170 時觸發時間凍結（DAY-212）
 	if isTimeFreezeFish(t.DefID) {
 		go g.tryTimeFreezeFish(p)
+	}
+	// 彩虹稜鏡魚：擊破 T171 時觸發稜鏡折射（DAY-213）
+	if isRainbowPrismFish(t.DefID) {
+		go g.tryRainbowPrismFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

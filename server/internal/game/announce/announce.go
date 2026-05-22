@@ -51,6 +51,7 @@ const (
 	EventFreezeBomb               EventType = "freeze_bomb"               // 冰凍炸彈魚觸發（DAY-170）
 	EventIceFishing               EventType = "ice_fishing"               // 冰釣幸運輪盤觸發（DAY-171）
 	EventIceFishingResult         EventType = "ice_fishing_result"        // 冰釣幸運輪盤結果（DAY-171）
+	EventRainbowPrism             EventType = "rainbow_prism"             // 彩虹稜鏡魚觸發（DAY-213）
 )
 
 // Priority 公告優先級
@@ -655,6 +656,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		message = fmt.Sprintf("🎣 %s 的 ×%s 冰釣輪盤擊破 %s 個目標！獲得 %s 金幣！", playerName, multStr, killsStr, rewardStr)
 		icon = "🎣"
 		color = "#80DFFF"
+		priority = PriorityNormal
+		duration = 4000
+
+	case EventRainbowPrism:
+		msg := fmt.Sprintf("🌈 %s 觸發彩虹稜鏡！", playerName)
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FF69B4"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🌈 彩虹稜鏡！"
+		message = msg
+		icon = "🌈"
+		color = c
 		priority = PriorityNormal
 		duration = 4000
 
