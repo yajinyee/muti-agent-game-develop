@@ -254,6 +254,7 @@ func _ready() -> void:
 	_init_lion_dance_panel()          # 獅子舞大獎爆發面板（DAY-168）
 	_init_vortex_fish_panel()         # 漩渦魚群吸引面板（DAY-169）
 	_init_freeze_bomb_panel()         # 冰凍炸彈魚面板（DAY-170）
+	_init_ice_fishing_panel()         # 冰釣幸運輪盤面板（DAY-171）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3330,3 +3331,15 @@ func _init_freeze_bomb_panel() -> void:
 	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
 	add_child(panel)
 	_freeze_bomb_panel = panel
+
+## ---- 冰釣幸運輪盤面板（DAY-171）----
+const IceFishingPanelScript = preload("res://scripts/ui/IceFishingPanel.gd")
+var _ice_fishing_panel: Control = null
+
+func _init_ice_fishing_panel() -> void:
+	var panel = IceFishingPanelScript.new()
+	panel.name = "IceFishingPanel"
+	panel.z_index = 71  # 在 FreezeBombPanel(72) 下方
+	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
+	add_child(panel)
+	_ice_fishing_panel = panel

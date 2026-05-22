@@ -49,6 +49,8 @@ const (
 	EventLionDance                EventType = "lion_dance"                 // 獅子舞大獎爆發觸發（DAY-168）
 	EventVortexFish               EventType = "vortex_fish"                // 漩渦魚群吸引觸發（DAY-169）
 	EventFreezeBomb               EventType = "freeze_bomb"               // 冰凍炸彈魚觸發（DAY-170）
+	EventIceFishing               EventType = "ice_fishing"               // 冰釣幸運輪盤觸發（DAY-171）
+	EventIceFishingResult         EventType = "ice_fishing_result"        // 冰釣幸運輪盤結果（DAY-171）
 )
 
 // Priority 公告優先級
@@ -619,6 +621,42 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = "#00CFFF"
 		priority = PriorityHigh
 		duration = 5000
+
+	case EventIceFishing:
+		multStr := fmt.Sprintf("%d", amount)
+		if extra != nil {
+			if m, ok := extra["mult"]; ok {
+				multStr = m
+			}
+		}
+		title = "🎣 冰釣幸運輪盤！"
+		message = fmt.Sprintf("🎣 %s 觸發冰釣輪盤！獲得 ×%s 倍率加成！8 秒黃金時間！", playerName, multStr)
+		icon = "🎣"
+		color = "#00E5FF"
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventIceFishingResult:
+		multStr := "?"
+		killsStr := "0"
+		rewardStr := "0"
+		if extra != nil {
+			if m, ok := extra["mult"]; ok {
+				multStr = m
+			}
+			if k, ok := extra["kills"]; ok {
+				killsStr = k
+			}
+			if r, ok := extra["reward"]; ok {
+				rewardStr = r
+			}
+		}
+		title = "🎣 冰釣輪盤結果！"
+		message = fmt.Sprintf("🎣 %s 的 ×%s 冰釣輪盤擊破 %s 個目標！獲得 %s 金幣！", playerName, multStr, killsStr, rewardStr)
+		icon = "🎣"
+		color = "#80DFFF"
+		priority = PriorityNormal
+		duration = 4000
 
 	default:
 		title = "📢 公告"

@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-170 冰凍炸彈魚系統）
+## 最後更新：2026-05-22（DAY-171 冰釣幸運輪盤系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-171 更新（自主觸發）：** 冰釣幸運輪盤系統（Ice Fishing Lucky Wheel）✅
+  - **業界依據：** Cozy Fishing Life（2026-05-10）「Winter Wheel — 8 segments x2-x10 multipliers + bonus mode triggers」+ Ice Fishing Live（Evolution Gaming）「wheel triggers bonus fishing rounds」— 擊破 T129 冰釣魚後觸發「冰釣幸運輪盤」（8格：2x-10x 倍率加成），玩家在 5 秒內點擊停止，觸發後 8 秒內所有擊破獎勵套用輪盤倍率
+  - **設計差異：** 與巨型章魚輪盤（950x 大獎）不同，冰釣輪盤是**倍率加成型**（2x-10x），讓玩家在短時間內所有擊破都有倍率加成，製造「黃金 8 秒」的爽感；結果預先決定（公平性保證），玩家「停止」只是視覺互動
+  - `server/internal/game/icefishing_handler.go`：iceFishingManager（個人冷卻 45 秒/倍率 8 秒）；iceFishingWheelSlots（8格加權隨機）；isIceFish 判斷；getIceFishingMult（供 handleKill 使用）；recordIceFishingKill（記錄倍率期間擊破）；tryIceFishingWheel（擊破後觸發/預先決定結果/廣播）；handleIceFishingWheelStop（停止輪盤/激活倍率/8秒後廣播結果）；announceIceFishing（全服公告≥7x）
+  - `server/internal/data/tables.go`：新增 T129 冰釣魚（45-65x/HP75/SpawnWeight5/ice_fishing_wheel 行為）
+  - `server/internal/ws/protocol.go`：新增 MsgIceFishingWheel/MsgIceFishingWheelStop；IceFishingWheelPayload（多階段：wheel_start/wheel_broadcast/wheel_result/wheel_result_broadcast/mult_end）
+  - `server/internal/game/announce/announce.go`：新增 EventIceFishing/EventIceFishingResult；buildContent 加入冰釣輪盤公告（冰藍色，5秒，高優先）
+  - `server/internal/game/game.go`：Game struct 加入 IceFishing *iceFishingManager；NewGameWithStore 初始化；handleKill 加入 getIceFishingMult 倍率套用 + isIceFish 分支；HandleMessage 加入 MsgIceFishingWheelStop
+  - `client/chiikawa-pixel/scripts/ui/IceFishingPanel.gd`：冰釣幸運輪盤面板（冰藍主題；wheel_start 全螢幕冰藍閃光+中央 8 格輪盤旋轉+停止按鈕+5秒倒數；wheel_result 輪盤緩停指向結果格+倍率彈跳動畫+右上角倒數計時 8 秒；mult_end 淡出倒數計時+右側滑入結果彈窗；全服廣播橫幅；≥7x 雙閃光；≥10x 彩虹三閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：ice_fishing_wheel 訊號 + _handle_ice_fishing_wheel
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 IceFishingPanelScript（z_index=71）
+  - 輪盤設計：8格（2x/3x/4x/5x/6x/7x/8x/10x）；加權隨機（低倍率高機率）；5 秒旋轉時間；45 秒個人冷卻
+  - 公平性設計：結果在 tryIceFishingWheel 時預先決定，玩家「停止」只是視覺互動（業界標準做法）
+  - 倍率設計：觸發後 8 秒內所有擊破獎勵套用輪盤倍率（2x-10x）；倍率在獅子舞之後套用（最後一層）
+  - 全服廣播：輪盤開始/結果全服廣播（≥5x 才廣播結果），讓其他玩家看到「有人觸發了冰釣輪盤」
+  - 全服公告：≥7x 時全服廣播，≥7x 且擊破 ≥3 個時廣播結果
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-170 更新（自主觸發）：** 冰凍炸彈魚系統（Freeze Bomb Fish）✅
   - **業界依據：** King of Ocean 2026「The freezing blast pauses an entire school for a few seconds — useful when a high-tier creature is escaping the frame.」— 擊破 T128 冰凍炸彈魚後，場上所有特殊目標（T101-T127）被冰凍 6 秒，停止移動
   - **設計差異：** 與黃金海龜（全場時間停止 8 秒）不同，冰凍炸彈魚只凍結特殊目標，讓玩家集中火力打高價值目標；視覺上特殊目標顯示冰晶光暈（藍白色），普通目標繼續移動，製造「選擇性凍結」的策略感

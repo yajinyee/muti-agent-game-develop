@@ -146,6 +146,7 @@ type Game struct {
 	LionDance          *lionDanceManager          // 獅子舞大獎爆發系統管理器（DAY-168）
 	VortexFish         *vortexFishManager         // 漩渦魚群吸引系統管理器（DAY-169）
 	FreezeBomb         *freezeBombManager         // 冰凍炸彈魚系統管理器（DAY-170）
+	IceFishing         *iceFishingManager         // 冰釣幸運輪盤系統管理器（DAY-171）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -270,6 +271,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LionDance:          newLionDanceManager(),
 		VortexFish:         newVortexFishManager(),
 		FreezeBomb:         newFreezeBombManager(),
+		IceFishing:         newIceFishingManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -777,6 +779,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 黃金輪盤螃蟹系統（DAY-167）
 	case ws.MsgRouletteCrabStop:
 		g.handleRouletteCrabWheelStop(p)
+	// 冰釣幸運輪盤系統（DAY-171）
+	case ws.MsgIceFishingWheelStop:
+		go g.handleIceFishingWheelStop(p)
 	}
 }
 
@@ -1049,6 +1054,13 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	lionDanceMult := g.getLionDanceMult(p.ID, t.InstanceID)
 	if lionDanceMult > 1.0 {
 		finalReward = int(float64(finalReward) * lionDanceMult)
+	}
+	// 套用冰釣幸運輪盤倍率（DAY-171）
+	iceFishingMult := g.getIceFishingMult(p.ID)
+	if iceFishingMult > 1.0 {
+		bonusReward := int(float64(finalReward) * (iceFishingMult - 1.0))
+		finalReward = int(float64(finalReward) * iceFishingMult)
+		go g.recordIceFishingKill(p.ID, bonusReward)
 	}
 	// 船長魚競速：記錄擊破（DAY-163）
 	if g.IsCaptainRaceActive() {
@@ -1368,6 +1380,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 冰凍炸彈魚：擊破 T128 時觸發（DAY-170）
 	if isFreezeBomb(t.DefID) {
 		go g.tryFreezeBomb(p, t.InstanceID, t.X, t.Y)
+	}
+	// 冰釣幸運輪盤：擊破 T129 時觸發（DAY-171）
+	if isIceFish(t.DefID) {
+		go g.tryIceFishingWheel(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

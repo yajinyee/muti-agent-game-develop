@@ -198,6 +198,8 @@ const (
 	MsgBlackHoleResult      MessageType = "black_hole_result"      // 黑洞漩渦爆炸結果（DAY-166）
 	MsgRouletteCrabStart    MessageType = "roulette_crab_start"    // 黃金輪盤螃蟹開始（DAY-167）
 	MsgRouletteCrabStop     MessageType = "roulette_crab_stop"     // 黃金輪盤螃蟹停止（DAY-167）
+	// 冰釣幸運輪盤系統（DAY-171）
+	MsgIceFishingWheelStop MessageType = "ice_fishing_wheel_stop" // 冰釣輪盤停止（Client→Server，DAY-171）
 	MsgRouletteCrabResult   MessageType = "roulette_crab_result"   // 黃金輪盤螃蟹結果（DAY-167）
 	MsgRouletteCrabStatus   MessageType = "roulette_crab_status"   // 黃金輪盤螃蟹冷卻狀態（DAY-167）
 	MsgGoldenTurtleTimeStop MessageType = "golden_turtle_time_stop" // 黃金海龜時間停止（DAY-159）
@@ -432,6 +434,9 @@ const (
 
 	// 冰凍炸彈魚系統（DAY-170）
 	MsgFreezeBomb MessageType = "freeze_bomb" // 冰凍炸彈魚廣播（Server→Client，全服）
+
+	// 冰釣幸運輪盤系統（DAY-171）
+	MsgIceFishingWheel MessageType = "ice_fishing_wheel" // 冰釣幸運輪盤廣播（Server→Client）
 
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -3706,3 +3711,25 @@ type FreezeBombPayload struct {
 	DurationSec   int               `json:"duration_sec"`   // 冰凍持續時間（秒）
 	FrozenTargets []FreezeBombEntry `json:"frozen_targets"` // 被冰凍的目標列表（freeze_start 時）
 }
+
+// ---- 冰釣幸運輪盤系統（DAY-171）----
+
+// IceFishingWheelPayload 冰釣幸運輪盤廣播（Server → Client，DAY-171）
+// Phase: "wheel_start"（個人）→ "wheel_broadcast"（全服）→ "wheel_result"（個人）
+//        → "wheel_result_broadcast"（全服，≥5x）→ "mult_end"（個人）
+type IceFishingWheelPayload struct {
+	Phase       string  `json:"phase"`        // 當前階段
+	PlayerID    string  `json:"player_id"`    // 觸發玩家 ID
+	PlayerName  string  `json:"player_name"`  // 觸發玩家名稱
+	WheelResult int     `json:"wheel_result"` // 輪盤結果格子索引（wheel_result 時）
+	Multiplier  float64 `json:"multiplier"`   // 輪盤倍率（2x-10x）
+	Label       string  `json:"label"`        // 格子顯示文字（×2-×10）
+	Color       string  `json:"color"`        // 格子顏色
+	SpinSec     int     `json:"spin_sec"`     // 旋轉時間（秒，wheel_start 時）
+	DurationSec int     `json:"duration_sec"` // 倍率持續時間（秒，wheel_result 時）
+	KillCount   int     `json:"kill_count"`   // 倍率期間擊破數（mult_end 時）
+	TotalBonus  int     `json:"total_bonus"`  // 倍率期間額外獎勵（mult_end 時）
+}
+
+// MsgIceFishingWheelStop Client → Server：玩家手動停止輪盤
+// （使用 MsgUseSpecialWeapon 的 action 欄位，或獨立訊息）

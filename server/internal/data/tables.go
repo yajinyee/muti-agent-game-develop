@@ -201,6 +201,13 @@ var Targets = map[string]*TargetDef{
 	// 設計差異：與黃金海龜（全場時間停止 8 秒）不同，冰凍炸彈魚只凍結特殊目標，讓玩家集中火力打高價值目標
 	// 設計：中等倍率（40-60x）+ 中等 HP（70）+ 中等生成權重（5）= 常見且有「凍結高價值目標」策略感的特殊目標
 	"T128": {ID: "T128", Name: "冰凍炸彈魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 60, HP: 70, SpawnWeight: 5, Speed: 45, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "freeze_bomb"},
+	// T129 冰釣魚（DAY-171）— 業界依據：Cozy Fishing Life（2026-05-10）「Winter Wheel — 8 segments x2-x10 multipliers
+	// + bonus mode triggers」+ Ice Fishing Live（Evolution Gaming）「wheel triggers bonus fishing rounds」
+	// 擊破後觸發「冰釣幸運輪盤」（8格：2x-10x 倍率加成），玩家在 5 秒內點擊停止
+	// 觸發後玩家在 8 秒內所有擊破獎勵套用輪盤倍率，製造「黃金 8 秒」的爽感
+	// 設計差異：與巨型章魚輪盤（950x 大獎）不同，冰釣輪盤是「倍率加成型」（2x-10x），讓玩家在短時間內所有擊破都有倍率加成
+	// 設計：中等倍率（45-65x）+ 中等 HP（75）+ 中等生成權重（5）= 常見且有「黃金時間」爽感的特殊目標
+	"T129": {ID: "T129", Name: "冰釣魚", Type: TargetTypeSpecial, MultiplierMin: 45, MultiplierMax: 65, HP: 75, SpawnWeight: 5, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "ice_fishing_wheel"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
