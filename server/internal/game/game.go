@@ -180,6 +180,7 @@ type Game struct {
 	FreeSpinFish       *freeSpinFishManager        // 自由旋轉魚免費射擊系統管理器（DAY-204）
 	JackpotDragon      *jackpotDragonManager       // 獎池龍 Jackpot 抽獎系統管理器（DAY-205）
 	CometFish          *cometFishManager           // 彗星魚連鎖爆炸系統管理器（DAY-206）
+	GoldenWaveFish     *goldenWaveFishManager      // 黃金波浪魚全場倍率衝擊系統管理器（DAY-207）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -336,6 +337,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		FreeSpinFish:       newFreeSpinFishManager(),
 		JackpotDragon:      newJackpotDragonManager(),
 		CometFish:          newCometFishManager(),
+		GoldenWaveFish:     newGoldenWaveFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1183,6 +1185,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if rockSkeletonEncoreBoost > 0.0 {
 		finalReward = finalReward + int(float64(finalReward)*rockSkeletonEncoreBoost)
 	}
+	// 套用黃金波浪魚加成（DAY-207，×2.0 乘法，全服共享，8 秒）
+	goldenWaveBoost := g.getGoldenWaveBoost()
+	if goldenWaveBoost > 1.0 {
+		finalReward = int(float64(finalReward) * goldenWaveBoost)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1658,6 +1665,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 彗星魚：擊破 T164 時提前引爆超新星（DAY-206）
 	if isCometFish(t.DefID) {
 		go g.notifyCometFishKill(p, t)
+	}
+	// 黃金波浪魚：擊破 T165 時觸發黃金波浪（DAY-207）
+	if isGoldenWaveFish(t.DefID) {
+		go g.tryGoldenWaveFish(t)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

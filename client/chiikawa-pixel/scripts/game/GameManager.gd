@@ -208,6 +208,7 @@ signal humpback_whale(data: Dictionary)                # 座頭鯨覺醒（DAY-2
 signal free_spin_fish(data: Dictionary)                # 自由旋轉魚免費射擊（DAY-204）
 signal jackpot_dragon(data: Dictionary)               # 獎池龍 Jackpot 抽獎（DAY-205）
 signal comet_fish(data: Dictionary)                   # 彗星魚連鎖爆炸（DAY-206）
+signal golden_wave_fish(data: Dictionary)             # 黃金波浪魚全場倍率衝擊（DAY-207）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -597,6 +598,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_jackpot_dragon(payload)
 		"comet_fish":
 			_handle_comet_fish(payload)
+		"golden_wave_fish":
+			_handle_golden_wave_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2339,6 +2342,25 @@ func _handle_comet_fish(payload: Dictionary) -> void:
 			var kills: int = payload.get("kill_count", 0)
 			var reward: int = payload.get("reward", 0)
 			print("[GameManager] Comet supernova: kills=%d reward=%d" % [kills, reward])
+
+## 處理黃金波浪魚全場倍率衝擊（DAY-207）
+func _handle_golden_wave_fish(payload: Dictionary) -> void:
+	emit_signal("golden_wave_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"wave_start":
+			var boost_mult: float = payload.get("boost_mult", 2.0)
+			print("[GameManager] Golden Wave started, boost=×%.0f" % boost_mult)
+		"wave_column":
+			var col_index: int = payload.get("col_index", 0)
+			var kills: int = payload.get("kill_count", 0)
+			print("[GameManager] Golden Wave col #%d: kills=%d" % [col_index, kills])
+		"boost_start":
+			var total_kills: int = payload.get("total_kills", 0)
+			var boost_sec: int = payload.get("boost_sec", 8)
+			print("[GameManager] Golden Wave boost started: kills=%d, %ds" % [total_kills, boost_sec])
+		"boost_end":
+			print("[GameManager] Golden Wave boost ended")
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:

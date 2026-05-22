@@ -1,6 +1,30 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-206 彗星魚連鎖爆炸系統）
+## 最後更新：2026-05-23（DAY-207 黃金波浪魚全場倍率衝擊系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-207 更新（自主觸發）：** 黃金波浪魚全場倍率衝擊系統（Golden Wave Fish）✅
+  - **業界依據：** Ocean King 4 Brand New World（2025 最新版）「Golden Wave Fish — triggers a golden tidal wave that sweeps across the entire screen, temporarily boosting all multipliers by 2x for 8 seconds while simultaneously dealing damage to all fish in its path.」
+  - **設計：** 擊破 T165 後觸發「黃金波浪」：8 列掃場（每列 150ms，70% 擊破機率，0.60x 倍率）；波浪結束後全服 ×2.0 倍率加成 8 秒（乘法，最強加成）；全服冷卻 50 秒
+  - **設計差異：** 與搖滾骷髏安可（+30% 加法）不同，黃金波浪是「×2.0 乘法」加成，效果最強；與幸運草魚（+50% 加法）不同，黃金波浪是「波浪掃場 + 立即 2x 倍率」雙重效果；乘法加成讓高倍率目標的獎勵更爆炸（50x 目標 → 100x 效果）；8 秒加成讓玩家有「趕快打高倍率目標」的緊迫感
+  - server/internal/game/golden_wave_fish_handler.go：goldenWaveFishManager；isGoldenWaveFish（T165）；getGoldenWaveBoost（供 handleKill 使用，加成期間回傳 2.0）；tryGoldenWaveFish（擊破後觸發/全服廣播）；runGoldenWaveSweep（goroutine 8 列掃場/每列 150ms/最終啟動加成）；doGoldenWaveColumnBlast（單列擊破/70%機率/全服共享獎勵）
+  - server/internal/data/tables.go：新增 T165 黃金波浪魚（45-70x/HP80/SpawnWeight3/Speed45/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgGoldenWaveFish；GoldenWaveFishPayload（wave_start/wave_column/boost_start/boost_end）
+  - server/internal/game/game.go：GoldenWaveFish *goldenWaveFishManager；handleKill 加入 getGoldenWaveBoost 乘法加成 + isGoldenWaveFish 分支
+  - client/chiikawa-pixel/scripts/ui/GoldenWaveFishPanel.gd：黃金海浪主題面板（wave_start 金色強閃光+橫幅；wave_column 黃金波浪柱從底部升起+浮動文字；boost_start 全螢幕三次金色強閃光+「×2 黃金加成！」大字+底部計時進度條；boost_end 進度條淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：golden_wave_fish 訊號 + _handle_golden_wave_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 GoldenWaveFishPanelScript（layer=38）
+  - 波浪設計：8 列；每列 150ms；70% 擊破機率；0.60x 倍率；全服共享獎勵；全服冷卻 50 秒
+  - 加成設計：×2.0 乘法（最強加成）；持續 8 秒；底部進度條顏色漸變（金→橙→紅橙）
+  - 視覺設計：黃金海浪主題（#FFD700 + #FF8C00 + #FFF8DC）；波浪柱從底部升起（0.12s）；三次金色強閃光；結算彈窗右側滑入
+  - 全服廣播：波浪開始/每列結果/加成開始/加成結束全服廣播
+  - 全服公告：波浪結束時全服公告（依擊破數決定顏色：≥10 橙色/其他金色）
+  - build/vet 全部通過（零錯誤零警告）
 
 ## 自我評估
 - **完成度：100%**

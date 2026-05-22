@@ -543,6 +543,9 @@ const (
 	// 彗星魚連鎖爆炸系統（DAY-206）
 	MsgCometFish MessageType = "comet_fish" // 彗星魚廣播（Server→Client，全服）
 
+	// 黃金波浪魚全場倍率衝擊系統（DAY-207）
+	MsgGoldenWaveFish MessageType = "golden_wave_fish" // 黃金波浪魚廣播（Server→Client，全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4570,4 +4573,23 @@ type CometFishPayload struct {
 	KillCount   int          `json:"kill_count,omitempty"`
 	Reward      int          `json:"reward,omitempty"`
 	IsEarly     bool         `json:"is_early,omitempty"`
+}
+
+// GoldenWaveFishPayload 黃金波浪魚全場倍率衝擊廣播（Server → Client，DAY-207）
+// Events:
+//   "wave_start"   — 黃金波浪開始（全服廣播，帶列數/加成倍率/持續時間）
+//   "wave_column"  — 波浪掃過一列（全服廣播，每 150ms 一次，共 8 列）
+//   "boost_start"  — 黃金加成開始（全服廣播，×2.0 倍率，8 秒）
+//   "boost_end"    — 黃金加成結束（全服廣播）
+type GoldenWaveFishPayload struct {
+	Event       string  `json:"event"`
+	Columns     int     `json:"columns,omitempty"`
+	ColIndex    int     `json:"col_index,omitempty"`
+	ColX        float64 `json:"col_x,omitempty"`
+	BoostMult   float64 `json:"boost_mult,omitempty"`
+	BoostSec    int     `json:"boost_sec,omitempty"`
+	KillCount   int     `json:"kill_count,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
+	TotalKills  int     `json:"total_kills,omitempty"`
+	TotalReward int     `json:"total_reward,omitempty"`
 }

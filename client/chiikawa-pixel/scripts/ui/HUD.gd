@@ -290,6 +290,7 @@ func _ready() -> void:
 	_init_free_spin_fish_panel()        # 自由旋轉魚免費射擊面板（DAY-204）
 	_init_jackpot_dragon_panel()        # 獎池龍 Jackpot 抽獎面板（DAY-205）
 	_init_comet_fish_panel()            # 彗星魚連鎖爆炸面板（DAY-206）
+	_init_golden_wave_fish_panel()      # 黃金波浪魚全場倍率衝擊面板（DAY-207）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3943,3 +3944,20 @@ func _init_comet_fish_panel() -> void:
 func _on_comet_fish(data: Dictionary) -> void:
 	if is_instance_valid(_comet_fish_panel):
 		_comet_fish_panel.handle_comet_fish(data)
+
+## ---- 黃金波浪魚全場倍率衝擊面板（DAY-207）----
+const GoldenWaveFishPanelScript = preload("res://scripts/ui/GoldenWaveFishPanel.gd")
+var _golden_wave_fish_panel = null
+
+func _init_golden_wave_fish_panel() -> void:
+	var panel = GoldenWaveFishPanelScript.new()
+	panel.name = "GoldenWaveFishPanel"
+	panel.layer = 38
+	add_child(panel)
+	_golden_wave_fish_panel = panel
+	if GameManager.has_signal("golden_wave_fish"):
+		GameManager.golden_wave_fish.connect(_on_golden_wave_fish)
+
+func _on_golden_wave_fish(data: Dictionary) -> void:
+	if is_instance_valid(_golden_wave_fish_panel):
+		_golden_wave_fish_panel.handle_golden_wave_fish(data)

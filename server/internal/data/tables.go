@@ -445,6 +445,12 @@ var Targets = map[string]*TargetDef{
 	// 生成後沿弧線軌跡飛越全場（1.5秒），沿途 7 個爆炸點（200px 半徑，70% 擊破，0.65x 倍率）
 	// 最終超新星爆炸（400px 半徑，80% 擊破，0.75x 倍率）；玩家擊破可提前引爆；全服冷卻 40 秒
 	"T164": {ID: "T164", Name: "彗星魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 60, Lifetime: 12, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "comet_fish_trail"},
+	// T165 黃金波浪魚（DAY-207）— 業界依據：Ocean King 4 Brand New World
+	// 「Golden Wave Fish — triggers a golden tidal wave that sweeps across the entire screen,
+	//  temporarily boosting all multipliers by 2x for 8 seconds.」
+	// 擊破後觸發「黃金波浪」：8 列掃場（每列 150ms，70% 擊破，0.60x 倍率）
+	// 波浪結束後全服 ×2.0 倍率加成 8 秒（乘法，最強加成）；全服冷卻 50 秒
+	"T165": {ID: "T165", Name: "黃金波浪魚", Type: TargetTypeSpecial, MultiplierMin: 45, MultiplierMax: 70, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "golden_wave_boost"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
