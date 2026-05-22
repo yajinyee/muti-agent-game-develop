@@ -3524,3 +3524,18 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **解決：** 連接 GameManager.target_updated 訊號，在回調中更新光環的 position
 - **連接 target_killed 訊號：** 目標被擊破時移除光環，避免殘留
 - **教訓：** 任何需要跟著目標移動的 UI 元素，都要連接 target_updated 訊號
+
+## 83. 漩渦魚群吸引系統設計（DAY-169）
+- **業界依據：** Ocean King（Google Play 2026）「Vortex Fish — catching a Vortex Fish will suck all fish of the same species in the area into a whirlpool」
+- **設計要點：** 同類型吸引（基礎目標群）vs 黑洞（全場吸引），製造策略性差異
+- **獎勵設計：** 0.55x 倍率（比直接擊破低），平衡 RTP
+- **視覺設計：** 逐步吸入（每 150ms 一個），製造「漩渦吸入」的戲劇感
+- **全服冷卻：** 20 秒，防止頻繁觸發
+
+## 84. 冰凍炸彈魚系統設計（DAY-170）
+- **業界依據：** King of Ocean 2026「The freezing blast pauses an entire school for a few seconds — useful when a high-tier creature is escaping the frame.」
+- **設計要點：** 只凍結特殊目標（T101-T127），普通目標繼續移動，製造「選擇性凍結」的策略感
+- **冰凍時間：** 6 秒（比黃金海龜的 8 秒短，但只針對高價值目標）
+- **視覺設計：** 冰晶光暈（藍白色閃爍）+ 目標被擊破時冰晶碎裂動畫
+- **全服冷卻：** 25 秒，防止頻繁觸發
+- **教訓：** 「選擇性凍結」比「全場時間停止」更有策略性，讓玩家感受到「我要集中打高價值目標」的決策感
