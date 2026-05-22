@@ -207,6 +207,7 @@ signal abyss_vortex(data: Dictionary)                  # 深淵漩渦魚（DAY-2
 signal humpback_whale(data: Dictionary)                # 座頭鯨覺醒（DAY-203）
 signal free_spin_fish(data: Dictionary)                # 自由旋轉魚免費射擊（DAY-204）
 signal jackpot_dragon(data: Dictionary)               # 獎池龍 Jackpot 抽獎（DAY-205）
+signal comet_fish(data: Dictionary)                   # 彗星魚連鎖爆炸（DAY-206）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -594,6 +595,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_free_spin_fish(payload)
 		"jackpot_dragon":
 			_handle_jackpot_dragon(payload)
+		"comet_fish":
+			_handle_comet_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2316,6 +2319,26 @@ func _handle_jackpot_dragon(payload: Dictionary) -> void:
 	var amount: int = payload.get("amount", 0)
 	var player_name: String = payload.get("player_name", "")
 	print("[GameManager] Jackpot Dragon: player=%s level=%s amount=%d" % [player_name, level, amount])
+
+## 處理彗星魚連鎖爆炸（DAY-206）
+func _handle_comet_fish(payload: Dictionary) -> void:
+	emit_signal("comet_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"comet_appear":
+			var trail_count: int = payload.get("trail_count", 7)
+			print("[GameManager] Comet Fish appeared, trail=%d" % trail_count)
+		"trail_blast":
+			var blast_idx: int = payload.get("blast_index", 1)
+			var kills: int = payload.get("kill_count", 0)
+			print("[GameManager] Comet trail blast #%d: kills=%d" % [blast_idx, kills])
+		"early_supernova":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Comet early supernova by %s" % player_name)
+		"supernova":
+			var kills: int = payload.get("kill_count", 0)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Comet supernova: kills=%d reward=%d" % [kills, reward])
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:

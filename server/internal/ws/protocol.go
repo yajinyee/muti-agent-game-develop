@@ -540,6 +540,9 @@ const (
 	// 獎池龍 Jackpot 抽獎系統（DAY-205）
 	MsgJackpotDragon MessageType = "jackpot_dragon" // 獎池龍廣播（Server→Client，全服）
 
+	// 彗星魚連鎖爆炸系統（DAY-206）
+	MsgCometFish MessageType = "comet_fish" // 彗星魚廣播（Server→Client，全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4538,4 +4541,33 @@ type JackpotDragonPayload struct {
 	Amount     int    `json:"amount"`      // 獎勵金額
 	IsGrand    bool   `json:"is_grand,omitempty"`
 	IsMajor    bool   `json:"is_major,omitempty"`
+}
+
+// CometPoint 彗星軌跡點（DAY-206）
+type CometPoint struct {
+	X float64 `json:"x"`
+	Y float64 `json:"y"`
+}
+
+// CometFishPayload 彗星魚連鎖爆炸廣播（Server → Client，DAY-206）
+// Events:
+//   "comet_appear"   — 彗星魚出現，帶軌跡點列表（全服廣播）
+//   "trail_blast"    — 軌跡爆炸點（全服廣播，每 200ms 一次）
+//   "early_supernova"— 玩家提前引爆（全服廣播）
+//   "supernova"      — 超新星爆炸結算（全服廣播）
+type CometFishPayload struct {
+	Event       string       `json:"event"`
+	InstanceID  string       `json:"instance_id,omitempty"`
+	PlayerID    string       `json:"player_id,omitempty"`
+	PlayerName  string       `json:"player_name,omitempty"`
+	StartX      float64      `json:"start_x,omitempty"`
+	StartY      float64      `json:"start_y,omitempty"`
+	X           float64      `json:"x,omitempty"`
+	Y           float64      `json:"y,omitempty"`
+	TrailPoints []CometPoint `json:"trail_points,omitempty"`
+	TrailCount  int          `json:"trail_count,omitempty"`
+	BlastIndex  int          `json:"blast_index,omitempty"`
+	KillCount   int          `json:"kill_count,omitempty"`
+	Reward      int          `json:"reward,omitempty"`
+	IsEarly     bool         `json:"is_early,omitempty"`
 }

@@ -440,6 +440,11 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「獎池抽獎」（個人）：加權隨機選擇 Jackpot 等級
 	//   Mini(70%) / Minor(20%) / Major(8%) / Grand(2%)；個人冷卻 60 秒
 	"T163": {ID: "T163", Name: "獎池龍", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 100, HP: 100, SpawnWeight: 2, Speed: 30, Lifetime: 18, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "jackpot_dragon_draw"},
+	// T164 彗星魚（DAY-206）— 業界依據：Ocean King 3 Plus「Comet Fish — streaks across the screen
+	// leaving a trail of explosions, each explosion has a chance to capture fish in its radius.」
+	// 生成後沿弧線軌跡飛越全場（1.5秒），沿途 7 個爆炸點（200px 半徑，70% 擊破，0.65x 倍率）
+	// 最終超新星爆炸（400px 半徑，80% 擊破，0.75x 倍率）；玩家擊破可提前引爆；全服冷卻 40 秒
+	"T164": {ID: "T164", Name: "彗星魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 60, Lifetime: 12, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "comet_fish_trail"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

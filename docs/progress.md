@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-205 獎池龍 Jackpot 抽獎系統）
+## 最後更新：2026-05-23（DAY-206 彗星魚連鎖爆炸系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-205 更新（自主觸發）：** 獎池龍 Jackpot 抽獎系統（Jackpot Dragon）✅
+- **DAY-206 更新（自主觸發）：** 彗星魚連鎖爆炸系統（Comet Fish Chain Blast）✅
+  - **業界依據：** Ocean King 3 Plus「Comet Fish — streaks across the screen leaving a trail of explosions, each explosion has a chance to capture fish in its radius. The comet leaves destruction in its wake.」
+  - **設計：** T164 彗星魚生成後，沿隨機弧線軌跡飛越全場（二次貝茲曲線），沿途 7 個爆炸點（每 200ms，200px 半徑，70% 擊破機率，0.65x 倍率）；最終超新星爆炸（400px 半徑，80% 擊破機率，0.75x 倍率）；玩家擊破彗星魚可「提前引爆」超新星；全服冷卻 40 秒
+  - **設計差異：** 與連環炸彈蟹（T159，靜態多點爆炸）不同，彗星魚是「動態軌跡」— 玩家看到彗星飛越全場，沿途爆炸，最後超新星；「提前引爆」機制讓玩家有「要不要現在打」的策略決策；超新星爆炸範圍是普通爆炸的 2 倍，製造「最後一擊最爽」的高潮感；全服共享獎勵讓所有玩家都受益
+  - server/internal/game/comet_fish_handler.go：cometFishManager；isCometFish（T164）；notifyCometFishSpawn（生成時觸發軌跡飛行/全服廣播）；notifyCometFishKill（玩家擊破時提前引爆/全服廣播）；runCometFishTrail（goroutine 每 200ms 軌跡爆炸/超時觸發超新星）；doCometFishTrailBlast（單個爆炸點/200px 半徑/70%擊破/全服共享獎勵）；doCometFishSupernova（超新星/400px 半徑/80%擊破/全服公告≥5擊破）；generateCometTrail（二次貝茲曲線軌跡生成）；distributeRewardToAll（全服共享獎勵）
+  - server/internal/data/tables.go：新增 T164 彗星魚（40-65x/HP75/SpawnWeight3/Speed60/Lifetime12）
+  - server/internal/ws/protocol.go：新增 MsgCometFish；CometPoint；CometFishPayload（comet_appear/trail_blast/early_supernova/supernova）
+  - server/internal/game/game.go：CometFish *cometFishManager；spawnTarget 加入 isCometFish 分支（notifyCometFishSpawn）；handleKill 加入 isCometFish 分支（notifyCometFishKill）
+  - client/chiikawa-pixel/scripts/ui/CometFishPanel.gd：彗星橙白主題面板（comet_appear 橙色閃光+頂部橫幅；trail_blast 爆炸圓圈擴散+浮動文字；early_supernova 金色強閃光+「提前引爆！」大字；supernova 全螢幕橙紅三次強閃光+「☄️ 超新星爆炸！」大字+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：comet_fish 訊號 + _handle_comet_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 CometFishPanelScript（layer=39）
+  - 軌跡設計：7 個爆炸點；200ms 間隔；200px 半徑；70% 擊破機率；0.65x 倍率；二次貝茲曲線弧線路徑
+  - 超新星設計：400px 半徑（2 倍）；80% 擊破機率；0.75x 倍率；全服冷卻 40 秒
+  - 提前引爆設計：玩家擊破彗星魚立即觸發超新星；廣播「提前引爆」讓全服看到；製造「英雄感」
+  - 視覺設計：橙白主題（#FF8C00 + #FFD700 + #FF4500 + #FFFFFF）；爆炸圓圈擴散（20→400px，0.4s）；超新星三次強閃光（橙→金→白）；結算彈窗右側滑入
+  - 全服廣播：彗星出現/每個軌跡爆炸/提前引爆/超新星全服廣播
+  - 全服公告：超新星≥5 個擊破時全服公告（依擊破數決定顏色：≥15 橙紅/≥10 橙色/≥5 金色）
+  - build/vet 全部通過（零錯誤零警告）
   - **業界依據：** JILI Jackpot Fishing「special targets like the Jackpot Fish and Jackpot Dragon offering chances at substantial prizes. With the potential for high payouts up to 1000 times the bet.」
   - **設計：** 擊破 T163 後觸發「獎池抽獎」（個人）：加權隨機選擇 Jackpot 等級 Mini(70%)/Minor(20%)/Major(8%)/Grand(2%)；直接觸發對應等級的 Jackpot（ForceWin），立即給予獎勵；個人冷卻 60 秒；Grand/Major 全服廣播+公告
   - **設計差異：** 與普通 Jackpot（每次射擊累積 0.5%，達到門檻後機率觸發）不同，獎池龍是「擊破後直接抽獎」（主動），讓玩家有「我要去打那條龍」的目標感；Grand 2% 機率讓玩家每次擊破都有「說不定這次就是 Grand」的期待感；個人冷卻確保不會被單一玩家壟斷

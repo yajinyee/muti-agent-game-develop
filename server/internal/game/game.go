@@ -179,6 +179,7 @@ type Game struct {
 	HumpbackWhale      *humpbackWhaleManager       // 座頭鯨覺醒系統管理器（DAY-203）
 	FreeSpinFish       *freeSpinFishManager        // 自由旋轉魚免費射擊系統管理器（DAY-204）
 	JackpotDragon      *jackpotDragonManager       // 獎池龍 Jackpot 抽獎系統管理器（DAY-205）
+	CometFish          *cometFishManager           // 彗星魚連鎖爆炸系統管理器（DAY-206）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -334,6 +335,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		HumpbackWhale:      newHumpbackWhaleManager(),
 		FreeSpinFish:       newFreeSpinFishManager(),
 		JackpotDragon:      newJackpotDragonManager(),
+		CometFish:          newCometFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1653,6 +1655,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isJackpotDragon(t.DefID) {
 		go g.tryJackpotDragonDraw(p)
 	}
+	// 彗星魚：擊破 T164 時提前引爆超新星（DAY-206）
+	if isCometFish(t.DefID) {
+		go g.notifyCometFishKill(p, t)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)
@@ -2114,6 +2120,10 @@ func (g *Game) spawnTarget() {
 	// 幽靈魚：T156 生成時觸發幻影分身（DAY-198）
 	if isGhostFish(def.ID) {
 		go g.notifyGhostFishSpawn(instanceID, x, y, t.Multiplier)
+	}
+	// 彗星魚：T164 生成時觸發軌跡飛行（DAY-206）
+	if isCometFish(def.ID) {
+		go g.notifyCometFishSpawn(t)
 	}
 }
 
