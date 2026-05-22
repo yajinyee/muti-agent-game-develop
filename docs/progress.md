@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-189 時間炸彈魚系統）
+## 最後更新：2026-05-22（DAY-190 三重幸運魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-190 更新（自主觸發）：** 三重幸運魚系統（Triple Lucky Fish）✅
+  - **業界靈感：** TaDa Gaming TriLuck™ 2026「trigger three different feature specifications simultaneously, ranging from win multipliers, jackpot bonuses, collecting all rewards, and more unique features」
+  - **設計：** 擊破 T148 後同時觸發三重效果：金幣雨（betLevel×20-50x）+ 倍率加成（+50%，12秒）+ 武器充能（龍怒/魚雷/軌道炮隨機一發）
+  - **設計差異：** 與幸運草魚（全服+50%）不同，三重幸運魚是「個人三重效果」，更有個人成就感；與幸運彩蛋魚（隨機開彩蛋）不同，三重幸運魚是「三個效果保證觸發」，沒有隨機性，更有確定感；三個效果同時生效，製造「三重爽感」
+  - server/internal/game/triple_lucky_fish_handler.go：tripleLuckyFishManager（個人 session/冷卻管理）；isTripleLuckyFish 判斷；getTripleLuckyMultBonus（供 handleKill 使用，活躍 session 回傳 +50%）；tryTripleLuckyFish（三重效果同時觸發/金幣雨/倍率加成/武器充能/全服廣播）；chargeRandomWeapon（隨機充能龍怒/魚雷/軌道炮）
+  - server/internal/data/tables.go：新增 T148 三重幸運魚（40-70x/HP80/SpawnWeight3/Speed45/Lifetime14/triple_lucky_fish 行為）
+  - server/internal/ws/protocol.go：新增 MsgTripleLuckyFish；TripleLuckyFishPayload（triple_start/triple_broadcast/mult_end）
+  - server/internal/game/game.go：TripleLucky *tripleLuckyFishManager；handleKill 加入 getTripleLuckyMultBonus 加成套用（+50% 加法）+ isTripleLuckyFish 分支（goroutine）
+  - client/chiikawa-pixel/scripts/ui/TripleLuckyFishPanel.gd：三重幸運魚面板（金色主題；triple_start 三次彩虹閃光（金→綠→藍）+頂部橫幅+三個效果彈窗（錯開200ms）+底部倍率進度條；triple_broadcast 全服廣播橫幅；mult_end 進度條淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：triple_lucky_fish 訊號 + _handle_triple_lucky_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 TripleLuckyFishPanelScript（z_index=55）
+  - 三重效果設計：金幣雨 betLevel×20-50x（隨機）；倍率加成 +50% 持續 12 秒（加法，與其他加成疊加）；武器充能龍怒/魚雷/軌道炮隨機一發
+  - 視覺設計：三次彩虹閃光（金→綠→藍）製造「三重爆發」感；三個效果彈窗錯開 200ms 出現（金幣/倍率/武器）；底部進度條顯示倍率加成剩餘時間（綠→黃→橙）
+  - 全服廣播：觸發時全服廣播，讓其他玩家看到「有人觸發了三重幸運」
+  - 全服公告：觸發時全服公告（金色，5秒，優先級 3）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-189 更新（自主觸發）：** 時間炸彈魚系統（Time Bomb Fish）✅
   - **業界靈感：** Ocean King 炸彈魚概念 + 倒數計時緊張感設計 — T147 時間炸彈魚出現後，螢幕顯示 10 秒倒數計時：倒數結束前玩家擊破 → 「拆彈成功」：全服 +25% 加成持續 15 秒；倒數結束無人擊破 → 「炸彈爆炸」：全場目標 80% 擊破機率（0.5x 倍率，全服共享）
   - **設計差異：** 與連鎖爆炸魚（被動觸發）不同，時間炸彈魚是「主動倒數」，製造「搶時間」的緊張感；「拆彈成功」的加成獎勵讓玩家有「英雄感」，「炸彈爆炸」讓玩家有「清場爽感」；兩種結果都有獎勵，但方式不同，製造「要不要拆彈」的策略決策

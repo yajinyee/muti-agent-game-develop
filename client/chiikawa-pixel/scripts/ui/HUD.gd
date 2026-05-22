@@ -273,6 +273,7 @@ func _ready() -> void:
 	_init_chain_bomb_panel()           # 連鎖爆炸魚面板（DAY-187）
 	_init_crocodile_hunter_panel()     # 巨型鱷魚獵食面板（DAY-188）
 	_init_time_bomb_fish_panel()       # 時間炸彈魚面板（DAY-189）
+	_init_triple_lucky_fish_panel()    # 三重幸運魚面板（DAY-190）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3650,3 +3651,15 @@ func _init_time_bomb_fish_panel() -> void:
 			if is_instance_valid(_time_bomb_fish_panel):
 				_time_bomb_fish_panel.handle(data)
 		)
+
+## ---- 三重幸運魚面板（DAY-190）----
+const TripleLuckyFishPanelScript = preload("res://scripts/ui/TripleLuckyFishPanel.gd")
+var _triple_lucky_fish_panel: Control = null
+
+func _init_triple_lucky_fish_panel() -> void:
+	var panel = TripleLuckyFishPanelScript.new()
+	panel.name = "TripleLuckyFishPanel"
+	panel.z_index = 55  # 在 TimeBombFishPanel(56) 之下
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(panel)
+	_triple_lucky_fish_panel = panel

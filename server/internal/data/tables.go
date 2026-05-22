@@ -343,7 +343,11 @@ var Targets = map[string]*TargetDef{
 	// 設計差異：與連鎖爆炸魚（被動觸發）不同，時間炸彈魚是「主動倒數」，製造「搶時間」的緊張感；
 	// 「拆彈成功」的加成獎勵讓玩家有「英雄感」，「炸彈爆炸」讓玩家有「清場爽感」
 	// 設計：中高倍率（35-65x）+ 中等 HP（75）+ 常見生成（3）= 常見且有「倒數緊張感」
-	"T147": {ID: "T147", Name: "時間炸彈魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 50, Lifetime: 15, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "time_bomb_fish"},	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
+	"T147": {ID: "T147", Name: "時間炸彈魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 50, Lifetime: 15, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "time_bomb_fish"},
+	// T148 三重幸運魚（DAY-190）— 業界靈感：TaDa Gaming TriLuck™ 2026「trigger three different feature specifications simultaneously」
+	// 擊破後同時觸發三重效果：金幣雨（betLevel×20-50x）+ 倍率加成（+50%，12秒）+ 武器充能（龍怒/魚雷/軌道炮隨機一發）
+	// 三個效果同時生效，製造「三重爽感」；全服廣播讓其他玩家看到「有人觸發了三重幸運」
+	"T148": {ID: "T148", Name: "三重幸運魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 70, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "triple_lucky_fish"},	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
 // MeteorMultiplierWeights 流星倍率權重（規格書 26.3）

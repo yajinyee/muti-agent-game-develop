@@ -191,6 +191,7 @@ signal dragon_turtle(data: Dictionary)                 # 龍龜不死 Boss（DAY
 signal chain_bomb(data: Dictionary)                    # 連鎖爆炸魚（DAY-187）
 signal crocodile_hunter(data: Dictionary)              # 巨型鱷魚獵食（DAY-188）
 signal time_bomb_fish(data: Dictionary)                # 時間炸彈魚（DAY-189）
+signal triple_lucky_fish(data: Dictionary)             # 三重幸運魚（DAY-190）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -546,6 +547,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_crocodile_hunter(payload)
 		"time_bomb_fish":
 			_handle_time_bomb_fish(payload)
+		"triple_lucky_fish":
+			_handle_triple_lucky_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2059,3 +2062,17 @@ func _handle_time_bomb_fish(payload: Dictionary) -> void:
 		var kill_count: int = payload.get("kill_count", 0)
 		var total_reward: int = payload.get("total_reward", 0)
 		print("[GameManager] Time Bomb result: kills=%d reward=%d" % [kill_count, total_reward])
+
+## 處理三重幸運魚（DAY-190）
+func _handle_triple_lucky_fish(payload: Dictionary) -> void:
+	emit_signal("triple_lucky_fish", payload)
+	var phase: String = payload.get("phase", "")
+	if phase == "triple_start":
+		var coin_reward: int = payload.get("coin_reward", 0)
+		var weapon_charged: String = payload.get("weapon_charged", "")
+		print("[GameManager] Triple Lucky Fish triggered: coin=%d weapon=%s" % [coin_reward, weapon_charged])
+	elif phase == "triple_broadcast":
+		var player_name: String = payload.get("player_name", "")
+		print("[GameManager] Triple Lucky Fish broadcast: player=%s" % player_name)
+	elif phase == "mult_end":
+		print("[GameManager] Triple Lucky Fish mult bonus ended")

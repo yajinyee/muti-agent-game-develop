@@ -164,6 +164,7 @@ type Game struct {
 	DragonTurtle       *dragonTurtleManager       // 龍龜不死 Boss 系統管理器（DAY-186）
 	CrocodileHunter    *crocodileHunterManager    // 巨型鱷魚獵食系統管理器（DAY-188）
 	TimeBomb           *timeBombManager           // 時間炸彈魚系統管理器（DAY-189）
+	TripleLucky        *tripleLuckyFishManager    // 三重幸運魚系統管理器（DAY-190）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -304,6 +305,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		DragonTurtle:       newDragonTurtleManager(),
 		CrocodileHunter:    newCrocodileHunterManager(),
 		TimeBomb:           newTimeBombManager(),
+		TripleLucky:        newTripleLuckyFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1135,6 +1137,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if timeBombBoost > 0.0 {
 		finalReward = finalReward + int(float64(finalReward)*timeBombBoost)
 	}
+	// 套用三重幸運魚倍率加成（DAY-190，+50% 加法，個人，12 秒）
+	tripleLuckyBonus := g.getTripleLuckyMultBonus(p.ID)
+	if tripleLuckyBonus > 0.0 {
+		finalReward = finalReward + int(float64(finalReward)*tripleLuckyBonus)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1538,6 +1545,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 時間炸彈魚：擊破 T147 時觸發拆彈成功（DAY-189）
 	if isTimeBombFish(t.DefID) {
 		go g.notifyTimeBombDefuse(p, t.InstanceID, t.Multiplier)
+	}
+	// 三重幸運魚：擊破 T148 時觸發三重效果（DAY-190）
+	if isTripleLuckyFish(t.DefID) {
+		go g.tryTripleLuckyFish(p, t.InstanceID)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

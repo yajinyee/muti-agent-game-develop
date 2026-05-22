@@ -491,6 +491,9 @@ const (
 
 	MsgTimeBombFish MessageType = "time_bomb_fish" // 時間炸彈魚廣播（Server→Client，全服，DAY-189）
 
+	// 三重幸運魚系統（DAY-190）
+	MsgTripleLuckyFish MessageType = "triple_lucky_fish" // 三重幸運魚廣播（Server→Client）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4157,4 +4160,20 @@ type TimeBombFishPayload struct {
 	KillCount     int    `json:"kill_count,omitempty"`     // 爆炸擊破數（bomb_result）
 	TotalReward   int    `json:"total_reward,omitempty"`   // 爆炸總獎勵（bomb_result）
 	Message       string `json:"message,omitempty"`        // 廣播訊息
+}
+
+// TripleLuckyFishPayload 三重幸運魚廣播（Server → Client，DAY-190）
+// Phase: "triple_start"（個人詳細）/ "triple_broadcast"（全服廣播）/ "mult_end"（倍率結束）
+type TripleLuckyFishPayload struct {
+	Phase         string  `json:"phase"`                    // 當前階段
+	PlayerID      string  `json:"player_id,omitempty"`      // 觸發玩家 ID
+	PlayerName    string  `json:"player_name,omitempty"`    // 觸發玩家名稱
+	CoinReward    int     `json:"coin_reward,omitempty"`    // 金幣雨獎勵
+	CoinMult      float64 `json:"coin_mult,omitempty"`      // 金幣雨倍率（20-50x）
+	MultBonus     float64 `json:"mult_bonus,omitempty"`     // 倍率加成（0.5 = +50%）
+	MultDuration  float64 `json:"mult_duration,omitempty"`  // 倍率加成持續秒數
+	MultEndUnix   int64   `json:"mult_end_unix,omitempty"`  // 倍率加成結束時間（Unix timestamp）
+	WeaponCharged string  `json:"weapon_charged,omitempty"` // 充能的武器名稱（龍怒/魚雷/軌道炮）
+	NewBalance    int     `json:"new_balance,omitempty"`    // 玩家新餘額（triple_start）
+	Message       string  `json:"message,omitempty"`        // 廣播訊息
 }
