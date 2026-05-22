@@ -494,6 +494,9 @@ const (
 	// 三重幸運魚系統（DAY-190）
 	MsgTripleLuckyFish MessageType = "triple_lucky_fish" // 三重幸運魚廣播（Server→Client）
 
+	// 魚群驚嚇連帶系統（DAY-191）
+	MsgSchoolPanic MessageType = "school_panic" // 魚群驚嚇廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4176,4 +4179,17 @@ type TripleLuckyFishPayload struct {
 	WeaponCharged string  `json:"weapon_charged,omitempty"` // 充能的武器名稱（龍怒/魚雷/軌道炮）
 	NewBalance    int     `json:"new_balance,omitempty"`    // 玩家新餘額（triple_start）
 	Message       string  `json:"message,omitempty"`        // 廣播訊息
+}
+
+// SchoolPanicPayload 魚群驚嚇廣播（Server → Client，DAY-191）
+// Phase: "panic_start" → "panic_end"
+type SchoolPanicPayload struct {
+	Phase        string   `json:"phase"`                     // 當前階段
+	TriggerID    string   `json:"trigger_id,omitempty"`      // 觸發的魚群領袖 InstanceID
+	KillerID     string   `json:"killer_id,omitempty"`       // 觸發玩家 ID
+	KillerName   string   `json:"killer_name,omitempty"`     // 觸發玩家名稱
+	PanicTargets []string `json:"panic_targets,omitempty"`   // 受驚嚇的目標 InstanceID 列表
+	TargetCount  int      `json:"target_count,omitempty"`    // 受驚嚇目標數量
+	Duration     float64  `json:"duration,omitempty"`        // 驚嚇持續秒數
+	Message      string   `json:"message,omitempty"`         // 廣播訊息
 }

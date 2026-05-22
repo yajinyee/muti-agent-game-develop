@@ -192,6 +192,7 @@ signal chain_bomb(data: Dictionary)                    # 連鎖爆炸魚（DAY-1
 signal crocodile_hunter(data: Dictionary)              # 巨型鱷魚獵食（DAY-188）
 signal time_bomb_fish(data: Dictionary)                # 時間炸彈魚（DAY-189）
 signal triple_lucky_fish(data: Dictionary)             # 三重幸運魚（DAY-190）
+signal school_panic(data: Dictionary)                  # 魚群驚嚇連帶（DAY-191）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -549,6 +550,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_time_bomb_fish(payload)
 		"triple_lucky_fish":
 			_handle_triple_lucky_fish(payload)
+		"school_panic":
+			_handle_school_panic(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2076,3 +2079,14 @@ func _handle_triple_lucky_fish(payload: Dictionary) -> void:
 		print("[GameManager] Triple Lucky Fish broadcast: player=%s" % player_name)
 	elif phase == "mult_end":
 		print("[GameManager] Triple Lucky Fish mult bonus ended")
+
+## 處理魚群驚嚇連帶（DAY-191）
+func _handle_school_panic(payload: Dictionary) -> void:
+	emit_signal("school_panic", payload)
+	var phase: String = payload.get("phase", "")
+	if phase == "panic_start":
+		var target_count: int = payload.get("target_count", 0)
+		var killer_name: String = payload.get("killer_name", "")
+		print("[GameManager] School Panic triggered by %s: %d targets HP halved" % [killer_name, target_count])
+	elif phase == "panic_end":
+		print("[GameManager] School Panic ended")

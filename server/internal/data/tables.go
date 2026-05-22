@@ -347,7 +347,11 @@ var Targets = map[string]*TargetDef{
 	// T148 三重幸運魚（DAY-190）— 業界靈感：TaDa Gaming TriLuck™ 2026「trigger three different feature specifications simultaneously」
 	// 擊破後同時觸發三重效果：金幣雨（betLevel×20-50x）+ 倍率加成（+50%，12秒）+ 武器充能（龍怒/魚雷/軌道炮隨機一發）
 	// 三個效果同時生效，製造「三重爽感」；全服廣播讓其他玩家看到「有人觸發了三重幸運」
-	"T148": {ID: "T148", Name: "三重幸運魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 70, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "triple_lucky_fish"},	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
+	"T148": {ID: "T148", Name: "三重幸運魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 70, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "triple_lucky_fish"},
+	// T149 魚群領袖（DAY-191）— 業界靈感：Ocean King 3 Plus「School of Fish — when one fish is caught, others scatter in panic」
+	// 擊破後觸發「魚群驚嚇」：場上所有基礎目標（T001-T006）HP 降低 50%，持續 8 秒
+	// 讓玩家在「魚群驚嚇」中快速收割，製造「緊張但有利」的感覺
+	"T149": {ID: "T149", Name: "魚群領袖", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 65, SpawnWeight: 4, Speed: 55, Lifetime: 12, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "school_panic"},	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
 // MeteorMultiplierWeights 流星倍率權重（規格書 26.3）

@@ -165,6 +165,7 @@ type Game struct {
 	CrocodileHunter    *crocodileHunterManager    // 巨型鱷魚獵食系統管理器（DAY-188）
 	TimeBomb           *timeBombManager           // 時間炸彈魚系統管理器（DAY-189）
 	TripleLucky        *tripleLuckyFishManager    // 三重幸運魚系統管理器（DAY-190）
+	SchoolPanic        *schoolPanicManager        // 魚群驚嚇連帶系統管理器（DAY-191）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -306,6 +307,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		CrocodileHunter:    newCrocodileHunterManager(),
 		TimeBomb:           newTimeBombManager(),
 		TripleLucky:        newTripleLuckyFishManager(),
+		SchoolPanic:        newSchoolPanicManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1549,6 +1551,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 三重幸運魚：擊破 T148 時觸發三重效果（DAY-190）
 	if isTripleLuckyFish(t.DefID) {
 		go g.tryTripleLuckyFish(p, t.InstanceID)
+	}
+	// 魚群領袖：擊破 T149 時觸發魚群驚嚇（DAY-191）
+	if isSchoolLeader(t.DefID) {
+		go g.trySchoolPanic(p, t.InstanceID)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-190 三重幸運魚系統）
+## 最後更新：2026-05-22（DAY-191 魚群驚嚇連帶系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-191 更新（自主觸發）：** 魚群驚嚇連帶系統（School of Fish Panic）✅
+  - **業界靈感：** Ocean King 3 Plus「School of Fish — when one fish in a school is caught, the others scatter in panic, but a lucky shot can trigger a chain reaction that catches the entire school」
+  - **設計：** 擊破 T149 魚群領袖後觸發「魚群驚嚇」：場上所有基礎目標（T001-T006）HP 降低 50%，持續 8 秒，讓玩家在「魚群驚嚇」中快速收割
+  - **設計差異：** 與漩渦魚（直接擊破所有基礎目標）不同，魚群驚嚇是「降低 HP」而非直接擊破，讓玩家仍需要主動射擊，製造「緊張但有利」的感覺；與冰凍炸彈魚（凍結特殊目標）不同，魚群驚嚇影響基礎目標，讓普通遊戲也有爽感
+  - server/internal/game/school_panic_handler.go：schoolPanicManager（全服共享 isActive/panicEnd/冷卻管理）；isSchoolLeader 判斷；isSchoolPanicActive（供 combat 查詢）；isSchoolBasicTarget（T001-T006 判斷）；trySchoolPanic（擊破後觸發/收集基礎目標/HP 降低 50%/全服廣播/全服公告≥3個）
+  - server/internal/data/tables.go：新增 T149 魚群領袖（30-50x/HP65/SpawnWeight4/Speed55/Lifetime12/school_panic 行為）
+  - server/internal/ws/protocol.go：新增 MsgSchoolPanic；SchoolPanicPayload（panic_start/panic_end）
+  - server/internal/game/game.go：SchoolPanic *schoolPanicManager；handleKill 加入 isSchoolLeader 分支（goroutine）
+  - client/chiikawa-pixel/scripts/ui/SchoolPanicPanel.gd：魚群驚嚇面板（橙色主題；panic_start 橙色雙閃光+頂部橫幅+中央大字提示（自己觸發時）+右下角倒數計時；最後3秒計時變紅色；panic_end 淡出所有 UI）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：school_panic 訊號 + _handle_school_panic
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 SchoolPanicPanelScript（z_index=54）
+  - 驚嚇設計：全服冷卻 25 秒；HP 降低 50%（最少 1）；持續 8 秒；只影響基礎目標（T001-T006）
+  - 策略設計：玩家需要在 8 秒內快速擊破 HP 減半的基礎魚，製造「緊張收割」的爽感
+  - 全服廣播：驚嚇開始/結束全服廣播，讓所有玩家看到「魚群驚嚇中，快打！」
+  - 全服公告：≥3 個基礎目標受驚嚇時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-190 更新（自主觸發）：** 三重幸運魚系統（Triple Lucky Fish）✅
   - **業界靈感：** TaDa Gaming TriLuck™ 2026「trigger three different feature specifications simultaneously, ranging from win multipliers, jackpot bonuses, collecting all rewards, and more unique features」
   - **設計：** 擊破 T148 後同時觸發三重效果：金幣雨（betLevel×20-50x）+ 倍率加成（+50%，12秒）+ 武器充能（龍怒/魚雷/軌道炮隨機一發）

@@ -274,6 +274,7 @@ func _ready() -> void:
 	_init_crocodile_hunter_panel()     # 巨型鱷魚獵食面板（DAY-188）
 	_init_time_bomb_fish_panel()       # 時間炸彈魚面板（DAY-189）
 	_init_triple_lucky_fish_panel()    # 三重幸運魚面板（DAY-190）
+	_init_school_panic_panel()         # 魚群驚嚇連帶面板（DAY-191）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3663,3 +3664,15 @@ func _init_triple_lucky_fish_panel() -> void:
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(panel)
 	_triple_lucky_fish_panel = panel
+
+## ---- 魚群驚嚇連帶面板（DAY-191）----
+const SchoolPanicPanelScript = preload("res://scripts/ui/SchoolPanicPanel.gd")
+var _school_panic_panel: Control = null
+
+func _init_school_panic_panel() -> void:
+	var panel = SchoolPanicPanelScript.new()
+	panel.name = "SchoolPanicPanel"
+	panel.z_index = 54  # 在 TripleLuckyFishPanel(55) 之下
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(panel)
+	_school_panic_panel = panel
