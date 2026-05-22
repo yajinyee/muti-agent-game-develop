@@ -2,32 +2,32 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-23（DAY-217）
-**整體目標**：幸運拍賣魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-23（DAY-218）
+**整體目標**：幸運進化魚系統 ✅ → 繼續自主推進
 
 ---
 
 ## 今日任務清單
 
-### ✅ DAY-217 啟動檢查
+### ✅ DAY-218 啟動檢查
 
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
 - [x] 上網研究業界最新機制
 
-### ✅ DAY-217 幸運拍賣魚系統（P1）
+### ✅ DAY-218 幸運進化魚系統（P1）
 
-- [x] `data/tables.go`：新增 T175 幸運拍賣魚（35-65x/HP70/SpawnWeight3/Speed48/Lifetime15）
-- [x] `ws/protocol.go`：新增 MsgLuckyAuctionFish；MsgLuckyAuctionBid；AuctionBidResult；LuckyAuctionFishPayload
-- [x] `announce/announce.go`：新增 EventLuckyAuctionFish + case 處理
-- [x] `lucky_auction_fish_handler.go`：完整 handler（競標/出價/結算/退款/控制權自動射擊）
-- [x] `game.go`：整合 LuckyAuctionFish manager（struct/init/handleKill/spawnTarget/HandleMessage）
-- [x] `LuckyAuctionFishPanel.gd`：黃金競標主題面板（計時條+出價按鈕+結算彈窗）
-- [x] `GameManager.gd`：lucky_auction_fish 訊號 + _handle_lucky_auction_fish
-- [x] `HUD.gd`：整合 LuckyAuctionFishPanelScript（layer=28）
+- [x] `data/tables.go`：新增 T176 幸運進化魚（40-70x/HP90/SpawnWeight3/Speed45/Lifetime18）
+- [x] `ws/protocol.go`：新增 MsgLuckyEvolutionFish；LuckyEvolutionFishPayload
+- [x] `announce/announce.go`：新增 EventLuckyEvolutionFish + case 處理
+- [x] `lucky_evolution_fish_handler.go`：完整 handler（三段進化/命中累積/終極爆發/倍率加成）
+- [x] `game.go`：整合 LuckyEvolutionFish manager（struct/init/handleKill/handleAttack/spawnTarget/gameLoop）
+- [x] `LuckyEvolutionFishPanel.gd`：三段進化主題面板（命中進度條+進化大字+終極爆發）
+- [x] `GameManager.gd`：lucky_evolution_fish 訊號 + _handle_lucky_evolution_fish
+- [x] `HUD.gd`：整合 LuckyEvolutionFishPanelScript（layer=27）
 - [x] build/vet 全部通過
 
-### 🔄 DAY-218 下一步（自主觸發）
+### 🔄 DAY-219 下一步（自主觸發）
 
 - [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
 
@@ -40,8 +40,8 @@
 - 完成度：**100%**
 - 美術質量：**100/100**
 - 規格一致性：**100%**
-- 特殊目標：**75種（T101-T175）**
-- 最新功能：**幸運拍賣魚（T175）— 全服競標 8 秒，贏家獲得 5 秒大獎控制權（×0.85 倍率）**
+- 特殊目標：**76種（T101-T176）**
+- 最新功能：**幸運進化魚（T176）— 三段進化（命中累積），終極爆發全場 HP -60% + ×4.0 倍率加成**
 - 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
 
 ---

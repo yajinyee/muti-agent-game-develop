@@ -557,6 +557,7 @@ const (
 	MsgCursedPoisonFish  MessageType = "cursed_poison_fish"  // 詛咒毒魚廣播（Server→Client，DAY-216）
 	MsgLuckyAuctionFish  MessageType = "lucky_auction_fish"  // 幸運拍賣魚廣播（Server→Client，DAY-217）
 	MsgLuckyAuctionBid   MessageType = "lucky_auction_bid"   // 玩家出價（Client→Server，DAY-217）
+	MsgLuckyEvolutionFish MessageType = "lucky_evolution_fish" // 幸運進化魚廣播（Server→Client，DAY-218）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4858,4 +4859,28 @@ type LuckyAuctionFishPayload struct {
 	ShotReward   int                `json:"shot_reward,omitempty"`
 	ShotCount    int                `json:"shot_count,omitempty"`
 	TotalReward  int                `json:"total_reward,omitempty"`
+}
+
+// LuckyEvolutionFishPayload 幸運進化魚廣播（Server → Client，DAY-218）
+//
+// Events:
+//
+//	"evolution_appear"    — 進化魚出現（全服廣播）
+//	"evolution_hit"       — 進化魚被命中（全服廣播，含命中進度）
+//	"evolution_stage"     — 進化觸發（全服廣播，含新倍率）
+//	"evolution_burst"     — 終極爆發（自動觸發，全服廣播）
+//	"evolution_kill_burst"— 終極爆發（玩家擊破觸發，全服廣播）
+//	"evolution_burst_end" — 倍率加成結束（全服廣播）
+//	"evolution_escape"    — 進化魚逃跑（全服廣播）
+type LuckyEvolutionFishPayload struct {
+	Event         string  `json:"event"`
+	InstanceID    string  `json:"instance_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	Stage         int     `json:"stage,omitempty"`
+	StageName     string  `json:"stage_name,omitempty"`
+	HitCount      int     `json:"hit_count,omitempty"`
+	NextHit       int     `json:"next_hit,omitempty"`
+	MultBoost     float64 `json:"mult_boost,omitempty"`
+	BoostSec      int     `json:"boost_sec,omitempty"`
+	AffectedCount int     `json:"affected_count,omitempty"`
 }

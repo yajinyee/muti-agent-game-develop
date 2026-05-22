@@ -523,6 +523,12 @@ var Targets = map[string]*TargetDef{
 	//   - 競標失敗者退還 50% 出價籌碼；若無人競標，T175 自動逃跑
 	//   - 個人冷卻 20 秒；全服廣播競標開始/出價/結算
 	"T175": {ID: "T175", Name: "幸運拍賣魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 70, SpawnWeight: 3, Speed: 48, Lifetime: 15, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_auction"},
+	// T176 幸運進化魚（DAY-218）— 業界原創「三段進化」機制
+	// 設計：T176 出現後，每次任何玩家命中它（不需要擊破），它會「進化」：
+	//   - 進化 1（命中 3 次）：HP -30%，倍率 ×1.5；進化 2（命中 6 次）：HP -50%，倍率 ×2.5
+	//   - 進化 3（命中 9 次）：HP -70%，倍率 ×4.0；3 秒後自動「終極爆發」
+	//   - 玩家擊破進化魚本身：立即觸發「終極爆發」（全場 HP -60% + 全服 ×4.0 倍率加成 6 秒）
+	"T176": {ID: "T176", Name: "幸運進化魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 70, HP: 90, SpawnWeight: 3, Speed: 45, Lifetime: 18, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "lucky_evolution"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -219,6 +219,7 @@ signal golden_accumulator(data: Dictionary)         # 黃金累積魚系統（DA
 signal lucky_mirror_fish(data: Dictionary)          # 幸運鏡像魚系統（DAY-215）
 signal cursed_poison_fish(data: Dictionary)         # 詛咒毒魚系統（DAY-216）
 signal lucky_auction_fish(data: Dictionary)         # 幸運拍賣魚系統（DAY-217）
+signal lucky_evolution_fish(data: Dictionary)       # 幸運進化魚系統（DAY-218）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -630,6 +631,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_cursed_poison_fish(payload)
 		"lucky_auction_fish":
 			_handle_lucky_auction_fish(payload)
+		"lucky_evolution_fish":
+			_handle_lucky_evolution_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2619,3 +2622,29 @@ func _handle_lucky_auction_fish(payload: Dictionary) -> void:
 			var player_name: String = payload.get("player_name", "")
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Control ended: player=%s total=%d" % [player_name, total_reward])
+
+## 處理幸運進化魚系統（DAY-218）
+func _handle_lucky_evolution_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_evolution_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"evolution_appear":
+			print("[GameManager] Lucky Evolution Fish appeared")
+		"evolution_hit":
+			var hit_count: int = payload.get("hit_count", 0)
+			var next_hit: int = payload.get("next_hit", 3)
+			print("[GameManager] Evolution hit: %d/%d" % [hit_count, next_hit])
+		"evolution_stage":
+			var stage: int = payload.get("stage", 1)
+			var mult: float = payload.get("mult_boost", 1.5)
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Evolution stage %d: player=%s mult=x%.1f" % [stage, player_name, mult])
+		"evolution_burst", "evolution_kill_burst":
+			var mult: float = payload.get("mult_boost", 4.0)
+			var affected: int = payload.get("affected_count", 0)
+			print("[GameManager] Evolution burst: mult=x%.1f affected=%d" % [mult, affected])
+		"evolution_burst_end":
+			print("[GameManager] Evolution burst ended")
+		"evolution_escape":
+			var stage: int = payload.get("stage", 0)
+			print("[GameManager] Evolution fish escaped at stage %d" % stage)
