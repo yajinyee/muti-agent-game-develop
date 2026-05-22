@@ -182,6 +182,7 @@ type Game struct {
 	CometFish          *cometFishManager           // 彗星魚連鎖爆炸系統管理器（DAY-206）
 	GoldenWaveFish     *goldenWaveFishManager      // 黃金波浪魚全場倍率衝擊系統管理器（DAY-207）
 	DragonKing         *dragonKingManager          // 深海龍王全服合力蓄力系統管理器（DAY-208）
+	FortuneCoinFish    *fortuneCoinFishManager     // 幸運金幣魚即時獎勵系統管理器（DAY-209）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -340,6 +341,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		CometFish:          newCometFishManager(),
 		GoldenWaveFish:     newGoldenWaveFishManager(),
 		DragonKing:         newDragonKingManager(),
+		FortuneCoinFish:    newFortuneCoinFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1677,6 +1679,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 深海龍王：擊破 T166 時觸發全服合力蓄力模式（DAY-208）
 	if isDragonKingFish(t.DefID) {
 		go g.tryDragonKingCharge(t)
+	}
+	// 幸運金幣魚：擊破 T167 時觸發即時金幣爆發（DAY-209）
+	if isFortuneCoinFish(t.DefID) {
+		go g.tryFortuneCoinFish(p, t)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

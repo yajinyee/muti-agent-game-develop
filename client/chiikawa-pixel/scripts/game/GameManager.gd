@@ -210,6 +210,7 @@ signal jackpot_dragon(data: Dictionary)               # 獎池龍 Jackpot 抽獎
 signal comet_fish(data: Dictionary)                   # 彗星魚連鎖爆炸（DAY-206）
 signal golden_wave_fish(data: Dictionary)             # 黃金波浪魚全場倍率衝擊（DAY-207）
 signal dragon_king(data: Dictionary)                  # 深海龍王全服合力蓄力（DAY-208）
+signal fortune_coin_fish(data: Dictionary)            # 幸運金幣魚即時獎勵（DAY-209）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -603,6 +604,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_golden_wave_fish(payload)
 		"dragon_king":
 			_handle_dragon_king(payload)
+		"fortune_coin_fish":
+			_handle_fortune_coin_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2395,6 +2398,26 @@ func _handle_dragon_king(payload: Dictionary) -> void:
 		"small_meteor_result":
 			var total_kills: int = payload.get("total_kills", 0)
 			print("[GameManager] Dragon King small meteor result: kills=%d" % total_kills)
+
+## 處理幸運金幣魚即時獎勵（DAY-209）
+func _handle_fortune_coin_fish(payload: Dictionary) -> void:
+	emit_signal("fortune_coin_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"coin_burst":
+			var multiplier: int = payload.get("multiplier", 5)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Fortune Coin burst: ×%d reward=%d" % [multiplier, reward])
+		"coin_broadcast":
+			var player_name: String = payload.get("player_name", "")
+			var label: String = payload.get("label", "")
+			print("[GameManager] Fortune Coin broadcast: %s %s" % [player_name, label])
+		"golden_burst_start":
+			var affected: int = payload.get("affected_count", 0)
+			var burst_sec: int = payload.get("burst_sec", 5)
+			print("[GameManager] Fortune Coin Golden Burst: affected=%d, %ds" % [affected, burst_sec])
+		"golden_burst_end":
+			print("[GameManager] Fortune Coin Golden Burst ended")
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:

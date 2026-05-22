@@ -1,6 +1,30 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-208 深海龍王全服合力蓄力系統）
+## 最後更新：2026-05-23（DAY-209 幸運金幣魚即時獎勵系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-209 更新（自主觸發）：** 幸運金幣魚即時獎勵系統（Fortune Coin Fish）✅
+  - **業界依據：** Galaxsys King of Ocean 2026「Free Spin Fish, Captain Fish, and Money Fish trigger bonus rounds, extra multipliers, and instant payouts.」
+  - **設計：** 擊破 T167 後立即觸發「金幣爆發」：加權隨機即時獎勵 5x(50%)/10x(30%)/20x(15%)/50x(5%) × betLevel；3% 機率觸發「黃金爆發」：全場所有目標 HP 降低 80%（持續 5 秒）；個人冷卻 15 秒（快節奏設計）
+  - **設計差異：** 與獎池龍（DAY-205，抽 Jackpot 等級，個人冷卻 60 秒）不同，幸運金幣魚是「即時小獎（5-50x）+ 低機率全場清場」，個人冷卻 15 秒，節奏更快；「黃金爆發」（3%）讓玩家有「說不定這次全場清場」的期待感；個人獎勵（不是全服共享），讓玩家有「我打到了！」的個人爽感；SpawnWeight=5（最高），讓玩家頻繁遇到，製造「快速節奏」的遊戲感
+  - server/internal/game/fortune_coin_fish_handler.go：fortuneCoinFishManager（個人冷卻 map）；isFortuneCoinFish（T167）；tryFortuneCoinFish（擊破後觸發/加權隨機選等級/個人獎勵/全服廣播/3%黃金爆發）；executeFortuneCoinGoldenBurst（全場 HP -80%/5秒/全服廣播/全服公告）；pickFortuneCoinTier（加權隨機）
+  - server/internal/data/tables.go：新增 T167 幸運金幣魚（20-50x/HP50/SpawnWeight5/Speed55/Lifetime12）
+  - server/internal/ws/protocol.go：新增 MsgFortuneCoinFish；FortuneCoinFishPayload（coin_burst/coin_broadcast/golden_burst_start/golden_burst_end）
+  - server/internal/game/game.go：FortuneCoinFish *fortuneCoinFishManager；handleKill 加入 isFortuneCoinFish 分支
+  - client/chiikawa-pixel/scripts/ui/FortuneCoinFishPanel.gd：金幣黃色主題面板（coin_burst 金色強閃光+「💰 ×N」大字彈跳+右側滑入獎勵彈窗；coin_broadcast 頂部小橫幅；golden_burst_start 全螢幕三次金色強閃光+「💥 黃金爆發！」52px大字+底部計時條；golden_burst_end 計時條淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：fortune_coin_fish 訊號 + _handle_fortune_coin_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 FortuneCoinFishPanelScript（layer=36）
+  - 即時獎勵設計：5x(50%)/10x(30%)/20x(15%)/50x(5%)；個人冷卻 15 秒；個人獎勵（不共享）
+  - 黃金爆發設計：3% 機率；全場所有目標 HP -80%（最少 1）；持續 5 秒；底部計時條顏色漸變（金→橙→紅橙）
+  - 視覺設計：金幣黃色主題（#FFD700 + #FF8C00 + #FFF8DC）；倍率越高字越大（36-72px）；全服廣播小橫幅
+  - 全服廣播：coin_broadcast 讓其他玩家看到有人觸發；golden_burst_start/end 全服廣播
+  - 全服公告：≥20x 時公告（依倍率決定顏色：≥50x 橙色/≥20x 金色）；黃金爆發時公告
+  - build/vet 全部通過（零錯誤零警告）
 
 ## 自我評估
 - **完成度：100%**

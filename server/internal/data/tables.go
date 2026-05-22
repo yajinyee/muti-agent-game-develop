@@ -457,6 +457,11 @@ var Targets = map[string]*TargetDef{
 	// 達到 20 點 → 龍怒隕石雨（5顆，350px，80%，0.75x）；未達到 → 小型龍怒（3顆，250px，65%，0.60x）
 	// 全服冷卻 45 秒；全服共享獎勵；製造「大家一起打才能觸發龍怒」的社群感
 	"T166": {ID: "T166", Name: "深海龍王", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 85, HP: 90, SpawnWeight: 2, Speed: 35, Lifetime: 16, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "dragon_king_charge"},
+	// T167 幸運金幣魚（DAY-209）— 業界依據：Galaxsys King of Ocean 2026
+	// 「Money Fish trigger instant payouts.」
+	// 擊破後立即觸發「金幣爆發」：加權隨機即時獎勵 5x(50%)/10x(30%)/20x(15%)/50x(5%) × betLevel
+	// 3% 機率觸發「黃金爆發」：全場所有目標 HP 降低 80%（持續 5 秒）；個人冷卻 15 秒
+	"T167": {ID: "T167", Name: "幸運金幣魚", Type: TargetTypeSpecial, MultiplierMin: 20, MultiplierMax: 50, HP: 50, SpawnWeight: 5, Speed: 55, Lifetime: 12, LaborGain: 8, DifficultyFactor: 16.0, SpecialBehavior: "fortune_coin_burst"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

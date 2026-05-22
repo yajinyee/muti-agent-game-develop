@@ -546,6 +546,7 @@ const (
 	// 黃金波浪魚全場倍率衝擊系統（DAY-207）
 	MsgGoldenWaveFish MessageType = "golden_wave_fish" // 黃金波浪魚廣播（Server→Client，全服）
 	MsgDragonKing     MessageType = "dragon_king"      // 深海龍王全服合力蓄力廣播（Server→Client，全服，DAY-208）
+	MsgFortuneCoinFish MessageType = "fortune_coin_fish" // 幸運金幣魚即時獎勵廣播（Server→Client，DAY-209）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4618,4 +4619,21 @@ type DragonKingPayload struct {
 	TotalKills   int     `json:"total_kills,omitempty"`
 	TotalReward  int     `json:"total_reward,omitempty"`
 	IsFull       bool    `json:"is_full,omitempty"`
+}
+
+// FortuneCoinFishPayload 幸運金幣魚即時獎勵廣播（Server → Client，DAY-209）
+// Events:
+//   "coin_burst"          — 個人金幣爆發（個人廣播，帶倍率/獎勵/標籤）
+//   "coin_broadcast"      — 全服廣播（讓其他玩家看到有人觸發）
+//   "golden_burst_start"  — 黃金爆發開始（全服廣播，全場 HP -80%，5 秒）
+//   "golden_burst_end"    — 黃金爆發結束（全服廣播）
+type FortuneCoinFishPayload struct {
+	Event         string `json:"event"`
+	PlayerID      string `json:"player_id,omitempty"`
+	PlayerName    string `json:"player_name,omitempty"`
+	Multiplier    int    `json:"multiplier,omitempty"`
+	Reward        int    `json:"reward,omitempty"`
+	Label         string `json:"label,omitempty"`
+	AffectedCount int    `json:"affected_count,omitempty"`
+	BurstSec      int    `json:"burst_sec,omitempty"`
 }

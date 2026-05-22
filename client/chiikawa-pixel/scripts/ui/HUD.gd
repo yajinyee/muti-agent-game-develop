@@ -292,6 +292,7 @@ func _ready() -> void:
 	_init_comet_fish_panel()            # 彗星魚連鎖爆炸面板（DAY-206）
 	_init_golden_wave_fish_panel()      # 黃金波浪魚全場倍率衝擊面板（DAY-207）
 	_init_dragon_king_panel()           # 深海龍王全服合力蓄力面板（DAY-208）
+	_init_fortune_coin_fish_panel()     # 幸運金幣魚即時獎勵面板（DAY-209）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3979,3 +3980,20 @@ func _init_dragon_king_panel() -> void:
 func _on_dragon_king(data: Dictionary) -> void:
 	if is_instance_valid(_dragon_king_panel):
 		_dragon_king_panel.handle_dragon_king(data)
+
+# ── 幸運金幣魚即時獎勵面板（DAY-209）──────────────────────────────────────
+const FortuneCoinFishPanelScript = preload("res://scripts/ui/FortuneCoinFishPanel.gd")
+var _fortune_coin_fish_panel = null
+
+func _init_fortune_coin_fish_panel() -> void:
+	var panel = FortuneCoinFishPanelScript.new()
+	panel.name = "FortuneCoinFishPanel"
+	panel.layer = 36
+	add_child(panel)
+	_fortune_coin_fish_panel = panel
+	if GameManager.has_signal("fortune_coin_fish"):
+		GameManager.fortune_coin_fish.connect(_on_fortune_coin_fish)
+
+func _on_fortune_coin_fish(data: Dictionary) -> void:
+	if is_instance_valid(_fortune_coin_fish_panel):
+		_fortune_coin_fish_panel.handle_fortune_coin_fish(data)
