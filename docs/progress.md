@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-183 閃電魚自動連鎖系統）
+## 最後更新：2026-05-22（DAY-184 隕石魚隕石雨系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-184 更新（自主觸發）：** 隕石魚隕石雨系統（Meteor Fish Meteor Shower）✅
+  - **業界依據：** Royal Fishing JILI「Dragon Wrath — unleash a massive meteorite attack across the centre screen, simultaneously targeting multiple fish including Immortal Bosses」— 擊破 T142 後觸發「隕石雨」：5-10 顆隕石從天而降，每顆命中隨機目標，70% 擊破機率，獎勵 0.60x 倍率
+  - **設計差異：** 與閃電魚（時間驅動/8秒/16次）不同，隕石魚是「數量驅動」（5-10顆），每顆隕石都是獨立的「天降神兵」，視覺上更有衝擊感；與漩渦魚（吸引同類）不同，隕石魚是「隨機轟炸」（任意目標），讓玩家感受到「天降神兵，無差別攻擊」的爽感；隕石可以命中 BOSS（30% 機率），讓玩家有「隕石打 BOSS」的驚喜感
+  - server/internal/game/meteor_fish_handler.go：meteorFishManager（全服冷卻 35 秒/isActive 防重複）；isMeteorFish 判斷；pickMeteorCount（加權隨機 5-10 顆）；tryMeteorFishShower（擊破後觸發/優先普通目標/10% 機率選 BOSS/每顆間隔 300ms/全服廣播/結果廣播）；announceMeteorFish（全服公告≥4擊破）
+  - server/internal/data/tables.go：新增 T142 隕石魚（70-90x/HP90/SpawnWeight3/meteor_fish_shower）
+  - server/internal/ws/protocol.go：新增 MsgMeteorFish；MeteorFishPayload（meteor_start/meteor_N/meteor_result）
+  - server/internal/game/game.go：MeteorFish *meteorFishManager；handleKill 加入 isMeteorFish 分支
+  - client/chiikawa-pixel/scripts/ui/MeteorFishPanel.gd：隕石魚面板（橙紅主題；meteor_start 三次橙紅閃光+頂部橫幅+隕石計數器；meteor_N 隕石從上方飛入動畫+爆炸圓圈（BOSS 命中紅色）+計數器更新；meteor_result 右側滑入結果彈窗（隕石數/擊破數/獎勵）；≥4擊破橙色雙閃光；≥7擊破金色強閃光）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：meteor_fish 訊號 + _handle_meteor_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 MeteorFishPanelScript（z_index=61）
+  - 隕石設計：5顆:30%, 6顆:25%, 7顆:20%, 8顆:15%, 9顆:7%, 10顆:3%（加權隨機）；全服冷卻 35 秒
+  - 目標選擇：優先普通目標；10% 機率選 BOSS（如果有的話）；BOSS 擊破機率降低到 30%
+  - 視覺設計：隕石從上方 80px 飛入（TRANS_QUAD/EASE_IN 加速感）；爆炸圓圈（4方向短線擴散）；BOSS 命中用紅色閃光
+  - 全服廣播：每顆隕石落點全服廣播，讓所有玩家看到「隕石在轟炸全場」
+  - 全服公告：≥4 個擊破時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-183 更新（自主觸發）：** 閃電魚自動連鎖系統（Lightning Fish Auto Chain）✅
   - **業界依據：** Ocean King 3 Monster Awaken「Lightning Fish — Catching a Lightning Fish will trigger a Lightning Chain. Lightning Chain will continue to catch fish automatically until time runs out.」— 擊破 T141 後觸發「閃電自動連鎖」：系統自動每 0.5 秒選一個隨機目標發射閃電，持續 8 秒（最多 16 次），每次 65% 擊破機率
   - **設計差異：** 與 T103 閃電鰻（手動觸發，5跳）和 T139 雷霆鯊魚（手動跳躍，20跳）不同，閃電魚是「全自動時間驅動連鎖」，玩家不需要操作，純粹享受「自動收割」的爽感；底部進度條顯示剩餘時間，讓玩家感受到「閃電在持續不斷地攻擊」

@@ -296,6 +296,11 @@ var Targets = map[string]*TargetDef{
 	// 閃電魚是「全自動時間驅動連鎖」，玩家不需要操作，純粹享受「自動收割」的爽感
 	// 設計：高倍率（65-85x）+ 中等 HP（85）+ 稀有生成權重（3）= 稀有且有「自動收割」爽感的特殊目標
 	"T141": {ID: "T141", Name: "閃電魚", Type: TargetTypeSpecial, MultiplierMin: 65, MultiplierMax: 85, HP: 85, SpawnWeight: 3, Speed: 60, Lifetime: 14, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "lightning_auto_chain"},
+	// T142 隕石魚（DAY-184）— 業界依據：Royal Fishing JILI「Dragon Wrath — unleash a massive
+	// meteorite attack across the centre screen, simultaneously targeting multiple fish」
+	// 擊破後觸發「隕石雨」：5-10 顆隕石從天而降，每顆命中隨機目標，70% 擊破機率，獎勵 0.60x 倍率
+	// 設計：高倍率（70-90x）+ 中等 HP（90）+ 稀有生成權重（3）= 稀有且有「天降神兵」爽感的特殊目標
+	"T142": {ID: "T142", Name: "隕石魚", Type: TargetTypeSpecial, MultiplierMin: 70, MultiplierMax: 90, HP: 90, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "meteor_fish_shower"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

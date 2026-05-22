@@ -267,6 +267,7 @@ func _ready() -> void:
 	_init_thunder_shark_panel()       # 雷霆鯊魚連鎖閃電面板（DAY-181）
 	_init_vampire_fish_panel()        # 吸血鬼魚累積倍率面板（DAY-182）
 	_init_lightning_auto_chain_panel() # 閃電魚自動連鎖面板（DAY-183）
+	_init_meteor_fish_panel()          # 隕石魚隕石雨面板（DAY-184）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3541,4 +3542,21 @@ func _init_lightning_auto_chain_panel() -> void:
 		GameManager.lightning_auto_chain.connect(func(data):
 			if is_instance_valid(_lightning_auto_chain_panel):
 				_lightning_auto_chain_panel.handle_lightning_auto_chain(data)
+		)
+
+## ---- 隕石魚隕石雨面板（DAY-184）----
+const MeteorFishPanelScript = preload("res://scripts/ui/MeteorFishPanel.gd")
+var _meteor_fish_panel: Control = null
+
+func _init_meteor_fish_panel() -> void:
+	var panel = MeteorFishPanelScript.new()
+	panel.name = "MeteorFishPanel"
+	panel.z_index = 61
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_meteor_fish_panel = panel
+	if GameManager.has_signal("meteor_fish"):
+		GameManager.meteor_fish.connect(func(data):
+			if is_instance_valid(_meteor_fish_panel):
+				_meteor_fish_panel.handle_meteor_fish(data)
 		)

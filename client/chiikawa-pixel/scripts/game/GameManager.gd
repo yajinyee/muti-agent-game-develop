@@ -185,6 +185,7 @@ signal rainbow_shark_burst(data: Dictionary)           # 彩虹鯊魚爆發（DA
 signal thunder_shark_chain(data: Dictionary)           # 雷霆鯊魚連鎖閃電（DAY-181）
 signal vampire_fish(data: Dictionary)                  # 吸血鬼魚累積倍率（DAY-182）
 signal lightning_auto_chain(data: Dictionary)          # 閃電魚自動連鎖（DAY-183）
+signal meteor_fish(data: Dictionary)                   # 隕石魚隕石雨（DAY-184）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -528,6 +529,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_vampire_fish(payload)
 		"lightning_auto_chain":
 			_handle_lightning_auto_chain(payload)
+		"meteor_fish":
+			_handle_meteor_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -1934,3 +1937,16 @@ func _handle_lightning_auto_chain(payload: Dictionary) -> void:
 		var total_attacks: int = payload.get("total_attacks", 0)
 		var total_kills: int = payload.get("total_kills", 0)
 		print("[GameManager] Lightning Auto Chain result: attacks=%d kills=%d" % [total_attacks, total_kills])
+
+## 處理隕石魚隕石雨（DAY-184）
+func _handle_meteor_fish(payload: Dictionary) -> void:
+	emit_signal("meteor_fish", payload)
+	var phase: String = payload.get("phase", "")
+	if phase == "meteor_start":
+		var killer_name: String = payload.get("killer_name", "")
+		var meteor_count: int = payload.get("meteor_count", 0)
+		print("[GameManager] Meteor Fish shower start: killer=%s meteors=%d" % [killer_name, meteor_count])
+	elif phase == "meteor_result":
+		var total_kills: int = payload.get("total_kills", 0)
+		var total_reward: int = payload.get("total_reward", 0)
+		print("[GameManager] Meteor Fish result: kills=%d reward=%d" % [total_kills, total_reward])

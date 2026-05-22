@@ -475,6 +475,9 @@ const (
 	// 閃電魚自動連鎖系統（DAY-183）
 	MsgLightningAutoChain MessageType = "lightning_auto_chain" // 閃電魚自動連鎖廣播（Server→Client，全服）
 
+	// 隕石魚隕石雨系統（DAY-184）
+	MsgMeteorFish MessageType = "meteor_fish" // 隕石魚隕石雨廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4024,4 +4027,25 @@ type LightningAutoChainPayload struct {
 	KillerID     string  `json:"killer_id"`     // 觸發玩家 ID
 	KillerName   string  `json:"killer_name"`   // 觸發玩家名稱
 	DurationSec  int     `json:"duration_sec"`  // 持續時間（chain_start 時）
+}
+
+// ---- 隕石魚隕石雨系統（DAY-184）----
+
+// MeteorFishPayload 隕石魚隕石雨廣播（Server → Client，DAY-184）
+// Phase: "meteor_start" → "meteor_N"（每顆隕石落點）→ "meteor_result"
+type MeteorFishPayload struct {
+	Phase       string  `json:"phase"`        // 當前階段
+	TriggerID   string  `json:"trigger_id"`   // 觸發目標 ID
+	TriggerX    float64 `json:"trigger_x"`    // 觸發位置 X
+	TriggerY    float64 `json:"trigger_y"`    // 觸發位置 Y
+	TargetID    string  `json:"target_id"`    // 命中目標 ID（meteor_N 時）
+	TargetX     float64 `json:"target_x"`     // 命中目標位置 X
+	TargetY     float64 `json:"target_y"`     // 命中目標位置 Y
+	MeteorNum   int     `json:"meteor_num"`   // 當前隕石編號（meteor_N 時）
+	MeteorCount int     `json:"meteor_count"` // 總隕石數（meteor_start/result 時）
+	TotalKills  int     `json:"total_kills"`  // 總擊破數（result 時）
+	TotalReward int     `json:"total_reward"` // 總獎勵（result 時）
+	KillerID    string  `json:"killer_id"`    // 觸發玩家 ID
+	KillerName  string  `json:"killer_name"`  // 觸發玩家名稱
+	IsBoss      bool    `json:"is_boss"`      // 是否命中 BOSS（meteor_N 時）
 }

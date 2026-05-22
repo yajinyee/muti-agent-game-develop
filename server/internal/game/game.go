@@ -159,6 +159,7 @@ type Game struct {
 	// DAY-181 雷霆鯊魚連鎖閃電系統：無需管理器（stateless，每次擊破獨立觸發）
 	VampireFish        *vampireFishManager        // 吸血鬼魚累積倍率系統管理器（DAY-182）
 	LightningAutoChain *lightningAutoChainManager // 閃電魚自動連鎖系統管理器（DAY-183）
+	MeteorFish         *meteorFishManager         // 隕石魚隕石雨系統管理器（DAY-184）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -294,6 +295,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		RainbowShark:       newRainbowSharkManager(),
 		VampireFish:        newVampireFishManager(),
 		LightningAutoChain: newLightningAutoChainManager(),
+		MeteorFish:         newMeteorFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1493,6 +1495,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 閃電魚：擊破 T141 時觸發（DAY-183）
 	if isLightningAutoFish(t.DefID) {
 		go g.tryLightningAutoChain(p, t.InstanceID, t.X, t.Y)
+	}
+	// 隕石魚：擊破 T142 時觸發（DAY-184）
+	if isMeteorFish(t.DefID) {
+		go g.tryMeteorFishShower(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
