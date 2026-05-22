@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-196 巨型鮟鱇魚電擊寶箱系統）
+## 最後更新：2026-05-22（DAY-197 神秘龍魚八波攻擊系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-196 更新（自主觸發）：** 巨型鮟鱇魚電擊寶箱系統（Giant Anglerfish Electric Treasure Chest）✅
+- **DAY-197 更新（自主觸發）：** 神秘龍魚八波攻擊系統（Mystic Dragon 8-Wave Attack）✅
+  - **業界依據：** Ocean King 3「Mystic Dragon — Catch this fish to get 8 waves and have more chances to kill any fish on the screen.」
+  - **設計：** 擊破 T155 後觸發「八波龍息攻擊」：每波（共 8 波）隨機選 3-5 個目標（65% 擊破機率，0.55x 倍率）；每波間隔 800ms；第 8 波「龍怒爆發」全場所有目標（85% 擊破機率，0.70x 倍率）；全服共享獎勵
+  - **設計差異：** 與閃電魚自動連鎖（每 0.5 秒單目標，8 秒）不同，神秘龍魚是「每波多目標」（3-5 個），讓玩家感受到「龍息是面狀攻擊」；與鳳凰魚涅槃（一次性全場爆炸）不同，神秘龍魚是「8 波漸進式攻擊」，有節奏感；第 8 波「龍怒爆發」是全場清場，製造「最後一波最爽」的高潮設計
+  - server/internal/game/mystic_dragon_handler.go：mysticDragonManager；isMysticDragon（T155）；tryMysticDragonWaves（擊破後觸發/8波攻擊/全服廣播）；doMysticDragonWave（單波執行/第8波全場清場/全服共享獎勵）
+  - server/internal/data/tables.go：新增 T155 神秘龍魚（65-90x/HP95/SpawnWeight2/Speed35/Lifetime20）
+  - server/internal/ws/protocol.go：新增 MsgMysticDragon；MysticDragonPayload（dragon_start/wave_N/dragon_result）
+  - server/internal/game/game.go：MysticDragon *mysticDragonManager；handleKill 加入 isMysticDragon 分支
+  - client/chiikawa-pixel/scripts/ui/MysticDragonPanel.gd：神秘紫金主題面板（dragon_start 紫色三次閃光+頂部橫幅+8格波數進度條；wave_N 龍息掃場動畫+波數計數器；第8波金色強閃光+「龍怒爆發！」大字；dragon_result 右側滑入結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：mystic_dragon 訊號 + _handle_mystic_dragon
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 MysticDragonPanelScript（layer=48）
+  - 波數設計：8 波；每波 3-5 個目標；65% 擊破機率；0.55x 倍率；每波間隔 800ms；全服冷卻 40 秒
+  - 第 8 波設計：全場所有目標；85% 擊破機率；0.70x 倍率；全螢幕金色強閃光；「龍怒爆發！」大字
+  - 全服共享：所有獎勵按玩家數平均分配；讓所有玩家都受益
+  - 全服廣播：開始/每波結果/最終結果全服廣播
+  - 全服公告：開始時公告；第 8 波≥3擊破時公告；總擊破≥8時公告
+  - build/vet 全部通過（零錯誤零警告）
   - **業界依據：** JILI Mega Fishing「Giant Anglerfish can shoot electricity to open treasure chests, giant crocodiles awaken to hunt fish on the fish farm to accumulate big prizes!」
   - **設計：** T154 巨型鮟鱇魚出現後，每 3 秒電擊一次（最多 8 次）：命中 T102 寶箱怪強制開箱（3-5x 倍率，全服共享）；命中普通目標 70% 擊破機率（0.60x 倍率）；5% 機率「超級電擊」全場所有目標同時受到電擊；玩家擊破鮟鱇魚本身獲得基礎倍率 + 累積電擊獎池 40%
   - **設計差異：** 與巨型鱷魚獵食（每 2 秒獵食，累積獎池）不同，鮟鱇魚是「電擊型」，有「超級電擊」全場清場的爆發感，且能強制開寶箱製造驚喜；與閃電魚自動連鎖（時間驅動，8 秒）不同，鮟鱇魚是「目標驅動」（在場上持續存在），玩家需要決策：讓它繼續電擊累積獎池，還是立刻擊破？「強制開寶箱」機制是業界首創設計感

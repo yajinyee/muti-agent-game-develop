@@ -378,6 +378,11 @@ var Targets = map[string]*TargetDef{
 	// 出現後每 3 秒電擊一次（最多 8 次）：命中 T102 寶箱怪強制開箱（3-5x 倍率）；命中普通目標 70% 擊破（0.60x 倍率）
 	// 5% 機率「超級電擊」全場所有目標同時受到電擊；玩家擊破獲得基礎倍率 + 累積電擊獎池 40%
 	"T154": {ID: "T154", Name: "巨型鮟鱇魚", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 85, HP: 100, SpawnWeight: 2, Speed: 30, Lifetime: 28, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "anglerfish_electric_zap"},
+	// T155 神秘龍魚（DAY-197）— 業界依據：Ocean King 3「Mystic Dragon — Catch this fish to get 8 waves
+	// and have more chances to kill any fish on the screen.」
+	// 擊破後觸發「八波龍息攻擊」：每波隨機選 3-5 個目標（65% 擊破機率，0.55x 倍率）
+	// 第 8 波「龍怒爆發」：全場所有目標（85% 擊破機率，0.70x 倍率）；全服共享獎勵
+	"T155": {ID: "T155", Name: "神秘龍魚", Type: TargetTypeSpecial, MultiplierMin: 65, MultiplierMax: 90, HP: 95, SpawnWeight: 2, Speed: 35, Lifetime: 20, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "mystic_dragon_waves"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

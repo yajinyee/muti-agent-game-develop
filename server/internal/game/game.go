@@ -170,6 +170,7 @@ type Game struct {
 	ChainLongKing      *chainLongKingManager      // 長龍王雙環輪盤系統管理器（DAY-194）
 	DrillLobster       *drillLobsterManager       // 鑽頭龍蝦穿透爆炸系統管理器（DAY-195）
 	AnglerfishElectric *anglerfishManager         // 巨型鮟鱇魚電擊寶箱系統管理器（DAY-196）
+	MysticDragon       *mysticDragonManager       // 神秘龍魚八波攻擊系統管理器（DAY-197）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -316,6 +317,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		ChainLongKing:      newChainLongKingManager(),
 		DrillLobster:       newDrillLobsterManager(),
 		AnglerfishElectric: newAnglerfishManager(),
+		MysticDragon:       newMysticDragonManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1594,6 +1596,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 巨型鮟鱇魚：擊破 T154 時觸發獎池結算（DAY-196）
 	if isAnglerfishElectric(t.DefID) {
 		go g.notifyAnglerfishKill(p, t.InstanceID, t.Multiplier)
+	}
+	// 神秘龍魚：擊破 T155 時觸發八波龍息攻擊（DAY-197）
+	if isMysticDragon(t.DefID) {
+		go g.tryMysticDragonWaves(p, t.InstanceID)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

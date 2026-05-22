@@ -513,6 +513,9 @@ const (
 	// 巨型鮟鱇魚電擊寶箱系統（DAY-196）
 	MsgAnglerfishElectric MessageType = "anglerfish_electric" // 巨型鮟鱇魚電擊廣播（Server→Client，全服）
 
+	// 神秘龍魚八波攻擊系統（DAY-197）
+	MsgMysticDragon MessageType = "mystic_dragon" // 神秘龍魚八波龍息攻擊廣播（Server→Client，全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4353,4 +4356,20 @@ type AnglerfishElectricPayload struct {
 	PoolBonus    int     `json:"pool_bonus,omitempty"`    // 獎池加成（40%）
 	BaseReward   int     `json:"base_reward,omitempty"`   // 基礎倍率獎勵
 	TotalReward  int     `json:"total_reward,omitempty"`  // 總獎勵
+}
+
+// MysticDragonPayload 神秘龍魚八波龍息攻擊廣播（Server → Client，DAY-197）
+// Phase: "dragon_start" → "wave_1"..."wave_8" → "dragon_result"
+type MysticDragonPayload struct {
+	Phase       string `json:"phase"`                  // 當前階段
+	TriggerID   string `json:"trigger_id,omitempty"`   // 觸發的神秘龍魚 InstanceID
+	KillerID    string `json:"killer_id,omitempty"`    // 觸發玩家 ID
+	KillerName  string `json:"killer_name,omitempty"`  // 觸發玩家名稱
+	TotalWaves  int    `json:"total_waves,omitempty"`  // 總波數（dragon_start 時）
+	WaveIndex   int    `json:"wave_index,omitempty"`   // 當前波數（1-8）
+	WaveKills   int    `json:"wave_kills,omitempty"`   // 本波擊破數
+	WaveReward  int    `json:"wave_reward,omitempty"`  // 本波獎勵
+	TotalKills  int    `json:"total_kills,omitempty"`  // 累計擊破數
+	TotalReward int    `json:"total_reward,omitempty"` // 累計獎勵
+	IsFinalWave bool   `json:"is_final_wave,omitempty"` // 是否為第 8 波（龍怒爆發）
 }

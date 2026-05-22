@@ -280,6 +280,7 @@ func _ready() -> void:
 	_init_chainlong_king_panel()        # 長龍王雙環輪盤面板（DAY-194）
 	_init_drill_lobster_panel()         # 鑽頭龍蝦穿透爆炸面板（DAY-195）
 	_init_anglerfish_electric_panel()   # 巨型鮟鱇魚電擊寶箱面板（DAY-196）
+	_init_mystic_dragon_panel()         # 神秘龍魚八波攻擊面板（DAY-197）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3763,3 +3764,20 @@ func _init_anglerfish_electric_panel() -> void:
 func _on_anglerfish_electric(data: Dictionary) -> void:
 	if is_instance_valid(_anglerfish_electric_panel):
 		_anglerfish_electric_panel.handle_anglerfish_electric(data)
+
+## ---- 神秘龍魚八波攻擊面板（DAY-197）----
+const MysticDragonPanelScript = preload("res://scripts/ui/MysticDragonPanel.gd")
+var _mystic_dragon_panel = null
+
+func _init_mystic_dragon_panel() -> void:
+	var panel = MysticDragonPanelScript.new()
+	panel.name = "MysticDragonPanel"
+	panel.layer = 48
+	add_child(panel)
+	_mystic_dragon_panel = panel
+	if GameManager.has_signal("mystic_dragon"):
+		GameManager.mystic_dragon.connect(_on_mystic_dragon)
+
+func _on_mystic_dragon(data: Dictionary) -> void:
+	if is_instance_valid(_mystic_dragon_panel):
+		_mystic_dragon_panel.handle_mystic_dragon(data)
