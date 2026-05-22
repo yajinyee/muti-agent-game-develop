@@ -3500,3 +3500,27 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **Windows Defender 誤報：** go test binary 被誤判為病毒（已知問題 #40），但 go build/vet 通過
 - **公平性驗證：** TestResultIsPreDetermined 確認結果在 StartSession 時就已決定，停止後不變
 - **教訓：** 每個新套件都要補充單元測試，即使 Windows Defender 會誤報，測試邏輯本身是正確的
+
+## 83. 新增目標物必須同步更新 TargetManager（重要）
+- **問題：** T118-T126 在 Server 端定義了，但 Client 端 TargetManager 沒有對應的 sprite 路徑，導致目標物不可見
+- **根本原因：** 每次新增目標物只更新了 Server 端（tables.go），忘記更新 Client 端（TargetManager.gd 的 TARGET_SPRITES）
+- **解決：** 建立 `tools/generate_targets_t118_t126.py` 生成 sprite，更新 TARGET_SPRITES 和 SWIM_SHEET_TARGETS
+- **教訓：** 新增目標物的 checklist：
+  1. Server: tables.go 新增定義
+  2. Server: handler 新增行為邏輯
+  3. Client: 生成 sprite PNG（tools/generate_targets_vX.py）
+  4. Client: TargetManager.gd 的 TARGET_SPRITES 加入路徑
+  5. Client: TargetManager.gd 的 SWIM_SHEET_TARGETS 加入 ID
+  6. 重新生成 Spritesheet（tools/generate_spritesheet.py）
+  7. 更新 SHEET_REGIONS（tools/update_sheet_regions.py）
+
+## 84. SHEET_REGIONS 座標會隨 Spritesheet 重新生成而改變
+- **問題：** Spritesheet 重新生成後，因為新增了 backup/swim 等檔案，所有目標物的座標都變了
+- **解決：** 建立 `tools/update_sheet_regions.py`，從 targets_sheet.json 自動更新 SHEET_REGIONS
+- **教訓：** 每次執行 generate_spritesheet.py 後，必須立刻執行 update_sheet_regions.py
+
+## 85. GDScript 訊號追蹤移動目標的正確方式
+- **問題：** LionDancePanel 的標記光環是靜態位置，目標物移動後光環不跟著走
+- **解決：** 連接 GameManager.target_updated 訊號，在回調中更新光環的 position
+- **連接 target_killed 訊號：** 目標被擊破時移除光環，避免殘留
+- **教訓：** 任何需要跟著目標移動的 UI 元素，都要連接 target_updated 訊號
