@@ -1,4 +1,4 @@
-// Package specialweapon 特殊武器系統（DAY-089，升級 DAY-134，DAY-141，DAY-154，DAY-155，DAY-157）
+// Package specialweapon 特殊武器系統（DAY-089，升級 DAY-134，DAY-141，DAY-154，DAY-155，DAY-157，DAY-166）
 // 業界依據：
 //   - Fish Road 2026 有 8 tier 武器系統，炸彈/雷射是標配特殊武器
 //   - Royal Fishing 2026 Tornado Cannon — 龍捲風掃場，旋轉吸入所有目標
@@ -7,6 +7,7 @@
 //   - royalfishing.co.uk 2026 Dragon Wrath — 累積怒氣值，釋放流星雨打擊全場（含 Immortal Boss 和 ChainLong King）
 //   - jiligames.com 2026 Mega Fishing Torpedo — 6x stake 費用，大範圍爆炸（250px），業界標準高費用高回報武器
 //   - megafishing.click 2026 Railgun (15x stake) — 穿透全場高能光束，100% 擊破路徑上所有目標，終極清場武器
+//   - Ocean King 3 2026 Vortex + Black Hole Fishing 2026 — 黑洞漩渦，吸入周圍目標後爆炸，費用 10x betLevel（DAY-166）
 package specialweapon
 
 import (
@@ -26,6 +27,7 @@ const (
 	WeaponDragonWrath WeaponType = "dragon_wrath" // 龍怒流星雨：累積怒氣值，釋放流星雨打擊全場（DAY-154）
 	WeaponTorpedo     WeaponType = "torpedo"      // 魚雷：大範圍爆炸（250px），費用 6x betLevel，業界標準高費用高回報武器（DAY-155）
 	WeaponRailgun     WeaponType = "railgun"      // 軌道炮：穿透全場高能光束，費用 15x betLevel，100% 擊破路徑上所有目標（DAY-157）
+	WeaponBlackHole   WeaponType = "black_hole"   // 黑洞漩渦：吸入周圍 300px 目標，3 秒後爆炸，費用 10x betLevel（DAY-166）
 )
 
 // WeaponDef 特殊武器定義
@@ -131,6 +133,17 @@ var AvailableWeapons = []WeaponDef{
 		ChargeRequired: 40, // 擊破 40 個目標自動充能一發（比魚雷 25 更難充能）
 		ChargePerKill:  1,
 	},
+	{
+		Type:           WeaponBlackHole,
+		Name:           "黑洞漩渦",
+		Description:    "放置黑洞，吸入周圍300px目標，3秒後爆炸擊破，費用10x投注額",
+		Cost:           -1,   // 動態費用（10x betLevel），-1 表示由 Server 動態計算（DAY-166）
+		MaxCharges:     2,    // 最多持有 2 發
+		Icon:           "🌀",
+		Color:          "#6600CC",
+		ChargeRequired: 45, // 擊破 45 個目標自動充能一發（介於魚雷 25 和軌道炮 40 之間）
+		ChargePerKill:  1,
+	},
 }
 
 // PlayerWeaponState 玩家特殊武器狀態
@@ -143,6 +156,7 @@ type PlayerWeaponState struct {
 	DragonWrathCharges int `json:"dragon_wrath_charges"` // DAY-154
 	TorpedoCharges     int `json:"torpedo_charges"`      // DAY-155
 	RailgunCharges     int `json:"railgun_charges"`      // DAY-157
+	BlackHoleCharges   int `json:"black_hole_charges"`   // DAY-166
 
 	// 自動充能進度（DAY-134）
 	BombChargeProgress    int `json:"bomb_charge_progress"`
@@ -153,6 +167,7 @@ type PlayerWeaponState struct {
 	DragonWrathChargeProgress int `json:"dragon_wrath_charge_progress"` // DAY-154（每次射擊累積）
 	TorpedoChargeProgress     int `json:"torpedo_charge_progress"`      // DAY-155
 	RailgunChargeProgress     int `json:"railgun_charge_progress"`      // DAY-157
+	BlackHoleChargeProgress   int `json:"black_hole_charge_progress"`   // DAY-166
 }
 
 // ChargeResult 充能結果（DAY-134）
@@ -431,6 +446,8 @@ func (m *Manager) getChargesLocked(s *PlayerWeaponState, wtype WeaponType) int {
 		return s.TorpedoCharges
 	case WeaponRailgun:
 		return s.RailgunCharges
+	case WeaponBlackHole:
+		return s.BlackHoleCharges
 	}
 	return 0
 }
@@ -453,6 +470,8 @@ func (m *Manager) setChargesLocked(s *PlayerWeaponState, wtype WeaponType, v int
 		s.TorpedoCharges = v
 	case WeaponRailgun:
 		s.RailgunCharges = v
+	case WeaponBlackHole:
+		s.BlackHoleCharges = v
 	}
 }
 
@@ -474,6 +493,8 @@ func (m *Manager) getProgressLocked(s *PlayerWeaponState, wtype WeaponType) int 
 		return s.TorpedoChargeProgress
 	case WeaponRailgun:
 		return s.RailgunChargeProgress
+	case WeaponBlackHole:
+		return s.BlackHoleChargeProgress
 	}
 	return 0
 }
@@ -496,6 +517,8 @@ func (m *Manager) setProgressLocked(s *PlayerWeaponState, wtype WeaponType, v in
 		s.TorpedoChargeProgress = v
 	case WeaponRailgun:
 		s.RailgunChargeProgress = v
+	case WeaponBlackHole:
+		s.BlackHoleChargeProgress = v
 	}
 }
 
@@ -652,6 +675,40 @@ func CalcRailgunTargets(clickY float64, targets []TargetPos) []string {
 	var hit []string
 	for _, t := range targets {
 		if math.Abs(t.Y-clickY) <= RailgunYRange {
+			hit = append(hit, t.InstanceID)
+		}
+	}
+	return hit
+}
+
+// ---- 黑洞漩渦（DAY-166）----
+
+// BlackHoleRadius 黑洞吸引半徑（px）
+// 業界依據：Ocean King 3 2026 Vortex 機制，吸引範圍 300px
+const BlackHoleRadius = 300.0
+
+// BlackHoleDuration 黑洞持續時間（秒）
+const BlackHoleDuration = 3.0
+
+// BlackHoleCostMultiplier 黑洞費用倍率（DAY-166）
+// 費用 = betLevel × BlackHoleCostMultiplier（10x，介於魚雷 6x 和軌道炮 15x 之間）
+const BlackHoleCostMultiplier = 10
+
+// BlackHoleNormalKillChance 黑洞擊破機率（DAY-166）
+// 普通目標 90%，特殊目標 70%，BOSS 類 45%
+const BlackHoleNormalKillChance = 0.90
+const BlackHoleSpecialKillChance = 0.70
+const BlackHoleBossKillChance = 0.45
+
+// CalcBlackHoleTargets 計算黑洞吸引範圍內的目標（DAY-166）
+// 以放置位置為中心，半徑 300px 內所有目標
+func CalcBlackHoleTargets(cx, cy float64, targets []TargetPos) []string {
+	var hit []string
+	for _, t := range targets {
+		dx := t.X - cx
+		dy := t.Y - cy
+		dist := math.Sqrt(dx*dx + dy*dy)
+		if dist <= BlackHoleRadius {
 			hit = append(hit, t.InstanceID)
 		}
 	}

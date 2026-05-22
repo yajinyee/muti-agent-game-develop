@@ -195,6 +195,7 @@ const (
 	MsgDragonWrathResult    MessageType = "dragon_wrath_result"    // 龍怒流星雨結果（DAY-154）
 	MsgTorpedoResult        MessageType = "torpedo_result"         // 魚雷爆炸結果（DAY-155）
 	MsgRailgunResult        MessageType = "railgun_result"         // 軌道炮穿透結果（DAY-157）
+	MsgBlackHoleResult      MessageType = "black_hole_result"      // 黑洞漩渦爆炸結果（DAY-166）
 	MsgGoldenTurtleTimeStop MessageType = "golden_turtle_time_stop" // 黃金海龜時間停止（DAY-159）
 	MsgLuckyStarFish        MessageType = "lucky_star_fish"         // 幸運星魚全場倍率翻倍（DAY-160）
 	MsgGoldenSharkBerserk   MessageType = "golden_shark_berserk"    // 黃金鯊魚全服狂暴模式（DAY-161）
@@ -1567,6 +1568,7 @@ type SpecialWeaponUpdatePayload struct {
 	DragonWrathCharges int            `json:"dragon_wrath_charges"` // DAY-154
 	TorpedoCharges     int            `json:"torpedo_charges"`      // DAY-155
 	RailgunCharges     int            `json:"railgun_charges"`      // DAY-157
+	BlackHoleCharges   int            `json:"black_hole_charges"`   // DAY-166
 	NewBalance     int                `json:"new_balance"`      // 購買後的新餘額（0=使用操作）
 	Definitions    []SpecialWeaponDef `json:"definitions"`      // 武器定義（首次發送時填入）
 	// 充能進度（DAY-134）
@@ -1578,6 +1580,7 @@ type SpecialWeaponUpdatePayload struct {
 	DragonWrathChargeProgress int `json:"dragon_wrath_charge_progress"` // DAY-154
 	TorpedoChargeProgress     int `json:"torpedo_charge_progress"`      // DAY-155
 	RailgunChargeProgress     int `json:"railgun_charge_progress"`      // DAY-157
+	BlackHoleChargeProgress   int `json:"black_hole_charge_progress"`   // DAY-166
 }
 
 // SpecialWeaponChargedPayload 自動充能完成通知（Server → Client，DAY-134）
@@ -3063,6 +3066,32 @@ type RailgunResultPayload struct {
 	TotalReward int                `json:"total_reward"` // 總獎勵（result 時）
 	NewBalance  int                `json:"new_balance"`  // 結果後餘額（result 時，僅射擊者）
 	Cost        int                `json:"cost"`         // 軌道炮費用（15x betLevel）
+}
+
+// ---- 黑洞漩渦（DAY-166）----
+
+// BlackHoleKillEntry 黑洞擊破的目標條目（DAY-166）
+type BlackHoleKillEntry struct {
+	InstanceID string  `json:"instance_id"` // 目標 InstanceID
+	DefID      string  `json:"def_id"`      // 目標 DefID
+	Multiplier float64 `json:"multiplier"`  // 目標倍率
+	Reward     int     `json:"reward"`      // 獎勵金幣
+}
+
+// BlackHoleResultPayload 黑洞漩渦爆炸結果廣播（Server → Client，DAY-166）
+// Phase: "black_hole_place" → "black_hole_suck" → "black_hole_explode" → "result"
+type BlackHoleResultPayload struct {
+	ShooterID   string               `json:"shooter_id"`   // 放置玩家 ID
+	ShooterName string               `json:"shooter_name"` // 放置玩家名稱
+	Phase       string               `json:"phase"`        // 當前階段
+	CenterX     float64              `json:"center_x"`     // 黑洞中心 X
+	CenterY     float64              `json:"center_y"`     // 黑洞中心 Y
+	Radius      float64              `json:"radius"`       // 吸引半徑（300px）
+	SuckedCount int                  `json:"sucked_count"` // 被吸入的目標數（suck 階段）
+	HitTargets  []BlackHoleKillEntry `json:"hit_targets"`  // 命中目標（result 時）
+	TotalReward int                  `json:"total_reward"` // 總獎勵（result 時）
+	NewBalance  int                  `json:"new_balance"`  // 結果後餘額（result 時，僅放置者）
+	Cost        int                  `json:"cost"`         // 黑洞費用（10x betLevel）
 }
 
 // GoldenTurtleTimeStopPayload 黃金海龜時間停止廣播（Server → Client，DAY-159）

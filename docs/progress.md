@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-165 S-Rank 傳說召喚深淵巨鯨系統）
+## 最後更新：2026-05-22（DAY-166 黑洞漩渦武器系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-166 更新（自主觸發）：** 黑洞漩渦武器系統（Black Hole Vortex Weapon）✅
+  - **業界依據：** Ocean King 3 2026 Vortex 機制 + Black Hole Fishing 2026（Steam，2026-04-07 發布）— 放置後吸引周圍 300px 目標向中心移動，3 秒後爆炸擊破，費用 10x betLevel（介於魚雷 6x 和軌道炮 15x 之間）
+  - **設計差異：** 與炸彈（即時爆炸）不同，黑洞有「吸引期」（1.5s）+ 「爆炸期」（1.5s），讓玩家看到目標被吸入的過程，製造「漩渦吸入→爆炸」的戲劇感；吸引半徑 300px（比炸彈 200px 大 50%）
+  - `server/internal/game/specialweapon/specialweapon.go`：新增 WeaponBlackHole 類型；黑洞定義（Cost=-1動態費用/MaxCharges=2/充能45次/🌀圖示/紫色）；BlackHoleRadius=300/BlackHoleCostMultiplier=10/BlackHoleNormalKillChance=0.90/BlackHoleSpecialKillChance=0.70/BlackHoleBossKillChance=0.45；CalcBlackHoleTargets；PlayerWeaponState 加入 BlackHoleCharges/BlackHoleChargeProgress；所有 switch 分支加入 WeaponBlackHole 處理
+  - `server/internal/game/blackhole_handler.go`：新增黑洞漩渦 handler；handleBlackHoleFire（費用 10x betLevel/三階段廣播：black_hole_place→black_hole_suck→result）；announceBlackHole（≥4個擊破全服公告）
+  - `server/internal/game/specialweapon_handler.go`：handleUseSpecialWeapon 加入 WeaponBlackHole 分支（直接呼叫 handleBlackHoleFire）；sendSpecialWeaponUpdate 加入 BlackHoleCharges/BlackHoleChargeProgress
+  - `server/internal/ws/protocol.go`：新增 MsgBlackHoleResult；BlackHoleKillEntry/BlackHoleResultPayload（四階段：black_hole_place/black_hole_suck/result）；SpecialWeaponUpdatePayload 加入 BlackHoleCharges/BlackHoleChargeProgress
+  - `client/chiikawa-pixel/scripts/ui/BlackHolePanel.gd`：黑洞漩渦面板（深紫主題；black_hole_place 漩渦光環+旋轉動畫+頂部橫幅+自己放置時中央大🌀標誌彈跳；black_hole_suck 漩渦擴大+吸入計數器；result 全螢幕紫色爆炸閃光+爆炸圓圈+右側滑入結果彈窗含吸入數/擊破數/費用/獎勵/淨收益；≥5個擊破雙閃光）
+  - `client/chiikawa-pixel/scripts/ui/SpecialWeaponPanel.gd`：升級為九武器面板（寬度 640→720）；新增黑洞按鈕（紫色邊框/🌀圖示）；_charges/_progress 加入 black_hole；_on_weapon_btn_pressed 黑洞走選擇目標模式（像炸彈，點擊位置決定黑洞中心）；_on_black_hole_result（結果彈窗顯示獎勵-費用+按鈕閃爍）；連接 black_hole_result 訊號
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：black_hole_result 訊號 + _handle_black_hole_result
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 BlackHolePanelScript（z_index=76）；MysteryBoxPanel 位置從 x=1065 右移到 x=1145（因 SpecialWeaponPanel 變寬）
+  - 費用設計：10x betLevel（動態費用）— LV1=10金幣/LV5=50金幣/LV10=100金幣，介於魚雷和軌道炮之間
+  - 吸引設計：300px 半徑（比炸彈 200px 大 50%），覆蓋更大範圍，適合打密集目標群
+  - 擊破機率：普通 90%（比炸彈高）/特殊 70%/BOSS 45%，整體比炸彈更強
+  - 獎勵設計：擊破獎勵 = 目標倍率 × betLevel × 0.70（比炸彈 0.5 高，平衡費用）
+  - 充能設計：擊破 45 個目標自動充能一發（介於魚雷 25 和軌道炮 40 之間）；最多持有 2 發
+  - 全服公告：擊破 ≥4 個目標時全服廣播
+  - 視覺設計：三階段廣播（放置→吸入→爆炸），製造「漩渦吸入→爆炸」的戲劇感；旋轉動畫讓玩家感受到「黑洞在旋轉」
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-165 更新（自主觸發）：** S-Rank 傳說召喚深淵巨鯨系統（Legendary Summon Abyss Whale）✅
   - **業界依據：** Fishing Frenzy Chapter 3 2026（2026-05-14）「Boss Fish encounters can be summoned by sacrificing an S-rank fish and 1,000 gold」— 擊破傳說品質（Legendary）目標後，有 15% 機率觸發「深淵召喚」，立即在場上生成 T124 深淵巨鯨
   - **設計意圖：** 讓傳說品質目標更有價值（不只是倍率加成，還有機率召喚 Boss）；讓深淵巨鯨的出現更有戲劇性（「有人的傳說目標召喚了巨鯨！」）

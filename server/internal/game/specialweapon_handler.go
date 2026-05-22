@@ -119,6 +119,12 @@ func (g *Game) handleUseSpecialWeapon(p *player.Player, msg *ws.Message) {
 		go g.handleRailgunFire(p, payload.ClickY)
 		g.sendSpecialWeaponUpdate(p, false)
 		return
+	case specialweapon.WeaponBlackHole:
+		// 黑洞漩渦：特殊處理，直接呼叫 handleBlackHoleFire（DAY-166）
+		// 費用動態（10x betLevel），3 秒吸引後爆炸，不走一般的 hitIDs 流程
+		go g.handleBlackHoleFire(p, payload.ClickX, payload.ClickY)
+		g.sendSpecialWeaponUpdate(p, false)
+		return
 	}
 
 	// 處理命中目標
@@ -385,6 +391,7 @@ func (g *Game) sendSpecialWeaponUpdate(p *player.Player, withDefs bool) {
 		DragonWrathCharges:    snap.DragonWrathCharges,
 		TorpedoCharges:        snap.TorpedoCharges,
 		RailgunCharges:        snap.RailgunCharges,
+		BlackHoleCharges:      snap.BlackHoleCharges,
 		NewBalance:            p.Coins,
 		BombChargeProgress:    snap.BombChargeProgress,
 		LaserChargeProgress:   snap.LaserChargeProgress,
@@ -394,6 +401,7 @@ func (g *Game) sendSpecialWeaponUpdate(p *player.Player, withDefs bool) {
 		DragonWrathChargeProgress: snap.DragonWrathChargeProgress,
 		TorpedoChargeProgress:     snap.TorpedoChargeProgress,
 		RailgunChargeProgress:     snap.RailgunChargeProgress,
+		BlackHoleChargeProgress:   snap.BlackHoleChargeProgress,
 	}
 
 	// 首次發送時附帶武器定義

@@ -249,6 +249,7 @@ func _ready() -> void:
 	_init_money_fish_panel()          # 金幣魚王即時獎勵面板（DAY-162）
 	_init_captain_fish_panel()        # 船長魚全服競速模式面板（DAY-163）
 	_init_abyss_whale_panel()         # 深淵巨鯨全服 Boss 挑戰面板（DAY-164）
+	_init_black_hole_panel()          # 黑洞漩渦武器視覺效果面板（DAY-166）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -1968,7 +1969,8 @@ func _init_mystery_box_panel() -> void:
 	# DAY-154：SpecialWeaponPanel 寬度從 400 升級到 480，MysteryBox 再右移 80px
 	# DAY-155：SpecialWeaponPanel 寬度從 480 升級到 560，MysteryBox 再右移 80px
 	# DAY-157：SpecialWeaponPanel 寬度從 560 升級到 640，MysteryBox 再右移 80px
-	panel.position = Vector2(1065, 540)
+	# DAY-166：SpecialWeaponPanel 寬度從 640 升級到 720，MysteryBox 再右移 80px
+	panel.position = Vector2(1145, 540)
 	panel.z_index = 8
 	add_child(panel)
 	panel.setup(_pixel_font)
@@ -3262,3 +3264,16 @@ func _init_abyss_whale_panel() -> void:
 	if panel.has_method("setup"):
 		panel.setup(_pixel_font)
 	_abyss_whale_panel = panel
+
+# ---- 黑洞漩渦武器視覺效果面板（DAY-166）----
+
+const BlackHolePanelScript = preload("res://scripts/ui/BlackHolePanel.gd")
+var _black_hole_panel: Control = null
+
+func _init_black_hole_panel() -> void:
+	var panel = BlackHolePanelScript.new()
+	panel.name = "BlackHolePanel"
+	panel.z_index = 76  # 在 AbyssWhalePanel(77) 下方
+	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
+	add_child(panel)
+	_black_hole_panel = panel
