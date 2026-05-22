@@ -181,6 +181,7 @@ type Game struct {
 	JackpotDragon      *jackpotDragonManager       // 獎池龍 Jackpot 抽獎系統管理器（DAY-205）
 	CometFish          *cometFishManager           // 彗星魚連鎖爆炸系統管理器（DAY-206）
 	GoldenWaveFish     *goldenWaveFishManager      // 黃金波浪魚全場倍率衝擊系統管理器（DAY-207）
+	DragonKing         *dragonKingManager          // 深海龍王全服合力蓄力系統管理器（DAY-208）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -338,6 +339,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		JackpotDragon:      newJackpotDragonManager(),
 		CometFish:          newCometFishManager(),
 		GoldenWaveFish:     newGoldenWaveFishManager(),
+		DragonKing:         newDragonKingManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -899,6 +901,8 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	go g.notifyWrathShot(p)
 	// 龍怒流星雨武器：每次射擊累積充能（DAY-154）
 	go g.notifyDragonWrathShot(p)
+	// 深海龍王：蓄力模式中每次射擊累積龍怒值（DAY-208）
+	go g.notifyDragonKingShot()
 	// 不死 BOSS：每次射擊嘗試命中（DAY-129）
 	go g.tryImmortalBossHit(p)
 	// 覺醒 BOSS：每次射擊嘗試命中（DAY-130）
@@ -1669,6 +1673,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 黃金波浪魚：擊破 T165 時觸發黃金波浪（DAY-207）
 	if isGoldenWaveFish(t.DefID) {
 		go g.tryGoldenWaveFish(t)
+	}
+	// 深海龍王：擊破 T166 時觸發全服合力蓄力模式（DAY-208）
+	if isDragonKingFish(t.DefID) {
+		go g.tryDragonKingCharge(t)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

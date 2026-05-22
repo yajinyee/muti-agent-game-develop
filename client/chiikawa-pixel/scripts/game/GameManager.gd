@@ -209,6 +209,7 @@ signal free_spin_fish(data: Dictionary)                # 自由旋轉魚免費�
 signal jackpot_dragon(data: Dictionary)               # 獎池龍 Jackpot 抽獎（DAY-205）
 signal comet_fish(data: Dictionary)                   # 彗星魚連鎖爆炸（DAY-206）
 signal golden_wave_fish(data: Dictionary)             # 黃金波浪魚全場倍率衝擊（DAY-207）
+signal dragon_king(data: Dictionary)                  # 深海龍王全服合力蓄力（DAY-208）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -600,6 +601,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_comet_fish(payload)
 		"golden_wave_fish":
 			_handle_golden_wave_fish(payload)
+		"dragon_king":
+			_handle_dragon_king(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2361,6 +2364,37 @@ func _handle_golden_wave_fish(payload: Dictionary) -> void:
 			print("[GameManager] Golden Wave boost started: kills=%d, %ds" % [total_kills, boost_sec])
 		"boost_end":
 			print("[GameManager] Golden Wave boost ended")
+
+## 處理深海龍王全服合力蓄力（DAY-208）
+func _handle_dragon_king(payload: Dictionary) -> void:
+	emit_signal("dragon_king", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"charge_start":
+			var charge_target: int = payload.get("charge_target", 20)
+			var charge_sec: int = payload.get("charge_sec", 12)
+			print("[GameManager] Dragon King charge started: target=%d, %ds" % [charge_target, charge_sec])
+		"charge_progress":
+			var current: int = payload.get("current", 0)
+			var target: int = payload.get("charge_target", 20)
+			print("[GameManager] Dragon King charge: %d/%d" % [current, target])
+		"meteor_rain_start":
+			var meteor_count: int = payload.get("meteor_count", 5)
+			print("[GameManager] Dragon King FULL meteor rain: %d meteors" % meteor_count)
+		"small_meteor_start":
+			var meteor_count: int = payload.get("meteor_count", 3)
+			print("[GameManager] Dragon King small meteor: %d meteors" % meteor_count)
+		"meteor_hit":
+			var kills: int = payload.get("kill_count", 0)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Dragon King meteor hit: kills=%d reward=%d" % [kills, reward])
+		"meteor_rain_result":
+			var total_kills: int = payload.get("total_kills", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Dragon King meteor rain result: kills=%d reward=%d" % [total_kills, total_reward])
+		"small_meteor_result":
+			var total_kills: int = payload.get("total_kills", 0)
+			print("[GameManager] Dragon King small meteor result: kills=%d" % total_kills)
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:

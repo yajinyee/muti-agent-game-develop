@@ -545,6 +545,7 @@ const (
 
 	// 黃金波浪魚全場倍率衝擊系統（DAY-207）
 	MsgGoldenWaveFish MessageType = "golden_wave_fish" // 黃金波浪魚廣播（Server→Client，全服）
+	MsgDragonKing     MessageType = "dragon_king"      // 深海龍王全服合力蓄力廣播（Server→Client，全服，DAY-208）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4592,4 +4593,29 @@ type GoldenWaveFishPayload struct {
 	Reward      int     `json:"reward,omitempty"`
 	TotalKills  int     `json:"total_kills,omitempty"`
 	TotalReward int     `json:"total_reward,omitempty"`
+}
+
+// DragonKingPayload 深海龍王全服合力蓄力廣播（Server → Client，DAY-208）
+// Events:
+//   "charge_start"        — 蓄力模式開始（全服廣播，帶目標值/持續時間）
+//   "charge_progress"     — 蓄力進度更新（全服廣播，每次射擊 +1）
+//   "meteor_rain_start"   — 龍怒隕石雨開始（全服廣播，5顆隕石）
+//   "small_meteor_start"  — 小型龍怒開始（全服廣播，3顆隕石）
+//   "meteor_hit"          — 單顆隕石命中（全服廣播，帶位置/擊破數/獎勵）
+//   "meteor_rain_result"  — 龍怒隕石雨結算（全服廣播）
+//   "small_meteor_result" — 小型龍怒結算（全服廣播）
+type DragonKingPayload struct {
+	Event        string  `json:"event"`
+	ChargeTarget int     `json:"charge_target,omitempty"`
+	ChargeSec    int     `json:"charge_sec,omitempty"`
+	Current      int     `json:"current,omitempty"`
+	MeteorCount  int     `json:"meteor_count,omitempty"`
+	MeteorIdx    int     `json:"meteor_idx,omitempty"`
+	MeteorX      float64 `json:"meteor_x,omitempty"`
+	MeteorY      float64 `json:"meteor_y,omitempty"`
+	KillCount    int     `json:"kill_count,omitempty"`
+	Reward       int     `json:"reward,omitempty"`
+	TotalKills   int     `json:"total_kills,omitempty"`
+	TotalReward  int     `json:"total_reward,omitempty"`
+	IsFull       bool    `json:"is_full,omitempty"`
 }

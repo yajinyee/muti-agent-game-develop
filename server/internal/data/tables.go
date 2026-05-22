@@ -451,6 +451,12 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「黃金波浪」：8 列掃場（每列 150ms，70% 擊破，0.60x 倍率）
 	// 波浪結束後全服 ×2.0 倍率加成 8 秒（乘法，最強加成）；全服冷卻 50 秒
 	"T165": {ID: "T165", Name: "黃金波浪魚", Type: TargetTypeSpecial, MultiplierMin: 45, MultiplierMax: 70, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "golden_wave_boost"},
+	// T166 深海龍王（DAY-208）— 業界依據：Royal Fishing JILI「Dragon Wrath — accumulate wrath value
+	//  through shooting, then unleash devastating meteor strikes across the entire screen.」
+	// 擊破後觸發「龍王怒火蓄力模式」（12秒）：全服合力射擊累積龍怒值（+1/shot）
+	// 達到 20 點 → 龍怒隕石雨（5顆，350px，80%，0.75x）；未達到 → 小型龍怒（3顆，250px，65%，0.60x）
+	// 全服冷卻 45 秒；全服共享獎勵；製造「大家一起打才能觸發龍怒」的社群感
+	"T166": {ID: "T166", Name: "深海龍王", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 85, HP: 90, SpawnWeight: 2, Speed: 35, Lifetime: 16, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "dragon_king_charge"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

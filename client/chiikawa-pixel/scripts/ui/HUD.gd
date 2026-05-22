@@ -291,6 +291,7 @@ func _ready() -> void:
 	_init_jackpot_dragon_panel()        # 獎池龍 Jackpot 抽獎面板（DAY-205）
 	_init_comet_fish_panel()            # 彗星魚連鎖爆炸面板（DAY-206）
 	_init_golden_wave_fish_panel()      # 黃金波浪魚全場倍率衝擊面板（DAY-207）
+	_init_dragon_king_panel()           # 深海龍王全服合力蓄力面板（DAY-208）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3961,3 +3962,20 @@ func _init_golden_wave_fish_panel() -> void:
 func _on_golden_wave_fish(data: Dictionary) -> void:
 	if is_instance_valid(_golden_wave_fish_panel):
 		_golden_wave_fish_panel.handle_golden_wave_fish(data)
+
+# ── 深海龍王全服合力蓄力面板（DAY-208）──────────────────────────────────────
+const DragonKingPanelScript = preload("res://scripts/ui/DragonKingPanel.gd")
+var _dragon_king_panel = null
+
+func _init_dragon_king_panel() -> void:
+	var panel = DragonKingPanelScript.new()
+	panel.name = "DragonKingPanel"
+	panel.layer = 37
+	add_child(panel)
+	_dragon_king_panel = panel
+	if GameManager.has_signal("dragon_king"):
+		GameManager.dragon_king.connect(_on_dragon_king)
+
+func _on_dragon_king(data: Dictionary) -> void:
+	if is_instance_valid(_dragon_king_panel):
+		_dragon_king_panel.handle_dragon_king(data)

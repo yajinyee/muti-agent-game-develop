@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-207 黃金波浪魚全場倍率衝擊系統）
+## 最後更新：2026-05-23（DAY-208 深海龍王全服合力蓄力系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-207 更新（自主觸發）：** 黃金波浪魚全場倍率衝擊系統（Golden Wave Fish）✅
+- **DAY-208 更新（自主觸發）：** 深海龍王全服合力蓄力系統（Dragon King Charge）✅
+  - **業界依據：** Royal Fishing JILI「Dragon Wrath — accumulate wrath value through shooting, then unleash devastating meteor strikes across the entire screen. Includes both Immortal Boss and ChainLong King encounters.」
+  - **設計：** 擊破 T166 後觸發「龍王怒火蓄力模式」（12秒）：全服所有玩家的每次射擊都累積「龍怒值」（+1/shot）；達到 20 點 → 觸發「龍怒隕石雨」（5 顆隕石，350px 半徑，80% 擊破機率，0.75x 倍率）；12 秒內未達到 20 點 → 觸發「小型龍怒」（3 顆隕石，250px 半徑，65% 擊破機率，0.60x 倍率）；全服冷卻 45 秒
+  - **設計差異：** 與個人 DragonWrath（DAY-154，個人蓄力/個人使用）不同，深海龍王是「全服合力蓄力」，任何玩家射擊都累積，製造「大家一起打才能觸發龍怒」的社群感；「射擊越多越快觸發」讓玩家有「趕快多打幾槍」的緊迫感；全服廣播讓所有玩家看到蓄力進度條，製造「還差幾槍就爆發」的期待感；隕石雨全服共享獎勵，讓觸發者有「我幫全服觸發了龍怒」的英雄感
+  - server/internal/game/dragon_king_handler.go：dragonKingManager（全服共享蓄力狀態/atomic chargeCount）；isDragonKingFish（T166）；tryDragonKingCharge（擊破後觸發/全服廣播/全服公告）；notifyDragonKingShot（每次射擊累積/達到目標觸發隕石雨）；runDragonKingChargeTimer（12秒超時觸發小型龍怒）；executeDragonKingMeteorRain（isFull=true 龍怒隕石雨/isFull=false 小型龍怒）；doDragonKingMeteorBlast（單顆隕石爆炸/全服共享獎勵）
+  - server/internal/data/tables.go：新增 T166 深海龍王（55-85x/HP90/SpawnWeight2/Speed35/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgDragonKing；DragonKingPayload（charge_start/charge_progress/meteor_rain_start/small_meteor_start/meteor_hit/meteor_rain_result/small_meteor_result）
+  - server/internal/game/game.go：DragonKing *dragonKingManager；handleKill 加入 isDragonKingFish 分支；handleAttack 加入 notifyDragonKingShot（蓄力模式中每次射擊累積）
+  - client/chiikawa-pixel/scripts/ui/DragonKingPanel.gd：深紅龍焰主題面板（charge_start 深紅三次閃光+頂部橫幅+底部蓄力進度條；charge_progress 進度條更新+每5點閃光+「還差N槍」提示；meteor_rain_start 全螢幕三次深紅強閃光+「🐉 龍怒隕石雨！」52px大字；small_meteor_start 橙色閃光+「🐉 小型龍怒！」40px大字；meteor_hit 爆炸雙圓圈+浮動獎勵文字；結算彈窗右側滑入）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：dragon_king 訊號 + _handle_dragon_king
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 DragonKingPanelScript（layer=37）
+  - 蓄力設計：12 秒持續；每次射擊 +1；目標 20 點；atomic 操作確保並發安全；全服廣播進度
+  - 隕石雨設計：5 顆隕石；350px 半徑；80% 擊破機率；0.75x 倍率；每顆 400ms 間隔；全服共享獎勵
+  - 小型龍怒設計：3 顆隕石；250px 半徑；65% 擊破機率；0.60x 倍率；12 秒未達目標時觸發
+  - 視覺設計：深紅龍焰主題（#FF4500 + #FF0000 + #FF6600 + #FFD700）；底部進度條顏色漸變（深紅→橙→金）；爆炸雙圓圈（外圈深紅/內圈金色）；全螢幕三次強閃光
+  - 全服廣播：蓄力開始/每次射擊進度/隕石雨開始/每顆隕石/結算全服廣播
+  - 全服公告：蓄力開始時公告；龍怒隕石雨≥5擊破時公告（依擊破數決定顏色：≥15紅色/≥10橙紅/≥5橙色）；小型龍怒≥3擊破時公告
+  - build/vet 全部通過（零錯誤零警告）
   - **業界依據：** Ocean King 4 Brand New World（2025 最新版）「Golden Wave Fish — triggers a golden tidal wave that sweeps across the entire screen, temporarily boosting all multipliers by 2x for 8 seconds while simultaneously dealing damage to all fish in its path.」
   - **設計：** 擊破 T165 後觸發「黃金波浪」：8 列掃場（每列 150ms，70% 擊破機率，0.60x 倍率）；波浪結束後全服 ×2.0 倍率加成 8 秒（乘法，最強加成）；全服冷卻 50 秒
   - **設計差異：** 與搖滾骷髏安可（+30% 加法）不同，黃金波浪是「×2.0 乘法」加成，效果最強；與幸運草魚（+50% 加法）不同，黃金波浪是「波浪掃場 + 立即 2x 倍率」雙重效果；乘法加成讓高倍率目標的獎勵更爆炸（50x 目標 → 100x 效果）；8 秒加成讓玩家有「趕快打高倍率目標」的緊迫感
