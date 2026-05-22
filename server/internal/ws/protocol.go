@@ -548,6 +548,8 @@ const (
 	MsgDragonKing     MessageType = "dragon_king"      // 深海龍王全服合力蓄力廣播（Server→Client，全服，DAY-208）
 	MsgFortuneCoinFish MessageType = "fortune_coin_fish" // 幸運金幣魚即時獎勵廣播（Server→Client，DAY-209）
 	MsgLuckyHotZone   MessageType = "lucky_hot_zone"    // 幸運熱區魚空間策略廣播（Server→Client，DAY-210）
+	MsgLuckyTrident   MessageType = "lucky_trident"     // 幸運三叉魚互動三轉盤廣播（Server→Client，DAY-211）
+	MsgLuckyTridentStop MessageType = "lucky_trident_stop" // 玩家停止轉盤（Client→Server，DAY-211）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4659,4 +4661,35 @@ type LuckyHotZonePayload struct {
 	KilledCount     int     `json:"killed_count,omitempty"`
 	TotalReward     int     `json:"total_reward,omitempty"`
 	RewardPerPlayer int     `json:"reward_per_player,omitempty"`
+}
+
+// LuckyTridentPayload 幸運三叉魚互動三轉盤廣播（Server → Client，DAY-211）
+// Events:
+//   "trident_start"      — 三叉儀式開始（個人廣播，帶超時秒數）
+//   "trident_result"     — 三叉結算（個人廣播，帶三個轉盤結果）
+//   "trident_mult_end"   — 倍率加成結束（個人廣播）
+//   "trident_effect"     — 特效執行（全服廣播，帶特效類型）
+//   "trident_effect_end" — 特效結束（個人廣播）
+//   "trident_broadcast"  — 全服廣播（讓其他玩家看到三叉結果）
+type LuckyTridentPayload struct {
+	Event         string  `json:"event"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	TimeoutSec    int     `json:"timeout_sec,omitempty"`
+	WheelALabel   string  `json:"wheel_a_label,omitempty"`
+	WheelBLabel   string  `json:"wheel_b_label,omitempty"`
+	WheelCLabel   string  `json:"wheel_c_label,omitempty"`
+	CoinReward    int     `json:"coin_reward,omitempty"`
+	MultBoost     float64 `json:"mult_boost,omitempty"`
+	MultSec       int     `json:"mult_sec,omitempty"`
+	Effect        string  `json:"effect,omitempty"`
+	EffectDesc    string  `json:"effect_desc,omitempty"`
+	AffectedCount int     `json:"affected_count,omitempty"`
+	FreeSec       int     `json:"free_sec,omitempty"`
+	IsTimeout     bool    `json:"is_timeout,omitempty"`
+}
+
+// LuckyTridentStopPayload 玩家停止轉盤（Client → Server，DAY-211）
+type LuckyTridentStopPayload struct {
+	PlayerID string `json:"player_id"`
 }

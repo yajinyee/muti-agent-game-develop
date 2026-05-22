@@ -294,6 +294,7 @@ func _ready() -> void:
 	_init_dragon_king_panel()           # 深海龍王全服合力蓄力面板（DAY-208）
 	_init_fortune_coin_fish_panel()     # 幸運金幣魚即時獎勵面板（DAY-209）
 	_init_lucky_hot_zone_panel()        # 幸運熱區魚空間策略面板（DAY-210）
+	_init_lucky_trident_panel()         # 幸運三叉魚互動三轉盤面板（DAY-211）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4015,3 +4016,20 @@ func _init_lucky_hot_zone_panel() -> void:
 func _on_lucky_hot_zone(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_hot_zone_panel):
 		_lucky_hot_zone_panel.handle_lucky_hot_zone(data)
+
+# ── DAY-211 幸運三叉魚互動三轉盤面板 ──────────────────────────────────────────
+const LuckyTridentPanelScript = preload("res://scripts/ui/LuckyTridentPanel.gd")
+var _lucky_trident_panel = null
+
+func _init_lucky_trident_panel() -> void:
+	var panel = LuckyTridentPanelScript.new()
+	panel.name = "LuckyTridentPanel"
+	panel.layer = 34
+	add_child(panel)
+	_lucky_trident_panel = panel
+	if GameManager.has_signal("lucky_trident"):
+		GameManager.lucky_trident.connect(_on_lucky_trident)
+
+func _on_lucky_trident(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_trident_panel):
+		_lucky_trident_panel.handle_lucky_trident(data)

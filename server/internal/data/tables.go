@@ -471,6 +471,16 @@ var Targets = map[string]*TargetDef{
 	//   3. 8 秒後「熱區爆炸」：熱區內所有目標 75% 擊破機率（0.65x 倍率，全服共享）
 	//   4. 個人冷卻 20 秒；全服冷卻 30 秒
 	"T168": {ID: "T168", Name: "幸運熱區魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 50, Lifetime: 13, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "lucky_hot_zone"},
+	// T169 幸運三叉魚（DAY-211）— 業界依據：TaDa Gaming TriLuck™ Series 2026
+	// 「Within the TriLuck™ Series, you can trigger three different feature specifications,
+	//  ranging from win multipliers, jackpot bonuses, collecting all rewards, and more unique features.」
+	// 擊破後觸發「三叉幸運儀式」（個人互動）：
+	//   三個獨立轉盤同時旋轉，玩家依序點擊停止：
+	//   - 轉盤 A（金幣）：即時金幣獎勵 10x/20x/30x/50x/100x × betLevel
+	//   - 轉盤 B（倍率）：下一次擊破倍率加成 ×1.5/×2.0/×2.5/×3.0/×5.0（持續 15 秒）
+	//   - 轉盤 C（特效）：HP削減/免費射擊/全服廣播/小型清場（隨機）
+	//   個人冷卻 25 秒；超時 12 秒自動停止
+	"T169": {ID: "T169", Name: "幸運三叉魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 60, HP: 70, SpawnWeight: 4, Speed: 48, Lifetime: 13, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_trident"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

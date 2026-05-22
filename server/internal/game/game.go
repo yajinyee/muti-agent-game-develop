@@ -184,6 +184,7 @@ type Game struct {
 	DragonKing         *dragonKingManager          // 深海龍王全服合力蓄力系統管理器（DAY-208）
 	FortuneCoinFish    *fortuneCoinFishManager     // 幸運金幣魚即時獎勵系統管理器（DAY-209）
 	LuckyHotZone       *luckyHotZoneManager        // 幸運熱區魚空間策略系統管理器（DAY-210）
+	LuckyTrident       *luckyTridentManager        // 幸運三叉魚互動三轉盤系統管理器（DAY-211）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -344,6 +345,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		DragonKing:         newDragonKingManager(),
 		FortuneCoinFish:    newFortuneCoinFishManager(),
 		LuckyHotZone:       newLuckyHotZoneManager(),
+		LuckyTrident:       newLuckyTridentManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -866,6 +868,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 		if err := remarshal(msg.Payload, &payload); err == nil {
 			g.handleChainLongKingStop(p, payload)
 		}
+	// 幸運三叉魚互動三轉盤系統（DAY-211）
+	case ws.MsgLuckyTridentStop:
+		g.handleLuckyTridentStop(p, msg)
 	}
 }
 
@@ -1202,6 +1207,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	hotZoneMult := g.getLuckyHotZoneMultiplier(t.X, t.Y)
 	if hotZoneMult > 1.0 {
 		finalReward = int(float64(finalReward) * hotZoneMult)
+	}
+	// 套用幸運三叉魚倍率加成（DAY-211，×1.5-5.0 乘法，個人，15 秒）
+	tridentMult := g.getLuckyTridentMultBoost(p.ID)
+	if tridentMult > 1.0 {
+		finalReward = int(float64(finalReward) * tridentMult)
 	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
@@ -1694,6 +1704,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運熱區魚：擊破 T168 時在場上建立幸運熱區（DAY-210）
 	if isLuckyHotZoneFish(t.DefID) {
 		go g.tryLuckyHotZone(p, t)
+	}
+	// 幸運三叉魚：擊破 T169 時觸發三叉幸運儀式（DAY-211）
+	if isLuckyTridentFish(t.DefID) {
+		go g.tryLuckyTrident(p, t)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
