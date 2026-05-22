@@ -38,6 +38,50 @@ const TARGET_SPRITES = {
 	"T124": "res://assets/sprites/targets/T124_abyss_whale.png",
 	"T125": "res://assets/sprites/targets/T125_roulette_crab.png",
 	"T126": "res://assets/sprites/targets/T126_lion_dance.png",
+	"T127": "res://assets/sprites/targets/T127_vortex_fish.png",
+	"T128": "res://assets/sprites/targets/T128_freeze_bomb.png",
+	"T129": "res://assets/sprites/targets/T129_ice_fish.png",
+	"T130": "res://assets/sprites/targets/T130_lucky_egg_fish.png",
+	"T131": "res://assets/sprites/targets/T131_rainbow_lucky_fish.png",
+	"T132": "res://assets/sprites/targets/T132_sea_anemone.png",
+	"T133": "res://assets/sprites/targets/T133_lucky_dice_fish.png",
+	"T134": "res://assets/sprites/targets/T134_fire_storm_fish.png",
+	"T135": "res://assets/sprites/targets/T135_golden_treasure.png",
+	"T136": "res://assets/sprites/targets/T136_mermaid.png",
+	"T137": "res://assets/sprites/targets/T137_lucky_clover_fish.png",
+	"T138": "res://assets/sprites/targets/T138_rainbow_shark.png",
+	"T139": "res://assets/sprites/targets/T139_thunder_shark.png",
+	"T140": "res://assets/sprites/targets/T140_vampire_fish.png",
+	"T141": "res://assets/sprites/targets/T141_lightning_fish.png",
+	"T142": "res://assets/sprites/targets/T142_meteor_fish.png",
+	"T143": "res://assets/sprites/targets/T143_phoenix_fish.png",
+	"T144": "res://assets/sprites/targets/T144_dragon_turtle.png",
+	"T145": "res://assets/sprites/targets/T145_chain_bomb.png",
+	"T146": "res://assets/sprites/targets/T146_croc_hunter.png",
+	"T147": "res://assets/sprites/targets/T147_time_bomb_fish.png",
+	"T148": "res://assets/sprites/targets/T148_triple_lucky.png",
+	"T149": "res://assets/sprites/targets/T149_school_leader.png",
+	"T150": "res://assets/sprites/targets/T150_rock_skeleton.png",
+	"T151": "res://assets/sprites/targets/T151_electric_jellyfish.png",
+	"T152": "res://assets/sprites/targets/T152_chainlong_king.png",
+	"T153": "res://assets/sprites/targets/T153_drill_bit_lobster.png",
+	"T154": "res://assets/sprites/targets/T154_anglerfish_elec.png",
+	"T155": "res://assets/sprites/targets/T155_mystic_dragon.png",
+	"T156": "res://assets/sprites/targets/T156_ghost_fish.png",
+	"T157": "res://assets/sprites/targets/T157_thunder_lobster_v2.png",
+	"T158": "res://assets/sprites/targets/T158_ice_phoenix.png",
+	"T159": "res://assets/sprites/targets/T159_serial_bomb_crab.png",
+	"T160": "res://assets/sprites/targets/T160_abyss_vortex.png",
+	"T161": "res://assets/sprites/targets/T161_humpback_whale.png",
+	"T162": "res://assets/sprites/targets/T162_free_spin_fish.png",
+	"T163": "res://assets/sprites/targets/T163_jackpot_dragon.png",
+	"T164": "res://assets/sprites/targets/T164_comet_fish.png",
+	"T165": "res://assets/sprites/targets/T165_golden_wave_fish.png",
+	"T166": "res://assets/sprites/targets/T166_dragon_king.png",
+	"T167": "res://assets/sprites/targets/T167_fortune_coin_fish.png",
+	"T168": "res://assets/sprites/targets/T168_lucky_hot_zone.png",
+	"T169": "res://assets/sprites/targets/T169_lucky_trident.png",
+	"T170": "res://assets/sprites/targets/T170_time_freeze_fish.png",
 	"B001": "res://assets/sprites/targets/B001_boss.png",
 }
 
@@ -128,11 +172,17 @@ var _swim_anim_frame: int = 0  # 0 或 1
 # 游泳動畫 AtlasTexture 快取：def_id -> [frame0_atlas, frame1_atlas]
 var _swim_atlas_cache: Dictionary = {}
 
+# 時間凍結狀態（DAY-212）
+var _is_globally_frozen: bool = false  # 全場凍結中（T170 時間凍結魚）
+
 func _ready() -> void:
 	GameManager.target_spawned.connect(_on_target_spawned)
 	GameManager.target_updated.connect(_on_target_updated)
 	GameManager.target_killed.connect(_on_target_killed)
 	GameManager.boss_event.connect(_on_boss_event)
+	# 時間凍結魚：全場靜止（DAY-212）
+	if GameManager.has_signal("time_freeze_fish"):
+		GameManager.time_freeze_fish.connect(_on_time_freeze_fish)
 	# 初始化 TargetPool（預建立 24 個空殼節點，避免高頻 GC）
 	TargetPool.init_pool(self)
 	# 預載入常用資源
@@ -666,6 +716,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 
 ## 更新目標位置（依行為模式移動）
 func _update_target_positions(delta: float) -> void:
+	# 時間凍結期間：所有目標靜止不動（DAY-212）
+	if _is_globally_frozen:
+		return
+
 	# 先收集要移除的 ID，避免迭代中修改 Dictionary
 	var to_remove: Array[String] = []
 
@@ -1264,3 +1318,58 @@ func _add_quality_glow(container: Node2D, quality: String, color_hex: String) ->
 	# legendary 進場音效（讓玩家注意到傳說品質目標出現）
 	if quality == "legendary":
 		AudioManager.play_sfx(AudioManager.SFX.COIN_DROP)
+
+## 處理時間凍結魚訊號（DAY-212）
+## freeze_start：全場靜止，目標物停止移動，加冰晶視覺效果
+## freeze_end：解除靜止，目標物恢復移動
+## thaw_blast：解凍爆炸（由 TimeFreezePanel 處理視覺，TargetManager 只需恢復移動）
+func _on_time_freeze_fish(data: Dictionary) -> void:
+	var event: String = data.get("event", "")
+	match event:
+		"freeze_start":
+			_is_globally_frozen = true
+			_apply_freeze_visual()
+		"freeze_end":
+			# 短暫延遲後恢復（等待解凍動畫）
+			var timer = get_tree().create_timer(0.3)
+			timer.timeout.connect(func() -> void:
+				_is_globally_frozen = false
+				_remove_freeze_visual()
+			)
+		"thaw_blast":
+			# 確保凍結已解除
+			_is_globally_frozen = false
+			_remove_freeze_visual()
+
+## 套用冰晶視覺效果（凍結期間目標物加冰藍色調）
+func _apply_freeze_visual() -> void:
+	for instance_id in _target_nodes:
+		var node = _target_nodes[instance_id]
+		if not is_instance_valid(node):
+			continue
+		# 找到 Sprite2D 子節點，套用冰藍色調
+		var sprite = node.get_node_or_null("Sprite2D")
+		if is_instance_valid(sprite):
+			# 冰藍色調：modulate 加藍色
+			var tween = node.create_tween()
+			tween.tween_property(sprite, "modulate", Color(0.7, 0.9, 1.2, 1.0), 0.15)
+		# 停止游泳動畫（讓目標看起來真的靜止）
+		var tween_stop = node.get_meta("swim_tween", null)
+		if tween_stop != null and tween_stop is Tween:
+			tween_stop.pause()
+
+## 移除冰晶視覺效果（解凍後恢復正常色調）
+func _remove_freeze_visual() -> void:
+	for instance_id in _target_nodes:
+		var node = _target_nodes[instance_id]
+		if not is_instance_valid(node):
+			continue
+		var sprite = node.get_node_or_null("Sprite2D")
+		if is_instance_valid(sprite):
+			# 恢復正常色調
+			var tween = node.create_tween()
+			tween.tween_property(sprite, "modulate", Color(1.0, 1.0, 1.0, 1.0), 0.2)
+		# 恢復游泳動畫
+		var tween_resume = node.get_meta("swim_tween", null)
+		if tween_resume != null and tween_resume is Tween:
+			tween_resume.play()
