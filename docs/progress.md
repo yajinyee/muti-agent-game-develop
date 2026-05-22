@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-203 座頭鯨覺醒系統）
+## 最後更新：2026-05-22（DAY-204 自由旋轉魚免費射擊系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-204 更新（自主觸發）：** 自由旋轉魚免費射擊系統（Free Spin Fish）✅
+  - **業界依據：** Galaxsys King of Ocean 2026「Free Spin Fish, Captain Fish, and Money Fish trigger bonus rounds, extra multipliers, and instant payouts.」
+  - **設計：** 擊破 T162 後觸發「個人免費射擊模式」（10秒，不扣費）：系統每 0.6 秒自動選最高價值目標射擊（80% 擊破機率，0.80x 倍率）；每擊破一個目標 +1 秒（最多延長到 20 秒）；個人冷卻 30 秒
+  - **設計差異：** 與 T157 雷霆龍蝦（全服共享砲台，0.75x 倍率）不同，T162 是「個人免費射擊」，不扣費（真正免費），0.80x 倍率更高；「不扣費」是核心設計，讓玩家感受到「白嫖的爽感」；個人冷卻讓每個玩家都有機會觸發，不會被一個玩家壟斷；全服廣播讓其他玩家知道有人觸發了免費射擊
+  - server/internal/game/free_spin_fish_handler.go：freeSpinFishManager；isFreeSpinFish（T162）；tryFreeSpinFishMode（擊破後觸發/個人冷卻/全服廣播）；runFreeSpinFishMode（goroutine 每 0.6 秒自動射擊/超時結算）；doFreeSpinFishShot（選最高價值目標/80%擊破/延長時間/廣播結果）；finalizeFreeSpinFish（結算/全服公告≥5擊破）
+  - server/internal/data/tables.go：新增 T162 自由旋轉魚（35-60x/HP70/SpawnWeight4/Speed50/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgFreeSpinFish；FreeSpinFishPayload（free_spin_start/free_spin_shot/free_spin_end/free_spin_broadcast）
+  - server/internal/game/game.go：FreeSpinFish *freeSpinFishManager；handleKill 加入 isFreeSpinFish 分支
+  - client/chiikawa-pixel/scripts/ui/FreeSpinFishPanel.gd：青色旋轉主題面板（free_spin_start 青色雙閃光+橫幅+底部時間進度條；free_spin_shot 小閃光+浮動獎勵文字+計數器更新+進度條顏色漸變；free_spin_end 結算彈窗+4秒後淡出；free_spin_broadcast 全服廣播橫幅）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：free_spin_fish 訊號 + _handle_free_spin_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 FreeSpinFishPanelScript（layer=41）
+  - 免費射擊設計：每 0.6 秒自動射擊；80% 擊破機率；0.80x 獎勵倍率；不扣費（純獎勵）；個人冷卻 30 秒；最高價值目標優先
+  - 延長設計：每次擊破 +1 秒；最多延長到 20 秒；讓玩家感受到「打得越準越久」
+  - 視覺設計：底部進度條顏色漸變（青→黃→橙）；每 5 次擊破額外閃光；結算彈窗顯示延長秒數
+  - 全服廣播：觸發時全服廣播，讓其他玩家知道有人觸發了免費射擊
+  - 全服公告：≥5 個擊破時全服公告（依擊破數決定顏色：≥15 橙紅/≥10 金色/≥5 青色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-203 更新（自主觸發）：** 座頭鯨覺醒系統（Humpback Whale Awaken）✅
   - **業界依據：** Royal Fishing JILI「Humpback Whale offers 90-150x with 15x base multiplier. Awaken Boss mechanic — triggers wave attack that sweeps the screen. The Humpback Whale's signature breach mechanic creates massive splash zones.」
   - **設計：** 擊破 T161 後觸發「鯨歌覺醒」：基礎獎勵 15x betLevel；3 波波浪攻擊（每波 3 個目標，65% 擊破機率，0.60x 倍率，每波間隔 1 秒）；5% 機率觸發「深海巨浪」：全場所有目標（60% 擊破機率，0.65x 倍率）；最高組合 150x

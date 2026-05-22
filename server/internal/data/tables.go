@@ -427,6 +427,13 @@ var Targets = map[string]*TargetDef{
 	// 5% 機率觸發「深海巨浪」：全場所有目標（60% 擊破機率，0.65x 倍率）；最高組合 150x
 	"T161": {ID: "T161", Name: "座頭鯨", Type: TargetTypeSpecial, MultiplierMin: 90, MultiplierMax: 150, HP: 120, SpawnWeight: 2, Speed: 25, Lifetime: 22, LaborGain: 18, DifficultyFactor: 16.0, SpecialBehavior: "humpback_whale_awaken"},
 
+	// T162 自由旋轉魚（DAY-204）— 業界依據：Galaxsys King of Ocean 2026
+	// 「Free Spin Fish, Captain Fish, and Money Fish trigger bonus rounds, extra multipliers, and instant payouts.」
+	// 擊破後觸發「個人免費射擊模式」（10秒，不扣費）：
+	//   系統每 0.6 秒自動選最高價值目標射擊（80% 擊破機率，0.80x 倍率）
+	//   每擊破一個目標 +1 秒（最多延長到 20 秒）；個人冷卻 30 秒
+	"T162": {ID: "T162", Name: "自由旋轉魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 60, HP: 70, SpawnWeight: 4, Speed: 50, Lifetime: 14, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "free_spin_fish"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

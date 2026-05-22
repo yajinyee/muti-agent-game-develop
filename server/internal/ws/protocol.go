@@ -534,6 +534,9 @@ const (
 	// 座頭鯨覺醒系統（DAY-203）
 	MsgHumpbackWhale MessageType = "humpback_whale" // 座頭鯨覺醒廣播（Server→Client，全服）
 
+	// 自由旋轉魚免費射擊系統（DAY-204）
+	MsgFreeSpinFish MessageType = "free_spin_fish" // 自由旋轉魚廣播（Server→Client，個人+全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4497,4 +4500,24 @@ type HumpbackWhalePayload struct {
 	TotalKills  int    `json:"total_kills,omitempty"`
 	TotalReward int    `json:"total_reward,omitempty"`
 	HasTidal    bool   `json:"has_tidal,omitempty"`
+}
+
+// FreeSpinFishPayload 自由旋轉魚免費射擊廣播（Server → Client，DAY-204）
+// Event: "free_spin_start" → "free_spin_shot"（每次射擊）× N → "free_spin_end"
+// "free_spin_broadcast" 廣播給全服（讓其他玩家知道有人觸發了免費射擊）
+type FreeSpinFishPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	Duration    float64 `json:"duration,omitempty"`
+	MaxDuration float64 `json:"max_duration,omitempty"`
+	TargetID    string  `json:"target_id,omitempty"`
+	TargetX     float64 `json:"target_x,omitempty"`
+	TargetY     float64 `json:"target_y,omitempty"`
+	Killed      bool    `json:"killed,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
+	KillCount   int     `json:"kill_count,omitempty"`
+	Remaining   float64 `json:"remaining,omitempty"`
+	TotalReward int     `json:"total_reward,omitempty"`
+	ExtendSec   float64 `json:"extend_sec,omitempty"`
 }

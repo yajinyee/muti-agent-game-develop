@@ -287,6 +287,7 @@ func _ready() -> void:
 	_init_serial_bomb_crab_panel()      # 連環炸彈蟹面板（DAY-201）
 	_init_abyss_vortex_panel()          # 深淵漩渦魚面板（DAY-202）
 	_init_humpback_whale_panel()        # 座頭鯨覺醒面板（DAY-203）
+	_init_free_spin_fish_panel()        # 自由旋轉魚免費射擊面板（DAY-204）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3889,3 +3890,20 @@ func _init_humpback_whale_panel() -> void:
 func _on_humpback_whale(data: Dictionary) -> void:
 	if is_instance_valid(_humpback_whale_panel):
 		_humpback_whale_panel.handle_humpback_whale(data)
+
+## ---- 自由旋轉魚免費射擊面板（DAY-204）----
+const FreeSpinFishPanelScript = preload("res://scripts/ui/FreeSpinFishPanel.gd")
+var _free_spin_fish_panel = null
+
+func _init_free_spin_fish_panel() -> void:
+	var panel = FreeSpinFishPanelScript.new()
+	panel.name = "FreeSpinFishPanel"
+	panel.layer = 41
+	add_child(panel)
+	_free_spin_fish_panel = panel
+	if GameManager.has_signal("free_spin_fish"):
+		GameManager.free_spin_fish.connect(_on_free_spin_fish)
+
+func _on_free_spin_fish(data: Dictionary) -> void:
+	if is_instance_valid(_free_spin_fish_panel):
+		_free_spin_fish_panel.handle_free_spin_fish(data)

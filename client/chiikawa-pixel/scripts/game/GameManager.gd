@@ -205,6 +205,7 @@ signal ice_phoenix(data: Dictionary)                   # 冰鳳凰覺醒 BOSS（
 signal serial_bomb_crab(data: Dictionary)              # 連環炸彈蟹（DAY-201）
 signal abyss_vortex(data: Dictionary)                  # 深淵漩渦魚（DAY-202）
 signal humpback_whale(data: Dictionary)                # 座頭鯨覺醒（DAY-203）
+signal free_spin_fish(data: Dictionary)                # 自由旋轉魚免費射擊（DAY-204）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -588,6 +589,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_abyss_vortex(payload)
 		"humpback_whale":
 			_handle_humpback_whale(payload)
+		"free_spin_fish":
+			_handle_free_spin_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2289,6 +2292,19 @@ func _handle_humpback_whale(payload: Dictionary) -> void:
 			var total_kills: int = payload.get("total_kills", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Humpback Whale result: kills=%d reward=%d" % [total_kills, total_reward])
+
+## 處理自由旋轉魚免費射擊（DAY-204）
+func _handle_free_spin_fish(payload: Dictionary) -> void:
+	emit_signal("free_spin_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"free_spin_start":
+			var player_id: String = payload.get("player_id", "")
+			print("[GameManager] Free Spin Fish started for player=%s" % player_id)
+		"free_spin_end":
+			var kill_count: int = payload.get("kill_count", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Free Spin Fish ended: kills=%d reward=%d" % [kill_count, total_reward])
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:
