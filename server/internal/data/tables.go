@@ -410,6 +410,16 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「連環爆炸」：3-5 顆炸彈依序爆炸（每顆間隔 600ms）
 	// 每顆炸彈：250px 半徑，75% 擊破機率，0.65x 倍率；炸彈位置隨機分散在場上
 	"T159": {ID: "T159", Name: "連環炸彈蟹", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 75, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "serial_bomb_crab"},
+
+	// T160 深淵漩渦魚（DAY-202）— 業界依據：Ocean King 2「Vortex Fish — sucks all fish of the same
+	// species into a whirlpool. Catching a Vortex Fish will suck all fish of the same species in the
+	// area into a whirlpool.」+ SteamDB OceanFest 2026「Abyssal Vortex (persistent whirlpool)」
+	// 擊破後在擊破位置生成「深淵漩渦」（持續 5 秒）：
+	//   每 0.5 秒吸引脈衝（500px 半徑內目標向中心移動 180px）
+	//   進入 100px 中心：80% 擊破機率，0.70x 倍率
+	//   漩渦結束後深淵爆炸：300px 半徑，60% 擊破機率，0.55x 倍率
+	"T160": {ID: "T160", Name: "深淵漩渦魚", Type: TargetTypeSpecial, MultiplierMin: 45, MultiplierMax: 70, HP: 75, SpawnWeight: 3, Speed: 50, Lifetime: 13, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "abyss_vortex_pull"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

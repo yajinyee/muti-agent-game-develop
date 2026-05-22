@@ -528,6 +528,9 @@ const (
 	// 連環炸彈蟹系統（DAY-201）
 	MsgSerialBombCrab MessageType = "serial_bomb_crab" // 連環炸彈蟹廣播（Server→Client，全服）
 
+	// 深淵漩渦魚系統（DAY-202）
+	MsgAbyssVortex MessageType = "abyss_vortex" // 深淵漩渦廣播（Server→Client，全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4455,6 +4458,23 @@ type SerialBombCrabPayload struct {
 	BombY       float64 `json:"bomb_y,omitempty"`
 	BombKills   int     `json:"bomb_kills,omitempty"`
 	BombReward  int     `json:"bomb_reward,omitempty"`
+	TotalKills  int     `json:"total_kills,omitempty"`
+	TotalReward int     `json:"total_reward,omitempty"`
+}
+
+// AbyssVortexPayload 深淵漩渦魚廣播（Server → Client，DAY-202）
+// Event: "vortex_start" → "vortex_pulse"（每次脈衝）× 10 → "vortex_blast" → "vortex_result"
+type AbyssVortexPayload struct {
+	Event       string  `json:"event"`
+	KillerName  string  `json:"killer_name,omitempty"`
+	VortexX     float64 `json:"vortex_x,omitempty"`
+	VortexY     float64 `json:"vortex_y,omitempty"`
+	Duration    int     `json:"duration,omitempty"`
+	PulseNum    int     `json:"pulse_num,omitempty"`
+	PulseKills  int     `json:"pulse_kills,omitempty"`
+	PulseReward int     `json:"pulse_reward,omitempty"`
+	BlastKills  int     `json:"blast_kills,omitempty"`
+	BlastReward int     `json:"blast_reward,omitempty"`
 	TotalKills  int     `json:"total_kills,omitempty"`
 	TotalReward int     `json:"total_reward,omitempty"`
 }

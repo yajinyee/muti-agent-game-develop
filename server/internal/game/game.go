@@ -175,6 +175,7 @@ type Game struct {
 	ThunderboltLobsterV2 *tbLobsterV2Manager       // 雷霆龍蝦免費射擊系統管理器（DAY-199）
 	IcePhoenix         *icePhoenixManager          // 冰鳳凰覺醒 BOSS 系統管理器（DAY-200）
 	SerialBombCrab     *serialBombCrabManager      // 連環炸彈蟹系統管理器（DAY-201）
+	AbyssVortex        *abyssVortexManager         // 深淵漩渦魚系統管理器（DAY-202）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -326,6 +327,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		ThunderboltLobsterV2: newTBLobsterV2Manager(),
 		IcePhoenix:         newIcePhoenixManager(),
 		SerialBombCrab:     newSerialBombCrabManager(),
+		AbyssVortex:        newAbyssVortexManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1628,6 +1630,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 連環炸彈蟹：擊破 T159 時觸發連環爆炸（DAY-201）
 	if isSerialBombCrab(t.DefID) {
 		go g.trySerialBombCrabExplosion(p, t.X, t.Y)
+	}
+	// 深淵漩渦魚：擊破 T160 時觸發深淵漩渦（DAY-202）
+	if isAbyssVortexFish(t.DefID) {
+		go g.tryAbyssVortexPull(p, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

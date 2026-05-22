@@ -203,6 +203,7 @@ signal ghost_fish(data: Dictionary)                    # 幽靈魚分身（DAY-1
 signal thunderbolt_lobster(data: Dictionary)           # 雷霆龍蝦免費射擊（DAY-199）
 signal ice_phoenix(data: Dictionary)                   # 冰鳳凰覺醒 BOSS（DAY-200）
 signal serial_bomb_crab(data: Dictionary)              # 連環炸彈蟹（DAY-201）
+signal abyss_vortex(data: Dictionary)                  # 深淵漩渦魚（DAY-202）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -582,6 +583,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_ice_phoenix(payload)
 		"serial_bomb_crab":
 			_handle_serial_bomb_crab(payload)
+		"abyss_vortex":
+			_handle_abyss_vortex(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2257,6 +2260,19 @@ func _handle_serial_bomb_crab(payload: Dictionary) -> void:
 			var total_kills: int = payload.get("total_kills", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Serial Bomb Crab result: kills=%d reward=%d" % [total_kills, total_reward])
+
+## 處理深淵漩渦魚（DAY-202）
+func _handle_abyss_vortex(payload: Dictionary) -> void:
+	emit_signal("abyss_vortex", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"vortex_start":
+			var killer_name: String = payload.get("killer_name", "")
+			print("[GameManager] Abyss Vortex started by %s" % killer_name)
+		"vortex_result":
+			var total_kills: int = payload.get("total_kills", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Abyss Vortex result: kills=%d reward=%d" % [total_kills, total_reward])
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:

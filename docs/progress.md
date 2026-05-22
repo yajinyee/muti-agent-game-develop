@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-201 連環炸彈蟹系統）
+## 最後更新：2026-05-22（DAY-202 深淵漩渦魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-202 更新（自主觸發）：** 深淵漩渦魚系統（Abyss Vortex Fish）✅
+  - **業界依據：** Ocean King 2「Vortex Fish — sucks all fish of the same species into a whirlpool. Catching a Vortex Fish will suck all fish of the same species in the area into a whirlpool.」+ SteamDB OceanFest 2026「Abyssal Vortex (Depth 3, persistent whirlpool)」
+  - **設計：** 擊破 T160 後在擊破位置生成「深淵漩渦」（持續 5 秒）：每 0.5 秒吸引脈衝（500px 半徑內目標向中心移動 180px）；進入 100px 中心：80% 擊破機率，0.70x 倍率；漩渦結束後深淵爆炸：300px 半徑，60% 擊破機率，0.55x 倍率
+  - **設計差異：** 與漩渦魚（直接擊破所有基礎目標）不同，深淵漩渦是「物理吸引」，讓玩家看到「魚被吸向漩渦中心」的動態視覺過程；與連鎖爆炸魚（靜態爆炸）不同，深淵漩渦是「持續 5 秒的動態場景」，有「吸引→聚集→爆炸」的完整敘事弧；「吸引脈衝」讓玩家感受到「漩渦在把魚吸過來」的物理感；最終爆炸是「聚集後的清場」，讓玩家有「等待→爆發」的高潮感
+  - server/internal/game/abyss_vortex_handler.go：abyssVortexManager；isAbyssVortexFish（T160）；tryAbyssVortexPull（擊破後觸發/全服廣播/全服公告）；runAbyssVortexLoop（goroutine 每 0.5 秒吸引脈衝/移動目標位置/中心擊破/最終爆炸/結算）
+  - server/internal/data/tables.go：新增 T160 深淵漩渦魚（45-70x/HP75/SpawnWeight3/Speed50/Lifetime13）
+  - server/internal/ws/protocol.go：新增 MsgAbyssVortex；AbyssVortexPayload（vortex_start/vortex_pulse/vortex_blast/vortex_result）
+  - server/internal/game/game.go：AbyssVortex *abyssVortexManager；handleKill 加入 isAbyssVortexFish 分支
+  - client/chiikawa-pixel/scripts/ui/AbyssVortexPanel.gd：深淵藍紫主題面板（vortex_start 深藍紫雙閃光+橫幅+漩渦旋轉動畫；vortex_pulse 脈衝閃光+擊破浮動文字+計數器；vortex_blast 全螢幕深藍白強閃光+爆炸圓圈擴散；vortex_result 右側滑入結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：abyss_vortex 訊號 + _handle_abyss_vortex
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 AbyssVortexPanelScript（layer=43）
+  - 漩渦設計：持續 5 秒；每 0.5 秒脈衝；500px 吸引半徑；180px/脈衝移動速度；全服冷卻 40 秒
+  - 中心擊破設計：100px 半徑；80% 擊破機率；0.70x 倍率；讓玩家感受到「魚被吸入漩渦核心」
+  - 深淵爆炸設計：300px 半徑；60% 擊破機率；0.55x 倍率；漩渦結束後 200ms 延遲（讓玩家感受到「漩渦消失→爆炸」）
+  - 視覺設計：深淵藍紫主題（#1A0033 + #6600CC + #00CCFF）；3 個同心圓旋轉（內快外慢）；中心青色脈衝核心；爆炸雙圓圈（紫+青）+ 4方向射線
+  - 全服廣播：漩渦開始/每次脈衝/深淵爆炸/結算全服廣播；≥5 個擊破時全服公告
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-201 更新（自主觸發）：** 連環炸彈蟹系統（Serial Bomb Crab）✅
   - **業界依據：** Royal Fishing JILI「Serial Bomb Crab (70x) — orange crab with panda face and skull bomb designs. Triggers large-scale multiple explosions across screen, capturing fish within each explosion range. Each bomb creates expanding capture zones for massive multi-target eliminations.」
   - **設計：** 擊破 T159 後觸發「連環爆炸」：3-5 顆炸彈依序爆炸（每顆間隔 600ms）；每顆炸彈 250px 半徑，75% 擊破機率，0.65x 倍率；炸彈位置隨機分散在場上（製造「全場覆蓋」感）
