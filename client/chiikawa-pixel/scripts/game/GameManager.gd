@@ -177,6 +177,8 @@ signal lucky_egg_fish(data: Dictionary)                # 幸運彩蛋魚（DAY-1
 signal rainbow_lucky_fish(data: Dictionary)            # 彩虹幸運魚（DAY-173）
 signal sea_anemone(data: Dictionary)                   # 海葵觸手攻擊（DAY-174）
 signal lucky_dice_fish(data: Dictionary)               # 幸運骰子魚（DAY-175）
+signal fire_storm_fish(data: Dictionary)               # 火焰風暴魚（DAY-176）
+signal golden_treasure_fish(data: Dictionary)          # 黃金寶藏魚（DAY-177）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -504,6 +506,10 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_sea_anemone(payload)
 		"lucky_dice_fish":
 			_handle_lucky_dice_fish(payload)
+		"fire_storm_fish":
+			_handle_fire_storm_fish(payload)
+		"golden_treasure_fish":
+			_handle_golden_treasure_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -1403,6 +1409,40 @@ func _handle_lucky_dice_fish(payload: Dictionary) -> void:
 		"dice_jackpot":
 			var reward: int = payload.get("reward", 0)
 			print("[GameManager] Lucky Dice Fish dice_jackpot: reward=%d" % reward)
+
+## 處理火焰風暴魚（DAY-176）
+func _handle_fire_storm_fish(payload: Dictionary) -> void:
+	emit_signal("fire_storm_fish", payload)
+	var phase: String = payload.get("phase", "")
+	match phase:
+		"fire_start":
+			var player_name: String = payload.get("player_name", "")
+			var count: int = payload.get("target_count", 0)
+			print("[GameManager] Fire Storm Fish fire_start: player=%s count=%d" % [player_name, count])
+		"fire_end":
+			var burned: int = payload.get("burned_count", 0)
+			var reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Fire Storm Fish fire_end: burned=%d reward=%d" % [burned, reward])
+
+## 處理黃金寶藏魚（DAY-177）
+func _handle_golden_treasure_fish(payload: Dictionary) -> void:
+	emit_signal("golden_treasure_fish", payload)
+	var phase: String = payload.get("phase", "")
+	match phase:
+		"treasure_start":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Golden Treasure Fish treasure_start: player=%s" % player_name)
+		"treasure_open":
+			var chest_id: int = payload.get("chest_id", 0)
+			var reward_type: String = payload.get("reward_type", "coins")
+			print("[GameManager] Golden Treasure Fish treasure_open: chest=%d type=%s" % [chest_id, reward_type])
+		"treasure_end":
+			print("[GameManager] Golden Treasure Fish treasure_end")
+
+## send_golden_treasure_open — 發送開箱請求（DAY-177）
+func send_golden_treasure_open(chest_id: int) -> void:
+	var msg := {"type": "golden_treasure_open", "payload": {"chest_id": chest_id}}
+	NetworkManager.send_json(msg)
 
 ## 處理黃金海龜時間停止（DAY-159）
 func _handle_golden_turtle_time_stop(payload: Dictionary) -> void:

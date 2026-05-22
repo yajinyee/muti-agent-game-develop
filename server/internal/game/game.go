@@ -151,6 +151,8 @@ type Game struct {
 	RainbowLucky       *rainbowLuckyManager       // 彩虹幸運魚系統管理器（DAY-173）
 	// DAY-174 海葵觸手攻擊系統：無需管理器（stateless，每次擊破獨立觸發）
 	LuckyDice          *luckyDiceManager          // 幸運骰子魚系統管理器（DAY-175）
+	FireStorm          *fireStormManager          // 火焰風暴魚系統管理器（DAY-176）
+	GoldenTreasure     *goldenTreasureManager     // 黃金寶藏魚系統管理器（DAY-177）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -279,6 +281,8 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyEgg:           newLuckyEggManager(),
 		RainbowLucky:       newRainbowLuckyManager(),
 		LuckyDice:          newLuckyDiceManager(),
+		FireStorm:          newFireStormManager(),
+		GoldenTreasure:     newGoldenTreasureManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -789,6 +793,12 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 冰釣幸運輪盤系統（DAY-171）
 	case ws.MsgIceFishingWheelStop:
 		go g.handleIceFishingWheelStop(p)
+	// 黃金寶藏魚系統（DAY-177）
+	case ws.MsgGoldenTreasureOpen:
+		var payload ws.GoldenTreasureOpenPayload
+		if err := remarshal(msg.Payload, &payload); err == nil {
+			go g.handleGoldenTreasureOpen(p, payload.ChestID)
+		}
 	}
 }
 
@@ -1073,6 +1083,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	luckyEggMult := g.getLuckyEggMult(p.ID)
 	if luckyEggMult > 1.0 {
 		finalReward = int(float64(finalReward) * luckyEggMult)
+	}
+	// 套用黃金寶藏魚倍率加成（DAY-177）
+	goldenTreasureMult := g.getGoldenTreasureMult(p.ID)
+	if goldenTreasureMult > 1.0 {
+		finalReward = int(float64(finalReward) * goldenTreasureMult)
 	}
 	// 船長魚競速：記錄擊破（DAY-163）
 	if g.IsCaptainRaceActive() {
@@ -1412,6 +1427,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運骰子魚：擊破 T133 時觸發（DAY-175）
 	if isLuckyDiceFish(t.DefID) {
 		go g.tryLuckyDiceFish(p, t.X, t.Y)
+	}
+	// 火焰風暴魚：擊破 T134 時觸發（DAY-176）
+	if isFireStormFish(t.DefID) {
+		go g.tryFireStormFish(p)
+	}
+	// 黃金寶藏魚：擊破 T135 時觸發（DAY-177）
+	if isGoldenTreasureFish(t.DefID) {
+		go g.tryGoldenTreasureFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

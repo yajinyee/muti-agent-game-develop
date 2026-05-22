@@ -450,6 +450,13 @@ const (
 	// 幸運骰子魚系統（DAY-175）
 	MsgLuckyDiceFish MessageType = "lucky_dice_fish" // 幸運骰子魚廣播（Server→Client）
 
+	// 火焰風暴魚系統（DAY-176）
+	MsgFireStormFish MessageType = "fire_storm_fish" // 火焰風暴魚廣播（Server→Client，全服）
+
+	// 黃金寶藏魚系統（DAY-177）
+	MsgGoldenTreasureFish    MessageType = "golden_treasure_fish"      // 黃金寶藏魚廣播（Server→Client）
+	MsgGoldenTreasureOpen    MessageType = "golden_treasure_open"      // 玩家開箱請求（Client→Server）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3847,4 +3854,50 @@ type LuckyDiceFishPayload struct {
 	RollMs     int     `json:"roll_ms"`     // 骰子滾動時間（ms，dice_start 時）
 	TriggerX   float64 `json:"trigger_x"`   // 觸發位置 X（dice_start 時）
 	TriggerY   float64 `json:"trigger_y"`   // 觸發位置 Y（dice_start 時）
+}
+
+// ---- 火焰風暴魚系統（DAY-176）----
+
+// FireStormFishPayload 火焰風暴魚廣播（Server → Client，DAY-176）
+// Phase: "fire_start"（全服）→ "fire_burn"（全服，每個目標）→ "fire_end"（全服）
+type FireStormFishPayload struct {
+	Phase       string   `json:"phase"`        // 當前階段
+	PlayerID    string   `json:"player_id"`    // 觸發玩家 ID
+	PlayerName  string   `json:"player_name"`  // 觸發玩家名稱
+	TargetCount int      `json:"target_count"` // 標記目標數（fire_start 時）
+	TargetIDs   []string `json:"target_ids"`   // 標記目標 ID 列表（fire_start 時）
+	DurationSec int      `json:"duration_sec"` // 持續時間（fire_start 時）
+	TargetID    string   `json:"target_id"`    // 當前燃燒目標 ID（fire_burn 時）
+	Reward      int      `json:"reward"`       // 燃燒獎勵（fire_burn 時）
+	Skipped     bool     `json:"skipped"`      // 目標已消失（fire_burn 時）
+	BurnedCount int      `json:"burned_count"` // 成功燃燒數（fire_end 時）
+	TotalReward int      `json:"total_reward"` // 總獎勵（fire_end 時）
+}
+
+// ---- 黃金寶藏魚系統（DAY-177）----
+
+// GoldenTreasureFishPayload 黃金寶藏魚廣播（Server → Client，DAY-177）
+// Phase: "treasure_start"（個人）→ "treasure_broadcast"（全服）
+//        → "treasure_open"（個人，玩家開箱）→ "treasure_mult_start"（個人）
+//        → "treasure_mult_end"（個人）→ "treasure_auto_open"（個人，超時自動開）
+//        → "treasure_end"（個人）→ "treasure_weapon_charge"（個人）
+type GoldenTreasureFishPayload struct {
+	Phase           string  `json:"phase"`             // 當前階段
+	PlayerID        string  `json:"player_id"`         // 觸發玩家 ID
+	PlayerName      string  `json:"player_name"`       // 觸發玩家名稱
+	ChestCount      int     `json:"chest_count"`       // 寶藏箱數量（treasure_start 時）
+	TimeoutSec      int     `json:"timeout_sec"`       // 超時時間（treasure_start 時）
+	ChestID         int     `json:"chest_id"`          // 箱子編號（treasure_open 時）
+	RewardType      string  `json:"reward_type"`       // 獎勵類型（coins/mult/weapon）
+	Reward          int     `json:"reward"`            // 金幣獎勵（treasure_open 時）
+	MultActivated   bool    `json:"mult_activated"`    // 倍率是否激活（treasure_open 時）
+	MultBonus       float64 `json:"mult_bonus"`        // 倍率加成值（treasure_mult_start 時）
+	MultDurationSec int     `json:"mult_duration_sec"` // 倍率持續時間（treasure_mult_start 時）
+	WeaponCharge    int     `json:"weapon_charge"`     // 武器充能量（treasure_weapon_charge 時）
+	IsAuto          bool    `json:"is_auto"`           // 是否自動開啟（treasure_auto_open 時）
+}
+
+// GoldenTreasureOpenPayload 玩家開箱請求（Client → Server，DAY-177）
+type GoldenTreasureOpenPayload struct {
+	ChestID int `json:"chest_id"` // 箱子編號（0-2）
 }

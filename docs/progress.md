@@ -1,6 +1,6 @@
-# 開發進度追蹤
+﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-175 幸運骰子魚系統）
+## 最後更新：2026-05-22（DAY-177 黃金寶藏魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-176 更新（自主觸發）：** 火焰風暴魚系統（Fire Storm Fish）✅
+  - **業界依據：** Ocean King 3 Plus「Fire Storm feature」— 擊破 T134 後觸發火焰風暴，場上隨機 4-8 個目標被火焰標記，15 秒內逐一燃燒擊破（每 1.5 秒一個），獎勵 0.6x 倍率
+  - server/internal/game/fire_storm_fish_handler.go：fireStormManager（全服冷卻 30 秒）；tryFireStormFish；announceFireStormFish
+  - server/internal/data/tables.go：新增 T134 火焰風暴魚（65-90x/HP90/SpawnWeight3/fire_storm_fish）
+  - server/internal/ws/protocol.go：新增 MsgFireStormFish；FireStormFishPayload（fire_start/fire_burn/fire_end）
+  - server/internal/game/game.go：FireStorm *fireStormManager；handleKill 加入 isFireStormFish 分支
+  - client/chiikawa-pixel/scripts/ui/FireStormPanel.gd：火焰風暴魚面板（橙紅主題）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：fire_storm_fish 訊號
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 FireStormPanelScript（z_index=68）
+  - build/vet 全部通過（零錯誤零警告）
+- **DAY-177 更新（自主觸發）：** 黃金寶藏魚系統（Golden Treasure Fish）✅
+  - **業界依據：** Ocean King 3 Plus「Golden Treasure feature」+ JILI Giant Anglerfish「shoot electricity to open treasure chests」— 擊破 T135 後觸發黃金寶藏，場上出現 3 個寶藏箱，玩家在 12 秒內點擊開啟（金幣 50%/倍率×3 30%/武器充能 20%）
+  - server/internal/game/golden_treasure_fish_handler.go：goldenTreasureManager（個人冷卻 35 秒/session/倍率）；tryGoldenTreasureFish；handleGoldenTreasureOpen；announceGoldenTreasureMult
+  - server/internal/data/tables.go：新增 T135 黃金寶藏魚（70-100x/HP95/SpawnWeight3/golden_treasure_fish）
+  - server/internal/ws/protocol.go：新增 MsgGoldenTreasureFish/MsgGoldenTreasureOpen；GoldenTreasureFishPayload/GoldenTreasureOpenPayload
+  - server/internal/game/game.go：GoldenTreasure *goldenTreasureManager；handleKill 加入 isGoldenTreasureFish 分支 + getGoldenTreasureMult 倍率套用；HandleMessage 加入 MsgGoldenTreasureOpen
+  - client/chiikawa-pixel/scripts/ui/GoldenTreasurePanel.gd：黃金寶藏魚面板（金色主題；3個寶藏箱互動）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：golden_treasure_fish 訊號 + send_golden_treasure_open
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 GoldenTreasurePanelScript（z_index=67）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-172 更新（自主觸發）：** 幸運彩蛋魚系統（Lucky Egg Fish）✅
   - **業界依據：** JILI Mega Fishing 2026「Giant Prize Fish lets you easily win great prizes, with the chance for 5x multipliers」+ Ocean King 2026「Egg Fish drops golden eggs containing random rewards — coins, multiplier boost, or weapon charge」— 擊破 T130 幸運彩蛋魚後掉落 1-5 個彩蛋（加權隨機），每個彩蛋隨機包含：金幣獎勵（50%）、倍率加成 ×2 持續 5 秒（30%）、特殊武器充能（20%）
   - **設計差異：** 與冰釣輪盤（玩家選擇停止）不同，彩蛋是「自動掉落+隨機開啟」，製造「每個彩蛋都是驚喜」的期待感；與幸運星魚（固定 ×2，10秒）不同，彩蛋的倍率加成是「短暫但可疊加」的（5秒，多個彩蛋可延長），讓玩家有「連續開彩蛋」的爽感
@@ -2171,3 +2191,4 @@
 - 擊破判定：混合制（可視HP + 機率擊破 + 保底）
 - 實際 RTP：95.93%（目標 92-96%）✅
 - 美術：ComfyUI + SD 1.5 + Pixel Art LoRA + 調色板系統化
+

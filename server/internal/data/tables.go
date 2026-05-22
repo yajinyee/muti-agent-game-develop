@@ -235,6 +235,22 @@ var Targets = map[string]*TargetDef{
 	// 設計差異：與輪盤（多格選擇）不同，骰子是「兩顆骰子點數之和」，機率分布符合真實骰子（7最常見）
 	// 設計：中高倍率（60-85x）+ 中等 HP（85）+ 中等生成權重（4）= 常見且有「骰子期待感」的特殊目標
 	"T133": {ID: "T133", Name: "幸運骰子魚", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 85, HP: 85, SpawnWeight: 4, Speed: 50, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_dice_fish"},
+	// T134 火焰風暴魚（DAY-176）— 業界依據：Ocean King 3 Plus「Fire Storm feature — triggers a fire storm
+	// that burns multiple fish simultaneously, creating chain combustion across the screen」
+	// 擊破後觸發「火焰風暴」：場上隨機 4-8 個目標被火焰標記，15 秒內逐一燃燒擊破（每 1.5 秒一個），獎勵 0.6x 倍率
+	// 設計差異：與漩渦魚（吸入基礎目標）不同，火焰風暴是「隨機標記任意目標」（包含特殊目標），
+	// 且有「燃燒蔓延」的視覺過程（每 1.5 秒一個），製造「火焰逐漸蔓延」的戲劇感
+	// 設計：中高倍率（65-90x）+ 中等 HP（90）+ 中等生成權重（3）= 稀有且有「火焰期待感」的特殊目標
+	"T134": {ID: "T134", Name: "火焰風暴魚", Type: TargetTypeSpecial, MultiplierMin: 65, MultiplierMax: 90, HP: 90, SpawnWeight: 3, Speed: 45, Lifetime: 15, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "fire_storm_fish"},
+	// T135 黃金寶藏魚（DAY-177）— 業界依據：Ocean King 3 Plus「Golden Treasure feature — catching triggers
+	// treasure chests to appear, players open them for random rewards」
+	// + JILI Giant Anglerfish「shoot electricity to open treasure chests」
+	// 擊破後觸發「黃金寶藏」：場上出現 3 個寶藏箱，玩家在 12 秒內點擊開啟，每個寶藏箱隨機包含：
+	//   金幣獎勵（50%）、倍率加成 ×3 持續 8 秒（30%）、特殊武器充能（20%）
+	// 設計差異：與幸運彩蛋魚（自動掉落+隨機開啟）不同，黃金寶藏是「玩家主動點擊開啟」，
+	// 製造「我選擇開哪個箱子」的互動感；寶藏箱在場上可見，讓其他玩家也能看到「有人觸發了寶藏」
+	// 設計：高倍率（70-100x）+ 較高 HP（95）+ 低生成權重（3）= 稀有且有「寶藏期待感」的特殊目標
+	"T135": {ID: "T135", Name: "黃金寶藏魚", Type: TargetTypeSpecial, MultiplierMin: 70, MultiplierMax: 100, HP: 95, SpawnWeight: 3, Speed: 40, Lifetime: 15, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "golden_treasure_fish"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

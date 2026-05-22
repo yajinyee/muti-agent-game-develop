@@ -259,6 +259,8 @@ func _ready() -> void:
 	_init_rainbow_lucky_panel()       # 彩虹幸運魚面板（DAY-173）
 	_init_sea_anemone_panel()         # 海葵觸手攻擊面板（DAY-174）
 	_init_lucky_dice_panel()          # 幸運骰子魚面板（DAY-175）
+	_init_fire_storm_panel()          # 火焰風暴魚面板（DAY-176）
+	_init_golden_treasure_panel()     # 黃金寶藏魚面板（DAY-177）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3395,3 +3397,39 @@ func _init_lucky_dice_panel() -> void:
 	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
 	add_child(panel)
 	_lucky_dice_panel = panel
+
+## ---- 火焰風暴魚面板（DAY-176）----
+const FireStormPanelScript = preload("res://scripts/ui/FireStormPanel.gd")
+var _fire_storm_panel: Control = null
+
+func _init_fire_storm_panel() -> void:
+	var panel = FireStormPanelScript.new()
+	panel.name = "FireStormPanel"
+	panel.z_index = 68  # 與 SeaAnemonePanel 同層，但 fire_storm 是全服事件
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_fire_storm_panel = panel
+	# 連接 GameManager 訊號
+	if GameManager.has_signal("fire_storm_fish"):
+		GameManager.fire_storm_fish.connect(func(data):
+			if is_instance_valid(_fire_storm_panel):
+				_fire_storm_panel.handle_fire_storm(data)
+		)
+
+## ---- 黃金寶藏魚面板（DAY-177）----
+const GoldenTreasurePanelScript = preload("res://scripts/ui/GoldenTreasurePanel.gd")
+var _golden_treasure_panel: Control = null
+
+func _init_golden_treasure_panel() -> void:
+	var panel = GoldenTreasurePanelScript.new()
+	panel.name = "GoldenTreasurePanel"
+	panel.z_index = 67  # 在 FireStormPanel(68) 下方
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_golden_treasure_panel = panel
+	# 連接 GameManager 訊號
+	if GameManager.has_signal("golden_treasure_fish"):
+		GameManager.golden_treasure_fish.connect(func(data):
+			if is_instance_valid(_golden_treasure_panel):
+				_golden_treasure_panel.handle_golden_treasure(data)
+		)
