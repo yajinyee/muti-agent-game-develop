@@ -268,6 +268,7 @@ func _ready() -> void:
 	_init_vampire_fish_panel()        # 吸血鬼魚累積倍率面板（DAY-182）
 	_init_lightning_auto_chain_panel() # 閃電魚自動連鎖面板（DAY-183）
 	_init_meteor_fish_panel()          # 隕石魚隕石雨面板（DAY-184）
+	_init_phoenix_fish_panel()         # 鳳凰魚涅槃重生面板（DAY-185）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3559,4 +3560,21 @@ func _init_meteor_fish_panel() -> void:
 		GameManager.meteor_fish.connect(func(data):
 			if is_instance_valid(_meteor_fish_panel):
 				_meteor_fish_panel.handle_meteor_fish(data)
+		)
+
+## ---- 鳳凰魚涅槃重生面板（DAY-185）----
+const PhoenixFishPanelScript = preload("res://scripts/ui/PhoenixFishPanel.gd")
+var _phoenix_fish_panel: Control = null
+
+func _init_phoenix_fish_panel() -> void:
+	var panel = PhoenixFishPanelScript.new()
+	panel.name = "PhoenixFishPanel"
+	panel.z_index = 60
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_phoenix_fish_panel = panel
+	if GameManager.has_signal("phoenix_fish"):
+		GameManager.phoenix_fish.connect(func(data):
+			if is_instance_valid(_phoenix_fish_panel):
+				_phoenix_fish_panel.handle_phoenix_fish(data)
 		)

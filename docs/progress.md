@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-184 隕石魚隕石雨系統）
+## 最後更新：2026-05-22（DAY-185 鳳凰魚涅槃重生系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-185 更新（自主觸發）：** 鳳凰魚涅槃重生系統（Phoenix Fish Rebirth）✅
+  - **業界依據：** Ocean King 3 Plus「Phoenix Fish — when defeated, the Phoenix Fish triggers a rebirth explosion that deals massive damage to all fish on screen, with the Phoenix rising from the ashes to grant a 30-second luck boost」— 擊破 T143 後觸發「涅槃爆炸」：場上所有目標受到爆炸傷害（普通 80%/特殊 50%/BOSS 20%），爆炸後全服 +30% 加成持續 30 秒
+  - **設計差異：** 與隕石魚（隨機選目標/數量驅動）不同，鳳凰魚是「全場同時爆炸」（一次性清場），讓玩家感受到「鳳凰涅槃，全場燃燒」的壯觀感；兩段式設計（爆炸→重生）讓玩家有「先爽一波，再持續爽」的雙重滿足感；重生加成 +30% 是加法疊加（不是乘法），與其他倍率系統共存
+  - server/internal/game/phoenix_fish_handler.go：phoenixFishManager（全服冷卻 45 秒/rebirthEnd 管理）；isPhoenixFish 判斷；activatePhoenix/deactivatePhoenix；getRebirthBoost（供 handleKill 使用）；tryPhoenixFishRebirth（爆炸→400ms 延遲→全場傷害→重生加成→30秒後廣播結束）；announcePhoenixFish（全服公告≥5擊破）
+  - server/internal/data/tables.go：新增 T143 鳳凰魚（75-95x/HP95/SpawnWeight2/phoenix_fish_rebirth）
+  - server/internal/ws/protocol.go：新增 MsgPhoenixFish；PhoenixFishPayload（phoenix_explode/phoenix_rebirth/rebirth_end）
+  - server/internal/game/game.go：PhoenixFish *phoenixFishManager；handleKill 加入 isPhoenixFish 分支 + getPhoenixRebirthBoost 加成套用（+30% 加法）
+  - client/chiikawa-pixel/scripts/ui/PhoenixFishPanel.gd：鳳凰魚面板（火焰橙紅主題；phoenix_explode 四次漸強閃光+8個隨機位置火焰粒子+橫幅；phoenix_rebirth 金色閃光+底部重生加成進度條（金→橙→紅）+結果彈窗；rebirth_end 淡出所有 UI；≥5擊破橙色閃光；≥8擊破金色雙閃光）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：phoenix_fish 訊號 + _handle_phoenix_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 PhoenixFishPanelScript（z_index=60）
+  - 爆炸設計：全場同時爆炸（不是逐一）；普通 80%/特殊 50%/BOSS 20%；0.55x 獎勵倍率；全服冷卻 45 秒
+  - 重生設計：爆炸後立即激活 +30% 加成（加法）；持續 30 秒；底部進度條顯示剩餘時間（金→橙→紅）
+  - 視覺設計：四次漸強閃光（0.4→0.6→0.75→0.5）製造「爆炸衝擊波」感；8個隨機位置火焰粒子；重生時金色閃光
+  - 全服廣播：爆炸開始/重生開始/重生結束全服廣播
+  - 全服公告：≥5 個擊破時全服廣播（優先級 4，持續 6 秒）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-184 更新（自主觸發）：** 隕石魚隕石雨系統（Meteor Fish Meteor Shower）✅
   - **業界依據：** Royal Fishing JILI「Dragon Wrath — unleash a massive meteorite attack across the centre screen, simultaneously targeting multiple fish including Immortal Bosses」— 擊破 T142 後觸發「隕石雨」：5-10 顆隕石從天而降，每顆命中隨機目標，70% 擊破機率，獎勵 0.60x 倍率
   - **設計差異：** 與閃電魚（時間驅動/8秒/16次）不同，隕石魚是「數量驅動」（5-10顆），每顆隕石都是獨立的「天降神兵」，視覺上更有衝擊感；與漩渦魚（吸引同類）不同，隕石魚是「隨機轟炸」（任意目標），讓玩家感受到「天降神兵，無差別攻擊」的爽感；隕石可以命中 BOSS（30% 機率），讓玩家有「隕石打 BOSS」的驚喜感

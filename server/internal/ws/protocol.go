@@ -478,6 +478,9 @@ const (
 	// 隕石魚隕石雨系統（DAY-184）
 	MsgMeteorFish MessageType = "meteor_fish" // 隕石魚隕石雨廣播（Server→Client，全服）
 
+	// 鳳凰魚涅槃重生系統（DAY-185）
+	MsgPhoenixFish MessageType = "phoenix_fish" // 鳳凰魚涅槃重生廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4048,4 +4051,21 @@ type MeteorFishPayload struct {
 	KillerID    string  `json:"killer_id"`    // 觸發玩家 ID
 	KillerName  string  `json:"killer_name"`  // 觸發玩家名稱
 	IsBoss      bool    `json:"is_boss"`      // 是否命中 BOSS（meteor_N 時）
+}
+
+// ---- 鳳凰魚涅槃重生系統（DAY-185）----
+
+// PhoenixFishPayload 鳳凰魚涅槃重生廣播（Server → Client，DAY-185）
+// Phase: "phoenix_explode" → "phoenix_rebirth" → "rebirth_end"
+type PhoenixFishPayload struct {
+	Phase       string  `json:"phase"`        // 當前階段
+	TriggerID   string  `json:"trigger_id"`   // 觸發目標 ID
+	TriggerX    float64 `json:"trigger_x"`    // 觸發位置 X
+	TriggerY    float64 `json:"trigger_y"`    // 觸發位置 Y
+	TotalKills  int     `json:"total_kills"`  // 總擊破數（rebirth 時）
+	TotalReward int     `json:"total_reward"` // 總獎勵（rebirth 時）
+	KillerID    string  `json:"killer_id"`    // 觸發玩家 ID
+	KillerName  string  `json:"killer_name"`  // 觸發玩家名稱
+	BoostPct    int     `json:"boost_pct"`    // 重生加成百分比（rebirth 時，30）
+	BoostSec    int     `json:"boost_sec"`    // 重生加成持續秒數（rebirth 時，30）
 }

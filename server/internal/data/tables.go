@@ -301,6 +301,12 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「隕石雨」：5-10 顆隕石從天而降，每顆命中隨機目標，70% 擊破機率，獎勵 0.60x 倍率
 	// 設計：高倍率（70-90x）+ 中等 HP（90）+ 稀有生成權重（3）= 稀有且有「天降神兵」爽感的特殊目標
 	"T142": {ID: "T142", Name: "隕石魚", Type: TargetTypeSpecial, MultiplierMin: 70, MultiplierMax: 90, HP: 90, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "meteor_fish_shower"},
+	// T143 鳳凰魚（DAY-185）— 業界依據：Ocean King 3 Plus「Phoenix Fish — when defeated, the
+	// Phoenix Fish triggers a rebirth explosion that deals massive damage to all fish on screen,
+	// with the Phoenix rising from the ashes to grant a 30-second luck boost」
+	// 擊破後觸發「涅槃爆炸」：全場同時爆炸（普通 80%/特殊 50%/BOSS 20%），爆炸後全服 +30% 加成 30 秒
+	// 設計：高倍率（75-95x）+ 中等 HP（95）+ 稀有生成權重（2）= 極稀有且有「全場清場+重生加成」雙重爽感
+	"T143": {ID: "T143", Name: "鳳凰魚", Type: TargetTypeSpecial, MultiplierMin: 75, MultiplierMax: 95, HP: 95, SpawnWeight: 2, Speed: 45, Lifetime: 15, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "phoenix_fish_rebirth"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

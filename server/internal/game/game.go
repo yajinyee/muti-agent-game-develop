@@ -160,6 +160,7 @@ type Game struct {
 	VampireFish        *vampireFishManager        // 吸血鬼魚累積倍率系統管理器（DAY-182）
 	LightningAutoChain *lightningAutoChainManager // 閃電魚自動連鎖系統管理器（DAY-183）
 	MeteorFish         *meteorFishManager         // 隕石魚隕石雨系統管理器（DAY-184）
+	PhoenixFish        *phoenixFishManager        // 鳳凰魚涅槃重生系統管理器（DAY-185）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -296,6 +297,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		VampireFish:        newVampireFishManager(),
 		LightningAutoChain: newLightningAutoChainManager(),
 		MeteorFish:         newMeteorFishManager(),
+		PhoenixFish:        newPhoenixFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1112,6 +1114,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if cloverBoost > 0.0 {
 		finalReward = finalReward + int(float64(finalReward)*cloverBoost)
 	}
+	// 套用鳳凰魚重生加成（DAY-185，+30% 加法，全服共享，30 秒）
+	phoenixBoost := g.getPhoenixRebirthBoost()
+	if phoenixBoost > 0.0 {
+		finalReward = finalReward + int(float64(finalReward)*phoenixBoost)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1499,6 +1506,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 隕石魚：擊破 T142 時觸發（DAY-184）
 	if isMeteorFish(t.DefID) {
 		go g.tryMeteorFishShower(p, t.InstanceID, t.X, t.Y)
+	}
+	// 鳳凰魚：擊破 T143 時觸發（DAY-185）
+	if isPhoenixFish(t.DefID) {
+		go g.tryPhoenixFishRebirth(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
