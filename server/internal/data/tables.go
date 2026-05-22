@@ -189,6 +189,12 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「獅子舞爆發」：全場隨機 3-5 個目標被「獅子舞光環」標記，玩家在 15 秒內擊破標記目標獲得 3x-10x 額外倍率加成
 	// 設計：中等倍率（30-50x）+ 中等 HP（60）+ 中等生成權重（5）= 常見且有爆發爽感的特殊目標
 	"T126": {ID: "T126", Name: "獅子舞魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 60, SpawnWeight: 5, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lion_dance_burst"},
+	// T127 漩渦魚（DAY-169）— 業界依據：Ocean King（Google Play 2026）「Vortex Fish — catching a Vortex Fish will
+	// suck all fish of the same species in the area into a whirlpool, capturing them all at once.」
+	// 擊破後觸發「漩渦吸引」：場上所有基礎目標（T001-T006）被吸入漩渦，全部擊破，獲得 0.55x 倍率獎勵
+	// 設計差異：與黑洞（吸引所有目標）不同，漩渦魚是「同類型吸引」，讓玩家有策略性選擇
+	// 設計：中等倍率（35-55x）+ 中等 HP（65）+ 中等生成權重（5）= 常見且有「一網打盡」爽感的特殊目標
+	"T127": {ID: "T127", Name: "漩渦魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 55, HP: 65, SpawnWeight: 5, Speed: 55, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "vortex_fish"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -47,6 +47,7 @@ const (
 	EventVampireKill              EventType = "vampire_kill"               // 吸血鬼血月模式被擊破（DAY-152）
 	EventCrystalDragon            EventType = "crystal_dragon"             // 水晶龍地獄龍大獎觸發（DAY-153）
 	EventLionDance                EventType = "lion_dance"                 // 獅子舞大獎爆發觸發（DAY-168）
+	EventVortexFish               EventType = "vortex_fish"                // 漩渦魚群吸引觸發（DAY-169）
 )
 
 // Priority 公告優先級
@@ -589,6 +590,24 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		}
 		icon = "🦁"
 		color = "#FF6B00"
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventVortexFish:
+		killedStr := "0"
+		rewardStr := "0"
+		if extra != nil {
+			if k, ok := extra["killed"]; ok {
+				killedStr = k
+			}
+			if r, ok := extra["reward"]; ok {
+				rewardStr = r
+			}
+		}
+		title = "🌀 漩渦魚大豐收！"
+		message = fmt.Sprintf("🌀 %s 觸發漩渦魚！一口氣吸入 %s 個目標！獲得 %s 金幣！", playerName, killedStr, rewardStr)
+		icon = "🌀"
+		color = "#00BFFF"
 		priority = PriorityHigh
 		duration = 5000
 

@@ -252,6 +252,7 @@ func _ready() -> void:
 	_init_black_hole_panel()          # 黑洞漩渦武器視覺效果面板（DAY-166）
 	_init_roulette_crab_panel()       # 黃金輪盤螃蟹面板（DAY-167）
 	_init_lion_dance_panel()          # 獅子舞大獎爆發面板（DAY-168）
+	_init_vortex_fish_panel()         # 漩渦魚群吸引面板（DAY-169）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3304,3 +3305,15 @@ func _init_lion_dance_panel() -> void:
 	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
 	add_child(panel)
 	_lion_dance_panel = panel
+
+## ---- 漩渦魚群吸引面板（DAY-169）----
+const VortexFishPanelScript = preload("res://scripts/ui/VortexFishPanel.gd")
+var _vortex_fish_panel: Control = null
+
+func _init_vortex_fish_panel() -> void:
+	var panel = VortexFishPanelScript.new()
+	panel.name = "VortexFishPanel"
+	panel.z_index = 73  # 在 LionDancePanel(74) 下方
+	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
+	add_child(panel)
+	_vortex_fish_panel = panel

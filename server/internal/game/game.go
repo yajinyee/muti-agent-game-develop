@@ -144,6 +144,7 @@ type Game struct {
 	RouletteCrab       *roulettecrab.Manager      // 黃金輪盤螃蟹系統管理器（DAY-167）
 	CrystalDragon      *crystaldragon.Manager     // 水晶龍收集大獎系統管理器（DAY-153）
 	LionDance          *lionDanceManager          // 獅子舞大獎爆發系統管理器（DAY-168）
+	VortexFish         *vortexFishManager         // 漩渦魚群吸引系統管理器（DAY-169）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -266,6 +267,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		RouletteCrab:       roulettecrab.New(),
 		CrystalDragon:      crystaldragon.New(),
 		LionDance:          newLionDanceManager(),
+		VortexFish:         newVortexFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1356,6 +1358,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 獅子舞大獎爆發：擊破 T126 時觸發（DAY-168）
 	if isLionDance(t.DefID) {
 		go g.tryLionDanceBurst(p, t.InstanceID, t.X, t.Y)
+	}
+	// 漩渦魚群吸引：擊破 T127 時觸發（DAY-169）
+	if isVortexFish(t.DefID) {
+		go g.tryVortexFishSuck(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

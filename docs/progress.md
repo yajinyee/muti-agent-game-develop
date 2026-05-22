@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-168 獅子舞大獎爆發系統）
+## 最後更新：2026-05-22（DAY-169 漩渦魚群吸引系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-169 更新（自主觸發）：** 漩渦魚群吸引系統（Vortex School Fish）✅
+  - **業界依據：** Ocean King（Google Play 2026）「Vortex Fish — catching a Vortex Fish will suck all fish of the same species in the area into a whirlpool, capturing them all at once.」— 擊破 T127 漩渦魚後，場上所有基礎目標（T001-T006）被吸入漩渦，全部擊破，獲得 0.55x 倍率獎勵
+  - **設計差異：** 與黑洞（吸引所有目標）不同，漩渦魚是**同類型吸引**（基礎目標群），讓玩家有「選擇打哪種魚」的策略性；與炸彈（即時爆炸）不同，漩渦魚有「逐步吸入」的視覺過程（每 150ms 一個），製造「漩渦吸入」的戲劇感
+  - `server/internal/game/vortex_fish_handler.go`：vortexFishManager（全服冷卻 20 秒）；isVortexFish 判斷；getVortexTargetGroup（基礎目標群篩選）；tryVortexFishSuck（擊破後觸發/逐步吸入/全服廣播/全服公告≥5個）；announceVortexFish（全服公告）
+  - `server/internal/data/tables.go`：新增 T127 漩渦魚（35-55x/HP65/SpawnWeight5/vortex_fish 行為）
+  - `server/internal/ws/protocol.go`：新增 MsgVortexFish；VortexKillEntry/VortexFishPayload（三階段：vortex_start/vortex_suck/vortex_end）
+  - `server/internal/game/announce/announce.go`：新增 EventVortexFish；buildContent 加入漩渦魚公告（深藍色，5秒，高優先）
+  - `server/internal/game/game.go`：Game struct 加入 VortexFish *vortexFishManager；NewGameWithStore 初始化；handleKill 加入 isVortexFish 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/VortexFishPanel.gd`：漩渦魚群面板（深藍主題；vortex_start 全螢幕深藍閃光+頂部橫幅滑入+漩渦旋轉動畫+吸入計數器；自己觸發時中央大 🌀 標誌彈跳+「漩渦吸引中！」提示；vortex_suck 目標飛向漩渦中心動畫+計數器更新+小閃光；vortex_end 爆炸閃光+右側滑入結果彈窗；≥5個雙閃光；≥8個彩虹三閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：vortex_fish 訊號 + _handle_vortex_fish
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 VortexFishPanelScript（z_index=73）
+  - 吸引設計：全服冷卻 20 秒（防止頻繁觸發）；每 150ms 吸入一個目標（逐步視覺效果）；只吸引基礎目標（T001-T006）
+  - 獎勵設計：每個被吸入目標獎勵 = 目標倍率中間值 × betLevel × 0.55（比直接擊破低，平衡 RTP）
+  - 全服廣播：漩渦開始/每個目標吸入/結束全服廣播，讓所有玩家看到「有人觸發了漩渦魚」
+  - 全服公告：≥5 個目標被吸入時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-168 更新（自主觸發）：** 獅子舞大獎爆發系統（Lion Dance Jackpot Burst）✅
   - **業界依據：** Fortune King Jackpot（TaDa Gaming 2026）「Lion Dance bonus — triggered by special fish, delivers burst multiplier payouts with festive visual effects」— 擊破 T126 後觸發「獅子舞爆發」：全場隨機 3-5 個目標被「獅子舞光環」標記，玩家在 15 秒內擊破標記目標獲得 3x-10x 額外倍率加成
   - **設計差異：** 與幸運星魚（個人 ×2，10秒）不同，獅子舞爆發是**標記特定目標**（3-5個），玩家需要主動找到並擊破標記目標，製造「搶時間」的緊張感；與黃金鯊魚（全場 ×1.5）不同，獅子舞是**高倍率但限定目標**（3x-10x），更有策略性

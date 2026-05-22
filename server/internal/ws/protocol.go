@@ -427,6 +427,9 @@ const (
 	// 獅子舞大獎爆發系統（DAY-168）
 	MsgLionDanceBurst MessageType = "lion_dance_burst" // 獅子舞爆發廣播（Server→Client，全服）
 
+	// 漩渦魚群吸引系統（DAY-169）
+	MsgVortexFish MessageType = "vortex_fish" // 漩渦魚群廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3647,4 +3650,33 @@ type LionDanceBurstPayload struct {
 	MarkedTargets    []LionDanceMarkedTarget `json:"marked_targets"`    // 標記目標列表（burst_start 時）
 	DurationSec      int                     `json:"duration_sec"`      // 持續時間（秒）
 	RemainingTargets int                     `json:"remaining_targets"` // 剩餘未擊破的標記目標數（burst_end 時）
+}
+
+// ---- 漩渦魚群吸引系統（DAY-169）----
+
+// VortexKillEntry 漩渦吸入的目標記錄
+type VortexKillEntry struct {
+	InstanceID string  `json:"instance_id"` // 被吸入的目標 InstanceID
+	DefID      string  `json:"def_id"`      // 目標定義 ID
+	Multiplier float64 `json:"multiplier"`  // 目標倍率
+	Reward     int     `json:"reward"`      // 獲得獎勵
+	X          float64 `json:"x"`           // 目標位置 X
+	Y          float64 `json:"y"`           // 目標位置 Y
+}
+
+// VortexFishPayload 漩渦魚群廣播（Server → Client，DAY-169）
+// Phase: "vortex_start" → "vortex_suck"（多次）→ "vortex_end"
+type VortexFishPayload struct {
+	Phase        string           `json:"phase"`         // 當前階段
+	TriggerID    string           `json:"trigger_id"`    // 觸發玩家 ID
+	TriggerName  string           `json:"trigger_name"`  // 觸發玩家名稱
+	VortexX      float64          `json:"vortex_x"`      // 漩渦中心 X（漩渦魚位置）
+	VortexY      float64          `json:"vortex_y"`      // 漩渦中心 Y
+	GroupName    string           `json:"group_name"`    // 目標群組名稱（例如「基礎目標群」）
+	TargetCount  int              `json:"target_count"`  // 預計吸入目標數
+	SuckIndex    int              `json:"suck_index"`    // 當前吸入的目標索引（vortex_suck 時）
+	SuckEntry    *VortexKillEntry `json:"suck_entry"`    // 當前被吸入的目標（vortex_suck 時）
+	KilledCount  int              `json:"killed_count"`  // 實際擊破數（vortex_end 時）
+	TotalReward  int              `json:"total_reward"`  // 總獎勵（vortex_end 時）
+	KilledEntries []VortexKillEntry `json:"killed_entries"` // 所有被擊破的目標（vortex_end 時）
 }
