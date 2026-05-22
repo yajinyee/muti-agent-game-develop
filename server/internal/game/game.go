@@ -193,6 +193,7 @@ type Game struct {
 	LuckyAuctionFish   *luckyAuctionFishManager    // 幸運拍賣魚系統管理器（DAY-217）
 	LuckyEvolutionFish *luckyEvolutionFishManager  // 幸運進化魚系統管理器（DAY-218）
 	LuckyInfectionFish *luckyInfectionFishManager  // 幸運連鎖感染魚系統管理器（DAY-219）
+	LuckyRicochetFish  *luckyRicochetFishManager   // 幸運反彈魚系統管理器（DAY-220）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -362,6 +363,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyAuctionFish:   newLuckyAuctionFishManager(),
 		LuckyEvolutionFish: newLuckyEvolutionFishManager(),
 		LuckyInfectionFish: newLuckyInfectionFishManager(),
+		LuckyRicochetFish:  newLuckyRicochetFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1042,6 +1044,11 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	// 幸運進化魚：命中進化魚時累積命中次數（DAY-218）
 	if result.IsHit && t != nil && !result.IsKill && isLuckyEvolutionFish(t.DefID) {
 		go g.notifyLuckyEvolutionFishHit(t.InstanceID, p)
+	}
+
+	// 幸運反彈魚：命中目標後觸發反彈（DAY-220）
+	if result.IsHit && t != nil && g.isRicochetActive(p.ID) {
+		go g.doRicochetBounce(p, t.X, t.Y, t.InstanceID, 0)
 	}
 
 	// 龍龜不死 Boss：命中時直接給獎勵（DAY-186）
@@ -1827,6 +1834,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運連鎖感染魚：擊破感染目標時移除感染標記（DAY-219）
 	if g.isInfectedTarget(t.InstanceID) {
 		go g.notifyLuckyInfectionFishKill(t.InstanceID)
+	}
+	// 幸運反彈魚：擊破 T178 本身時觸發反彈模式（DAY-220）
+	if isLuckyRicochetFish(t.DefID) {
+		go g.tryLuckyRicochetFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

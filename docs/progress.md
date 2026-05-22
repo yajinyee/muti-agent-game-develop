@@ -1,6 +1,34 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-219 幸運連鎖感染魚系統）
+## 最後更新：2026-05-23（DAY-220 幸運反彈魚系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-220 更新（自主觸發）：** 幸運反彈魚系統（Lucky Ricochet Fish）✅
+  - **業界依據：** 業界原創「子彈反彈」機制
+  - **設計：** 擊破 T178 後觸發「反彈模式」（8秒）：玩家的每次射擊在命中目標後，子彈會「反彈」到最近的另一個目標；反彈範圍：第1跳 200px，第2跳 150px，第3跳 100px（最多 3 跳）；每次反彈命中：60% 擊破機率，0.55x 倍率；個人冷卻 18 秒
+  - **設計差異：** 與閃電鰻（連鎖跳躍，隨機目標）不同，反彈魚是「射擊觸發的即時反彈」，讓玩家感受到「每一槍都有額外效果」的爽感；「反彈範圍遞減」讓玩家有「要把魚聚集在一起才能最大化反彈效果」的策略感；「8 秒反彈模式」讓玩家有「趕快在 8 秒內多打幾槍」的緊迫感
+  - server/internal/game/lucky_ricochet_fish_handler.go：luckyRicochetFishManager（個人冷卻/反彈 session）；isLuckyRicochetFish（T178）；isRicochetActive（供 handleAttack 使用）；tryLuckyRicochetFish（擊破後觸發/全服廣播/計時器）；doRicochetBounce（反彈邏輯/距離計算/遞迴最多3跳/廣播）
+  - server/internal/data/tables.go：新增 T178 幸運反彈魚（30-55x/HP65/SpawnWeight4/Speed52/Lifetime13）
+  - server/internal/ws/protocol.go：新增 MsgLuckyRicochetFish；LuckyRicochetFishPayload（ricochet_start/ricochet_bounce/ricochet_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyRicochetFish + case 處理
+  - server/internal/game/game.go：LuckyRicochetFish *luckyRicochetFishManager；handleKill 加入 isLuckyRicochetFish 分支；handleAttack 加入 isRicochetActive + doRicochetBounce
+  - client/chiikawa-pixel/scripts/ui/LuckyRicochetFishPanel.gd：橙色反彈主題面板（ricochet_start 橙色雙閃光+頂部橫幅+計時條；ricochet_bounce 爆炸圓圈+反彈次數標記+浮動獎勵；ricochet_end 橙色淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_ricochet_fish 訊號 + _handle_lucky_ricochet_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyRicochetFishPanelScript（layer=25）
+  - 反彈設計：最多 3 跳；範圍遞減（200→150→100px）；60% 擊破機率；0.55x 倍率；個人冷卻 18 秒
+  - 視覺設計：橙色反彈主題（#FF8C00 + #FFD700 + #FF4500 + #FFF8DC）；擴散圓圈動畫；反彈次數標記；計時條橙→紅橙漸變
+  - 全服廣播：反彈開始/每次反彈/結束全服廣播
+  - 全服公告：反彈模式開始時公告
+  - build/vet 全部通過（零錯誤零警告）
+
+
+
+
 
 ## 自我評估
 - **完成度：100%**

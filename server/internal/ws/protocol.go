@@ -559,6 +559,7 @@ const (
 	MsgLuckyAuctionBid   MessageType = "lucky_auction_bid"   // 玩家出價（Client→Server，DAY-217）
 	MsgLuckyEvolutionFish  MessageType = "lucky_evolution_fish"  // 幸運進化魚廣播（Server→Client，DAY-218）
 	MsgLuckyInfectionFish  MessageType = "lucky_infection_fish"  // 幸運連鎖感染魚廣播（Server→Client，DAY-219）
+	MsgLuckyRicochetFish   MessageType = "lucky_ricochet_fish"   // 幸運反彈魚廣播（Server→Client，DAY-220）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4886,7 +4887,25 @@ type LuckyEvolutionFishPayload struct {
 	AffectedCount int     `json:"affected_count,omitempty"`
 }
 
-// InfectionTargetInfo 感染目標資訊（DAY-219）
+// LuckyRicochetFishPayload 幸運反彈魚廣播（Server → Client，DAY-220）
+//
+// Events:
+//
+//	"ricochet_start"  — 反彈模式開始（全服廣播）
+//	"ricochet_bounce" — 子彈反彈命中（全服廣播）
+//	"ricochet_end"    — 反彈模式結束（全服廣播）
+type LuckyRicochetFishPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	DurationSec int     `json:"duration_sec,omitempty"`
+	BounceNum   int     `json:"bounce_num,omitempty"`
+	TargetID    string  `json:"target_id,omitempty"`
+	Killed      bool    `json:"killed,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
+	X           float64 `json:"x,omitempty"`
+	Y           float64 `json:"y,omitempty"`
+}
 type InfectionTargetInfo struct {
 	InstanceID string  `json:"instance_id"`
 	Layer      int     `json:"layer"`

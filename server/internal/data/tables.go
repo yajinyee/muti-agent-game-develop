@@ -537,6 +537,13 @@ var Targets = map[string]*TargetDef{
 	//   - 12 秒後所有感染目標同時「感染爆發」（75% 擊破機率，0.65x 倍率，全服共享）
 	//   - 個人冷卻 22 秒；全服廣播感染建立/蔓延/爆發
 	"T177": {ID: "T177", Name: "幸運連鎖感染魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_infection"},
+	// T178 幸運反彈魚（DAY-220）— 業界原創「子彈反彈」機制
+	// 設計：擊破 T178 後觸發「反彈模式」（8秒）：
+	//   - 玩家的每次射擊在命中目標後，子彈會「反彈」到最近的另一個目標
+	//   - 反彈範圍：第1跳 200px，第2跳 150px，第3跳 100px（最多 3 跳）
+	//   - 每次反彈命中：60% 擊破機率，0.55x 倍率
+	//   - 個人冷卻 18 秒；全服廣播反彈開始/每次反彈/結束
+	"T178": {ID: "T178", Name: "幸運反彈魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 52, Lifetime: 13, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_ricochet"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

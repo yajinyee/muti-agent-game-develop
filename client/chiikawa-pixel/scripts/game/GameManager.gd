@@ -221,6 +221,7 @@ signal cursed_poison_fish(data: Dictionary)         # 詛咒毒魚系統（DAY-2
 signal lucky_auction_fish(data: Dictionary)         # 幸運拍賣魚系統（DAY-217）
 signal lucky_evolution_fish(data: Dictionary)       # 幸運進化魚系統（DAY-218）
 signal lucky_infection_fish(data: Dictionary)       # 幸運連鎖感染魚系統（DAY-219）
+signal lucky_ricochet_fish(data: Dictionary)        # 幸運反彈魚系統（DAY-220）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -636,6 +637,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_evolution_fish(payload)
 		"lucky_infection_fish":
 			_handle_lucky_infection_fish(payload)
+		"lucky_ricochet_fish":
+			_handle_lucky_ricochet_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2672,3 +2675,19 @@ func _handle_lucky_infection_fish(payload: Dictionary) -> void:
 			var killed: int = payload.get("total_killed", 0)
 			var reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Infection blast: killed=%d reward=%d" % [killed, reward])
+
+## 處理幸運反彈魚系統（DAY-220）
+func _handle_lucky_ricochet_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_ricochet_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"ricochet_start":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Ricochet mode started by %s" % player_name)
+		"ricochet_bounce":
+			var bounce_num: int = payload.get("bounce_num", 1)
+			var killed: bool = payload.get("killed", false)
+			print("[GameManager] Ricochet bounce #%d: killed=%s" % [bounce_num, killed])
+		"ricochet_end":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Ricochet mode ended for %s" % player_name)
