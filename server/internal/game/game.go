@@ -150,6 +150,7 @@ type Game struct {
 	LuckyEgg           *luckyEggManager           // 幸運彩蛋魚系統管理器（DAY-172）
 	RainbowLucky       *rainbowLuckyManager       // 彩虹幸運魚系統管理器（DAY-173）
 	// DAY-174 海葵觸手攻擊系統：無需管理器（stateless，每次擊破獨立觸發）
+	LuckyDice          *luckyDiceManager          // 幸運骰子魚系統管理器（DAY-175）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -277,6 +278,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		IceFishing:         newIceFishingManager(),
 		LuckyEgg:           newLuckyEggManager(),
 		RainbowLucky:       newRainbowLuckyManager(),
+		LuckyDice:          newLuckyDiceManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1406,6 +1408,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 海葵觸手攻擊：擊破 T132 時觸發（DAY-174）
 	if isSeaAnemone(t.DefID) {
 		go g.trySeaAnemone(p, t.InstanceID, t.X, t.Y)
+	}
+	// 幸運骰子魚：擊破 T133 時觸發（DAY-175）
+	if isLuckyDiceFish(t.DefID) {
+		go g.tryLuckyDiceFish(p, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

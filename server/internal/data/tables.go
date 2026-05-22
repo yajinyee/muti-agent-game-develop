@@ -228,6 +228,13 @@ var Targets = map[string]*TargetDef{
 	// 設計差異：與閃電鰻（連鎖跳躍，隨機目標）不同，海葵是「方向性觸手」（8方向固定延伸），更有視覺衝擊感
 	// 設計：中高倍率（55-80x）+ 中等 HP（90）+ 稀有生成權重（3）= 稀有且有「觸手蔓延」視覺爽感的特殊目標
 	"T132": {ID: "T132", Name: "海葵", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 80, HP: 90, SpawnWeight: 3, Speed: 40, Lifetime: 15, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "sea_anemone"},
+	// T133 幸運骰子魚（DAY-175）— 業界依據：Ocean King 3 Plus「Fast Bomb — randomly triggered bonus」
+	// + 捕魚機業界「Dice Roll bonus — roll dice to determine reward multiplier」
+	// + Fishing Carnival 2026「Dice Fish — catching triggers a dice roll, sum determines payout」
+	// 擊破後觸發「幸運骰子」：擲 2 顆骰子（1-6），點數之和決定獎勵（2=20x/7=7x/12=50x/其他=點數x）
+	// 設計差異：與輪盤（多格選擇）不同，骰子是「兩顆骰子點數之和」，機率分布符合真實骰子（7最常見）
+	// 設計：中高倍率（60-85x）+ 中等 HP（85）+ 中等生成權重（4）= 常見且有「骰子期待感」的特殊目標
+	"T133": {ID: "T133", Name: "幸運骰子魚", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 85, HP: 85, SpawnWeight: 4, Speed: 50, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_dice_fish"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

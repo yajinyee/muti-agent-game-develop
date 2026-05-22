@@ -258,6 +258,7 @@ func _ready() -> void:
 	_init_lucky_egg_panel()           # 幸運彩蛋魚面板（DAY-172）
 	_init_rainbow_lucky_panel()       # 彩虹幸運魚面板（DAY-173）
 	_init_sea_anemone_panel()         # 海葵觸手攻擊面板（DAY-174）
+	_init_lucky_dice_panel()          # 幸運骰子魚面板（DAY-175）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3382,3 +3383,15 @@ func _init_sea_anemone_panel() -> void:
 	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
 	add_child(panel)
 	_sea_anemone_panel = panel
+
+## ---- 幸運骰子魚面板（DAY-175）----
+const LuckyDicePanelScript = preload("res://scripts/ui/LuckyDicePanel.gd")
+var _lucky_dice_panel: Control = null
+
+func _init_lucky_dice_panel() -> void:
+	var panel = LuckyDicePanelScript.new()
+	panel.name = "LuckyDicePanel"
+	panel.z_index = 67  # 在 SeaAnemonePanel(68) 下方
+	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
+	add_child(panel)
+	_lucky_dice_panel = panel

@@ -447,6 +447,9 @@ const (
 	// 海葵觸手攻擊系統（DAY-174）
 	MsgSeaAnemone MessageType = "sea_anemone" // 海葵觸手攻擊廣播（Server→Client，全服）
 
+	// 幸運骰子魚系統（DAY-175）
+	MsgLuckyDiceFish MessageType = "lucky_dice_fish" // 幸運骰子魚廣播（Server→Client）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3824,4 +3827,24 @@ type SeaAnemonePayload struct {
 	HitEntries  []SeaAnemoneHitEntry `json:"hit_entries"`  // 所有命中記錄（tentacle_result 時）
 	KillCount   int                  `json:"kill_count"`   // 擊破數（tentacle_result 時）
 	TotalReward int                  `json:"total_reward"` // 總獎勵（tentacle_result 時）
+}
+
+// ---- 幸運骰子魚系統（DAY-175）----
+
+// LuckyDiceFishPayload 幸運骰子魚廣播（Server → Client，DAY-175）
+// Phase: "dice_start"（個人）→ "dice_broadcast"（全服）→ "dice_result"（個人）
+//        → "dice_jackpot"（全服，點數12時）
+type LuckyDiceFishPayload struct {
+	Phase      string  `json:"phase"`       // 當前階段
+	PlayerID   string  `json:"player_id"`   // 觸發玩家 ID
+	PlayerName string  `json:"player_name"` // 觸發玩家名稱
+	Die1       int     `json:"die1"`        // 骰子1點數（1-6，dice_result 時）
+	Die2       int     `json:"die2"`        // 骰子2點數（1-6，dice_result 時）
+	Sum        int     `json:"sum"`         // 點數之和（2-12，dice_result 時）
+	Reward     int     `json:"reward"`      // 獎勵金幣（dice_result 時）
+	Label      string  `json:"label"`       // 結果標籤（dice_result 時）
+	NewBalance int     `json:"new_balance"` // 新餘額（dice_result 時）
+	RollMs     int     `json:"roll_ms"`     // 骰子滾動時間（ms，dice_start 時）
+	TriggerX   float64 `json:"trigger_x"`   // 觸發位置 X（dice_start 時）
+	TriggerY   float64 `json:"trigger_y"`   // 觸發位置 Y（dice_start 時）
 }

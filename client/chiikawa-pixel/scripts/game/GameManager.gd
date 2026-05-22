@@ -176,6 +176,7 @@ signal ice_fishing_wheel(data: Dictionary)             # 冰釣幸運輪盤（DA
 signal lucky_egg_fish(data: Dictionary)                # 幸運彩蛋魚（DAY-172）
 signal rainbow_lucky_fish(data: Dictionary)            # 彩虹幸運魚（DAY-173）
 signal sea_anemone(data: Dictionary)                   # 海葵觸手攻擊（DAY-174）
+signal lucky_dice_fish(data: Dictionary)               # 幸運骰子魚（DAY-175）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -501,6 +502,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_rainbow_lucky_fish(payload)
 		"sea_anemone":
 			_handle_sea_anemone(payload)
+		"lucky_dice_fish":
+			_handle_lucky_dice_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -1382,6 +1385,24 @@ func _handle_sea_anemone(payload: Dictionary) -> void:
 			var kill_count: int = payload.get("kill_count", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Sea Anemone tentacle_result: kills=%d reward=%d" % [kill_count, total_reward])
+
+## 處理幸運骰子魚（DAY-175）
+func _handle_lucky_dice_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_dice_fish", payload)
+	var phase: String = payload.get("phase", "")
+	var player_name: String = payload.get("player_name", "")
+	match phase:
+		"dice_start":
+			print("[GameManager] Lucky Dice Fish dice_start: player=%s" % player_name)
+		"dice_result":
+			var die1: int = payload.get("die1", 1)
+			var die2: int = payload.get("die2", 1)
+			var sum: int = payload.get("sum", 2)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Lucky Dice Fish dice_result: %d+%d=%d reward=%d" % [die1, die2, sum, reward])
+		"dice_jackpot":
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Lucky Dice Fish dice_jackpot: reward=%d" % reward)
 
 ## 處理黃金海龜時間停止（DAY-159）
 func _handle_golden_turtle_time_stop(payload: Dictionary) -> void:
