@@ -497,6 +497,9 @@ const (
 	// 魚群驚嚇連帶系統（DAY-191）
 	MsgSchoolPanic MessageType = "school_panic" // 魚群驚嚇廣播（Server→Client，全服）
 
+	// 搖滾骷髏演唱會系統（DAY-192）
+	MsgRockSkeletonConcert MessageType = "rock_skeleton_concert" // 搖滾骷髏演唱會廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4192,4 +4195,30 @@ type SchoolPanicPayload struct {
 	TargetCount  int      `json:"target_count,omitempty"`    // 受驚嚇目標數量
 	Duration     float64  `json:"duration,omitempty"`        // 驚嚇持續秒數
 	Message      string   `json:"message,omitempty"`         // 廣播訊息
+}
+
+// RockSkeletonConcertPayload 搖滾骷髏演唱會廣播（Server → Client，DAY-192）
+// Phase: "concert_start" → "note_N" → "beat_result" → "awakening" → "encore_start"/"concert_end" → "encore_end"
+type RockSkeletonConcertPayload struct {
+	Phase           string    `json:"phase"`                        // 當前階段
+	TriggerID       string    `json:"trigger_id,omitempty"`         // 觸發的搖滾骷髏魚 InstanceID
+	TriggerX        float64   `json:"trigger_x,omitempty"`          // 觸發位置 X
+	TriggerY        float64   `json:"trigger_y,omitempty"`          // 觸發位置 Y
+	KillerID        string    `json:"killer_id,omitempty"`          // 觸發玩家 ID
+	KillerName      string    `json:"killer_name,omitempty"`        // 觸發玩家名稱
+	DurationSec     int       `json:"duration_sec,omitempty"`       // 演唱會持續秒數
+	Beat            int       `json:"beat,omitempty"`               // 當前拍數（1-15）
+	NoteTargetIDs   []string  `json:"note_target_ids,omitempty"`    // 音符炸彈目標 InstanceID 列表
+	NoteTargetXs    []float64 `json:"note_target_xs,omitempty"`     // 音符炸彈目標 X 座標列表
+	NoteTargetYs    []float64 `json:"note_target_ys,omitempty"`     // 音符炸彈目標 Y 座標列表
+	BeatKills       int       `json:"beat_kills,omitempty"`         // 本拍擊破數
+	BeatReward      int       `json:"beat_reward,omitempty"`        // 本拍獎勵
+	TotalKills      int       `json:"total_kills,omitempty"`        // 累計擊破數
+	TotalReward     int       `json:"total_reward,omitempty"`       // 累計獎勵
+	IsAwakening     bool      `json:"is_awakening,omitempty"`       // 是否在超級覺醒狀態
+	AwakenedTargets []string  `json:"awakened_targets,omitempty"`   // 超級覺醒影響的目標 InstanceID 列表
+	AwakenedCount   int       `json:"awakened_count,omitempty"`     // 超級覺醒影響目標數量
+	EncoreDuration  int       `json:"encore_duration,omitempty"`    // 安可加成持續秒數
+	EncoreBonus     float64   `json:"encore_bonus,omitempty"`       // 安可加成比例（0.30 = +30%）
+	Message         string    `json:"message,omitempty"`            // 廣播訊息
 }

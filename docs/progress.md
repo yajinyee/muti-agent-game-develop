@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-191 魚群驚嚇連帶系統）
+## 最後更新：2026-05-22（DAY-192 搖滾骷髏演唱會系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-192 更新（自主觸發）：** 搖滾骷髏演唱會系統（Rock Skeleton Concert）✅
+  - **業界依據：** JILI 2026「Rock Skeleton Concert — Rock Skeleton and Super Awakening Performance, you can get a large bonus of up to 3,000 times」
+  - **設計：** 擊破 T150 後觸發「演唱會模式」（15 秒）：每 1 秒「音符炸彈」隨機命中 2-4 個目標（70% 擊破機率，0.60x 倍率）；第 10 秒觸發「超級覺醒高潮」：全場所有目標 HP 降低 70%，持續 5 秒；演唱會結束後：≥10 個擊破 → 全服 +30% 加成 10 秒（安可獎勵）
+  - **設計差異：** 與閃電魚（每 0.5 秒單目標，8 秒）不同，搖滾骷髏是「每 1 秒多目標（2-4 個）」，節奏更有音樂感，且有「高潮覺醒」雙段式設計；與鳳凰魚（一次性全場爆炸）不同，搖滾骷髏是「持續 15 秒的演唱會」，有節奏感和高潮設計，讓玩家感受到「演唱會從開場到高潮到安可」的完整體驗；「超級覺醒高潮」讓第 10-15 秒的音符炸彈效率大幅提升（HP 降低 70%），製造「演唱會越到後面越爽」的正向反饋
+  - server/internal/game/rock_skeleton_handler.go：rockSkeletonManager（全服共享 isActive/encoreEnd/冷卻管理）；isRockSkeleton 判斷；getRockSkeletonEncoreBoost（供 handleKill 使用，安可期間 +30%）；tryRockSkeletonConcert（演唱會主流程/每 1 秒音符炸彈/第 10 秒覺醒/安可獎勵/全服廣播）；triggerRockSkeletonAwakening（全場 HP 降低 70%/全服廣播/全服公告≥3個）；announceRockSkeletonConcert（全服公告≥8擊破）
+  - server/internal/data/tables.go：新增 T150 搖滾骷髏魚（35-60x/HP70/SpawnWeight3/Speed50/Lifetime13/rock_skeleton_concert 行為）
+  - server/internal/ws/protocol.go：新增 MsgRockSkeletonConcert；RockSkeletonConcertPayload（concert_start/note_N/beat_result/awakening/encore_start/concert_end/encore_end）
+  - server/internal/game/game.go：RockSkeleton *rockSkeletonManager；handleKill 加入 isRockSkeleton 分支（goroutine）+ getRockSkeletonEncoreBoost 加成套用（+30% 加法）
+  - client/chiikawa-pixel/scripts/ui/RockSkeletonConcertPanel.gd：搖滾骷髏演唱會面板（洋紅色主題；concert_start 三次洋紅閃光+頂部橫幅+擊破計數器；note_N 音符符號（♪/♫）飄動+爆炸圓圈；awakening 金色三次強閃光+中央大字提示+橫幅更新；encore_start 青綠色閃光+安可橫幅+結算彈窗+底部進度條；concert_end 結算彈窗；encore_end 淡出所有 UI）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：rock_skeleton_concert 訊號 + _handle_rock_skeleton_concert
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 RockSkeletonConcertPanelScript（z_index=53）
+  - 演唱會設計：15 秒持續；每 1 秒音符炸彈（2-4 個目標）；70% 擊破機率；0.60x 獎勵倍率；全服冷卻 45 秒
+  - 覺醒設計：第 10 秒觸發；全場所有目標 HP 降低 70%（最少 1）；讓後半段音符炸彈效率大幅提升
+  - 安可設計：≥10 個擊破觸發；全服 +30% 加成（加法）；持續 10 秒；底部進度條顯示剩餘時間
+  - 視覺設計：洋紅色（搖滾感）→ 金色（覺醒）→ 青綠色（安可）三段式顏色變化；音符符號（♪/♫）交替出現；爆炸圓圈擴散
+  - 全服廣播：演唱會開始/每拍結果/覺醒/安可/結束全服廣播
+  - 全服公告：覺醒時≥3個目標（洋紅色，4秒，優先級4）；演唱會結束≥8擊破（橙色/洋紅色，5秒，優先級3）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-191 更新（自主觸發）：** 魚群驚嚇連帶系統（School of Fish Panic）✅
   - **業界靈感：** Ocean King 3 Plus「School of Fish — when one fish in a school is caught, the others scatter in panic, but a lucky shot can trigger a chain reaction that catches the entire school」
   - **設計：** 擊破 T149 魚群領袖後觸發「魚群驚嚇」：場上所有基礎目標（T001-T006）HP 降低 50%，持續 8 秒，讓玩家在「魚群驚嚇」中快速收割

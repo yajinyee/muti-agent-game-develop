@@ -166,6 +166,7 @@ type Game struct {
 	TimeBomb           *timeBombManager           // 時間炸彈魚系統管理器（DAY-189）
 	TripleLucky        *tripleLuckyFishManager    // 三重幸運魚系統管理器（DAY-190）
 	SchoolPanic        *schoolPanicManager        // 魚群驚嚇連帶系統管理器（DAY-191）
+	RockSkeleton       *rockSkeletonManager       // 搖滾骷髏演唱會系統管理器（DAY-192）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -308,6 +309,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		TimeBomb:           newTimeBombManager(),
 		TripleLucky:        newTripleLuckyFishManager(),
 		SchoolPanic:        newSchoolPanicManager(),
+		RockSkeleton:       newRockSkeletonManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1144,6 +1146,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if tripleLuckyBonus > 0.0 {
 		finalReward = finalReward + int(float64(finalReward)*tripleLuckyBonus)
 	}
+	// 套用搖滾骷髏演唱會安可加成（DAY-192，+30% 加法，全服共享，10 秒）
+	rockSkeletonEncoreBoost := g.getRockSkeletonEncoreBoost()
+	if rockSkeletonEncoreBoost > 0.0 {
+		finalReward = finalReward + int(float64(finalReward)*rockSkeletonEncoreBoost)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1555,6 +1562,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 魚群領袖：擊破 T149 時觸發魚群驚嚇（DAY-191）
 	if isSchoolLeader(t.DefID) {
 		go g.trySchoolPanic(p, t.InstanceID)
+	}
+	// 搖滾骷髏魚：擊破 T150 時觸發演唱會（DAY-192）
+	if isRockSkeleton(t.DefID) {
+		go g.tryRockSkeletonConcert(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

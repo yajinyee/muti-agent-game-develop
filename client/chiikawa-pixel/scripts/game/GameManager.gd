@@ -193,6 +193,7 @@ signal crocodile_hunter(data: Dictionary)              # 巨型鱷魚獵食（DA
 signal time_bomb_fish(data: Dictionary)                # 時間炸彈魚（DAY-189）
 signal triple_lucky_fish(data: Dictionary)             # 三重幸運魚（DAY-190）
 signal school_panic(data: Dictionary)                  # 魚群驚嚇連帶（DAY-191）
+signal rock_skeleton_concert(data: Dictionary)         # 搖滾骷髏演唱會（DAY-192）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -552,6 +553,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_triple_lucky_fish(payload)
 		"school_panic":
 			_handle_school_panic(payload)
+		"rock_skeleton_concert":
+			_handle_rock_skeleton_concert(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2090,3 +2093,21 @@ func _handle_school_panic(payload: Dictionary) -> void:
 		print("[GameManager] School Panic triggered by %s: %d targets HP halved" % [killer_name, target_count])
 	elif phase == "panic_end":
 		print("[GameManager] School Panic ended")
+
+## 處理搖滾骷髏演唱會（DAY-192）
+func _handle_rock_skeleton_concert(payload: Dictionary) -> void:
+	emit_signal("rock_skeleton_concert", payload)
+	var phase: String = payload.get("phase", "")
+	match phase:
+		"concert_start":
+			var killer_name: String = payload.get("killer_name", "")
+			print("[GameManager] Rock Skeleton Concert started by %s" % killer_name)
+		"awakening":
+			var awakened_count: int = payload.get("awakened_count", 0)
+			print("[GameManager] Rock Skeleton Awakening! %d targets HP reduced 70%%" % awakened_count)
+		"encore_start":
+			var total_kills: int = payload.get("total_kills", 0)
+			print("[GameManager] Rock Skeleton Encore! kills=%d +30%% bonus activated" % total_kills)
+		"concert_end":
+			var total_kills: int = payload.get("total_kills", 0)
+			print("[GameManager] Rock Skeleton Concert ended. kills=%d" % total_kills)

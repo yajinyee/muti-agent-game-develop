@@ -275,6 +275,7 @@ func _ready() -> void:
 	_init_time_bomb_fish_panel()       # 時間炸彈魚面板（DAY-189）
 	_init_triple_lucky_fish_panel()    # 三重幸運魚面板（DAY-190）
 	_init_school_panic_panel()         # 魚群驚嚇連帶面板（DAY-191）
+	_init_rock_skeleton_concert_panel() # 搖滾骷髏演唱會面板（DAY-192）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3676,3 +3677,15 @@ func _init_school_panic_panel() -> void:
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(panel)
 	_school_panic_panel = panel
+
+## ---- 搖滾骷髏演唱會面板（DAY-192）----
+const RockSkeletonConcertPanelScript = preload("res://scripts/ui/RockSkeletonConcertPanel.gd")
+var _rock_skeleton_concert_panel: Control = null
+
+func _init_rock_skeleton_concert_panel() -> void:
+	var panel = RockSkeletonConcertPanelScript.new()
+	panel.name = "RockSkeletonConcertPanel"
+	panel.z_index = 53  # 在 SchoolPanicPanel(54) 之下
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(panel)
+	_rock_skeleton_concert_panel = panel

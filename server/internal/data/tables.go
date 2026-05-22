@@ -351,7 +351,13 @@ var Targets = map[string]*TargetDef{
 	// T149 魚群領袖（DAY-191）— 業界靈感：Ocean King 3 Plus「School of Fish — when one fish is caught, others scatter in panic」
 	// 擊破後觸發「魚群驚嚇」：場上所有基礎目標（T001-T006）HP 降低 50%，持續 8 秒
 	// 讓玩家在「魚群驚嚇」中快速收割，製造「緊張但有利」的感覺
-	"T149": {ID: "T149", Name: "魚群領袖", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 65, SpawnWeight: 4, Speed: 55, Lifetime: 12, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "school_panic"},	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
+	"T149": {ID: "T149", Name: "魚群領袖", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 65, SpawnWeight: 4, Speed: 55, Lifetime: 12, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "school_panic"},
+	// T150 搖滾骷髏魚（DAY-192）— 業界依據：JILI 2026「Rock Skeleton Concert — Rock Skeleton and Super Awakening Performance, up to 3,000x」
+	// 擊破後觸發「演唱會模式」（15 秒）：每 1 秒音符炸彈命中 2-4 個目標（70% 擊破機率，0.60x 倍率）
+	// 第 10 秒觸發「超級覺醒高潮」：全場所有目標 HP 降低 70%，持續 5 秒
+	// 演唱會結束後：≥10 個擊破 → 全服 +30% 加成 10 秒（安可獎勵）
+	"T150": {ID: "T150", Name: "搖滾骷髏魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 13, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "rock_skeleton_concert"},
+	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
 // MeteorMultiplierWeights 流星倍率權重（規格書 26.3）
