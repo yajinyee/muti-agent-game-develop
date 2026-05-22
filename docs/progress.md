@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-198 幽靈魚分身系統）
+## 最後更新：2026-05-22（DAY-199 雷霆龍蝦免費射擊系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-199 更新（自主觸發）：** 雷霆龍蝦免費射擊系統（Thunderbolt Lobster Free Play）✅
+  - **業界依據：** Royal Fishing JILI「Thunderbolt Lobster feature — provides 15 seconds of free play followed by automatic shooting from the Thunderbolt Turret. Players can earn extra seconds during this period to extend gameplay and increase reward potential.」
+  - **設計：** 擊破 T157 後觸發「雷霆砲台模式」（15秒，全服共享）：系統自動每 0.5 秒選最高價值目標射擊（85% 擊破機率，0.75x 倍率）；每擊破一個目標 +0.5 秒（最多延長到 30 秒）；全服廣播「雷霆砲台啟動」
+  - **設計差異：** 與 DAY-150 T114（個人觸發，per-player session）不同，T157 是「全服共享砲台」，觸發後全服所有玩家都看到砲台在自動射擊；「延長時間」機制讓玩家感受到「打得越準，免費射擊越久」的技巧感；全服廣播讓觸發者有「我在幫全服打魚」的英雄感
+  - server/internal/game/thunderbolt_lobster_v2_handler.go：tbLobsterV2Manager；isThunderboltLobsterV2（T157）；tryThunderboltLobsterFreePlay（擊破後觸發/全服廣播/全服公告）；runTBLobsterV2Turret（goroutine 每 0.5 秒自動射擊/超時結算）；doTBLobsterV2Shot（選最高價值目標/85%擊破/延長時間/廣播結果）
+  - server/internal/data/tables.go：新增 T157 雷霆龍蝦（50-80x/HP85/SpawnWeight3/Speed40/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgThunderboltLobster；ThunderboltLobsterPayload（turret_start/turret_shot/turret_end）
+  - server/internal/game/game.go：ThunderboltLobsterV2 *tbLobsterV2Manager；handleKill 加入 isThunderboltLobsterV2 分支
+  - client/chiikawa-pixel/scripts/ui/ThunderboltLobsterPanel.gd：電黃橙主題面板（turret_start 全螢幕黃色強閃光+頂部橫幅+底部時間進度條；turret_shot 小閃光+浮動獎勵文字+計數器更新；turret_end 結算彈窗+4秒後淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：thunderbolt_lobster 訊號 + _handle_thunderbolt_lobster
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 ThunderboltLobsterPanelScript（layer=46）
+  - 砲台設計：每 0.5 秒自動射擊；85% 擊破機率；0.75x 獎勵倍率；全服冷卻 45 秒；最高價值目標優先
+  - 延長設計：每次擊破 +0.5 秒；最多延長到 30 秒；讓玩家感受到「打得越準越久」
+  - 視覺設計：底部進度條顏色漸變（黃→橙→紅橙）；每 5 次擊破額外閃光；結算彈窗顯示延長秒數
+  - 全服廣播：啟動/每次射擊/結束全服廣播；每 10 次擊破全服公告；≥5 擊破結束時全服公告
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-198 更新（自主觸發）：** 幽靈魚分身系統（Ghost Fish Phantom Clone）✅
   - **業界靈感：** Fisch Phantom Mutation（4x 倍率）+ 業界「分身」概念原創設計
   - **設計：** T156 幽靈魚出現時，同時在場上生成 2-3 個「幻影分身」（T156C，HP=1）；擊破幻影分身給 1x betLevel 安慰獎；擊破真身觸發「幽靈爆發」：所有幻影分身同時爆炸（50% 擊破機率，0.50x 倍率）；全服廣播幽靈魚出現（不告訴玩家哪個是真身）

@@ -282,6 +282,7 @@ func _ready() -> void:
 	_init_anglerfish_electric_panel()   # 巨型鮟鱇魚電擊寶箱面板（DAY-196）
 	_init_mystic_dragon_panel()         # 神秘龍魚八波攻擊面板（DAY-197）
 	_init_ghost_fish_panel()            # 幽靈魚分身面板（DAY-198）
+	_init_thunderbolt_lobster_panel()   # 雷霆龍蝦免費射擊面板（DAY-199）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3799,3 +3800,20 @@ func _init_ghost_fish_panel() -> void:
 func _on_ghost_fish(data: Dictionary) -> void:
 	if is_instance_valid(_ghost_fish_panel):
 		_ghost_fish_panel.handle_ghost_fish(data)
+
+## ---- 雷霆龍蝦免費射擊面板（DAY-199）----
+const ThunderboltLobsterPanelScript = preload("res://scripts/ui/ThunderboltLobsterPanel.gd")
+var _thunderbolt_lobster_panel = null
+
+func _init_thunderbolt_lobster_panel() -> void:
+	var panel = ThunderboltLobsterPanelScript.new()
+	panel.name = "ThunderboltLobsterPanel"
+	panel.layer = 46
+	add_child(panel)
+	_thunderbolt_lobster_panel = panel
+	if GameManager.has_signal("thunderbolt_lobster"):
+		GameManager.thunderbolt_lobster.connect(_on_thunderbolt_lobster)
+
+func _on_thunderbolt_lobster(data: Dictionary) -> void:
+	if is_instance_valid(_thunderbolt_lobster_panel):
+		_thunderbolt_lobster_panel.handle_thunderbolt_lobster(data)

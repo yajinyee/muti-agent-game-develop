@@ -519,6 +519,9 @@ const (
 	// 幽靈魚分身系統（DAY-198）
 	MsgGhostFish MessageType = "ghost_fish" // 幽靈魚分身廣播（Server→Client，全服）
 
+	// 雷霆龍蝦免費射擊系統（DAY-199）
+	MsgThunderboltLobster MessageType = "thunderbolt_lobster" // 雷霆龍蝦免費射擊廣播（Server→Client，全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4390,4 +4393,20 @@ type GhostFishPayload struct {
 	Reward        int      `json:"reward,omitempty"`         // 安慰獎（phantom_vanish 時）
 	ExplodeKills  int      `json:"explode_kills,omitempty"`  // 幻影爆炸擊破數（ghost_explode 時）
 	ExplodeReward int      `json:"explode_reward,omitempty"` // 幻影爆炸獎勵（ghost_explode 時）
+}
+
+// ThunderboltLobsterPayload 雷霆龍蝦免費射擊廣播（Server → Client，DAY-199）
+// Event: "turret_start" → "turret_shot"（每次自動射擊）→ "turret_end"
+type ThunderboltLobsterPayload struct {
+	Event       string  `json:"event"`                  // 事件類型
+	KillerName  string  `json:"killer_name,omitempty"`  // 觸發者名稱（turret_start 時）
+	Duration    float64 `json:"duration,omitempty"`     // 基礎持續時間（turret_start 時）
+	MaxDuration float64 `json:"max_duration,omitempty"` // 最大持續時間（turret_start 時）
+	TargetID    string  `json:"target_id,omitempty"`    // 射擊目標 ID（turret_shot 時）
+	Killed      bool    `json:"killed,omitempty"`       // 是否擊破（turret_shot 時）
+	Reward      int64   `json:"reward,omitempty"`       // 本次獎勵（turret_shot 時）
+	KillCount   int     `json:"kill_count,omitempty"`   // 累計擊破數
+	TotalReward int64   `json:"total_reward,omitempty"` // 累計總獎勵
+	Remaining   float64 `json:"remaining,omitempty"`    // 剩餘時間（秒）
+	ExtendSec   float64 `json:"extend_sec,omitempty"`   // 已延長秒數（turret_end 時）
 }

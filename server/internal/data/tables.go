@@ -391,6 +391,12 @@ var Targets = map[string]*TargetDef{
 	// T156C 幽靈魚幻影分身（DAY-198）— 由 T156 生成時自動創建，HP=1，外觀與 T156 相同
 	// 擊破給 1x betLevel 安慰獎；真身被擊破時同時爆炸
 	"T156C": {ID: "T156C", Name: "幽靈魚（幻影）", Type: TargetTypeSpecial, MultiplierMin: 1, MultiplierMax: 1, HP: 1, SpawnWeight: 0, Speed: 45, Lifetime: 18, LaborGain: 0, DifficultyFactor: 16.0, SpecialBehavior: "ghost_fish_clone"},
+	// T157 雷霆龍蝦（DAY-199）— 業界依據：Royal Fishing JILI「Thunderbolt Lobster feature —
+	// provides 15 seconds of free play followed by automatic shooting from the Thunderbolt Turret.
+	// Players can earn extra seconds during this period to extend gameplay and increase reward potential.」
+	// 擊破後觸發「雷霆砲台模式」（15秒）：系統自動每 0.5 秒選最高價值目標射擊（85% 擊破機率，0.75x 倍率）
+	// 每擊破一個目標 +0.5 秒（最多延長到 30 秒）；全服廣播「雷霆砲台啟動」
+	"T157": {ID: "T157", Name: "雷霆龍蝦", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 80, HP: 85, SpawnWeight: 3, Speed: 40, Lifetime: 16, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "thunderbolt_lobster_free_play"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

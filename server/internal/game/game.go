@@ -172,6 +172,7 @@ type Game struct {
 	AnglerfishElectric *anglerfishManager         // 巨型鮟鱇魚電擊寶箱系統管理器（DAY-196）
 	MysticDragon       *mysticDragonManager       // 神秘龍魚八波攻擊系統管理器（DAY-197）
 	GhostFish          *ghostFishManager          // 幽靈魚分身系統管理器（DAY-198）
+	ThunderboltLobsterV2 *tbLobsterV2Manager       // 雷霆龍蝦免費射擊系統管理器（DAY-199）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -320,6 +321,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		AnglerfishElectric: newAnglerfishManager(),
 		MysticDragon:       newMysticDragonManager(),
 		GhostFish:          newGhostFishManager(),
+		ThunderboltLobsterV2: newTBLobsterV2Manager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1610,6 +1612,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幽靈魚幻影分身：擊破 T156C 時給安慰獎（DAY-198）
 	if isGhostFishClone(t.DefID) {
 		go g.notifyGhostFishCloneKill(p, t.InstanceID)
+	}
+	// 雷霆龍蝦：擊破 T157 時觸發免費射擊模式（DAY-199）
+	if isThunderboltLobsterV2(t.DefID) {
+		go g.tryThunderboltLobsterFreePlay(p, t.Multiplier)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
