@@ -266,6 +266,7 @@ func _ready() -> void:
 	_init_rainbow_shark_panel()       # 彩虹鯊魚爆發面板（DAY-180）
 	_init_thunder_shark_panel()       # 雷霆鯊魚連鎖閃電面板（DAY-181）
 	_init_vampire_fish_panel()        # 吸血鬼魚累積倍率面板（DAY-182）
+	_init_lightning_auto_chain_panel() # 閃電魚自動連鎖面板（DAY-183）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3523,4 +3524,21 @@ func _init_vampire_fish_panel() -> void:
 			if is_instance_valid(_vampire_fish_panel):
 				var my_id: String = GameManager.get("_player_id") if GameManager.get("_player_id") != null else ""
 				_vampire_fish_panel.handle_vampire_fish(data, my_id)
+		)
+
+## ---- 閃電魚自動連鎖面板（DAY-183）----
+const LightningAutoChainPanelScript = preload("res://scripts/ui/LightningAutoChainPanel.gd")
+var _lightning_auto_chain_panel: Control = null
+
+func _init_lightning_auto_chain_panel() -> void:
+	var panel = LightningAutoChainPanelScript.new()
+	panel.name = "LightningAutoChainPanel"
+	panel.z_index = 62
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_lightning_auto_chain_panel = panel
+	if GameManager.has_signal("lightning_auto_chain"):
+		GameManager.lightning_auto_chain.connect(func(data):
+			if is_instance_valid(_lightning_auto_chain_panel):
+				_lightning_auto_chain_panel.handle_lightning_auto_chain(data)
 		)

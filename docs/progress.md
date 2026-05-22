@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-182 吸血鬼魚累積倍率系統）
+## 最後更新：2026-05-22（DAY-183 閃電魚自動連鎖系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-183 更新（自主觸發）：** 閃電魚自動連鎖系統（Lightning Fish Auto Chain）✅
+  - **業界依據：** Ocean King 3 Monster Awaken「Lightning Fish — Catching a Lightning Fish will trigger a Lightning Chain. Lightning Chain will continue to catch fish automatically until time runs out.」— 擊破 T141 後觸發「閃電自動連鎖」：系統自動每 0.5 秒選一個隨機目標發射閃電，持續 8 秒（最多 16 次），每次 65% 擊破機率
+  - **設計差異：** 與 T103 閃電鰻（手動觸發，5跳）和 T139 雷霆鯊魚（手動跳躍，20跳）不同，閃電魚是「全自動時間驅動連鎖」，玩家不需要操作，純粹享受「自動收割」的爽感；底部進度條顯示剩餘時間，讓玩家感受到「閃電在持續不斷地攻擊」
+  - server/internal/game/lightning_auto_chain_handler.go：lightningAutoChainManager（全服冷卻 30 秒/isActive 防重複）；isLightningAutoFish 判斷；tryLightningAutoChain（擊破後觸發/每 0.5 秒自動攻擊/全服廣播/結果廣播）；announceLightningAutoChain（全服公告≥6擊破）
+  - server/internal/data/tables.go：新增 T141 閃電魚（65-85x/HP85/SpawnWeight3/lightning_auto_chain）
+  - server/internal/ws/protocol.go：新增 MsgLightningAutoChain；LightningAutoChainPayload（chain_start/auto_N/result）
+  - server/internal/game/game.go：LightningAutoChain *lightningAutoChainManager；handleKill 加入 isLightningAutoFish 分支
+  - client/chiikawa-pixel/scripts/ui/LightningAutoChainPanel.gd：閃電魚面板（電黃主題；chain_start 全螢幕黃色閃光+頂部橫幅+攻擊計數器+底部時間進度條；auto_N 小閃光+目標位置⚡符號+計數器更新；進度條顏色從黃→橙→紅；result 右側滑入結果彈窗（攻擊次數/擊破數/獎勵）；≥6擊破橙色閃光；≥10擊破金色強閃光）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lightning_auto_chain 訊號 + _handle_lightning_auto_chain
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LightningAutoChainPanelScript（z_index=62）
+  - 連鎖設計：每 0.5 秒自動攻擊（時間驅動）；持續 8 秒（最多 16 次）；65% 擊破機率；全服冷卻 30 秒
+  - 視覺設計：底部進度條顯示剩餘時間（黃→橙→紅），讓玩家感受到「時間在流逝」；每次攻擊在目標位置顯示⚡符號
+  - 全服廣播：每次自動攻擊全服廣播，讓所有玩家看到「閃電在自動收割」
+  - 全服公告：≥6 個擊破時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-182 更新（自主觸發）：** 吸血鬼魚累積倍率系統（Vampire Fish Escalating Multiplier）✅
   - **業界依據：** JILI 2026「The explicit multiplier of vampires increases the more you fight, and there is a chance that you can enter the multiplier mode, up to X5」— 擊破 T140 後觸發「吸血鬼模式」：玩家每擊破一個目標，倍率累積 +0.1x（從 1.0x 開始），最高 5.0x，持續 15 秒
   - **設計差異：** 與幸運星魚（固定 ×2，10秒）不同，吸血鬼魚是「累積型倍率」（越打越高），製造「越打越爽」的正向反饋；玩家需要在 15 秒內盡量多打目標，每次擊破都讓倍率更高

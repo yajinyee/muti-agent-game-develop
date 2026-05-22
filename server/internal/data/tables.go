@@ -288,6 +288,14 @@ var Targets = map[string]*TargetDef{
 	// 製造「越打越爽」的正向反饋；玩家需要在 15 秒內盡量多打目標
 	// 設計：高倍率（65-85x）+ 中等 HP（90）+ 稀有生成權重（3）= 稀有且有「累積爽感」的特殊目標
 	"T140": {ID: "T140", Name: "吸血鬼魚", Type: TargetTypeSpecial, MultiplierMin: 65, MultiplierMax: 85, HP: 90, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "vampire_fish_escalating"},
+	// T141 閃電魚（DAY-183）— 業界依據：Ocean King 3 Monster Awaken「Lightning Fish — Catching a
+	// Lightning Fish will trigger a Lightning Chain. Lightning Chain will continue to catch fish
+	// automatically until time runs out.」
+	// 擊破後觸發「閃電自動連鎖」：系統自動每 0.5 秒選一個隨機目標發射閃電，持續 8 秒（最多 16 次）
+	// 設計差異：與 T103 閃電鰻（手動觸發，5跳）和 T139 雷霆鯊魚（手動跳躍，20跳）不同，
+	// 閃電魚是「全自動時間驅動連鎖」，玩家不需要操作，純粹享受「自動收割」的爽感
+	// 設計：高倍率（65-85x）+ 中等 HP（85）+ 稀有生成權重（3）= 稀有且有「自動收割」爽感的特殊目標
+	"T141": {ID: "T141", Name: "閃電魚", Type: TargetTypeSpecial, MultiplierMin: 65, MultiplierMax: 85, HP: 85, SpawnWeight: 3, Speed: 60, Lifetime: 14, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "lightning_auto_chain"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

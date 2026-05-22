@@ -472,6 +472,9 @@ const (
 	// 吸血鬼魚累積倍率系統（DAY-182）
 	MsgVampireFish MessageType = "vampire_fish" // 吸血鬼魚倍率廣播（Server→Client）
 
+	// 閃電魚自動連鎖系統（DAY-183）
+	MsgLightningAutoChain MessageType = "lightning_auto_chain" // 閃電魚自動連鎖廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4000,4 +4003,25 @@ type VampireFishPayload struct {
 	MaxMult     float64 `json:"max_mult"`     // 最高倍率（vampire_start 時）
 	DurationSec int     `json:"duration_sec"` // 持續時間（vampire_start 時）
 	KillCount   int     `json:"kill_count"`   // 擊破數（vampire_end 時）
+}
+
+// ---- 閃電魚自動連鎖系統（DAY-183）----
+
+// LightningAutoChainPayload 閃電魚自動連鎖廣播（Server → Client，DAY-183）
+// Phase: "chain_start" → "auto_N"（每次自動攻擊）→ "result"
+type LightningAutoChainPayload struct {
+	Phase        string  `json:"phase"`         // 當前階段
+	TriggerID    string  `json:"trigger_id"`    // 觸發目標 ID
+	TriggerX     float64 `json:"trigger_x"`     // 觸發位置 X
+	TriggerY     float64 `json:"trigger_y"`     // 觸發位置 Y
+	TargetID     string  `json:"target_id"`     // 攻擊目標 ID（auto_N 時）
+	TargetX      float64 `json:"target_x"`      // 攻擊目標位置 X
+	TargetY      float64 `json:"target_y"`      // 攻擊目標位置 Y
+	AttackNum    int     `json:"attack_num"`    // 當前攻擊次數（auto_N 時）
+	TotalAttacks int     `json:"total_attacks"` // 總攻擊次數（result 時）
+	TotalKills   int     `json:"total_kills"`   // 總擊破數（result 時）
+	TotalReward  int     `json:"total_reward"`  // 總獎勵（result 時）
+	KillerID     string  `json:"killer_id"`     // 觸發玩家 ID
+	KillerName   string  `json:"killer_name"`   // 觸發玩家名稱
+	DurationSec  int     `json:"duration_sec"`  // 持續時間（chain_start 時）
 }
