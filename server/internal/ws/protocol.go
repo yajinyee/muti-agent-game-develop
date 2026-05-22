@@ -487,6 +487,8 @@ const (
 	// 連鎖爆炸魚系統（DAY-187）
 	MsgChainBomb MessageType = "chain_bomb" // 連鎖爆炸魚廣播（Server→Client，全服）
 
+	MsgCrocodileHunter MessageType = "crocodile_hunter" // 巨型鱷魚獵食廣播（Server→Client，全服，DAY-188）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4109,4 +4111,29 @@ type ChainBombPayload struct {
 	Reward      int     `json:"reward,omitempty"`       // 本層獎勵（chain_explode）
 	TotalKills  int     `json:"total_kills,omitempty"`  // 總擊破數（chain_result）
 	TotalReward int     `json:"total_reward,omitempty"` // 總獎勵（chain_result）
+}
+
+// ---- 巨型鱷魚獵食系統（DAY-188）----
+
+// CrocodileHunterPayload 巨型鱷魚獵食廣播（Server → Client，DAY-188）
+// Phase: "croc_appear" → "croc_hunt"(×N) / "croc_miss" → "croc_killed" / "croc_leave"
+type CrocodileHunterPayload struct {
+	Phase       string  `json:"phase"`                  // 當前階段
+	InstanceID  string  `json:"instance_id,omitempty"`  // 鱷魚 InstanceID
+	KillerID    string  `json:"killer_id,omitempty"`    // 擊破玩家 ID（croc_killed）
+	KillerName  string  `json:"killer_name,omitempty"`  // 擊破玩家名稱（croc_killed）
+	HuntIndex   int     `json:"hunt_index,omitempty"`   // 第幾次獵食（croc_hunt）
+	HuntCount   int     `json:"hunt_count,omitempty"`   // 總獵食次數（croc_killed/croc_leave）
+	MaxHunts    int     `json:"max_hunts,omitempty"`    // 最大獵食次數（croc_appear）
+	TargetName  string  `json:"target_name,omitempty"`  // 被獵食目標名稱（croc_hunt/croc_miss）
+	TargetMult  float64 `json:"target_mult,omitempty"`  // 被獵食目標倍率（croc_hunt）
+	TargetX     float64 `json:"target_x,omitempty"`     // 被獵食目標位置 X（croc_hunt/croc_miss）
+	TargetY     float64 `json:"target_y,omitempty"`     // 被獵食目標位置 Y（croc_hunt/croc_miss）
+	HuntReward  int     `json:"hunt_reward,omitempty"`  // 本次獵食獎勵（croc_hunt）
+	TotalPool   int     `json:"total_pool,omitempty"`   // 累積獎池（croc_hunt/croc_killed/croc_leave）
+	PoolBonus   int     `json:"pool_bonus,omitempty"`   // 獎池加成（croc_killed）
+	BaseReward  int     `json:"base_reward,omitempty"`  // 基礎獎勵（croc_killed）
+	TotalReward int     `json:"total_reward,omitempty"` // 總獎勵（croc_killed）
+	NewBalance  int     `json:"new_balance,omitempty"`  // 玩家新餘額（croc_killed）
+	Message     string  `json:"message,omitempty"`      // 廣播訊息
 }

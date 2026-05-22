@@ -328,6 +328,14 @@ var Targets = map[string]*TargetDef{
 	// 最多 5 層連鎖，讓玩家有「一顆引爆全場」的爽感，但不會無限連鎖（平衡 RTP）
 	// 設計：中等倍率（25-45x）+ 中等 HP（60）+ 常見生成權重（4）= 常見且有「連鎖爆炸」爽感
 	"T145": {ID: "T145", Name: "連鎖爆炸魚", Type: TargetTypeSpecial, MultiplierMin: 25, MultiplierMax: 45, HP: 60, SpawnWeight: 4, Speed: 55, Lifetime: 12, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "chain_bomb"},
+	// T146 巨型鱷魚（DAY-188）— 業界依據：JILI Mega Fishing「giant crocodiles awaken to hunt fish
+	// on the fish farm to accumulate big prizes」
+	// 出現後每 2 秒主動「獵食」場上一個目標（優先高倍率普通目標），
+	// 獵食成功給全服玩家共享獎勵（0.4x 倍率），玩家擊破鱷魚本身獲得鱷魚倍率 + 累積獎池 50%
+	// 設計差異：與不死 BOSS（玩家打它）不同，鱷魚是「它主動打其他魚」，
+	// 製造「看著鱷魚在場上橫行霸道」的緊張感，玩家需要決策：讓它繼續獵食累積獎池，還是立刻擊破？
+	// 設計：高倍率（40-80x）+ 高 HP（120）+ 稀有生成（2）= 稀有且有「獵食決策」策略感
+	"T146": {ID: "T146", Name: "巨型鱷魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 80, HP: 120, SpawnWeight: 2, Speed: 30, Lifetime: 25, LaborGain: 18, DifficultyFactor: 16.0, SpecialBehavior: "crocodile_hunter"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

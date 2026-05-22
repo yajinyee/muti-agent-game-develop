@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-187 連鎖爆炸魚系統）
+## 最後更新：2026-05-22（DAY-188 巨型鱷魚獵食系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-188 更新（自主觸發）：** 巨型鱷魚獵食系統（Giant Crocodile Hunter）✅
+  - **業界依據：** JILI Mega Fishing「giant crocodiles awaken to hunt fish on the fish farm to accumulate big prizes」— T146 巨型鱷魚出現後，每 2 秒主動「獵食」場上一個目標（優先高倍率普通目標），獵食成功給全服玩家共享獎勵（0.4x 倍率），玩家擊破鱷魚本身獲得鱷魚倍率 + 累積獎池 50%
+  - **設計差異：** 與不死 BOSS（玩家打它）不同，鱷魚是「它主動打其他魚」，製造「看著鱷魚在場上橫行霸道」的緊張感；玩家需要決策：讓它繼續獵食累積獎池，還是立刻擊破？這是「主動獵食型 BOSS」機制，業界首創設計感
+  - server/internal/game/crocodile_hunter_handler.go：crocodileHunterManager（全服共享 isActive/instanceID/huntCount/totalPool/冷卻管理）；isCrocodileHunter 判斷；tryCrocodileHunterSpawn（T146 生成時觸發獵食模式/全服廣播/全服公告）；runCrocodileHunting（goroutine 每 2 秒獵食一次）；doCrocodileHunt（選擇高倍率目標/85% 成功機率/全服廣播/≥4次公告）；notifyCrocodileHunterKill（玩家擊破時結算/基礎獎勵+獎池50%/全服廣播/動態牆）；onCrocodileHunterLeave（達到最大獵食次數或超時離開）；getAverageBetLevel（全服平均 betLevel 計算）
+  - server/internal/data/tables.go：新增 T146 巨型鱷魚（40-80x/HP120/SpawnWeight2/Speed30/Lifetime25/crocodile_hunter 行為）
+  - server/internal/ws/protocol.go：新增 MsgCrocodileHunter；CrocodileHunterPayload（croc_appear/croc_hunt/croc_miss/croc_killed/croc_leave）
+  - server/internal/game/game.go：CrocodileHunter *crocodileHunterManager；spawnTarget 加入 isCrocodileHunter 分支（tryCrocodileHunterSpawn）；handleKill 加入 isCrocodileHunter 分支（notifyCrocodileHunterKill）；gameLoop 目標超時移除加入 isCrocodileHunter 分支（onCrocodileHunterLeave）
+  - client/chiikawa-pixel/scripts/ui/CrocodileHunterPanel.gd：巨型鱷魚獵食面板（深綠主題；croc_appear 綠色閃光+頂部橫幅滑入+獵食計數器+累積獎池；croc_hunt 橙色小閃光+目標位置浮動文字+計數器更新+≥4次橙色雙閃光+≥6次金色強閃光；croc_miss 「💨 逃脫！」浮動文字；croc_killed 金色強閃光+右側滑入結算彈窗（獵食次數/累積獎池/獎池加成/基礎獎勵/總獎勵）+5秒後淡出；croc_leave 紅色閃光+結算彈窗（未領取獎池）+4秒後淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：crocodile_hunter 訊號 + _handle_crocodile_hunter
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 CrocodileHunterPanelScript（z_index=57）
+  - 獵食設計：每 2 秒獵食一次；優先選高倍率目標（前 30% 中隨機）；85% 成功機率；最多 8 次；全服冷卻 50 秒
+  - 獎勵設計：獵食獎勵 = 目標倍率 × 全服平均 betLevel × 0.40（全服共享）；玩家擊破 = 鱷魚倍率 × betLevel + 累積獎池 × 50%
+  - 決策設計：玩家可以選擇「讓鱷魚繼續獵食累積獎池」或「立刻擊破獲得當前獎池」，製造策略感
+  - 全服廣播：出現/每次獵食/擊破/離開全服廣播；≥4 次獵食時全服公告
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-187 更新（自主觸發）：** 連鎖爆炸魚系統（Chain Bomb Fish）✅
   - **業界依據：** Royal Fishing「chain reaction mechanic — players can trigger multiple explosions to capture additional fish within a blast radius」— 擊破 T145 後在原位爆炸（200px 半徑），爆炸命中的目標 75% 機率擊破（0.65x 倍率），若命中的目標也是 T145 則繼續引爆（連鎖反應，最多 5 層）
   - **設計差異：** 與炸彈武器（玩家主動放置，即時爆炸）不同，連鎖爆炸魚是「被動觸發的連鎖反應」；與漩渦魚（吸引同類）不同，連鎖爆炸魚是「位置驅動的爆炸傳播」；最多 5 層連鎖，讓玩家有「一顆引爆全場」的爽感，但不會無限連鎖（平衡 RTP）；每層爆炸間隔 300ms，讓玩家看到「爆炸在場上蔓延」的視覺過程

@@ -271,6 +271,7 @@ func _ready() -> void:
 	_init_phoenix_fish_panel()         # 鳳凰魚涅槃重生面板（DAY-185）
 	_init_dragon_turtle_panel()        # 龍龜不死 Boss 面板（DAY-186）
 	_init_chain_bomb_panel()           # 連鎖爆炸魚面板（DAY-187）
+	_init_crocodile_hunter_panel()     # 巨型鱷魚獵食面板（DAY-188）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3613,4 +3614,21 @@ func _init_chain_bomb_panel() -> void:
 		GameManager.chain_bomb.connect(func(data):
 			if is_instance_valid(_chain_bomb_panel):
 				_chain_bomb_panel.handle_chain_bomb(data)
+		)
+
+## ---- 巨型鱷魚獵食面板（DAY-188）----
+const CrocodileHunterPanelScript = preload("res://scripts/ui/CrocodileHunterPanel.gd")
+var _crocodile_hunter_panel: Control = null
+
+func _init_crocodile_hunter_panel() -> void:
+	var panel = CrocodileHunterPanelScript.new()
+	panel.name = "CrocodileHunterPanel"
+	panel.z_index = 57
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_crocodile_hunter_panel = panel
+	if GameManager.has_signal("crocodile_hunter"):
+		GameManager.crocodile_hunter.connect(func(data):
+			if is_instance_valid(_crocodile_hunter_panel):
+				_crocodile_hunter_panel.handle(data)
 		)

@@ -189,6 +189,7 @@ signal meteor_fish(data: Dictionary)                   # 隕石魚隕石雨（DA
 signal phoenix_fish(data: Dictionary)                  # 鳳凰魚涅槃重生（DAY-185）
 signal dragon_turtle(data: Dictionary)                 # 龍龜不死 Boss（DAY-186）
 signal chain_bomb(data: Dictionary)                    # 連鎖爆炸魚（DAY-187）
+signal crocodile_hunter(data: Dictionary)              # 巨型鱷魚獵食（DAY-188）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -540,6 +541,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_dragon_turtle(payload)
 		"chain_bomb":
 			_handle_chain_bomb(payload)
+		"crocodile_hunter":
+			_handle_crocodile_hunter(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2010,3 +2013,25 @@ func _handle_chain_bomb(payload: Dictionary) -> void:
 		var total_reward: int = payload.get("total_reward", 0)
 		var chain_depth: int = payload.get("chain_depth", 0)
 		print("[GameManager] Chain Bomb result: depth=%d kills=%d reward=%d" % [chain_depth, total_kills, total_reward])
+
+## 處理巨型鱷魚獵食（DAY-188）
+func _handle_crocodile_hunter(payload: Dictionary) -> void:
+	emit_signal("crocodile_hunter", payload)
+	var phase: String = payload.get("phase", "")
+	if phase == "croc_appear":
+		var max_hunts: int = payload.get("max_hunts", 8)
+		print("[GameManager] Crocodile Hunter appeared: max_hunts=%d" % max_hunts)
+	elif phase == "croc_hunt":
+		var hunt_index: int = payload.get("hunt_index", 0)
+		var target_name: String = payload.get("target_name", "")
+		var hunt_reward: int = payload.get("hunt_reward", 0)
+		var total_pool: int = payload.get("total_pool", 0)
+		print("[GameManager] Croc hunt #%d: target=%s reward=%d pool=%d" % [hunt_index, target_name, hunt_reward, total_pool])
+	elif phase == "croc_killed":
+		var killer_name: String = payload.get("killer_name", "")
+		var total_reward: int = payload.get("total_reward", 0)
+		print("[GameManager] Croc killed by %s: total_reward=%d" % [killer_name, total_reward])
+	elif phase == "croc_leave":
+		var hunt_count: int = payload.get("hunt_count", 0)
+		var total_pool: int = payload.get("total_pool", 0)
+		print("[GameManager] Croc left: hunts=%d pool=%d" % [hunt_count, total_pool])

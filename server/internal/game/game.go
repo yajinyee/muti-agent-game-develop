@@ -162,6 +162,7 @@ type Game struct {
 	MeteorFish         *meteorFishManager         // 隕石魚隕石雨系統管理器（DAY-184）
 	PhoenixFish        *phoenixFishManager        // 鳳凰魚涅槃重生系統管理器（DAY-185）
 	DragonTurtle       *dragonTurtleManager       // 龍龜不死 Boss 系統管理器（DAY-186）
+	CrocodileHunter    *crocodileHunterManager    // 巨型鱷魚獵食系統管理器（DAY-188）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -300,6 +301,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		MeteorFish:         newMeteorFishManager(),
 		PhoenixFish:        newPhoenixFishManager(),
 		DragonTurtle:       newDragonTurtleManager(),
+		CrocodileHunter:    newCrocodileHunterManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1522,6 +1524,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isChainBomb(t.DefID) {
 		go g.tryChainBombExplosion(p, t.InstanceID, t.X, t.Y)
 	}
+	// 巨型鱷魚：擊破 T146 時觸發獎池結算（DAY-188）
+	if isCrocodileHunter(t.DefID) {
+		go g.notifyCrocodileHunterKill(p, t.InstanceID, t.Multiplier)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)
@@ -1639,6 +1645,10 @@ func (g *Game) updateNormalPlay() {
 			// 龍龜不死 Boss：離開畫面時廣播結算（DAY-186）
 			if isDragonTurtle(t.DefID) {
 				go g.notifyDragonTurtleLeave(id)
+			}
+			// 巨型鱷魚：離開畫面時廣播結算（DAY-188）
+			if isCrocodileHunter(t.DefID) {
+				go g.onCrocodileHunterLeave(id, "timeout")
 			}
 		}
 	}
@@ -1955,6 +1965,10 @@ func (g *Game) spawnTarget() {
 	// 龍龜不死 Boss：T144 生成時通知全服（DAY-186）
 	if isDragonTurtle(def.ID) {
 		go g.notifyDragonTurtleSpawn(instanceID, x, y)
+	}
+	// 巨型鱷魚：T146 生成時觸發獵食模式（DAY-188）
+	if isCrocodileHunter(def.ID) {
+		go g.tryCrocodileHunterSpawn(instanceID)
 	}
 }
 
