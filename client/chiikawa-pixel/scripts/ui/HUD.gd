@@ -283,6 +283,7 @@ func _ready() -> void:
 	_init_mystic_dragon_panel()         # 神秘龍魚八波攻擊面板（DAY-197）
 	_init_ghost_fish_panel()            # 幽靈魚分身面板（DAY-198）
 	_init_thunderbolt_lobster_panel()   # 雷霆龍蝦免費射擊面板（DAY-199）
+	_init_ice_phoenix_panel()           # 冰鳳凰覺醒 BOSS 面板（DAY-200）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3817,3 +3818,20 @@ func _init_thunderbolt_lobster_panel() -> void:
 func _on_thunderbolt_lobster(data: Dictionary) -> void:
 	if is_instance_valid(_thunderbolt_lobster_panel):
 		_thunderbolt_lobster_panel.handle_thunderbolt_lobster(data)
+
+## ---- 冰鳳凰覺醒 BOSS 面板（DAY-200）----
+const IcePhoenixPanelScript = preload("res://scripts/ui/IcePhoenixPanel.gd")
+var _ice_phoenix_panel = null
+
+func _init_ice_phoenix_panel() -> void:
+	var panel = IcePhoenixPanelScript.new()
+	panel.name = "IcePhoenixPanel"
+	panel.layer = 45
+	add_child(panel)
+	_ice_phoenix_panel = panel
+	if GameManager.has_signal("ice_phoenix"):
+		GameManager.ice_phoenix.connect(_on_ice_phoenix)
+
+func _on_ice_phoenix(data: Dictionary) -> void:
+	if is_instance_valid(_ice_phoenix_panel):
+		_ice_phoenix_panel.handle_ice_phoenix(data)

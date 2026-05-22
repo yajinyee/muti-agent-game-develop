@@ -397,6 +397,12 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「雷霆砲台模式」（15秒）：系統自動每 0.5 秒選最高價值目標射擊（85% 擊破機率，0.75x 倍率）
 	// 每擊破一個目標 +0.5 秒（最多延長到 30 秒）；全服廣播「雷霆砲台啟動」
 	"T157": {ID: "T157", Name: "雷霆龍蝦", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 80, HP: 85, SpawnWeight: 3, Speed: 40, Lifetime: 16, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "thunderbolt_lobster_free_play"},
+	// T158 冰鳳凰（DAY-200）— 業界依據：Royal Fishing JILI「Ice Phoenix Awaken Feature —
+	// fixed jackpot mechanic that awards up to 300x the bet when players eliminate the Ice Phoenix boss.
+	// Awaken Boss with 30x basic multiplier. Power Up attack delivers 6x-10x boost for rewards up to 300x.」
+	// 擊破後觸發「冰鳳凰覺醒」：基礎獎勵 30x betLevel；Power Up 攻擊 3-5 個目標（6-10x 倍率，70% 擊破機率）
+	// 5% 機率觸發「冰霜爆發」：全場所有目標（50% 擊破機率，0.60x 倍率）；最高組合 300x
+	"T158": {ID: "T158", Name: "冰鳳凰", Type: TargetTypeSpecial, MultiplierMin: 80, MultiplierMax: 120, HP: 110, SpawnWeight: 2, Speed: 30, Lifetime: 20, LaborGain: 16, DifficultyFactor: 16.0, SpecialBehavior: "ice_phoenix_awaken"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

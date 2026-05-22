@@ -522,6 +522,9 @@ const (
 	// 雷霆龍蝦免費射擊系統（DAY-199）
 	MsgThunderboltLobster MessageType = "thunderbolt_lobster" // 雷霆龍蝦免費射擊廣播（Server→Client，全服）
 
+	// 冰鳳凰覺醒 BOSS 系統（DAY-200）
+	MsgIcePhoenix MessageType = "ice_phoenix" // 冰鳳凰覺醒廣播（Server→Client，全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4409,4 +4412,29 @@ type ThunderboltLobsterPayload struct {
 	TotalReward int64   `json:"total_reward,omitempty"` // 累計總獎勵
 	Remaining   float64 `json:"remaining,omitempty"`    // 剩餘時間（秒）
 	ExtendSec   float64 `json:"extend_sec,omitempty"`   // 已延長秒數（turret_end 時）
+}
+
+// IcePhoenixPowerUpResult 冰鳳凰 Power Up 單次攻擊結果
+type IcePhoenixPowerUpResult struct {
+	TargetID string  `json:"target_id"`
+	Mult     float64 `json:"mult"`
+	Killed   bool    `json:"killed"`
+	Reward   int     `json:"reward"`
+}
+
+// IcePhoenixPayload 冰鳳凰覺醒廣播（Server → Client，DAY-200）
+// Event: "awaken_start" → "power_up_shot"（每次 Power Up）→ "frost_burst_start"（可選）→ "frost_burst_result"（可選）→ "awaken_result"
+type IcePhoenixPayload struct {
+	Event         string                   `json:"event"`
+	KillerName    string                   `json:"killer_name,omitempty"`
+	BaseReward    int                      `json:"base_reward,omitempty"`
+	ShotIndex     int                      `json:"shot_index,omitempty"`
+	TotalShots    int                      `json:"total_shots,omitempty"`
+	PowerUpResult IcePhoenixPowerUpResult  `json:"power_up_result,omitempty"`
+	PowerUpKills  int                      `json:"power_up_kills,omitempty"`
+	PowerUpReward int                      `json:"power_up_reward,omitempty"`
+	FrostKills    int                      `json:"frost_kills,omitempty"`
+	FrostReward   int                      `json:"frost_reward,omitempty"`
+	TotalReward   int                      `json:"total_reward,omitempty"`
+	HasFrost      bool                     `json:"has_frost,omitempty"`
 }

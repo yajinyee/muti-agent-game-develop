@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-199 雷霆龍蝦免費射擊系統）
+## 最後更新：2026-05-22（DAY-200 冰鳳凰覺醒 BOSS 系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-200 更新（自主觸發）：** 冰鳳凰覺醒 BOSS 系統（Ice Phoenix Awaken）✅
+  - **業界依據：** Royal Fishing JILI「Ice Phoenix Awaken Feature — fixed jackpot mechanic that awards up to 300x the bet when players eliminate the Ice Phoenix boss. Multicoloured phoenix (blue, pink, purple, orange) with magical aura. Awaken Boss with 30x basic multiplier. Power Up attack delivers 6x-10x boost for rewards up to 300 times bet.」
+  - **設計：** 擊破 T158 後觸發「冰鳳凰覺醒」：基礎獎勵 30x betLevel；Power Up 攻擊 3-5 個目標（6-10x 倍率，70% 擊破機率）；5% 機率觸發「冰霜爆發」：全場所有目標（50% 擊破機率，0.60x 倍率）；最高組合 300x
+  - **設計差異：** 與鳳凰魚涅槃（全場爆炸，一次性）不同，冰鳳凰是「覺醒 BOSS + Power Up 攻擊」雙段式；與神秘龍魚（8波攻擊）不同，冰鳳凰是「精準 Power Up」（3-5個目標，高倍率）；「冰霜爆發」（5%）讓玩家有「說不定這次全場清場」的期待感
+  - server/internal/game/ice_phoenix_handler.go：icePhoenixManager；isIcePhoenix（T158）；tryIcePhoenixAwaken（擊破後觸發/基礎獎勵/全服廣播）；runIcePhoenixPowerUp（Power Up 攻擊/每 400ms 一個目標/5%冰霜爆發/最終結算）
+  - server/internal/data/tables.go：新增 T158 冰鳳凰（80-120x/HP110/SpawnWeight2/Speed30/Lifetime20）
+  - server/internal/ws/protocol.go：新增 MsgIcePhoenix；IcePhoenixPayload（awaken_start/power_up_shot/frost_burst_start/frost_burst_result/awaken_result）；IcePhoenixPowerUpResult
+  - server/internal/game/game.go：IcePhoenix *icePhoenixManager；handleKill 加入 isIcePhoenix 分支
+  - client/chiikawa-pixel/scripts/ui/IcePhoenixPanel.gd：冰藍紫主題面板（awaken_start 冰藍三次閃光+橫幅+基礎獎勵；power_up_shot 冰藍閃光+浮動文字+進度條；frost_burst_start 全螢幕冰白強閃光+大字；awaken_result 結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：ice_phoenix 訊號 + _handle_ice_phoenix
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 IcePhoenixPanelScript（layer=45）
+  - 覺醒設計：基礎 30x；Power Up 3-5 個目標；6-10x 倍率；70% 擊破機率；每 400ms 一個目標
+  - 冰霜爆發設計：5% 機率；全場所有目標；50% 擊破機率；0.60x 倍率；每 60ms 一個目標
+  - 視覺設計：冰藍紫主題（#00BFFF + #9400D3 + #FF69B4）；Power Up 進度條；冰霜爆發全螢幕冰白強閃光
+  - 全服廣播：覺醒開始/每次 Power Up/冰霜爆發/結算全服廣播；≥100x 時全服公告
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-199 更新（自主觸發）：** 雷霆龍蝦免費射擊系統（Thunderbolt Lobster Free Play）✅
   - **業界依據：** Royal Fishing JILI「Thunderbolt Lobster feature — provides 15 seconds of free play followed by automatic shooting from the Thunderbolt Turret. Players can earn extra seconds during this period to extend gameplay and increase reward potential.」
   - **設計：** 擊破 T157 後觸發「雷霆砲台模式」（15秒，全服共享）：系統自動每 0.5 秒選最高價值目標射擊（85% 擊破機率，0.75x 倍率）；每擊破一個目標 +0.5 秒（最多延長到 30 秒）；全服廣播「雷霆砲台啟動」
