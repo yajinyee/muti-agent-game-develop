@@ -195,6 +195,12 @@ var Targets = map[string]*TargetDef{
 	// 設計差異：與黑洞（吸引所有目標）不同，漩渦魚是「同類型吸引」，讓玩家有策略性選擇
 	// 設計：中等倍率（35-55x）+ 中等 HP（65）+ 中等生成權重（5）= 常見且有「一網打盡」爽感的特殊目標
 	"T127": {ID: "T127", Name: "漩渦魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 55, HP: 65, SpawnWeight: 5, Speed: 55, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "vortex_fish"},
+	// T128 冰凍炸彈魚（DAY-170）— 業界依據：King of Ocean 2026「The freezing blast pauses an entire school for
+	// a few seconds — useful when a high-tier creature is escaping the frame.」
+	// 擊破後觸發「冰凍爆炸」：場上所有特殊目標（T101-T127）被冰凍 6 秒，停止移動
+	// 設計差異：與黃金海龜（全場時間停止 8 秒）不同，冰凍炸彈魚只凍結特殊目標，讓玩家集中火力打高價值目標
+	// 設計：中等倍率（40-60x）+ 中等 HP（70）+ 中等生成權重（5）= 常見且有「凍結高價值目標」策略感的特殊目標
+	"T128": {ID: "T128", Name: "冰凍炸彈魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 60, HP: 70, SpawnWeight: 5, Speed: 45, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "freeze_bomb"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

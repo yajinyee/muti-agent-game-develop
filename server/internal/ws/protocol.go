@@ -430,6 +430,9 @@ const (
 	// 漩渦魚群吸引系統（DAY-169）
 	MsgVortexFish MessageType = "vortex_fish" // 漩渦魚群廣播（Server→Client，全服）
 
+	// 冰凍炸彈魚系統（DAY-170）
+	MsgFreezeBomb MessageType = "freeze_bomb" // 冰凍炸彈魚廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3679,4 +3682,27 @@ type VortexFishPayload struct {
 	KilledCount  int              `json:"killed_count"`  // 實際擊破數（vortex_end 時）
 	TotalReward  int              `json:"total_reward"`  // 總獎勵（vortex_end 時）
 	KilledEntries []VortexKillEntry `json:"killed_entries"` // 所有被擊破的目標（vortex_end 時）
+}
+
+// ---- 冰凍炸彈魚系統（DAY-170）----
+
+// FreezeBombEntry 被冰凍的特殊目標記錄
+type FreezeBombEntry struct {
+	InstanceID string  `json:"instance_id"` // 被冰凍的目標 InstanceID
+	DefID      string  `json:"def_id"`      // 目標定義 ID
+	X          float64 `json:"x"`           // 目標位置 X
+	Y          float64 `json:"y"`           // 目標位置 Y
+}
+
+// FreezeBombPayload 冰凍炸彈魚廣播（Server → Client，DAY-170）
+// Phase: "freeze_start" → "freeze_end"
+type FreezeBombPayload struct {
+	Phase         string            `json:"phase"`          // 當前階段
+	TriggerID     string            `json:"trigger_id"`     // 觸發玩家 ID
+	TriggerName   string            `json:"trigger_name"`   // 觸發玩家名稱
+	FreezeX       float64           `json:"freeze_x"`       // 冰凍炸彈位置 X
+	FreezeY       float64           `json:"freeze_y"`       // 冰凍炸彈位置 Y
+	FrozenCount   int               `json:"frozen_count"`   // 被冰凍的目標數
+	DurationSec   int               `json:"duration_sec"`   // 冰凍持續時間（秒）
+	FrozenTargets []FreezeBombEntry `json:"frozen_targets"` // 被冰凍的目標列表（freeze_start 時）
 }

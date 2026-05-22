@@ -145,6 +145,7 @@ type Game struct {
 	CrystalDragon      *crystaldragon.Manager     // 水晶龍收集大獎系統管理器（DAY-153）
 	LionDance          *lionDanceManager          // 獅子舞大獎爆發系統管理器（DAY-168）
 	VortexFish         *vortexFishManager         // 漩渦魚群吸引系統管理器（DAY-169）
+	FreezeBomb         *freezeBombManager         // 冰凍炸彈魚系統管理器（DAY-170）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -268,6 +269,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		CrystalDragon:      crystaldragon.New(),
 		LionDance:          newLionDanceManager(),
 		VortexFish:         newVortexFishManager(),
+		FreezeBomb:         newFreezeBombManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1362,6 +1364,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 漩渦魚群吸引：擊破 T127 時觸發（DAY-169）
 	if isVortexFish(t.DefID) {
 		go g.tryVortexFishSuck(p, t.InstanceID, t.X, t.Y)
+	}
+	// 冰凍炸彈魚：擊破 T128 時觸發（DAY-170）
+	if isFreezeBomb(t.DefID) {
+		go g.tryFreezeBomb(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

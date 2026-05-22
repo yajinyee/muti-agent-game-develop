@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-169 漩渦魚群吸引系統）
+## 最後更新：2026-05-22（DAY-170 冰凍炸彈魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-170 更新（自主觸發）：** 冰凍炸彈魚系統（Freeze Bomb Fish）✅
+  - **業界依據：** King of Ocean 2026「The freezing blast pauses an entire school for a few seconds — useful when a high-tier creature is escaping the frame.」— 擊破 T128 冰凍炸彈魚後，場上所有特殊目標（T101-T127）被冰凍 6 秒，停止移動
+  - **設計差異：** 與黃金海龜（全場時間停止 8 秒）不同，冰凍炸彈魚只凍結特殊目標，讓玩家集中火力打高價值目標；視覺上特殊目標顯示冰晶光暈（藍白色），普通目標繼續移動，製造「選擇性凍結」的策略感
+  - `server/internal/game/freeze_bomb_handler.go`：freezeBombManager（全服冷卻 25 秒/冰凍 6 秒）；isFreezeBomb 判斷；IsSpecialFrozen（查詢冰凍狀態）；tryFreezeBomb（擊破後觸發/收集特殊目標/全服廣播/全服公告≥3個）；announceFreezeBomb（全服公告）
+  - `server/internal/data/tables.go`：新增 T128 冰凍炸彈魚（40-60x/HP70/SpawnWeight5/freeze_bomb 行為）
+  - `server/internal/ws/protocol.go`：新增 MsgFreezeBomb；FreezeBombEntry/FreezeBombPayload（兩階段：freeze_start/freeze_end）
+  - `server/internal/game/announce/announce.go`：新增 EventFreezeBomb；buildContent 加入冰凍炸彈魚公告（冰藍色，5秒，高優先）
+  - `server/internal/game/game.go`：Game struct 加入 FreezeBomb *freezeBombManager；NewGameWithStore 初始化；handleKill 加入 isFreezeBomb 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/FreezeBombPanel.gd`：冰凍炸彈魚面板（冰藍主題；freeze_start 全螢幕冰藍閃光+頂部橫幅滑入+特殊目標冰晶光暈+倒數計時 6 秒；自己觸發時中央大 ❄️ 標誌彈跳+「特殊目標已冰凍！快去擊破！」提示；目標被擊破時冰晶碎裂動畫；freeze_end 冰晶碎裂閃光+淡出所有 UI；≥3個雙閃光；≥5個彩虹三閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：freeze_bomb 訊號 + _handle_freeze_bomb
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 FreezeBombPanelScript（z_index=72）
+  - 冰凍設計：全服冷卻 25 秒（防止頻繁觸發）；只凍結特殊目標（T101-T127）；6 秒持續時間
+  - 策略設計：冰凍期間特殊目標停止移動，讓玩家可以輕鬆瞄準高價值目標；普通目標繼續移動，製造「選擇性凍結」的策略感
+  - 全服廣播：冰凍開始/結束全服廣播，讓所有玩家看到「有人觸發了冰凍炸彈魚」
+  - 全服公告：≥3 個特殊目標被冰凍時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-169 更新（自主觸發）：** 漩渦魚群吸引系統（Vortex School Fish）✅
   - **業界依據：** Ocean King（Google Play 2026）「Vortex Fish — catching a Vortex Fish will suck all fish of the same species in the area into a whirlpool, capturing them all at once.」— 擊破 T127 漩渦魚後，場上所有基礎目標（T001-T006）被吸入漩渦，全部擊破，獲得 0.55x 倍率獎勵
   - **設計差異：** 與黑洞（吸引所有目標）不同，漩渦魚是**同類型吸引**（基礎目標群），讓玩家有「選擇打哪種魚」的策略性；與炸彈（即時爆炸）不同，漩渦魚有「逐步吸入」的視覺過程（每 150ms 一個），製造「漩渦吸入」的戲劇感

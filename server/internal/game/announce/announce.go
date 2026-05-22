@@ -48,6 +48,7 @@ const (
 	EventCrystalDragon            EventType = "crystal_dragon"             // 水晶龍地獄龍大獎觸發（DAY-153）
 	EventLionDance                EventType = "lion_dance"                 // 獅子舞大獎爆發觸發（DAY-168）
 	EventVortexFish               EventType = "vortex_fish"                // 漩渦魚群吸引觸發（DAY-169）
+	EventFreezeBomb               EventType = "freeze_bomb"               // 冰凍炸彈魚觸發（DAY-170）
 )
 
 // Priority 公告優先級
@@ -608,6 +609,14 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		message = fmt.Sprintf("🌀 %s 觸發漩渦魚！一口氣吸入 %s 個目標！獲得 %s 金幣！", playerName, killedStr, rewardStr)
 		icon = "🌀"
 		color = "#00BFFF"
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventFreezeBomb:
+		title = "❄️ 冰凍炸彈魚！"
+		message = fmt.Sprintf("❄️ %s 觸發冰凍炸彈魚！%d 個特殊目標被冰凍 6 秒！快去擊破！", playerName, amount)
+		icon = "❄️"
+		color = "#00CFFF"
 		priority = PriorityHigh
 		duration = 5000
 
