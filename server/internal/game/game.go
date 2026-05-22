@@ -178,6 +178,7 @@ type Game struct {
 	AbyssVortex        *abyssVortexManager         // 深淵漩渦魚系統管理器（DAY-202）
 	HumpbackWhale      *humpbackWhaleManager       // 座頭鯨覺醒系統管理器（DAY-203）
 	FreeSpinFish       *freeSpinFishManager        // 自由旋轉魚免費射擊系統管理器（DAY-204）
+	JackpotDragon      *jackpotDragonManager       // 獎池龍 Jackpot 抽獎系統管理器（DAY-205）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -332,6 +333,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		AbyssVortex:        newAbyssVortexManager(),
 		HumpbackWhale:      newHumpbackWhaleManager(),
 		FreeSpinFish:       newFreeSpinFishManager(),
+		JackpotDragon:      newJackpotDragonManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1646,6 +1648,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 自由旋轉魚：擊破 T162 時觸發個人免費射擊模式（DAY-204）
 	if isFreeSpinFish(t.DefID) {
 		go g.tryFreeSpinFishMode(p, t.Multiplier)
+	}
+	// 獎池龍：擊破 T163 時觸發獎池抽獎（DAY-205）
+	if isJackpotDragon(t.DefID) {
+		go g.tryJackpotDragonDraw(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

@@ -206,6 +206,7 @@ signal serial_bomb_crab(data: Dictionary)              # 連環炸彈蟹（DAY-2
 signal abyss_vortex(data: Dictionary)                  # 深淵漩渦魚（DAY-202）
 signal humpback_whale(data: Dictionary)                # 座頭鯨覺醒（DAY-203）
 signal free_spin_fish(data: Dictionary)                # 自由旋轉魚免費射擊（DAY-204）
+signal jackpot_dragon(data: Dictionary)               # 獎池龍 Jackpot 抽獎（DAY-205）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -591,6 +592,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_humpback_whale(payload)
 		"free_spin_fish":
 			_handle_free_spin_fish(payload)
+		"jackpot_dragon":
+			_handle_jackpot_dragon(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2305,6 +2308,14 @@ func _handle_free_spin_fish(payload: Dictionary) -> void:
 			var kill_count: int = payload.get("kill_count", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Free Spin Fish ended: kills=%d reward=%d" % [kill_count, total_reward])
+
+## 處理獎池龍 Jackpot 抽獎（DAY-205）
+func _handle_jackpot_dragon(payload: Dictionary) -> void:
+	emit_signal("jackpot_dragon", payload)
+	var level: String = payload.get("level", "mini")
+	var amount: int = payload.get("amount", 0)
+	var player_name: String = payload.get("player_name", "")
+	print("[GameManager] Jackpot Dragon: player=%s level=%s amount=%d" % [player_name, level, amount])
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:

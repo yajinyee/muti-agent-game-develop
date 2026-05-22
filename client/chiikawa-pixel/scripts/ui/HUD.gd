@@ -288,6 +288,7 @@ func _ready() -> void:
 	_init_abyss_vortex_panel()          # 深淵漩渦魚面板（DAY-202）
 	_init_humpback_whale_panel()        # 座頭鯨覺醒面板（DAY-203）
 	_init_free_spin_fish_panel()        # 自由旋轉魚免費射擊面板（DAY-204）
+	_init_jackpot_dragon_panel()        # 獎池龍 Jackpot 抽獎面板（DAY-205）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3907,3 +3908,20 @@ func _init_free_spin_fish_panel() -> void:
 func _on_free_spin_fish(data: Dictionary) -> void:
 	if is_instance_valid(_free_spin_fish_panel):
 		_free_spin_fish_panel.handle_free_spin_fish(data)
+
+## ---- 獎池龍 Jackpot 抽獎面板（DAY-205）----
+const JackpotDragonPanelScript = preload("res://scripts/ui/JackpotDragonPanel.gd")
+var _jackpot_dragon_panel = null
+
+func _init_jackpot_dragon_panel() -> void:
+	var panel = JackpotDragonPanelScript.new()
+	panel.name = "JackpotDragonPanel"
+	panel.layer = 60
+	add_child(panel)
+	_jackpot_dragon_panel = panel
+	if GameManager.has_signal("jackpot_dragon"):
+		GameManager.jackpot_dragon.connect(_on_jackpot_dragon)
+
+func _on_jackpot_dragon(data: Dictionary) -> void:
+	if is_instance_valid(_jackpot_dragon_panel):
+		_jackpot_dragon_panel.handle_jackpot_dragon(data)

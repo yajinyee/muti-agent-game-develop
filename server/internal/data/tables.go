@@ -434,6 +434,12 @@ var Targets = map[string]*TargetDef{
 	//   每擊破一個目標 +1 秒（最多延長到 20 秒）；個人冷卻 30 秒
 	"T162": {ID: "T162", Name: "自由旋轉魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 60, HP: 70, SpawnWeight: 4, Speed: 50, Lifetime: 14, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "free_spin_fish"},
 
+	// T163 獎池龍（DAY-205）— 業界依據：JILI Jackpot Fishing
+	// 「special targets like the Jackpot Fish and Jackpot Dragon offering chances at substantial prizes.
+	//  With the potential for high payouts up to 1000 times the bet.」
+	// 擊破後觸發「獎池抽獎」（個人）：加權隨機選擇 Jackpot 等級
+	//   Mini(70%) / Minor(20%) / Major(8%) / Grand(2%)；個人冷卻 60 秒
+	"T163": {ID: "T163", Name: "獎池龍", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 100, HP: 100, SpawnWeight: 2, Speed: 30, Lifetime: 18, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "jackpot_dragon_draw"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

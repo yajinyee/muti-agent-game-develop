@@ -537,6 +537,9 @@ const (
 	// 自由旋轉魚免費射擊系統（DAY-204）
 	MsgFreeSpinFish MessageType = "free_spin_fish" // 自由旋轉魚廣播（Server→Client，個人+全服）
 
+	// 獎池龍 Jackpot 抽獎系統（DAY-205）
+	MsgJackpotDragon MessageType = "jackpot_dragon" // 獎池龍廣播（Server→Client，全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4520,4 +4523,19 @@ type FreeSpinFishPayload struct {
 	Remaining   float64 `json:"remaining,omitempty"`
 	TotalReward int     `json:"total_reward,omitempty"`
 	ExtendSec   float64 `json:"extend_sec,omitempty"`
+}
+
+// JackpotDragonPayload 獎池龍 Jackpot 抽獎廣播（Server → Client，DAY-205）
+// Event: "dragon_draw" — 擊破獎池龍後觸發抽獎，廣播給全服
+type JackpotDragonPayload struct {
+	Event      string `json:"event"`
+	PlayerID   string `json:"player_id,omitempty"`
+	PlayerName string `json:"player_name,omitempty"`
+	Level      string `json:"level"`       // "mini" / "minor" / "major" / "grand"
+	LevelName  string `json:"level_name"`  // "MINI" / "MINOR" / "MAJOR" / "GRAND"
+	LevelColor string `json:"level_color"` // 顏色代碼
+	LevelIcon  string `json:"level_icon"`  // 圖示
+	Amount     int    `json:"amount"`      // 獎勵金額
+	IsGrand    bool   `json:"is_grand,omitempty"`
+	IsMajor    bool   `json:"is_major,omitempty"`
 }

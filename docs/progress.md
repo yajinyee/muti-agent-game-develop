@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-204 自由旋轉魚免費射擊系統）
+## 最後更新：2026-05-22（DAY-205 獎池龍 Jackpot 抽獎系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-205 更新（自主觸發）：** 獎池龍 Jackpot 抽獎系統（Jackpot Dragon）✅
+  - **業界依據：** JILI Jackpot Fishing「special targets like the Jackpot Fish and Jackpot Dragon offering chances at substantial prizes. With the potential for high payouts up to 1000 times the bet.」
+  - **設計：** 擊破 T163 後觸發「獎池抽獎」（個人）：加權隨機選擇 Jackpot 等級 Mini(70%)/Minor(20%)/Major(8%)/Grand(2%)；直接觸發對應等級的 Jackpot（ForceWin），立即給予獎勵；個人冷卻 60 秒；Grand/Major 全服廣播+公告
+  - **設計差異：** 與普通 Jackpot（每次射擊累積 0.5%，達到門檻後機率觸發）不同，獎池龍是「擊破後直接抽獎」（主動），讓玩家有「我要去打那條龍」的目標感；Grand 2% 機率讓玩家每次擊破都有「說不定這次就是 Grand」的期待感；個人冷卻確保不會被單一玩家壟斷
+  - server/internal/game/jackpot_dragon_handler.go：jackpotDragonManager；isJackpotDragon（T163）；tryJackpotDragonDraw（擊破後觸發/加權隨機選等級/ForceWin/handleJackpotWin/全服廣播）；pickJackpotDragonLevel（加權隨機）
+  - server/internal/data/tables.go：新增 T163 獎池龍（50-100x/HP100/SpawnWeight2/Speed30/Lifetime18）
+  - server/internal/ws/protocol.go：新增 MsgJackpotDragon；JackpotDragonPayload（dragon_draw）
+  - server/internal/game/game.go：JackpotDragon *jackpotDragonManager；handleKill 加入 isJackpotDragon 分支
+  - client/chiikawa-pixel/scripts/ui/JackpotDragonPanel.gd：金龍主題面板（Grand 全螢幕粉紅金色爆炸+大字；Major 橙紅色雙閃光+大字；Minor 金色閃光+浮動文字；Mini 銀色浮動文字；所有等級右側滑入結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：jackpot_dragon 訊號 + _handle_jackpot_dragon
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 JackpotDragonPanelScript（layer=60）
+  - 抽獎設計：Mini(70%)/Minor(20%)/Major(8%)/Grand(2%)；個人冷卻 60 秒；直接觸發 ForceWin（不需要累積）
+  - 視覺設計：Grand 全螢幕三次閃光（粉紅→金→白）+「GRAND JACKPOT！」52px 大字；Major 橙紅雙閃光+40px 大字；Minor 金色閃光+浮動文字；Mini 銀色浮動文字
+  - 全服廣播：dragon_draw 廣播給全服（讓所有玩家看到龍的特效）
+  - 全服公告：Grand/Major 觸發時全服公告（使用 EventGrandJackpot 最高優先級）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-204 更新（自主觸發）：** 自由旋轉魚免費射擊系統（Free Spin Fish）✅
   - **業界依據：** Galaxsys King of Ocean 2026「Free Spin Fish, Captain Fish, and Money Fish trigger bonus rounds, extra multipliers, and instant payouts.」
   - **設計：** 擊破 T162 後觸發「個人免費射擊模式」（10秒，不扣費）：系統每 0.6 秒自動選最高價值目標射擊（80% 擊破機率，0.80x 倍率）；每擊破一個目標 +1 秒（最多延長到 20 秒）；個人冷卻 30 秒
