@@ -502,6 +502,13 @@ var Targets = map[string]*TargetDef{
 	// 玩家擊破黃金累積魚本身 → 「提前引爆」（不論累積多少）
 	// 全服廣播累積進度（每 5 點）；全服冷卻 40 秒
 	"T172": {ID: "T172", Name: "黃金累積魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 70, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 15, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "golden_accumulator"},
+	// T173 幸運鏡像魚（DAY-215）— 業界原創「鏡像複製」機制
+	// 設計：擊破 T173 後觸發「鏡像複製」：在場上隨機選 3 個目標，為每個目標建立「鏡像分身」
+	//   - 鏡像分身 HP = 原目標 HP × 50%，倍率 = 原目標倍率 × 1.5
+	//   - 鏡像分身持續 8 秒；擊破鏡像分身獲得 ×1.5 倍率加成
+	//   - 8 秒後所有未被擊破的鏡像分身「鏡像爆炸」（60% 擊破機率，0.60x 倍率）
+	//   - 個人冷卻 20 秒；全服廣播鏡像建立/爆炸
+	"T173": {ID: "T173", Name: "幸運鏡像魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 48, Lifetime: 13, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_mirror"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

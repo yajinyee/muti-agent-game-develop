@@ -553,6 +553,7 @@ const (
 	MsgTimeFreezeFish  MessageType = "time_freeze_fish"  // 時間凍結魚廣播（Server→Client，DAY-212）
 	MsgRainbowPrism    MessageType = "rainbow_prism"     // 彩虹稜鏡魚廣播（Server→Client，DAY-213）
 	MsgGoldenAccumulator MessageType = "golden_accumulator" // 黃金累積魚廣播（Server→Client，DAY-214）
+	MsgLuckyMirrorFish   MessageType = "lucky_mirror_fish"  // 幸運鏡像魚廣播（Server→Client，DAY-215）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4757,4 +4758,34 @@ type GoldenAccumulatorPayload struct {
 	AffectedCount int     `json:"affected_count,omitempty"`
 	BoostMult     float64 `json:"boost_mult,omitempty"`
 	BoostSec      int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyMirrorFishInfo 鏡像分身資訊
+type LuckyMirrorFishInfo struct {
+	MirrorID       string  `json:"mirror_id"`        // 鏡像分身 ID（"mirror_" + 原目標 instanceID）
+	OriginalID     string  `json:"original_id"`      // 原目標 instanceID
+	OriginalDefID  string  `json:"original_def_id"`  // 原目標 defID
+	X              float64 `json:"x"`                // 鏡像位置 X
+	Y              float64 `json:"y"`                // 鏡像位置 Y
+	MirrorHP       int     `json:"mirror_hp"`        // 鏡像 HP（原 HP × 50%）
+	MirrorMult     float64 `json:"mirror_mult"`      // 鏡像倍率（原倍率 × 1.5）
+}
+
+// LuckyMirrorFishPayload 幸運鏡像魚廣播（Server → Client，DAY-215）
+//
+// Events:
+//
+//	"mirror_start"  — 鏡像複製開始（全服廣播，含鏡像分身列表）
+//	"mirror_kill"   — 鏡像分身被擊破（全服廣播）
+//	"mirror_blast"  — 鏡像爆炸（8 秒後，全服廣播）
+//	"mirror_result" — 鏡像結算（全服廣播）
+type LuckyMirrorFishPayload struct {
+	Event         string                `json:"event"`
+	PlayerName    string                `json:"player_name,omitempty"`
+	Mirrors       []LuckyMirrorFishInfo `json:"mirrors,omitempty"`
+	MirrorID      string                `json:"mirror_id,omitempty"`
+	KilledCount   int                   `json:"killed_count,omitempty"`
+	BlastCount    int                   `json:"blast_count,omitempty"`
+	TotalReward   int                   `json:"total_reward,omitempty"`
+	MultBoost     float64               `json:"mult_boost,omitempty"`
 }

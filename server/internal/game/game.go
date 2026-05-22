@@ -188,6 +188,7 @@ type Game struct {
 	TimeFreeze         *timeFreezeManager          // 時間凍結魚系統管理器（DAY-212）
 	RainbowPrism       *rainbowPrismManager        // 彩虹稜鏡魚系統管理器（DAY-213）
 	GoldenAccumulator  *goldenAccumulatorManager   // 黃金累積魚系統管理器（DAY-214）
+	LuckyMirrorFish    *luckyMirrorFishManager     // 幸運鏡像魚系統管理器（DAY-215）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -352,6 +353,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		TimeFreeze:         newTimeFreezeManager(),
 		RainbowPrism:       newRainbowPrismManager(),
 		GoldenAccumulator:  newGoldenAccumulatorManager(),
+		LuckyMirrorFish:    newLuckyMirrorFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1236,6 +1238,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if goldenAccumBoost > 1.0 {
 		finalReward = int(float64(finalReward) * goldenAccumBoost)
 	}
+	// 套用幸運鏡像魚分身倍率加成（DAY-215，×1.5 乘法，擊破鏡像分身時）
+	mirrorMult := g.getLuckyMirrorMultiplier(t.InstanceID)
+	if mirrorMult > 1.0 {
+		finalReward = int(float64(finalReward) * mirrorMult)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1746,6 +1753,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	}
 	// 黃金累積魚：任何目標被擊破時累積計數（DAY-214）
 	go g.notifyGoldenAccumulatorKill()
+	// 幸運鏡像魚：擊破 T173 時觸發鏡像複製（DAY-215）
+	if isLuckyMirrorFish(t.DefID) {
+		go g.tryLuckyMirrorFish(p)
+	}
+	// 幸運鏡像魚：擊破鏡像分身時套用倍率加成（DAY-215）
+	if g.isLuckyMirrorEntry(t.InstanceID) {
+		go g.removeLuckyMirrorEntry(t.InstanceID)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)

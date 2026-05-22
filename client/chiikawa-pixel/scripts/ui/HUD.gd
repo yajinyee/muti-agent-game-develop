@@ -298,6 +298,7 @@ func _ready() -> void:
 	_init_time_freeze_panel()           # 時間凍結魚系統面板（DAY-212）
 	_init_rainbow_prism_panel()         # 彩虹稜鏡魚系統面板（DAY-213）
 	_init_golden_accumulator_panel()    # 黃金累積魚系統面板（DAY-214）
+	_init_lucky_mirror_fish_panel()     # 幸運鏡像魚系統面板（DAY-215）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4089,3 +4090,21 @@ func _init_golden_accumulator_panel() -> void:
 func _on_golden_accumulator(data: Dictionary) -> void:
 	if is_instance_valid(_golden_accumulator_panel):
 		_golden_accumulator_panel.handle_golden_accumulator(data)
+
+# ─── 幸運鏡像魚系統面板（DAY-215）───────────────────────────────────────────
+const LuckyMirrorFishPanelScript = preload("res://scripts/ui/LuckyMirrorFishPanel.gd")
+
+var _lucky_mirror_fish_panel = null
+
+func _init_lucky_mirror_fish_panel() -> void:
+	var panel = LuckyMirrorFishPanelScript.new()
+	panel.name = "LuckyMirrorFishPanel"
+	panel.layer = 30
+	add_child(panel)
+	_lucky_mirror_fish_panel = panel
+	if GameManager.has_signal("lucky_mirror_fish"):
+		GameManager.lucky_mirror_fish.connect(_on_lucky_mirror_fish)
+
+func _on_lucky_mirror_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_mirror_fish_panel):
+		_lucky_mirror_fish_panel.handle_lucky_mirror_fish(data)

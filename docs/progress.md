@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-214 黃金累積魚系統）
+## 最後更新：2026-05-23（DAY-215 幸運鏡像魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-215 更新（自主觸發）：** 幸運鏡像魚系統（Lucky Mirror Fish）✅
+  - **業界依據：** 業界原創「鏡像複製」機制
+  - **設計：** 擊破 T173 後觸發「鏡像複製」：在場上隨機選最多 3 個目標，為每個目標建立「鏡像分身」（HP 50%，倍率 ×1.5）；鏡像分身持續 8 秒；擊破鏡像分身獲得 ×1.5 倍率加成（乘法）；8 秒後所有未被擊破的鏡像分身「鏡像爆炸」（60% 擊破機率，0.60x 倍率）；個人冷卻 20 秒；全服廣播鏡像建立/爆炸
+  - **設計差異：** 與彩虹稜鏡魚（DAY-213，染色 5 個目標，顏色對應不同倍率）不同，幸運鏡像魚是「複製分身」，讓玩家有「要先打分身還是本體」的策略選擇；分身 HP 只有 50%，更容易擊破，讓玩家有「快速連殺」的爽感；分身倍率 ×1.5，讓玩家有「打分身比打本體更划算」的感覺；8 秒後自動爆炸，製造「等待→爆發」的高潮感；全服廣播讓所有玩家都看到鏡像，製造「全服競爭搶打分身」的社交感
+  - server/internal/game/lucky_mirror_fish_handler.go：luckyMirrorFishManager（個人冷卻/activeMirrors/mirrorEntry）；isLuckyMirrorFish（T173）；getLuckyMirrorMultiplier（供 handleKill 使用，鏡像分身 ×1.5 乘法加成）；removeLuckyMirrorEntry（鏡像分身被擊破後移除）；isLuckyMirrorEntry（判斷是否為鏡像分身）；tryLuckyMirrorFish（擊破後觸發/選取最多3個目標/建立鏡像分身/全服廣播）；runLuckyMirrorBlast（8秒後鏡像爆炸/全服共享獎勵/全服公告）；getAvgBetCost（平均投注成本計算）
+  - server/internal/data/tables.go：新增 T173 幸運鏡像魚（35-60x/HP70/SpawnWeight3/Speed48/Lifetime13）
+  - server/internal/ws/protocol.go：新增 MsgLuckyMirrorFish；LuckyMirrorFishInfo；LuckyMirrorFishPayload（mirror_start/mirror_kill/mirror_blast/mirror_result）
+  - server/internal/game/announce/announce.go：新增 EventLuckyMirrorFish + case 處理
+  - server/internal/game/game.go：LuckyMirrorFish *luckyMirrorFishManager；handleKill 加入 getLuckyMirrorMultiplier 乘法加成 + isLuckyMirrorFish 分支 + isLuckyMirrorEntry 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyMirrorFishPanel.gd：青色鏡像主題面板（mirror_start 青色雙閃光+頂部橫幅+鏡像分身菱形標記；mirror_kill 消失閃光+浮動文字；mirror_blast 全螢幕三次青色強閃光+「🪞 鏡像爆炸！」大字；mirror_result 右側滑入結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_mirror_fish 訊號 + _handle_lucky_mirror_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyMirrorFishPanelScript（layer=30）
+  - 鏡像設計：最多 3 個目標；HP = 原 HP × 50%；倍率 = 原倍率 × 1.5；持續 8 秒；個人冷卻 20 秒
+  - 鏡像爆炸設計：60% 擊破機率；0.60x 倍率；200px 範圍內最近目標；全服共享獎勵；≥2 個爆炸時全服公告
+  - 視覺設計：青色鏡像主題（#00FFFF + #00CCFF + #88FFFF + #0088FF）；菱形輪廓標記（4個 ColorRect）；閃爍動畫；消失閃光
+  - 全服廣播：鏡像建立/分身被擊破/鏡像爆炸/結算全服廣播
+  - 全服公告：觸發時公告；爆炸≥2 個時公告（依爆炸數決定顏色：≥3 青綠/其他青色）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-214 更新（自主觸發）：** 黃金累積魚系統（Golden Accumulator Fish）✅
   - **業界依據：** Evolution Ice Fishing Live 2026「random multipliers ranging from 2x to 10x to selected wheel segments, creating pathways to maximum 5000x payout」+ 業界原創「全服累積爆發」機制
   - **設計：** T172 黃金累積魚出現後，每次任何玩家擊破任何目標，累積槽 +1（最多 20 點）；全服廣播累積進度（每 5 點）；累積槽滿 → 自動觸發「黃金爆發」：全場所有目標 HP -60%（立即）+ 全服 ×2.0 倍率加成 8 秒；玩家擊破黃金累積魚本身 → 「提前引爆」（不論累積多少）；全服冷卻 40 秒
