@@ -267,6 +267,13 @@ var Targets = map[string]*TargetDef{
 	// 且有「隨機發放金幣給玩家」的社交機制，讓被選中的玩家感到「幸運」
 	// 設計：中高倍率（50-70x）+ 中等 HP（75）+ 中等生成權重（4）= 常見且有「幸運期待感」的特殊目標
 	"T137": {ID: "T137", Name: "幸運草魚", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 70, HP: 75, SpawnWeight: 4, Speed: 45, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_clover_fish"},
+	// T138 彩虹鯊魚（DAY-180）— 業界依據：JILI 2026 新特性「Rainbow Shark — triggers a rainbow burst
+	// that randomly assigns 1.5x-3x multiplier bonuses to all targets on screen for 10 seconds」
+	// 擊破後觸發「彩虹爆發」：場上所有存活目標隨機獲得 1.5x/2.0x/2.5x/3.0x 倍率加成標記，持續 10 秒
+	// 設計差異：與黃金鯊魚（全服固定 ×1.5）不同，彩虹鯊魚是「每個目標倍率不同」（1.5x-3x），
+	// 製造「哪個目標倍率最高？快去打！」的策略感；與幸運星魚（個人 ×2）不同，彩虹鯊魚是全服共享
+	// 設計：中高倍率（55-75x）+ 中等 HP（80）+ 稀有生成權重（3）= 稀有且有「彩虹策略感」的特殊目標
+	"T138": {ID: "T138", Name: "彩虹鯊魚", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 75, HP: 80, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "rainbow_shark_burst"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

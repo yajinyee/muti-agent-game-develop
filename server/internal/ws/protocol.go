@@ -463,6 +463,9 @@ const (
 	// 幸運草魚系統（DAY-179）
 	MsgLuckyCloverFish MessageType = "lucky_clover_fish" // 幸運草魚廣播（Server→Client，全服）
 
+	// 彩虹鯊魚爆發系統（DAY-180）
+	MsgRainbowSharkBurst MessageType = "rainbow_shark_burst" // 彩虹鯊魚爆發廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3936,4 +3939,25 @@ type LuckyCloverFishPayload struct {
 	GiftAmount       int     `json:"gift_amount"`        // 幸運草金幣數（clover_gift 時）
 	GiftMult         int     `json:"gift_mult"`          // 幸運草金幣倍率（clover_gift 時）
 	NewBalance       int     `json:"new_balance"`        // 新餘額（clover_gift 時）
+}
+
+// ---- 彩虹鯊魚爆發系統（DAY-180）----
+
+// RainbowSharkMarkedTargetPayload 彩虹爆發標記目標（用於 payload）
+type RainbowSharkMarkedTargetPayload struct {
+	InstanceID string  `json:"instance_id"`
+	DefID      string  `json:"def_id"`
+	X          float64 `json:"x"`
+	Y          float64 `json:"y"`
+	BurstMult  float64 `json:"burst_mult"` // 1.5/2.0/2.5/3.0
+}
+
+// RainbowSharkBurstPayload 彩虹鯊魚爆發廣播（Server → Client，DAY-180）
+// Phase: "burst_start"（全服）→ "burst_end"（全服）
+type RainbowSharkBurstPayload struct {
+	Phase           string                              `json:"phase"`             // 當前階段
+	TriggerPlayerID string                              `json:"trigger_player_id"` // 觸發玩家 ID
+	TriggerName     string                              `json:"trigger_name"`      // 觸發玩家名稱
+	MarkedTargets   []RainbowSharkMarkedTargetPayload   `json:"marked_targets"`    // 標記目標列表
+	DurationSec     int                                 `json:"duration_sec"`      // 持續時間（秒）
 }

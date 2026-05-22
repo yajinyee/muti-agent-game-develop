@@ -181,6 +181,7 @@ signal fire_storm_fish(data: Dictionary)               # 火焰風暴魚（DAY-1
 signal golden_treasure_fish(data: Dictionary)          # 黃金寶藏魚（DAY-177）
 signal mermaid_healing(data: Dictionary)               # 美人魚治癒（DAY-178）
 signal lucky_clover_fish(data: Dictionary)             # 幸運草魚（DAY-179）
+signal rainbow_shark_burst(data: Dictionary)           # 彩虹鯊魚爆發（DAY-180）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -516,6 +517,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_mermaid_healing(payload)
 		"lucky_clover_fish":
 			_handle_lucky_clover_fish(payload)
+		"rainbow_shark_burst":
+			_handle_rainbow_shark_burst(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -1870,3 +1873,15 @@ func _handle_chainlong_wheel_result(payload: Dictionary) -> void:
 func send_chainlong_wheel_stop() -> void:
 	if NetworkManager != null:
 		NetworkManager.send_message({"type": "chainlong_wheel_stop", "payload": {}})
+
+## 處理彩虹鯊魚爆發（DAY-180）
+func _handle_rainbow_shark_burst(payload: Dictionary) -> void:
+	emit_signal("rainbow_shark_burst", payload)
+	var phase: String = payload.get("phase", "")
+	match phase:
+		"burst_start":
+			var trigger_name: String = payload.get("trigger_name", "")
+			var marked_count: int = payload.get("marked_targets", []).size()
+			print("[GameManager] Rainbow Shark burst_start: player=%s, targets=%d" % [trigger_name, marked_count])
+		"burst_end":
+			print("[GameManager] Rainbow Shark burst_end")

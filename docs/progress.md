@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-177 黃金寶藏魚系統）
+## 最後更新：2026-05-22（DAY-180 彩虹鯊魚爆發系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,42 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-176 更新（自主觸發）：** 火焰風暴魚系統（Fire Storm Fish）✅
+- **DAY-180 更新（自主觸發）：** 彩虹鯊魚爆發系統（Rainbow Shark Burst）✅
+  - **業界依據：** JILI 2026 新特性「Rainbow Shark — triggers a rainbow burst that randomly assigns 1.5x-3x multiplier bonuses to all targets on screen for 10 seconds」— 擊破 T138 後觸發彩虹爆發，場上所有存活目標隨機獲得 1.5x/2.0x/2.5x/3.0x 倍率加成標記，持續 10 秒
+  - **設計差異：** 與黃金鯊魚（全服固定 ×1.5）不同，彩虹鯊魚是「每個目標倍率不同」（1.5x-3x），製造「哪個目標倍率最高？快去打！」的策略感；與幸運星魚（個人 ×2）不同，彩虹鯊魚是全服共享，讓所有玩家都能受益
+  - server/internal/game/rainbow_shark_handler.go：rainbowSharkManager（全服冷卻 40 秒/標記目標管理）；isRainbowShark 判斷；pickRainbowSharkMult（加權隨機 1.5x/2.0x/2.5x/3.0x）；tryRainbowSharkBurst（擊破後觸發/收集場上目標/隨機分配倍率/全服廣播）；getRainbowSharkMult（供 handleKill 使用）；removeRainbowSharkMark（擊破後移除標記）；announceRainbowSharkBurst（全服公告≥3x）
+  - server/internal/data/tables.go：新增 T138 彩虹鯊魚（55-75x/HP80/SpawnWeight3/rainbow_shark_burst）
+  - server/internal/ws/protocol.go：新增 MsgRainbowSharkBurst；RainbowSharkMarkedTargetPayload/RainbowSharkBurstPayload（burst_start/burst_end）
+  - server/internal/game/game.go：RainbowShark *rainbowSharkManager；handleKill 加入 getRainbowSharkMult 倍率套用（乘法，每個目標不同）+ removeRainbowSharkMark + isRainbowShark 分支
+  - client/chiikawa-pixel/scripts/ui/RainbowSharkPanel.gd：彩虹鯊魚爆發面板（彩虹主題；burst_start 三次彩虹閃光+頂部橫幅+場上每個目標顯示倍率標籤（顏色依倍率：綠/藍/金/粉）+倒數計時；標籤持續閃爍（高倍率更快）；目標被擊破時標籤爆炸消失；burst_end 淡出所有 UI；橫幅文字彩虹色相旋轉）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：rainbow_shark_burst 訊號 + _handle_rainbow_shark_burst
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 RainbowSharkPanelScript（z_index=66）
+  - 倍率設計：1.5x(40%)/2.0x(30%)/2.5x(20%)/3.0x(10%)（加權隨機，低倍率高機率）；全服冷卻 40 秒
+  - 策略設計：每個目標倍率不同，玩家需要快速判斷哪個目標最值得打（高倍率目標優先）
+  - 視覺設計：倍率標籤顏色依倍率不同（綠/藍/金/粉），讓玩家一眼看出哪個目標最值得打
+  - 全服廣播：爆發開始/結束全服廣播，讓所有玩家看到「有人觸發了彩虹鯊魚爆發」
+  - 全服公告：有 3x 目標時全服廣播
+  - build/vet 全部通過（零錯誤零警告）
+- **DAY-179 更新（自主觸發）：** 幸運草魚系統（Lucky Clover Fish）✅
+  - **業界依據：** Ocean King 3 Plus「Lucky Shamrock Leprechaun Boss」+ Fisch Roblox 2026「Lucky Gold Pool — rainbow event triggers lucky fish spawns」— 擊破 T137 後觸發「幸運草爆發」：場上所有目標物獎勵 +50% 持續 10 秒（全服共享），同時隨機為 1-3 個玩家發放「幸運草金幣」（betLevel × 10-30x）
+  - server/internal/game/lucky_clover_fish_handler.go：luckyCloverManager（全服共享 isActive/cooldown 管理）；isLuckyCloverFish 判斷；getLuckyCloverBoost（供 handleKill 使用，活躍時回傳 0.5）；tryLuckyCloverFish（觸發爆發/全服廣播/隨機發放金幣/10秒後廣播結束）；announceLuckyCloverFish（全服公告）
+  - server/internal/data/tables.go：新增 T137 幸運草魚（50-70x/HP75/SpawnWeight4/lucky_clover_fish）
+  - server/internal/ws/protocol.go：新增 MsgLuckyCloverFish；LuckyCloverFishPayload（clover_start/clover_gift/clover_end）
+  - server/internal/game/game.go：LuckyClover *luckyCloverManager；handleKill 加入 getLuckyCloverBoost 加成套用（+50% 加法）+ isLuckyCloverFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyCloverPanel.gd：幸運草魚面板（春綠主題）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_clover_fish 訊號 + _handle_lucky_clover_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyCloverPanelScript（z_index=65）
+  - build/vet 全部通過（零錯誤零警告）
+- **DAY-178 更新（自主觸發）：** 美人魚治癒系統（Mermaid Healing）✅
+  - **業界依據：** Ocean King 3 Plus「The Mermaid feature — catching the Mermaid triggers a healing event, restoring coins to the player and granting a brief luck boost」— 擊破 T136 後觸發「美人魚治癒」：為觸發玩家恢復 betLevel × 15 金幣，觸發後 20 秒內擊破獎勵 +20% 幸運加成（全服共享）
+  - server/internal/game/mermaid_healing_handler.go：mermaidManager（個人冷卻 30 秒/全服幸運加成管理）；isMermaid 判斷；tryMermaidHealing（治癒/全服廣播/激活幸運加成）；getMermaidLuckBoost（供 handleKill 使用）；announceMermaidHealing（全服公告）
+  - server/internal/data/tables.go：新增 T136 美人魚（45-65x/HP70/SpawnWeight4/mermaid_healing）
+  - server/internal/ws/protocol.go：新增 MsgMermaidHealing；MermaidHealingPayload（heal_start/heal_broadcast/luck_start/luck_end）
+  - server/internal/game/game.go：Mermaid *mermaidManager；handleKill 加入 getMermaidLuckBoost 加成套用（+20% 加法）+ isMermaid 分支
+  - client/chiikawa-pixel/scripts/ui/MermaidHealingPanel.gd：美人魚治癒面板（深青主題）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：mermaid_healing 訊號 + _handle_mermaid_healing
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 MermaidHealingPanelScript（z_index=66）
+  - build/vet 全部通過（零錯誤零警告）
   - **業界依據：** Ocean King 3 Plus「Fire Storm feature」— 擊破 T134 後觸發火焰風暴，場上隨機 4-8 個目標被火焰標記，15 秒內逐一燃燒擊破（每 1.5 秒一個），獎勵 0.6x 倍率
   - server/internal/game/fire_storm_fish_handler.go：fireStormManager（全服冷卻 30 秒）；tryFireStormFish；announceFireStormFish
   - server/internal/data/tables.go：新增 T134 火焰風暴魚（65-90x/HP90/SpawnWeight3/fire_storm_fish）

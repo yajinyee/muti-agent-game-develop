@@ -263,6 +263,7 @@ func _ready() -> void:
 	_init_golden_treasure_panel()     # 黃金寶藏魚面板（DAY-177）
 	_init_mermaid_healing_panel()     # 美人魚治癒面板（DAY-178）
 	_init_lucky_clover_panel()        # 幸運草魚面板（DAY-179）
+	_init_rainbow_shark_panel()       # 彩虹鯊魚爆發面板（DAY-180）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3468,4 +3469,21 @@ func _init_lucky_clover_panel() -> void:
 		GameManager.lucky_clover_fish.connect(func(data):
 			if is_instance_valid(_lucky_clover_panel):
 				_lucky_clover_panel.handle_lucky_clover(data)
+		)
+
+## ---- 彩虹鯊魚爆發面板（DAY-180）----
+const RainbowSharkPanelScript = preload("res://scripts/ui/RainbowSharkPanel.gd")
+var _rainbow_shark_panel: Control = null
+
+func _init_rainbow_shark_panel() -> void:
+	var panel = RainbowSharkPanelScript.new()
+	panel.name = "RainbowSharkPanel"
+	panel.z_index = 66
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_rainbow_shark_panel = panel
+	if GameManager.has_signal("rainbow_shark_burst"):
+		GameManager.rainbow_shark_burst.connect(func(data):
+			if is_instance_valid(_rainbow_shark_panel):
+				_rainbow_shark_panel.handle_rainbow_shark(data)
 		)

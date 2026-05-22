@@ -155,6 +155,7 @@ type Game struct {
 	GoldenTreasure     *goldenTreasureManager     // 黃金寶藏魚系統管理器（DAY-177）
 	Mermaid            *mermaidManager            // 美人魚治癒系統管理器（DAY-178）
 	LuckyClover        *luckyCloverManager        // 幸運草魚系統管理器（DAY-179）
+	RainbowShark       *rainbowSharkManager       // 彩虹鯊魚爆發系統管理器（DAY-180）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -287,6 +288,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		GoldenTreasure:     newGoldenTreasureManager(),
 		Mermaid:            newMermaidManager(),
 		LuckyClover:        newLuckyCloverManager(),
+		RainbowShark:       newRainbowSharkManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1103,6 +1105,13 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if cloverBoost > 0.0 {
 		finalReward = finalReward + int(float64(finalReward)*cloverBoost)
 	}
+	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
+	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
+	if rainbowSharkMult > 1.0 {
+		finalReward = int(float64(finalReward) * rainbowSharkMult)
+		// 移除已擊破的彩虹標記
+		g.removeRainbowSharkMark(t.InstanceID)
+	}
 	// 船長魚競速：記錄擊破（DAY-163）
 	if g.IsCaptainRaceActive() {
 		go g.recordCaptainRaceKill(p, finalReward)
@@ -1457,6 +1466,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運草魚：擊破 T137 時觸發（DAY-179）
 	if isLuckyCloverFish(t.DefID) {
 		go g.tryLuckyCloverFish(p)
+	}
+	// 彩虹鯊魚：擊破 T138 時觸發（DAY-180）
+	if isRainbowShark(t.DefID) {
+		go g.tryRainbowSharkBurst(p, t.InstanceID)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
