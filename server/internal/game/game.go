@@ -163,6 +163,7 @@ type Game struct {
 	PhoenixFish        *phoenixFishManager        // 鳳凰魚涅槃重生系統管理器（DAY-185）
 	DragonTurtle       *dragonTurtleManager       // 龍龜不死 Boss 系統管理器（DAY-186）
 	CrocodileHunter    *crocodileHunterManager    // 巨型鱷魚獵食系統管理器（DAY-188）
+	TimeBomb           *timeBombManager           // 時間炸彈魚系統管理器（DAY-189）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -302,6 +303,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		PhoenixFish:        newPhoenixFishManager(),
 		DragonTurtle:       newDragonTurtleManager(),
 		CrocodileHunter:    newCrocodileHunterManager(),
+		TimeBomb:           newTimeBombManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1128,6 +1130,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if phoenixBoost > 0.0 {
 		finalReward = finalReward + int(float64(finalReward)*phoenixBoost)
 	}
+	// 套用時間炸彈魚拆彈加成（DAY-189，+25% 加法，全服共享，15 秒）
+	timeBombBoost := g.getTimeBombDefuseBoost()
+	if timeBombBoost > 0.0 {
+		finalReward = finalReward + int(float64(finalReward)*timeBombBoost)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1527,6 +1534,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 巨型鱷魚：擊破 T146 時觸發獎池結算（DAY-188）
 	if isCrocodileHunter(t.DefID) {
 		go g.notifyCrocodileHunterKill(p, t.InstanceID, t.Multiplier)
+	}
+	// 時間炸彈魚：擊破 T147 時觸發拆彈成功（DAY-189）
+	if isTimeBombFish(t.DefID) {
+		go g.notifyTimeBombDefuse(p, t.InstanceID, t.Multiplier)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
@@ -1969,6 +1980,10 @@ func (g *Game) spawnTarget() {
 	// 巨型鱷魚：T146 生成時觸發獵食模式（DAY-188）
 	if isCrocodileHunter(def.ID) {
 		go g.tryCrocodileHunterSpawn(instanceID)
+	}
+	// 時間炸彈魚：T147 生成時觸發倒數（DAY-189）
+	if isTimeBombFish(def.ID) {
+		go g.tryTimeBombFishSpawn(instanceID)
 	}
 }
 

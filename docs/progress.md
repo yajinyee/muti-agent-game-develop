@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-188 巨型鱷魚獵食系統）
+## 最後更新：2026-05-22（DAY-189 時間炸彈魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-189 更新（自主觸發）：** 時間炸彈魚系統（Time Bomb Fish）✅
+  - **業界靈感：** Ocean King 炸彈魚概念 + 倒數計時緊張感設計 — T147 時間炸彈魚出現後，螢幕顯示 10 秒倒數計時：倒數結束前玩家擊破 → 「拆彈成功」：全服 +25% 加成持續 15 秒；倒數結束無人擊破 → 「炸彈爆炸」：全場目標 80% 擊破機率（0.5x 倍率，全服共享）
+  - **設計差異：** 與連鎖爆炸魚（被動觸發）不同，時間炸彈魚是「主動倒數」，製造「搶時間」的緊張感；「拆彈成功」的加成獎勵讓玩家有「英雄感」，「炸彈爆炸」讓玩家有「清場爽感」；兩種結果都有獎勵，但方式不同，製造「要不要拆彈」的策略決策
+  - server/internal/game/time_bomb_fish_handler.go：timeBombManager（全服共享 isActive/instanceID/defuseEnd/冷卻管理）；isTimeBombFish 判斷；tryTimeBombFishSpawn（T147 生成時觸發倒數/全服廣播/全服公告）；runTimeBombCountdown（goroutine 每秒廣播倒數/倒數結束觸發爆炸）；notifyTimeBombDefuse（玩家擊破時拆彈成功/基礎獎勵/全服廣播/15秒後廣播加成結束）；onTimeBombExplode（倒數結束爆炸/全場目標80%擊破/全服共享獎勵/廣播結果）；getTimeBombDefuseBoost（供 handleKill 使用，拆彈加成期間 +25%）
+  - server/internal/data/tables.go：新增 T147 時間炸彈魚（35-65x/HP75/SpawnWeight3/Speed50/Lifetime15/time_bomb_fish 行為）
+  - server/internal/ws/protocol.go：新增 MsgTimeBombFish；TimeBombFishPayload（bomb_appear/bomb_tick/bomb_defused/bomb_explode/bomb_result/defuse_end）
+  - server/internal/game/game.go：TimeBomb *timeBombManager；spawnTarget 加入 isTimeBombFish 分支（tryTimeBombFishSpawn）；handleKill 加入 isTimeBombFish 分支（notifyTimeBombDefuse）+ getTimeBombDefuseBoost 加成套用（+25% 加法）
+  - client/chiikawa-pixel/scripts/ui/TimeBombFishPanel.gd：時間炸彈魚面板（紅色主題；bomb_appear 紅色閃光+頂部橫幅滑入+大型倒數數字；bomb_tick 倒數數字彈跳+顏色漸變（綠→黃→紅）+≤3秒紅色閃光+橫幅震動；bomb_defused 綠色強閃光+拆彈加成進度條（底部，持續15秒）+結果彈窗；bomb_explode 橙紅色三次強閃光；bomb_result 爆炸結果彈窗（擊破數/全服共享獎勵）+4秒後淡出；defuse_end 進度條淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：time_bomb_fish 訊號 + _handle_time_bomb_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 TimeBombFishPanelScript（z_index=56）
+  - 倒數設計：10 秒倒數；每秒廣播更新；全服冷卻 40 秒；Lifetime=15 秒（確保倒數結束前目標還在場上）
+  - 拆彈設計：擊破後立即停止倒數；全服 +25% 加成（加法）；持續 15 秒；底部進度條顯示剩餘時間
+  - 爆炸設計：全場目標 80% 擊破機率；0.5x 倍率；全服平均 betLevel 計算；獎勵平均分配給所有玩家
+  - 視覺設計：倒數數字顏色漸變（綠→黃→紅）；≤3 秒時橫幅震動；拆彈成功綠色強閃光；爆炸橙紅色三次強閃光
+  - 全服廣播：出現/每秒倒數/拆彈成功/爆炸/結果全服廣播
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-188 更新（自主觸發）：** 巨型鱷魚獵食系統（Giant Crocodile Hunter）✅
   - **業界依據：** JILI Mega Fishing「giant crocodiles awaken to hunt fish on the fish farm to accumulate big prizes」— T146 巨型鱷魚出現後，每 2 秒主動「獵食」場上一個目標（優先高倍率普通目標），獵食成功給全服玩家共享獎勵（0.4x 倍率），玩家擊破鱷魚本身獲得鱷魚倍率 + 累積獎池 50%
   - **設計差異：** 與不死 BOSS（玩家打它）不同，鱷魚是「它主動打其他魚」，製造「看著鱷魚在場上橫行霸道」的緊張感；玩家需要決策：讓它繼續獵食累積獎池，還是立刻擊破？這是「主動獵食型 BOSS」機制，業界首創設計感

@@ -489,6 +489,8 @@ const (
 
 	MsgCrocodileHunter MessageType = "crocodile_hunter" // 巨型鱷魚獵食廣播（Server→Client，全服，DAY-188）
 
+	MsgTimeBombFish MessageType = "time_bomb_fish" // 時間炸彈魚廣播（Server→Client，全服，DAY-189）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4136,4 +4138,23 @@ type CrocodileHunterPayload struct {
 	TotalReward int     `json:"total_reward,omitempty"` // 總獎勵（croc_killed）
 	NewBalance  int     `json:"new_balance,omitempty"`  // 玩家新餘額（croc_killed）
 	Message     string  `json:"message,omitempty"`      // 廣播訊息
+}
+
+// ---- 時間炸彈魚系統（DAY-189）----
+
+// TimeBombFishPayload 時間炸彈魚廣播（Server → Client，DAY-189）
+// Phase: "bomb_appear" → "bomb_tick"(×N) → "bomb_defused" / "bomb_explode" → "bomb_result" / "defuse_end"
+type TimeBombFishPayload struct {
+	Phase         string `json:"phase"`                    // 當前階段
+	InstanceID    string `json:"instance_id,omitempty"`    // 炸彈魚 InstanceID
+	Countdown     int    `json:"countdown,omitempty"`      // 剩餘秒數（bomb_appear/bomb_tick）
+	KillerID      string `json:"killer_id,omitempty"`      // 拆彈玩家 ID（bomb_defused）
+	KillerName    string `json:"killer_name,omitempty"`    // 拆彈玩家名稱（bomb_defused）
+	BaseReward    int    `json:"base_reward,omitempty"`    // 基礎擊破獎勵（bomb_defused）
+	NewBalance    int    `json:"new_balance,omitempty"`    // 玩家新餘額（bomb_defused）
+	BonusPct      int    `json:"bonus_pct,omitempty"`      // 拆彈加成百分比（bomb_defused）
+	BonusDuration int    `json:"bonus_duration,omitempty"` // 拆彈加成持續秒數（bomb_defused）
+	KillCount     int    `json:"kill_count,omitempty"`     // 爆炸擊破數（bomb_result）
+	TotalReward   int    `json:"total_reward,omitempty"`   // 爆炸總獎勵（bomb_result）
+	Message       string `json:"message,omitempty"`        // 廣播訊息
 }

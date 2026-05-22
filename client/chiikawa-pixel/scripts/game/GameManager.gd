@@ -190,6 +190,7 @@ signal phoenix_fish(data: Dictionary)                  # 鳳凰魚涅槃重生�
 signal dragon_turtle(data: Dictionary)                 # 龍龜不死 Boss（DAY-186）
 signal chain_bomb(data: Dictionary)                    # 連鎖爆炸魚（DAY-187）
 signal crocodile_hunter(data: Dictionary)              # 巨型鱷魚獵食（DAY-188）
+signal time_bomb_fish(data: Dictionary)                # 時間炸彈魚（DAY-189）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -543,6 +544,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_chain_bomb(payload)
 		"crocodile_hunter":
 			_handle_crocodile_hunter(payload)
+		"time_bomb_fish":
+			_handle_time_bomb_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2035,3 +2038,24 @@ func _handle_crocodile_hunter(payload: Dictionary) -> void:
 		var hunt_count: int = payload.get("hunt_count", 0)
 		var total_pool: int = payload.get("total_pool", 0)
 		print("[GameManager] Croc left: hunts=%d pool=%d" % [hunt_count, total_pool])
+
+## 處理時間炸彈魚（DAY-189）
+func _handle_time_bomb_fish(payload: Dictionary) -> void:
+	emit_signal("time_bomb_fish", payload)
+	var phase: String = payload.get("phase", "")
+	if phase == "bomb_appear":
+		var countdown: int = payload.get("countdown", 10)
+		print("[GameManager] Time Bomb appeared: countdown=%d" % countdown)
+	elif phase == "bomb_tick":
+		var remaining: int = payload.get("countdown", 0)
+		print("[GameManager] Time Bomb tick: remaining=%d" % remaining)
+	elif phase == "bomb_defused":
+		var killer_name: String = payload.get("killer_name", "")
+		var bonus_pct: int = payload.get("bonus_pct", 25)
+		print("[GameManager] Time Bomb defused by %s: bonus=+%d%%" % [killer_name, bonus_pct])
+	elif phase == "bomb_explode":
+		print("[GameManager] Time Bomb EXPLODED!")
+	elif phase == "bomb_result":
+		var kill_count: int = payload.get("kill_count", 0)
+		var total_reward: int = payload.get("total_reward", 0)
+		print("[GameManager] Time Bomb result: kills=%d reward=%d" % [kill_count, total_reward])

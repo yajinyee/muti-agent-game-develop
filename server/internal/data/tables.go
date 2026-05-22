@@ -336,7 +336,14 @@ var Targets = map[string]*TargetDef{
 	// 製造「看著鱷魚在場上橫行霸道」的緊張感，玩家需要決策：讓它繼續獵食累積獎池，還是立刻擊破？
 	// 設計：高倍率（40-80x）+ 高 HP（120）+ 稀有生成（2）= 稀有且有「獵食決策」策略感
 	"T146": {ID: "T146", Name: "巨型鱷魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 80, HP: 120, SpawnWeight: 2, Speed: 30, Lifetime: 25, LaborGain: 18, DifficultyFactor: 16.0, SpecialBehavior: "crocodile_hunter"},
-	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
+	// T147 時間炸彈魚（DAY-189）— 業界靈感：Ocean King 炸彈魚概念 + 倒數計時緊張感設計
+	// 出現後顯示 10 秒倒數計時：
+	//   - 倒數結束前玩家擊破 → 「拆彈成功」：全服 +25% 加成持續 15 秒
+	//   - 倒數結束無人擊破 → 「炸彈爆炸」：全場目標 80% 擊破機率（0.5x 倍率，全服共享）
+	// 設計差異：與連鎖爆炸魚（被動觸發）不同，時間炸彈魚是「主動倒數」，製造「搶時間」的緊張感；
+	// 「拆彈成功」的加成獎勵讓玩家有「英雄感」，「炸彈爆炸」讓玩家有「清場爽感」
+	// 設計：中高倍率（35-65x）+ 中等 HP（75）+ 常見生成（3）= 常見且有「倒數緊張感」
+	"T147": {ID: "T147", Name: "時間炸彈魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 50, Lifetime: 15, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "time_bomb_fish"},	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
 // MeteorMultiplierWeights 流星倍率權重（規格書 26.3）

@@ -272,6 +272,7 @@ func _ready() -> void:
 	_init_dragon_turtle_panel()        # 龍龜不死 Boss 面板（DAY-186）
 	_init_chain_bomb_panel()           # 連鎖爆炸魚面板（DAY-187）
 	_init_crocodile_hunter_panel()     # 巨型鱷魚獵食面板（DAY-188）
+	_init_time_bomb_fish_panel()       # 時間炸彈魚面板（DAY-189）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3631,4 +3632,21 @@ func _init_crocodile_hunter_panel() -> void:
 		GameManager.crocodile_hunter.connect(func(data):
 			if is_instance_valid(_crocodile_hunter_panel):
 				_crocodile_hunter_panel.handle(data)
+		)
+
+## ---- 時間炸彈魚面板（DAY-189）----
+const TimeBombFishPanelScript = preload("res://scripts/ui/TimeBombFishPanel.gd")
+var _time_bomb_fish_panel: Control = null
+
+func _init_time_bomb_fish_panel() -> void:
+	var panel = TimeBombFishPanelScript.new()
+	panel.name = "TimeBombFishPanel"
+	panel.z_index = 56
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_time_bomb_fish_panel = panel
+	if GameManager.has_signal("time_bomb_fish"):
+		GameManager.time_bomb_fish.connect(func(data):
+			if is_instance_valid(_time_bomb_fish_panel):
+				_time_bomb_fish_panel.handle(data)
 		)
