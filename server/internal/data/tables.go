@@ -214,6 +214,13 @@ var Targets = map[string]*TargetDef{
 	// 設計差異：與冰釣輪盤（玩家選擇停止）不同，彩蛋是「自動掉落+隨機開啟」，製造「每個彩蛋都是驚喜」的期待感
 	// 設計：中高倍率（50-70x）+ 中等 HP（80）+ 中等生成權重（4）= 常見且有「開彩蛋」驚喜感的特殊目標
 	"T130": {ID: "T130", Name: "幸運彩蛋魚", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 70, HP: 80, SpawnWeight: 4, Speed: 45, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_egg_fish"},
+	// T131 彩虹幸運魚（DAY-173）— 業界依據：Fisch Roblox 2026「Rainbow Leviathan — rare rainbow fish that triggers a luck boost event」
+	// + Fish It 2026「Rainbow Throw — triggered by Prismatic enchant, increases luck for rare fish」
+	// + Ocean King 2026「Rainbow Fish — when caught, all players receive a luck boost for 10 seconds」
+	// 擊破後觸發「彩虹幸運時間」（10秒），全服所有玩家的擊破機率提升 20%（BASE_RTP × 1.2）
+	// 設計差異：與幸運星魚（個人 ×2 倍率）不同，彩虹幸運魚是**全服共享的擊破機率加成**，製造「全服一起爽」的社交感
+	// 設計：中高倍率（55-75x）+ 中等 HP（85）+ 稀有生成權重（3）= 稀有且有「全服幸運」社交感的特殊目標
+	"T131": {ID: "T131", Name: "彩虹幸運魚", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 75, HP: 85, SpawnWeight: 3, Speed: 55, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "rainbow_lucky_fish"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

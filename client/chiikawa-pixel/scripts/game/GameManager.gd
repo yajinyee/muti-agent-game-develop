@@ -174,6 +174,7 @@ signal vortex_fish(data: Dictionary)                   # 漩渦魚群吸引（DA
 signal freeze_bomb(data: Dictionary)                   # 冰凍炸彈魚（DAY-170）
 signal ice_fishing_wheel(data: Dictionary)             # 冰釣幸運輪盤（DAY-171）
 signal lucky_egg_fish(data: Dictionary)                # 幸運彩蛋魚（DAY-172）
+signal rainbow_lucky_fish(data: Dictionary)            # 彩虹幸運魚（DAY-173）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -495,6 +496,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_ice_fishing_wheel(payload)
 		"lucky_egg_fish":
 			_handle_lucky_egg_fish(payload)
+		"rainbow_lucky_fish":
+			_handle_rainbow_lucky_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -1345,6 +1348,19 @@ func _handle_lucky_egg_fish(payload: Dictionary) -> void:
 			print("[GameManager] Lucky Egg Fish egg_result: eggs=%d coins=%d mult=%d" % [egg_count, total_coins, mult_count])
 		"mult_end":
 			print("[GameManager] Lucky Egg Fish mult_end")
+
+## 處理彩虹幸運魚（DAY-173）
+func _handle_rainbow_lucky_fish(payload: Dictionary) -> void:
+	emit_signal("rainbow_lucky_fish", payload)
+	var phase: String = payload.get("phase", "")
+	var player_name: String = payload.get("player_name", "")
+	match phase:
+		"lucky_start":
+			var duration_sec: int = payload.get("duration_sec", 10)
+			var kill_boost: float = payload.get("kill_boost", 0.20)
+			print("[GameManager] Rainbow Lucky Fish lucky_start: player=%s duration=%ds boost=+%.0f%%" % [player_name, duration_sec, kill_boost * 100])
+		"lucky_end":
+			print("[GameManager] Rainbow Lucky Fish lucky_end")
 
 ## 處理黃金海龜時間停止（DAY-159）
 func _handle_golden_turtle_time_stop(payload: Dictionary) -> void:

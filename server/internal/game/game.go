@@ -148,6 +148,7 @@ type Game struct {
 	FreezeBomb         *freezeBombManager         // 冰凍炸彈魚系統管理器（DAY-170）
 	IceFishing         *iceFishingManager         // 冰釣幸運輪盤系統管理器（DAY-171）
 	LuckyEgg           *luckyEggManager           // 幸運彩蛋魚系統管理器（DAY-172）
+	RainbowLucky       *rainbowLuckyManager       // 彩虹幸運魚系統管理器（DAY-173）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -274,6 +275,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		FreezeBomb:         newFreezeBombManager(),
 		IceFishing:         newIceFishingManager(),
 		LuckyEgg:           newLuckyEggManager(),
+		RainbowLucky:       newRainbowLuckyManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -851,7 +853,7 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 		ClickX:         payload.ClickX,
 		ClickY:         payload.ClickY,
 		WeaponPowerMod: p.GetWeaponPowerMod(), // 武器攻擊力加成（DAY-067）
-		EventKillAdd:   g.getEventKillChanceAdd(), // 限時活動擊破率加成（DAY-079）
+		EventKillAdd:   g.getEventKillChanceAdd() + g.GetRainbowLuckyBoost(), // 限時活動+彩虹幸運魚擊破率加成（DAY-079/DAY-173）
 	}
 
 	result := combat.ProcessAttack(req, t)
@@ -1395,6 +1397,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運彩蛋魚：擊破 T130 時觸發（DAY-172）
 	if isLuckyEggFish(t.DefID) {
 		go g.tryLuckyEggFish(p, t.InstanceID, t.X, t.Y)
+	}
+	// 彩虹幸運魚：擊破 T131 時觸發（DAY-173）
+	if isRainbowLuckyFish(t.DefID) {
+		go g.tryRainbowLuckyFish(p.DisplayName, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

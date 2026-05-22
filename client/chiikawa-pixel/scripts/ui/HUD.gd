@@ -256,6 +256,7 @@ func _ready() -> void:
 	_init_freeze_bomb_panel()         # 冰凍炸彈魚面板（DAY-170）
 	_init_ice_fishing_panel()         # 冰釣幸運輪盤面板（DAY-171）
 	_init_lucky_egg_panel()           # 幸運彩蛋魚面板（DAY-172）
+	_init_rainbow_lucky_panel()       # 彩虹幸運魚面板（DAY-173）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3356,3 +3357,15 @@ func _init_lucky_egg_panel() -> void:
 	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
 	add_child(panel)
 	_lucky_egg_panel = panel
+
+## ---- 彩虹幸運魚面板（DAY-173）----
+const RainbowLuckyPanelScript = preload("res://scripts/ui/RainbowLuckyPanel.gd")
+var _rainbow_lucky_panel: Control = null
+
+func _init_rainbow_lucky_panel() -> void:
+	var panel = RainbowLuckyPanelScript.new()
+	panel.name = "RainbowLuckyPanel"
+	panel.z_index = 69  # 在 LuckyEggPanel(70) 下方
+	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
+	add_child(panel)
+	_rainbow_lucky_panel = panel

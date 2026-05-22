@@ -441,6 +441,9 @@ const (
 	// 幸運彩蛋魚系統（DAY-172）
 	MsgLuckyEggFish MessageType = "lucky_egg_fish" // 幸運彩蛋魚廣播（Server→Client）
 
+	// 彩虹幸運魚系統（DAY-173）
+	MsgRainbowLuckyFish MessageType = "rainbow_lucky_fish" // 彩虹幸運魚廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3766,4 +3769,17 @@ type LuckyEggFishPayload struct {
 	WeaponCount int             `json:"weapon_count"` // 武器充能彩蛋數量
 	TriggerX    float64         `json:"trigger_x"`    // 觸發位置 X（egg_start 時）
 	TriggerY    float64         `json:"trigger_y"`    // 觸發位置 Y（egg_start 時）
+}
+
+// ---- 彩虹幸運魚系統（DAY-173）----
+
+// RainbowLuckyFishPayload 彩虹幸運魚廣播（Server → Client，DAY-173）
+// Phase: "lucky_start"（全服）→ "lucky_end"（全服）
+type RainbowLuckyFishPayload struct {
+	Phase       string  `json:"phase"`        // 當前階段：lucky_start/lucky_end
+	PlayerName  string  `json:"player_name"`  // 觸發玩家名稱
+	DurationSec int     `json:"duration_sec"` // 持續時間（秒，lucky_start 時）
+	KillBoost   float64 `json:"kill_boost"`   // 擊破機率加成（0.20 = +20%，lucky_start 時）
+	TriggerX    float64 `json:"trigger_x"`    // 觸發位置 X（lucky_start 時）
+	TriggerY    float64 `json:"trigger_y"`    // 觸發位置 Y（lucky_start 時）
 }
