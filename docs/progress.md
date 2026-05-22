@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-202 深淵漩渦魚系統）
+## 最後更新：2026-05-22（DAY-203 座頭鯨覺醒系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-203 更新（自主觸發）：** 座頭鯨覺醒系統（Humpback Whale Awaken）✅
+  - **業界依據：** Royal Fishing JILI「Humpback Whale offers 90-150x with 15x base multiplier. Awaken Boss mechanic — triggers wave attack that sweeps the screen. The Humpback Whale's signature breach mechanic creates massive splash zones.」
+  - **設計：** 擊破 T161 後觸發「鯨歌覺醒」：基礎獎勵 15x betLevel；3 波波浪攻擊（每波 3 個目標，65% 擊破機率，0.60x 倍率，每波間隔 1 秒）；5% 機率觸發「深海巨浪」：全場所有目標（60% 擊破機率，0.65x 倍率）；最高組合 150x
+  - **設計差異：** 與冰鳳凰（Power Up 精準攻擊 3-5 個目標）不同，座頭鯨是「波浪式掃場」（3 波 × 3 個目標），讓玩家感受到「鯨魚在場上掀起巨浪」的壯觀感；與神秘龍魚（8 波，每波 3-5 個目標）不同，座頭鯨是「3 波快速掃場」，節奏更緊湊；「深海巨浪」（5%）讓玩家有「說不定這次全場清場」的期待感；基礎獎勵 15x 確保玩家擊破後立刻有回報
+  - server/internal/game/humpback_whale_handler.go：humpbackWhaleManager；isHumpbackWhale（T161）；tryHumpbackWhaleAwaken（擊破後觸發/基礎獎勵/全服廣播）；runHumpbackWhaleWaves（3波波浪攻擊/5%深海巨浪/最終結算）
+  - server/internal/data/tables.go：新增 T161 座頭鯨（90-150x/HP120/SpawnWeight2/Speed25/Lifetime22）
+  - server/internal/ws/protocol.go：新增 MsgHumpbackWhale；HumpbackWhalePayload（awaken_start/wave_attack/tidal_wave_start/tidal_wave_result/awaken_result）
+  - server/internal/game/game.go：HumpbackWhale *humpbackWhaleManager；handleKill 加入 isHumpbackWhale 分支
+  - client/chiikawa-pixel/scripts/ui/HumpbackWhalePanel.gd：深海藍綠主題面板（awaken_start 深藍雙閃光+橫幅+基礎獎勵彈窗；wave_attack 橫向波浪動畫+擊破浮動文字；tidal_wave_start 全螢幕深藍白強閃光+「深海巨浪！」大字；awaken_result 右側滑入結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：humpback_whale 訊號 + _handle_humpback_whale
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 HumpbackWhalePanelScript（layer=42）
+  - 波浪設計：3 波；每波 3 個目標；65% 擊破機率；0.60x 倍率；每波間隔 1 秒；全服冷卻 45 秒
+  - 深海巨浪設計：5% 機率；全場所有目標；60% 擊破機率；0.65x 倍率；每個目標間隔 50ms
+  - 視覺設計：深海藍綠主題（#006994 + #00CED1 + #7FFFD4）；橫向波浪掃場動畫（每波不同高度）；深海巨浪全螢幕三次閃光
+  - 全服廣播：覺醒開始/每波攻擊/深海巨浪/結算全服廣播；≥100x 時全服公告
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-202 更新（自主觸發）：** 深淵漩渦魚系統（Abyss Vortex Fish）✅
   - **業界依據：** Ocean King 2「Vortex Fish — sucks all fish of the same species into a whirlpool. Catching a Vortex Fish will suck all fish of the same species in the area into a whirlpool.」+ SteamDB OceanFest 2026「Abyssal Vortex (Depth 3, persistent whirlpool)」
   - **設計：** 擊破 T160 後在擊破位置生成「深淵漩渦」（持續 5 秒）：每 0.5 秒吸引脈衝（500px 半徑內目標向中心移動 180px）；進入 100px 中心：80% 擊破機率，0.70x 倍率；漩渦結束後深淵爆炸：300px 半徑，60% 擊破機率，0.55x 倍率

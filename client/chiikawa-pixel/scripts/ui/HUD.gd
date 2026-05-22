@@ -286,6 +286,7 @@ func _ready() -> void:
 	_init_ice_phoenix_panel()           # 冰鳳凰覺醒 BOSS 面板（DAY-200）
 	_init_serial_bomb_crab_panel()      # 連環炸彈蟹面板（DAY-201）
 	_init_abyss_vortex_panel()          # 深淵漩渦魚面板（DAY-202）
+	_init_humpback_whale_panel()        # 座頭鯨覺醒面板（DAY-203）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3871,3 +3872,20 @@ func _init_abyss_vortex_panel() -> void:
 func _on_abyss_vortex(data: Dictionary) -> void:
 	if is_instance_valid(_abyss_vortex_panel):
 		_abyss_vortex_panel.handle_abyss_vortex(data)
+
+## ---- 座頭鯨覺醒面板（DAY-203）----
+const HumpbackWhalePanelScript = preload("res://scripts/ui/HumpbackWhalePanel.gd")
+var _humpback_whale_panel = null
+
+func _init_humpback_whale_panel() -> void:
+	var panel = HumpbackWhalePanelScript.new()
+	panel.name = "HumpbackWhalePanel"
+	panel.layer = 42
+	add_child(panel)
+	_humpback_whale_panel = panel
+	if GameManager.has_signal("humpback_whale"):
+		GameManager.humpback_whale.connect(_on_humpback_whale)
+
+func _on_humpback_whale(data: Dictionary) -> void:
+	if is_instance_valid(_humpback_whale_panel):
+		_humpback_whale_panel.handle_humpback_whale(data)

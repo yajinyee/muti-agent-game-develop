@@ -531,6 +531,9 @@ const (
 	// 深淵漩渦魚系統（DAY-202）
 	MsgAbyssVortex MessageType = "abyss_vortex" // 深淵漩渦廣播（Server→Client，全服）
 
+	// 座頭鯨覺醒系統（DAY-203）
+	MsgHumpbackWhale MessageType = "humpback_whale" // 座頭鯨覺醒廣播（Server→Client，全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4477,4 +4480,21 @@ type AbyssVortexPayload struct {
 	BlastReward int     `json:"blast_reward,omitempty"`
 	TotalKills  int     `json:"total_kills,omitempty"`
 	TotalReward int     `json:"total_reward,omitempty"`
+}
+
+// HumpbackWhalePayload 座頭鯨覺醒廣播（Server → Client，DAY-203）
+// Event: "awaken_start" → "wave_attack"（每波）× 3 → ["tidal_wave_start" → "tidal_wave_result"] → "awaken_result"
+type HumpbackWhalePayload struct {
+	Event       string `json:"event"`
+	KillerName  string `json:"killer_name,omitempty"`
+	BaseReward  int    `json:"base_reward,omitempty"`
+	WaveCount   int    `json:"wave_count,omitempty"`
+	WaveNum     int    `json:"wave_num,omitempty"`
+	WaveKills   int    `json:"wave_kills,omitempty"`
+	WaveReward  int    `json:"wave_reward,omitempty"`
+	TidalKills  int    `json:"tidal_kills,omitempty"`
+	TidalReward int    `json:"tidal_reward,omitempty"`
+	TotalKills  int    `json:"total_kills,omitempty"`
+	TotalReward int    `json:"total_reward,omitempty"`
+	HasTidal    bool   `json:"has_tidal,omitempty"`
 }

@@ -420,6 +420,13 @@ var Targets = map[string]*TargetDef{
 	//   漩渦結束後深淵爆炸：300px 半徑，60% 擊破機率，0.55x 倍率
 	"T160": {ID: "T160", Name: "深淵漩渦魚", Type: TargetTypeSpecial, MultiplierMin: 45, MultiplierMax: 70, HP: 75, SpawnWeight: 3, Speed: 50, Lifetime: 13, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "abyss_vortex_pull"},
 
+	// T161 座頭鯨（DAY-203）— 業界依據：Royal Fishing JILI「Humpback Whale offers 90-150x with
+	// 15x base multiplier. Awaken Boss mechanic — triggers wave attack that sweeps the screen.
+	// The Humpback Whale's signature breach mechanic creates massive splash zones.」
+	// 擊破後觸發「鯨歌覺醒」：基礎獎勵 15x betLevel；3 波波浪攻擊（每波 3 個目標，65% 擊破機率，0.60x 倍率）
+	// 5% 機率觸發「深海巨浪」：全場所有目標（60% 擊破機率，0.65x 倍率）；最高組合 150x
+	"T161": {ID: "T161", Name: "座頭鯨", Type: TargetTypeSpecial, MultiplierMin: 90, MultiplierMax: 150, HP: 120, SpawnWeight: 2, Speed: 25, Lifetime: 22, LaborGain: 18, DifficultyFactor: 16.0, SpecialBehavior: "humpback_whale_awaken"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

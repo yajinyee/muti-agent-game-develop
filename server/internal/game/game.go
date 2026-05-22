@@ -176,6 +176,7 @@ type Game struct {
 	IcePhoenix         *icePhoenixManager          // 冰鳳凰覺醒 BOSS 系統管理器（DAY-200）
 	SerialBombCrab     *serialBombCrabManager      // 連環炸彈蟹系統管理器（DAY-201）
 	AbyssVortex        *abyssVortexManager         // 深淵漩渦魚系統管理器（DAY-202）
+	HumpbackWhale      *humpbackWhaleManager       // 座頭鯨覺醒系統管理器（DAY-203）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -328,6 +329,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		IcePhoenix:         newIcePhoenixManager(),
 		SerialBombCrab:     newSerialBombCrabManager(),
 		AbyssVortex:        newAbyssVortexManager(),
+		HumpbackWhale:      newHumpbackWhaleManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1634,6 +1636,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 深淵漩渦魚：擊破 T160 時觸發深淵漩渦（DAY-202）
 	if isAbyssVortexFish(t.DefID) {
 		go g.tryAbyssVortexPull(p, t.X, t.Y)
+	}
+	// 座頭鯨：擊破 T161 時觸發鯨歌覺醒（DAY-203）
+	if isHumpbackWhale(t.DefID) {
+		go g.tryHumpbackWhaleAwaken(p, t.Multiplier)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
