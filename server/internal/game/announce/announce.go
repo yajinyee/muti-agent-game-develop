@@ -54,6 +54,7 @@ const (
 	EventRainbowPrism             EventType = "rainbow_prism"             // 彩虹稜鏡魚觸發（DAY-213）
 	EventGoldenAccumulator        EventType = "golden_accumulator"        // 黃金累積魚觸發（DAY-214）
 	EventLuckyMirrorFish          EventType = "lucky_mirror_fish"         // 幸運鏡像魚觸發（DAY-215）
+	EventCursedPoisonFish         EventType = "cursed_poison_fish"        // 詛咒毒魚觸發（DAY-216）
 )
 
 // Priority 公告優先級
@@ -717,6 +718,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🪞 幸運鏡像魚！"
 		message = msg
 		icon = "🪞"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventCursedPoisonFish:
+		msg := "☠️ 詛咒毒魚觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#9B59B6"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "☠️ 詛咒毒魚！"
+		message = msg
+		icon = "☠️"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

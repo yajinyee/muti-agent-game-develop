@@ -299,6 +299,7 @@ func _ready() -> void:
 	_init_rainbow_prism_panel()         # 彩虹稜鏡魚系統面板（DAY-213）
 	_init_golden_accumulator_panel()    # 黃金累積魚系統面板（DAY-214）
 	_init_lucky_mirror_fish_panel()     # 幸運鏡像魚系統面板（DAY-215）
+	_init_cursed_poison_fish_panel()    # 詛咒毒魚系統面板（DAY-216）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4108,3 +4109,21 @@ func _init_lucky_mirror_fish_panel() -> void:
 func _on_lucky_mirror_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_mirror_fish_panel):
 		_lucky_mirror_fish_panel.handle_lucky_mirror_fish(data)
+
+# ─── 詛咒毒魚系統面板（DAY-216）───────────────────────────────────────────
+const CursedPoisonFishPanelScript = preload("res://scripts/ui/CursedPoisonFishPanel.gd")
+
+var _cursed_poison_fish_panel = null
+
+func _init_cursed_poison_fish_panel() -> void:
+	var panel = CursedPoisonFishPanelScript.new()
+	panel.name = "CursedPoisonFishPanel"
+	panel.layer = 29
+	add_child(panel)
+	_cursed_poison_fish_panel = panel
+	if GameManager.has_signal("cursed_poison_fish"):
+		GameManager.cursed_poison_fish.connect(_on_cursed_poison_fish)
+
+func _on_cursed_poison_fish(data: Dictionary) -> void:
+	if is_instance_valid(_cursed_poison_fish_panel):
+		_cursed_poison_fish_panel.handle_cursed_poison_fish(data)

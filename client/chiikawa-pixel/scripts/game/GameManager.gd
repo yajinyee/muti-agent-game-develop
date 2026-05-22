@@ -217,6 +217,7 @@ signal time_freeze_fish(data: Dictionary)            # 時間凍結魚系統（D
 signal rainbow_prism(data: Dictionary)              # 彩虹稜鏡魚系統（DAY-213）
 signal golden_accumulator(data: Dictionary)         # 黃金累積魚系統（DAY-214）
 signal lucky_mirror_fish(data: Dictionary)          # 幸運鏡像魚系統（DAY-215）
+signal cursed_poison_fish(data: Dictionary)         # 詛咒毒魚系統（DAY-216）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -624,6 +625,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_golden_accumulator(payload)
 		"lucky_mirror_fish":
 			_handle_lucky_mirror_fish(payload)
+		"cursed_poison_fish":
+			_handle_cursed_poison_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2548,6 +2551,26 @@ func _handle_lucky_mirror_fish(payload: Dictionary) -> void:
 			var blasted: int = payload.get("blast_count", 0)
 			var reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Mirror result: killed=%d blast=%d reward=%d" % [killed, blasted, reward])
+
+## 處理詛咒毒魚系統（DAY-216）
+func _handle_cursed_poison_fish(payload: Dictionary) -> void:
+	emit_signal("cursed_poison_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"curse_start":
+			var targets: Array = payload.get("cursed_targets", [])
+			var mult: float = payload.get("curse_mult", 2.5)
+			print("[GameManager] Cursed Poison Fish: %d targets cursed (x%.1f)" % [targets.size(), mult])
+		"curse_kill":
+			var instance_id: String = payload.get("instance_id", "")
+			print("[GameManager] Cursed target killed: %s" % instance_id)
+		"curse_escape":
+			var penalty_sec: int = payload.get("penalty_sec", 5)
+			print("[GameManager] Curse escape! Penalty x0.5 for %ds" % penalty_sec)
+		"curse_cleanse":
+			var player_name: String = payload.get("player_name", "")
+			var reward: int = payload.get("cleanse_reward", 0)
+			print("[GameManager] Curse cleansed by %s, reward=%d" % [player_name, reward])
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:

@@ -189,6 +189,7 @@ type Game struct {
 	RainbowPrism       *rainbowPrismManager        // 彩虹稜鏡魚系統管理器（DAY-213）
 	GoldenAccumulator  *goldenAccumulatorManager   // 黃金累積魚系統管理器（DAY-214）
 	LuckyMirrorFish    *luckyMirrorFishManager     // 幸運鏡像魚系統管理器（DAY-215）
+	CursedPoisonFish   *cursedPoisonFishManager    // 詛咒毒魚系統管理器（DAY-216）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -354,6 +355,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		RainbowPrism:       newRainbowPrismManager(),
 		GoldenAccumulator:  newGoldenAccumulatorManager(),
 		LuckyMirrorFish:    newLuckyMirrorFishManager(),
+		CursedPoisonFish:   newCursedPoisonFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1243,6 +1245,17 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if mirrorMult > 1.0 {
 		finalReward = int(float64(finalReward) * mirrorMult)
 	}
+	// 套用詛咒毒魚倍率加成（DAY-216，×2.5 乘法，擊破詛咒目標時）
+	cursedMult := g.getCursedPoisonKillMult(t.InstanceID)
+	if cursedMult > 1.0 {
+		finalReward = int(float64(finalReward) * cursedMult)
+		g.removeCursedEntry(t.InstanceID)
+	}
+	// 套用詛咒懲罰倍率（DAY-216，×0.5 乘法，詛咒目標逃跑後持續 5 秒）
+	penaltyMult := g.getCursedPoisonPenaltyMult(p.ID)
+	if penaltyMult < 1.0 {
+		finalReward = int(float64(finalReward) * penaltyMult)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1761,6 +1774,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if g.isLuckyMirrorEntry(t.InstanceID) {
 		go g.removeLuckyMirrorEntry(t.InstanceID)
 	}
+	// 詛咒毒魚：擊破 T174 本身時解除所有詛咒（DAY-216）
+	if isCursedPoisonFish(t.DefID) {
+		go g.tryCleanseAllCurses(p)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)
@@ -1894,6 +1911,10 @@ func (g *Game) updateNormalPlay() {
 			// 黃金累積魚：離開畫面時通知累積系統（DAY-214）
 			if isGoldenAccumulatorFish(t.DefID) {
 				go g.notifyGoldenAccumulatorLeave(id)
+			}
+			// 詛咒毒魚：詛咒目標離開畫面時觸發懲罰（DAY-216）
+			if g.isCursedTarget(id) {
+				go g.notifyCursedTargetEscape(id)
 			}
 		}
 	}
@@ -2234,6 +2255,12 @@ func (g *Game) spawnTarget() {
 	// 黃金累積魚：T172 生成時啟動累積系統（DAY-214）
 	if isGoldenAccumulatorFish(def.ID) {
 		go g.notifyGoldenAccumulatorSpawn(t)
+	}
+	// 詛咒毒魚：T174 生成時自動詛咒場上目標（DAY-216）
+	// 注意：詛咒毒魚生成時立即詛咒，不需要玩家擊破才觸發
+	if isCursedPoisonFish(def.ID) {
+		// 用一個虛擬玩家觸發詛咒（取第一個在線玩家，或直接呼叫內部函數）
+		go g.spawnCursedPoisonMarks()
 	}
 }
 

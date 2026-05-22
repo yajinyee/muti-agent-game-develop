@@ -554,6 +554,7 @@ const (
 	MsgRainbowPrism    MessageType = "rainbow_prism"     // 彩虹稜鏡魚廣播（Server→Client，DAY-213）
 	MsgGoldenAccumulator MessageType = "golden_accumulator" // 黃金累積魚廣播（Server→Client，DAY-214）
 	MsgLuckyMirrorFish   MessageType = "lucky_mirror_fish"  // 幸運鏡像魚廣播（Server→Client，DAY-215）
+	MsgCursedPoisonFish  MessageType = "cursed_poison_fish" // 詛咒毒魚廣播（Server→Client，DAY-216）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4788,4 +4789,32 @@ type LuckyMirrorFishPayload struct {
 	BlastCount    int                   `json:"blast_count,omitempty"`
 	TotalReward   int                   `json:"total_reward,omitempty"`
 	MultBoost     float64               `json:"mult_boost,omitempty"`
+}
+
+// CursedTargetInfo 詛咒目標資訊
+type CursedTargetInfo struct {
+	InstanceID string  `json:"instance_id"` // 被詛咒的目標 instanceID
+	DefID      string  `json:"def_id"`      // 目標 defID
+	CurseMult  float64 `json:"curse_mult"`  // 詛咒倍率（×2.5）
+}
+
+// CursedPoisonFishPayload 詛咒毒魚廣播（Server → Client，DAY-216）
+//
+// Events:
+//
+//	"curse_start"    — 詛咒毒魚出現，詛咒標記建立（全服廣播）
+//	"curse_kill"     — 詛咒目標被擊破（全服廣播，含觸發者）
+//	"curse_escape"   — 詛咒目標逃跑，觸發懲罰（個人廣播）
+//	"curse_cleanse"  — 擊破毒魚解除詛咒（全服廣播）
+//	"curse_end"      — 詛咒期間結束（全服廣播）
+type CursedPoisonFishPayload struct {
+	Event        string             `json:"event"`
+	PlayerName   string             `json:"player_name,omitempty"`
+	CursedTargets []CursedTargetInfo `json:"cursed_targets,omitempty"`
+	InstanceID   string             `json:"instance_id,omitempty"`
+	CurseMult    float64            `json:"curse_mult,omitempty"`
+	PenaltyMult  float64            `json:"penalty_mult,omitempty"`
+	PenaltySec   int                `json:"penalty_sec,omitempty"`
+	CleanseReward int               `json:"cleanse_reward,omitempty"`
+	KilledCount  int                `json:"killed_count,omitempty"`
 }

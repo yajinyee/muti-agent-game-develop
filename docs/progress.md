@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-215 幸運鏡像魚系統）
+## 最後更新：2026-05-23（DAY-216 詛咒毒魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-216 更新（自主觸發）：** 詛咒毒魚系統（Cursed Poison Fish）✅
+  - **業界依據：** 業界原創「詛咒反轉」機制
+  - **設計：** T174 詛咒毒魚出現後，場上隨機 3 個目標被「詛咒標記」（紫色）；詛咒目標被擊破：獎勵 ×2.5 倍率（高風險高報酬）；詛咒目標逃跑：觸發「詛咒懲罰」— 下一次擊破任何目標獎勵 ×0.5（持續 5 秒）；擊破 T174 本身：「解除詛咒」— 移除所有詛咒標記 + 解咒獎勵 10x betLevel；個人冷卻 18 秒；全服廣播詛咒標記/解除/懲罰
+  - **設計差異：** 與彩虹稜鏡魚（染色 + 不同倍率）不同，詛咒毒魚是「高風險高報酬」— 打到詛咒目標 ×2.5，但讓它跑掉就被懲罰 ×0.5；「詛咒懲罰」讓玩家有「一定要在它跑掉前打到」的緊迫感；「解除詛咒」讓玩家有「要不要先打毒魚解咒」的策略決策；全服廣播讓所有玩家都看到詛咒目標，製造「全服競爭搶打詛咒目標」的社交感
+  - server/internal/game/cursed_poison_fish_handler.go：cursedPoisonFishManager（個人冷卻/cursedTargets/penaltyUntil）；isCursedPoisonFish（T174）；getCursedPoisonKillMult（供 handleKill 使用，詛咒目標 ×2.5 乘法加成）；getCursedPoisonPenaltyMult（供 handleKill 使用，懲罰期間 ×0.5）；removeCursedEntry（詛咒目標被擊破後移除）；isCursedTarget（判斷是否為詛咒目標）；notifyCursedTargetEscape（詛咒目標逃跑時觸發懲罰）；tryCleanseAllCurses（擊破毒魚解除所有詛咒）；tryCursedPoisonFish（玩家觸發版本）；spawnCursedPoisonMarks（生成時自動詛咒版本）
+  - server/internal/data/tables.go：新增 T174 詛咒毒魚（30-55x/HP65/SpawnWeight3/Speed52/Lifetime12）
+  - server/internal/ws/protocol.go：新增 MsgCursedPoisonFish；CursedTargetInfo；CursedPoisonFishPayload（curse_start/curse_kill/curse_escape/curse_cleanse）
+  - server/internal/game/announce/announce.go：新增 EventCursedPoisonFish + case 處理
+  - server/internal/game/game.go：CursedPoisonFish *cursedPoisonFishManager；handleKill 加入 getCursedPoisonKillMult + getCursedPoisonPenaltyMult + isCursedPoisonFish 分支；gameLoop 加入 isCursedTarget 逃跑偵測；spawnTarget 加入 isCursedPoisonFish 自動詛咒
+  - client/chiikawa-pixel/scripts/ui/CursedPoisonFishPanel.gd：紫色詛咒主題面板（curse_start 紫色雙閃光+頂部橫幅+骷髏標記；curse_kill 消失閃光+浮動文字；curse_escape 紅色警告閃光+懲罰大字+計時條；curse_cleanse 白色解咒閃光+大字+獎勵）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：cursed_poison_fish 訊號 + _handle_cursed_poison_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 CursedPoisonFishPanelScript（layer=29）
+  - 詛咒設計：最多 3 個目標；×2.5 擊破倍率；×0.5 逃跑懲罰（5 秒）；個人冷卻 18 秒；生成時自動詛咒
+  - 解咒設計：擊破 T174 本身；移除所有詛咒標記；解咒獎勵 10x betLevel；清除玩家懲罰
+  - 視覺設計：紫色詛咒主題（#9B59B6 + #6C3483 + #E8D5FF + #FF4444）；骷髏標記右側排列；紅色懲罰計時條；白色解咒閃光
+  - 全服廣播：詛咒建立/目標被擊破/目標逃跑/解除詛咒全服廣播
+  - 全服公告：詛咒建立時公告；解除詛咒時公告
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-215 更新（自主觸發）：** 幸運鏡像魚系統（Lucky Mirror Fish）✅
   - **業界依據：** 業界原創「鏡像複製」機制
   - **設計：** 擊破 T173 後觸發「鏡像複製」：在場上隨機選最多 3 個目標，為每個目標建立「鏡像分身」（HP 50%，倍率 ×1.5）；鏡像分身持續 8 秒；擊破鏡像分身獲得 ×1.5 倍率加成（乘法）；8 秒後所有未被擊破的鏡像分身「鏡像爆炸」（60% 擊破機率，0.60x 倍率）；個人冷卻 20 秒；全服廣播鏡像建立/爆炸

@@ -509,6 +509,13 @@ var Targets = map[string]*TargetDef{
 	//   - 8 秒後所有未被擊破的鏡像分身「鏡像爆炸」（60% 擊破機率，0.60x 倍率）
 	//   - 個人冷卻 20 秒；全服廣播鏡像建立/爆炸
 	"T173": {ID: "T173", Name: "幸運鏡像魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 48, Lifetime: 13, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_mirror"},
+	// T174 詛咒毒魚（DAY-216）— 業界原創「詛咒反轉」機制
+	// 設計：T174 出現後，場上隨機 3 個目標被「詛咒標記」（紫色）
+	//   - 詛咒目標被擊破：獎勵 ×2.5 倍率（高風險高報酬）
+	//   - 詛咒目標逃跑：觸發「詛咒懲罰」— 下一次擊破任何目標獎勵 ×0.5（持續 5 秒）
+	//   - 擊破 T174 本身：「解除詛咒」— 移除所有詛咒標記 + 解咒獎勵 10x betLevel
+	//   - 個人冷卻 18 秒；全服廣播詛咒標記/解除/懲罰
+	"T174": {ID: "T174", Name: "詛咒毒魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 55, HP: 65, SpawnWeight: 3, Speed: 52, Lifetime: 12, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "cursed_poison"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
