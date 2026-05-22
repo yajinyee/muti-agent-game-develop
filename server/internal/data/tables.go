@@ -361,6 +361,12 @@ var Targets = map[string]*TargetDef{
 	// 擊破後建立「電流網路」：場上所有相鄰目標（200px 內）之間建立電流連接，每條連接 65% 擊破機率（0.55x 倍率）
 	// 密集目標群形成更多連接，製造「越多魚越爽」的策略感；電流選擇較低 HP 的目標擊破
 	"T151": {ID: "T151", Name: "電流水母", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 55, HP: 60, SpawnWeight: 4, Speed: 45, Lifetime: 12, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "electric_jellyfish_network"},
+	// T152 長龍王（DAY-194）— 業界依據：Royal Fishing JILI「ChainLong King — dual-ring roulette activates when captured.
+	// You control when the pointer stops, multiplying inner and outer ring values together.
+	// Maximum combination delivers 350X, whilst the ChainLong King itself can award up to 1000X mega wins.」
+	// 擊破後觸發「雙環輪盤」互動（個人）：內環 5x/10x/20x/50x × 外環 1x/2x/3x/5x/7x = 最高 350x
+	// 特殊：1% 機率觸發「千倍大獎」（1000x），跳過輪盤直接給獎
+	"T152": {ID: "T152", Name: "長龍王", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 100, HP: 100, SpawnWeight: 2, Speed: 35, Lifetime: 18, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "chainlong_king_roulette"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

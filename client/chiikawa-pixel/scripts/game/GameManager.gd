@@ -195,6 +195,7 @@ signal triple_lucky_fish(data: Dictionary)             # 三重幸運魚（DAY-1
 signal school_panic(data: Dictionary)                  # 魚群驚嚇連帶（DAY-191）
 signal rock_skeleton_concert(data: Dictionary)         # 搖滾骷髏演唱會（DAY-192）
 signal electric_jellyfish(data: Dictionary)            # 電流水母電流網路（DAY-193）
+signal chainlong_king(data: Dictionary)                # 長龍王雙環輪盤（DAY-194）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -558,6 +559,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_rock_skeleton_concert(payload)
 		"electric_jellyfish":
 			_handle_electric_jellyfish(payload)
+		"chainlong_king":
+			_handle_chainlong_king(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2128,3 +2131,23 @@ func _handle_electric_jellyfish(payload: Dictionary) -> void:
 			var total_kills: int = payload.get("total_kills", 0)
 			var link_count: int = payload.get("link_count", 0)
 			print("[GameManager] Electric Jellyfish network ended. links=%d kills=%d" % [link_count, total_kills])
+
+## 處理長龍王雙環輪盤（DAY-194）
+func _handle_chainlong_king(payload: Dictionary) -> void:
+	emit_signal("chainlong_king", payload)
+	var phase: String = payload.get("phase", "")
+	match phase:
+		"roulette_start":
+			var instance_id: String = payload.get("instance_id", "")
+			print("[GameManager] ChainLong King roulette started: %s" % instance_id)
+		"mega_win":
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] ChainLong King MEGA WIN! reward=%d" % reward)
+		"result":
+			var total_mult: int = payload.get("total_mult", 0)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] ChainLong King result: %dx reward=%d" % [total_mult, reward])
+
+## 發送長龍王停止輪盤訊息（DAY-194）
+func send_chainlong_king_stop(instance_id: String) -> void:
+	_send_message("chainlong_king_stop", {"instance_id": instance_id})

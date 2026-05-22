@@ -503,6 +503,10 @@ const (
 	// 電流水母電流網路系統（DAY-193）
 	MsgElectricJellyfish MessageType = "electric_jellyfish" // 電流水母電流網路廣播（Server→Client，全服）
 
+	// 長龍王雙環輪盤系統（DAY-194）
+	MsgChainLongKing     MessageType = "chainlong_king"      // 長龍王雙環輪盤廣播（Server→Client，個人+全服）
+	MsgChainLongKingStop MessageType = "chainlong_king_stop" // 玩家停止輪盤（Client→Server）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4264,4 +4268,28 @@ type ElectricJellyfishPayload struct {
 	TotalKills  int                  `json:"total_kills,omitempty"`    // 累計擊破數
 	TotalReward int                  `json:"total_reward,omitempty"`   // 累計獎勵
 	Links       []ElectricLinkResult `json:"links,omitempty"`          // 所有連接結果（result 階段）
+}
+
+// ChainLongKingPayload 長龍王雙環輪盤廣播（Server → Client，DAY-194）
+// Phase: "roulette_start" → "inner_stop" → "outer_stop" → "result"
+// 千倍大獎: "mega_win" → "mega_broadcast"
+// 全服廣播: "broadcast"（≥100x）
+type ChainLongKingPayload struct {
+	Phase       string `json:"phase"`                    // 當前階段
+	InstanceID  string `json:"instance_id,omitempty"`    // 觸發的長龍王 InstanceID
+	PlayerName  string `json:"player_name,omitempty"`    // 觸發玩家名稱（全服廣播用）
+	InnerRing   []int  `json:"inner_ring,omitempty"`     // 內環倍率定義（roulette_start 時發送）
+	OuterRing   []int  `json:"outer_ring,omitempty"`     // 外環乘數定義（roulette_start 時發送）
+	InnerResult int    `json:"inner_result,omitempty"`   // 內環停止結果
+	OuterResult int    `json:"outer_result,omitempty"`   // 外環停止結果
+	TotalMult   int    `json:"total_mult,omitempty"`     // 最終倍率（內環 × 外環）
+	Reward      int    `json:"reward,omitempty"`         // 獎勵金幣
+	IsBigWin    bool   `json:"is_big_win,omitempty"`     // 是否大獎（≥100x）
+	IsMega      bool   `json:"is_mega,omitempty"`        // 是否千倍大獎
+	IsTimeout   bool   `json:"is_timeout,omitempty"`     // 是否超時自動停止
+}
+
+// ChainLongKingStopPayload 玩家停止輪盤（Client → Server，DAY-194）
+type ChainLongKingStopPayload struct {
+	InstanceID string `json:"instance_id"` // 輪盤 InstanceID（防止重複停止）
 }

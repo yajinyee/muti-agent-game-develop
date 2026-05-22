@@ -277,6 +277,7 @@ func _ready() -> void:
 	_init_school_panic_panel()         # 魚群驚嚇連帶面板（DAY-191）
 	_init_rock_skeleton_concert_panel() # 搖滾骷髏演唱會面板（DAY-192）
 	_init_electric_jellyfish_panel()    # 電流水母電流網路面板（DAY-193）
+	_init_chainlong_king_panel()        # 長龍王雙環輪盤面板（DAY-194）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3702,3 +3703,27 @@ func _init_electric_jellyfish_panel() -> void:
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(panel)
 	_electric_jellyfish_panel = panel
+
+## ---- 長龍王雙環輪盤面板（DAY-194）----
+const ChainLongKingPanelScript = preload("res://scripts/ui/ChainLongKingPanel.gd")
+var _chainlong_king_panel = null
+
+func _init_chainlong_king_panel() -> void:
+	var panel = ChainLongKingPanelScript.new()
+	panel.name = "ChainLongKingPanel"
+	panel.layer = 51  # 在 ElectricJellyfishPanel(52) 之下
+	add_child(panel)
+	_chainlong_king_panel = panel
+	# 連接停止按鈕訊號
+	if panel.has_signal("chainlong_king_stop_pressed"):
+		panel.chainlong_king_stop_pressed.connect(_on_chainlong_king_stop_pressed)
+	# 連接 GameManager 訊號
+	if GameManager.has_signal("chainlong_king"):
+		GameManager.chainlong_king.connect(_on_chainlong_king)
+
+func _on_chainlong_king(data: Dictionary) -> void:
+	if is_instance_valid(_chainlong_king_panel):
+		_chainlong_king_panel.handle_chainlong_king(data)
+
+func _on_chainlong_king_stop_pressed(instance_id: String) -> void:
+	GameManager.send_chainlong_king_stop(instance_id)

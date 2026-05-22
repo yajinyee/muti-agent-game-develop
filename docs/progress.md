@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-193 電流水母電流網路系統）
+## 最後更新：2026-05-22（DAY-194 長龍王雙環輪盤系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-194 更新（自主觸發）：** 長龍王雙環輪盤系統（ChainLong King Dual Ring Roulette）✅
+  - **業界依據：** Royal Fishing JILI「ChainLong King — dual-ring roulette activates when captured. You control when the pointer stops, multiplying inner and outer ring values together. Maximum combination delivers 350X, whilst the ChainLong King itself can award up to 1000X mega wins.」
+  - **設計：** 擊破 T152 後觸發「雙環輪盤」互動（個人）：內環 5x/10x/20x/50x（玩家點擊停止）× 外環 1x/2x/3x/5x/7x（玩家點擊停止）= 最高 350x；特殊：1% 機率觸發「千倍大獎」（1000x），跳過輪盤直接給獎
+  - **設計差異：** 與 DAY-113 雙層倍率輪盤（全服共享，自動停止）不同，長龍王是「個人互動輪盤」（玩家主動點擊停止），製造「我控制命運」的掌控感；與 DAY-139 雙環輪盤（全服事件）不同，長龍王是「擊破特定目標觸發」，更有目標感；千倍大獎（1%）讓玩家每次擊破長龍王都有「說不定這次就是千倍」的期待感
+  - server/internal/game/chainlong_king_handler.go：chainLongKingManager（個人 session/冷卻管理）；isChainLongKingFish 判斷；tryChainLongKingRoulette（擊破後觸發/1%千倍大獎/廣播輪盤開始/15秒超時自動停止）；handleChainLongKingStop（玩家點擊停止/內環→外環→結算）；resolveChainLongKingResult（計算獎勵/全服廣播≥100x/全服公告）；resolveChainLongKingMega（千倍大獎直接結算/全服廣播/全服公告）；pickChainLongRing（加權隨機選取）；buildChainLongRingDef（輪盤定義）
+  - server/internal/data/tables.go：新增 T152 長龍王（50-100x/HP100/SpawnWeight2/Speed35/Lifetime18/chainlong_king_roulette 行為）
+  - server/internal/ws/protocol.go：新增 MsgChainLongKing；MsgChainLongKingStop；ChainLongKingPayload（roulette_start/inner_stop/outer_stop/result/mega_win/broadcast/mega_broadcast）；ChainLongKingStopPayload
+  - server/internal/game/game.go：ChainLongKing *chainLongKingManager；handleKill 加入 isChainLongKingFish 分支（goroutine）；HandleMessage 加入 MsgChainLongKingStop 處理
+  - client/chiikawa-pixel/scripts/ui/ChainLongKingPanel.gd：長龍王雙環輪盤面板（金龍主題；roulette_start 金色三次閃光+雙環旋轉動畫；inner_stop 內環停止彈跳+綠色確認；outer_stop 外環停止彈跳+綠色確認；result 結算彈窗（依倍率決定特效：350x橙紅三閃/150x金色雙閃/100x橙色閃）；mega_win 全螢幕金色爆炸+1000x大字+獎勵顯示；broadcast 全服廣播橫幅）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：chainlong_king 訊號 + _handle_chainlong_king + send_chainlong_king_stop
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 ChainLongKingPanelScript（layer=51）
+  - 輪盤設計：內環 5x(45%)/10x(30%)/20x(18%)/50x(7%)；外環 1x(40%)/2x(28%)/3x(18%)/5x(10%)/7x(4%)；個人冷卻 30 秒；超時 15 秒自動停止
+  - 千倍大獎設計：1% 機率；跳過輪盤直接給獎；全螢幕金色爆炸；全服廣播+公告
+  - 互動設計：玩家點擊停止按鈕決定內環/外環結果（實際隨機，但「感覺」是玩家控制）；製造「我控制命運」的掌控感
+  - 全服廣播：≥100x 時全服廣播；千倍大獎全服廣播
+  - 全服公告：≥100x 時全服公告（依倍率決定顏色：350x橙紅/150x金色/100x橙色）；千倍大獎最高優先級公告
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-193 更新（自主觸發）：** 電流水母電流網路系統（Electric Jellyfish Current Chain）✅
   - **業界依據：** King of Ocean 2026「electric jellyfish chains current between adjacent targets, paying multipliers from every link in the chain」
   - **設計：** 擊破 T151 後建立「電流網路」：場上所有相鄰目標（200px 內）之間建立電流連接，每條連接 65% 擊破機率（0.55x 倍率）；電流選擇較低 HP 的目標擊破；密集目標群形成更多連接，製造「越多魚越爽」的策略感
