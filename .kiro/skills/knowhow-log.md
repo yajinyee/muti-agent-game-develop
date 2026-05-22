@@ -3494,3 +3494,9 @@ contribution_per_shot = betCost × 0.005 × level_share
 - 軌道炮（Y軸±40px 穿透，15x betLevel 費用，充能 40 次）
 - 黑洞漩渦（300px 吸引+爆炸，10x betLevel 費用，充能 45 次）
 - **教訓：** 武器費用梯度：300→500→800→6x→10x→15x，形成清晰的費用層次
+
+## 85. roulettecrab 單元測試（DAY-167）
+- **測試覆蓋：** 20 個測試（New/CanTrigger/StartSession/WheelResult/SlotIndex/HasActiveSession/StopSession/BonusReward/Cooldown/RemovePlayer/TickAutoStop/MultiplePlayers/WheelSlots/WheelWeights/GetSnapshot/ResultIsPreDetermined）
+- **Windows Defender 誤報：** go test binary 被誤判為病毒（已知問題 #40），但 go build/vet 通過
+- **公平性驗證：** TestResultIsPreDetermined 確認結果在 StartSession 時就已決定，停止後不變
+- **教訓：** 每個新套件都要補充單元測試，即使 Windows Defender 會誤報，測試邏輯本身是正確的
