@@ -552,6 +552,7 @@ const (
 	MsgLuckyTridentStop MessageType = "lucky_trident_stop" // 玩家停止轉盤（Client→Server，DAY-211）
 	MsgTimeFreezeFish  MessageType = "time_freeze_fish"  // 時間凍結魚廣播（Server→Client，DAY-212）
 	MsgRainbowPrism    MessageType = "rainbow_prism"     // 彩虹稜鏡魚廣播（Server→Client，DAY-213）
+	MsgGoldenAccumulator MessageType = "golden_accumulator" // 黃金累積魚廣播（Server→Client，DAY-214）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4734,4 +4735,26 @@ type RainbowPrismPayload struct {
 	Duration       int                      `json:"duration,omitempty"`    // 染色持續秒數
 	BlastKills     int                      `json:"blast_kills,omitempty"` // 彩虹爆炸擊破數
 	BlastReward    int                      `json:"blast_reward,omitempty"` // 彩虹爆炸總獎勵
+}
+
+// GoldenAccumulatorPayload 黃金累積魚廣播（Server → Client，DAY-214）
+//
+// Events:
+//
+//	"accum_appear"      — 黃金累積魚出現（全服廣播）
+//	"accum_progress"    — 累積進度更新（全服廣播，每 5 點）
+//	"early_detonate"    — 提前引爆（玩家擊破累積魚，全服廣播）
+//	"burst_start"       — 黃金爆發開始（自動觸發，全服廣播）
+//	"early_burst_start" — 黃金爆發開始（提前引爆，全服廣播）
+//	"burst_end"         — 黃金爆發結束（全服廣播）
+//	"accum_escape"      — 累積魚逃跑（全服廣播）
+type GoldenAccumulatorPayload struct {
+	Event         string  `json:"event"`
+	InstanceID    string  `json:"instance_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	AccumCount    int     `json:"accum_count,omitempty"`
+	AccumTarget   int     `json:"accum_target,omitempty"`
+	AffectedCount int     `json:"affected_count,omitempty"`
+	BoostMult     float64 `json:"boost_mult,omitempty"`
+	BoostSec      int     `json:"boost_sec,omitempty"`
 }

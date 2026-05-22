@@ -297,6 +297,7 @@ func _ready() -> void:
 	_init_lucky_trident_panel()         # 幸運三叉魚互動三轉盤面板（DAY-211）
 	_init_time_freeze_panel()           # 時間凍結魚系統面板（DAY-212）
 	_init_rainbow_prism_panel()         # 彩虹稜鏡魚系統面板（DAY-213）
+	_init_golden_accumulator_panel()    # 黃金累積魚系統面板（DAY-214）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4070,3 +4071,21 @@ func _init_rainbow_prism_panel() -> void:
 func _on_rainbow_prism(data: Dictionary) -> void:
 	if is_instance_valid(_rainbow_prism_panel):
 		_rainbow_prism_panel.handle_rainbow_prism(data)
+
+# ─── 黃金累積魚系統面板（DAY-214）───────────────────────────────────────────
+const GoldenAccumulatorPanelScript = preload("res://scripts/ui/GoldenAccumulatorPanel.gd")
+
+var _golden_accumulator_panel = null
+
+func _init_golden_accumulator_panel() -> void:
+	var panel = GoldenAccumulatorPanelScript.new()
+	panel.name = "GoldenAccumulatorPanel"
+	panel.layer = 31
+	add_child(panel)
+	_golden_accumulator_panel = panel
+	if GameManager.has_signal("golden_accumulator"):
+		GameManager.golden_accumulator.connect(_on_golden_accumulator)
+
+func _on_golden_accumulator(data: Dictionary) -> void:
+	if is_instance_valid(_golden_accumulator_panel):
+		_golden_accumulator_panel.handle_golden_accumulator(data)

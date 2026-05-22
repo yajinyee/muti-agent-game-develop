@@ -187,6 +187,7 @@ type Game struct {
 	LuckyTrident       *luckyTridentManager        // 幸運三叉魚互動三轉盤系統管理器（DAY-211）
 	TimeFreeze         *timeFreezeManager          // 時間凍結魚系統管理器（DAY-212）
 	RainbowPrism       *rainbowPrismManager        // 彩虹稜鏡魚系統管理器（DAY-213）
+	GoldenAccumulator  *goldenAccumulatorManager   // 黃金累積魚系統管理器（DAY-214）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -350,6 +351,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyTrident:       newLuckyTridentManager(),
 		TimeFreeze:         newTimeFreezeManager(),
 		RainbowPrism:       newRainbowPrismManager(),
+		GoldenAccumulator:  newGoldenAccumulatorManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1229,6 +1231,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		// 移除已擊破的染色標記
 		g.removeRainbowPrismColor(t.InstanceID)
 	}
+	// 套用黃金累積魚爆發倍率加成（DAY-214，×2.0 乘法，全服共享，8 秒）
+	goldenAccumBoost := g.getGoldenAccumulatorBoost()
+	if goldenAccumBoost > 1.0 {
+		finalReward = int(float64(finalReward) * goldenAccumBoost)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1733,6 +1740,12 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isRainbowPrismFish(t.DefID) {
 		go g.tryRainbowPrismFish(p)
 	}
+	// 黃金累積魚：擊破 T172 時提前引爆（DAY-214）
+	if isGoldenAccumulatorFish(t.DefID) {
+		go g.notifyGoldenAccumulatorFishKill(p)
+	}
+	// 黃金累積魚：任何目標被擊破時累積計數（DAY-214）
+	go g.notifyGoldenAccumulatorKill()
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)
@@ -1862,6 +1875,10 @@ func (g *Game) updateNormalPlay() {
 			// 幽靈魚真身：離開畫面時移除所有幻影分身（DAY-198）
 			if isGhostFish(t.DefID) {
 				go g.onGhostFishLeave(id)
+			}
+			// 黃金累積魚：離開畫面時通知累積系統（DAY-214）
+			if isGoldenAccumulatorFish(t.DefID) {
+				go g.notifyGoldenAccumulatorLeave(id)
 			}
 		}
 	}
@@ -2198,6 +2215,10 @@ func (g *Game) spawnTarget() {
 	// 彗星魚：T164 生成時觸發軌跡飛行（DAY-206）
 	if isCometFish(def.ID) {
 		go g.notifyCometFishSpawn(t)
+	}
+	// 黃金累積魚：T172 生成時啟動累積系統（DAY-214）
+	if isGoldenAccumulatorFish(def.ID) {
+		go g.notifyGoldenAccumulatorSpawn(t)
 	}
 }
 

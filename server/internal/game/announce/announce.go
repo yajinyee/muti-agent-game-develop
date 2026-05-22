@@ -52,6 +52,7 @@ const (
 	EventIceFishing               EventType = "ice_fishing"               // 冰釣幸運輪盤觸發（DAY-171）
 	EventIceFishingResult         EventType = "ice_fishing_result"        // 冰釣幸運輪盤結果（DAY-171）
 	EventRainbowPrism             EventType = "rainbow_prism"             // 彩虹稜鏡魚觸發（DAY-213）
+	EventGoldenAccumulator        EventType = "golden_accumulator"        // 黃金累積魚觸發（DAY-214）
 )
 
 // Priority 公告優先級
@@ -678,6 +679,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityNormal
 		duration = 4000
+
+	case EventGoldenAccumulator:
+		msg := fmt.Sprintf("🌟 黃金累積魚觸發！", )
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FFD700"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🌟 黃金累積魚！"
+		message = msg
+		icon = "🌟"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
 
 	default:
 		title = "📢 公告"

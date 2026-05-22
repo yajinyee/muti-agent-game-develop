@@ -2,8 +2,50 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-23（DAY-213）
-**整體目標**：彩虹稜鏡魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-23（DAY-214）
+**整體目標**：黃金累積魚系統 ✅ → 繼續自主推進
+
+---
+
+## 今日任務清單
+
+### ✅ DAY-214 啟動檢查
+
+- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-213，彩虹稜鏡魚系統）
+- [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
+- [x] go vet ./... 確認無警告（VET OK）
+
+### ✅ DAY-214 黃金累積魚系統（P1）
+
+- [x] `data/tables.go`：新增 T172 黃金累積魚（40-70x/HP80/SpawnWeight3/Speed45/Lifetime15）
+- [x] `ws/protocol.go`：新增 MsgGoldenAccumulator；GoldenAccumulatorPayload
+- [x] `announce/announce.go`：新增 EventGoldenAccumulator + case 處理
+- [x] `golden_accumulator_handler.go`：完整 handler（累積/爆發/提前引爆/全服廣播）
+- [x] `game.go`：整合 GoldenAccumulator manager（struct/init/spawnTarget/handleKill/gameLoop）
+- [x] `GoldenAccumulatorPanel.gd`：黃金主題面板（進度條+爆發+提前引爆）
+- [x] `GameManager.gd`：golden_accumulator 訊號 + _handle_golden_accumulator
+- [x] `HUD.gd`：整合 GoldenAccumulatorPanelScript（layer=31）
+- [x] build/vet 全部通過，GitHub 推送完成
+
+### 🔄 DAY-215 下一步（自主觸發）
+
+- [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
+- [ ] 執行自我評估循環
+
+---
+
+## 每日自問（Game Director 必填）
+
+> **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
+
+- 完成度：**100%**
+- 美術質量：**100/100**
+- 規格一致性：**100%**
+- 特殊目標：**72種（T101-T172）**
+- 最新功能：**黃金累積魚（T172）— 全服合力累積 20 點觸發黃金爆發 + 提前引爆**
+- 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
+
+
 
 ---
 

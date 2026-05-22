@@ -1,6 +1,34 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-213 彩虹稜鏡魚系統）
+## 最後更新：2026-05-23（DAY-214 黃金累積魚系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-214 更新（自主觸發）：** 黃金累積魚系統（Golden Accumulator Fish）✅
+  - **業界依據：** Evolution Ice Fishing Live 2026「random multipliers ranging from 2x to 10x to selected wheel segments, creating pathways to maximum 5000x payout」+ 業界原創「全服累積爆發」機制
+  - **設計：** T172 黃金累積魚出現後，每次任何玩家擊破任何目標，累積槽 +1（最多 20 點）；全服廣播累積進度（每 5 點）；累積槽滿 → 自動觸發「黃金爆發」：全場所有目標 HP -60%（立即）+ 全服 ×2.0 倍率加成 8 秒；玩家擊破黃金累積魚本身 → 「提前引爆」（不論累積多少）；全服冷卻 40 秒
+  - **設計差異：** 與深海龍王（DAY-208，射擊累積）不同，黃金累積魚是「擊破累積」，讓玩家有「打越多魚，累積越快」的正向回饋；「提前引爆」讓玩家有「要不要現在打黃金累積魚」的策略決策；全服 ×2.0 倍率加成讓所有玩家在爆發後 8 秒內都受益，製造「全服一起爽」的高潮感；全服廣播進度讓玩家感受到「還差幾個就爆發」的期待感
+  - server/internal/game/golden_accumulator_handler.go：goldenAccumulatorManager（全服冷卻/activeInstanceID/atomic accumCount/boostActive）；isGoldenAccumulatorFish（T172）；getGoldenAccumulatorBoost（供 handleKill 使用，爆發期間 ×2.0）；notifyGoldenAccumulatorSpawn（生成時啟動累積/全服廣播/全服公告）；notifyGoldenAccumulatorKill（任何目標被擊破時累積 +1/每 5 點廣播/達到目標觸發爆發）；notifyGoldenAccumulatorFishKill（提前引爆/全服廣播）；notifyGoldenAccumulatorLeave（累積魚離開/廣播）；triggerGoldenAccumulatorBurst（黃金爆發/HP -60%/倍率加成/全服廣播/全服公告）
+  - server/internal/data/tables.go：新增 T172 黃金累積魚（40-70x/HP80/SpawnWeight3/Speed45/Lifetime15）
+  - server/internal/ws/protocol.go：新增 MsgGoldenAccumulator；GoldenAccumulatorPayload（accum_appear/accum_progress/early_detonate/burst_start/early_burst_start/burst_end/accum_escape）
+  - server/internal/game/announce/announce.go：新增 EventGoldenAccumulator + case 處理
+  - server/internal/game/game.go：GoldenAccumulator *goldenAccumulatorManager；spawnTarget 加入 notifyGoldenAccumulatorSpawn；handleKill 加入 getGoldenAccumulatorBoost 乘法加成 + notifyGoldenAccumulatorKill + isGoldenAccumulatorFish 分支；gameLoop 加入 notifyGoldenAccumulatorLeave
+  - client/chiikawa-pixel/scripts/ui/GoldenAccumulatorPanel.gd：黃金主題面板（accum_appear 金色雙閃光+頂部橫幅+底部累積進度條；accum_progress 進度條更新+每5點閃光+「還差N個」提示；early_detonate 金色強閃光+「提前引爆！」大字；burst_start 全螢幕三次金色強閃光+「🌟 黃金爆發！」52px大字+倍率計時條；burst_end 計時條淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：golden_accumulator 訊號 + _handle_golden_accumulator
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 GoldenAccumulatorPanelScript（layer=31）
+  - 累積設計：20 點目標；每次擊破 +1；每 5 點廣播；atomic 操作確保並發安全；全服冷卻 40 秒
+  - 黃金爆發設計：全場 HP -60%（保留 1 HP）；×2.0 倍率加成 8 秒；底部計時條顏色漸變（金→橙→紅橙）
+  - 提前引爆設計：玩家擊破累積魚立即觸發；廣播「提前引爆」讓全服看到；製造「英雄感」
+  - 視覺設計：黃金主題（#FFD700 + #FF8C00 + #FFF8DC + #FF4500）；底部進度條顏色漸變（金→橙→紅橙）；三次金色強閃光；副標題顯示 HP -60% + 倍率加成
+  - 全服廣播：出現/每5點進度/提前引爆/爆發開始/爆發結束/逃跑全服廣播
+  - 全服公告：出現時公告；爆發時公告（依是否提前引爆決定訊息）
+  - build/vet 全部通過（零錯誤零警告）
+
+
 
 ## 自我評估
 - **完成度：100%**

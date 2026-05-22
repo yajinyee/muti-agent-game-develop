@@ -496,6 +496,12 @@ var Targets = map[string]*TargetDef{
 	// 10 秒後「彩虹爆炸」：所有仍存活的染色目標同時爆炸（70% 擊破機率，0.65x 倍率）
 	// 個人冷卻 25 秒；全服廣播染色開始/爆炸結算
 	"T171": {ID: "T171", Name: "彩虹稜鏡魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "rainbow_prism"},
+	// T172 黃金累積魚（DAY-214）— 業界依據：Evolution Ice Fishing Live 2026「random multipliers 2x-10x」
+	// 業界原創「全服累積爆發」機制：T172 出現後，每次任何玩家擊破任何目標，累積槽 +1（最多 20 點）
+	// 累積槽滿 → 自動觸發「黃金爆發」：全場所有目標 HP -60% + 全服 ×2.0 倍率加成 8 秒
+	// 玩家擊破黃金累積魚本身 → 「提前引爆」（不論累積多少）
+	// 全服廣播累積進度（每 5 點）；全服冷卻 40 秒
+	"T172": {ID: "T172", Name: "黃金累積魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 70, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 15, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "golden_accumulator"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
