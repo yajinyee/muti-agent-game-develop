@@ -188,6 +188,7 @@ signal lightning_auto_chain(data: Dictionary)          # 閃電魚自動連鎖�
 signal meteor_fish(data: Dictionary)                   # 隕石魚隕石雨（DAY-184）
 signal phoenix_fish(data: Dictionary)                  # 鳳凰魚涅槃重生（DAY-185）
 signal dragon_turtle(data: Dictionary)                 # 龍龜不死 Boss（DAY-186）
+signal chain_bomb(data: Dictionary)                    # 連鎖爆炸魚（DAY-187）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -537,6 +538,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_phoenix_fish(payload)
 		"dragon_turtle":
 			_handle_dragon_turtle(payload)
+		"chain_bomb":
+			_handle_chain_bomb(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -1990,3 +1993,20 @@ func _handle_dragon_turtle(payload: Dictionary) -> void:
 		var total_hits: int = payload.get("total_hits", 0)
 		var total_reward: int = payload.get("total_reward", 0)
 		print("[GameManager] Dragon Turtle left: hits=%d reward=%d" % [total_hits, total_reward])
+
+## 處理連鎖爆炸魚（DAY-187）
+func _handle_chain_bomb(payload: Dictionary) -> void:
+	emit_signal("chain_bomb", payload)
+	var phase: String = payload.get("phase", "")
+	if phase == "chain_start":
+		var killer_name: String = payload.get("killer_name", "")
+		print("[GameManager] Chain Bomb started: killer=%s" % killer_name)
+	elif phase == "chain_explode":
+		var chain_depth: int = payload.get("chain_depth", 0)
+		var kill_count: int = payload.get("kill_count", 0)
+		print("[GameManager] Chain Bomb explode: depth=%d kills=%d" % [chain_depth, kill_count])
+	elif phase == "chain_result":
+		var total_kills: int = payload.get("total_kills", 0)
+		var total_reward: int = payload.get("total_reward", 0)
+		var chain_depth: int = payload.get("chain_depth", 0)
+		print("[GameManager] Chain Bomb result: depth=%d kills=%d reward=%d" % [chain_depth, total_kills, total_reward])

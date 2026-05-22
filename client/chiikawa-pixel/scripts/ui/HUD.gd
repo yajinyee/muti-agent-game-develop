@@ -270,6 +270,7 @@ func _ready() -> void:
 	_init_meteor_fish_panel()          # 隕石魚隕石雨面板（DAY-184）
 	_init_phoenix_fish_panel()         # 鳳凰魚涅槃重生面板（DAY-185）
 	_init_dragon_turtle_panel()        # 龍龜不死 Boss 面板（DAY-186）
+	_init_chain_bomb_panel()           # 連鎖爆炸魚面板（DAY-187）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3595,4 +3596,21 @@ func _init_dragon_turtle_panel() -> void:
 		GameManager.dragon_turtle.connect(func(data):
 			if is_instance_valid(_dragon_turtle_panel):
 				_dragon_turtle_panel.handle_dragon_turtle(data)
+		)
+
+## ---- 連鎖爆炸魚面板（DAY-187）----
+const ChainBombPanelScript = preload("res://scripts/ui/ChainBombPanel.gd")
+var _chain_bomb_panel: Control = null
+
+func _init_chain_bomb_panel() -> void:
+	var panel = ChainBombPanelScript.new()
+	panel.name = "ChainBombPanel"
+	panel.z_index = 58
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_chain_bomb_panel = panel
+	if GameManager.has_signal("chain_bomb"):
+		GameManager.chain_bomb.connect(func(data):
+			if is_instance_valid(_chain_bomb_panel):
+				_chain_bomb_panel.handle_chain_bomb(data)
 		)

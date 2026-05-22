@@ -1518,6 +1518,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isPhoenixFish(t.DefID) {
 		go g.tryPhoenixFishRebirth(p, t.InstanceID, t.X, t.Y)
 	}
+	// 連鎖爆炸魚：擊破 T145 時觸發（DAY-187）
+	if isChainBomb(t.DefID) {
+		go g.tryChainBombExplosion(p, t.InstanceID, t.X, t.Y)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)

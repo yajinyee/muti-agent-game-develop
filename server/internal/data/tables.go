@@ -319,6 +319,15 @@ var Targets = map[string]*TargetDef{
 	// 設計：中等倍率（30-50x）+ 超高 HP（99999，不死）+ 極稀有生成權重（1）+ 30秒 Lifetime
 	// HP=99999 確保永遠不會被擊破；MultiplierMin/Max 用於顯示，實際獎勵由 handler 計算
 	"T144": {ID: "T144", Name: "龍龜不死", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 99999, SpawnWeight: 1, Speed: 25, Lifetime: 30, LaborGain: 20, DifficultyFactor: 16.0, SpecialBehavior: "immortal_boss"},
+	// T145 連鎖爆炸魚（DAY-187）— 業界依據：Royal Fishing「chain reaction mechanic —
+	// players can trigger multiple explosions to capture additional fish within a blast radius」
+	// 擊破後在原位爆炸（200px 半徑），爆炸命中的目標 75% 機率擊破（0.65x 倍率），
+	// 若命中的目標也是 T145 則繼續引爆（連鎖反應，最多 5 層）
+	// 設計差異：與炸彈武器（玩家主動放置）不同，連鎖爆炸魚是「被動觸發的連鎖反應」；
+	// 與漩渦魚（吸引同類）不同，連鎖爆炸魚是「位置驅動的爆炸傳播」；
+	// 最多 5 層連鎖，讓玩家有「一顆引爆全場」的爽感，但不會無限連鎖（平衡 RTP）
+	// 設計：中等倍率（25-45x）+ 中等 HP（60）+ 常見生成權重（4）= 常見且有「連鎖爆炸」爽感
+	"T145": {ID: "T145", Name: "連鎖爆炸魚", Type: TargetTypeSpecial, MultiplierMin: 25, MultiplierMax: 45, HP: 60, SpawnWeight: 4, Speed: 55, Lifetime: 12, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "chain_bomb"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

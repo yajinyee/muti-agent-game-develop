@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-186 龍龜不死 Boss 系統）
+## 最後更新：2026-05-22（DAY-187 連鎖爆炸魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-187 更新（自主觸發）：** 連鎖爆炸魚系統（Chain Bomb Fish）✅
+  - **業界依據：** Royal Fishing「chain reaction mechanic — players can trigger multiple explosions to capture additional fish within a blast radius」— 擊破 T145 後在原位爆炸（200px 半徑），爆炸命中的目標 75% 機率擊破（0.65x 倍率），若命中的目標也是 T145 則繼續引爆（連鎖反應，最多 5 層）
+  - **設計差異：** 與炸彈武器（玩家主動放置，即時爆炸）不同，連鎖爆炸魚是「被動觸發的連鎖反應」；與漩渦魚（吸引同類）不同，連鎖爆炸魚是「位置驅動的爆炸傳播」；最多 5 層連鎖，讓玩家有「一顆引爆全場」的爽感，但不會無限連鎖（平衡 RTP）；每層爆炸間隔 300ms，讓玩家看到「爆炸在場上蔓延」的視覺過程
+  - server/internal/game/chain_bomb_handler.go：isChainBomb 判斷；chainBombEntry（單次爆炸記錄）；tryChainBombExplosion（BFS 連鎖爆炸/最多 5 層/每層 300ms 間隔/全服廣播每層/結果廣播/公告≥4擊破）；chainBombAnnounceMsg/chainBombColor（依層數決定公告內容和顏色）
+  - server/internal/data/tables.go：新增 T145 連鎖爆炸魚（25-45x/HP60/SpawnWeight4/Speed55/Lifetime12/chain_bomb 行為）
+  - server/internal/ws/protocol.go：新增 MsgChainBomb；ChainBombPayload（chain_start/chain_explode/chain_result）
+  - server/internal/game/game.go：handleKill 加入 isChainBomb 分支（goroutine）
+  - client/chiikawa-pixel/scripts/ui/ChainBombPanel.gd：連鎖爆炸魚面板（深紅主題；chain_start 紅色閃光+頂部橫幅滑入+連鎖計數器；chain_explode 爆炸圓圈擴散動畫+4方向短線+獎勵浮動文字+層數越高顏色越橙/金；chain_result 依層數決定顏色（紅/橙/金）+右側滑入結算彈窗（層數/擊破數/總獎勵）+4秒後淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：chain_bomb 訊號 + _handle_chain_bomb
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 ChainBombPanelScript（z_index=58）
+  - 爆炸設計：200px 半徑；75% 擊破機率；0.65x 獎勵倍率；最多 5 層連鎖；每層 300ms 間隔
+  - 連鎖設計：BFS 廣度優先搜尋（確保每個目標只被爆炸一次）；T145 被爆炸命中時繼續引爆（連鎖傳播）
+  - 視覺設計：爆炸圓圈擴散（20→400px，0.4s）；4方向短線（爆炸感）；層數越高顏色越暖（紅→橙→金）
+  - 全服廣播：連鎖開始/每層爆炸/結果全服廣播；≥4 個擊破時全服公告
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-186 更新（自主觸發）：** 龍龜不死 Boss 系統（Dragon Turtle Immortal Boss）✅
   - **業界依據：** Royal Fishing JILI「Immortal Boss mechanic — Golden Toad and Ancient Crocodile bosses appear randomly and award consecutive wins ranging from 50X to 150X until they leave the screen. This creates extended winning sequences impossible in standard fish games.」— T144 龍龜不死 Boss 出現後不會被擊破（HP=99999），每次命中給 50-150x betLevel 獎勵，直到 Lifetime（30秒）結束離開畫面
   - **設計差異：** 與 DAY-129 不死 BOSS（隱形/每次射擊有機率命中）不同，龍龜是「可見目標物」（在場上移動），玩家需要主動瞄準；與普通 BOSS（需要擊破）完全不同，龍龜是「持續收割型」，玩家不需要擊破，只要命中就有獎勵，製造「穩定收益」的安心感；全服共享龍龜，所有玩家都可以打，製造「搶打龍龜」的競爭感

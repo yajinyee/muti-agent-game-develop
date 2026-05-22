@@ -484,6 +484,9 @@ const (
 	// 龍龜不死 Boss 系統（DAY-186）
 	MsgDragonTurtle MessageType = "dragon_turtle" // 龍龜不死 Boss 廣播（Server→Client，全服）
 
+	// 連鎖爆炸魚系統（DAY-187）
+	MsgChainBomb MessageType = "chain_bomb" // 連鎖爆炸魚廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4088,4 +4091,22 @@ type DragonTurtlePayload struct {
 	HitMult     int     `json:"hit_mult,omitempty"`     // 本次命中倍率（turtle_hit/my_hit）
 	TotalHits   int     `json:"total_hits,omitempty"`   // 全服總命中數
 	TotalReward int     `json:"total_reward,omitempty"` // 全服總獎勵（turtle_leave）
+}
+
+// ---- 連鎖爆炸魚系統（DAY-187）----
+
+// ChainBombPayload 連鎖爆炸魚廣播（Server → Client，DAY-187）
+// Phase: "chain_start" → "chain_explode"(×N) → "chain_result"
+type ChainBombPayload struct {
+	Phase       string  `json:"phase"`                  // 當前階段
+	TriggerID   string  `json:"trigger_id,omitempty"`   // 觸發目標 InstanceID
+	TriggerX    float64 `json:"trigger_x,omitempty"`    // 觸發位置 X（chain_start/chain_explode）
+	TriggerY    float64 `json:"trigger_y,omitempty"`    // 觸發位置 Y（chain_start/chain_explode）
+	KillerID    string  `json:"killer_id,omitempty"`    // 觸發玩家 ID
+	KillerName  string  `json:"killer_name,omitempty"`  // 觸發玩家名稱
+	ChainDepth  int     `json:"chain_depth,omitempty"`  // 當前連鎖層數（chain_explode/chain_result）
+	KillCount   int     `json:"kill_count,omitempty"`   // 本層擊破數（chain_explode）
+	Reward      int     `json:"reward,omitempty"`       // 本層獎勵（chain_explode）
+	TotalKills  int     `json:"total_kills,omitempty"`  // 總擊破數（chain_result）
+	TotalReward int     `json:"total_reward,omitempty"` // 總獎勵（chain_result）
 }
