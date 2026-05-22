@@ -516,6 +516,13 @@ var Targets = map[string]*TargetDef{
 	//   - 擊破 T174 本身：「解除詛咒」— 移除所有詛咒標記 + 解咒獎勵 10x betLevel
 	//   - 個人冷卻 18 秒；全服廣播詛咒標記/解除/懲罰
 	"T174": {ID: "T174", Name: "詛咒毒魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 55, HP: 65, SpawnWeight: 3, Speed: 52, Lifetime: 12, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "cursed_poison"},
+	// T175 幸運拍賣魚（DAY-217）— 業界原創「全服競標」機制
+	// 設計：T175 出現後，開啟「全服競標」（持續 8 秒）：
+	//   - 任何玩家可以「出價」（消耗 betLevel × 5 籌碼），出價最高者獲得「大獎控制權」
+	//   - 競標結束後，最高出價者獲得「大獎控制權」（5 秒內自動射擊最高價值目標，0.85x 倍率）
+	//   - 競標失敗者退還 50% 出價籌碼；若無人競標，T175 自動逃跑
+	//   - 個人冷卻 20 秒；全服廣播競標開始/出價/結算
+	"T175": {ID: "T175", Name: "幸運拍賣魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 70, SpawnWeight: 3, Speed: 48, Lifetime: 15, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_auction"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

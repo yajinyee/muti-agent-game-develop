@@ -300,6 +300,7 @@ func _ready() -> void:
 	_init_golden_accumulator_panel()    # 黃金累積魚系統面板（DAY-214）
 	_init_lucky_mirror_fish_panel()     # 幸運鏡像魚系統面板（DAY-215）
 	_init_cursed_poison_fish_panel()    # 詛咒毒魚系統面板（DAY-216）
+	_init_lucky_auction_fish_panel()    # 幸運拍賣魚系統面板（DAY-217）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4127,3 +4128,21 @@ func _init_cursed_poison_fish_panel() -> void:
 func _on_cursed_poison_fish(data: Dictionary) -> void:
 	if is_instance_valid(_cursed_poison_fish_panel):
 		_cursed_poison_fish_panel.handle_cursed_poison_fish(data)
+
+# ─── 幸運拍賣魚系統面板（DAY-217）───────────────────────────────────────────
+const LuckyAuctionFishPanelScript = preload("res://scripts/ui/LuckyAuctionFishPanel.gd")
+
+var _lucky_auction_fish_panel = null
+
+func _init_lucky_auction_fish_panel() -> void:
+	var panel = LuckyAuctionFishPanelScript.new()
+	panel.name = "LuckyAuctionFishPanel"
+	panel.layer = 28
+	add_child(panel)
+	_lucky_auction_fish_panel = panel
+	if GameManager.has_signal("lucky_auction_fish"):
+		GameManager.lucky_auction_fish.connect(_on_lucky_auction_fish)
+
+func _on_lucky_auction_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_auction_fish_panel):
+		_lucky_auction_fish_panel.handle_lucky_auction_fish(data)

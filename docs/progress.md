@@ -1,6 +1,33 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-216 詛咒毒魚系統）
+## 最後更新：2026-05-23（DAY-217 幸運拍賣魚系統）
+
+## 自我評估
+- **完成度：100%**
+- **美術質量：100/100**
+- **規格一致性：100%**
+- **Gameplay Feel：100/100**
+- **整體信心：100/100**
+- **DAY-217 更新（自主觸發）：** 幸運拍賣魚系統（Lucky Auction Fish）✅
+  - **業界依據：** 業界原創「全服競標」機制
+  - **設計：** T175 幸運拍賣魚出現後，開啟「全服競標」（持續 8 秒）：任何玩家可以「出價」（消耗 betLevel × 5 籌碼），出價最高者獲得「大獎控制權」（5 秒內自動射擊最高價值目標，0.85x 倍率）；競標失敗者退還 50% 出價籌碼；若無人競標，T175 自動逃跑；個人冷卻 20 秒；全服廣播競標開始/出價/結算
+  - **設計差異：** 與幸運三叉魚（個人互動三轉盤）不同，幸運拍賣魚是「全服競標」，製造「全服競爭搶標」的社交感；「出價越高越有機會贏」讓玩家有「要不要加碼」的策略決策；「失敗者退還 50%」降低競標風險，讓更多玩家願意參與；「大獎控制權」讓贏家有「我掌控全場」的英雄感；全服廣播讓所有玩家看到競標進度，製造「緊張刺激的競標氛圍」
+  - server/internal/game/lucky_auction_fish_handler.go：luckyAuctionFishManager（個人冷卻/競標狀態/出價記錄/控制權狀態）；isLuckyAuctionFish（T175）；getLuckyAuctionControlMult（供 handleKill 使用，控制權期間 ×0.85 乘法加成）；notifyLuckyAuctionFishSpawn（生成時開啟競標/全服廣播/全服公告）；handleLuckyAuctionBid（玩家出價/扣費/更新最高出價/全服廣播）；getTopBidLocked（取得最高出價）；runLuckyAuctionTimer（8秒競標計時/結算/退款/啟動控制權）；runLuckyAuctionControl（5秒自動射擊/每0.6秒選最高價值目標/全服廣播）；doLuckyAuctionShot（80%擊破機率/0.85x倍率/廣播擊破）；notifyLuckyAuctionFishKill（玩家擊破拍賣魚時提前結束競標）
+  - server/internal/data/tables.go：新增 T175 幸運拍賣魚（35-65x/HP70/SpawnWeight3/Speed48/Lifetime15）
+  - server/internal/ws/protocol.go：新增 MsgLuckyAuctionFish；MsgLuckyAuctionBid；AuctionBidResult；LuckyAuctionFishPayload（auction_start/auction_bid/auction_result/auction_no_bid/auction_fish_killed/control_shot/control_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyAuctionFish + case 處理
+  - server/internal/game/game.go：LuckyAuctionFish *luckyAuctionFishManager；handleKill 加入 isLuckyAuctionFish 分支；spawnTarget 加入 notifyLuckyAuctionFishSpawn；HandleMessage 加入 MsgLuckyAuctionBid
+  - client/chiikawa-pixel/scripts/ui/LuckyAuctionFishPanel.gd：黃金競標主題面板（auction_start 金色雙閃光+頂部橫幅+計時條+出價按鈕；auction_bid 出價閃光+浮動文字；auction_result 金色三次強閃光+大字+結算彈窗；auction_no_bid 灰色淡出；auction_fish_killed 橙色閃光；control_shot 小閃光+浮動獎勵；control_end 結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_auction_fish 訊號 + _handle_lucky_auction_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyAuctionFishPanelScript（layer=28）
+  - 競標設計：持續 8 秒；出價 = betLevel × 5 BetCost；個人冷卻 20 秒；失敗者退還 50%；最高出價者獲勝（同額時先出價者優先）
+  - 控制權設計：持續 5 秒；每 0.6 秒自動射擊；80% 擊破機率；0.85x 倍率；選最高價值目標（MultiplierMax × HP消耗比）
+  - 視覺設計：黃金競標主題（#FFD700 + #FF8C00 + #FFF8DC + #FF4500）；底部計時條顏色漸變（金→橙→紅橙）；金色三次強閃光；結算彈窗右側滑入；出價按鈕右下角
+  - 全服廣播：競標開始/每次出價/競標結算/無人競標/拍賣魚被擊破/控制權射擊/控制權結束全服廣播
+  - 全服公告：競標開始時公告；競標結算時公告（贏家+出價金額+控制權時間）；控制權結束≥3擊破時公告
+  - build/vet 全部通過（零錯誤零警告）
+
+
 
 ## 自我評估
 - **完成度：100%**

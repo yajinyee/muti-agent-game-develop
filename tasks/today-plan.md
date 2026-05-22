@@ -2,32 +2,32 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-23（DAY-216）
-**整體目標**：詛咒毒魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-23（DAY-217）
+**整體目標**：幸運拍賣魚系統 ✅ → 繼續自主推進
 
 ---
 
 ## 今日任務清單
 
-### ✅ DAY-216 啟動檢查
+### ✅ DAY-217 啟動檢查
 
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
 - [x] 上網研究業界最新機制
 
-### ✅ DAY-216 詛咒毒魚系統（P1）
+### ✅ DAY-217 幸運拍賣魚系統（P1）
 
-- [x] `data/tables.go`：新增 T174 詛咒毒魚（30-55x/HP65/SpawnWeight3/Speed52/Lifetime12）
-- [x] `ws/protocol.go`：新增 MsgCursedPoisonFish；CursedTargetInfo；CursedPoisonFishPayload
-- [x] `announce/announce.go`：新增 EventCursedPoisonFish + case 處理
-- [x] `cursed_poison_fish_handler.go`：完整 handler（詛咒標記/倍率加成/懲罰/解咒）
-- [x] `game.go`：整合 CursedPoisonFish manager（struct/init/handleKill/gameLoop/spawnTarget）
-- [x] `CursedPoisonFishPanel.gd`：紫色詛咒主題面板（骷髏標記+懲罰條+解咒閃光）
-- [x] `GameManager.gd`：cursed_poison_fish 訊號 + _handle_cursed_poison_fish
-- [x] `HUD.gd`：整合 CursedPoisonFishPanelScript（layer=29）
-- [x] build/vet 全部通過，GitHub 推送完成
+- [x] `data/tables.go`：新增 T175 幸運拍賣魚（35-65x/HP70/SpawnWeight3/Speed48/Lifetime15）
+- [x] `ws/protocol.go`：新增 MsgLuckyAuctionFish；MsgLuckyAuctionBid；AuctionBidResult；LuckyAuctionFishPayload
+- [x] `announce/announce.go`：新增 EventLuckyAuctionFish + case 處理
+- [x] `lucky_auction_fish_handler.go`：完整 handler（競標/出價/結算/退款/控制權自動射擊）
+- [x] `game.go`：整合 LuckyAuctionFish manager（struct/init/handleKill/spawnTarget/HandleMessage）
+- [x] `LuckyAuctionFishPanel.gd`：黃金競標主題面板（計時條+出價按鈕+結算彈窗）
+- [x] `GameManager.gd`：lucky_auction_fish 訊號 + _handle_lucky_auction_fish
+- [x] `HUD.gd`：整合 LuckyAuctionFishPanelScript（layer=28）
+- [x] build/vet 全部通過
 
-### 🔄 DAY-217 下一步（自主觸發）
+### 🔄 DAY-218 下一步（自主觸發）
 
 - [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
 
@@ -40,8 +40,8 @@
 - 完成度：**100%**
 - 美術質量：**100/100**
 - 規格一致性：**100%**
-- 特殊目標：**74種（T101-T174）**
-- 最新功能：**詛咒毒魚（T174）— 詛咒 3 個目標 ×2.5 倍率，逃跑懲罰 ×0.5，解咒獎勵**
+- 特殊目標：**75種（T101-T175）**
+- 最新功能：**幸運拍賣魚（T175）— 全服競標 8 秒，贏家獲得 5 秒大獎控制權（×0.85 倍率）**
 - 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
 
 ---

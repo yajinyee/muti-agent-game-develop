@@ -554,7 +554,9 @@ const (
 	MsgRainbowPrism    MessageType = "rainbow_prism"     // 彩虹稜鏡魚廣播（Server→Client，DAY-213）
 	MsgGoldenAccumulator MessageType = "golden_accumulator" // 黃金累積魚廣播（Server→Client，DAY-214）
 	MsgLuckyMirrorFish   MessageType = "lucky_mirror_fish"  // 幸運鏡像魚廣播（Server→Client，DAY-215）
-	MsgCursedPoisonFish  MessageType = "cursed_poison_fish" // 詛咒毒魚廣播（Server→Client，DAY-216）
+	MsgCursedPoisonFish  MessageType = "cursed_poison_fish"  // 詛咒毒魚廣播（Server→Client，DAY-216）
+	MsgLuckyAuctionFish  MessageType = "lucky_auction_fish"  // 幸運拍賣魚廣播（Server→Client，DAY-217）
+	MsgLuckyAuctionBid   MessageType = "lucky_auction_bid"   // 玩家出價（Client→Server，DAY-217）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4817,4 +4819,43 @@ type CursedPoisonFishPayload struct {
 	PenaltySec   int                `json:"penalty_sec,omitempty"`
 	CleanseReward int               `json:"cleanse_reward,omitempty"`
 	KilledCount  int                `json:"killed_count,omitempty"`
+}
+
+// AuctionBidResult 競標出價結果（用於結算廣播）
+type AuctionBidResult struct {
+	PlayerName string `json:"player_name"`
+	BidAmount  int    `json:"bid_amount"`
+	IsWinner   bool   `json:"is_winner"`
+}
+
+// LuckyAuctionFishPayload 幸運拍賣魚廣播（Server → Client，DAY-217）
+//
+// Events:
+//
+//	"auction_start"       — 競標開始（全服廣播）
+//	"auction_bid"         — 玩家出價（全服廣播）
+//	"auction_result"      — 競標結算（全服廣播，含退款資訊）
+//	"auction_no_bid"      — 無人競標（全服廣播）
+//	"auction_fish_killed" — 拍賣魚被擊破，競標提前結束（全服廣播）
+//	"control_shot"        — 大獎控制權自動射擊（全服廣播）
+//	"control_end"         — 大獎控制權結束（全服廣播）
+type LuckyAuctionFishPayload struct {
+	Event        string             `json:"event"`
+	InstanceID   string             `json:"instance_id,omitempty"`
+	PlayerName   string             `json:"player_name,omitempty"`
+	DurationSec  int                `json:"duration_sec,omitempty"`
+	BidBase      int                `json:"bid_base,omitempty"`
+	BidAmount    int                `json:"bid_amount,omitempty"`
+	TopBidder    string             `json:"top_bidder,omitempty"`
+	TopBidAmount int                `json:"top_bid_amount,omitempty"`
+	TotalBidders int                `json:"total_bidders,omitempty"`
+	WinnerName   string             `json:"winner_name,omitempty"`
+	WinnerBid    int                `json:"winner_bid,omitempty"`
+	ControlSec   int                `json:"control_sec,omitempty"`
+	ControlMult  float64            `json:"control_mult,omitempty"`
+	BidResults   []AuctionBidResult `json:"bid_results,omitempty"`
+	RefundRate   float64            `json:"refund_rate,omitempty"`
+	ShotReward   int                `json:"shot_reward,omitempty"`
+	ShotCount    int                `json:"shot_count,omitempty"`
+	TotalReward  int                `json:"total_reward,omitempty"`
 }

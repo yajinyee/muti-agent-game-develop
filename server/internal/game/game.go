@@ -190,6 +190,7 @@ type Game struct {
 	GoldenAccumulator  *goldenAccumulatorManager   // 黃金累積魚系統管理器（DAY-214）
 	LuckyMirrorFish    *luckyMirrorFishManager     // 幸運鏡像魚系統管理器（DAY-215）
 	CursedPoisonFish   *cursedPoisonFishManager    // 詛咒毒魚系統管理器（DAY-216）
+	LuckyAuctionFish   *luckyAuctionFishManager    // 幸運拍賣魚系統管理器（DAY-217）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -356,6 +357,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		GoldenAccumulator:  newGoldenAccumulatorManager(),
 		LuckyMirrorFish:    newLuckyMirrorFishManager(),
 		CursedPoisonFish:   newCursedPoisonFishManager(),
+		LuckyAuctionFish:   newLuckyAuctionFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -881,6 +883,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 幸運三叉魚互動三轉盤系統（DAY-211）
 	case ws.MsgLuckyTridentStop:
 		g.handleLuckyTridentStop(p, msg)
+	// 幸運拍賣魚競標出價（DAY-217）
+	case ws.MsgLuckyAuctionBid:
+		g.handleLuckyAuctionBid(p)
 	}
 }
 
@@ -1778,6 +1783,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isCursedPoisonFish(t.DefID) {
 		go g.tryCleanseAllCurses(p)
 	}
+	// 幸運拍賣魚：擊破 T175 本身時提前結束競標（DAY-217）
+	if isLuckyAuctionFish(t.DefID) {
+		go g.notifyLuckyAuctionFishKill(p)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)
@@ -2261,6 +2270,10 @@ func (g *Game) spawnTarget() {
 	if isCursedPoisonFish(def.ID) {
 		// 用一個虛擬玩家觸發詛咒（取第一個在線玩家，或直接呼叫內部函數）
 		go g.spawnCursedPoisonMarks()
+	}
+	// 幸運拍賣魚：T175 生成時開啟全服競標（DAY-217）
+	if isLuckyAuctionFish(def.ID) {
+		go g.notifyLuckyAuctionFishSpawn(t)
 	}
 }
 

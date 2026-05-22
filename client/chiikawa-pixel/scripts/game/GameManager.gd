@@ -218,6 +218,7 @@ signal rainbow_prism(data: Dictionary)              # 彩虹稜鏡魚系統（DA
 signal golden_accumulator(data: Dictionary)         # 黃金累積魚系統（DAY-214）
 signal lucky_mirror_fish(data: Dictionary)          # 幸運鏡像魚系統（DAY-215）
 signal cursed_poison_fish(data: Dictionary)         # 詛咒毒魚系統（DAY-216）
+signal lucky_auction_fish(data: Dictionary)         # 幸運拍賣魚系統（DAY-217）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -627,6 +628,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_mirror_fish(payload)
 		"cursed_poison_fish":
 			_handle_cursed_poison_fish(payload)
+		"lucky_auction_fish":
+			_handle_lucky_auction_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2584,3 +2587,35 @@ func _handle_drill_lobster(payload: Dictionary) -> void:
 			var total_kills: int = payload.get("total_kills", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Drill Lobster result: kills=%d reward=%d" % [total_kills, total_reward])
+
+## 處理幸運拍賣魚系統（DAY-217）
+func _handle_lucky_auction_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_auction_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"auction_start":
+			var duration: int = payload.get("duration_sec", 8)
+			var control_mult: float = payload.get("control_mult", 0.85)
+			print("[GameManager] Lucky Auction Fish: auction started (%ds, x%.2f)" % [duration, control_mult])
+		"auction_bid":
+			var player_name: String = payload.get("player_name", "")
+			var bid_amount: int = payload.get("bid_amount", 0)
+			var top_bidder: String = payload.get("top_bidder", "")
+			print("[GameManager] Auction bid: %s bid=%d, top=%s" % [player_name, bid_amount, top_bidder])
+		"auction_result":
+			var winner: String = payload.get("winner_name", "")
+			var winner_bid: int = payload.get("winner_bid", 0)
+			print("[GameManager] Auction result: winner=%s bid=%d" % [winner, winner_bid])
+		"auction_no_bid":
+			print("[GameManager] Auction ended with no bids")
+		"auction_fish_killed":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Auction fish killed by %s" % player_name)
+		"control_shot":
+			var shot_reward: int = payload.get("shot_reward", 0)
+			var shot_count: int = payload.get("shot_count", 0)
+			print("[GameManager] Control shot: count=%d reward=%d" % [shot_count, shot_reward])
+		"control_end":
+			var player_name: String = payload.get("player_name", "")
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Control ended: player=%s total=%d" % [player_name, total_reward])

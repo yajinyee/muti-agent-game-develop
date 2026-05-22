@@ -55,6 +55,7 @@ const (
 	EventGoldenAccumulator        EventType = "golden_accumulator"        // 黃金累積魚觸發（DAY-214）
 	EventLuckyMirrorFish          EventType = "lucky_mirror_fish"         // 幸運鏡像魚觸發（DAY-215）
 	EventCursedPoisonFish         EventType = "cursed_poison_fish"        // 詛咒毒魚觸發（DAY-216）
+	EventLuckyAuctionFish         EventType = "lucky_auction_fish"        // 幸運拍賣魚觸發（DAY-217）
 )
 
 // Priority 公告優先級
@@ -738,6 +739,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "☠️ 詛咒毒魚！"
 		message = msg
 		icon = "☠️"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyAuctionFish:
+		msg := "🏆 幸運拍賣魚競標！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FFD700"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🏆 幸運拍賣魚！"
+		message = msg
+		icon = "🏆"
 		color = c
 		priority = PriorityHigh
 		duration = 5000
