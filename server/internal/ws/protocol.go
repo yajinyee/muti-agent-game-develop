@@ -438,6 +438,9 @@ const (
 	// 冰釣幸運輪盤系統（DAY-171）
 	MsgIceFishingWheel MessageType = "ice_fishing_wheel" // 冰釣幸運輪盤廣播（Server→Client）
 
+	// 幸運彩蛋魚系統（DAY-172）
+	MsgLuckyEggFish MessageType = "lucky_egg_fish" // 幸運彩蛋魚廣播（Server→Client）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3733,3 +3736,34 @@ type IceFishingWheelPayload struct {
 
 // MsgIceFishingWheelStop Client → Server：玩家手動停止輪盤
 // （使用 MsgUseSpecialWeapon 的 action 欄位，或獨立訊息）
+
+// ---- 幸運彩蛋魚系統（DAY-172）----
+
+// LuckyEggResult 單個彩蛋開啟結果
+type LuckyEggResult struct {
+	EggIndex    int     `json:"egg_index"`    // 彩蛋索引（0-4）
+	RewardType  string  `json:"reward_type"`  // 獎勵類型：coins/mult/weapon
+	CoinsReward int     `json:"coins_reward"` // 金幣獎勵（coins 類型）
+	MultBoost   float64 `json:"mult_boost"`   // 倍率加成（mult 類型，2.0）
+	DurationSec int     `json:"duration_sec"` // 倍率持續時間（mult 類型，5秒）
+	Label       string  `json:"label"`        // 顯示文字
+	Color       string  `json:"color"`        // 顯示顏色
+}
+
+// LuckyEggFishPayload 幸運彩蛋魚廣播（Server → Client，DAY-172）
+// Phase: "egg_start"（全服）→ "egg_open"（個人，每個彩蛋）→ "egg_result"（個人）
+//        → "egg_broadcast"（全服，≥4個）→ "mult_end"（個人，倍率結束）
+type LuckyEggFishPayload struct {
+	Phase       string          `json:"phase"`        // 當前階段
+	PlayerID    string          `json:"player_id"`    // 觸發玩家 ID
+	PlayerName  string          `json:"player_name"`  // 觸發玩家名稱
+	EggCount    int             `json:"egg_count"`    // 彩蛋總數
+	EggIndex    int             `json:"egg_index"`    // 當前彩蛋索引（egg_open 時）
+	EggResult   LuckyEggResult  `json:"egg_result"`   // 當前彩蛋結果（egg_open 時）
+	EggResults  []LuckyEggResult `json:"egg_results"` // 所有彩蛋結果（egg_result 時）
+	TotalCoins  int             `json:"total_coins"`  // 金幣彩蛋總獎勵
+	MultCount   int             `json:"mult_count"`   // 倍率彩蛋數量
+	WeaponCount int             `json:"weapon_count"` // 武器充能彩蛋數量
+	TriggerX    float64         `json:"trigger_x"`    // 觸發位置 X（egg_start 時）
+	TriggerY    float64         `json:"trigger_y"`    // 觸發位置 Y（egg_start 時）
+}

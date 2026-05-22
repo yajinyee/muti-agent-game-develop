@@ -255,6 +255,7 @@ func _ready() -> void:
 	_init_vortex_fish_panel()         # 漩渦魚群吸引面板（DAY-169）
 	_init_freeze_bomb_panel()         # 冰凍炸彈魚面板（DAY-170）
 	_init_ice_fishing_panel()         # 冰釣幸運輪盤面板（DAY-171）
+	_init_lucky_egg_panel()           # 幸運彩蛋魚面板（DAY-172）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3343,3 +3344,15 @@ func _init_ice_fishing_panel() -> void:
 	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
 	add_child(panel)
 	_ice_fishing_panel = panel
+
+## ---- 幸運彩蛋魚面板（DAY-172）----
+const LuckyEggPanelScript = preload("res://scripts/ui/LuckyEggPanel.gd")
+var _lucky_egg_panel: Control = null
+
+func _init_lucky_egg_panel() -> void:
+	var panel = LuckyEggPanelScript.new()
+	panel.name = "LuckyEggPanel"
+	panel.z_index = 70  # 在 IceFishingPanel(71) 下方
+	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
+	add_child(panel)
+	_lucky_egg_panel = panel

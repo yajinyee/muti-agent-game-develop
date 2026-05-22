@@ -208,6 +208,12 @@ var Targets = map[string]*TargetDef{
 	// 設計差異：與巨型章魚輪盤（950x 大獎）不同，冰釣輪盤是「倍率加成型」（2x-10x），讓玩家在短時間內所有擊破都有倍率加成
 	// 設計：中等倍率（45-65x）+ 中等 HP（75）+ 中等生成權重（5）= 常見且有「黃金時間」爽感的特殊目標
 	"T129": {ID: "T129", Name: "冰釣魚", Type: TargetTypeSpecial, MultiplierMin: 45, MultiplierMax: 65, HP: 75, SpawnWeight: 5, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "ice_fishing_wheel"},
+	// T130 幸運彩蛋魚（DAY-172）— 業界依據：JILI Mega Fishing 2026「Giant Prize Fish lets you easily win great prizes,
+	// with the chance for 5x multipliers」+ Ocean King 2026「Egg Fish drops golden eggs containing random rewards」
+	// 擊破後掉落 1-5 個彩蛋（加權隨機），每個彩蛋隨機包含：金幣獎勵（50%）、倍率加成 ×2 持續 5 秒（30%）、特殊武器充能（20%）
+	// 設計差異：與冰釣輪盤（玩家選擇停止）不同，彩蛋是「自動掉落+隨機開啟」，製造「每個彩蛋都是驚喜」的期待感
+	// 設計：中高倍率（50-70x）+ 中等 HP（80）+ 中等生成權重（4）= 常見且有「開彩蛋」驚喜感的特殊目標
+	"T130": {ID: "T130", Name: "幸運彩蛋魚", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 70, HP: 80, SpawnWeight: 4, Speed: 45, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_egg_fish"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

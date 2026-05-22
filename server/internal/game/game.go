@@ -147,6 +147,7 @@ type Game struct {
 	VortexFish         *vortexFishManager         // 漩渦魚群吸引系統管理器（DAY-169）
 	FreezeBomb         *freezeBombManager         // 冰凍炸彈魚系統管理器（DAY-170）
 	IceFishing         *iceFishingManager         // 冰釣幸運輪盤系統管理器（DAY-171）
+	LuckyEgg           *luckyEggManager           // 幸運彩蛋魚系統管理器（DAY-172）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -272,6 +273,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		VortexFish:         newVortexFishManager(),
 		FreezeBomb:         newFreezeBombManager(),
 		IceFishing:         newIceFishingManager(),
+		LuckyEgg:           newLuckyEggManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1062,6 +1064,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		finalReward = int(float64(finalReward) * iceFishingMult)
 		go g.recordIceFishingKill(p.ID, bonusReward)
 	}
+	// 套用幸運彩蛋魚倍率加成（DAY-172）
+	luckyEggMult := g.getLuckyEggMult(p.ID)
+	if luckyEggMult > 1.0 {
+		finalReward = int(float64(finalReward) * luckyEggMult)
+	}
 	// 船長魚競速：記錄擊破（DAY-163）
 	if g.IsCaptainRaceActive() {
 		go g.recordCaptainRaceKill(p, finalReward)
@@ -1384,6 +1391,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 冰釣幸運輪盤：擊破 T129 時觸發（DAY-171）
 	if isIceFish(t.DefID) {
 		go g.tryIceFishingWheel(p, t.InstanceID, t.X, t.Y)
+	}
+	// 幸運彩蛋魚：擊破 T130 時觸發（DAY-172）
+	if isLuckyEggFish(t.DefID) {
+		go g.tryLuckyEggFish(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

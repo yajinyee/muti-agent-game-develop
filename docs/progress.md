@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-171 冰釣幸運輪盤系統）
+## 最後更新：2026-05-22（DAY-172 幸運彩蛋魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,22 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-172 更新（自主觸發）：** 幸運彩蛋魚系統（Lucky Egg Fish）✅
+  - **業界依據：** JILI Mega Fishing 2026「Giant Prize Fish lets you easily win great prizes, with the chance for 5x multipliers」+ Ocean King 2026「Egg Fish drops golden eggs containing random rewards — coins, multiplier boost, or weapon charge」— 擊破 T130 幸運彩蛋魚後掉落 1-5 個彩蛋（加權隨機），每個彩蛋隨機包含：金幣獎勵（50%）、倍率加成 ×2 持續 5 秒（30%）、特殊武器充能（20%）
+  - **設計差異：** 與冰釣輪盤（玩家選擇停止）不同，彩蛋是「自動掉落+隨機開啟」，製造「每個彩蛋都是驚喜」的期待感；與幸運星魚（固定 ×2，10秒）不同，彩蛋的倍率加成是「短暫但可疊加」的（5秒，多個彩蛋可延長），讓玩家有「連續開彩蛋」的爽感
+  - `server/internal/game/lucky_egg_fish_handler.go`：luckyEggManager（個人冷卻 30 秒/session 管理）；isLuckyEggFish 判斷；getLuckyEggMult（供 handleKill 使用，活躍 session 回傳 2.0）；activateLuckyEggMult（激活/延長倍率）；deactivateLuckyEggMult（倍率結束廣播）；pickEggCount（加權隨機 1-5 個）；pickEggRewardType（金幣 50%/倍率 30%/武器 20%）；pickCoinReward（betLevel × 5-20x）；tryLuckyEggFish（擊破後觸發/逐一掉落/廣播）；notifyLuckyEggWeaponCharge（武器充能）；announceLuckyEggFish（全服公告≥4個）
+  - `server/internal/data/tables.go`：新增 T130 幸運彩蛋魚（50-70x/HP80/SpawnWeight4/lucky_egg_fish 行為）
+  - `server/internal/ws/protocol.go`：新增 MsgLuckyEggFish；LuckyEggResult（單個彩蛋結果）；LuckyEggFishPayload（多階段：egg_start/egg_open/egg_result/egg_broadcast/mult_end）
+  - `server/internal/game/game.go`：Game struct 加入 LuckyEgg *luckyEggManager；NewGameWithStore 初始化；handleKill 加入 getLuckyEggMult 倍率套用（在冰釣輪盤之後）+ isLuckyEggFish 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/LuckyEggPanel.gd`：幸運彩蛋魚面板（彩色主題；egg_start 全服廣播橫幅；egg_open 彩蛋從觸發位置飛出+開啟動畫+獎勵浮動文字（金色/粉紅/天藍）；egg_result 右側滑入結果彈窗（彩蛋數/金幣/倍率/武器）；mult_end 倒數計時淡出；≥5個彩蛋金色雙閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：lucky_egg_fish 訊號 + _handle_lucky_egg_fish
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 LuckyEggPanelScript（z_index=70）
+  - 彩蛋設計：1個:40%, 2個:30%, 3個:15%, 4個:10%, 5個:5%（加權隨機）；30 秒個人冷卻
+  - 獎勵設計：金幣 betLevel×5-20x；倍率 ×2 持續 5 秒（可疊加延長）；武器充能相當於擊破 30x 目標
+  - 倍率疊加：多個倍率彩蛋可延長持續時間（每個 +5 秒）；倍率在冰釣輪盤之後套用（最後一層）
+  - 全服廣播：≥4 個彩蛋時全服廣播，讓其他玩家看到「有人觸發了幸運彩蛋魚」
+  - 全服公告：≥4 個彩蛋時全服公告（金色，4秒，優先級 2）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-171 更新（自主觸發）：** 冰釣幸運輪盤系統（Ice Fishing Lucky Wheel）✅
   - **業界依據：** Cozy Fishing Life（2026-05-10）「Winter Wheel — 8 segments x2-x10 multipliers + bonus mode triggers」+ Ice Fishing Live（Evolution Gaming）「wheel triggers bonus fishing rounds」— 擊破 T129 冰釣魚後觸發「冰釣幸運輪盤」（8格：2x-10x 倍率加成），玩家在 5 秒內點擊停止，觸發後 8 秒內所有擊破獎勵套用輪盤倍率
   - **設計差異：** 與巨型章魚輪盤（950x 大獎）不同，冰釣輪盤是**倍率加成型**（2x-10x），讓玩家在短時間內所有擊破都有倍率加成，製造「黃金 8 秒」的爽感；結果預先決定（公平性保證），玩家「停止」只是視覺互動
