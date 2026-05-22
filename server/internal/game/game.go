@@ -192,6 +192,7 @@ type Game struct {
 	CursedPoisonFish   *cursedPoisonFishManager    // 詛咒毒魚系統管理器（DAY-216）
 	LuckyAuctionFish   *luckyAuctionFishManager    // 幸運拍賣魚系統管理器（DAY-217）
 	LuckyEvolutionFish *luckyEvolutionFishManager  // 幸運進化魚系統管理器（DAY-218）
+	LuckyInfectionFish *luckyInfectionFishManager  // 幸運連鎖感染魚系統管理器（DAY-219）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -360,6 +361,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		CursedPoisonFish:   newCursedPoisonFishManager(),
 		LuckyAuctionFish:   newLuckyAuctionFishManager(),
 		LuckyEvolutionFish: newLuckyEvolutionFishManager(),
+		LuckyInfectionFish: newLuckyInfectionFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1283,6 +1285,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if evolutionKillMult > 1.0 {
 		finalReward = int(float64(finalReward) * evolutionKillMult)
 	}
+	// 套用幸運連鎖感染魚感染目標倍率加成（DAY-219，×2.0 乘法，感染目標被擊破時）
+	infectionMult := g.getLuckyInfectionKillMult(t.InstanceID)
+	if infectionMult > 1.0 {
+		finalReward = int(float64(finalReward) * infectionMult)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1812,6 +1819,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運進化魚：擊破 T176 本身時立即觸發終極爆發（DAY-218）
 	if isLuckyEvolutionFish(t.DefID) {
 		go g.notifyLuckyEvolutionFishKill(p, t.InstanceID)
+	}
+	// 幸運連鎖感染魚：擊破 T177 本身時觸發感染（DAY-219）
+	if isLuckyInfectionFish(t.DefID) {
+		go g.tryLuckyInfectionFish(p)
+	}
+	// 幸運連鎖感染魚：擊破感染目標時移除感染標記（DAY-219）
+	if g.isInfectedTarget(t.InstanceID) {
+		go g.notifyLuckyInfectionFishKill(t.InstanceID)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

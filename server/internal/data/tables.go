@@ -529,6 +529,14 @@ var Targets = map[string]*TargetDef{
 	//   - 進化 3（命中 9 次）：HP -70%，倍率 ×4.0；3 秒後自動「終極爆發」
 	//   - 玩家擊破進化魚本身：立即觸發「終極爆發」（全場 HP -60% + 全服 ×4.0 倍率加成 6 秒）
 	"T176": {ID: "T176", Name: "幸運進化魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 70, HP: 90, SpawnWeight: 3, Speed: 45, Lifetime: 18, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "lucky_evolution"},
+	// T177 幸運連鎖感染魚（DAY-219）— 業界原創「病毒式蔓延」機制
+	// 設計：擊破 T177 後觸發「感染標記」：
+	//   - 場上隨機 2 個目標被「感染」（綠色標記）
+	//   - 感染目標每 2 秒向相鄰目標（300px 內）傳播感染（最多蔓延 3 層，最多 8 個感染目標）
+	//   - 感染目標被擊破：獎勵 ×2.0 倍率加成（乘法）
+	//   - 12 秒後所有感染目標同時「感染爆發」（75% 擊破機率，0.65x 倍率，全服共享）
+	//   - 個人冷卻 22 秒；全服廣播感染建立/蔓延/爆發
+	"T177": {ID: "T177", Name: "幸運連鎖感染魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_infection"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

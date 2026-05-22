@@ -57,6 +57,7 @@ const (
 	EventCursedPoisonFish         EventType = "cursed_poison_fish"        // 詛咒毒魚觸發（DAY-216）
 	EventLuckyAuctionFish         EventType = "lucky_auction_fish"        // 幸運拍賣魚觸發（DAY-217）
 	EventLuckyEvolutionFish       EventType = "lucky_evolution_fish"      // 幸運進化魚觸發（DAY-218）
+	EventLuckyInfectionFish       EventType = "lucky_infection_fish"      // 幸運連鎖感染魚觸發（DAY-219）
 )
 
 // Priority 公告優先級
@@ -783,6 +784,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 5000
+
+	case EventLuckyInfectionFish:
+		msg := "🦠 感染蔓延！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#00FF88"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🦠 幸運感染魚！"
+		message = msg
+		icon = "🦠"
+		color = c
+		priority = PriorityNormal
+		duration = 4000
 
 	default:
 		title = "📢 公告"

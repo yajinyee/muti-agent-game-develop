@@ -557,7 +557,8 @@ const (
 	MsgCursedPoisonFish  MessageType = "cursed_poison_fish"  // 詛咒毒魚廣播（Server→Client，DAY-216）
 	MsgLuckyAuctionFish  MessageType = "lucky_auction_fish"  // 幸運拍賣魚廣播（Server→Client，DAY-217）
 	MsgLuckyAuctionBid   MessageType = "lucky_auction_bid"   // 玩家出價（Client→Server，DAY-217）
-	MsgLuckyEvolutionFish MessageType = "lucky_evolution_fish" // 幸運進化魚廣播（Server→Client，DAY-218）
+	MsgLuckyEvolutionFish  MessageType = "lucky_evolution_fish"  // 幸運進化魚廣播（Server→Client，DAY-218）
+	MsgLuckyInfectionFish  MessageType = "lucky_infection_fish"  // 幸運連鎖感染魚廣播（Server→Client，DAY-219）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4883,4 +4884,42 @@ type LuckyEvolutionFishPayload struct {
 	MultBoost     float64 `json:"mult_boost,omitempty"`
 	BoostSec      int     `json:"boost_sec,omitempty"`
 	AffectedCount int     `json:"affected_count,omitempty"`
+}
+
+// InfectionTargetInfo 感染目標資訊（DAY-219）
+type InfectionTargetInfo struct {
+	InstanceID string  `json:"instance_id"`
+	Layer      int     `json:"layer"`
+	X          float64 `json:"x"`
+	Y          float64 `json:"y"`
+}
+
+// InfectionBlastResult 感染爆發結果（DAY-219）
+type InfectionBlastResult struct {
+	InstanceID string `json:"instance_id"`
+	Killed     bool   `json:"killed"`
+	Reward     int    `json:"reward,omitempty"`
+}
+
+// LuckyInfectionFishPayload 幸運連鎖感染魚廣播（Server → Client，DAY-219）
+//
+// Events:
+//
+//	"infection_start"  — 感染開始（全服廣播，含初始感染目標列表）
+//	"infection_spread" — 感染蔓延（全服廣播，含新感染目標列表）
+//	"infection_kill"   — 感染目標被玩家擊破（全服廣播）
+//	"infection_blast"  — 感染爆發（12秒後，全服廣播，含爆發結果）
+type LuckyInfectionFishPayload struct {
+	Event           string                 `json:"event"`
+	SessionID       string                 `json:"session_id,omitempty"`
+	TriggerPlayer   string                 `json:"trigger_player,omitempty"`
+	InfectedTargets []InfectionTargetInfo  `json:"infected_targets,omitempty"`
+	TotalInfected   int                    `json:"total_infected,omitempty"`
+	MaxInfected     int                    `json:"max_infected,omitempty"`
+	DurationSec     int                    `json:"duration_sec,omitempty"`
+	KilledTarget    string                 `json:"killed_target,omitempty"`
+	BlastResults    []InfectionBlastResult `json:"blast_results,omitempty"`
+	TotalKilled     int                    `json:"total_killed,omitempty"`
+	TotalReward     int                    `json:"total_reward,omitempty"`
+	Color           string                 `json:"color,omitempty"`
 }

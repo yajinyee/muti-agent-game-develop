@@ -220,6 +220,7 @@ signal lucky_mirror_fish(data: Dictionary)          # 幸運鏡像魚系統（DA
 signal cursed_poison_fish(data: Dictionary)         # 詛咒毒魚系統（DAY-216）
 signal lucky_auction_fish(data: Dictionary)         # 幸運拍賣魚系統（DAY-217）
 signal lucky_evolution_fish(data: Dictionary)       # 幸運進化魚系統（DAY-218）
+signal lucky_infection_fish(data: Dictionary)       # 幸運連鎖感染魚系統（DAY-219）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -633,6 +634,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_auction_fish(payload)
 		"lucky_evolution_fish":
 			_handle_lucky_evolution_fish(payload)
+		"lucky_infection_fish":
+			_handle_lucky_infection_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2648,3 +2651,24 @@ func _handle_lucky_evolution_fish(payload: Dictionary) -> void:
 		"evolution_escape":
 			var stage: int = payload.get("stage", 0)
 			print("[GameManager] Evolution fish escaped at stage %d" % stage)
+
+## 處理幸運連鎖感染魚系統（DAY-219）
+func _handle_lucky_infection_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_infection_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"infection_start":
+			var trigger: String = payload.get("trigger_player", "")
+			var total: int = payload.get("total_infected", 0)
+			print("[GameManager] Infection started by %s, %d targets infected" % [trigger, total])
+		"infection_spread":
+			var new_count: int = payload.get("infected_targets", []).size()
+			var total: int = payload.get("total_infected", 0)
+			print("[GameManager] Infection spread: +%d new, total=%d" % [new_count, total])
+		"infection_kill":
+			var killed_id: String = payload.get("killed_target", "")
+			print("[GameManager] Infected target killed: %s" % killed_id)
+		"infection_blast":
+			var killed: int = payload.get("total_killed", 0)
+			var reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Infection blast: killed=%d reward=%d" % [killed, reward])
