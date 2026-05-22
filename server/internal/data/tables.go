@@ -373,6 +373,11 @@ var Targets = map[string]*TargetDef{
 	// 擊破後發射「穿透鑽頭」：沿隨機方向穿透最多 5 個目標（80% 擊破機率，0.70x 倍率）
 	// 穿透結束後在終點「自爆」（300px 半徑，75% 擊破機率，0.65x 倍率）
 	"T153": {ID: "T153", Name: "鑽頭龍蝦", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 80, HP: 90, SpawnWeight: 3, Speed: 40, Lifetime: 15, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "drill_lobster_penetrate"},
+	// T154 巨型鮟鱇魚（DAY-196）— 業界依據：JILI Mega Fishing「Giant Anglerfish can shoot electricity
+	// to open treasure chests, giant crocodiles awaken to hunt fish on the fish farm to accumulate big prizes!」
+	// 出現後每 3 秒電擊一次（最多 8 次）：命中 T102 寶箱怪強制開箱（3-5x 倍率）；命中普通目標 70% 擊破（0.60x 倍率）
+	// 5% 機率「超級電擊」全場所有目標同時受到電擊；玩家擊破獲得基礎倍率 + 累積電擊獎池 40%
+	"T154": {ID: "T154", Name: "巨型鮟鱇魚", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 85, HP: 100, SpawnWeight: 2, Speed: 30, Lifetime: 28, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "anglerfish_electric_zap"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

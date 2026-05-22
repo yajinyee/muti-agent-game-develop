@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-195 鑽頭龍蝦穿透爆炸系統）
+## 最後更新：2026-05-22（DAY-196 巨型鮟鱇魚電擊寶箱系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-196 更新（自主觸發）：** 巨型鮟鱇魚電擊寶箱系統（Giant Anglerfish Electric Treasure Chest）✅
+  - **業界依據：** JILI Mega Fishing「Giant Anglerfish can shoot electricity to open treasure chests, giant crocodiles awaken to hunt fish on the fish farm to accumulate big prizes!」
+  - **設計：** T154 巨型鮟鱇魚出現後，每 3 秒電擊一次（最多 8 次）：命中 T102 寶箱怪強制開箱（3-5x 倍率，全服共享）；命中普通目標 70% 擊破機率（0.60x 倍率）；5% 機率「超級電擊」全場所有目標同時受到電擊；玩家擊破鮟鱇魚本身獲得基礎倍率 + 累積電擊獎池 40%
+  - **設計差異：** 與巨型鱷魚獵食（每 2 秒獵食，累積獎池）不同，鮟鱇魚是「電擊型」，有「超級電擊」全場清場的爆發感，且能強制開寶箱製造驚喜；與閃電魚自動連鎖（時間驅動，8 秒）不同，鮟鱇魚是「目標驅動」（在場上持續存在），玩家需要決策：讓它繼續電擊累積獎池，還是立刻擊破？「強制開寶箱」機制是業界首創設計感
+  - server/internal/game/anglerfish_electric_handler.go：anglerfishManager；isAnglerfishElectric（T154）；notifyAnglerfishSpawn（T154 生成時觸發電擊模式）；runAnglerfishZapLoop（goroutine 每 3 秒電擊一次）；doAnglerfishSingleZap（單次電擊/優先選 T102 寶箱怪/強制開箱/普通目標 70% 擊破）；doAnglerfishSuperZap（超級電擊/全場所有目標同時受到電擊/每個目標間隔 80ms）；notifyAnglerfishKill（玩家擊破時結算/基礎倍率+獎池40%）；onAnglerfishLeave（達到最大電擊次數或超時離開）
+  - server/internal/data/tables.go：新增 T154 巨型鮟鱇魚（55-85x/HP100/SpawnWeight2/Speed30/Lifetime28）
+  - server/internal/ws/protocol.go：新增 MsgAnglerfishElectric；AnglerfishElectricPayload（anglerfish_appear/zap_N/super_zap_start/super_zap_N/super_zap_result/anglerfish_killed/anglerfish_leave）
+  - server/internal/game/game.go：AnglerfishElectric *anglerfishManager；spawnTarget 加入 isAnglerfishElectric 分支（notifyAnglerfishSpawn）；handleKill 加入 isAnglerfishElectric 分支（notifyAnglerfishKill）；gameLoop 目標超時移除加入 isAnglerfishElectric 分支（onAnglerfishLeave）
+  - client/chiikawa-pixel/scripts/ui/AnglerfishElectricPanel.gd：深海藍紫主題面板（anglerfish_appear 藍紫色雙閃光+頂部橫幅+電擊計數器+累積獎池；zap_N 電弧效果+寶箱開箱金色強閃光+「💰 寶箱開箱！×N倍」大字彈跳；super_zap_start 全螢幕藍白強閃光+超級電擊橫幅；super_zap_N 每個目標依序閃光；anglerfish_killed 金色閃光+右側滑入結算彈窗；anglerfish_leave 淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：anglerfish_electric 訊號 + _handle_anglerfish_electric
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 AnglerfishElectricPanelScript（layer=49）
+  - 電擊設計：每 3 秒電擊一次；最多 8 次；全服冷卻 50 秒；優先選 T102 寶箱怪（強制開箱）
+  - 寶箱設計：強制開箱 3-5x 倍率（隨機）；全服共享獎勵；全服公告
+  - 超級電擊設計：5% 機率觸發；全場所有目標同時受到電擊；每個目標間隔 80ms（電流蔓延感）；≥3 個擊破時全服公告
+  - 獎池設計：每次電擊獎勵累積進獎池；玩家擊破時獲得獎池 40%；讓玩家有「讓它繼續電擊 vs 立刻擊破」的策略決策
+  - 視覺設計：深海藍紫主題（#4B0082 + #9400D3 + #00BFFF）；電弧圓圈 + ⚡ 符號；寶箱開箱金色強閃光；超級電擊全螢幕藍白強閃光
+  - 全服廣播：出現/每次電擊/超級電擊/擊破/離開全服廣播
+  - 全服公告：出現時公告；寶箱開箱時公告；超級電擊≥3擊破時公告；擊破時≥3次電擊或有獎池時公告
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-195 更新（自主觸發）：** 鑽頭龍蝦穿透爆炸系統（Drill Bit Lobster Penetrating Explosion）✅
   - **業界依據：** Royal Fishing JILI「Drill Bit Lobster (80X) — fires a penetrating drill that passes through multiple fish before self-detonating, capturing everything in the explosion radius. Mechanical marvel with penetrating drill projectiles.」
   - **設計：** 擊破 T153 後發射「穿透鑽頭」：沿隨機 8 方向移動，每步 120px/150ms，穿透最多 5 個目標（80% 擊破機率，0.70x 倍率）；穿透結束後在終點「自爆」（300px 半徑，75% 擊破機率，0.65x 倍率）

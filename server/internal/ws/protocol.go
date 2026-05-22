@@ -510,7 +510,10 @@ const (
 	// 鑽頭龍蝦穿透爆炸系統（DAY-195）
 	MsgDrillLobster MessageType = "drill_lobster" // 鑽頭龍蝦穿透爆炸廣播（Server→Client，全服）
 
-	MsgError            MessageType = "error"
+	// 巨型鮟鱇魚電擊寶箱系統（DAY-196）
+	MsgAnglerfishElectric MessageType = "anglerfish_electric" // 巨型鮟鱇魚電擊廣播（Server→Client，全服）
+
+	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
 
@@ -4322,4 +4325,32 @@ type DrillLobsterPayload struct {
 	ExplodeReward  int     `json:"explode_reward,omitempty"`  // 爆炸獎勵
 	PenetrateCount int     `json:"penetrate_count,omitempty"` // 穿透命中目標數
 	TotalReward    int     `json:"total_reward,omitempty"`    // 總獎勵
+}
+
+// AnglerfishElectricPayload 巨型鮟鱇魚電擊寶箱廣播（Server → Client，DAY-196）
+// Phase: "anglerfish_appear" → "zap_1"..."zap_8" / "super_zap_start"/"super_zap_N"/"super_zap_result" → "anglerfish_killed"/"anglerfish_leave"
+type AnglerfishElectricPayload struct {
+	Phase        string  `json:"phase"`                   // 當前階段
+	InstanceID   string  `json:"instance_id,omitempty"`   // 鮟鱇魚 InstanceID
+	ZapIndex     int     `json:"zap_index,omitempty"`     // 電擊序號（1-8）
+	TargetID     string  `json:"target_id,omitempty"`     // 被電擊目標 InstanceID
+	TargetDefID  string  `json:"target_def_id,omitempty"` // 被電擊目標定義 ID
+	TargetX      float64 `json:"target_x,omitempty"`      // 被電擊目標位置 X
+	TargetY      float64 `json:"target_y,omitempty"`      // 被電擊目標位置 Y
+	IsKill       bool    `json:"is_kill,omitempty"`       // 是否擊破目標
+	IsTreasure   bool    `json:"is_treasure,omitempty"`   // 是否為寶箱開箱
+	TreasureMult float64 `json:"treasure_mult,omitempty"` // 寶箱開箱倍率（3-5x）
+	ZapReward    int     `json:"zap_reward,omitempty"`    // 本次電擊獎勵
+	IsSuperZap   bool    `json:"is_super_zap,omitempty"`  // 是否為超級電擊
+	IsEmpty      bool    `json:"is_empty,omitempty"`      // 場上無目標（空電擊）
+	TargetCount  int     `json:"target_count,omitempty"`  // 超級電擊目標數
+	SuperKills   int     `json:"super_kills,omitempty"`   // 超級電擊擊破數
+	SuperReward  int     `json:"super_reward,omitempty"`  // 超級電擊總獎勵
+	KillerID     string  `json:"killer_id,omitempty"`     // 擊破鮟鱇魚的玩家 ID
+	KillerName   string  `json:"killer_name,omitempty"`   // 擊破鮟鱇魚的玩家名稱
+	ZapCount     int     `json:"zap_count,omitempty"`     // 累計電擊次數
+	TotalPool    int     `json:"total_pool,omitempty"`    // 累積電擊獎池
+	PoolBonus    int     `json:"pool_bonus,omitempty"`    // 獎池加成（40%）
+	BaseReward   int     `json:"base_reward,omitempty"`   // 基礎倍率獎勵
+	TotalReward  int     `json:"total_reward,omitempty"`  // 總獎勵
 }

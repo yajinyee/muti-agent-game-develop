@@ -169,6 +169,7 @@ type Game struct {
 	RockSkeleton       *rockSkeletonManager       // 搖滾骷髏演唱會系統管理器（DAY-192）
 	ChainLongKing      *chainLongKingManager      // 長龍王雙環輪盤系統管理器（DAY-194）
 	DrillLobster       *drillLobsterManager       // 鑽頭龍蝦穿透爆炸系統管理器（DAY-195）
+	AnglerfishElectric *anglerfishManager         // 巨型鮟鱇魚電擊寶箱系統管理器（DAY-196）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -314,6 +315,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		RockSkeleton:       newRockSkeletonManager(),
 		ChainLongKing:      newChainLongKingManager(),
 		DrillLobster:       newDrillLobsterManager(),
+		AnglerfishElectric: newAnglerfishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1589,6 +1591,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isDrillBitLobster(t.DefID) {
 		go g.tryDrillLobsterPenetrate(p, t.InstanceID, t.X, t.Y)
 	}
+	// 巨型鮟鱇魚：擊破 T154 時觸發獎池結算（DAY-196）
+	if isAnglerfishElectric(t.DefID) {
+		go g.notifyAnglerfishKill(p, t.InstanceID, t.Multiplier)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)
@@ -1710,6 +1716,10 @@ func (g *Game) updateNormalPlay() {
 			// 巨型鱷魚：離開畫面時廣播結算（DAY-188）
 			if isCrocodileHunter(t.DefID) {
 				go g.onCrocodileHunterLeave(id, "timeout")
+			}
+			// 巨型鮟鱇魚：離開畫面時廣播結算（DAY-196）
+			if isAnglerfishElectric(t.DefID) {
+				go g.onAnglerfishLeave(id, "timeout")
 			}
 		}
 	}
@@ -2034,6 +2044,10 @@ func (g *Game) spawnTarget() {
 	// 時間炸彈魚：T147 生成時觸發倒數（DAY-189）
 	if isTimeBombFish(def.ID) {
 		go g.tryTimeBombFishSpawn(instanceID)
+	}
+	// 巨型鮟鱇魚：T154 生成時觸發電擊模式（DAY-196）
+	if isAnglerfishElectric(def.ID) {
+		go g.notifyAnglerfishSpawn(instanceID)
 	}
 }
 
