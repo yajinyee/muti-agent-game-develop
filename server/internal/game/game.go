@@ -161,6 +161,7 @@ type Game struct {
 	LightningAutoChain *lightningAutoChainManager // 閃電魚自動連鎖系統管理器（DAY-183）
 	MeteorFish         *meteorFishManager         // 隕石魚隕石雨系統管理器（DAY-184）
 	PhoenixFish        *phoenixFishManager        // 鳳凰魚涅槃重生系統管理器（DAY-185）
+	DragonTurtle       *dragonTurtleManager       // 龍龜不死 Boss 系統管理器（DAY-186）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -298,6 +299,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LightningAutoChain: newLightningAutoChainManager(),
 		MeteorFish:         newMeteorFishManager(),
 		PhoenixFish:        newPhoenixFishManager(),
+		DragonTurtle:       newDragonTurtleManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -954,6 +956,11 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	// 深淵巨鯨：命中時記錄傷害（DAY-164）
 	if result.IsHit && t != nil && isAbyssWhale(t.DefID) {
 		go g.notifyAbyssWhaleHit(p, t.InstanceID, betCost)
+	}
+
+	// 龍龜不死 Boss：命中時直接給獎勵（DAY-186）
+	if result.IsHit && t != nil && isDragonTurtle(t.DefID) {
+		go g.notifyDragonTurtleHit(p, t.InstanceID)
 	}
 
 	// BOSS 階段變化
@@ -1625,6 +1632,10 @@ func (g *Game) updateNormalPlay() {
 			go g.cancelSpeedRaceIfTarget(id)
 			// 懸賞：目標消失時取消懸賞並退款（DAY-137）
 			go g.cancelBountyForTarget(id)
+			// 龍龜不死 Boss：離開畫面時廣播結算（DAY-186）
+			if isDragonTurtle(t.DefID) {
+				go g.notifyDragonTurtleLeave(id)
+			}
 		}
 	}
 	targetCount := len(g.Targets)
@@ -1936,6 +1947,10 @@ func (g *Game) spawnTarget() {
 	// 深淵巨鯨：T124 生成時通知全服（DAY-164）
 	if isAbyssWhale(def.ID) {
 		go g.notifyAbyssWhaleSpawn(instanceID, x, y)
+	}
+	// 龍龜不死 Boss：T144 生成時通知全服（DAY-186）
+	if isDragonTurtle(def.ID) {
+		go g.notifyDragonTurtleSpawn(instanceID, x, y)
 	}
 }
 

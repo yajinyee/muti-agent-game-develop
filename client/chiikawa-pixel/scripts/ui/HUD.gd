@@ -269,6 +269,7 @@ func _ready() -> void:
 	_init_lightning_auto_chain_panel() # 閃電魚自動連鎖面板（DAY-183）
 	_init_meteor_fish_panel()          # 隕石魚隕石雨面板（DAY-184）
 	_init_phoenix_fish_panel()         # 鳳凰魚涅槃重生面板（DAY-185）
+	_init_dragon_turtle_panel()        # 龍龜不死 Boss 面板（DAY-186）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3577,4 +3578,21 @@ func _init_phoenix_fish_panel() -> void:
 		GameManager.phoenix_fish.connect(func(data):
 			if is_instance_valid(_phoenix_fish_panel):
 				_phoenix_fish_panel.handle_phoenix_fish(data)
+		)
+
+## ---- 龍龜不死 Boss 面板（DAY-186）----
+const DragonTurtlePanelScript = preload("res://scripts/ui/DragonTurtlePanel.gd")
+var _dragon_turtle_panel: Control = null
+
+func _init_dragon_turtle_panel() -> void:
+	var panel = DragonTurtlePanelScript.new()
+	panel.name = "DragonTurtlePanel"
+	panel.z_index = 59
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_dragon_turtle_panel = panel
+	if GameManager.has_signal("dragon_turtle"):
+		GameManager.dragon_turtle.connect(func(data):
+			if is_instance_valid(_dragon_turtle_panel):
+				_dragon_turtle_panel.handle_dragon_turtle(data)
 		)

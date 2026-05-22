@@ -481,6 +481,9 @@ const (
 	// 鳳凰魚涅槃重生系統（DAY-185）
 	MsgPhoenixFish MessageType = "phoenix_fish" // 鳳凰魚涅槃重生廣播（Server→Client，全服）
 
+	// 龍龜不死 Boss 系統（DAY-186）
+	MsgDragonTurtle MessageType = "dragon_turtle" // 龍龜不死 Boss 廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4068,4 +4071,21 @@ type PhoenixFishPayload struct {
 	KillerName  string  `json:"killer_name"`  // 觸發玩家名稱
 	BoostPct    int     `json:"boost_pct"`    // 重生加成百分比（rebirth 時，30）
 	BoostSec    int     `json:"boost_sec"`    // 重生加成持續秒數（rebirth 時，30）
+}
+
+// ---- 龍龜不死 Boss 系統（DAY-186）----
+
+// DragonTurtlePayload 龍龜不死 Boss 廣播（Server → Client，DAY-186）
+// Phase: "turtle_appear" → "turtle_hit" / "my_hit" → "turtle_leave"
+type DragonTurtlePayload struct {
+	Phase       string  `json:"phase"`                  // 當前階段
+	InstanceID  string  `json:"instance_id"`            // 龍龜 InstanceID
+	X           float64 `json:"x,omitempty"`            // 出現位置 X（turtle_appear）
+	Y           float64 `json:"y,omitempty"`            // 出現位置 Y（turtle_appear）
+	HitterID    string  `json:"hitter_id,omitempty"`    // 命中玩家 ID（turtle_hit）
+	HitterName  string  `json:"hitter_name,omitempty"`  // 命中玩家名稱（turtle_hit）
+	HitReward   int     `json:"hit_reward,omitempty"`   // 本次命中獎勵（turtle_hit/my_hit）
+	HitMult     int     `json:"hit_mult,omitempty"`     // 本次命中倍率（turtle_hit/my_hit）
+	TotalHits   int     `json:"total_hits,omitempty"`   // 全服總命中數
+	TotalReward int     `json:"total_reward,omitempty"` // 全服總獎勵（turtle_leave）
 }

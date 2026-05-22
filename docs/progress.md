@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-185 鳳凰魚涅槃重生系統）
+## 最後更新：2026-05-22（DAY-186 龍龜不死 Boss 系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,20 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-186 更新（自主觸發）：** 龍龜不死 Boss 系統（Dragon Turtle Immortal Boss）✅
+  - **業界依據：** Royal Fishing JILI「Immortal Boss mechanic — Golden Toad and Ancient Crocodile bosses appear randomly and award consecutive wins ranging from 50X to 150X until they leave the screen. This creates extended winning sequences impossible in standard fish games.」— T144 龍龜不死 Boss 出現後不會被擊破（HP=99999），每次命中給 50-150x betLevel 獎勵，直到 Lifetime（30秒）結束離開畫面
+  - **設計差異：** 與 DAY-129 不死 BOSS（隱形/每次射擊有機率命中）不同，龍龜是「可見目標物」（在場上移動），玩家需要主動瞄準；與普通 BOSS（需要擊破）完全不同，龍龜是「持續收割型」，玩家不需要擊破，只要命中就有獎勵，製造「穩定收益」的安心感；全服共享龍龜，所有玩家都可以打，製造「搶打龍龜」的競爭感
+  - server/internal/game/dragon_turtle_handler.go：dragonTurtleManager（全服共享 isActive/instanceID/totalHits/totalReward/節流廣播）；isDragonTurtle 判斷；notifyDragonTurtleSpawn（T144 生成時全服廣播+公告）；notifyDragonTurtleHit（命中時給獎勵+節流廣播+個人回饋）；notifyDragonTurtleLeave（離開時廣播結算+公告≥5命中）
+  - server/internal/data/tables.go：新增 T144 龍龜不死（30-50x/HP99999/SpawnWeight1/Speed25/Lifetime30/immortal_boss 行為）
+  - server/internal/ws/protocol.go：新增 MsgDragonTurtle；DragonTurtlePayload（turtle_appear/turtle_hit/my_hit/turtle_leave）
+  - server/internal/game/game.go：DragonTurtle *dragonTurtleManager；spawnTarget 加入 isDragonTurtle 分支（notifyDragonTurtleSpawn）；handleAttack 加入 isDragonTurtle 命中分支（notifyDragonTurtleHit）；gameLoop 目標超時移除加入 isDragonTurtle 分支（notifyDragonTurtleLeave）
+  - client/chiikawa-pixel/scripts/ui/DragonTurtlePanel.gd：龍龜不死 Boss 面板（深綠主題；turtle_appear 綠色閃光+頂部橫幅滑入+命中計數器；turtle_hit 小閃光+命中玩家浮動文字（青綠色）+計數器更新；my_hit 金色大字彈跳（+獎勵 金幣 ×倍率）+高倍率額外閃光；turtle_leave 金色閃光+右側滑入結算彈窗（命中數/總獎勵）+5秒後淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：dragon_turtle 訊號 + _handle_dragon_turtle
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 DragonTurtlePanelScript（z_index=59）
+  - 龍龜設計：HP=99999（永遠不死）；每次命中 50-150x betLevel（隨機）；30秒 Lifetime；全服冷卻 60 秒；SpawnWeight=1（極稀有）
+  - 命中廣播：200ms 節流（防止多人同時命中造成廣播風暴）；個人命中不節流（立刻看到獎勵）
+  - 全服廣播：出現/命中（節流）/離開全服廣播；≥5 次命中才廣播離開公告
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-185 更新（自主觸發）：** 鳳凰魚涅槃重生系統（Phoenix Fish Rebirth）✅
   - **業界依據：** Ocean King 3 Plus「Phoenix Fish — when defeated, the Phoenix Fish triggers a rebirth explosion that deals massive damage to all fish on screen, with the Phoenix rising from the ashes to grant a 30-second luck boost」— 擊破 T143 後觸發「涅槃爆炸」：場上所有目標受到爆炸傷害（普通 80%/特殊 50%/BOSS 20%），爆炸後全服 +30% 加成持續 30 秒
   - **設計差異：** 與隕石魚（隨機選目標/數量驅動）不同，鳳凰魚是「全場同時爆炸」（一次性清場），讓玩家感受到「鳳凰涅槃，全場燃燒」的壯觀感；兩段式設計（爆炸→重生）讓玩家有「先爽一波，再持續爽」的雙重滿足感；重生加成 +30% 是加法疊加（不是乘法），與其他倍率系統共存

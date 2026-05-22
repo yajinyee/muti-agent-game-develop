@@ -307,6 +307,18 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「涅槃爆炸」：全場同時爆炸（普通 80%/特殊 50%/BOSS 20%），爆炸後全服 +30% 加成 30 秒
 	// 設計：高倍率（75-95x）+ 中等 HP（95）+ 稀有生成權重（2）= 極稀有且有「全場清場+重生加成」雙重爽感
 	"T143": {ID: "T143", Name: "鳳凰魚", Type: TargetTypeSpecial, MultiplierMin: 75, MultiplierMax: 95, HP: 95, SpawnWeight: 2, Speed: 45, Lifetime: 15, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "phoenix_fish_rebirth"},
+	// T144 龍龜不死 Boss（DAY-186）— 業界依據：Royal Fishing JILI「Immortal Boss mechanic —
+	// Golden Toad and Ancient Crocodile bosses appear randomly and award consecutive wins
+	// ranging from 50X to 150X until they leave the screen. This creates extended winning
+	// sequences impossible in standard fish games.」
+	// 龍龜不死機制：出現後不會被擊破（Immortal），每次命中給 50-150x betLevel 獎勵，
+	// 直到 Lifetime 結束離開畫面，全服廣播每次命中
+	// 設計差異：與普通 BOSS（需要擊破）完全不同，龍龜是「持續收割型」，
+	// 玩家不需要擊破，只要命中就有獎勵，製造「穩定收益」的安心感；
+	// 全服共享龍龜，所有玩家都可以打，製造「搶打龍龜」的競爭感
+	// 設計：中等倍率（30-50x）+ 超高 HP（99999，不死）+ 極稀有生成權重（1）+ 30秒 Lifetime
+	// HP=99999 確保永遠不會被擊破；MultiplierMin/Max 用於顯示，實際獎勵由 handler 計算
+	"T144": {ID: "T144", Name: "龍龜不死", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 99999, SpawnWeight: 1, Speed: 25, Lifetime: 30, LaborGain: 20, DifficultyFactor: 16.0, SpecialBehavior: "immortal_boss"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
