@@ -29,6 +29,15 @@ const TARGET_SPRITES = {
 	"T115": "res://assets/sprites/targets/T115_rainbow_phoenix.png",
 	"T116": "res://assets/sprites/targets/T116_vampire.png",
 	"T117": "res://assets/sprites/targets/T117_crystal_dragon.png",
+	"T118": "res://assets/sprites/targets/T118_royal_lightning_eel.png",
+	"T119": "res://assets/sprites/targets/T119_golden_turtle.png",
+	"T120": "res://assets/sprites/targets/T120_lucky_star_fish.png",
+	"T121": "res://assets/sprites/targets/T121_golden_shark.png",
+	"T122": "res://assets/sprites/targets/T122_money_fish.png",
+	"T123": "res://assets/sprites/targets/T123_captain_fish.png",
+	"T124": "res://assets/sprites/targets/T124_abyss_whale.png",
+	"T125": "res://assets/sprites/targets/T125_roulette_crab.png",
+	"T126": "res://assets/sprites/targets/T126_lion_dance.png",
 	"B001": "res://assets/sprites/targets/B001_boss.png",
 }
 
@@ -38,7 +47,8 @@ const SWIM_SHEET_TARGETS = [
 	"T001", "T002", "T003", "T004", "T005", "T006",
 	"T101", "T102", "T103", "T104", "T105",
 	"T106", "T107", "T108", "T109", "T110",
-	"T111", "T112", "T113", "T114", "T115", "T116", "T117"
+	"T111", "T112", "T113", "T114", "T115", "T116", "T117",
+	"T118", "T119", "T120", "T121", "T122", "T123", "T124", "T125", "T126"
 ]
 const SWIM_ANIM_FPS: float = 4.0  # 每 0.25 秒切換一幀
 
@@ -53,29 +63,30 @@ const BOSS_ROW_DEATH  = 2
 
 # Spritesheet 中各目標的 UV 座標（來自 targets_sheet.json，cell_size=64）
 const SHEET_REGIONS = {
-	"T001": Rect2(0, 0, 64, 64),
-	"T002": Rect2(64, 0, 64, 64),
-	"T003": Rect2(128, 0, 64, 64),
-	"T004": Rect2(192, 0, 64, 64),
-	"T005": Rect2(0, 64, 64, 64),
-	"T006": Rect2(64, 64, 64, 64),
-	"T101": Rect2(128, 64, 64, 64),
-	"T102": Rect2(192, 64, 64, 64),
-	"T103": Rect2(0, 128, 64, 64),
-	"T104": Rect2(64, 128, 64, 64),
-	"T105": Rect2(128, 128, 64, 64),
-	"T106": Rect2(192, 128, 64, 64),
-	"T107": Rect2(0, 192, 64, 64),
-	"T108": Rect2(64, 192, 64, 64),
-	"T109": Rect2(128, 192, 64, 64),
-	"T110": Rect2(192, 192, 64, 64),
-	"T111": Rect2(0, 256, 64, 64),
-	"T112": Rect2(64, 256, 64, 64),
-	"T113": Rect2(128, 256, 64, 64),
-	"T114": Rect2(192, 256, 64, 64),
-	"T115": Rect2(0, 320, 64, 64),
-	"T116": Rect2(64, 320, 64, 64),
-	"T117": Rect2(128, 320, 64, 64),
+	"T001": Rect2(64, 64, 64, 64),
+	"T002": Rect2(64, 128, 64, 64),
+	"T003": Rect2(64, 192, 64, 64),
+	"T004": Rect2(64, 256, 64, 64),
+	"T005": Rect2(64, 320, 64, 64),
+	"T006": Rect2(64, 384, 64, 64),
+	"T101": Rect2(0, 448, 64, 64),
+	"T102": Rect2(0, 512, 64, 64),
+	"T103": Rect2(0, 576, 64, 64),
+	"T104": Rect2(0, 640, 64, 64),
+	"T105": Rect2(192, 640, 64, 64),
+	"T106": Rect2(128, 704, 64, 64),
+	"T107": Rect2(192, 704, 64, 64),
+	"T108": Rect2(0, 768, 64, 64),
+	"T109": Rect2(64, 768, 64, 64),
+	"T110": Rect2(128, 768, 64, 64),
+	"T111": Rect2(192, 768, 64, 64),
+	"T112": Rect2(0, 832, 64, 64),
+	"T113": Rect2(64, 832, 64, 64),
+	"T114": Rect2(128, 832, 64, 64),
+	"T115": Rect2(192, 832, 64, 64),
+	"T116": Rect2(0, 896, 64, 64),
+	"T117": Rect2(64, 896, 64, 64),
+	# T118-T126 使用獨立 PNG（TARGET_SPRITES 備用路徑），不在 Spritesheet 中
 }
 
 # 命中特效 Sprite
