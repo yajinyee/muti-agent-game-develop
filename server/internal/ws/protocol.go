@@ -500,6 +500,9 @@ const (
 	// 搖滾骷髏演唱會系統（DAY-192）
 	MsgRockSkeletonConcert MessageType = "rock_skeleton_concert" // 搖滾骷髏演唱會廣播（Server→Client，全服）
 
+	// 電流水母電流網路系統（DAY-193）
+	MsgElectricJellyfish MessageType = "electric_jellyfish" // 電流水母電流網路廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4221,4 +4224,44 @@ type RockSkeletonConcertPayload struct {
 	EncoreDuration  int       `json:"encore_duration,omitempty"`    // 安可加成持續秒數
 	EncoreBonus     float64   `json:"encore_bonus,omitempty"`       // 安可加成比例（0.30 = +30%）
 	Message         string    `json:"message,omitempty"`            // 廣播訊息
+}
+
+// ElectricLinkResult 電流連接結果（DAY-193）
+type ElectricLinkResult struct {
+	IDA        string  `json:"id_a"`                    // 目標 A InstanceID
+	IDB        string  `json:"id_b"`                    // 目標 B InstanceID
+	XA         float64 `json:"x_a"`                     // 目標 A X 座標
+	YA         float64 `json:"y_a"`                     // 目標 A Y 座標
+	XB         float64 `json:"x_b"`                     // 目標 B X 座標
+	YB         float64 `json:"y_b"`                     // 目標 B Y 座標
+	IsKill     bool    `json:"is_kill"`                 // 是否擊破
+	KilledID   string  `json:"killed_id,omitempty"`     // 被擊破的目標 InstanceID
+	KilledMult float64 `json:"killed_mult,omitempty"`   // 被擊破目標的倍率
+	Reward     int     `json:"reward,omitempty"`        // 獎勵金幣
+}
+
+// ElectricJellyfishPayload 電流水母電流網路廣播（Server → Client，DAY-193）
+// Phase: "network_start" → "link_N" → "network_result"
+type ElectricJellyfishPayload struct {
+	Phase       string               `json:"phase"`                    // 當前階段
+	TriggerID   string               `json:"trigger_id,omitempty"`     // 觸發的電流水母 InstanceID
+	TriggerX    float64              `json:"trigger_x,omitempty"`      // 觸發位置 X
+	TriggerY    float64              `json:"trigger_y,omitempty"`      // 觸發位置 Y
+	KillerID    string               `json:"killer_id,omitempty"`      // 觸發玩家 ID
+	KillerName  string               `json:"killer_name,omitempty"`    // 觸發玩家名稱
+	LinkCount   int                  `json:"link_count,omitempty"`     // 電流連接總數
+	LinkIndex   int                  `json:"link_index,omitempty"`     // 當前連接序號（1-based）
+	IDA         string               `json:"id_a,omitempty"`           // 目標 A InstanceID
+	IDB         string               `json:"id_b,omitempty"`           // 目標 B InstanceID
+	XA          float64              `json:"x_a,omitempty"`            // 目標 A X 座標
+	YA          float64              `json:"y_a,omitempty"`            // 目標 A Y 座標
+	XB          float64              `json:"x_b,omitempty"`            // 目標 B X 座標
+	YB          float64              `json:"y_b,omitempty"`            // 目標 B Y 座標
+	IsKill      bool                 `json:"is_kill,omitempty"`        // 是否擊破
+	KilledID    string               `json:"killed_id,omitempty"`      // 被擊破的目標 InstanceID
+	KilledMult  float64              `json:"killed_mult,omitempty"`    // 被擊破目標的倍率
+	Reward      int                  `json:"reward,omitempty"`         // 本次連接獎勵
+	TotalKills  int                  `json:"total_kills,omitempty"`    // 累計擊破數
+	TotalReward int                  `json:"total_reward,omitempty"`   // 累計獎勵
+	Links       []ElectricLinkResult `json:"links,omitempty"`          // 所有連接結果（result 階段）
 }

@@ -357,6 +357,10 @@ var Targets = map[string]*TargetDef{
 	// 第 10 秒觸發「超級覺醒高潮」：全場所有目標 HP 降低 70%，持續 5 秒
 	// 演唱會結束後：≥10 個擊破 → 全服 +30% 加成 10 秒（安可獎勵）
 	"T150": {ID: "T150", Name: "搖滾骷髏魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 13, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "rock_skeleton_concert"},
+	// T151 電流水母（DAY-193）— 業界依據：King of Ocean 2026「electric jellyfish chains current between adjacent targets, paying multipliers from every link in the chain」
+	// 擊破後建立「電流網路」：場上所有相鄰目標（200px 內）之間建立電流連接，每條連接 65% 擊破機率（0.55x 倍率）
+	// 密集目標群形成更多連接，製造「越多魚越爽」的策略感；電流選擇較低 HP 的目標擊破
+	"T151": {ID: "T151", Name: "電流水母", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 55, HP: 60, SpawnWeight: 4, Speed: 45, Lifetime: 12, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "electric_jellyfish_network"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

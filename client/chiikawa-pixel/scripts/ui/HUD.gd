@@ -276,6 +276,7 @@ func _ready() -> void:
 	_init_triple_lucky_fish_panel()    # 三重幸運魚面板（DAY-190）
 	_init_school_panic_panel()         # 魚群驚嚇連帶面板（DAY-191）
 	_init_rock_skeleton_concert_panel() # 搖滾骷髏演唱會面板（DAY-192）
+	_init_electric_jellyfish_panel()    # 電流水母電流網路面板（DAY-193）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3689,3 +3690,15 @@ func _init_rock_skeleton_concert_panel() -> void:
 	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(panel)
 	_rock_skeleton_concert_panel = panel
+
+## ---- 電流水母電流網路面板（DAY-193）----
+const ElectricJellyfishPanelScript = preload("res://scripts/ui/ElectricJellyfishPanel.gd")
+var _electric_jellyfish_panel: Control = null
+
+func _init_electric_jellyfish_panel() -> void:
+	var panel = ElectricJellyfishPanelScript.new()
+	panel.name = "ElectricJellyfishPanel"
+	panel.z_index = 52  # 在 RockSkeletonConcertPanel(53) 之下
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(panel)
+	_electric_jellyfish_panel = panel

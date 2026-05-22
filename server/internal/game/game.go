@@ -1567,6 +1567,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isRockSkeleton(t.DefID) {
 		go g.tryRockSkeletonConcert(p, t.InstanceID, t.X, t.Y)
 	}
+	// 電流水母：擊破 T151 時觸發電流網路（DAY-193）
+	if isElectricJellyfish(t.DefID) {
+		go g.tryElectricJellyfishNetwork(p, t.InstanceID, t.X, t.Y)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)

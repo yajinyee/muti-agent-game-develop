@@ -194,6 +194,7 @@ signal time_bomb_fish(data: Dictionary)                # 時間炸彈魚（DAY-1
 signal triple_lucky_fish(data: Dictionary)             # 三重幸運魚（DAY-190）
 signal school_panic(data: Dictionary)                  # 魚群驚嚇連帶（DAY-191）
 signal rock_skeleton_concert(data: Dictionary)         # 搖滾骷髏演唱會（DAY-192）
+signal electric_jellyfish(data: Dictionary)            # 電流水母電流網路（DAY-193）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -555,6 +556,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_school_panic(payload)
 		"rock_skeleton_concert":
 			_handle_rock_skeleton_concert(payload)
+		"electric_jellyfish":
+			_handle_electric_jellyfish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2111,3 +2114,17 @@ func _handle_rock_skeleton_concert(payload: Dictionary) -> void:
 		"concert_end":
 			var total_kills: int = payload.get("total_kills", 0)
 			print("[GameManager] Rock Skeleton Concert ended. kills=%d" % total_kills)
+
+## 處理電流水母電流網路（DAY-193）
+func _handle_electric_jellyfish(payload: Dictionary) -> void:
+	emit_signal("electric_jellyfish", payload)
+	var phase: String = payload.get("phase", "")
+	match phase:
+		"network_start":
+			var killer_name: String = payload.get("killer_name", "")
+			var link_count: int = payload.get("link_count", 0)
+			print("[GameManager] Electric Jellyfish network started by %s: %d links" % [killer_name, link_count])
+		"network_result":
+			var total_kills: int = payload.get("total_kills", 0)
+			var link_count: int = payload.get("link_count", 0)
+			print("[GameManager] Electric Jellyfish network ended. links=%d kills=%d" % [link_count, total_kills])

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-192 搖滾骷髏演唱會系統）
+## 最後更新：2026-05-22（DAY-193 電流水母電流網路系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-193 更新（自主觸發）：** 電流水母電流網路系統（Electric Jellyfish Current Chain）✅
+  - **業界依據：** King of Ocean 2026「electric jellyfish chains current between adjacent targets, paying multipliers from every link in the chain」
+  - **設計：** 擊破 T151 後建立「電流網路」：場上所有相鄰目標（200px 內）之間建立電流連接，每條連接 65% 擊破機率（0.55x 倍率）；電流選擇較低 HP 的目標擊破；密集目標群形成更多連接，製造「越多魚越爽」的策略感
+  - **設計差異：** 與閃電鰻（隨機跳躍，單一路徑，5跳）不同，電流水母是「網路拓撲」（所有相鄰目標同時建立連接），讓玩家看到「電流在整個場上形成網路」的壯觀視覺；與雷霆鯊魚（全場隨機跳躍，20跳）不同，電流水母是「距離驅動」（只連接相鄰目標），密集的目標群會形成更多連接
+  - server/internal/game/electric_jellyfish_handler.go：isElectricJellyfish 判斷；electricLink 結構；tryElectricJellyfishNetwork（建立電流網路/按距離排序/逐條連接/65%擊破/全服廣播/結果廣播）；announceElectricJellyfish（全服公告≥5擊破或≥8連接）
+  - server/internal/data/tables.go：新增 T151 電流水母（30-55x/HP60/SpawnWeight4/Speed45/Lifetime12/electric_jellyfish_network 行為）
+  - server/internal/ws/protocol.go：新增 MsgElectricJellyfish；ElectricLinkResult；ElectricJellyfishPayload（network_start/link_N/network_result）
+  - server/internal/game/game.go：handleKill 加入 isElectricJellyfish 分支（goroutine）
+  - client/chiikawa-pixel/scripts/ui/ElectricJellyfishPanel.gd：電流水母面板（青色主題；network_start 青色雙閃光+頂部橫幅+連接計數器；link_N 鋸齒電流線+節點圓點+擊破浮動獎勵；network_result 結算彈窗+大量連接時額外閃光）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：electric_jellyfish 訊號 + _handle_electric_jellyfish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 ElectricJellyfishPanelScript（z_index=52）
+  - 網路設計：200px 相鄰半徑；65% 擊破機率；0.55x 獎勵倍率；按距離排序（近的先連接）；每條連接 80ms 間隔
+  - 策略設計：密集目標群形成更多連接（越多魚越爽）；電流選擇較低 HP 的目標擊破（自然感）
+  - 視覺設計：鋸齒電流線（隨機偏移 ±6px）；青色（未擊破）/ 黃色（擊破）雙色；節點圓點標記連接端點
+  - 全服廣播：網路開始/每條連接/結果全服廣播
+  - 全服公告：≥5 個擊破或 ≥8 條連接時全服廣播（青色，5秒，優先級3）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-192 更新（自主觸發）：** 搖滾骷髏演唱會系統（Rock Skeleton Concert）✅
   - **業界依據：** JILI 2026「Rock Skeleton Concert — Rock Skeleton and Super Awakening Performance, you can get a large bonus of up to 3,000 times」
   - **設計：** 擊破 T150 後觸發「演唱會模式」（15 秒）：每 1 秒「音符炸彈」隨機命中 2-4 個目標（70% 擊破機率，0.60x 倍率）；第 10 秒觸發「超級覺醒高潮」：全場所有目標 HP 降低 70%，持續 5 秒；演唱會結束後：≥10 個擊破 → 全服 +30% 加成 10 秒（安可獎勵）
