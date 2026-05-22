@@ -424,6 +424,9 @@ const (
 	MsgCrystalDragonReward MessageType = "crystal_dragon_reward" // 地獄龍大獎（Server→Client，全服）
 	MsgCrystalDragonStatus MessageType = "crystal_dragon_status" // 水晶狀態（Server→Client，個人，登入時）
 
+	// 獅子舞大獎爆發系統（DAY-168）
+	MsgLionDanceBurst MessageType = "lion_dance_burst" // 獅子舞爆發廣播（Server→Client，全服）
+
 	MsgError            MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -3623,4 +3626,25 @@ type AbyssWhalePayload struct {
 	MyBonus     int               `json:"my_bonus"`     // 我的獎勵（reward 時）
 	MyDamage    int               `json:"my_damage"`    // 我的傷害（reward 時）
 	MyRatio     float64           `json:"my_ratio"`     // 我的貢獻比例（reward 時）
+}
+
+// ---- 獅子舞大獎爆發系統（DAY-168）----
+
+// LionDanceMarkedTarget 獅子舞標記目標
+type LionDanceMarkedTarget struct {
+	InstanceID string  `json:"instance_id"` // 被標記的目標 InstanceID
+	X          float64 `json:"x"`           // 目標位置 X
+	Y          float64 `json:"y"`           // 目標位置 Y
+}
+
+// LionDanceBurstPayload 獅子舞爆發廣播（Server → Client，DAY-168）
+// Phase: "burst_start" → "burst_end"
+type LionDanceBurstPayload struct {
+	Phase            string                  `json:"phase"`             // 當前階段
+	TriggerPlayer    string                  `json:"trigger_player"`    // 觸發玩家 ID
+	TriggerName      string                  `json:"trigger_name"`      // 觸發玩家名稱
+	BurstMult        float64                 `json:"burst_mult"`        // 爆發倍率（3-10x）
+	MarkedTargets    []LionDanceMarkedTarget `json:"marked_targets"`    // 標記目標列表（burst_start 時）
+	DurationSec      int                     `json:"duration_sec"`      // 持續時間（秒）
+	RemainingTargets int                     `json:"remaining_targets"` // 剩餘未擊破的標記目標數（burst_end 時）
 }

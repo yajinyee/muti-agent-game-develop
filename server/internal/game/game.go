@@ -143,6 +143,7 @@ type Game struct {
 	AbyssWhale         *abyssWhaleManager         // 深淵巨鯨全服 Boss 挑戰管理器（DAY-164）
 	RouletteCrab       *roulettecrab.Manager      // 黃金輪盤螃蟹系統管理器（DAY-167）
 	CrystalDragon      *crystaldragon.Manager     // 水晶龍收集大獎系統管理器（DAY-153）
+	LionDance          *lionDanceManager          // 獅子舞大獎爆發系統管理器（DAY-168）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -264,6 +265,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		AbyssWhale:         newAbyssWhaleManager(),
 		RouletteCrab:       roulettecrab.New(),
 		CrystalDragon:      crystaldragon.New(),
+		LionDance:          newLionDanceManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1039,6 +1041,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if goldenSharkMult > 1.0 {
 		finalReward = int(float64(finalReward) * goldenSharkMult)
 	}
+	// 套用獅子舞爆發倍率（DAY-168）
+	lionDanceMult := g.getLionDanceMult(p.ID, t.InstanceID)
+	if lionDanceMult > 1.0 {
+		finalReward = int(float64(finalReward) * lionDanceMult)
+	}
 	// 船長魚競速：記錄擊破（DAY-163）
 	if g.IsCaptainRaceActive() {
 		go g.recordCaptainRaceKill(p, finalReward)
@@ -1345,6 +1352,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 黃金輪盤螃蟹：擊破 T125 時觸發（DAY-167）
 	if isRouletteCrab(t.DefID) {
 		go g.tryRouletteCrabWheel(p, t.Multiplier, finalReward)
+	}
+	// 獅子舞大獎爆發：擊破 T126 時觸發（DAY-168）
+	if isLionDance(t.DefID) {
+		go g.tryLionDanceBurst(p, t.InstanceID, t.X, t.Y)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

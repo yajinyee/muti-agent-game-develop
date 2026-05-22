@@ -184,6 +184,11 @@ var Targets = map[string]*TargetDef{
 	// 與千龍王輪盤（雙環，最高 1000x）不同：輪盤螃蟹是單環輪盤，更簡單直接，適合中等 betLevel 玩家
 	// 設計：中等倍率（20-40x）+ 低 HP（50）+ 中高生成權重（6）= 常見且有輪盤爽感的特殊目標
 	"T125": {ID: "T125", Name: "黃金輪盤螃蟹", Type: TargetTypeSpecial, MultiplierMin: 20, MultiplierMax: 40, HP: 50, SpawnWeight: 6, Speed: 45, Lifetime: 12, LaborGain: 10, DifficultyFactor: 16.0, SpecialBehavior: "roulette_crab"},
+	// T126 獅子舞魚（DAY-168）— 業界依據：Fortune King Jackpot（TaDa Gaming 2026）「Lion Dance bonus — triggered by
+	// special fish, delivers burst multiplier payouts with festive visual effects」
+	// 擊破後觸發「獅子舞爆發」：全場隨機 3-5 個目標被「獅子舞光環」標記，玩家在 15 秒內擊破標記目標獲得 3x-10x 額外倍率加成
+	// 設計：中等倍率（30-50x）+ 中等 HP（60）+ 中等生成權重（5）= 常見且有爆發爽感的特殊目標
+	"T126": {ID: "T126", Name: "獅子舞魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 50, HP: 60, SpawnWeight: 5, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lion_dance_burst"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

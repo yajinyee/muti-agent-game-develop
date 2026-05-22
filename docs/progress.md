@@ -1,6 +1,6 @@
 # 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-167 黃金輪盤螃蟹系統）
+## 最後更新：2026-05-22（DAY-168 獅子舞大獎爆發系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-168 更新（自主觸發）：** 獅子舞大獎爆發系統（Lion Dance Jackpot Burst）✅
+  - **業界依據：** Fortune King Jackpot（TaDa Gaming 2026）「Lion Dance bonus — triggered by special fish, delivers burst multiplier payouts with festive visual effects」— 擊破 T126 後觸發「獅子舞爆發」：全場隨機 3-5 個目標被「獅子舞光環」標記，玩家在 15 秒內擊破標記目標獲得 3x-10x 額外倍率加成
+  - **設計差異：** 與幸運星魚（個人 ×2，10秒）不同，獅子舞爆發是**標記特定目標**（3-5個），玩家需要主動找到並擊破標記目標，製造「搶時間」的緊張感；與黃金鯊魚（全場 ×1.5）不同，獅子舞是**高倍率但限定目標**（3x-10x），更有策略性
+  - `server/internal/game/lion_dance_handler.go`：lionDanceManager（全服冷卻 30 秒/per-player session）；isLionDance 判斷；tryLionDanceBurst（擊破後觸發/隨機選 3-5 個目標標記/全服廣播/全服公告≥7x）；getLionDanceMult（供 handleKill 使用，標記目標回傳倍率）；pickWeightedFloat（加權隨機倍率選擇）
+  - `server/internal/data/tables.go`：新增 T126 獅子舞魚（30-50x/HP60/SpawnWeight5/lion_dance_burst 行為）
+  - `server/internal/ws/protocol.go`：新增 MsgLionDanceBurst；LionDanceMarkedTarget/LionDanceBurstPayload（兩階段：burst_start/burst_end）
+  - `server/internal/game/announce/announce.go`：新增 EventLionDance；buildContent 加入獅子舞公告（橙色，5秒，高優先）
+  - `server/internal/game/game.go`：Game struct 加入 LionDance *lionDanceManager；NewGameWithStore 初始化；handleKill 加入 getLionDanceMult 倍率套用（在黃金鯊魚之後）+ isLionDance 分支（goroutine）
+  - `client/chiikawa-pixel/scripts/ui/LionDancePanel.gd`：獅子舞爆發面板（橙紅主題；burst_start 全螢幕橙紅閃光+頂部橫幅滑入+標記目標金色光環+倒數計時 15 秒；自己觸發時中央大 🦁 標誌彈跳+「快去擊破標記目標！」提示；burst_end 淡出所有 UI+右側滑入結果彈窗；≥7x 雙閃光；≥10x 彩虹三閃光）
+  - `client/chiikawa-pixel/scripts/game/GameManager.gd`：lion_dance_burst 訊號 + _handle_lion_dance_burst
+  - `client/chiikawa-pixel/scripts/ui/HUD.gd`：整合 LionDancePanelScript（z_index=74）
+  - 爆發設計：全服冷卻 30 秒（防止多人同時觸發）；per-player session（每個玩家獨立標記列表）；15 秒持續時間
+  - 倍率設計：3x/4x/5x/6x/7x/8x/10x（加權隨機，低倍率高機率）；倍率在黃金鯊魚之後套用（最後一層）
+  - 標記設計：隨機選 3-5 個存活目標；標記後顯示金色光環 + 倍率標籤；擊破後自動移除標記
+  - 全服廣播：爆發開始/結束全服廣播，讓所有玩家看到「有人觸發了獅子舞爆發」
+  - 全服公告：≥7x 時全服廣播，讓其他玩家看到「有人獅子舞爆發高倍率」
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-167 更新（自主觸發）：** 黃金輪盤螃蟹系統（Roulette Crab Golden Wheel）✅
   - **業界依據：** King of Treasures Plus 2026「Roulette Crab — triggers Golden Roulette bonus game, player hits SHOOT to stop wheel, wins the amount listed where it stops.」— 擊破 T125 後觸發個人黃金輪盤（8格：10x-200x），玩家點擊停止，結果預先決定（公平性保證）
   - **設計差異：** 與千龍王輪盤（雙環，最高 1000x）不同，輪盤螃蟹是**單環輪盤**，更簡單直接，適合中等 betLevel 玩家；T125 HP=50（容易擊破）+ SpawnWeight=6（常見），讓玩家頻繁體驗輪盤爽感

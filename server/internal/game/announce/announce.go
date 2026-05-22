@@ -46,6 +46,7 @@ const (
 	EventVampireBloodMoon         EventType = "vampire_blood_moon"         // 吸血鬼血月模式觸發（DAY-152）
 	EventVampireKill              EventType = "vampire_kill"               // 吸血鬼血月模式被擊破（DAY-152）
 	EventCrystalDragon            EventType = "crystal_dragon"             // 水晶龍地獄龍大獎觸發（DAY-153）
+	EventLionDance                EventType = "lion_dance"                 // 獅子舞大獎爆發觸發（DAY-168）
 )
 
 // Priority 公告優先級
@@ -570,6 +571,24 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		}
 		icon = "🐉"
 		color = "#7B2FBE"
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLionDance:
+		multStr := ""
+		if extra != nil {
+			if m, ok := extra["mult"]; ok {
+				multStr = m
+			}
+		}
+		title = "🦁 獅子舞爆發！"
+		if multStr != "" {
+			message = fmt.Sprintf("🦁 %s 觸發獅子舞爆發！全場標記目標獲得 %sx 額外倍率！", playerName, multStr)
+		} else {
+			message = fmt.Sprintf("🦁 %s 觸發獅子舞爆發！快去擊破標記目標！", playerName)
+		}
+		icon = "🦁"
+		color = "#FF6B00"
 		priority = PriorityHigh
 		duration = 5000
 

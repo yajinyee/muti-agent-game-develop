@@ -251,6 +251,7 @@ func _ready() -> void:
 	_init_abyss_whale_panel()         # 深淵巨鯨全服 Boss 挑戰面板（DAY-164）
 	_init_black_hole_panel()          # 黑洞漩渦武器視覺效果面板（DAY-166）
 	_init_roulette_crab_panel()       # 黃金輪盤螃蟹面板（DAY-167）
+	_init_lion_dance_panel()          # 獅子舞大獎爆發面板（DAY-168）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3291,3 +3292,15 @@ func _init_roulette_crab_panel() -> void:
 	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
 	add_child(panel)
 	_roulette_crab_panel = panel
+
+## ---- 獅子舞大獎爆發面板（DAY-168）----
+const LionDancePanelScript = preload("res://scripts/ui/LionDancePanel.gd")
+var _lion_dance_panel: Control = null
+
+func _init_lion_dance_panel() -> void:
+	var panel = LionDancePanelScript.new()
+	panel.name = "LionDancePanel"
+	panel.z_index = 74  # 在 RouletteCrabPanel(75) 下方
+	panel.position = Vector2(0, 0)  # 左上角原點（面板內部用絕對座標）
+	add_child(panel)
+	_lion_dance_panel = panel
