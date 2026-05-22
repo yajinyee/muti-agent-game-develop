@@ -295,6 +295,7 @@ func _ready() -> void:
 	_init_fortune_coin_fish_panel()     # 幸運金幣魚即時獎勵面板（DAY-209）
 	_init_lucky_hot_zone_panel()        # 幸運熱區魚空間策略面板（DAY-210）
 	_init_lucky_trident_panel()         # 幸運三叉魚互動三轉盤面板（DAY-211）
+	_init_time_freeze_panel()           # 時間凍結魚系統面板（DAY-212）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4033,3 +4034,20 @@ func _init_lucky_trident_panel() -> void:
 func _on_lucky_trident(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_trident_panel):
 		_lucky_trident_panel.handle_lucky_trident(data)
+
+# ─── 時間凍結魚系統面板（DAY-212）───────────────────────────────────────────
+const TimeFreezePanelScript = preload("res://scripts/ui/TimeFreezePanel.gd")
+var _time_freeze_panel = null
+
+func _init_time_freeze_panel() -> void:
+	var panel = TimeFreezePanelScript.new()
+	panel.name = "TimeFreezePanel"
+	panel.layer = 33
+	add_child(panel)
+	_time_freeze_panel = panel
+	if GameManager.has_signal("time_freeze_fish"):
+		GameManager.time_freeze_fish.connect(_on_time_freeze_fish)
+
+func _on_time_freeze_fish(data: Dictionary) -> void:
+	if is_instance_valid(_time_freeze_panel):
+		_time_freeze_panel.handle_time_freeze(data)

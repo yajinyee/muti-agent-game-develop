@@ -481,6 +481,14 @@ var Targets = map[string]*TargetDef{
 	//   - 轉盤 C（特效）：HP削減/免費射擊/全服廣播/小型清場（隨機）
 	//   個人冷卻 25 秒；超時 12 秒自動停止
 	"T169": {ID: "T169", Name: "幸運三叉魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 60, HP: 70, SpawnWeight: 4, Speed: 48, Lifetime: 13, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_trident"},
+	// T170 時間凍結魚（DAY-212）— 業界依據：Evolution Ice Fishing Live 2026「frozen paradise」概念
+	// 業界原創設計：「時間停止」讓玩家在凍結期間免費射擊所有靜止目標
+	// 擊破後觸發「時間凍結」（5秒）：
+	//   1. 全場所有目標物靜止不動（Speed=0）
+	//   2. 凍結期間玩家射擊命中率 +30%
+	//   3. 凍結結束後「解凍爆炸」：所有被命中過的目標 HP -50% + 60% 擊破機率
+	//   個人冷卻 20 秒；全服冷卻 35 秒
+	"T170": {ID: "T170", Name: "時間凍結魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 52, Lifetime: 13, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "time_freeze"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

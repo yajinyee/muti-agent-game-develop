@@ -185,6 +185,7 @@ type Game struct {
 	FortuneCoinFish    *fortuneCoinFishManager     // 幸運金幣魚即時獎勵系統管理器（DAY-209）
 	LuckyHotZone       *luckyHotZoneManager        // 幸運熱區魚空間策略系統管理器（DAY-210）
 	LuckyTrident       *luckyTridentManager        // 幸運三叉魚互動三轉盤系統管理器（DAY-211）
+	TimeFreeze         *timeFreezeManager          // 時間凍結魚系統管理器（DAY-212）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -346,6 +347,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		FortuneCoinFish:    newFortuneCoinFishManager(),
 		LuckyHotZone:       newLuckyHotZoneManager(),
 		LuckyTrident:       newLuckyTridentManager(),
+		TimeFreeze:         newTimeFreezeManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -940,7 +942,7 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 		ClickX:         payload.ClickX,
 		ClickY:         payload.ClickY,
 		WeaponPowerMod: p.GetWeaponPowerMod(), // 武器攻擊力加成（DAY-067）
-		EventKillAdd:   g.getEventKillChanceAdd() + g.GetRainbowLuckyBoost(), // 限時活動+彩虹幸運魚擊破率加成（DAY-079/DAY-173）
+		EventKillAdd:   g.getEventKillChanceAdd() + g.GetRainbowLuckyBoost() + g.getTimeFreezeHitBonus(), // 限時活動+彩虹幸運魚+時間凍結擊破率加成（DAY-079/DAY-173/DAY-212）
 	}
 
 	result := combat.ProcessAttack(req, t)
@@ -1013,6 +1015,11 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	// 深淵巨鯨：命中時記錄傷害（DAY-164）
 	if result.IsHit && t != nil && isAbyssWhale(t.DefID) {
 		go g.notifyAbyssWhaleHit(p, t.InstanceID, betCost)
+	}
+
+	// 時間凍結魚：凍結期間命中目標時記錄（DAY-212）
+	if result.IsHit && t != nil && !result.IsKill {
+		g.notifyTimeFreezeTargetHit(t)
 	}
 
 	// 龍龜不死 Boss：命中時直接給獎勵（DAY-186）
@@ -1708,6 +1715,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運三叉魚：擊破 T169 時觸發三叉幸運儀式（DAY-211）
 	if isLuckyTridentFish(t.DefID) {
 		go g.tryLuckyTrident(p, t)
+	}
+	// 時間凍結魚：擊破 T170 時觸發時間凍結（DAY-212）
+	if isTimeFreezeFish(t.DefID) {
+		go g.tryTimeFreezeFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

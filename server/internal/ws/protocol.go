@@ -550,6 +550,7 @@ const (
 	MsgLuckyHotZone   MessageType = "lucky_hot_zone"    // 幸運熱區魚空間策略廣播（Server→Client，DAY-210）
 	MsgLuckyTrident   MessageType = "lucky_trident"     // 幸運三叉魚互動三轉盤廣播（Server→Client，DAY-211）
 	MsgLuckyTridentStop MessageType = "lucky_trident_stop" // 玩家停止轉盤（Client→Server，DAY-211）
+	MsgTimeFreezeFish MessageType = "time_freeze_fish" // 時間凍結魚廣播（Server→Client，DAY-212）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4692,4 +4693,21 @@ type LuckyTridentPayload struct {
 // LuckyTridentStopPayload 玩家停止轉盤（Client → Server，DAY-211）
 type LuckyTridentStopPayload struct {
 	PlayerID string `json:"player_id"`
+}
+
+// TimeFreezeFishPayload 時間凍結魚廣播（Server → Client，DAY-212）
+// Events:
+//   "freeze_start" — 凍結開始（全服廣播，帶持續時間/命中率加成）
+//   "freeze_end"   — 凍結結束（全服廣播，帶被命中目標數）
+//   "thaw_blast"   — 解凍爆炸（全服廣播，帶擊破數/總獎勵/每人獎勵）
+type TimeFreezeFishPayload struct {
+	Event           string  `json:"event"`
+	PlayerID        string  `json:"player_id,omitempty"`
+	PlayerName      string  `json:"player_name,omitempty"`
+	DurationSec     int     `json:"duration_sec,omitempty"`
+	HitBonus        float64 `json:"hit_bonus,omitempty"`
+	HitCount        int     `json:"hit_count,omitempty"`
+	KilledCount     int     `json:"killed_count,omitempty"`
+	TotalReward     int     `json:"total_reward,omitempty"`
+	RewardPerPlayer int     `json:"reward_per_player,omitempty"`
 }

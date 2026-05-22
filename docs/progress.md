@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-211 幸運三叉魚互動三轉盤系統）
+## 最後更新：2026-05-23（DAY-212 時間凍結魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-211 更新（自主觸發）：** 幸運三叉魚互動三轉盤系統（Lucky Trident Fish）✅
+- **DAY-212 更新（自主觸發）：** 時間凍結魚系統（Time Freeze Fish）✅
+  - **業界依據：** Evolution Ice Fishing Live 2026「frozen paradise」概念 + 業界原創設計
+  - **設計：** 擊破 T170 後觸發「時間凍結」（5秒）：全場所有目標物靜止不動（Speed=0）；凍結期間玩家射擊命中率 +30%（EventKillAdd 加成）；凍結結束後「解凍爆炸」：所有被命中過的目標 HP -50% + 60% 擊破機率（0.55x 倍率，全服共享）；個人冷卻 20 秒；全服冷卻 35 秒
+  - **設計差異：** 與黃金海龜時間停止（DAY-159，個人 5 秒，只影響個人射擊）不同，時間凍結魚是「全場靜止 + 命中率 +30% + 解凍爆炸」三重效果；與冰凍炸彈魚（DAY-170，凍結特定目標）不同，時間凍結魚是「全場靜止」；「全場靜止」讓玩家有「趕快打靜止的魚」的緊迫感；「命中率 +30%」讓玩家感受到「凍結期間打魚更容易」；「解凍爆炸」讓被打過的目標在解凍時有額外傷害，製造「凍結期間打越多，解凍後爆炸越多」的策略感；全服廣播讓所有玩家都知道「現在是凍結期間，趕快打」
+  - server/internal/game/time_freeze_fish_handler.go：timeFreezeManager（個人+全服冷卻/凍結狀態/命中記錄）；isTimeFreezeFish（T170）；isTimeFreezeActive（供 handleAttack 使用）；getTimeFreezeHitBonus（+30% 命中率加成，供 combat 使用）；recordTimeFreezeHit（記錄凍結期間被命中的目標）；tryTimeFreezeFish（擊破後觸發/全服廣播/全服公告）；runTimeFreezeTimer（goroutine 等待結束後觸發解凍爆炸）；doTimeFreezeThaw（HP -50% + 60% 擊破機率/全服共享獎勵/全服公告）；notifyTimeFreezeTargetHit（供 handleAttack 使用）
+  - server/internal/data/tables.go：新增 T170 時間凍結魚（30-55x/HP65/SpawnWeight4/Speed52/Lifetime13）
+  - server/internal/ws/protocol.go：新增 MsgTimeFreezeFish；TimeFreezeFishPayload（freeze_start/freeze_end/thaw_blast）
+  - server/internal/game/game.go：TimeFreeze *timeFreezeManager；handleAttack 加入 getTimeFreezeHitBonus 命中率加成 + notifyTimeFreezeTargetHit 命中記錄；handleKill 加入 isTimeFreezeFish 分支
+  - client/chiikawa-pixel/scripts/ui/TimeFreezePanel.gd：冰藍白主題面板（freeze_start 全螢幕冰藍三次強閃光+頂部橫幅+畫面邊框冰晶效果+底部計時條；freeze_end 冰藍淡出+「解凍中...」提示；thaw_blast 全螢幕白色爆炸閃光+「💥 解凍爆炸！」大字+結算彈窗右側滑入）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：time_freeze_fish 訊號 + _handle_time_freeze_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 TimeFreezePanelScript（layer=33）
+  - 凍結設計：5 秒持續；全場靜止（Server 端 Speed=0 效果由 Client 端凍結動畫呈現）；命中率 +30%（EventKillAdd 加成）；個人冷卻 20 秒；全服冷卻 35 秒
+  - 解凍爆炸設計：HP -50%；60% 擊破機率；0.55x 倍率；全服共享獎勵；300ms 延遲（讓 Client 播放解凍動畫）
+  - 視覺設計：冰藍白主題（#00BFFF + #87CEEB + #FFFFFF + #1E90FF）；畫面四邊冰晶邊框（脈衝閃爍）；底部計時條顏色漸變（冰藍→白）；解凍爆炸全螢幕白色三次強閃光
+  - 全服廣播：凍結開始/結束/解凍爆炸全服廣播
+  - 全服公告：凍結開始時公告；解凍爆炸≥4 個擊破時公告（依擊破數決定顏色：≥8 深藍/其他冰藍）
+  - build/vet 全部通過（零錯誤零警告）
+
+
   - **業界依據：** TaDa Gaming TriLuck™ Series 2026「Within the TriLuck™ Series, you can trigger three different feature specifications, ranging from win multipliers, jackpot bonuses, collecting all rewards, and more unique features.」
   - **設計：** 擊破 T169 後觸發「三叉幸運儀式」（個人互動）：三個獨立轉盤同時旋轉，玩家依序點擊停止；轉盤 A（金幣）：10x/20x/30x/50x/100x × betLevel；轉盤 B（倍率）：×1.5/×2.0/×2.5/×3.0/×5.0（持續 15 秒）；轉盤 C（特效）：HP削減/免費射擊/全服廣播/小型清場；個人冷卻 25 秒；超時 12 秒自動停止
   - **設計差異：** 與巨型章魚輪盤（單一轉盤，950x）和長龍王雙環輪盤（雙環，350x）不同，幸運三叉魚是「三個獨立轉盤，每個決定不同類型獎勵」，三重疊加；「三個轉盤」讓玩家有「每個轉盤都是一次期待」的連續爽感；轉盤 C 的特效多樣性讓每次觸發都有驚喜感

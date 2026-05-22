@@ -213,6 +213,7 @@ signal dragon_king(data: Dictionary)                  # 深海龍王全服合力
 signal fortune_coin_fish(data: Dictionary)            # 幸運金幣魚即時獎勵（DAY-209）
 signal lucky_hot_zone(data: Dictionary)               # 幸運熱區魚空間策略（DAY-210）
 signal lucky_trident(data: Dictionary)               # 幸運三叉魚互動三轉盤（DAY-211）
+signal time_freeze_fish(data: Dictionary)            # 時間凍結魚系統（DAY-212）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -612,6 +613,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_hot_zone(payload)
 		"lucky_trident":
 			_handle_lucky_trident(payload)
+		"time_freeze_fish":
+			_handle_time_freeze_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2465,6 +2468,23 @@ func _handle_lucky_trident(payload: Dictionary) -> void:
 		"trident_broadcast":
 			var player_name: String = payload.get("player_name", "")
 			print("[GameManager] Lucky Trident broadcast: %s" % player_name)
+
+## 處理時間凍結魚系統（DAY-212）
+func _handle_time_freeze_fish(payload: Dictionary) -> void:
+	emit_signal("time_freeze_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"freeze_start":
+			var duration: int = payload.get("duration_sec", 5)
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Time Freeze start: player=%s duration=%ds" % [player_name, duration])
+		"freeze_end":
+			var hit_count: int = payload.get("hit_count", 0)
+			print("[GameManager] Time Freeze end: hit_count=%d" % hit_count)
+		"thaw_blast":
+			var killed: int = payload.get("killed_count", 0)
+			var reward_per: int = payload.get("reward_per_player", 0)
+			print("[GameManager] Time Freeze thaw blast: killed=%d reward_per=%d" % [killed, reward_per])
 
 ## 處理鑽頭龍蝦穿透爆炸（DAY-195）
 func _handle_drill_lobster(payload: Dictionary) -> void:
