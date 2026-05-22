@@ -525,6 +525,9 @@ const (
 	// 冰鳳凰覺醒 BOSS 系統（DAY-200）
 	MsgIcePhoenix MessageType = "ice_phoenix" // 冰鳳凰覺醒廣播（Server→Client，全服）
 
+	// 連環炸彈蟹系統（DAY-201）
+	MsgSerialBombCrab MessageType = "serial_bomb_crab" // 連環炸彈蟹廣播（Server→Client，全服）
+
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
 )
@@ -4437,4 +4440,21 @@ type IcePhoenixPayload struct {
 	FrostReward   int                      `json:"frost_reward,omitempty"`
 	TotalReward   int                      `json:"total_reward,omitempty"`
 	HasFrost      bool                     `json:"has_frost,omitempty"`
+}
+
+// SerialBombCrabPayload 連環炸彈蟹廣播（Server → Client，DAY-201）
+// Event: "bomb_start" → "bomb_explode"（每顆炸彈）× N → "bomb_result"
+type SerialBombCrabPayload struct {
+	Event       string  `json:"event"`
+	KillerName  string  `json:"killer_name,omitempty"`
+	BombCount   int     `json:"bomb_count,omitempty"`
+	BombIndex   int     `json:"bomb_index,omitempty"`
+	KillX       float64 `json:"kill_x,omitempty"`
+	KillY       float64 `json:"kill_y,omitempty"`
+	BombX       float64 `json:"bomb_x,omitempty"`
+	BombY       float64 `json:"bomb_y,omitempty"`
+	BombKills   int     `json:"bomb_kills,omitempty"`
+	BombReward  int     `json:"bomb_reward,omitempty"`
+	TotalKills  int     `json:"total_kills,omitempty"`
+	TotalReward int     `json:"total_reward,omitempty"`
 }

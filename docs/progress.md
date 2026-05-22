@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-22（DAY-200 冰鳳凰覺醒 BOSS 系統）
+## 最後更新：2026-05-22（DAY-201 連環炸彈蟹系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,21 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-201 更新（自主觸發）：** 連環炸彈蟹系統（Serial Bomb Crab）✅
+  - **業界依據：** Royal Fishing JILI「Serial Bomb Crab (70x) — orange crab with panda face and skull bomb designs. Triggers large-scale multiple explosions across screen, capturing fish within each explosion range. Each bomb creates expanding capture zones for massive multi-target eliminations.」
+  - **設計：** 擊破 T159 後觸發「連環爆炸」：3-5 顆炸彈依序爆炸（每顆間隔 600ms）；每顆炸彈 250px 半徑，75% 擊破機率，0.65x 倍率；炸彈位置隨機分散在場上（製造「全場覆蓋」感）
+  - **設計差異：** 與連鎖爆炸魚（BFS 傳播，從擊破點擴散）不同，連環炸彈蟹是「預設位置的多顆炸彈」，讓玩家看到「炸彈在場上各處爆炸」的壯觀感；與鑽頭龍蝦（穿透移動）不同，連環炸彈蟹是「靜態爆炸」但多顆同時覆蓋全場
+  - server/internal/game/serial_bomb_crab_handler.go：serialBombCrabManager；isSerialBombCrab（T159）；trySerialBombCrabExplosion（擊破後觸發/生成炸彈位置/全服廣播）；runSerialBombCrabExplosions（依序引爆/每顆 600ms/範圍內目標/最終結算）
+  - server/internal/data/tables.go：新增 T159 連環炸彈蟹（55-75x/HP80/SpawnWeight3/Speed45/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgSerialBombCrab；SerialBombCrabPayload（bomb_start/bomb_explode/bomb_result）
+  - server/internal/game/game.go：SerialBombCrab *serialBombCrabManager；handleKill 加入 isSerialBombCrab 分支
+  - client/chiikawa-pixel/scripts/ui/SerialBombCrabPanel.gd：橙紅爆炸主題面板（bomb_start 橙紅閃光+橫幅+計數器；bomb_explode 爆炸圓圈擴散+4方向短線+浮動文字；bomb_result 結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：serial_bomb_crab 訊號 + _handle_serial_bomb_crab
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 SerialBombCrabPanelScript（layer=44）
+  - 爆炸設計：3-5 顆炸彈；250px 半徑；75% 擊破機率；0.65x 倍率；每顆 600ms 間隔；全服冷卻 35 秒
+  - 視覺設計：橙紅爆炸圓圈擴散（20→500px，0.5s）；4方向短線；擊破時金色浮動文字
+  - 全服廣播：開始/每顆炸彈/結算全服廣播；≥4 個擊破時全服公告
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-200 更新（自主觸發）：** 冰鳳凰覺醒 BOSS 系統（Ice Phoenix Awaken）✅
   - **業界依據：** Royal Fishing JILI「Ice Phoenix Awaken Feature — fixed jackpot mechanic that awards up to 300x the bet when players eliminate the Ice Phoenix boss. Multicoloured phoenix (blue, pink, purple, orange) with magical aura. Awaken Boss with 30x basic multiplier. Power Up attack delivers 6x-10x boost for rewards up to 300 times bet.」
   - **設計：** 擊破 T158 後觸發「冰鳳凰覺醒」：基礎獎勵 30x betLevel；Power Up 攻擊 3-5 個目標（6-10x 倍率，70% 擊破機率）；5% 機率觸發「冰霜爆發」：全場所有目標（50% 擊破機率，0.60x 倍率）；最高組合 300x

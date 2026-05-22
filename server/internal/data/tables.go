@@ -403,6 +403,13 @@ var Targets = map[string]*TargetDef{
 	// 擊破後觸發「冰鳳凰覺醒」：基礎獎勵 30x betLevel；Power Up 攻擊 3-5 個目標（6-10x 倍率，70% 擊破機率）
 	// 5% 機率觸發「冰霜爆發」：全場所有目標（50% 擊破機率，0.60x 倍率）；最高組合 300x
 	"T158": {ID: "T158", Name: "冰鳳凰", Type: TargetTypeSpecial, MultiplierMin: 80, MultiplierMax: 120, HP: 110, SpawnWeight: 2, Speed: 30, Lifetime: 20, LaborGain: 16, DifficultyFactor: 16.0, SpecialBehavior: "ice_phoenix_awaken"},
+	// T159 連環炸彈蟹（DAY-201）— 業界依據：Royal Fishing JILI「Serial Bomb Crab (70x) —
+	// orange crab with panda face and skull bomb designs. Triggers large-scale multiple explosions
+	// across screen, capturing fish within each explosion range.
+	// Each bomb creates expanding capture zones for massive multi-target eliminations.」
+	// 擊破後觸發「連環爆炸」：3-5 顆炸彈依序爆炸（每顆間隔 600ms）
+	// 每顆炸彈：250px 半徑，75% 擊破機率，0.65x 倍率；炸彈位置隨機分散在場上
+	"T159": {ID: "T159", Name: "連環炸彈蟹", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 75, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "serial_bomb_crab"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

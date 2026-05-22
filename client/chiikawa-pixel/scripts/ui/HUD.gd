@@ -284,6 +284,7 @@ func _ready() -> void:
 	_init_ghost_fish_panel()            # 幽靈魚分身面板（DAY-198）
 	_init_thunderbolt_lobster_panel()   # 雷霆龍蝦免費射擊面板（DAY-199）
 	_init_ice_phoenix_panel()           # 冰鳳凰覺醒 BOSS 面板（DAY-200）
+	_init_serial_bomb_crab_panel()      # 連環炸彈蟹面板（DAY-201）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -3835,3 +3836,20 @@ func _init_ice_phoenix_panel() -> void:
 func _on_ice_phoenix(data: Dictionary) -> void:
 	if is_instance_valid(_ice_phoenix_panel):
 		_ice_phoenix_panel.handle_ice_phoenix(data)
+
+## ---- 連環炸彈蟹面板（DAY-201）----
+const SerialBombCrabPanelScript = preload("res://scripts/ui/SerialBombCrabPanel.gd")
+var _serial_bomb_crab_panel = null
+
+func _init_serial_bomb_crab_panel() -> void:
+	var panel = SerialBombCrabPanelScript.new()
+	panel.name = "SerialBombCrabPanel"
+	panel.layer = 44
+	add_child(panel)
+	_serial_bomb_crab_panel = panel
+	if GameManager.has_signal("serial_bomb_crab"):
+		GameManager.serial_bomb_crab.connect(_on_serial_bomb_crab)
+
+func _on_serial_bomb_crab(data: Dictionary) -> void:
+	if is_instance_valid(_serial_bomb_crab_panel):
+		_serial_bomb_crab_panel.handle_serial_bomb_crab(data)
