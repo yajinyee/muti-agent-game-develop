@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-244 幸運奪旗魚系統）
+## 最後更新：2026-05-23（DAY-245 幸運幽靈魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-245 更新（自主觸發）：** 幸運幽靈魚系統（Lucky Phantom Fish）✅
+  - **業界依據：** 業界原創「幽靈殘影+死亡後復活攻擊」機制
+  - **設計：** 擊破 T203 後，玩家獲得「幽靈護盾」（12 秒）；護盾期間，玩家每次擊破任何目標，目標留下「幽靈殘影」（持續 5 秒）；幽靈殘影可被再次擊破（50% 機率，×1.5 倍率，個人獎勵）；12 秒後「幽靈爆發」：所有場上幽靈殘影同時爆炸（100% 擊破，×2.0 倍率，個人獎勵）；個人冷卻 22 秒；全服冷卻 35 秒
+  - **設計差異：** 與分身魚（T200，同時三方向射擊）不同，幽靈魚是「死亡後留下殘影可再次擊破」，讓玩家有「打死一條魚還能再賺一次」的爽感；「幽靈爆發」讓玩家有「等待殘影累積再一次爆發」的策略感；「50% 機率擊破殘影」讓玩家有「要不要賭一把」的刺激感；「×2.0 爆發倍率 > ×1.5 單次倍率」鼓勵玩家等待爆發而非逐一擊破；全服廣播讓其他玩家看到「有人觸發了幽靈護盾」，製造羨慕感
+  - server/internal/game/lucky_phantom_fish_handler.go：luckyPhantomFishManager（個人冷卻/全服冷卻/activeSessions）；phantomSession（playerID/expiresAt/ghosts）；phantomGhost（ghostID/origDefID/X/Y/expiresAt）；isLuckyPhantomFish（T203）；isPhantomShieldActive（供 handleKill 使用）；tryLuckyPhantomFish（擊破後觸發/個人訊息+全服廣播/全服公告/12秒後爆發）；createPhantomGhost（擊破目標後建立殘影/通知玩家/5秒後自動清理）；tryHitPhantomGhost（50%機率擊破殘影/×1.5倍率/個人獎勵）；runLuckyPhantomShield（goroutine 12秒後觸發爆發）；doPhantomBurst（收集存活殘影/100%爆炸/×2.0倍率/個人獎勵/≥3個時全服公告）
+  - server/internal/data/tables.go：新增 T203 幸運幽靈魚（40-72x/HP80/SpawnWeight3/Speed42/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyPhantomFish；LuckyPhantomFishPayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyPhantomFish + case 處理
+  - server/internal/game/game.go：LuckyPhantomFish *luckyPhantomFishManager；handleKill 加入 isLuckyPhantomFish 分支 + isPhantomShieldActive 分支（createPhantomGhost）
+  - client/chiikawa-pixel/scripts/ui/LuckyPhantomFishPanel.gd：幽靈紫主題面板（phantom_start 紫色三次強閃光+頂部橫幅+「👻 幽靈護盾！」大字+計時條+倍率說明；phantom_broadcast 頂部小橫幅；phantom_ghost_created 幽靈殘影標記（半透明紫色圓圈+閃爍動畫）；phantom_ghost_killed 殘影擊破閃光+×1.5浮動文字；phantom_burst 三次強閃光+「👻 幽靈爆發！」大字+結算彈窗；phantom_end 計時條淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_phantom_fish 訊號 + _handle_lucky_phantom_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyPhantomFishPanelScript（layer=18）
+  - 護盾設計：持續 12 秒；個人冷卻 22 秒；全服冷卻 35 秒
+  - 殘影設計：存活 5 秒；50% 擊破機率；×1.5 倍率；個人獎勵
+  - 爆發設計：100% 擊破；×2.0 倍率；個人獎勵；≥3 個時全服公告
+  - 視覺設計：幽靈紫主題（#8E44AD + #6C3483 + #D7BDE2 + #BB8FCE）；殘影標記（半透明圓圈+👻+閃爍動畫）；右側豎向計時條（紫色，從上往下縮短）；結算彈窗右側滑入
+  - 全服廣播：護盾啟動（全服）/殘影生成（個人）/殘影擊破（個人）/幽靈爆發（個人）/護盾結束（個人）
+  - 全服公告：觸發時公告（紫色）；爆發≥3個殘影時公告（深紫色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-244 更新（自主觸發）：** 幸運奪旗魚系統（Lucky Flag Fish）✅
   - **業界依據：** 業界原創「全服搶旗競爭」機制，2025-2026 業界最熱門的 real-time multiplayer PvP 方向
   - **設計：** 擊破 T202 後，場上最高倍率目標被「旗幟標記」（持續 15 秒）；所有玩家射擊旗幟目標，每次命中累積「搶旗積分」（+1/命中，不消耗籌碼）；每 3 秒廣播即時排名；15 秒後積分最高者獲得 ×4.0 倍率加成；第 2 名 ×2.0，第 3 名 ×1.5；無人命中 → 自動爆炸全服共享；個人冷卻 25 秒；全服冷卻 40 秒

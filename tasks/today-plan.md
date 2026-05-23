@@ -2,32 +2,32 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-23（DAY-244）
-**整體目標**：幸運奪旗魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-23（DAY-245）
+**整體目標**：幸運幽靈魚系統 ✅ → 繼續自主推進
 
 ---
 
 ## 今日任務清單
 
-### ✅ DAY-244 啟動檢查
+### ✅ DAY-245 啟動檢查
 
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
-- [x] 上網研究業界最新機制（real-time multiplayer PvP 競爭）
+- [x] 上網研究業界最新機制（幽靈殘影+死亡後復活攻擊）
 
-### ✅ DAY-244 幸運奪旗魚系統（P1）
+### ✅ DAY-245 幸運幽靈魚系統（P1）
 
-- [x] `data/tables.go`：新增 T202 幸運奪旗魚（39-70x/HP79/SpawnWeight3/Speed43/Lifetime14）
-- [x] `ws/protocol.go`：新增 MsgLuckyFlagFish；LuckyFlagFishPayload（6種事件）
-- [x] `announce/announce.go`：新增 EventLuckyFlagFish + case 處理
-- [x] `lucky_flag_fish_handler.go`：完整 handler（搶旗積分/排名廣播/奪旗結算/自動爆炸）
-- [x] `game.go`：整合 LuckyFlagFish manager（struct/init/handleKill 倍率加成 + 2個分支/handleAttack 積分記錄/updateNormalPlay 目標消失通知）
-- [x] `LuckyFlagFishPanel.gd`：紅白搶旗主題面板（目標標記+計時條+排名面板+結算彈窗）
-- [x] `GameManager.gd`：lucky_flag_fish 訊號 + _handle_lucky_flag_fish
-- [x] `HUD.gd`：整合 LuckyFlagFishPanelScript（layer=1）
+- [x] `data/tables.go`：新增 T203 幸運幽靈魚（40-72x/HP80/SpawnWeight3/Speed42/Lifetime14）
+- [x] `ws/protocol.go`：新增 MsgLuckyPhantomFish；LuckyPhantomFishPayload（6種事件）
+- [x] `announce/announce.go`：新增 EventLuckyPhantomFish + case 處理
+- [x] `lucky_phantom_fish_handler.go`：完整 handler（幽靈護盾/殘影生成/殘影擊破/幽靈爆發）
+- [x] `game.go`：整合 LuckyPhantomFish manager（struct/init/handleKill 2個分支）
+- [x] `LuckyPhantomFishPanel.gd`：幽靈紫主題面板（殘影標記+計時條+爆發結算彈窗）
+- [x] `GameManager.gd`：lucky_phantom_fish 訊號 + _handle_lucky_phantom_fish
+- [x] `HUD.gd`：整合 LuckyPhantomFishPanelScript（layer=18）
 - [x] build/vet 全部通過，GitHub 推送完成
 
-### 🔄 DAY-245 下一步（自主觸發）
+### 🔄 DAY-246 下一步（自主觸發）
 
 - [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
 
@@ -40,8 +40,8 @@
 - 完成度：**100%**
 - 美術質量：**100/100**
 - 規格一致性：**100%**
-- 特殊目標：**102種（T101-T202）**
-- 最新功能：**幸運奪旗魚（T202）— 全服搶旗競爭，×4.0/2.0/1.5 倍率，每3秒排名廣播**
+- 特殊目標：**103種（T101-T203）**
+- 最新功能：**幸運幽靈魚（T203）— 幽靈護盾12秒，殘影×1.5，爆發×2.0**
 - 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
 
 ---

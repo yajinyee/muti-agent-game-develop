@@ -707,6 +707,13 @@ var Targets = map[string]*TargetDef{
 	//   - 第 2 名 ×2.0，第 3 名 ×1.5；無人命中 → 自動爆炸全服共享
 	//   - 個人冷卻 25 秒；全服冷卻 40 秒
 	"T202": {ID: "T202", Name: "幸運奪旗魚", Type: TargetTypeSpecial, MultiplierMin: 39, MultiplierMax: 70, HP: 79, SpawnWeight: 3, Speed: 43, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_flag"},
+	// T203 幸運幽靈魚（DAY-245）— 業界原創「幽靈殘影+死亡後復活攻擊」機制
+	//   - 擊破 T203 後，玩家獲得「幽靈護盾」（12 秒）
+	//   - 護盾期間，玩家每次擊破任何目標，目標留下「幽靈殘影」（持續 5 秒）
+	//   - 幽靈殘影可被再次擊破（50% 機率，×1.5 倍率，個人獎勵）
+	//   - 12 秒後「幽靈爆發」：所有場上幽靈殘影同時爆炸（100% 擊破，×2.0 倍率，個人獎勵）
+	//   - 個人冷卻 22 秒；全服冷卻 35 秒
+	"T203": {ID: "T203", Name: "幸運幽靈魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 72, HP: 80, SpawnWeight: 3, Speed: 42, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_phantom"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

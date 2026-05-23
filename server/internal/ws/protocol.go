@@ -585,6 +585,7 @@ const (
 	MsgLuckyCloneFish        MessageType = "lucky_clone_fish"         // 幸運分身魚廣播（Server→Client，DAY-242）
 	MsgLuckyProphecyFish     MessageType = "lucky_prophecy_fish"      // 幸運預言魚廣播（Server→Client，DAY-243）
 	MsgLuckyFlagFish         MessageType = "lucky_flag_fish"          // 幸運奪旗魚廣播（Server→Client，DAY-244）
+	MsgLuckyPhantomFish      MessageType = "lucky_phantom_fish"       // 幸運幽靈魚廣播（Server→Client，DAY-245）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5550,4 +5551,30 @@ type LuckyFlagFishPayload struct {
 	Reward       int                      `json:"reward,omitempty"`
 	RankList     []map[string]interface{} `json:"rank_list,omitempty"`
 	RemainingSec int                      `json:"remaining_sec,omitempty"`
+}
+
+// LuckyPhantomFishPayload 幸運幽靈魚廣播（Server → Client，DAY-245）
+// Event 類型：
+//   - phantom_start：幽靈護盾啟動（個人訊息，PlayerID/DurationSec/GhostKillMult/BurstMult）
+//   - phantom_broadcast：全服廣播幽靈護盾啟動（PlayerName）
+//   - phantom_ghost_created：幽靈殘影生成（個人訊息，GhostID/OrigTargetDefID/X/Y/GhostDurationSec）
+//   - phantom_ghost_killed：幽靈殘影被擊破（個人訊息，GhostID/Reward/KillMult）
+//   - phantom_burst：幽靈爆發（個人訊息，GhostCount/TotalReward/BurstMult）
+//   - phantom_end：幽靈護盾結束（個人訊息）
+type LuckyPhantomFishPayload struct {
+	Event           string  `json:"event"`
+	PlayerID        string  `json:"player_id,omitempty"`
+	PlayerName      string  `json:"player_name,omitempty"`
+	GhostID         string  `json:"ghost_id,omitempty"`
+	OrigTargetDefID string  `json:"orig_target_def_id,omitempty"`
+	X               float64 `json:"x,omitempty"`
+	Y               float64 `json:"y,omitempty"`
+	DurationSec     int     `json:"duration_sec,omitempty"`
+	GhostDurationSec int    `json:"ghost_duration_sec,omitempty"`
+	GhostKillMult   float64 `json:"ghost_kill_mult,omitempty"`
+	BurstMult       float64 `json:"burst_mult,omitempty"`
+	KillMult        float64 `json:"kill_mult,omitempty"`
+	Reward          int     `json:"reward,omitempty"`
+	GhostCount      int     `json:"ghost_count,omitempty"`
+	TotalReward     int     `json:"total_reward,omitempty"`
 }

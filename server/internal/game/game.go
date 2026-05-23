@@ -218,6 +218,7 @@ type Game struct {
 	LuckyCloneFish     *luckyCloneFishManager        // 幸運分身魚系統管理器（DAY-242）
 	LuckyProphecyFish  *luckyProphecyFishManager     // 幸運預言魚系統管理器（DAY-243）
 	LuckyFlagFish      *luckyFlagFishManager          // 幸運奪旗魚系統管理器（DAY-244）
+	LuckyPhantomFish   *luckyPhantomFishManager        // 幸運幽靈魚系統管理器（DAY-245）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -412,6 +413,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyCloneFish:     newLuckyCloneFishManager(),
 		LuckyProphecyFish:  newLuckyProphecyFishManager(),
 		LuckyFlagFish:      newLuckyFlagFishManager(),
+		LuckyPhantomFish:   newLuckyPhantomFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2156,6 +2158,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運奪旗魚：玩家擊破旗幟目標時觸發奪旗結算（DAY-244）
 	if g.isFlagTarget(t.InstanceID) {
 		go g.notifyFlagTargetKill(p, t.InstanceID, finalReward)
+	}
+	// 幸運幽靈魚：擊破 T203 本身時觸發幽靈護盾（DAY-245）
+	if isLuckyPhantomFish(t.DefID) {
+		go g.tryLuckyPhantomFish(p)
+	}
+	// 幸運幽靈魚：玩家在幽靈護盾期間擊破任何目標時，留下幽靈殘影（DAY-245）
+	if !isLuckyPhantomFish(t.DefID) && g.LuckyPhantomFish.isPhantomShieldActive(p.ID) {
+		go g.createPhantomGhost(p, t.DefID, t.X, t.Y)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

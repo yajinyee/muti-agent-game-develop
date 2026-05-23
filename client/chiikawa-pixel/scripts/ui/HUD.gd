@@ -328,6 +328,7 @@ func _ready() -> void:
 	_init_lucky_clone_fish_panel()      # 幸運分身魚系統面板（DAY-242）
 	_init_lucky_prophecy_fish_panel()   # 幸運預言魚系統面板（DAY-243）
 	_init_lucky_flag_fish_panel()       # 幸運奪旗魚系統面板（DAY-244）
+	_init_lucky_phantom_fish_panel()    # 幸運幽靈魚系統面板（DAY-245）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4633,3 +4634,20 @@ func _init_lucky_flag_fish_panel() -> void:
 func _on_lucky_flag_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_flag_fish_panel):
 		_lucky_flag_fish_panel.handle_lucky_flag_fish(data)
+
+# ─── 幸運幽靈魚系統面板（DAY-245）───────────────────────────────────────────
+const LuckyPhantomFishPanelScript = preload("res://scripts/ui/LuckyPhantomFishPanel.gd")
+var _lucky_phantom_fish_panel = null
+
+func _init_lucky_phantom_fish_panel() -> void:
+	var panel = LuckyPhantomFishPanelScript.new()
+	panel.name = "LuckyPhantomFishPanel"
+	panel.layer = 18
+	add_child(panel)
+	_lucky_phantom_fish_panel = panel
+	if GameManager.has_signal("lucky_phantom_fish"):
+		GameManager.lucky_phantom_fish.connect(_on_lucky_phantom_fish)
+
+func _on_lucky_phantom_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_phantom_fish_panel):
+		_lucky_phantom_fish_panel.handle_lucky_phantom_fish(data)

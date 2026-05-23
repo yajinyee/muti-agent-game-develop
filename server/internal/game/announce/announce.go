@@ -83,6 +83,7 @@ const (
 	EventLuckyCloneFish           EventType = "lucky_clone_fish"          // 幸運分身魚觸發（DAY-242）
 	EventLuckyProphecyFish        EventType = "lucky_prophecy_fish"       // 幸運預言魚觸發（DAY-243）
 	EventLuckyFlagFish            EventType = "lucky_flag_fish"           // 幸運奪旗魚觸發（DAY-244）
+	EventLuckyPhantomFish         EventType = "lucky_phantom_fish"        // 幸運幽靈魚觸發（DAY-245）
 )
 
 // Priority 公告優先級
@@ -1326,6 +1327,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🚩 全服搶旗！"
 		message = msg
 		icon = "🚩"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyPhantomFish:
+		msg := "👻 幸運幽靈魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#8E44AD"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "👻 幽靈護盾！"
+		message = msg
+		icon = "👻"
 		color = c
 		priority = PriorityHigh
 		duration = 5000
