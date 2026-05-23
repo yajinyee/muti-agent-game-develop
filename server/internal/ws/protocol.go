@@ -5174,9 +5174,10 @@ type LuckyParasiteFishPayload struct {
 //
 // Events:
 //
-//	"storm_start"   — 風暴建立（全服廣播）
-//	"storm_rotate"  — 風暴旋轉（全服廣播，每 1.5 秒）
-//	"storm_blast"   — 風暴爆發（全服廣播）
+//	"storm_start"       — 風暴建立（全服廣播）
+//	"storm_rotate"      — 風暴旋轉（全服廣播，每 1.5 秒）
+//	"storm_blast_start" — 風暴爆發開始（全服廣播，播放動畫用）
+//	"storm_blast"       — 風暴爆發結算（全服廣播）
 type LuckyStormFishPayload struct {
 	Event       string      `json:"event"`
 	InstanceID  string      `json:"instance_id,omitempty"`

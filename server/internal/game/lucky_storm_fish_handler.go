@@ -24,20 +24,21 @@ import (
 	"sync"
 	"time"
 
+	"digital-twin/server/internal/data"
 	"digital-twin/server/internal/game/announce"
 	"digital-twin/server/internal/player"
 	"digital-twin/server/internal/ws"
 )
 
 const (
-	LuckyStormPersonalCD    = 22 * time.Second // 個人冷卻
-	LuckyStormGlobalCD      = 35 * time.Second // 全服冷卻
-	LuckyStormDuration      = 10 * time.Second // 風暴持續時間
-	LuckyStormRotateInterval = 1500 * time.Millisecond // 旋轉間隔（1.5 秒）
-	LuckyStormRadius        = 320.0            // 風暴半徑（px）
-	LuckyStormKillMult      = 2.5              // 風暴範圍內擊破倍率
-	LuckyStormBlastChance   = 0.80             // 風暴爆發擊破機率
-	LuckyStormBlastMult     = 0.75             // 風暴爆發倍率
+	LuckyStormPersonalCD     = 22 * time.Second           // 個人冷卻
+	LuckyStormGlobalCD       = 35 * time.Second           // 全服冷卻
+	LuckyStormDuration       = 10 * time.Second           // 風暴持續時間
+	LuckyStormRotateInterval = 1500 * time.Millisecond    // 旋轉間隔（1.5 秒）
+	LuckyStormRadius         = 320.0                      // 風暴半徑（px）
+	LuckyStormKillMult       = 2.5                        // 風暴範圍內擊破倍率
+	LuckyStormBlastChance    = 0.80                       // 風暴爆發擊破機率
+	LuckyStormBlastMult      = 0.75                       // 風暴爆發倍率
 )
 
 // luckyStormFishManager 幸運風暴魚管理器
@@ -51,11 +52,11 @@ type luckyStormFishManager struct {
 	globalCooldownUntil time.Time
 
 	// 風暴狀態
-	active     bool
-	stormX     float64   // 風暴中心 X
-	stormY     float64   // 風暴中心 Y
+	active      bool
+	stormX      float64   // 風暴中心 X
+	stormY      float64   // 風暴中心 Y
 	activeUntil time.Time
-	instanceID string
+	instanceID  string
 }
 
 func newLuckyStormFishManager() *luckyStormFishManager {
@@ -111,6 +112,11 @@ func (g *Game) tryLuckyStormFish(p *player.Player) {
 		mgr.mu.Unlock()
 		return
 	}
+	// 已有風暴在運作中
+	if mgr.active {
+		mgr.mu.Unlock()
+		return
+	}
 
 	// 設定冷卻
 	mgr.personalCooldown[p.ID] = time.Now().Add(LuckyStormPersonalCD)
@@ -156,51 +162,51 @@ func (g *Game) tryLuckyStormFish(p *player.Player) {
 	g.broadcastAnnouncement(ann)
 
 	// 啟動風暴 goroutine
-	go g.runLuckyStorm(instanceID, centerX, centerY)
+	go g.runLuckyStorm(p, instanceID, centerX, centerY)
 }
 
 // runLuckyStorm 風暴主 goroutine：每 1.5 秒旋轉目標，10 秒後爆發
-func (g *Game) runLuckyStorm(instanceID string, centerX, centerY float64) {
+func (g *Game) runLuckyStorm(p *player.Player, instanceID string, centerX, centerY float64) {
 	ticker := time.NewTicker(LuckyStormRotateInterval)
 	defer ticker.Stop()
 
-	deadline := time.Now().Add(LuckyStormDuration)
+	deadline := time.NewTimer(LuckyStormDuration)
+	defer deadline.Stop()
+
 	rotateCount := 0
 
 	for {
 		select {
 		case <-ticker.C:
-			if time.Now().After(deadline) {
-				ticker.Stop()
-				goto blast
-			}
 			rotateCount++
 			g.doStormRotate(instanceID, centerX, centerY, rotateCount)
+
+		case <-deadline.C:
+			// 確認風暴仍然是同一個 instance
+			mgr := g.LuckyStormFish
+			mgr.mu.Lock()
+			if mgr.instanceID != instanceID {
+				mgr.mu.Unlock()
+				return
+			}
+			mgr.active = false
+			mgr.mu.Unlock()
+
+			g.doStormBlast(p, instanceID, centerX, centerY)
+			return
 		}
 	}
-
-blast:
-	// 確認風暴仍然是同一個 instance
-	mgr := g.LuckyStormFish
-	mgr.mu.Lock()
-	if mgr.instanceID != instanceID {
-		mgr.mu.Unlock()
-		return
-	}
-	mgr.active = false
-	mgr.mu.Unlock()
-
-	g.doStormBlast(instanceID, centerX, centerY)
 }
 
 // doStormRotate 執行一次風暴旋轉（隨機傳送範圍內目標到新位置）
 func (g *Game) doStormRotate(instanceID string, centerX, centerY float64, rotateCount int) {
-	g.mu.Lock()
 	type movedTarget struct {
 		ID   string  `json:"id"`
 		NewX float64 `json:"new_x"`
 		NewY float64 `json:"new_y"`
 	}
+
+	g.mu.Lock()
 	moved := make([]movedTarget, 0)
 
 	for id, t := range g.Targets {
@@ -256,47 +262,128 @@ func (g *Game) doStormRotate(instanceID string, centerX, centerY float64, rotate
 	})
 }
 
-// doStormBlast 風暴爆發：範圍內所有目標 80% 擊破機率
-func (g *Game) doStormBlast(instanceID string, centerX, centerY float64) {
+// doStormBlast 風暴爆發：範圍內所有目標 80% 擊破機率，全服共享獎勵
+func (g *Game) doStormBlast(p *player.Player, instanceID string, centerX, centerY float64) {
 	log.Printf("[LuckyStorm] blast triggered instance=%s", instanceID)
 
-	g.mu.Lock()
-	type blastTarget struct {
-		ID      string  `json:"id"`
-		Killed  bool    `json:"killed"`
-		Reward  int     `json:"reward"`
-	}
-	blastResults := make([]blastTarget, 0)
-	totalReward := 0
-	killedCount := 0
+	// 廣播風暴爆發開始（讓 Client 播放動畫）
+	g.Hub.Broadcast(&ws.Message{
+		Type: ws.MsgLuckyStormFish,
+		Payload: ws.LuckyStormFishPayload{
+			Event:      "storm_blast_start",
+			InstanceID: instanceID,
+			StormX:     centerX,
+			StormY:     centerY,
+			Radius:     LuckyStormRadius,
+		},
+	})
 
+	// 稍等 300ms 讓 Client 播放爆炸動畫
+	time.Sleep(300 * time.Millisecond)
+
+	// 計算平均 betCost（全服共享獎勵基準）
+	g.mu.RLock()
+	avgBet := 1
+	if len(g.Players) > 0 {
+		total := 0
+		for _, pl := range g.Players {
+			betDef := data.GetBetDef(pl.BetLevel)
+			if betDef != nil {
+				total += betDef.BetCost
+			}
+		}
+		avgBet = total / len(g.Players)
+	}
+	g.mu.RUnlock()
+
+	// 收集風暴範圍內的存活目標
+	type blastTarget struct {
+		id         string
+		multiplier float64
+		x, y       float64
+	}
+
+	g.mu.Lock()
+	var targets []blastTarget
 	for id, t := range g.Targets {
 		if !t.IsAlive || t.Def.Type == "boss" {
 			continue
 		}
 		dx := t.X - centerX
 		dy := t.Y - centerY
-		dist := math.Sqrt(dx*dx + dy*dy)
-		if dist > LuckyStormRadius {
+		if math.Sqrt(dx*dx+dy*dy) > LuckyStormRadius {
 			continue
 		}
-		// 80% 擊破機率
-		if rand.Float64() < LuckyStormBlastChance {
-			reward := int(float64(t.Def.MultiplierMax) * LuckyStormBlastMult)
-			t.IsAlive = false
-			t.HP = 0
-			totalReward += reward
-			killedCount++
-			blastResults = append(blastResults, blastTarget{ID: id, Killed: true, Reward: reward})
-		} else {
-			blastResults = append(blastResults, blastTarget{ID: id, Killed: false})
-		}
+		targets = append(targets, blastTarget{
+			id:         id,
+			multiplier: t.Multiplier,
+			x:          t.X,
+			y:          t.Y,
+		})
 	}
 	g.mu.Unlock()
 
+	// 執行爆發
+	killedCount := 0
+	totalReward := 0
+
+	type blastResult struct {
+		ID     string  `json:"id"`
+		Killed bool    `json:"killed"`
+		Reward int     `json:"reward"`
+		X      float64 `json:"x"`
+		Y      float64 `json:"y"`
+	}
+	blastResults := make([]blastResult, 0, len(targets))
+
+	for _, bt := range targets {
+		if rand.Float64() >= LuckyStormBlastChance {
+			blastResults = append(blastResults, blastResult{ID: bt.id, Killed: false, X: bt.x, Y: bt.y})
+			continue
+		}
+
+		g.mu.Lock()
+		t, exists := g.Targets[bt.id]
+		if !exists || !t.IsAlive {
+			g.mu.Unlock()
+			continue
+		}
+		t.IsAlive = false
+		t.HP = 0
+		g.mu.Unlock()
+
+		reward := int(bt.multiplier * float64(avgBet) * LuckyStormBlastMult)
+		if reward < 1 {
+			reward = 1
+		}
+		totalReward += reward
+		killedCount++
+		blastResults = append(blastResults, blastResult{ID: bt.id, Killed: true, Reward: reward, X: bt.x, Y: bt.y})
+	}
+
+	// 全服共享獎勵（分配給所有在線玩家）
+	if totalReward > 0 {
+		g.mu.RLock()
+		players := make([]*player.Player, 0, len(g.Players))
+		for _, pl := range g.Players {
+			players = append(players, pl)
+		}
+		g.mu.RUnlock()
+
+		if len(players) > 0 {
+			share := totalReward / len(players)
+			if share < 1 {
+				share = 1
+			}
+			for _, pl := range players {
+				pl.AddCoins(share)
+			}
+		}
+	}
+
 	log.Printf("[LuckyStorm] blast killed=%d totalReward=%d", killedCount, totalReward)
 
-	// 廣播風暴爆發
+	// 廣播風暴爆發結算
 	g.Hub.Broadcast(&ws.Message{
 		Type: ws.MsgLuckyStormFish,
 		Payload: ws.LuckyStormFishPayload{
@@ -315,7 +402,7 @@ func (g *Game) doStormBlast(instanceID string, centerX, centerY float64) {
 		if killedCount >= 6 {
 			color = "#00FF7F"
 		}
-		ann := g.Announce.Create(announce.EventLuckyStormFish, "", 0, map[string]string{
+		ann := g.Announce.Create(announce.EventLuckyStormFish, p.DisplayName, killedCount, map[string]string{
 			"message": fmt.Sprintf("🌪️ 風暴爆發！%d 個目標被摧毀！獎勵 %d！",
 				killedCount, totalReward),
 			"color": color,

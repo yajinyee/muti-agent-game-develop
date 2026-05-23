@@ -41,6 +41,8 @@ func handle_lucky_storm_fish(payload: Dictionary) -> void:
 			_on_storm_start(payload)
 		"storm_rotate":
 			_on_storm_rotate(payload)
+		"storm_blast_start":
+			_on_storm_blast_start(payload)
 		"storm_blast":
 			_on_storm_blast(payload)
 
@@ -144,14 +146,8 @@ func _on_storm_rotate(payload: Dictionary) -> void:
 		var tween_circle = _storm_circle.create_tween()
 		tween_circle.tween_property(_storm_circle, "rotation", _storm_circle.rotation + PI * 0.5, 0.3)
 
-## storm_blast — 風暴爆發
-func _on_storm_blast(payload: Dictionary) -> void:
-	var killed_count: int = payload.get("killed_count", 0)
-	var total_reward: int = payload.get("total_reward", 0)
-	var blast_mult: float = payload.get("blast_mult", 0.75)
-
-	_active = false
-
+## storm_blast_start — 風暴爆發開始（播放動畫）
+func _on_storm_blast_start(_payload: Dictionary) -> void:
 	# 清除計時條和風暴圓圈
 	if is_instance_valid(_timer_bar):
 		_timer_bar.queue_free()
@@ -160,8 +156,21 @@ func _on_storm_blast(payload: Dictionary) -> void:
 		_timer_bar_bg.queue_free()
 		_timer_bar_bg = null
 	if is_instance_valid(_storm_circle):
-		_storm_circle.queue_free()
+		var tween_fade = _storm_circle.create_tween()
+		tween_fade.tween_property(_storm_circle, "modulate:a", 0.0, 0.2)
+		tween_fade.tween_callback(_storm_circle.queue_free)
 		_storm_circle = null
+
+	# 預告閃光
+	_flash_screen(COLOR_DARK, 0.15)
+
+## storm_blast — 風暴爆發結算
+func _on_storm_blast(payload: Dictionary) -> void:
+	var killed_count: int = payload.get("killed_count", 0)
+	var total_reward: int = payload.get("total_reward", 0)
+	var blast_mult: float = payload.get("blast_mult", 0.75)
+
+	_active = false
 
 	var vp_size = get_viewport().size
 

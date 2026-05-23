@@ -2918,6 +2918,8 @@ func _handle_lucky_storm_fish(payload: Dictionary) -> void:
 			var rotate_count: int = payload.get("rotate_count", 1)
 			var moved_count: int = payload.get("moved_count", 0)
 			print("[GameManager] Storm rotate #%d moved=%d" % [rotate_count, moved_count])
+		"storm_blast_start":
+			print("[GameManager] Storm blast starting!")
 		"storm_blast":
 			var killed_count: int = payload.get("killed_count", 0)
 			var total_reward: int = payload.get("total_reward", 0)
