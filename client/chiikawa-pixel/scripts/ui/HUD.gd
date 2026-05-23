@@ -338,6 +338,7 @@ func _ready() -> void:
 	_init_lucky_weapon_evo_panel()           # 幸運武器進化魚系統面板（DAY-252）
 	_init_lucky_meteor_shower_panel()        # 幸運星際隕石魚系統面板（DAY-253）
 	_init_lucky_dragon_king_panel()          # 幸運龍王降臨魚系統面板（DAY-254）
+	_init_lucky_rift_panel()                 # 幸運時空裂縫魚系統面板（DAY-255）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4819,3 +4820,21 @@ func _init_lucky_dragon_king_panel() -> void:
 func _on_lucky_dragon_king(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_dragon_king_panel):
 		_lucky_dragon_king_panel.handle_lucky_dragon_king(data)
+
+# ─── 幸運時空裂縫魚系統面板（DAY-255）────────────────────────────────────────
+
+const LuckyRiftPanelScript = preload("res://scripts/ui/LuckyRiftPanel.gd")
+var _lucky_rift_panel = null
+
+func _init_lucky_rift_panel() -> void:
+	var panel = LuckyRiftPanelScript.new()
+	panel.name = "LuckyRiftPanel"
+	panel.layer = 28
+	add_child(panel)
+	_lucky_rift_panel = panel
+	if GameManager.has_signal("lucky_rift"):
+		GameManager.lucky_rift.connect(_on_lucky_rift)
+
+func _on_lucky_rift(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_rift_panel):
+		_lucky_rift_panel.handle_lucky_rift(data)

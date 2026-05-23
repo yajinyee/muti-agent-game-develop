@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-254 幸運龍王降臨魚系統）
+## 最後更新：2026-05-24（DAY-255 幸運時空裂縫魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-255 更新（自主觸發）：** 幸運時空裂縫魚系統（Lucky Rift Fish）✅
+  - **業界依據：** 業界原創「時空裂縫+傳送吸入+裂縫崩塌」機制，2026 年業界最熱門空間傳送+AOE 崩塌方向
+  - **設計：** 擊破 T213 後，場景中央出現「時空裂縫」（持續 18 秒）；每 3 秒「裂縫吸入」：吸入距離裂縫最近的目標，傳送到隨機位置（×1.6 倍率，全服共享）；最多吸入 5 個目標（達到上限後裂縫提前崩塌）；18 秒後「裂縫崩塌」：場上所有目標 HP -50%，全服 AOE 獎勵（×2.5 倍率，全服共享）；個人冷卻 22 秒；全服冷卻 35 秒
+  - **設計差異：** 與黑洞爆炸魚（T207，吸收消滅+能量爆炸）不同，時空裂縫是「傳送而非消滅」，目標被傳送到隨機位置後仍然存活，讓玩家有「魚突然出現在意想不到的地方」的驚喜感；「傳送後仍存活」讓玩家有「要趕快找到被傳送的魚繼續打」的追逐感；「裂縫崩塌 HP -50%」讓玩家在崩塌後有「全場魚都快死了，趕快打」的緊迫感；「×2.5 全服 AOE 獎勵」讓所有玩家都受益，製造「全服一起等崩塌」的社交感；全服廣播裂縫位置讓所有玩家都知道「裂縫在哪裡」，製造「全服一起看裂縫」的緊張感
+  - server/internal/game/lucky_rift_handler.go：luckyRiftManager（個人冷卻/全服冷卻/activeSession）；riftSession（triggerPlayerID/triggerPlayerName/expiresAt/suckCount）；isLuckyRiftFish（T213）；isRiftActive；tryLuckyRiftFish（擊破後觸發/個人訊息+全服廣播+全服公告）；runRiftSession（goroutine 每3秒吸入/達到5個或18秒後崩塌）；doRiftSuck（找最近目標/傳送到隨機位置/×1.6倍率/全服共享/廣播）；doRiftCollapse（HP-50%/×2.5全服AOE/廣播/公告）
+  - server/internal/data/tables.go：新增 T213 幸運時空裂縫魚（50-91x/HP90/SpawnWeight3/Speed32/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyRift；LuckyRiftPayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyRift + case 處理
+  - server/internal/game/game.go：LuckyRift *luckyRiftManager；handleKill 加入 isLuckyRiftFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyRiftPanel.gd：深紫時空主題面板（rift_start 深紫三次強閃光+頂部橫幅+「🌀 時空裂縫！」大字+裂縫旋轉圓圈+吸入計數器+計時條；rift_broadcast 頂部小橫幅；rift_suck 深紫閃光+「🌀 第N次吸入！目標名 傳送！×1.6」浮動文字+計數器更新；rift_collapse 全螢幕三次強閃光+「🌀 裂縫崩塌！」大字+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_rift 訊號 + _handle_lucky_rift
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyRiftPanelScript（layer=28）
+  - 裂縫設計：每 3 秒吸入最近目標；傳送到隨機位置（100~900x, 50~550y）；最多 5 個；持續 18 秒；個人冷卻 22 秒；全服冷卻 35 秒
+  - 吸入設計：×1.6 倍率；全服共享獎勵；目標傳送後仍存活
+  - 崩塌設計：HP -50%；×2.5 倍率；全服 AOE 共享；≥3 個時全服公告
+  - 視覺設計：深紫時空主題（#6A0DAD + #9B59B6 + #4B0082 + #E8DAEF）；裂縫旋轉圓圈（多層同心圓+持續旋轉+脈衝縮放+🌀中心標記）；吸入計數器（🌀 吸入 N/5，脈衝動畫）；右側豎向計時條（深紫，x=-156 與其他計時條錯開）；結算彈窗右側滑入
+  - 全服廣播：裂縫啟動/每次吸入（含目標名/舊位置/新位置/獎勵）/裂縫崩塌全服廣播
+  - 全服公告：觸發時公告（深紫色）；崩塌≥3個時公告（靛藍色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-254 更新（自主觸發）：** 幸運龍王降臨魚系統（Lucky Dragon King Fish）✅
   - **業界依據：** 業界原創「龍王降臨+龍息攻擊+龍王護盾+龍王爆發」機制，Royal Fishing 2026 三層大廳+龍王主題趨勢
   - **設計：** 擊破 T212 後，「龍王降臨」（持續 15 秒）；每 2 秒「龍息攻擊」：隨機選 3 個目標，80% 擊破機率，×1.4 倍率（全服共享）；龍王降臨期間，觸發玩家獲得「龍王護盾」（護盾指示器+脈衝動畫）；15 秒後「龍王爆發」：場上所有目標 HP -60%，觸發玩家獲得 ×3.0 倍率加成（個人，5 秒）；個人冷卻 25 秒；全服冷卻 40 秒

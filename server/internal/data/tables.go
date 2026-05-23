@@ -778,6 +778,13 @@ var Targets = map[string]*TargetDef{
 	//   - 15 秒後「龍王爆發」：場上所有目標 HP -60%，觸發玩家獲得 ×3.0 倍率加成（個人，5 秒）
 	//   - 個人冷卻 25 秒；全服冷卻 40 秒
 	"T212": {ID: "T212", Name: "幸運龍王降臨魚", Type: TargetTypeSpecial, MultiplierMin: 49, MultiplierMax: 89, HP: 89, SpawnWeight: 3, Speed: 33, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_dragon_king"},
+	// T213 幸運時空裂縫魚（DAY-255）— 業界原創「時空裂縫+傳送吸入+裂縫崩塌」機制
+	//   - 擊破 T213 後，場景中央出現「時空裂縫」（持續 18 秒）
+	//   - 每 3 秒「裂縫吸入」：吸入距離裂縫最近的目標，傳送到隨機位置（×1.6 倍率，全服共享）
+	//   - 最多吸入 5 個目標（達到上限後裂縫提前崩塌）
+	//   - 18 秒後「裂縫崩塌」：場上所有目標 HP -50%，全服 AOE 獎勵（×2.5 倍率，全服共享）
+	//   - 個人冷卻 22 秒；全服冷卻 35 秒
+	"T213": {ID: "T213", Name: "幸運時空裂縫魚", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 91, HP: 90, SpawnWeight: 3, Speed: 32, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_rift"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -595,6 +595,7 @@ const (
 	MsgLuckyWeaponEvo              MessageType = "lucky_weapon_evo"                // 幸運武器進化魚廣播（Server→Client，DAY-252）
 	MsgLuckyMeteorShower           MessageType = "lucky_meteor_shower"              // 幸運星際隕石魚廣播（Server→Client，DAY-253）
 	MsgLuckyDragonKing             MessageType = "lucky_dragon_king"                // 幸運龍王降臨魚廣播（Server→Client，DAY-254）
+	MsgLuckyRift                   MessageType = "lucky_rift"                       // 幸運時空裂縫魚廣播（Server→Client，DAY-255）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5800,4 +5801,32 @@ type LuckyDragonKingPayload struct {
 	Mult        float64 `json:"mult,omitempty"`
 	TotalReward int     `json:"total_reward,omitempty"`
 	DrainCount  int     `json:"drain_count,omitempty"`
+}
+
+// LuckyRiftPayload 幸運時空裂縫魚廣播（Server → Client，DAY-255）
+// Event 類型：
+//   - rift_start：裂縫啟動（個人訊息，PlayerID/PlayerName/DurationSec/SuckMult/CollapseMult/RiftX/RiftY）
+//   - rift_broadcast：全服廣播裂縫（PlayerName/SuckMult/RiftX/RiftY）
+//   - rift_suck：裂縫吸入（全服廣播，PlayerName/SuckNum/SuckCount/MaxSuck/TargetName/OldX/OldY/NewX/NewY/Mult/TotalReward）
+//   - rift_collapse：裂縫崩塌（全服廣播，PlayerName/DrainCount/CollapseMult/TotalReward/SuckCount）
+type LuckyRiftPayload struct {
+	Event        string  `json:"event"`
+	PlayerID     string  `json:"player_id,omitempty"`
+	PlayerName   string  `json:"player_name,omitempty"`
+	DurationSec  int     `json:"duration_sec,omitempty"`
+	SuckMult     float64 `json:"suck_mult,omitempty"`
+	CollapseMult float64 `json:"collapse_mult,omitempty"`
+	RiftX        float64 `json:"rift_x,omitempty"`
+	RiftY        float64 `json:"rift_y,omitempty"`
+	SuckNum      int     `json:"suck_num,omitempty"`
+	SuckCount    int     `json:"suck_count,omitempty"`
+	MaxSuck      int     `json:"max_suck,omitempty"`
+	TargetName   string  `json:"target_name,omitempty"`
+	OldX         float64 `json:"old_x,omitempty"`
+	OldY         float64 `json:"old_y,omitempty"`
+	NewX         float64 `json:"new_x,omitempty"`
+	NewY         float64 `json:"new_y,omitempty"`
+	Mult         float64 `json:"mult,omitempty"`
+	TotalReward  int     `json:"total_reward,omitempty"`
+	DrainCount   int     `json:"drain_count,omitempty"`
 }

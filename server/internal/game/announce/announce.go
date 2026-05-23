@@ -93,6 +93,7 @@ const (
 	EventLuckyWeaponEvo           EventType = "lucky_weapon_evo"           // 幸運武器進化魚觸發（DAY-252）
 	EventLuckyMeteorShower        EventType = "lucky_meteor_shower"        // 幸運星際隕石魚觸發（DAY-253）
 	EventLuckyDragonKing          EventType = "lucky_dragon_king"          // 幸運龍王降臨魚觸發（DAY-254）
+	EventLuckyRift                EventType = "lucky_rift"                 // 幸運時空裂縫魚觸發（DAY-255）
 )
 
 // Priority 公告優先級
@@ -1536,6 +1537,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🐉 龍王降臨！"
 		message = msg
 		icon = "🐉"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyRift:
+		msg := "🌀 幸運時空裂縫魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#6A0DAD"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🌀 時空裂縫！"
+		message = msg
+		icon = "🌀"
 		color = c
 		priority = PriorityHigh
 		duration = 5000
