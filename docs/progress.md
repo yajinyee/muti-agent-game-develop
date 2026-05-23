@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-241 幸運連鎖反應魚系統）
+## 最後更新：2026-05-23（DAY-242 幸運分身魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-242 更新（自主觸發）：** 幸運分身魚系統（Lucky Clone Fish）✅
+  - **業界依據：** 業界原創「三方向同時射擊」機制
+  - **設計：** 擊破 T200 後觸發「分身模式」（8 秒）：玩家的每次射擊同時產生 2 個「分身子彈」，分別向左右各偏移 30 度飛出；分身子彈命中目標：60% 擊破機率，×0.7 倍率（個人獎勵）；分身子彈搜尋範圍：偏移方向 300px 內最近目標；個人冷卻 20 秒
+  - **設計差異：** 與迴旋鏢魚（T189，折返穿透）不同，分身魚是「同時三方向射擊」，讓玩家有「一槍打三個方向」的爽感；與充能魚（T183，累積爆發）不同，分身魚是「持續輔助」，每槍都有額外收益；「偏移 30 度」讓分身子彈打到不同目標，最大化覆蓋範圍；「60% × 0.7 × 2 = 0.84 額外收益/槍」確保 RTP 平衡；全服廣播讓其他玩家看到「有人觸發了分身模式」，製造羨慕感
+  - server/internal/game/lucky_clone_fish_handler.go：luckyCloneFishManager（個人冷卻/activeSessions）；cloneFishSession（playerID/expiresAt）；isLuckyCloneFish（T200）；isCloneModeActive（供 handleAttack 使用）；tryLuckyCloneFish（擊破後觸發/個人訊息+全服廣播/全服公告/8秒後廣播結束）；doCloneShots（計算偏移方向/發射左右兩個分身子彈）；fireCloneShot（搜尋偏移方向最近目標/60%擊破/×0.7倍率/廣播命中）
+  - server/internal/data/tables.go：新增 T200 幸運分身魚（37-68x/HP77/SpawnWeight3/Speed45/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyCloneFish；LuckyCloneFishPayload（clone_start/clone_broadcast/clone_hit/clone_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyCloneFish + case 處理
+  - server/internal/game/game.go：LuckyCloneFish *luckyCloneFishManager；handleKill 加入 isLuckyCloneFish 分支；handleAttack 加入 isCloneModeActive + doCloneShots
+  - client/chiikawa-pixel/scripts/ui/LuckyCloneFishPanel.gd：紫色分身主題面板（clone_start 紫色雙閃光+方向示意圖三條線+右側豎向計時條+「👥 分身模式！」大字+角度說明；clone_broadcast 頂部小橫幅；clone_hit 左/右分身命中閃光+倍率浮動文字；clone_end 計時條淡出+結束提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_clone_fish 訊號 + _handle_lucky_clone_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyCloneFishPanelScript（layer=3）
+  - 分身設計：偏移 ±30 度；搜尋範圍 300px；點積篩選（夾角 < 75 度）；個人冷卻 20 秒；持續 8 秒
+  - 倍率設計：×0.7 乘法（個人獎勵）；60% 擊破機率；期望額外收益 = 0.6 × 0.7 × 2 = 0.84/槍
+  - 視覺設計：紫色分身主題（#8E44AD + #9B59B6 + #D7BDE2 + #F5EEF8）；左分身藍色（#3498DB）；右分身紅色（#E74C3C）；右側豎向計時條（紫色，從上往下縮短）；方向示意圖（三條點線）
+  - 全服廣播：分身模式開始（全服）/每次分身命中（全服）/分身模式結束（個人）
+  - 全服公告：觸發時公告（紫色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-241 更新（自主觸發）：** 幸運連鎖反應魚系統（Lucky Chain Reaction Fish）✅
   - **業界依據：** 業界原創「多米諾骨牌效應」機制
   - **設計：** 擊破 T199 後，場上隨機選 1 個目標作為「連鎖起點」（標記持續 15 秒）；玩家擊破連鎖起點後，自動引爆距離最近的目標（100% 擊破，×1.4 倍率）；被引爆的目標再引爆下一個最近目標（×1.3 倍率）；連鎖最多 8 層，每層倍率遞減 0.1（×1.4 → ×1.3 → ... → ×0.7）；每層引爆間隔 400ms，製造「多米諾骨牌」的視覺爽感；個人冷卻 25 秒

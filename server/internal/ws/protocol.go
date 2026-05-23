@@ -582,6 +582,7 @@ const (
 	MsgLuckyBetFish          MessageType = "lucky_bet_fish"           // 幸運賭注魚廣播（Server→Client，DAY-240）
 	MsgLuckyBetChoice        MessageType = "lucky_bet_choice"         // 玩家賭注選擇（Client→Server，DAY-240）
 	MsgLuckyChainReaction    MessageType = "lucky_chain_reaction"     // 幸運連鎖反應魚廣播（Server→Client，DAY-241）
+	MsgLuckyCloneFish        MessageType = "lucky_clone_fish"         // 幸運分身魚廣播（Server→Client，DAY-242）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5471,4 +5472,28 @@ type LuckyChainReactionPayload struct {
 	FromY      float64 `json:"from_y,omitempty"`      // 連鎖起始 Y
 	ToX        float64 `json:"to_x,omitempty"`        // 被引爆目標 X
 	ToY        float64 `json:"to_y,omitempty"`        // 被引爆目標 Y
+}
+
+// LuckyCloneFishPayload 幸運分身魚廣播（Server → Client，DAY-242）
+// Event 類型：
+//   - clone_start：分身模式開始（個人訊息，DurationSec/AngleDeg/KillChance/KillMult）
+//   - clone_broadcast：全服廣播有人觸發分身模式（PlayerName/DurationSec）
+//   - clone_hit：分身子彈命中（Side/TargetID/Killed/Reward/X/Y/DirX/DirY）
+//   - clone_end：分身模式結束（個人訊息）
+type LuckyCloneFishPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	DurationSec int     `json:"duration_sec,omitempty"`
+	AngleDeg    float64 `json:"angle_deg,omitempty"`   // 偏移角度
+	KillChance  float64 `json:"kill_chance,omitempty"` // 擊破機率
+	KillMult    float64 `json:"kill_mult,omitempty"`   // 擊破倍率
+	Side        string  `json:"side,omitempty"`        // "left" / "right"
+	TargetID    string  `json:"target_id,omitempty"`
+	Killed      bool    `json:"killed,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
+	X           float64 `json:"x,omitempty"`
+	Y           float64 `json:"y,omitempty"`
+	DirX        float64 `json:"dir_x,omitempty"`
+	DirY        float64 `json:"dir_y,omitempty"`
 }

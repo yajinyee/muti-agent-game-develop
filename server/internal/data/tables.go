@@ -687,6 +687,12 @@ var Targets = map[string]*TargetDef{
 	//   - 每層引爆間隔 400ms，製造「多米諾骨牌」的視覺爽感
 	//   - 個人冷卻 25 秒
 	"T199": {ID: "T199", Name: "幸運連鎖反應魚", Type: TargetTypeSpecial, MultiplierMin: 36, MultiplierMax: 67, HP: 76, SpawnWeight: 3, Speed: 46, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_chain_reaction"},
+	// T200 幸運分身魚（DAY-242）— 業界原創「三方向同時射擊」機制
+	//   - 擊破 T200 後觸發「分身模式」（8 秒）：玩家的每次射擊同時產生 2 個「分身子彈」
+	//   - 分身子彈分別向左右各偏移 30 度飛出，命中目標：60% 擊破機率，×0.7 倍率（個人獎勵）
+	//   - 分身子彈搜尋範圍：偏移方向 300px 內最近目標
+	//   - 個人冷卻 20 秒
+	"T200": {ID: "T200", Name: "幸運分身魚", Type: TargetTypeSpecial, MultiplierMin: 37, MultiplierMax: 68, HP: 77, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_clone"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

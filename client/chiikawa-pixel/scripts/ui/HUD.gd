@@ -325,6 +325,7 @@ func _ready() -> void:
 	_init_lucky_synergy_burst_panel()   # 幸運共鳴爆發魚系統面板（DAY-239）
 	_init_lucky_bet_fish_panel()        # 幸運賭注魚系統面板（DAY-240）
 	_init_lucky_chain_reaction_panel()  # 幸運連鎖反應魚系統面板（DAY-241）
+	_init_lucky_clone_fish_panel()      # 幸運分身魚系統面板（DAY-242）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4579,3 +4580,20 @@ func _init_lucky_chain_reaction_panel() -> void:
 func _on_lucky_chain_reaction(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_chain_reaction_panel):
 		_lucky_chain_reaction_panel.handle_lucky_chain_reaction(data)
+
+# ─── 幸運分身魚系統面板（DAY-242）───────────────────────────────────────────
+const LuckyCloneFishPanelScript = preload("res://scripts/ui/LuckyCloneFishPanel.gd")
+var _lucky_clone_fish_panel = null
+
+func _init_lucky_clone_fish_panel() -> void:
+	var panel = LuckyCloneFishPanelScript.new()
+	panel.name = "LuckyCloneFishPanel"
+	panel.layer = 3
+	add_child(panel)
+	_lucky_clone_fish_panel = panel
+	if GameManager.has_signal("lucky_clone_fish"):
+		GameManager.lucky_clone_fish.connect(_on_lucky_clone_fish)
+
+func _on_lucky_clone_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_clone_fish_panel):
+		_lucky_clone_fish_panel.handle_lucky_clone_fish(data)

@@ -215,6 +215,7 @@ type Game struct {
 	LuckySynergyBurst  *luckySynergyBurstManager   // 幸運共鳴爆發魚系統管理器（DAY-239）
 	LuckyBetFish       *luckyBetFishManager         // 幸運賭注魚系統管理器（DAY-240）
 	LuckyChainReaction *luckyChainReactionManager   // 幸運連鎖反應魚系統管理器（DAY-241）
+	LuckyCloneFish     *luckyCloneFishManager        // 幸運分身魚系統管理器（DAY-242）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -406,6 +407,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckySynergyBurst:  newLuckySynergyBurstManager(),
 		LuckyBetFish:       newLuckyBetFishManager(),
 		LuckyChainReaction: newLuckyChainReactionManager(),
+		LuckyCloneFish:     newLuckyCloneFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1111,6 +1113,12 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 			dirX = 1.0
 		}
 		go g.doBoomerangBounce(p, t.X, t.Y, dirX, dirY, t.InstanceID, 0)
+	}
+
+	// 幸運分身魚：射擊時同時發射兩個偏移方向的分身子彈（DAY-242）
+	if t != nil && g.isCloneModeActive(p.ID) {
+		// 砲台在左側（x≈0），目標在右側
+		go g.doCloneShots(p, 0, t.Y, t.X, t.Y, t.InstanceID)
 	}
 
 	// 龍龜不死 Boss：命中時直接給獎勵（DAY-186）
@@ -2109,6 +2117,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if g.isChainReactionStarter(t.InstanceID) {
 		g.removeChainReactionStarter(t.InstanceID)
 		go g.notifyChainReactionKill(p, t)
+	}
+	// 幸運分身魚：擊破 T200 本身時觸發分身模式（DAY-242）
+	if isLuckyCloneFish(t.DefID) {
+		go g.tryLuckyCloneFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
