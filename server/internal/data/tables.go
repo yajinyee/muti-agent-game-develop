@@ -609,6 +609,13 @@ var Targets = map[string]*TargetDef{
 	//   - 玩家擊破寄生目標獲得 ×2.2 倍率加成（乘法）
 	//   - 個人冷卻 22 秒；全服廣播寄生附著/跳躍/消散
 	"T187": {ID: "T187", Name: "幸運寄生魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 58, HP: 68, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_parasite"},
+	// T188 幸運風暴魚（DAY-230）— 業界原創「風暴旋轉+位置混亂」機制
+	// 設計：擊破 T188 後在場上建立「風暴中心」（持續 10 秒）：
+	//   - 風暴範圍（半徑 320px）內所有目標每 1.5 秒被「風暴旋轉」（隨機傳送到範圍內新位置）
+	//   - 風暴範圍內目標被擊破：獎勵 ×2.5 倍率加成（乘法）
+	//   - 10 秒後「風暴爆發」：範圍內所有目標 80% 擊破機率（0.75x 倍率，全服共享）
+	//   - 個人冷卻 22 秒；全服冷卻 35 秒
+	"T188": {ID: "T188", Name: "幸運風暴魚", Type: TargetTypeSpecial, MultiplierMin: 32, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_storm"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

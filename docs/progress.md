@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-229 幸運寄生魚系統）
+## 最後更新：2026-05-23（DAY-230 幸運風暴魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-230 更新（自主觸發）：** 幸運風暴魚系統（Lucky Storm Fish）✅
+  - **業界依據：** 業界原創「風暴旋轉+位置混亂」機制
+  - **設計：** 擊破 T188 後在場上建立「風暴中心」（持續 10 秒）：風暴範圍（半徑 320px）內所有目標每 1.5 秒被「風暴旋轉」（隨機傳送到範圍內新位置）；風暴範圍內目標被擊破獲得 ×2.5 倍率加成；10 秒後「風暴爆發」（範圍內所有目標 80% 擊破機率，0.75x 倍率，全服共享）；個人冷卻 22 秒；全服冷卻 35 秒
+  - **設計差異：** 與黑洞魚（DAY-221，重力吸引+奇點爆炸，HP 損失）不同，風暴魚是「位置混亂+旋轉」，讓玩家有「要趁目標在風暴範圍內快打」的緊迫感；與傳送魚（DAY-223，全場瞬間移動）不同，風暴魚是「局部風暴範圍內旋轉」，讓玩家有「要站在風暴範圍內打」的空間策略感；「風暴旋轉」讓目標在範圍內隨機移動，製造「混亂爽感」；「風暴爆發」讓玩家有「等待→爆發」的高潮設計；全服廣播風暴位置讓所有玩家都往同一個地方打，製造「全服聚焦」的社交感
+  - server/internal/game/lucky_storm_fish_handler.go：luckyStormFishManager（個人冷卻/全服冷卻/風暴狀態/位置/半徑）；isLuckyStormFish（T188）；isInStorm（空間判斷）；getLuckyStormMultiplier（×2.5 乘法）；tryLuckyStormFish（擊破後觸發/全服廣播/全服公告）；runLuckyStorm（goroutine 每1.5秒旋轉/10秒後爆發）；doStormRotate（隨機傳送範圍內目標/廣播）；doStormBlast（80%擊破/全服共享獎勵/全服公告）
+  - server/internal/data/tables.go：新增 T188 幸運風暴魚（32-60x/HP70/SpawnWeight3/Speed50/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyStormFish；LuckyStormFishPayload（storm_start/storm_rotate/storm_blast）
+  - server/internal/game/announce/announce.go：新增 EventLuckyStormFish + case 處理
+  - server/internal/game/game.go：LuckyStormFish *luckyStormFishManager；handleKill 加入 getLuckyStormMultiplier 乘法加成 + isLuckyStormFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyStormFishPanel.gd：青綠風暴主題面板（storm_start 青綠三次強閃光+頂部橫幅+「🌪️ 風暴來襲！」大字+風暴圓圈+計時條；storm_rotate 青綠閃光+「🌪️ 旋轉！」提示+移動目標數；storm_blast 全螢幕三次強閃光+「🌪️ 風暴爆發！」大字+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_storm_fish 訊號 + _handle_lucky_storm_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyStormFishPanelScript（layer=15）
+  - 風暴設計：半徑 320px；持續 10 秒；每 1.5 秒旋轉；個人冷卻 22 秒；全服冷卻 35 秒
+  - 倍率設計：×2.5 乘法（空間限定，風暴範圍內）
+  - 風暴爆發設計：80% 擊破機率；0.75x 倍率；全服共享獎勵；≥3 個擊破時全服公告
+  - 視覺設計：青綠風暴主題（#1ABC9C + #16A085 + #A3E4D7 + #F0FFF4）；旋轉同心圓；底部計時條（青綠漸變）；三次強閃光；結算彈窗右側滑入
+  - 全服廣播：風暴建立/每次旋轉（含移動目標數）/風暴爆發全服廣播
+  - 全服公告：觸發時公告（青綠色）；爆發≥3 個擊破時公告（依擊破數決定顏色：≥6 亮綠/其他青綠）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-229 更新（自主觸發）：** 幸運寄生魚系統（Lucky Parasite Fish）✅
   - **業界依據：** 業界原創「寄生附著+跳躍」機制
   - **設計：** 擊破 T187 後觸發「寄生釋放」：場上隨機 3 個目標被「寄生蟲附著」；寄生目標每 2 秒自動損失 HP（-8%/次，最多 5 次）；寄生目標被擊破時，寄生蟲「跳躍」到最近的目標繼續寄生（最多跳躍 2 次）；玩家擊破寄生目標獲得 ×2.2 倍率加成；個人冷卻 22 秒

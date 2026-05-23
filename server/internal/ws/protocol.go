@@ -569,6 +569,7 @@ const (
 	MsgLuckyMirrorTime     MessageType = "lucky_mirror_time"     // 幸運鏡像時空魚廣播（Server→Client，DAY-227）
 	MsgLuckyQuantumFish    MessageType = "lucky_quantum_fish"    // 幸運量子魚廣播（Server→Client，DAY-228）
 	MsgLuckyParasiteFish   MessageType = "lucky_parasite_fish"   // 幸運寄生魚廣播（Server→Client，DAY-229）
+	MsgLuckyStormFish      MessageType = "lucky_storm_fish"      // 幸運風暴魚廣播（Server→Client，DAY-230）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5167,4 +5168,29 @@ type LuckyParasiteFishPayload struct {
 	JumpLayer     int         `json:"jump_layer,omitempty"`
 	KillReward    int         `json:"kill_reward,omitempty"`
 	Targets       interface{} `json:"targets,omitempty"`
+}
+
+// LuckyStormFishPayload 幸運風暴魚廣播（Server → Client，DAY-230）
+//
+// Events:
+//
+//	"storm_start"   — 風暴建立（全服廣播）
+//	"storm_rotate"  — 風暴旋轉（全服廣播，每 1.5 秒）
+//	"storm_blast"   — 風暴爆發（全服廣播）
+type LuckyStormFishPayload struct {
+	Event       string      `json:"event"`
+	InstanceID  string      `json:"instance_id,omitempty"`
+	PlayerID    string      `json:"player_id,omitempty"`
+	PlayerName  string      `json:"player_name,omitempty"`
+	StormX      float64     `json:"storm_x,omitempty"`
+	StormY      float64     `json:"storm_y,omitempty"`
+	Radius      float64     `json:"radius,omitempty"`
+	DurationSec int         `json:"duration_sec,omitempty"`
+	KillMult    float64     `json:"kill_mult,omitempty"`
+	RotateCount int         `json:"rotate_count,omitempty"`
+	MovedCount  int         `json:"moved_count,omitempty"`
+	KilledCount int         `json:"killed_count,omitempty"`
+	TotalReward int         `json:"total_reward,omitempty"`
+	BlastMult   float64     `json:"blast_mult,omitempty"`
+	Targets     interface{} `json:"targets,omitempty"`
 }
