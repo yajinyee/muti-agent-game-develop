@@ -86,6 +86,7 @@ const (
 	EventLuckyPhantomFish         EventType = "lucky_phantom_fish"        // 幸運幽靈魚觸發（DAY-245）
 	EventLuckyCrystalBallFish     EventType = "lucky_crystal_ball_fish"   // 幸運水晶球魚觸發（DAY-246）
 	EventLuckyTimeRewind          EventType = "lucky_time_rewind"         // 幸運時光倒流魚觸發（DAY-247）
+	EventLuckyTornado             EventType = "lucky_tornado"             // 幸運龍捲風魚觸發（DAY-248）
 )
 
 // Priority 公告優先級
@@ -1389,6 +1390,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "⏪ 時光倒流！"
 		message = msg
 		icon = "⏪"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyTornado:
+		msg := "🌪️ 幸運龍捲風魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#1ABC9C"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🌪️ 龍捲風！"
+		message = msg
+		icon = "🌪️"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

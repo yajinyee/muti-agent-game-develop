@@ -331,6 +331,7 @@ func _ready() -> void:
 	_init_lucky_phantom_fish_panel()    # 幸運幽靈魚系統面板（DAY-245）
 	_init_lucky_crystal_ball_fish_panel() # 幸運水晶球魚系統面板（DAY-246）
 	_init_lucky_time_rewind_panel()       # 幸運時光倒流魚系統面板（DAY-247）
+	_init_lucky_tornado_panel()           # 幸運龍捲風魚系統面板（DAY-248）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4687,3 +4688,20 @@ func _init_lucky_time_rewind_panel() -> void:
 func _on_lucky_time_rewind(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_time_rewind_panel):
 		_lucky_time_rewind_panel.handle_lucky_time_rewind(data)
+
+# ─── 幸運龍捲風魚系統面板（DAY-248）───────────────────────────────────────────
+const LuckyTornadoPanelScript = preload("res://scripts/ui/LuckyTornadoPanel.gd")
+var _lucky_tornado_panel = null
+
+func _init_lucky_tornado_panel() -> void:
+	var panel = LuckyTornadoPanelScript.new()
+	panel.name = "LuckyTornadoPanel"
+	panel.layer = 21
+	add_child(panel)
+	_lucky_tornado_panel = panel
+	if GameManager.has_signal("lucky_tornado"):
+		GameManager.lucky_tornado.connect(_on_lucky_tornado)
+
+func _on_lucky_tornado(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_tornado_panel):
+		_lucky_tornado_panel.handle_lucky_tornado(data)

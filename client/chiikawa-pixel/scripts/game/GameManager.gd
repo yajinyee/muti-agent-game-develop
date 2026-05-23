@@ -252,6 +252,7 @@ signal lucky_flag_fish(data: Dictionary)            # 幸運奪旗魚系統（DA
 signal lucky_phantom_fish(data: Dictionary)         # 幸運幽靈魚系統（DAY-245）
 signal lucky_crystal_ball_fish(data: Dictionary)    # 幸運水晶球魚系統（DAY-246）
 signal lucky_time_rewind(data: Dictionary)           # 幸運時光倒流魚系統（DAY-247）
+signal lucky_tornado(data: Dictionary)               # 幸運龍捲風魚系統（DAY-248）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -723,6 +724,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_crystal_ball_fish(payload)
 		"lucky_time_rewind":
 			_handle_lucky_time_rewind(payload)
+		"lucky_tornado":
+			_handle_lucky_tornado(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3411,3 +3414,27 @@ func _handle_lucky_time_rewind(payload: Dictionary) -> void:
 			var replay_count: int = payload.get("replay_count", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Time rewind end! replay=%d total=%d" % [replay_count, total_reward])
+
+## 幸運龍捲風魚系統（DAY-248）
+func _handle_lucky_tornado(payload: Dictionary) -> void:
+	emit_signal("lucky_tornado", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"tornado_start":
+			var duration_sec: int = payload.get("duration_sec", 12)
+			var kill_mult: float = payload.get("kill_mult", 2.2)
+			print("[GameManager] Tornado started! duration=%ds kill_mult=x%.1f" % [duration_sec, kill_mult])
+		"tornado_broadcast":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Tornado broadcast! player=%s" % player_name)
+		"tornado_spiral":
+			var pull_count: int = payload.get("pull_count", 1)
+			var moved_count: int = payload.get("moved_count", 0)
+			print("[GameManager] Tornado spiral #%d! moved=%d" % [pull_count, moved_count])
+		"tornado_blast":
+			var blast_count: int = payload.get("blast_count", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Tornado blast! count=%d total=%d" % [blast_count, total_reward])
+		"tornado_end":
+			var blast_count: int = payload.get("blast_count", 0)
+			print("[GameManager] Tornado end! blast=%d" % blast_count)

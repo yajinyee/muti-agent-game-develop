@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-247 幸運時光倒流魚系統）
+## 最後更新：2026-05-23（DAY-248 幸運龍捲風魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-248 更新（自主觸發）：** 幸運龍捲風魚系統（Lucky Tornado Fish）✅
+  - **業界依據：** 業界原創「龍捲風吸引+螺旋爆發」機制
+  - **設計：** 擊破 T206 後，場景中央生成「龍捲風」（持續 12 秒）；龍捲風每 2 秒「吸引」場上所有目標向中央螺旋移動（每次移動 80px，帶 30 度旋轉角度）；龍捲風期間擊破任何目標獲得 ×2.2 倍率加成；12 秒後「龍捲風爆發」：中央 250px 範圍內所有目標 85% 擊破機率（×1.5 倍率，全服共享）；個人冷卻 22 秒；全服冷卻 35 秒
+  - **設計差異：** 與磁力魚（DAY-232，直線向中央移動）不同，龍捲風是「螺旋移動」，目標繞著中央旋轉靠近，讓玩家看到「魚群被龍捲風捲起來」的視覺爽感；與漩渦魚（DAY-234，磁力聚集）不同，龍捲風有「旋轉角度」，讓目標移動路徑更有視覺感；「螺旋移動」讓玩家有「要趁目標螺旋靠近時趕快打」的緊迫感；「龍捲風爆發」讓玩家有「等待→爆發」的高潮設計；全服廣播龍捲風位置讓所有玩家都往中央打，製造「全服聚焦」的社交感
+  - server/internal/game/lucky_tornado_handler.go：luckyTornadoManager（個人冷卻/全服冷卻/tornadoActive/triggerPlayerID）；isLuckyTornadoFish（T206）；isTornadoActive；getLuckyTornadoBoost（×2.2 乘法）；tryLuckyTornadoFish（擊破後觸發/個人訊息+全服廣播+全服公告）；runLuckyTornado（goroutine 每2秒螺旋吸引/12秒後爆發）；doTornadoSpiral（所有目標螺旋移動/30度旋轉/80px/廣播位置）；doTornadoBlast（中央250px/85%擊破/×1.5/全服共享獎勵/全服公告）
+  - server/internal/data/tables.go：新增 T206 幸運龍捲風魚（43-77x/HP83/SpawnWeight3/Speed39/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyTornado；LuckyTornadoPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyTornado + case 處理
+  - server/internal/game/game.go：LuckyTornado *luckyTornadoManager；handleKill 加入 isLuckyTornadoFish 分支 + getLuckyTornadoBoost 乘法加成
+  - client/chiikawa-pixel/scripts/ui/LuckyTornadoPanel.gd：青綠龍捲風主題面板（tornado_start 青綠三次強閃光+頂部橫幅+「🌪️ 龍捲風！」大字+中央旋轉圓圈+計時條；tornado_broadcast 頂部小橫幅；tornado_spiral 青綠閃光+「🌪️ 螺旋吸引 #N！M 個目標」浮動文字；tornado_blast 全螢幕三次強閃光+「🌪️ 龍捲風爆發！」大字+結算彈窗；tornado_end 清理）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_tornado 訊號 + _handle_lucky_tornado
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyTornadoPanelScript（layer=21）
+  - 龍捲風設計：每 2 秒螺旋吸引；30 度旋轉角度；80px 移動距離；持續 12 秒；個人冷卻 22 秒；全服冷卻 35 秒
+  - 爆發設計：中央 250px 範圍；85% 擊破機率；×1.5 倍率；全服共享獎勵；≥3 個時全服公告
+  - 視覺設計：青綠龍捲風主題（#1ABC9C + #16A085 + #A3E4D7 + #27AE60）；中央旋轉圓圈（多層同心圓+持續旋轉+脈衝縮放）；右側豎向計時條（青綠，x=-58 與其他計時條錯開）；結算彈窗右側滑入
+  - 全服廣播：龍捲風啟動/每次螺旋吸引（含位置）/龍捲風爆發/結束全服廣播
+  - 全服公告：觸發時公告（青綠色）；爆發≥3個時公告（深青綠色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-247 更新（自主觸發）：** 幸運時光倒流魚系統（Lucky Time Rewind Fish）✅
   - **業界依據：** 業界原創「時光倒流+過去擊破重現」機制
   - **設計：** 擊破 T205 後，Server 重播玩家「過去 10 秒內」擊破的最多 5 個目標；每個重播目標以 ×1.6 倍率給予個人獎勵（不需要再次射擊，直接結算）；同時場上所有目標 HP 恢復到 60%（讓玩家有更多目標可打）；重播動畫：每個目標間隔 400ms 依序「閃現→爆炸」，製造「時光倒流」的視覺感；個人冷卻 25 秒；全服冷卻 40 秒

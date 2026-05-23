@@ -728,6 +728,13 @@ var Targets = map[string]*TargetDef{
 	//   - 重播動畫：每個目標間隔 400ms 依序「閃現→爆炸」，製造「時光倒流」的視覺感
 	//   - 個人冷卻 25 秒；全服冷卻 40 秒
 	"T205": {ID: "T205", Name: "幸運時光倒流魚", Type: TargetTypeSpecial, MultiplierMin: 42, MultiplierMax: 75, HP: 82, SpawnWeight: 3, Speed: 40, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_time_rewind"},
+	// T206 幸運龍捲風魚（DAY-248）— 業界原創「龍捲風吸引+螺旋爆發」機制
+	//   - 擊破 T206 後，場景中央生成「龍捲風」（持續 12 秒）
+	//   - 龍捲風每 2 秒「吸引」場上所有目標向中央螺旋移動（每次移動 80px，帶旋轉角度）
+	//   - 龍捲風期間擊破任何目標獲得 ×2.2 倍率加成（乘法）
+	//   - 12 秒後「龍捲風爆發」：中央 250px 範圍內所有目標 85% 擊破機率（×1.5 倍率，全服共享）
+	//   - 個人冷卻 22 秒；全服冷卻 35 秒
+	"T206": {ID: "T206", Name: "幸運龍捲風魚", Type: TargetTypeSpecial, MultiplierMin: 43, MultiplierMax: 77, HP: 83, SpawnWeight: 3, Speed: 39, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_tornado"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

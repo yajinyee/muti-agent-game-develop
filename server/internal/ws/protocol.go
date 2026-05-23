@@ -588,6 +588,7 @@ const (
 	MsgLuckyPhantomFish      MessageType = "lucky_phantom_fish"       // 幸運幽靈魚廣播（Server→Client，DAY-245）
 	MsgLuckyCrystalBallFish  MessageType = "lucky_crystal_ball_fish"  // 幸運水晶球魚廣播（Server→Client，DAY-246）
 	MsgLuckyTimeRewind       MessageType = "lucky_time_rewind"        // 幸運時光倒流魚廣播（Server→Client，DAY-247）
+	MsgLuckyTornado          MessageType = "lucky_tornado"             // 幸運龍捲風魚廣播（Server→Client，DAY-248）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5627,4 +5628,27 @@ type LuckyTimeRewindPayload struct {
 	TotalReward     int      `json:"total_reward,omitempty"`
 	ReplayIdx       int      `json:"replay_idx,omitempty"`
 	TotalCount      int      `json:"total_count,omitempty"`
+}
+
+// LuckyTornadoPayload 幸運龍捲風魚廣播（Server → Client，DAY-248）
+// Event 類型：
+//   - tornado_start：龍捲風啟動（個人訊息，PlayerID/CenterX/CenterY/DurationSec/KillMult/BlastMult）
+//   - tornado_broadcast：全服廣播龍捲風啟動（PlayerName/CenterX/CenterY）
+//   - tornado_spiral：螺旋吸引（全服廣播，PullCount/MovedCount/Positions）
+//   - tornado_blast：龍捲風爆發（全服廣播，BlastCount/TotalReward/BlastMult）
+//   - tornado_end：龍捲風結束（個人訊息，BlastCount/TotalReward）
+type LuckyTornadoPayload struct {
+	Event       string      `json:"event"`
+	PlayerID    string      `json:"player_id,omitempty"`
+	PlayerName  string      `json:"player_name,omitempty"`
+	CenterX     float64     `json:"center_x,omitempty"`
+	CenterY     float64     `json:"center_y,omitempty"`
+	DurationSec int         `json:"duration_sec,omitempty"`
+	KillMult    float64     `json:"kill_mult,omitempty"`
+	BlastMult   float64     `json:"blast_mult,omitempty"`
+	PullCount   int         `json:"pull_count,omitempty"`
+	MovedCount  int         `json:"moved_count,omitempty"`
+	Positions   interface{} `json:"positions,omitempty"` // []tornadoPos
+	BlastCount  int         `json:"blast_count,omitempty"`
+	TotalReward int         `json:"total_reward,omitempty"`
 }

@@ -221,6 +221,7 @@ type Game struct {
 	LuckyPhantomFish   *luckyPhantomFishManager        // 幸運幽靈魚系統管理器（DAY-245）
 	LuckyCrystalBallFish *luckyCrystalBallFishManager   // 幸運水晶球魚系統管理器（DAY-246）
 	LuckyTimeRewind      *luckyTimeRewindManager          // 幸運時光倒流魚系統管理器（DAY-247）
+	LuckyTornado         *luckyTornadoManager              // 幸運龍捲風魚系統管理器（DAY-248）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -418,6 +419,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyPhantomFish:   newLuckyPhantomFishManager(),
 		LuckyCrystalBallFish: newLuckyCrystalBallFishManager(),
 		LuckyTimeRewind:    newLuckyTimeRewindManager(),
+		LuckyTornado:       newLuckyTornadoManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1507,6 +1509,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if flagMult > 1.0 {
 		finalReward = int(float64(finalReward) * flagMult)
 	}
+	// 套用幸運龍捲風魚龍捲風期間倍率加成（DAY-248，×2.2 乘法，全服，龍捲風期間）
+	tornadoBoost := g.LuckyTornado.getLuckyTornadoBoost()
+	if tornadoBoost > 1.0 {
+		finalReward = int(float64(finalReward) * tornadoBoost)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -2192,6 +2199,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			name = def.Name
 		}
 		g.LuckyTimeRewind.recordKillHistory(p.ID, t.InstanceID, t.DefID, name, int(t.Multiplier))
+	}
+	// 幸運龍捲風魚：擊破 T206 本身時觸發龍捲風（DAY-248）
+	if isLuckyTornadoFish(t.DefID) {
+		go g.tryLuckyTornadoFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
