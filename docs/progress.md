@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-230 幸運風暴魚系統）
+## 最後更新：2026-05-23（DAY-231 幸運迴旋鏢魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,29 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-231 更新（自主觸發）：** 幸運迴旋鏢魚系統（Lucky Boomerang Fish）✅
+  - **業界依據：** 業界原創「迴旋鏢來回穿透」機制
+  - **設計：** 擊破 T189 後觸發「迴旋鏢模式」（10 秒）：玩家的每次射擊發射「迴旋鏢子彈」，命中目標後折返，沿反方向繼續飛行，最多來回 3 次；每次命中 70% 擊破機率，0.65x 倍率（個人獎勵）；個人冷卻 18 秒
+  - **設計差異：** 與反彈魚（DAY-220，命中後跳到最近目標，範圍遞減）不同，迴旋鏢是「直線來回穿透」，讓玩家有「要瞄準一排魚」的策略感；「折返」讓玩家感受到「一槍打多個目標」的爽感；「最多 3 次折返」確保 RTP 平衡；「10 秒迴旋鏢模式」讓玩家有「趕快在 10 秒內多打幾槍」的緊迫感
+  - server/internal/game/lucky_boomerang_fish_handler.go：luckyBoomerangFishManager（個人冷卻/activeSessions）；boomerangSession（playerID/expiresAt）；isLuckyBoomerangFish（T189）；isBoomerangActive（供 handleAttack 使用）；tryLuckyBoomerangFish（擊破後觸發/全服廣播/全服公告）；doBoomerangBounce（折返邏輯/方向向量/點積篩選/遞迴最多3次/個人獎勵）
+  - server/internal/data/tables.go：新增 T189 幸運迴旋鏢魚（28-55x/HP65/SpawnWeight4/Speed52/Lifetime13）
+  - server/internal/ws/protocol.go：新增 MsgLuckyBoomerangFish；LuckyBoomerangFishPayload（boomerang_start/boomerang_hit/boomerang_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyBoomerangFish + case 處理
+  - server/internal/game/game.go：LuckyBoomerangFish *luckyBoomerangFishManager；handleKill 加入 isLuckyBoomerangFish 分支；handleAttack 加入 isBoomerangActive + doBoomerangBounce
+  - client/chiikawa-pixel/scripts/ui/LuckyBoomerangFishPanel.gd：橙棕迴旋鏢主題面板（boomerang_start 橙色雙閃光+頂部橫幅+「🪃 迴旋鏢模式！」大字+計時條；boomerang_hit 命中閃光+折返次數標記+浮動獎勵；boomerang_end 橙色淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_boomerang_fish 訊號 + _handle_lucky_boomerang_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyBoomerangFishPanelScript（layer=14）
+  - 迴旋鏢設計：最多 3 次折返；70% 擊破機率；0.65x 倍率；搜尋範圍 250px；點積篩選（夾角 < 72 度）；個人冷卻 18 秒
+  - 視覺設計：橙棕迴旋鏢主題（#E67E22 + #D35400 + #FAD7A0 + #FFF3E0）；折返次數標記；浮動獎勵文字；底部計時條（橙→深橙漸變）
+  - 全服廣播：迴旋鏢開始/每次命中（含折返次數/位置/方向）/結束全服廣播
+  - 全服公告：觸發時公告（橙色）
+  - build/vet 全部通過（零錯誤零警告）
+- **DAY-230 修正（自主觸發）：** 幸運風暴魚 doStormBlast 獎勵分配修正 ✅
+  - 修正：`doStormBlast` 現在正確使用 `avgBet` 計算獎勵並呼叫 `pl.AddCoins(share)` 分配給所有玩家
+  - 修正：`runLuckyStorm` 移除 `goto`，改用 `time.NewTimer` + select 的標準 Go 模式
+  - 新增：`storm_blast_start` 事件（爆發前 300ms 廣播，讓 Client 播放動畫）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-230 更新（自主觸發）：** 幸運風暴魚系統（Lucky Storm Fish）✅
   - **業界依據：** 業界原創「風暴旋轉+位置混亂」機制
   - **設計：** 擊破 T188 後在場上建立「風暴中心」（持續 10 秒）：風暴範圍（半徑 320px）內所有目標每 1.5 秒被「風暴旋轉」（隨機傳送到範圍內新位置）；風暴範圍內目標被擊破獲得 ×2.5 倍率加成；10 秒後「風暴爆發」（範圍內所有目標 80% 擊破機率，0.75x 倍率，全服共享）；個人冷卻 22 秒；全服冷卻 35 秒

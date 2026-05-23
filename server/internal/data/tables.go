@@ -616,6 +616,12 @@ var Targets = map[string]*TargetDef{
 	//   - 10 秒後「風暴爆發」：範圍內所有目標 80% 擊破機率（0.75x 倍率，全服共享）
 	//   - 個人冷卻 22 秒；全服冷卻 35 秒
 	"T188": {ID: "T188", Name: "幸運風暴魚", Type: TargetTypeSpecial, MultiplierMin: 32, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_storm"},
+	// T189 幸運迴旋鏢魚（DAY-231）— 業界原創「迴旋鏢來回穿透」機制
+	// 設計：擊破 T189 後觸發「迴旋鏢模式」（10 秒）：
+	//   - 玩家的每次射擊發射「迴旋鏢子彈」，命中目標後折返，最多來回 3 次
+	//   - 每次命中：70% 擊破機率，0.65x 倍率（個人獎勵）
+	//   - 個人冷卻 18 秒
+	"T189": {ID: "T189", Name: "幸運迴旋鏢魚", Type: TargetTypeSpecial, MultiplierMin: 28, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 52, Lifetime: 13, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "lucky_boomerang"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

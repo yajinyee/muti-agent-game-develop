@@ -570,6 +570,7 @@ const (
 	MsgLuckyQuantumFish    MessageType = "lucky_quantum_fish"    // 幸運量子魚廣播（Server→Client，DAY-228）
 	MsgLuckyParasiteFish   MessageType = "lucky_parasite_fish"   // 幸運寄生魚廣播（Server→Client，DAY-229）
 	MsgLuckyStormFish      MessageType = "lucky_storm_fish"      // 幸運風暴魚廣播（Server→Client，DAY-230）
+	MsgLuckyBoomerangFish  MessageType = "lucky_boomerang_fish"  // 幸運迴旋鏢魚廣播（Server→Client，DAY-231）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5194,4 +5195,29 @@ type LuckyStormFishPayload struct {
 	TotalReward int         `json:"total_reward,omitempty"`
 	BlastMult   float64     `json:"blast_mult,omitempty"`
 	Targets     interface{} `json:"targets,omitempty"`
+}
+
+// LuckyBoomerangFishPayload 幸運迴旋鏢魚廣播（Server → Client，DAY-231）
+//
+// Events:
+//
+//	"boomerang_start" — 迴旋鏢模式開始（全服廣播）
+//	"boomerang_hit"   — 迴旋鏢命中目標（全服廣播）
+//	"boomerang_end"   — 迴旋鏢模式結束（全服廣播）
+type LuckyBoomerangFishPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	DurationSec int     `json:"duration_sec,omitempty"`
+	MaxBounces  int     `json:"max_bounces,omitempty"`
+	KillChance  float64 `json:"kill_chance,omitempty"`
+	KillMult    float64 `json:"kill_mult,omitempty"`
+	BounceNum   int     `json:"bounce_num,omitempty"`
+	TargetID    string  `json:"target_id,omitempty"`
+	Killed      bool    `json:"killed,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
+	X           float64 `json:"x,omitempty"`
+	Y           float64 `json:"y,omitempty"`
+	DirX        float64 `json:"dir_x,omitempty"`
+	DirY        float64 `json:"dir_y,omitempty"`
 }

@@ -204,6 +204,7 @@ type Game struct {
 	LuckyQuantumFish   *luckyQuantumFishManager    // 幸運量子魚系統管理器（DAY-228）
 	LuckyParasiteFish  *luckyParasiteFishManager   // 幸運寄生魚系統管理器（DAY-229）
 	LuckyStormFish     *luckyStormFishManager      // 幸運風暴魚系統管理器（DAY-230）
+	LuckyBoomerangFish *luckyBoomerangFishManager  // 幸運迴旋鏢魚系統管理器（DAY-231）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -384,6 +385,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyQuantumFish:   newLuckyQuantumFishManager(),
 		LuckyParasiteFish:  newLuckyParasiteFishManager(),
 		LuckyStormFish:     newLuckyStormFishManager(),
+		LuckyBoomerangFish: newLuckyBoomerangFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1073,6 +1075,19 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	// 幸運反彈魚：命中目標後觸發反彈（DAY-220）
 	if result.IsHit && t != nil && g.isRicochetActive(p.ID) {
 		go g.doRicochetBounce(p, t.X, t.Y, t.InstanceID, 0)
+	}
+
+	// 幸運迴旋鏢魚：命中目標後觸發折返（DAY-231）
+	// 計算射擊方向（從砲台位置到目標位置）
+	if result.IsHit && t != nil && g.isBoomerangActive(p.ID) {
+		// 預設射擊方向為向右（-1,0 表示從右往左折返）
+		dirX := -1.0
+		dirY := 0.0
+		if t.X > 0 {
+			// 從砲台（左側）到目標的方向
+			dirX = 1.0
+		}
+		go g.doBoomerangBounce(p, t.X, t.Y, dirX, dirY, t.InstanceID, 0)
 	}
 
 	// 龍龜不死 Boss：命中時直接給獎勵（DAY-186）
@@ -1964,6 +1979,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運風暴魚：擊破 T188 本身時觸發風暴（DAY-230）
 	if isLuckyStormFish(t.DefID) {
 		go g.tryLuckyStormFish(p)
+	}
+	// 幸運迴旋鏢魚：擊破 T189 本身時觸發迴旋鏢模式（DAY-231）
+	if isLuckyBoomerangFish(t.DefID) {
+		go g.tryLuckyBoomerangFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

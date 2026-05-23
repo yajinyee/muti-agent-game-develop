@@ -69,6 +69,7 @@ const (
 	EventLuckyQuantumFish         EventType = "lucky_quantum_fish"        // 幸運量子魚觸發（DAY-228）
 	EventLuckyParasiteFish        EventType = "lucky_parasite_fish"       // 幸運寄生魚觸發（DAY-229）
 	EventLuckyStormFish           EventType = "lucky_storm_fish"          // 幸運風暴魚觸發（DAY-230）
+	EventLuckyBoomerangFish       EventType = "lucky_boomerang_fish"      // 幸運迴旋鏢魚觸發（DAY-231）
 )
 
 // Priority 公告優先級
@@ -1032,6 +1033,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🌪️ 幸運風暴魚！"
 		message = msg
 		icon = "🌪️"
+		color = c
+		priority = PriorityHigh
+		duration = 4000
+
+	case EventLuckyBoomerangFish:
+		msg := "🪃 迴旋鏢模式觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#E67E22"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🪃 幸運迴旋鏢魚！"
+		message = msg
+		icon = "🪃"
 		color = c
 		priority = PriorityHigh
 		duration = 4000
