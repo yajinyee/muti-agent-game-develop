@@ -106,6 +106,7 @@ const (
 	EventLuckySpeedRaceFish       EventType = "lucky_speed_race_fish"      // 幸運競速賽魚觸發（DAY-265）
 	EventLuckyChainExplosion      EventType = "lucky_chain_explosion"      // 幸運連鎖爆炸魚觸發（DAY-266）
 	EventLuckyMultiplierStack     EventType = "lucky_multiplier_stack"     // 幸運倍率疊加魚觸發（DAY-267）
+	EventLuckyCountdownBomb       EventType = "lucky_countdown_bomb"       // 幸運倒數炸彈魚觸發（DAY-268）
 )
 
 // Priority 公告優先級
@@ -1809,6 +1810,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "📈 倍率疊加！"
 		message = msg
 		icon = "📈"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyCountdownBomb:
+		msg := "💣 幸運倒數炸彈魚觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FF4500"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "💣 倒數炸彈！"
+		message = msg
+		icon = "💣"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

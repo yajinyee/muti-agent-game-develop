@@ -608,6 +608,7 @@ const (
 	MsgLuckySpeedRaceFish          MessageType = "lucky_speed_race_fish"               // 幸運競速賽魚廣播（Server→Client，DAY-265）
 	MsgLuckyChainExplosion         MessageType = "lucky_chain_explosion"                // 幸運連鎖爆炸魚廣播（Server→Client，DAY-266）
 	MsgLuckyMultiplierStack        MessageType = "lucky_multiplier_stack"               // 幸運倍率疊加魚廣播（Server→Client，DAY-267）
+	MsgLuckyCountdownBomb          MessageType = "lucky_countdown_bomb"                 // 幸運倒數炸彈魚廣播（Server→Client，DAY-268）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6131,4 +6132,24 @@ type LuckyMultiplierStackPayload struct {
 	BurstReward  int     `json:"burst_reward,omitempty"`  // 爆發獎勵
 	FinalStack   float64 `json:"final_stack,omitempty"`   // 超時時的最終疊加倍率
 	TotalReward  int     `json:"total_reward,omitempty"`  // 總獎勵
+}
+
+// LuckyCountdownBombPayload 幸運倒數炸彈魚廣播（Server → Client，DAY-268）
+// Event 類型：
+//   - bomb_start：觸發倒數炸彈（全服，PlayerName/Countdown/MaxCharge/NormalMult/BurstMult）
+//   - bomb_charge：充能更新（全服，ChargeCount/MaxCharge/ChargerName）
+//   - bomb_explode：炸彈爆炸（全服，ChargeCount/Mult/TotalReward/IsBurst）
+type LuckyCountdownBombPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	Countdown   float64 `json:"countdown,omitempty"`    // 倒數秒數
+	MaxCharge   int     `json:"max_charge,omitempty"`   // 最大充能次數（10）
+	NormalMult  float64 `json:"normal_mult,omitempty"`  // 普通爆炸倍率（充能數 × 1.5）
+	BurstMult   float64 `json:"burst_mult,omitempty"`   // 滿充能爆炸倍率（3.0）
+	ChargeCount int     `json:"charge_count,omitempty"` // 當前充能次數
+	ChargerName string  `json:"charger_name,omitempty"` // 本次充能玩家名稱
+	Mult        float64 `json:"mult,omitempty"`         // 爆炸倍率
+	TotalReward int     `json:"total_reward,omitempty"` // 全服總獎勵
+	IsBurst     bool    `json:"is_burst,omitempty"`     // 是否為滿充能爆炸
 }

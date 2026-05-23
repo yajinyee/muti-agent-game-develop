@@ -351,6 +351,7 @@ func _ready() -> void:
 	_init_lucky_speed_race_fish_panel()     # 幸運競速賽魚系統面板（DAY-265）
 	_init_lucky_chain_explosion_panel()     # 幸運連鎖爆炸魚系統面板（DAY-266）
 	_init_lucky_multiplier_stack_panel()    # 幸運倍率疊加魚系統面板（DAY-267）
+	_init_lucky_countdown_bomb_panel()      # 幸運倒數炸彈魚系統面板（DAY-268）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5056,3 +5057,19 @@ func _init_lucky_multiplier_stack_panel() -> void:
 func _on_lucky_multiplier_stack(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_multiplier_stack_panel):
 		_lucky_multiplier_stack_panel.handle_event(data)
+
+const LuckyCountdownBombPanelScript = preload("res://scripts/ui/LuckyCountdownBombPanel.gd")
+var _lucky_countdown_bomb_panel = null
+
+func _init_lucky_countdown_bomb_panel() -> void:
+	var panel = LuckyCountdownBombPanelScript.new()
+	panel.name = "LuckyCountdownBombPanel"
+	panel.layer = 41
+	add_child(panel)
+	_lucky_countdown_bomb_panel = panel
+	if GameManager.has_signal("lucky_countdown_bomb"):
+		GameManager.lucky_countdown_bomb.connect(_on_lucky_countdown_bomb)
+
+func _on_lucky_countdown_bomb(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_countdown_bomb_panel):
+		_lucky_countdown_bomb_panel.handle_event(data)

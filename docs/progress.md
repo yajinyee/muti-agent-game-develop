@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-267 幸運倍率疊加魚系統）
+## 最後更新：2026-05-24（DAY-268 幸運倒數炸彈魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-267 更新（自主觸發）：** 幸運倍率疊加魚系統（Lucky Multiplier Stack Fish）✅
+- **DAY-268 更新（自主觸發）：** 幸運倒數炸彈魚系統（Lucky Countdown Bomb Fish）✅
+  - **業界依據：** 業界原創「倒數充能+全服爆炸」機制，結合「倒數計時+全服合力充能+爆炸獎勵」三個元素，製造全服社交緊迫感
+  - **設計：** 擊破 T226 後，場上出現「倒數炸彈」（10 秒倒數）；倒數期間，任何玩家每次擊破任何目標，炸彈充能 +1（最多 10 次）；10 秒後炸彈爆炸：充能數 × ×1.5 倍率（全服共享 AOE）；若充能達到 10 次，提前引爆：×3.0 倍率（全服大獎）；個人冷卻 28 秒；全服冷卻 45 秒
+  - **設計差異：** 與倍率疊加（T225，個人累積）不同，倒數炸彈是「全服合力充能」，讓所有玩家有「快快快，還差幾個！」的緊迫感；「充能數 × ×1.5」讓玩家有「充能越多爆炸越強」的動力；「滿充能提前引爆 ×3.0」讓玩家有「要趁 10 秒內全服打滿 10 個目標」的策略感；「倒數計時器全服廣播」讓所有玩家看到「還剩幾秒」，製造緊迫感；「充能進度全服廣播」讓所有玩家看到「現在充能了幾個」，製造「快滿了！」的期待感
+  - server/internal/game/lucky_countdown_bomb_handler.go：luckyCountdownBombManager（個人冷卻/全服冷卻/activeSession）；countdownBombSession（triggerPlayerID/triggerPlayerName/expiresAt/chargeCount/exploded）；isLuckyCountdownBombFish（T226）；isCountdownBombActive（供 handleKill 使用）；tryLuckyCountdownBombFish（擊破後觸發/全服廣播+全服公告）；notifyCountdownBombKill（充能+1/達到10次提前引爆）；runCountdownBombTimer（goroutine 10秒後普通爆炸）；doCountdownBombExplode（計算倍率/HP-40%/全服廣播/全服公告）
+  - server/internal/data/tables.go：新增 T226 幸運倒數炸彈魚（63-117x/HP103/SpawnWeight2/Speed19/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyCountdownBomb；LuckyCountdownBombPayload（3種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyCountdownBomb + case 處理
+  - server/internal/game/game.go：LuckyCountdownBomb *luckyCountdownBombManager；handleKill 加入 isLuckyCountdownBombFish 分支 + isCountdownBombActive 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyCountdownBombPanel.gd：紅橙炸彈主題面板（bomb_start 火橙三次強閃光+頂部橫幅+「💣 倒數炸彈！」大字+充能計數器（右上角）+倒數計時顯示+底部充能進度條；bomb_charge 輕微閃光+計數器更新+進度條更新+浮動文字；bomb_explode 全螢幕三次強閃光+「💣 爆炸！」大字+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_countdown_bomb 訊號 + _handle_lucky_countdown_bomb
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyCountdownBombPanelScript（layer=41）
+  - 充能設計：任何玩家擊破任何非T226目標 +1；最大 10 次；提前引爆 ×3.0；個人冷卻 28 秒；全服冷卻 45 秒
+  - 爆炸設計：充能數 × ×1.5 倍率；全服共享 AOE；HP -40%；全服廣播；全服公告
+  - 視覺設計：紅橙炸彈主題（#FF4500 火橙 + #FFD700 金 + #FF0000 紅 + #1A1A2E 深藍黑）；充能計數器（💣 充能 N/10，右上角，顏色隨進度變化：橙→火橙→金）；倒數計時顯示（⏱ N.Ns，剩餘少時變紅色）；底部充能進度條（接近滿時變金色）；結算彈窗右側滑入（含充能次數/倍率/全服AOE獎勵）
+  - 全服廣播：炸彈觸發/每次充能/爆炸結果全服廣播
+  - 全服公告：觸發時公告（火橙色）；爆炸公告（金色/橙色）
+  - build/vet 全部通過（零錯誤零警告）
   - **業界依據：** Fishing Fortune 的 Multiplier Cascade 機制（2026 年最熱門），讓玩家有「每次擊破稀有魚都在疊加倍率，越打越高」的爽感
   - **設計：** 擊破 T225 後，觸發「倍率疊加模式」（持續 25 秒）；玩家每次擊破任何目標，疊加倍率 +0.3x（從 1.0x 開始，最高 10.0x）；每次擊破都用「當前疊加倍率」計算額外獎勵；達到 10.0x 時觸發「倍率爆發」：最後一次擊破獲得 ×20.0 大獎（個人）；25 秒後未達到 10.0x → 「倍率結算」：用最終疊加倍率計算最後一次擊破獎勵；個人冷卻 32 秒；全服冷卻 50 秒
   - **設計差異：** 與連鎖爆炸（T224，空間擴散）不同，倍率疊加是「時間累積」，讓玩家有「越打越高，要趁 25 秒內打滿 10.0x」的緊迫感；「每次擊破 +0.3x」讓玩家有「每一槍都在累積倍率」的動力；「達到 10.0x 觸發 ×20.0 爆發」讓玩家有「要趁疊加期間打滿 30 個目標」的策略感；「倍率計數器即時顯示」讓玩家看到「現在疊加到幾倍了」，製造「快滿了！」的期待感；「全服廣播倍率爆發」讓所有玩家看到「有人疊加到 10.0x 爆發了」，製造羨慕感

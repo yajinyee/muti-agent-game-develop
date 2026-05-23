@@ -241,6 +241,7 @@ type Game struct {
 	LuckySpeedRaceFish      *luckySpeedRaceFishManager         // 幸運競速賽魚系統管理器（DAY-265）
 	LuckyChainExplosion     *luckyChainExplosionManager        // 幸運連鎖爆炸魚系統管理器（DAY-266）
 	LuckyMultiplierStack    *luckyMultiplierStackManager       // 幸運倍率疊加魚系統管理器（DAY-267）
+	LuckyCountdownBomb      *luckyCountdownBombManager         // 幸運倒數炸彈魚系統管理器（DAY-268）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -458,6 +459,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckySpeedRaceFish:      newLuckySpeedRaceFishManager(),
 		LuckyChainExplosion:     newLuckyChainExplosionManager(),
 		LuckyMultiplierStack:    newLuckyMultiplierStackManager(),
+		LuckyCountdownBomb:      newLuckyCountdownBombManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2405,6 +2407,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			targetName = t.Def.Name
 		}
 		go g.notifyMultiplierStackKill(p, targetName, finalReward)
+	}
+	// 幸運倒數炸彈魚：擊破 T226 時觸發倒數炸彈（DAY-268）
+	if isLuckyCountdownBombFish(t.DefID) {
+		go g.tryLuckyCountdownBombFish(p)
+	}
+	// 幸運倒數炸彈魚：倒數炸彈活躍時，任何玩家擊破任何非 T226 目標時充能（DAY-268）
+	if !isLuckyCountdownBombFish(t.DefID) && g.LuckyCountdownBomb.isCountdownBombActive() {
+		go g.notifyCountdownBombKill(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

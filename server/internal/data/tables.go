@@ -830,6 +830,14 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 32 秒；全服冷卻 50 秒
 	"T225": {ID: "T225", Name: "幸運倍率疊加魚", Type: TargetTypeSpecial, MultiplierMin: 62, MultiplierMax: 115, HP: 102, SpawnWeight: 2, Speed: 20, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_multiplier_stack"},
 
+	// T226 幸運倒數炸彈魚（DAY-268）— 業界原創「倒數充能+全服爆炸」機制
+	//   - 擊破 T226 後，場上出現「倒數炸彈」（10 秒倒數）
+	//   - 倒數期間，任何玩家每次擊破任何目標，炸彈充能 +1（最多 10 次）
+	//   - 10 秒後炸彈爆炸：充能數 × ×1.5 倍率（全服共享 AOE）
+	//   - 若充能達到 10 次，提前引爆：×3.0 倍率（全服大獎）
+	//   - 個人冷卻 28 秒；全服冷卻 45 秒
+	"T226": {ID: "T226", Name: "幸運倒數炸彈魚", Type: TargetTypeSpecial, MultiplierMin: 63, MultiplierMax: 117, HP: 103, SpawnWeight: 2, Speed: 19, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_countdown_bomb"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
