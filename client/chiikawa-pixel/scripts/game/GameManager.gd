@@ -253,6 +253,7 @@ signal lucky_phantom_fish(data: Dictionary)         # 幸運幽靈魚系統（DA
 signal lucky_crystal_ball_fish(data: Dictionary)    # 幸運水晶球魚系統（DAY-246）
 signal lucky_time_rewind(data: Dictionary)           # 幸運時光倒流魚系統（DAY-247）
 signal lucky_tornado(data: Dictionary)               # 幸運龍捲風魚系統（DAY-248）
+signal lucky_black_hole_explosion(data: Dictionary)  # 幸運黑洞爆炸魚系統（DAY-249）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -726,6 +727,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_time_rewind(payload)
 		"lucky_tornado":
 			_handle_lucky_tornado(payload)
+		"lucky_black_hole_explosion":
+			_handle_lucky_black_hole_explosion(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3438,3 +3441,28 @@ func _handle_lucky_tornado(payload: Dictionary) -> void:
 		"tornado_end":
 			var blast_count: int = payload.get("blast_count", 0)
 			print("[GameManager] Tornado end! blast=%d" % blast_count)
+
+## 幸運黑洞爆炸魚系統（DAY-249）
+func _handle_lucky_black_hole_explosion(payload: Dictionary) -> void:
+	emit_signal("lucky_black_hole_explosion", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"blackhole_start":
+			var duration_sec: int = payload.get("duration_sec", 10)
+			var max_absorb: int = payload.get("max_absorb", 6)
+			print("[GameManager] BlackHole started! duration=%ds max_absorb=%d" % [duration_sec, max_absorb])
+		"blackhole_broadcast":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] BlackHole broadcast! player=%s" % player_name)
+		"blackhole_absorb":
+			var absorb_count: int = payload.get("absorb_count", 1)
+			var target_name: String = payload.get("target_name", "")
+			print("[GameManager] BlackHole absorb #%d: %s" % [absorb_count, target_name])
+		"blackhole_explosion":
+			var energy: int = payload.get("energy", 0)
+			var blast_mult: float = payload.get("blast_mult", 1.0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] BlackHole explosion! energy=%d mult=x%.1f total=%d" % [energy, blast_mult, total_reward])
+		"blackhole_end":
+			var energy: int = payload.get("energy", 0)
+			print("[GameManager] BlackHole end! energy=%d" % energy)

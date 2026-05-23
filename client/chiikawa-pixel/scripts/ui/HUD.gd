@@ -332,6 +332,7 @@ func _ready() -> void:
 	_init_lucky_crystal_ball_fish_panel() # 幸運水晶球魚系統面板（DAY-246）
 	_init_lucky_time_rewind_panel()       # 幸運時光倒流魚系統面板（DAY-247）
 	_init_lucky_tornado_panel()           # 幸運龍捲風魚系統面板（DAY-248）
+	_init_lucky_black_hole_explosion_panel() # 幸運黑洞爆炸魚系統面板（DAY-249）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4705,3 +4706,21 @@ func _init_lucky_tornado_panel() -> void:
 func _on_lucky_tornado(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_tornado_panel):
 		_lucky_tornado_panel.handle_lucky_tornado(data)
+
+# ─── 幸運黑洞爆炸魚系統面板（DAY-249）────────────────────────────────────────
+
+const LuckyBlackHoleExplosionPanelScript = preload("res://scripts/ui/LuckyBlackHoleExplosionPanel.gd")
+var _lucky_black_hole_explosion_panel = null
+
+func _init_lucky_black_hole_explosion_panel() -> void:
+	var panel = LuckyBlackHoleExplosionPanelScript.new()
+	panel.name = "LuckyBlackHoleExplosionPanel"
+	panel.layer = 22
+	add_child(panel)
+	_lucky_black_hole_explosion_panel = panel
+	if GameManager.has_signal("lucky_black_hole_explosion"):
+		GameManager.lucky_black_hole_explosion.connect(_on_lucky_black_hole_explosion)
+
+func _on_lucky_black_hole_explosion(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_black_hole_explosion_panel):
+		_lucky_black_hole_explosion_panel.handle_lucky_black_hole_explosion(data)

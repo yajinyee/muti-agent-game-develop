@@ -222,6 +222,7 @@ type Game struct {
 	LuckyCrystalBallFish *luckyCrystalBallFishManager   // 幸運水晶球魚系統管理器（DAY-246）
 	LuckyTimeRewind      *luckyTimeRewindManager          // 幸運時光倒流魚系統管理器（DAY-247）
 	LuckyTornado         *luckyTornadoManager              // 幸運龍捲風魚系統管理器（DAY-248）
+	LuckyBlackHoleExplosion *luckyBlackHoleExplosionManager  // 幸運黑洞爆炸魚系統管理器（DAY-249）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -420,6 +421,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyCrystalBallFish: newLuckyCrystalBallFishManager(),
 		LuckyTimeRewind:    newLuckyTimeRewindManager(),
 		LuckyTornado:       newLuckyTornadoManager(),
+		LuckyBlackHoleExplosion: newLuckyBlackHoleExplosionManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2203,6 +2205,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運龍捲風魚：擊破 T206 本身時觸發龍捲風（DAY-248）
 	if isLuckyTornadoFish(t.DefID) {
 		go g.tryLuckyTornadoFish(p)
+	}
+	// 幸運黑洞爆炸魚：擊破 T207 本身時觸發黑洞（DAY-249）
+	if isLuckyBlackHoleExplosionFish(t.DefID) {
+		go g.tryLuckyBlackHoleExplosionFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

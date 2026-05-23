@@ -735,6 +735,13 @@ var Targets = map[string]*TargetDef{
 	//   - 12 秒後「龍捲風爆發」：中央 250px 範圍內所有目標 85% 擊破機率（×1.5 倍率，全服共享）
 	//   - 個人冷卻 22 秒；全服冷卻 35 秒
 	"T206": {ID: "T206", Name: "幸運龍捲風魚", Type: TargetTypeSpecial, MultiplierMin: 43, MultiplierMax: 77, HP: 83, SpawnWeight: 3, Speed: 39, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_tornado"},
+	// T207 幸運黑洞爆炸魚（DAY-249）— 業界原創「黑洞吸收+能量爆炸」機制
+	//   - 擊破 T207 後，場景中央生成「黑洞」（持續 10 秒）
+	//   - 黑洞每 1.5 秒「吸收」場上距離最近的目標（直接消滅，×1.2 倍率，個人獎勵）
+	//   - 黑洞最多吸收 6 個目標，每吸收一個「能量充能 +1」
+	//   - 10 秒後「黑洞爆炸」：能量值 × 場上目標數 × 0.8 倍率（全服共享）
+	//   - 個人冷卻 20 秒；全服冷卻 30 秒
+	"T207": {ID: "T207", Name: "幸運黑洞爆炸魚", Type: TargetTypeSpecial, MultiplierMin: 44, MultiplierMax: 79, HP: 84, SpawnWeight: 3, Speed: 38, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_black_hole_explosion"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

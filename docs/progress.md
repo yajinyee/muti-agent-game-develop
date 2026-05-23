@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-248 幸運龍捲風魚系統）
+## 最後更新：2026-05-23（DAY-249 幸運黑洞爆炸魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-249 更新（自主觸發）：** 幸運黑洞爆炸魚系統（Lucky Black Hole Explosion Fish）✅
+  - **業界依據：** 業界原創「黑洞吸收+能量爆炸」機制
+  - **設計：** 擊破 T207 後，場景中央生成「黑洞」（持續 10 秒）；黑洞每 1.5 秒「吸收」場上距離最近的目標（直接消滅，×1.2 倍率，個人獎勵）；黑洞最多吸收 6 個目標，每吸收一個「能量充能 +1」；10 秒後「黑洞爆炸」：能量值 × 場上目標數 × 0.8 倍率（全服共享，上限 50x）；個人冷卻 20 秒；全服冷卻 30 秒
+  - **設計差異：** 與龍捲風（螺旋移動+爆發）不同，黑洞是「直接吸收消滅+能量累積爆炸」，讓玩家看到「魚一條一條被黑洞吸走消失」的爽感；「能量充能」讓玩家有「吸越多，爆炸越強」的期待感；「全服共享爆炸」讓所有玩家都受益，製造社交感；「最多 6 個」讓玩家有「要趁黑洞還在時多打周圍的魚」的策略感；爆炸倍率 = 能量值 × 場上目標數 × 0.8，讓玩家有「場上魚越多，爆炸越強」的動機
+  - server/internal/game/lucky_black_hole_explosion_handler.go：luckyBlackHoleExplosionManager（個人冷卻/全服冷卻/blackHoleActive/triggerPlayerID/absorbedCount）；isLuckyBlackHoleExplosionFish（T207）；isBlackHoleExplosionActive；tryLuckyBlackHoleExplosionFish（擊破後觸發/個人訊息+全服廣播+全服公告）；runLuckyBlackHoleExplosion（goroutine 每1.5秒吸收/達到6個提前爆炸/10秒後爆炸）；doBlackHoleAbsorb（找最近目標/直接消滅/×1.2倍率/個人獎勵/廣播）；doBlackHoleExplosion（能量×目標數×0.8/上限50x/全服共享獎勵/全服公告）
+  - server/internal/data/tables.go：新增 T207 幸運黑洞爆炸魚（44-79x/HP84/SpawnWeight3/Speed38/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyBlackHoleExplosion；LuckyBlackHoleExplosionPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyBlackHoleExplosion + case 處理
+  - server/internal/game/game.go：LuckyBlackHoleExplosion *luckyBlackHoleExplosionManager；handleKill 加入 isLuckyBlackHoleExplosionFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyBlackHoleExplosionPanel.gd：深黑宇宙主題面板（blackhole_start 深黑三次強閃光+頂部橫幅+「🕳️ 黑洞！」大字+中央黑洞圓圈+能量計數器+計時條；blackhole_broadcast 頂部小橫幅；blackhole_absorb 深黑閃光+「🕳️ [N/6] 吸收目標名」浮動文字+能量計數器更新；blackhole_explosion 全螢幕三次強閃光+「🕳️ 黑洞爆炸！」大字+結算彈窗；blackhole_end 清理）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_black_hole_explosion 訊號 + _handle_lucky_black_hole_explosion
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyBlackHoleExplosionPanelScript（layer=22）
+  - 吸收設計：每 1.5 秒吸收最近目標；最多 6 個；搜尋範圍 600px；個人冷卻 20 秒；全服冷卻 30 秒
+  - 爆炸設計：能量值 × 場上目標數 × 0.8；最少 1.0x；上限 50x；全服共享獎勵；≥3 個能量時全服公告
+  - 視覺設計：深黑宇宙主題（#2C3E50 + #1A252F + #85929E + #F39C12）；中央黑洞圓圈（多層同心圓+逆時針旋轉+脈衝縮放）；右側能量計數器（⚡ N/6，橙色閃爍）；右側豎向計時條（深黑，x=-72 與龍捲風計時條錯開）；結算彈窗右側滑入
+  - 全服廣播：黑洞生成/每次吸收（含目標名/位置/獎勵）/黑洞爆炸/結束全服廣播
+  - 全服公告：觸發時公告（深黑色）；爆炸≥3個能量時公告（更深黑色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-248 更新（自主觸發）：** 幸運龍捲風魚系統（Lucky Tornado Fish）✅
   - **業界依據：** 業界原創「龍捲風吸引+螺旋爆發」機制
   - **設計：** 擊破 T206 後，場景中央生成「龍捲風」（持續 12 秒）；龍捲風每 2 秒「吸引」場上所有目標向中央螺旋移動（每次移動 80px，帶 30 度旋轉角度）；龍捲風期間擊破任何目標獲得 ×2.2 倍率加成；12 秒後「龍捲風爆發」：中央 250px 範圍內所有目標 85% 擊破機率（×1.5 倍率，全服共享）；個人冷卻 22 秒；全服冷卻 35 秒

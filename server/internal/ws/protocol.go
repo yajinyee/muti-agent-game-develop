@@ -588,7 +588,8 @@ const (
 	MsgLuckyPhantomFish      MessageType = "lucky_phantom_fish"       // 幸運幽靈魚廣播（Server→Client，DAY-245）
 	MsgLuckyCrystalBallFish  MessageType = "lucky_crystal_ball_fish"  // 幸運水晶球魚廣播（Server→Client，DAY-246）
 	MsgLuckyTimeRewind       MessageType = "lucky_time_rewind"        // 幸運時光倒流魚廣播（Server→Client，DAY-247）
-	MsgLuckyTornado          MessageType = "lucky_tornado"             // 幸運龍捲風魚廣播（Server→Client，DAY-248）
+	MsgLuckyTornado                MessageType = "lucky_tornado"                  // 幸運龍捲風魚廣播（Server→Client，DAY-248）
+	MsgLuckyBlackHoleExplosion     MessageType = "lucky_black_hole_explosion"     // 幸運黑洞爆炸魚廣播（Server→Client，DAY-249）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5651,4 +5652,32 @@ type LuckyTornadoPayload struct {
 	Positions   interface{} `json:"positions,omitempty"` // []tornadoPos
 	BlastCount  int         `json:"blast_count,omitempty"`
 	TotalReward int         `json:"total_reward,omitempty"`
+}
+
+// LuckyBlackHoleExplosionPayload 幸運黑洞爆炸魚廣播（Server → Client，DAY-249）
+// Event 類型：
+//   - blackhole_start：黑洞生成（個人訊息，PlayerID/CenterX/CenterY/DurationSec/MaxAbsorb/AbsorbMult）
+//   - blackhole_broadcast：全服廣播黑洞生成（PlayerName/CenterX/CenterY）
+//   - blackhole_absorb：吸收目標（全服廣播，AbsorbCount/MaxAbsorb/TargetName/TargetX/TargetY/InstanceID/Reward）
+//   - blackhole_explosion：黑洞爆炸（全服廣播，Energy/TargetCount/BlastMult/TotalReward）
+//   - blackhole_end：黑洞結束（個人訊息，Energy/BlastMult/TotalReward）
+type LuckyBlackHoleExplosionPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	CenterX     float64 `json:"center_x,omitempty"`
+	CenterY     float64 `json:"center_y,omitempty"`
+	DurationSec int     `json:"duration_sec,omitempty"`
+	MaxAbsorb   int     `json:"max_absorb,omitempty"`
+	AbsorbMult  float64 `json:"absorb_mult,omitempty"`
+	AbsorbCount int     `json:"absorb_count,omitempty"`
+	TargetName  string  `json:"target_name,omitempty"`
+	TargetX     float64 `json:"target_x,omitempty"`
+	TargetY     float64 `json:"target_y,omitempty"`
+	InstanceID  string  `json:"instance_id,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
+	Energy      int     `json:"energy,omitempty"`
+	TargetCount int     `json:"target_count,omitempty"`
+	BlastMult   float64 `json:"blast_mult,omitempty"`
+	TotalReward int     `json:"total_reward,omitempty"`
 }
