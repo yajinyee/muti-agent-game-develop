@@ -343,6 +343,7 @@ func _ready() -> void:
 	_init_lucky_guild_war_panel()            # 幸運公會戰魚系統面板（DAY-257）
 	_init_lucky_lightning_storm_panel()      # 幸運閃電風暴魚系統面板（DAY-258）
 	_init_lucky_zodiac_fate_panel()          # 幸運星座命運魚系統面板（DAY-259）
+	_init_lucky_treasure_hunter_panel()     # 幸運寶藏獵人魚系統面板（DAY-260）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4914,3 +4915,21 @@ func _init_lucky_zodiac_fate_panel() -> void:
 func _on_lucky_zodiac_fate(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_zodiac_fate_panel):
 		_lucky_zodiac_fate_panel.handle_lucky_zodiac_fate(data)
+
+# ─── 幸運寶藏獵人魚系統面板（DAY-260）────────────────────────────────────────
+
+const LuckyTreasureHunterPanelScript = preload("res://scripts/ui/LuckyTreasureHunterPanel.gd")
+var _lucky_treasure_hunter_panel = null
+
+func _init_lucky_treasure_hunter_panel() -> void:
+	var panel = LuckyTreasureHunterPanelScript.new()
+	panel.name = "LuckyTreasureHunterPanel"
+	panel.layer = 33
+	add_child(panel)
+	_lucky_treasure_hunter_panel = panel
+	if GameManager.has_signal("lucky_treasure_hunter"):
+		GameManager.lucky_treasure_hunter.connect(_on_lucky_treasure_hunter)
+
+func _on_lucky_treasure_hunter(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_treasure_hunter_panel):
+		_lucky_treasure_hunter_panel.handle_lucky_treasure_hunter(data)

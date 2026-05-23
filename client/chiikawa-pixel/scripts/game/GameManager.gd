@@ -264,6 +264,7 @@ signal lucky_server_charge(data: Dictionary)         # 幸運全服充能魚系�
 signal lucky_guild_war(data: Dictionary)             # 幸運公會戰魚系統（DAY-257）
 signal lucky_lightning_storm(data: Dictionary)       # 幸運閃電風暴魚系統（DAY-258）
 signal lucky_zodiac_fate(data: Dictionary)           # 幸運星座命運魚系統（DAY-259）
+signal lucky_treasure_hunter(data: Dictionary)       # 幸運寶藏獵人魚系統（DAY-260）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -759,6 +760,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_lightning_storm(payload)
 		"lucky_zodiac_fate":
 			_handle_lucky_zodiac_fate(payload)
+		"lucky_treasure_hunter":
+			_handle_lucky_treasure_hunter(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3737,3 +3740,33 @@ func _handle_lucky_zodiac_fate(payload: Dictionary) -> void:
 		"zodiac_end":
 			var zodiac: String = payload.get("zodiac", "")
 			print("[GameManager] ZodiacFate ended! zodiac=%s" % zodiac)
+
+## 幸運寶藏獵人魚系統（DAY-260）
+func _handle_lucky_treasure_hunter(payload: Dictionary) -> void:
+	emit_signal("lucky_treasure_hunter", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"treasure_start":
+			var duration_sec: int = payload.get("duration_sec", 20)
+			var burst_mult: float = payload.get("burst_mult", 5.0)
+			print("[GameManager] TreasureHunter started! duration=%ds burst=x%.1f" % [duration_sec, burst_mult])
+		"treasure_broadcast":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] TreasureHunter broadcast! player=%s" % player_name)
+		"treasure_fragment":
+			var fragments: int = payload.get("fragments", 0)
+			var frag_target: int = payload.get("frag_target", 3)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] TreasureHunter fragment! %d/%d reward=%d" % [fragments, frag_target, reward])
+		"treasure_burst":
+			var burst_mult: float = payload.get("burst_mult", 5.0)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] TreasureHunter BURST! mult=x%.1f reward=%d" % [burst_mult, reward])
+		"treasure_burst_broadcast":
+			var player_name: String = payload.get("player_name", "")
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] TreasureHunter burst broadcast! player=%s reward=%d" % [player_name, reward])
+		"treasure_timeout":
+			var fragments: int = payload.get("fragments", 0)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] TreasureHunter timeout! fragments=%d consolation=%d" % [fragments, reward])

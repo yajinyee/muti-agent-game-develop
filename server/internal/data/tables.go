@@ -805,6 +805,7 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 20 秒；全服冷卻 32 秒
 	"T216": {ID: "T216", Name: "幸運閃電風暴魚", Type: TargetTypeSpecial, MultiplierMin: 53, MultiplierMax: 97, HP: 93, SpawnWeight: 3, Speed: 29, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_lightning_storm"},
 	"T217": {ID: "T217", Name: "幸運星座命運魚", Type: TargetTypeSpecial, MultiplierMin: 54, MultiplierMax: 99, HP: 94, SpawnWeight: 3, Speed: 28, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_zodiac_fate"},
+	"T218": {ID: "T218", Name: "幸運寶藏獵人魚", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 101, HP: 95, SpawnWeight: 3, Speed: 27, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_treasure_hunter"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-259 幸運星座命運魚系統）
+## 最後更新：2026-05-24（DAY-260 幸運寶藏獵人魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-260 更新（自主觸發）：** 幸運寶藏獵人魚系統（Lucky Treasure Hunter Fish）✅
+  - **業界依據：** Ocean King 系列最熱門「寶藏地圖碎片+挖掘+寶藏爆發」機制，2026 年業界最熱門「探索+發現」主題，讓玩家有「每一槍都可能發現寶藏」的期待感
+  - **設計：** 擊破 T218 後，Server 為觸發玩家啟動「寶藏獵人模式」（持續 20 秒）；玩家每次擊破任何目標，有 30% 機率「發現碎片」（個人獎勵 ×1.8）；集齊 3 個碎片 → 「寶藏爆發」：×5.0 倍率大獎（個人）；20 秒後未集齊 → 「寶藏消失」：已收集碎片數 × ×1.2 安慰獎（個人）；個人冷卻 30 秒；全服冷卻 48 秒
+  - **設計差異：** 與星座命運（T217，命運分配+標記目標）不同，寶藏獵人是「個人探索」，讓玩家有「每一槍都可能發現寶藏」的期待感；「30% 機率發現碎片」讓玩家有「要趁 20 秒內多打幾條魚」的緊迫感；「集齊 3 個碎片 ×5.0 大獎」是目前個人類最高倍率，製造「哇，集齊了！」的爽感；「安慰獎 ×1.2 × 碎片數」確保即使沒集齊也有收益，降低挫敗感；全服廣播「有人集齊寶藏爆發了」讓所有玩家看到，製造「我也想觸發」的動機
+  - server/internal/game/lucky_treasure_hunter_handler.go：luckyTreasureHunterManager（個人冷卻/全服冷卻/activeSessions）；treasureHunterSession（playerID/playerName/expiresAt/fragments）；isLuckyTreasureHunterFish（T218）；isTreasureHunterActive（供 handleKill 使用）；tryLuckyTreasureHunterFish（擊破後觸發/個人訊息+全服廣播+全服公告）；notifyTreasureHunterKill（30%機率發現碎片/×1.8倍率/個人獎勵/集齊3個觸發爆發）；doTreasureHunterBurst（×5.0倍率/個人大獎/全服廣播/全服公告）；runTreasureHunterTimeout（goroutine 20秒後超時/安慰獎/個人通知）
+  - server/internal/data/tables.go：新增 T218 幸運寶藏獵人魚（55-101x/HP95/SpawnWeight3/Speed27/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyTreasureHunter；LuckyTreasureHunterPayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyTreasureHunter + case 處理
+  - server/internal/game/game.go：LuckyTreasureHunter *luckyTreasureHunterManager；handleKill 加入 isLuckyTreasureHunterFish 分支 + isTreasureHunterActive 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyTreasureHunterPanel.gd：古銅寶藏主題面板（treasure_start 古銅三次強閃光+頂部橫幅+「🗺️ 寶藏獵人！」大字+碎片進度條（底部）+計時條；treasure_broadcast 頂部小橫幅；treasure_fragment 金色閃光+「🗺️ 發現碎片！N/3 ×1.8」浮動文字+進度條更新；treasure_burst 全螢幕三次強閃光+「🏆 寶藏爆發！×5.0」大字+結算彈窗；treasure_burst_broadcast 全服廣播橫幅；treasure_timeout 計時條淡出+安慰獎提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_treasure_hunter 訊號 + _handle_lucky_treasure_hunter
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyTreasureHunterPanelScript（layer=33）
+  - 碎片設計：每次擊破 30% 機率；個人獎勵 ×1.8；集齊 3 個觸發爆發；個人冷卻 30 秒；全服冷卻 48 秒
+  - 爆發設計：×5.0 倍率；個人大獎；全服廣播；全服公告（目前個人類最高倍率）
+  - 安慰獎設計：已收集碎片數 × ×1.2；個人獎勵；超時後自動發放
+  - 視覺設計：古銅寶藏主題（#D4A017 古銅金 + #8B4513 深棕 + #FFD700 金 + #FFF8DC 奶油）；底部碎片進度條（接近集齊時變金色）；右側豎向計時條（古銅色，x=-226 與其他計時條錯開）；寶藏爆發結算彈窗右側滑入
+  - 全服廣播：寶藏獵人啟動/寶藏爆發全服廣播
+  - 全服公告：觸發時公告（古銅色）；寶藏爆發公告（金色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-259 更新（自主觸發）：** 幸運星座命運魚系統（Lucky Zodiac Fate Fish）✅
   - **業界依據：** 業界原創「星座命運+星座祝福+星座庇護+星座標記」機制，2026 年業界最熱門「命運輪盤+占星主題」方向，讓玩家有「今天是我的幸運星座日嗎？」的期待感
   - **設計：** 擊破 T217 後，Server 隨機抽取「今日星座」（12 星座之一）；對應星座的玩家獲得「星座祝福」（×3.0 倍率加成，10 秒）；非對應星座玩家獲得「星座庇護」（×1.5 倍率加成，5 秒）；同時場上隨機 3 個目標被「星座標記」（持續 15 秒），擊破標記目標獲得 ×2.0 倍率（全服共享）；個人冷卻 28 秒；全服冷卻 45 秒

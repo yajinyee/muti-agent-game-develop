@@ -600,6 +600,7 @@ const (
 	MsgLuckyGuildWar               MessageType = "lucky_guild_war"                  // 幸運公會戰魚廣播（Server→Client，DAY-257）
 	MsgLuckyLightningStorm         MessageType = "lucky_lightning_storm"             // 幸運閃電風暴魚廣播（Server→Client，DAY-258）
 	MsgLuckyZodiacFate             MessageType = "lucky_zodiac_fate"                 // 幸運星座命運魚廣播（Server→Client，DAY-259）
+	MsgLuckyTreasureHunter         MessageType = "lucky_treasure_hunter"              // 幸運寶藏獵人魚廣播（Server→Client，DAY-260）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5922,4 +5923,26 @@ type LuckyZodiacFatePayload struct {
 	BlessedCount  int     `json:"blessed_count,omitempty"`
 	TargetName    string  `json:"target_name,omitempty"`
 	TotalReward   int     `json:"total_reward,omitempty"`
+}
+
+// LuckyTreasureHunterPayload 幸運寶藏獵人魚廣播（Server → Client，DAY-260）
+// Event 類型：
+//   - treasure_start：寶藏獵人啟動（個人訊息，PlayerID/PlayerName/DurationSec/FragTarget/FragMult/BurstMult/FindChance）
+//   - treasure_broadcast：全服廣播（PlayerName/FragTarget/BurstMult）
+//   - treasure_fragment：發現碎片（個人，PlayerName/Fragments/FragTarget/FragMult/Reward/TargetName）
+//   - treasure_burst：寶藏爆發（個人，PlayerID/PlayerName/Fragments/FragTarget/BurstMult/Reward）
+//   - treasure_burst_broadcast：寶藏爆發全服廣播（PlayerName/BurstMult/Reward）
+//   - treasure_timeout：寶藏消失（個人，PlayerName/Fragments/FragTarget/Reward）
+type LuckyTreasureHunterPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	DurationSec int     `json:"duration_sec,omitempty"`
+	FragTarget  int     `json:"frag_target,omitempty"`
+	FragMult    float64 `json:"frag_mult,omitempty"`
+	BurstMult   float64 `json:"burst_mult,omitempty"`
+	FindChance  float64 `json:"find_chance,omitempty"`
+	Fragments   int     `json:"fragments,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
+	TargetName  string  `json:"target_name,omitempty"`
 }
