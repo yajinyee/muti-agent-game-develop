@@ -312,6 +312,7 @@ func _ready() -> void:
 	_init_lucky_chain_bomb_panel()      # 幸運鏈鎖爆炸魚系統面板（DAY-226）
 	_init_lucky_mirror_time_panel()     # 幸運鏡像時空魚系統面板（DAY-227）
 	_init_lucky_quantum_fish_panel()    # 幸運量子魚系統面板（DAY-228）
+	_init_lucky_parasite_fish_panel()   # 幸運寄生魚系統面板（DAY-229）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4345,3 +4346,20 @@ func _init_lucky_quantum_fish_panel() -> void:
 func _on_lucky_quantum_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_quantum_fish_panel):
 		_lucky_quantum_fish_panel.handle_lucky_quantum_fish(data)
+
+# ─── 幸運寄生魚系統面板（DAY-229）───────────────────────────────────────────
+const LuckyParasiteFishPanelScript = preload("res://scripts/ui/LuckyParasiteFishPanel.gd")
+var _lucky_parasite_fish_panel = null
+
+func _init_lucky_parasite_fish_panel() -> void:
+	var panel = LuckyParasiteFishPanelScript.new()
+	panel.name = "LuckyParasiteFishPanel"
+	panel.layer = 16
+	add_child(panel)
+	_lucky_parasite_fish_panel = panel
+	if GameManager.has_signal("lucky_parasite_fish"):
+		GameManager.lucky_parasite_fish.connect(_on_lucky_parasite_fish)
+
+func _on_lucky_parasite_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_parasite_fish_panel):
+		_lucky_parasite_fish_panel.handle_lucky_parasite_fish(data)

@@ -568,6 +568,7 @@ const (
 	MsgLuckyChainBomb      MessageType = "lucky_chain_bomb"      // 幸運鏈鎖爆炸魚廣播（Server→Client，DAY-226）
 	MsgLuckyMirrorTime     MessageType = "lucky_mirror_time"     // 幸運鏡像時空魚廣播（Server→Client，DAY-227）
 	MsgLuckyQuantumFish    MessageType = "lucky_quantum_fish"    // 幸運量子魚廣播（Server→Client，DAY-228）
+	MsgLuckyParasiteFish   MessageType = "lucky_parasite_fish"   // 幸運寄生魚廣播（Server→Client，DAY-229）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5139,4 +5140,31 @@ type LuckyQuantumFishPayload struct {
 	BlastResults  interface{} `json:"blast_results,omitempty"`
 	TotalReward   int         `json:"total_reward,omitempty"`
 	BlastCount    int         `json:"blast_count,omitempty"`
+}
+
+// LuckyParasiteFishPayload 幸運寄生魚廣播（Server → Client，DAY-229）
+//
+// Events:
+//
+//	"parasite_start"  — 寄生釋放開始（全服廣播）
+//	"parasite_tick"   — 寄生 HP 損失（全服廣播，每 2 秒）
+//	"parasite_jump"   — 寄生蟲跳躍（全服廣播）
+//	"parasite_kill"   — 寄生目標被玩家擊破（全服廣播）
+//	"parasite_end"    — 寄生消散（全服廣播）
+type LuckyParasiteFishPayload struct {
+	Event         string      `json:"event"`
+	InstanceID    string      `json:"instance_id,omitempty"`
+	PlayerID      string      `json:"player_id,omitempty"`
+	PlayerName    string      `json:"player_name,omitempty"`
+	ParasiteCount int         `json:"parasite_count,omitempty"`
+	DurationSec   int         `json:"duration_sec,omitempty"`
+	KillMult      float64     `json:"kill_mult,omitempty"`
+	TargetID      string      `json:"target_id,omitempty"`
+	HPLoss        float64     `json:"hp_loss,omitempty"`
+	TickCount     int         `json:"tick_count,omitempty"`
+	FromTargetID  string      `json:"from_target_id,omitempty"`
+	ToTargetID    string      `json:"to_target_id,omitempty"`
+	JumpLayer     int         `json:"jump_layer,omitempty"`
+	KillReward    int         `json:"kill_reward,omitempty"`
+	Targets       interface{} `json:"targets,omitempty"`
 }

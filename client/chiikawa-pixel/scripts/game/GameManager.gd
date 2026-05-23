@@ -231,6 +231,7 @@ signal lucky_charge_fish(data: Dictionary)          # 幸運充能魚系統（DA
 signal lucky_chain_bomb(data: Dictionary)           # 幸運鏈鎖爆炸魚系統（DAY-226）
 signal lucky_mirror_time(data: Dictionary)          # 幸運鏡像時空魚系統（DAY-227）
 signal lucky_quantum_fish(data: Dictionary)         # 幸運量子魚系統（DAY-228）
+signal lucky_parasite_fish(data: Dictionary)        # 幸運寄生魚系統（DAY-229）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -664,6 +665,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_mirror_time(payload)
 		"lucky_quantum_fish":
 			_handle_lucky_quantum_fish(payload)
+		"lucky_parasite_fish":
+			_handle_lucky_parasite_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2874,3 +2877,26 @@ func _handle_lucky_quantum_fish(payload: Dictionary) -> void:
 			var blast_count: int = payload.get("blast_count", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Quantum blast! count=%d reward=%d" % [blast_count, total_reward])
+
+## 處理幸運寄生魚系統（DAY-229）
+func _handle_lucky_parasite_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_parasite_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"parasite_start":
+			var parasite_count: int = payload.get("parasite_count", 0)
+			var kill_mult: float = payload.get("kill_mult", 2.2)
+			print("[GameManager] Parasite released! count=%d mult=×%.1f" % [parasite_count, kill_mult])
+		"parasite_tick":
+			var target_id: String = payload.get("target_id", "")
+			var tick_count: int = payload.get("tick_count", 1)
+			print("[GameManager] Parasite tick=%d target=%s" % [tick_count, target_id])
+		"parasite_jump":
+			var jump_layer: int = payload.get("jump_layer", 1)
+			print("[GameManager] Parasite jumped! layer=%d" % jump_layer)
+		"parasite_kill":
+			var kill_reward: int = payload.get("kill_reward", 0)
+			print("[GameManager] Parasite target killed! reward=%d" % kill_reward)
+		"parasite_end":
+			var target_id: String = payload.get("target_id", "")
+			print("[GameManager] Parasite expired on target=%s" % target_id)

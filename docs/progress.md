@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-228 幸運量子魚系統）
+## 最後更新：2026-05-23（DAY-229 幸運寄生魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-229 更新（自主觸發）：** 幸運寄生魚系統（Lucky Parasite Fish）✅
+  - **業界依據：** 業界原創「寄生附著+跳躍」機制
+  - **設計：** 擊破 T187 後觸發「寄生釋放」：場上隨機 3 個目標被「寄生蟲附著」；寄生目標每 2 秒自動損失 HP（-8%/次，最多 5 次）；寄生目標被擊破時，寄生蟲「跳躍」到最近的目標繼續寄生（最多跳躍 2 次）；玩家擊破寄生目標獲得 ×2.2 倍率加成；個人冷卻 22 秒
+  - **設計差異：** 與感染魚（DAY-219，動態蔓延，時間驅動）不同，寄生魚是「附著+跳躍」，讓玩家有「要趁寄生蟲跳走前打死它」的緊迫感；「自動 HP 損失」讓玩家感受到「寄生蟲在幫我削血」的輔助感；「跳躍機制」讓寄生蟲像真正的寄生蟲一樣移動；「最多跳躍 2 次」確保 RTP 平衡
+  - server/internal/game/lucky_parasite_fish_handler.go：luckyParasiteFishManager（個人冷卻/parasiteTargets/currentInstanceID）；parasiteEntry（instanceID/jumpLayer/tickCount/expiresAt）；isLuckyParasiteFish（T187）；isParasiteTarget；getLuckyParasiteKillMult（×2.2）；notifyParasiteKill（跳躍觸發）；removeParasiteEntry；doParasiteJump（最近目標跳躍/最多2次）；tryLuckyParasiteFish（擊破後觸發/隨機3個目標/全服廣播）；runParasiteTick（每2秒HP-8%/最多5次）
+  - server/internal/data/tables.go：新增 T187 幸運寄生魚（30-58x/HP68/SpawnWeight3/Speed50/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyParasiteFish；LuckyParasiteFishPayload（parasite_start/parasite_tick/parasite_jump/parasite_kill/parasite_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyParasiteFish + case 處理
+  - server/internal/game/game.go：LuckyParasiteFish *luckyParasiteFishManager；handleKill 加入 getLuckyParasiteKillMult 乘法加成 + notifyParasiteKill + isLuckyParasiteFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyParasiteFishPanel.gd：綠色寄生主題面板（parasite_start 綠色雙閃光+頂部橫幅+「🦠 寄生釋放！」大字；parasite_tick HP損失浮動文字；parasite_jump 跳躍提示+閃光；parasite_kill ×2.2浮動文字；parasite_end 標記淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_parasite_fish 訊號 + _handle_lucky_parasite_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyParasiteFishPanelScript（layer=16）
+  - 寄生設計：初始 3 個目標；每 2 秒 HP -8%；最多 5 次；最多跳躍 2 次；跳躍範圍 300px；個人冷卻 22 秒
+  - 倍率設計：×2.2 乘法（寄生目標擊破）
+  - 視覺設計：綠色寄生主題（#27AE60 + #2ECC71 + #A9DFBF + #FF4444）；HP 損失紅色浮動文字；跳躍綠色閃光；擊破金色倍率文字
+  - 全服廣播：寄生開始/每次 HP 損失/跳躍/擊破/消散全服廣播
+  - 全服公告：觸發時公告（深綠色）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-228 更新（自主觸發）：** 幸運量子魚系統（Lucky Quantum Fish）✅
   - **業界依據：** 業界原創「量子疊加態」機制
   - **設計：** 擊破 T186 後觸發「量子疊加」：場上隨機 4 個目標進入「量子態」（同時疊加高倍率 ×3.0 和低倍率 ×0.8）；玩家「觀測」（射擊命中）量子態目標時，50% 機率坍縮為高倍率（×3.0），50% 機率坍縮為低倍率（×0.8）；量子態持續 10 秒；10 秒後所有未被觀測的量子態目標「量子爆炸」（70% 擊破機率，倍率隨機 ×1.0-×4.0）；個人冷卻 20 秒

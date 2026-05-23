@@ -601,6 +601,14 @@ var Targets = map[string]*TargetDef{
 	//   - 量子態持續 10 秒；10 秒後所有未被觀測的量子態目標「量子爆炸」（70% 擊破機率，倍率隨機 ×1.0-×4.0）
 	//   - 個人冷卻 20 秒；全服廣播量子態建立/坍縮/爆炸
 	"T186": {ID: "T186", Name: "幸運量子魚", Type: TargetTypeSpecial, MultiplierMin: 32, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 48, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_quantum"},
+	// T187 幸運寄生魚（DAY-229）— 業界原創「寄生附著+跳躍」機制
+	// 設計：擊破 T187 後觸發「寄生釋放」：
+	//   - 場上隨機 3 個目標被「寄生蟲附著」（綠色標記）
+	//   - 寄生目標每 2 秒自動損失 HP（-8%/次，最多 5 次）
+	//   - 寄生目標被擊破時，寄生蟲「跳躍」到最近的目標繼續寄生（最多跳躍 2 次）
+	//   - 玩家擊破寄生目標獲得 ×2.2 倍率加成（乘法）
+	//   - 個人冷卻 22 秒；全服廣播寄生附著/跳躍/消散
+	"T187": {ID: "T187", Name: "幸運寄生魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 58, HP: 68, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_parasite"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
