@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-250 幸運鏡像分裂魚系統）
+## 最後更新：2026-05-23（DAY-251 幸運量子糾纏魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-251 更新（自主觸發）：** 幸運量子糾纏魚系統（Lucky Quantum Entangle Fish）✅
+  - **業界依據：** 業界原創「量子糾纏+同步爆炸+量子共鳴」機制，2026 年最熱門多玩家社交互動方向
+  - **設計：** 擊破 T209 後，場上隨機 2 個目標被「量子糾纏」（持續 20 秒）；任何玩家擊破其中一個 → 另一個立刻「同步爆炸」（×1.8 倍率，全服共享）；若兩個在 1.5 秒內被不同玩家擊破 → 觸發「量子共鳴」：全服 ×3.5 倍率大獎；20 秒後未擊破 → 「量子衰變」：兩個目標 HP -60%（安慰獎）；個人冷卻 25 秒；全服冷卻 40 秒
+  - **設計差異：** 與鏡像分裂（T208，目標分裂成副本）不同，量子糾纏是「兩個真實目標互相連結」，讓玩家有「打一個，另一個也爆」的驚喜感；「量子共鳴」鼓勵多玩家協作，1.5 秒內同時擊破兩個目標，製造「全服合力」的社交感；×3.5 倍率是目前全服合力類最高倍率；「量子衰變 HP -60%」確保即使沒人打也有安慰獎；全服廣播糾纏位置讓所有玩家都看到「這兩條魚是連結的」，製造「全服一起盯著」的緊張感
+  - server/internal/game/lucky_quantum_entangle_handler.go：luckyQuantumEntangleManager（個人冷卻/全服冷卻/activeSessions/targetToSession）；quantumEntangleSession（sessionID/triggerID/targetA/targetB/firstKillAt/firstKillerID/firstKilledID）；isLuckyQuantumEntangleFish（T209）；isQuantumEntangleTarget（供 handleKill 使用）；getSession；removeSession；tryLuckyQuantumEntangleFish（擊破後觸發/選2個目標/個人訊息+全服廣播+全服公告）；notifyQuantumEntangleKill（第一次擊破→同步爆炸/第二次擊破→判斷量子共鳴）；doQuantumSyncExplosion（消滅另一個目標/×1.8倍率/全服共享獎勵/廣播）；doQuantumResonance（兩個在1.5秒內擊破/avgMult×3.5/全服共享大獎/廣播）；runQuantumEntangleDecay（goroutine 20秒後衰變）；doQuantumEntangleDecay（HP-60%/保留最少1/廣播/公告）
+  - server/internal/data/tables.go：新增 T209 幸運量子糾纏魚（46-83x/HP86/SpawnWeight3/Speed36/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyQuantumEntangle；LuckyQuantumEntanglePayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyQuantumEntangle + case 處理
+  - server/internal/game/game.go：LuckyQuantumEntangle *luckyQuantumEntangleManager；handleKill 加入 isLuckyQuantumEntangleFish 分支 + isQuantumEntangleTarget 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyQuantumEntanglePanel.gd：深藍量子主題面板（entangle_start 深藍三次強閃光+頂部橫幅+「⚛️ 量子糾纏！」大字+糾纏連線（多個閃爍點+⚛️標記）+計時條；entangle_broadcast 頂部小橫幅；entangle_sync 深藍閃光+「⚛️ 同步爆炸！×1.8」浮動文字；entangle_resonance 全螢幕三次強閃光+「⚛️ 量子共鳴！×3.5」大字+結算彈窗；entangle_decay 灰色閃光+「⚛️ 量子衰變！HP-60%」提示；entangle_end 計時條淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_quantum_entangle 訊號 + _handle_lucky_quantum_entangle
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyQuantumEntanglePanelScript（layer=24）
+  - 糾纏設計：隨機 2 個目標；持續 20 秒；個人冷卻 25 秒；全服冷卻 40 秒
+  - 同步爆炸設計：×1.8 倍率；全服共享獎勵；廣播爆炸位置
+  - 量子共鳴設計：1.5 秒時間窗口；avgMult × ×3.5；全服共享大獎；全服公告
+  - 量子衰變設計：HP -60%；保留最少 1；全服廣播；全服公告
+  - 視覺設計：深藍量子主題（#1A5276 + #2471A3 + #AED6F1 + #EBF5FB）；糾纏連線（多個閃爍點模擬量子連線+⚛️脈衝標記）；右側豎向計時條（深藍，x=-100 與其他計時條錯開）；量子共鳴結算彈窗右側滑入（含兩個擊破者名稱+間隔時間+倍率+獎勵）
+  - 全服廣播：糾纏啟動/同步爆炸/量子共鳴/量子衰變/結束全服廣播
+  - 全服公告：觸發時公告（深藍色）；同步爆炸公告（亮藍色）；量子共鳴公告（深藍色）；衰變公告（灰色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-250 更新（自主觸發）：** 幸運鏡像分裂魚系統（Lucky Mirror Split Fish）✅
   - **業界依據：** 業界原創「鏡像分裂+雙重目標」機制
   - **設計：** 擊破 T208 後，場上隨機 4 個目標被「鏡像分裂」；每個目標在其鏡像位置（X 軸對稱）生成一個「鏡像副本」；鏡像副本 HP = 原目標 50%，倍率 = 原目標 × 0.6（個人獎勵）；鏡像副本存活 15 秒，玩家擊破獲得個人獎勵；15 秒後所有未擊破的鏡像副本「鏡像消融」：每個消融給全服 ×0.3 倍率共享獎勵；個人冷卻 22 秒；全服冷卻 35 秒

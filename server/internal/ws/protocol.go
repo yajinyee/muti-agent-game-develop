@@ -591,6 +591,7 @@ const (
 	MsgLuckyTornado                MessageType = "lucky_tornado"                  // 幸運龍捲風魚廣播（Server→Client，DAY-248）
 	MsgLuckyBlackHoleExplosion     MessageType = "lucky_black_hole_explosion"     // 幸運黑洞爆炸魚廣播（Server→Client，DAY-249）
 	MsgLuckyMirrorSplit            MessageType = "lucky_mirror_split"             // 幸運鏡像分裂魚廣播（Server→Client，DAY-250）
+	MsgLuckyQuantumEntangle        MessageType = "lucky_quantum_entangle"          // 幸運量子糾纏魚廣播（Server→Client，DAY-251）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5703,4 +5704,29 @@ type LuckyMirrorSplitPayload struct {
 	Reward      int         `json:"reward,omitempty"`
 	FadeCount   int         `json:"fade_count,omitempty"`
 	TotalReward int         `json:"total_reward,omitempty"`
+}
+
+// LuckyQuantumEntanglePayload 幸運量子糾纏魚廣播（Server → Client，DAY-251）
+// Event 類型：
+//   - entangle_start：糾纏啟動（個人訊息，PlayerID/Targets/DurationSec/SyncMult/ResonMult）
+//   - entangle_broadcast：全服廣播糾纏（PlayerName/Targets/SyncMult/ResonMult）
+//   - entangle_sync：同步爆炸（全服廣播，PlayerName/InstanceID/SyncMult/TotalReward）
+//   - entangle_resonance：量子共鳴（全服廣播，PlayerName/FirstKillerName/ResonMult/TotalReward/TimeDiffMs）
+//   - entangle_decay：量子衰變（全服廣播，PlayerName/DecayCount/DecayHP）
+//   - entangle_end：糾纏結束（全服廣播，SessionID）
+type LuckyQuantumEntanglePayload struct {
+	Event           string      `json:"event"`
+	SessionID       string      `json:"session_id,omitempty"`
+	PlayerID        string      `json:"player_id,omitempty"`
+	PlayerName      string      `json:"player_name,omitempty"`
+	FirstKillerName string      `json:"first_killer_name,omitempty"`
+	Targets         interface{} `json:"targets,omitempty"` // []entangleInfo
+	DurationSec     int         `json:"duration_sec,omitempty"`
+	SyncMult        float64     `json:"sync_mult,omitempty"`
+	ResonMult       float64     `json:"reson_mult,omitempty"`
+	InstanceID      string      `json:"instance_id,omitempty"`
+	TotalReward     int         `json:"total_reward,omitempty"`
+	TimeDiffMs      int         `json:"time_diff_ms,omitempty"`
+	DecayCount      int         `json:"decay_count,omitempty"`
+	DecayHP         int         `json:"decay_hp,omitempty"`
 }

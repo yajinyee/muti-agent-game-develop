@@ -334,6 +334,7 @@ func _ready() -> void:
 	_init_lucky_tornado_panel()           # 幸運龍捲風魚系統面板（DAY-248）
 	_init_lucky_black_hole_explosion_panel() # 幸運黑洞爆炸魚系統面板（DAY-249）
 	_init_lucky_mirror_split_panel()         # 幸運鏡像分裂魚系統面板（DAY-250）
+	_init_lucky_quantum_entangle_panel()     # 幸運量子糾纏魚系統面板（DAY-251）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4743,3 +4744,21 @@ func _init_lucky_mirror_split_panel() -> void:
 func _on_lucky_mirror_split(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_mirror_split_panel):
 		_lucky_mirror_split_panel.handle_lucky_mirror_split(data)
+
+# ─── 幸運量子糾纏魚系統面板（DAY-251）────────────────────────────────────────
+
+const LuckyQuantumEntanglePanelScript = preload("res://scripts/ui/LuckyQuantumEntanglePanel.gd")
+var _lucky_quantum_entangle_panel = null
+
+func _init_lucky_quantum_entangle_panel() -> void:
+	var panel = LuckyQuantumEntanglePanelScript.new()
+	panel.name = "LuckyQuantumEntanglePanel"
+	panel.layer = 24
+	add_child(panel)
+	_lucky_quantum_entangle_panel = panel
+	if GameManager.has_signal("lucky_quantum_entangle"):
+		GameManager.lucky_quantum_entangle.connect(_on_lucky_quantum_entangle)
+
+func _on_lucky_quantum_entangle(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_quantum_entangle_panel):
+		_lucky_quantum_entangle_panel.handle_lucky_quantum_entangle(data)

@@ -750,6 +750,13 @@ var Targets = map[string]*TargetDef{
 	//   - 15 秒後所有未擊破的鏡像副本「鏡像消融」：每個消融給全服 ×0.3 倍率共享獎勵
 	//   - 個人冷卻 22 秒；全服冷卻 35 秒
 	"T208": {ID: "T208", Name: "幸運鏡像分裂魚", Type: TargetTypeSpecial, MultiplierMin: 45, MultiplierMax: 81, HP: 85, SpawnWeight: 3, Speed: 37, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_mirror_split"},
+	// T209 幸運量子糾纏魚（DAY-251）— 業界原創「量子糾纏+同步爆炸+量子共鳴」機制
+	//   - 擊破 T209 後，場上隨機 2 個目標被「量子糾纏」（持續 20 秒）
+	//   - 任何玩家擊破其中一個 → 另一個立刻「同步爆炸」（×1.8 倍率，全服共享）
+	//   - 若兩個在 1.5 秒內被不同玩家擊破 → 觸發「量子共鳴」：全服 ×3.5 倍率大獎
+	//   - 20 秒後未擊破 → 「量子衰變」：兩個目標 HP -60%（安慰獎）
+	//   - 個人冷卻 25 秒；全服冷卻 40 秒
+	"T209": {ID: "T209", Name: "幸運量子糾纏魚", Type: TargetTypeSpecial, MultiplierMin: 46, MultiplierMax: 83, HP: 86, SpawnWeight: 3, Speed: 36, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_quantum_entangle"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
