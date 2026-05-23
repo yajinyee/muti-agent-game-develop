@@ -63,6 +63,7 @@ const (
 	EventLuckyResonanceFish       EventType = "lucky_resonance_fish"      // 幸運共鳴魚觸發（DAY-222）
 	EventLuckyTeleportFish        EventType = "lucky_teleport_fish"       // 幸運傳送魚觸發（DAY-223）
 	EventLuckySplitFish           EventType = "lucky_split_fish"          // 幸運分裂魚觸發（DAY-224）
+	EventLuckyChargeFish          EventType = "lucky_charge_fish"         // 幸運充能魚觸發（DAY-225）
 )
 
 // Priority 公告優先級
@@ -909,6 +910,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 5000
+
+	case EventLuckyChargeFish:
+		msg := "⚡ 充能模式觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#F39C12"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "⚡ 幸運充能魚！"
+		message = msg
+		icon = "⚡"
+		color = c
+		priority = PriorityHigh
+		duration = 4000
 
 	default:
 		title = "📢 公告"

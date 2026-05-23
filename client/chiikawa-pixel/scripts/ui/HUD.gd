@@ -308,6 +308,7 @@ func _ready() -> void:
 	_init_lucky_resonance_fish_panel()  # 幸運共鳴魚系統面板（DAY-222）
 	_init_lucky_teleport_fish_panel()   # 幸運傳送魚系統面板（DAY-223）
 	_init_lucky_split_fish_panel()      # 幸運分裂魚系統面板（DAY-224）
+	_init_lucky_charge_fish_panel()     # 幸運充能魚系統面板（DAY-225）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4273,3 +4274,20 @@ func _init_lucky_split_fish_panel() -> void:
 func _on_lucky_split_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_split_fish_panel):
 		_lucky_split_fish_panel.handle_lucky_split_fish(data)
+
+# ─── 幸運充能魚系統面板（DAY-225）───────────────────────────────────────────
+const LuckyChargeFishPanelScript = preload("res://scripts/ui/LuckyChargeFishPanel.gd")
+var _lucky_charge_fish_panel = null
+
+func _init_lucky_charge_fish_panel() -> void:
+	var panel = LuckyChargeFishPanelScript.new()
+	panel.name = "LuckyChargeFishPanel"
+	panel.layer = 20
+	add_child(panel)
+	_lucky_charge_fish_panel = panel
+	if GameManager.has_signal("lucky_charge_fish"):
+		GameManager.lucky_charge_fish.connect(_on_lucky_charge_fish)
+
+func _on_lucky_charge_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_charge_fish_panel):
+		_lucky_charge_fish_panel.handle_lucky_charge_fish(data)

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-224 幸運分裂魚系統）
+## 最後更新：2026-05-23（DAY-225 幸運充能魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-224 更新（自主觸發）：** 幸運分裂魚系統（Lucky Split Fish）✅
+- **DAY-225 更新（自主觸發）：** 幸運充能魚系統（Lucky Charge Fish）✅
+  - **業界依據：** Royal Fishing「Power Up mechanic amplifies rewards up to 200x」+ Ice Fishing「random boosts up to x500」+ 業界原創「射擊充能→爆發」機制
+  - **設計：** 擊破 T183 後觸發「充能模式」（12 秒）：玩家的每次射擊都累積「充能值」（+1/shot）；充能值達到 10 → 自動觸發「充能爆發」：下一次擊破任何目標獲得 ×5.0 倍率加成（一次性）；充能爆發後重置，可再次累積（12 秒內可觸發多次）；個人冷卻 22 秒；個人機制（不是全服）
+  - **設計差異：** 與幸運共鳴魚（DAY-222，全服合力射擊，貢獻比例分配）不同，充能魚是「個人射擊累積→個人爆發」，讓玩家有「我自己充能，我自己爆發」的個人英雄感；×5.0 一次性爆發是目前最高的個人倍率；12 秒內可多次觸發，讓積極射擊的玩家有更多爆發機會；充能進度條讓玩家清楚看到「還差幾槍就爆發」的期待感；個人機制讓每個玩家都有自己的充能節奏
+  - server/internal/game/lucky_charge_fish_handler.go：luckyChargeFishManager（個人冷卻/sessions）；chargeSession（instanceID/atomic count/burstReady/activeUntil）；isLuckyChargeFish（T183）；getLuckyChargeBurst（供 handleKill 使用，充能爆發就緒時 ×5.0 乘法加成，一次性消耗）；notifyChargeShot（每次射擊累積/每 3 點廣播/達到目標設定 burstReady）；tryLuckyChargeFish（擊破後觸發/建立 session/個人訊息+全服廣播/全服公告）；notifyLuckyChargeBurstUsed（爆發後廣播）；getChargeInstanceID（供 handleKill 使用）
+  - server/internal/data/tables.go：新增 T183 幸運充能魚（32-62x/HP72/SpawnWeight3/Speed49/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyChargeFish；LuckyChargeFishPayload（charge_start/charge_progress/charge_ready/charge_burst/charge_end/charge_broadcast/charge_burst_broadcast）
+  - server/internal/game/announce/announce.go：新增 EventLuckyChargeFish + case 處理
+  - server/internal/game/game.go：LuckyChargeFish *luckyChargeFishManager；handleKill 加入 getLuckyChargeBurst 乘法加成 + notifyLuckyChargeBurstUsed + isLuckyChargeFish 分支；handleAttack 加入 notifyChargeShot
+  - client/chiikawa-pixel/scripts/ui/LuckyChargeFishPanel.gd：黃橙充能主題面板（charge_start 黃橙雙閃光+右側豎向充能進度條+底部計時條；charge_progress 進度條更新+閃光+「還差N槍」提示；charge_ready 全螢幕黃色強閃光+「⚡ 充能就緒！」大字+充能條閃爍；charge_burst 全螢幕三次黃橙強閃光+「⚡ ×5.0 爆發！」大字+獎勵浮動文字；charge_end 淡出；charge_broadcast/charge_burst_broadcast 頂部小橫幅）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_charge_fish 訊號 + _handle_lucky_charge_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyChargeFishPanelScript（layer=20）
+  - 充能設計：目標 10 次射擊；每 3 點廣播；atomic 操作確保並發安全；個人冷卻 22 秒；12 秒內可多次觸發
+  - 充能爆發設計：×5.0 乘法（目前最高個人倍率）；一次性消耗；爆發後重置充能計數
+  - 視覺設計：黃橙充能主題（#F39C12 + #E67E22 + #F1C40F + #FEF9E7）；右側豎向充能進度條（從底部往上填充）；底部計時條（黃橙→深橙漸變）；充能就緒時充能條閃爍
+  - 廣播設計：個人訊息（charge_start/progress/ready/burst/end）；全服廣播（charge_broadcast/charge_burst_broadcast）
+  - 全服公告：充能模式開始時公告（黃橙色）
+  - build/vet 全部通過（零錯誤零警告）
+
+
   - **業界依據：** 業界原創「一魚分三」機制
   - **設計：** 擊破 T182 後觸發「分裂爆炸」：T182 分裂成 3 個「分裂碎片」（HP = 原 HP × 30%，倍率 ×1.8）；分裂碎片在場上存活 8 秒，被擊破獲得 ×1.8 倍率加成（乘法）；8 秒後所有未被擊破的分裂碎片「二次爆炸」（65% 擊破機率，0.60x 倍率）；個人冷卻 18 秒；全服廣播分裂事件
   - **設計差異：** 與幸運鏡像魚（DAY-215，複製分身 HP 50%，×1.5）不同，分裂魚是「一魚分三」，讓玩家有「打一個得三個機會」的爽感；分裂碎片 HP 只有 30%，更容易擊破，讓玩家有「快速連殺」的節奏感；分裂碎片倍率 ×1.8，比鏡像魚（×1.5）更高；「二次爆炸」讓玩家有「等待→爆發」的高潮設計；全服廣播讓所有玩家都看到分裂碎片，製造「全服競爭搶打碎片」的社交感

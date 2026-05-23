@@ -198,6 +198,7 @@ type Game struct {
 	LuckyResonanceFish *luckyResonanceFishManager  // 幸運共鳴魚系統管理器（DAY-222）
 	LuckyTeleportFish  *luckyTeleportFishManager   // 幸運傳送魚系統管理器（DAY-223）
 	LuckySplitFish     *luckySplitFishManager      // 幸運分裂魚系統管理器（DAY-224）
+	LuckyChargeFish    *luckyChargeFishManager     // 幸運充能魚系統管理器（DAY-225）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -372,6 +373,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyResonanceFish: newLuckyResonanceFishManager(),
 		LuckyTeleportFish:  newLuckyTeleportFishManager(),
 		LuckySplitFish:     newLuckySplitFishManager(),
+		LuckyChargeFish:    newLuckyChargeFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -943,6 +945,8 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	go g.notifyDragonKingShot()
 	// 幸運共鳴魚：共鳴模式中每次射擊累積共鳴能量（DAY-222）
 	go g.notifyResonanceShot(p)
+	// 幸運充能魚：充能模式中每次射擊累積充能值（DAY-225）
+	go g.notifyChargeShot(p)
 	// 不死 BOSS：每次射擊嘗試命中（DAY-129）
 	go g.tryImmortalBossHit(p)
 	// 覺醒 BOSS：每次射擊嘗試命中（DAY-130）
@@ -1327,6 +1331,13 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if splitFragMult > 1.0 {
 		finalReward = int(float64(finalReward) * splitFragMult)
 		g.removeLuckySplitFragment(t.InstanceID)
+	}
+	// 套用幸運充能魚充能爆發倍率（DAY-225，×5.0 乘法，個人，一次性）
+	chargeInstanceID := g.getChargeInstanceID(p.ID)
+	chargeBurst := g.getLuckyChargeBurst(p)
+	if chargeBurst > 1.0 {
+		finalReward = int(float64(finalReward) * chargeBurst)
+		go g.notifyLuckyChargeBurstUsed(p, chargeInstanceID, finalReward)
 	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
@@ -1886,6 +1897,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運分裂魚：擊破 T182 本身時觸發分裂爆炸（DAY-224）
 	if isLuckySplitFish(t.DefID) {
 		go g.tryLuckySplitFish(p, t.X, t.Y, t.HP)
+	}
+	// 幸運充能魚：擊破 T183 本身時觸發充能模式（DAY-225）
+	if isLuckyChargeFish(t.DefID) {
+		go g.tryLuckyChargeFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

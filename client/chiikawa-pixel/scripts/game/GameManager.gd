@@ -227,6 +227,7 @@ signal lucky_black_hole(data: Dictionary)           # 幸運黑洞魚系統（DA
 signal lucky_resonance_fish(data: Dictionary)       # 幸運共鳴魚系統（DAY-222）
 signal lucky_teleport_fish(data: Dictionary)        # 幸運傳送魚系統（DAY-223）
 signal lucky_split_fish(data: Dictionary)           # 幸運分裂魚系統（DAY-224）
+signal lucky_charge_fish(data: Dictionary)          # 幸運充能魚系統（DAY-225）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -652,6 +653,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_teleport_fish(payload)
 		"lucky_split_fish":
 			_handle_lucky_split_fish(payload)
+		"lucky_charge_fish":
+			_handle_lucky_charge_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2790,3 +2793,24 @@ func _handle_lucky_split_fish(payload: Dictionary) -> void:
 			print("[GameManager] Split blast: count=%d reward=%d" % [blast_count, total_reward])
 		"split_end":
 			print("[GameManager] Split fish ended (all fragments killed by players)")
+
+## 處理幸運充能魚系統（DAY-225）
+func _handle_lucky_charge_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_charge_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"charge_start":
+			var target: int = payload.get("target", 10)
+			print("[GameManager] Charge mode started, target=%d" % target)
+		"charge_progress":
+			var count: int = payload.get("count", 0)
+			var target: int = payload.get("target", 10)
+			print("[GameManager] Charge progress: %d/%d" % [count, target])
+		"charge_ready":
+			var burst_mult: float = payload.get("burst_mult", 5.0)
+			print("[GameManager] Charge burst ready! mult=×%.1f" % burst_mult)
+		"charge_burst":
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Charge burst triggered! reward=%d" % reward)
+		"charge_end":
+			print("[GameManager] Charge mode ended")

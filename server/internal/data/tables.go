@@ -574,6 +574,13 @@ var Targets = map[string]*TargetDef{
 	//   - 8 秒後所有未被擊破的分裂碎片「二次爆炸」（65% 擊破機率，0.60x 倍率）
 	//   - 個人冷卻 18 秒
 	"T182": {ID: "T182", Name: "幸運分裂魚", Type: TargetTypeSpecial, MultiplierMin: 28, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 52, Lifetime: 13, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "lucky_split"},
+	// T183 幸運充能魚（DAY-225）— 業界原創「射擊充能→爆發」機制
+	// 設計：擊破 T183 後觸發「充能模式」（12 秒）：
+	//   - 玩家的每次射擊都累積「充能值」（+1/shot）
+	//   - 充能值達到 10 → 自動觸發「充能爆發」：下一次擊破獲得 ×5.0 倍率加成（一次性）
+	//   - 充能爆發後重置，可再次累積（12 秒內可觸發多次）
+	//   - 個人冷卻 22 秒
+	"T183": {ID: "T183", Name: "幸運充能魚", Type: TargetTypeSpecial, MultiplierMin: 32, MultiplierMax: 62, HP: 72, SpawnWeight: 3, Speed: 49, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_charge"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

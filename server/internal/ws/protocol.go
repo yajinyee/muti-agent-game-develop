@@ -564,6 +564,7 @@ const (
 	MsgLuckyResonanceFish  MessageType = "lucky_resonance_fish"  // 幸運共鳴魚廣播（Server→Client，DAY-222）
 	MsgLuckyTeleportFish   MessageType = "lucky_teleport_fish"   // 幸運傳送魚廣播（Server→Client，DAY-223）
 	MsgLuckySplitFish      MessageType = "lucky_split_fish"      // 幸運分裂魚廣播（Server→Client，DAY-224）
+	MsgLuckyChargeFish     MessageType = "lucky_charge_fish"     // 幸運充能魚廣播（Server→Client，DAY-225）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5045,4 +5046,27 @@ type LuckySplitFishPayload struct {
 	KillMult    float64             `json:"kill_mult,omitempty"`
 	BlastCount  int                 `json:"blast_count,omitempty"`
 	TotalReward int                 `json:"total_reward,omitempty"`
+}
+
+// LuckyChargeFishPayload 幸運充能魚廣播（Server → Client，DAY-225）
+//
+// Events:
+//
+//	"charge_start"           — 充能模式開始（個人訊息）
+//	"charge_progress"        — 充能進度（每 3 點，個人訊息）
+//	"charge_ready"           — 充能爆發就緒（個人訊息）
+//	"charge_burst"           — 充能爆發觸發（個人訊息）
+//	"charge_end"             — 充能模式結束（個人訊息）
+//	"charge_broadcast"       — 充能模式開始廣播（全服）
+//	"charge_burst_broadcast" — 充能爆發廣播（全服）
+type LuckyChargeFishPayload struct {
+	Event       string  `json:"event"`
+	InstanceID  string  `json:"instance_id,omitempty"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	Count       int     `json:"count,omitempty"`
+	Target      int     `json:"target,omitempty"`
+	DurationSec int     `json:"duration_sec,omitempty"`
+	BurstMult   float64 `json:"burst_mult,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
 }
