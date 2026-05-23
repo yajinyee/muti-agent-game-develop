@@ -2961,9 +2961,23 @@ func _handle_lucky_magnet_fish(payload: Dictionary) -> void:
 			var pull_num: int = payload.get("pull_num", 1)
 			var moved_count: int = payload.get("moved_count", 0)
 			print("[GameManager] Magnet pull#%d: %d targets moved" % [pull_num, moved_count])
+			# 同步目標物位置（磁力吸引後更新 Client 端位置）
+			var positions: Array = payload.get("positions", [])
+			_sync_magnet_positions(positions)
 		"magnet_blast":
 			var killed_count: int = payload.get("killed_count", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Magnet blast! killed=%d total_reward=%d" % [killed_count, total_reward])
 		"magnet_end":
 			print("[GameManager] Magnet field ended!")
+
+## 同步磁力吸引後的目標物位置（DAY-232）
+func _sync_magnet_positions(positions: Array) -> void:
+	for pos_info in positions:
+		var target_id: String = pos_info.get("id", "")
+		var new_x: float = pos_info.get("x", 0.0)
+		var new_y: float = pos_info.get("y", 0.0)
+		if target_id.is_empty():
+			continue
+		# 複用傳送魚的 target_teleported 訊號同步位置（平滑移動）
+		emit_signal("target_teleported", target_id, Vector2(new_x, new_y))

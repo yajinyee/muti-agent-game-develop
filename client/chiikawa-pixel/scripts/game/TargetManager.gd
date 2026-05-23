@@ -183,6 +183,9 @@ func _ready() -> void:
 	# 時間凍結魚：全場靜止（DAY-212）
 	if GameManager.has_signal("time_freeze_fish"):
 		GameManager.time_freeze_fish.connect(_on_time_freeze_fish)
+	# 傳送魚 / 磁力魚：目標位置同步（DAY-223 / DAY-232）
+	if GameManager.has_signal("target_teleported"):
+		GameManager.target_teleported.connect(_on_target_teleported)
 	# 初始化 TargetPool（預建立 24 個空殼節點，避免高頻 GC）
 	TargetPool.init_pool(self)
 	# 預載入常用資源
@@ -1373,3 +1376,26 @@ func _remove_freeze_visual() -> void:
 		var tween_resume = node.get_meta("swim_tween", null)
 		if tween_resume != null and tween_resume is Tween:
 			tween_resume.play()
+
+## 目標物位置同步（傳送魚 DAY-223 / 磁力魚 DAY-232）
+## 收到 target_teleported 訊號時，平滑移動目標到新位置
+func _on_target_teleported(target_id: String, new_pos: Vector2) -> void:
+	if not _target_nodes.has(target_id):
+		return
+	var node = _target_nodes[target_id]
+	if not is_instance_valid(node):
+		return
+
+	# 計算螢幕座標（遊戲座標 1000x600 → 螢幕座標）
+	var vp_size = get_viewport().size
+	var screen_x = new_pos.x * vp_size.x / 1000.0
+	var screen_y = new_pos.y * vp_size.y / 600.0
+	var screen_pos = Vector2(screen_x, screen_y)
+
+	# 平滑移動（0.4 秒 tween，讓磁力吸引有流暢感）
+	var tween = node.create_tween()
+	tween.tween_property(node, "position", screen_pos, 0.4).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_QUAD)
+
+	# 更新 meta 中的目標位置（供 _process 中的游泳邏輯使用）
+	node.set_meta("target_x", screen_x)
+	node.set_meta("target_y", screen_y)
