@@ -88,6 +88,7 @@ const (
 	EventLuckyTimeRewind          EventType = "lucky_time_rewind"         // 幸運時光倒流魚觸發（DAY-247）
 	EventLuckyTornado             EventType = "lucky_tornado"             // 幸運龍捲風魚觸發（DAY-248）
 	EventLuckyBlackHoleExplosion  EventType = "lucky_black_hole_explosion" // 幸運黑洞爆炸魚觸發（DAY-249）
+	EventLuckyMirrorSplit         EventType = "lucky_mirror_split"         // 幸運鏡像分裂魚觸發（DAY-250）
 )
 
 // Priority 公告優先級
@@ -1431,6 +1432,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🕳️ 黑洞爆炸！"
 		message = msg
 		icon = "🕳️"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyMirrorSplit:
+		msg := "🪞 幸運鏡像分裂魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#8E44AD"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🪞 鏡像分裂！"
+		message = msg
+		icon = "🪞"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

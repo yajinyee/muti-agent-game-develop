@@ -742,6 +742,14 @@ var Targets = map[string]*TargetDef{
 	//   - 10 秒後「黑洞爆炸」：能量值 × 場上目標數 × 0.8 倍率（全服共享）
 	//   - 個人冷卻 20 秒；全服冷卻 30 秒
 	"T207": {ID: "T207", Name: "幸運黑洞爆炸魚", Type: TargetTypeSpecial, MultiplierMin: 44, MultiplierMax: 79, HP: 84, SpawnWeight: 3, Speed: 38, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_black_hole_explosion"},
+	// T208 幸運鏡像分裂魚（DAY-250）— 業界原創「鏡像分裂+雙重目標」機制
+	//   - 擊破 T208 後，場上隨機 4 個目標被「鏡像分裂」
+	//   - 每個目標在其鏡像位置（X 軸對稱）生成一個「鏡像副本」
+	//   - 鏡像副本 HP = 原目標 50%，倍率 = 原目標 × 0.6（個人獎勵）
+	//   - 鏡像副本存活 15 秒，玩家擊破獲得個人獎勵
+	//   - 15 秒後所有未擊破的鏡像副本「鏡像消融」：每個消融給全服 ×0.3 倍率共享獎勵
+	//   - 個人冷卻 22 秒；全服冷卻 35 秒
+	"T208": {ID: "T208", Name: "幸運鏡像分裂魚", Type: TargetTypeSpecial, MultiplierMin: 45, MultiplierMax: 81, HP: 85, SpawnWeight: 3, Speed: 37, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_mirror_split"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

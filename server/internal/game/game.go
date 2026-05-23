@@ -223,6 +223,7 @@ type Game struct {
 	LuckyTimeRewind      *luckyTimeRewindManager          // 幸運時光倒流魚系統管理器（DAY-247）
 	LuckyTornado         *luckyTornadoManager              // 幸運龍捲風魚系統管理器（DAY-248）
 	LuckyBlackHoleExplosion *luckyBlackHoleExplosionManager  // 幸運黑洞爆炸魚系統管理器（DAY-249）
+	LuckyMirrorSplit        *luckyMirrorSplitManager          // 幸運鏡像分裂魚系統管理器（DAY-250）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -422,6 +423,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyTimeRewind:    newLuckyTimeRewindManager(),
 		LuckyTornado:       newLuckyTornadoManager(),
 		LuckyBlackHoleExplosion: newLuckyBlackHoleExplosionManager(),
+		LuckyMirrorSplit:        newLuckyMirrorSplitManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2209,6 +2211,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運黑洞爆炸魚：擊破 T207 本身時觸發黑洞（DAY-249）
 	if isLuckyBlackHoleExplosionFish(t.DefID) {
 		go g.tryLuckyBlackHoleExplosionFish(p)
+	}
+	// 幸運鏡像分裂魚：擊破 T208 本身時觸發鏡像分裂（DAY-250）
+	if isLuckyMirrorSplitFish(t.DefID) {
+		go g.tryLuckyMirrorSplitFish(p)
+	}
+	// 幸運鏡像分裂魚：擊破鏡像副本時給予個人獎勵（DAY-250）
+	if isMirror, mirrorEntry := g.LuckyMirrorSplit.isMirrorSplitTarget(t.InstanceID); isMirror && mirrorEntry != nil {
+		go g.notifyMirrorSplitKill(p, t.InstanceID, mirrorEntry)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

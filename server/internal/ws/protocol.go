@@ -590,6 +590,7 @@ const (
 	MsgLuckyTimeRewind       MessageType = "lucky_time_rewind"        // 幸運時光倒流魚廣播（Server→Client，DAY-247）
 	MsgLuckyTornado                MessageType = "lucky_tornado"                  // 幸運龍捲風魚廣播（Server→Client，DAY-248）
 	MsgLuckyBlackHoleExplosion     MessageType = "lucky_black_hole_explosion"     // 幸運黑洞爆炸魚廣播（Server→Client，DAY-249）
+	MsgLuckyMirrorSplit            MessageType = "lucky_mirror_split"             // 幸運鏡像分裂魚廣播（Server→Client，DAY-250）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5680,4 +5681,26 @@ type LuckyBlackHoleExplosionPayload struct {
 	TargetCount int     `json:"target_count,omitempty"`
 	BlastMult   float64 `json:"blast_mult,omitempty"`
 	TotalReward int     `json:"total_reward,omitempty"`
+}
+
+// LuckyMirrorSplitPayload 幸運鏡像分裂魚廣播（Server → Client，DAY-250）
+// Event 類型：
+//   - mirror_split_start：分裂啟動（個人訊息，PlayerID/SplitCount/DurationSec/KillMult/FadeMult/Mirrors）
+//   - mirror_split_broadcast：全服廣播分裂（PlayerName/SplitCount/Mirrors）
+//   - mirror_split_kill：鏡像副本被擊破（全服廣播，PlayerName/InstanceID/Reward/KillMult）
+//   - mirror_split_fade：鏡像消融（全服廣播，FadeCount/TotalReward/FadeMult）
+//   - mirror_split_end：分裂結束（個人訊息，FadeCount/TotalReward）
+type LuckyMirrorSplitPayload struct {
+	Event       string      `json:"event"`
+	PlayerID    string      `json:"player_id,omitempty"`
+	PlayerName  string      `json:"player_name,omitempty"`
+	SplitCount  int         `json:"split_count,omitempty"`
+	DurationSec int         `json:"duration_sec,omitempty"`
+	KillMult    float64     `json:"kill_mult,omitempty"`
+	FadeMult    float64     `json:"fade_mult,omitempty"`
+	Mirrors     interface{} `json:"mirrors,omitempty"` // []mirrorSpawnInfo
+	InstanceID  string      `json:"instance_id,omitempty"`
+	Reward      int         `json:"reward,omitempty"`
+	FadeCount   int         `json:"fade_count,omitempty"`
+	TotalReward int         `json:"total_reward,omitempty"`
 }

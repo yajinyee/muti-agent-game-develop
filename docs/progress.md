@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-249 幸運黑洞爆炸魚系統）
+## 最後更新：2026-05-23（DAY-250 幸運鏡像分裂魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-250 更新（自主觸發）：** 幸運鏡像分裂魚系統（Lucky Mirror Split Fish）✅
+  - **業界依據：** 業界原創「鏡像分裂+雙重目標」機制
+  - **設計：** 擊破 T208 後，場上隨機 4 個目標被「鏡像分裂」；每個目標在其鏡像位置（X 軸對稱）生成一個「鏡像副本」；鏡像副本 HP = 原目標 50%，倍率 = 原目標 × 0.6（個人獎勵）；鏡像副本存活 15 秒，玩家擊破獲得個人獎勵；15 秒後所有未擊破的鏡像副本「鏡像消融」：每個消融給全服 ×0.3 倍率共享獎勵；個人冷卻 22 秒；全服冷卻 35 秒
+  - **設計差異：** 與分身魚（T200，射擊產生分身子彈）不同，鏡像分裂是「目標本身分裂成兩個」，讓玩家有「突然多了一倍的目標可以打」的驚喜感；「鏡像副本 HP 只有 50%」讓玩家有「這些比較好打」的成就感；「消融獎勵」確保即使沒打完也有收益；「X 軸鏡像位置」讓玩家有「要同時注意兩個位置」的空間感；全服廣播分裂位置讓所有玩家都看到鏡像副本，製造「全服一起打」的社交感
+  - server/internal/game/lucky_mirror_split_handler.go：luckyMirrorSplitManager（個人冷卻/全服冷卻/activeMirrors）；mirrorSplitEntry（mirrorInstanceID/origInstanceID/origDefID/origMult/expiresAt）；isLuckyMirrorSplitFish（T208）；isMirrorSplitTarget；removeMirrorEntry；tryLuckyMirrorSplitFish（擊破後觸發/選4個目標/X軸鏡像/建立副本/個人訊息+全服廣播+全服公告）；notifyMirrorSplitKill（副本被擊破/×0.6倍率/個人獎勵/廣播）；runMirrorSplitFade（goroutine 15秒後消融）；doMirrorSplitFade（消滅副本/全服共享獎勵/廣播/公告）；shuffleTargets（Fisher-Yates 隨機打亂）
+  - server/internal/data/tables.go：新增 T208 幸運鏡像分裂魚（45-81x/HP85/SpawnWeight3/Speed37/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyMirrorSplit；LuckyMirrorSplitPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyMirrorSplit + case 處理
+  - server/internal/game/game.go：LuckyMirrorSplit *luckyMirrorSplitManager；handleKill 加入 isLuckyMirrorSplitFish 分支 + isMirrorSplitTarget 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyMirrorSplitPanel.gd：紫色鏡像主題面板（mirror_split_start 紫色三次強閃光+頂部橫幅+「🪞 鏡像分裂！」大字+場景中央鏡像線+計時條；mirror_split_broadcast 頂部小橫幅；mirror_split_kill 紫色閃光+「🪞 擊破鏡像！×0.6」浮動文字；mirror_split_fade 灰色閃光+「🪞 鏡像消融！」大字+結算彈窗；mirror_split_end 清理）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_mirror_split 訊號 + _handle_lucky_mirror_split
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyMirrorSplitPanelScript（layer=23）
+  - 分裂設計：隨機 4 個目標；X 軸鏡像（以 X=500 為軸）；副本 HP 50%；副本倍率 ×0.6；存活 15 秒；個人冷卻 22 秒；全服冷卻 35 秒
+  - 消融設計：×0.3 倍率；全服共享；≥2 個時全服公告
+  - 視覺設計：紫色鏡像主題（#8E44AD + #6C3483 + #D7BDE2 + #F5EEF8）；場景中央垂直鏡像線（閃爍動畫）；右側豎向計時條（紫色，x=-86 與其他計時條錯開）；結算彈窗右側滑入
+  - 全服廣播：分裂啟動（含所有副本位置）/副本被擊破/鏡像消融/結束全服廣播
+  - 全服公告：觸發時公告（紫色）；消融≥2個時公告（深紫色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-249 更新（自主觸發）：** 幸運黑洞爆炸魚系統（Lucky Black Hole Explosion Fish）✅
   - **業界依據：** 業界原創「黑洞吸收+能量爆炸」機制
   - **設計：** 擊破 T207 後，場景中央生成「黑洞」（持續 10 秒）；黑洞每 1.5 秒「吸收」場上距離最近的目標（直接消滅，×1.2 倍率，個人獎勵）；黑洞最多吸收 6 個目標，每吸收一個「能量充能 +1」；10 秒後「黑洞爆炸」：能量值 × 場上目標數 × 0.8 倍率（全服共享，上限 50x）；個人冷卻 20 秒；全服冷卻 30 秒

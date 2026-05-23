@@ -333,6 +333,7 @@ func _ready() -> void:
 	_init_lucky_time_rewind_panel()       # 幸運時光倒流魚系統面板（DAY-247）
 	_init_lucky_tornado_panel()           # 幸運龍捲風魚系統面板（DAY-248）
 	_init_lucky_black_hole_explosion_panel() # 幸運黑洞爆炸魚系統面板（DAY-249）
+	_init_lucky_mirror_split_panel()         # 幸運鏡像分裂魚系統面板（DAY-250）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4724,3 +4725,21 @@ func _init_lucky_black_hole_explosion_panel() -> void:
 func _on_lucky_black_hole_explosion(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_black_hole_explosion_panel):
 		_lucky_black_hole_explosion_panel.handle_lucky_black_hole_explosion(data)
+
+# ─── 幸運鏡像分裂魚系統面板（DAY-250）────────────────────────────────────────
+
+const LuckyMirrorSplitPanelScript = preload("res://scripts/ui/LuckyMirrorSplitPanel.gd")
+var _lucky_mirror_split_panel = null
+
+func _init_lucky_mirror_split_panel() -> void:
+	var panel = LuckyMirrorSplitPanelScript.new()
+	panel.name = "LuckyMirrorSplitPanel"
+	panel.layer = 23
+	add_child(panel)
+	_lucky_mirror_split_panel = panel
+	if GameManager.has_signal("lucky_mirror_split"):
+		GameManager.lucky_mirror_split.connect(_on_lucky_mirror_split)
+
+func _on_lucky_mirror_split(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_mirror_split_panel):
+		_lucky_mirror_split_panel.handle_lucky_mirror_split(data)
