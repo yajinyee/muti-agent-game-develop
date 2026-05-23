@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-255 幸運時空裂縫魚系統）
+## 最後更新：2026-05-24（DAY-256 幸運全服充能魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-256 更新（自主觸發）：** 幸運全服充能魚系統（Lucky Server Charge Fish）✅
+  - **業界依據：** 業界原創「全服共同充能→全服大爆發」機制，2026 年業界最熱門多人合作集體感方向
+  - **設計：** 擊破 T214 後，全服所有玩家共同累積「充能值」（每次任何玩家擊破任何目標 +1）；充能值達到 20 時「全服大爆發」：全場所有目標 100% 擊破（×2.0 倍率，全服共享）；若 30 秒內未達到 20 → 「充能失敗」：已累積充能值 × 0.5 倍率（安慰獎，全服共享）；每次充能 +1 時廣播進度；個人冷卻 30 秒；全服冷卻 50 秒
+  - **設計差異：** 與量子共鳴（T209，2個玩家1.5秒內協作）不同，全服充能是「所有玩家長期協作」，讓玩家有「全服一起努力打魚，累積到20個就爆發」的集體感；「每次充能廣播進度」讓玩家即時看到「還差幾個」，製造「快了快了」的緊迫感；「充能失敗安慰獎」確保即使沒達到目標也有收益，降低挫敗感；「×2.0 全場 100% 擊破」是目前全服合力類最強的爆發效果；觸發玩家獲得「充能先鋒」稱號廣播，製造「是我開啟了這次充能」的成就感
+  - server/internal/game/lucky_server_charge_handler.go：luckyServerChargeManager（個人冷卻/全服冷卻/activeSession）；serverChargeSession（triggerPlayerID/triggerPlayerName/expiresAt/chargeCount）；isLuckyServerChargeFish（T214）；notifyServerChargeKill（任何非T214擊破都累積充能值/達到20觸發爆發）；tryLuckyServerChargeFish（擊破後觸發/個人訊息+全服廣播+全服公告）；runServerChargeTimeout（goroutine 30秒後超時失敗）；doServerChargeBurst（全場100%擊破/×2.0倍率/全服共享/廣播/公告）；doServerChargeFail（安慰獎/廣播/公告）
+  - server/internal/data/tables.go：新增 T214 幸運全服充能魚（51-93x/HP91/SpawnWeight3/Speed31/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyServerCharge；LuckyServerChargePayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyServerCharge + case 處理
+  - server/internal/game/game.go：LuckyServerCharge *luckyServerChargeManager；handleKill 加入 isLuckyServerChargeFish 分支 + notifyServerChargeKill（所有非T214擊破）
+  - client/chiikawa-pixel/scripts/ui/LuckyServerChargePanel.gd：橙金充能主題面板（charge_start 橙色三次強閃光+頂部橫幅+「⚡ 全服充能！」大字+充能進度條（底部）+計時條；charge_broadcast 頂部小橫幅+進度條；charge_progress 輕微橙色閃光+進度條更新+每5次浮動文字；charge_burst 全螢幕三次強閃光+「⚡ 全服大爆發！×2.0」大字+結算彈窗；charge_fail 灰色閃光+失敗提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_server_charge 訊號 + _handle_lucky_server_charge
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyServerChargePanelScript（layer=29）
+  - 充能設計：任何玩家擊破任何非T214目標 +1；目標 20 次；時限 30 秒；個人冷卻 30 秒；全服冷卻 50 秒
+  - 大爆發設計：全場 100% 擊破；×2.0 倍率；全服共享；全服公告
+  - 失敗設計：已累積充能值 × 0.5 安慰獎；≥10 次時全服公告
+  - 視覺設計：橙金充能主題（#FF8C00 + #FFD700 + #FF4500 + #FFF3E0）；底部充能進度條（接近目標時變金色）；右側豎向計時條（橙色，x=-170 與其他計時條錯開）；大爆發結算彈窗右側滑入（含充能先鋒名稱）
+  - 全服廣播：充能啟動/每次充能進度/大爆發/充能失敗全服廣播
+  - 全服公告：觸發時公告（橙色）；大爆發公告（金色）；失敗≥10次時公告（灰色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-255 更新（自主觸發）：** 幸運時空裂縫魚系統（Lucky Rift Fish）✅
   - **業界依據：** 業界原創「時空裂縫+傳送吸入+裂縫崩塌」機制，2026 年業界最熱門空間傳送+AOE 崩塌方向
   - **設計：** 擊破 T213 後，場景中央出現「時空裂縫」（持續 18 秒）；每 3 秒「裂縫吸入」：吸入距離裂縫最近的目標，傳送到隨機位置（×1.6 倍率，全服共享）；最多吸入 5 個目標（達到上限後裂縫提前崩塌）；18 秒後「裂縫崩塌」：場上所有目標 HP -50%，全服 AOE 獎勵（×2.5 倍率，全服共享）；個人冷卻 22 秒；全服冷卻 35 秒

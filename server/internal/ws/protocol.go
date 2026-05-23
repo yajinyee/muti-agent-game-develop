@@ -596,6 +596,7 @@ const (
 	MsgLuckyMeteorShower           MessageType = "lucky_meteor_shower"              // 幸運星際隕石魚廣播（Server→Client，DAY-253）
 	MsgLuckyDragonKing             MessageType = "lucky_dragon_king"                // 幸運龍王降臨魚廣播（Server→Client，DAY-254）
 	MsgLuckyRift                   MessageType = "lucky_rift"                       // 幸運時空裂縫魚廣播（Server→Client，DAY-255）
+	MsgLuckyServerCharge           MessageType = "lucky_server_charge"              // 幸運全服充能魚廣播（Server→Client，DAY-256）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5829,4 +5830,23 @@ type LuckyRiftPayload struct {
 	Mult         float64 `json:"mult,omitempty"`
 	TotalReward  int     `json:"total_reward,omitempty"`
 	DrainCount   int     `json:"drain_count,omitempty"`
+}
+
+// LuckyServerChargePayload 幸運全服充能魚廣播（Server → Client，DAY-256）
+// Event 類型：
+//   - charge_start：充能啟動（個人訊息，PlayerID/PlayerName/DurationSec/ChargeTarget/BurstMult）
+//   - charge_broadcast：全服廣播充能（PlayerName/DurationSec/ChargeTarget/BurstMult）
+//   - charge_progress：充能進度（全服廣播，PlayerName/ChargeCount/ChargeTarget）
+//   - charge_burst：全服大爆發（全服廣播，PlayerName/KillCount/BurstMult/TotalReward/ChargeCount/ChargeTarget）
+//   - charge_fail：充能失敗（全服廣播，PlayerName/ChargeCount/ChargeTarget/TotalReward）
+type LuckyServerChargePayload struct {
+	Event        string  `json:"event"`
+	PlayerID     string  `json:"player_id,omitempty"`
+	PlayerName   string  `json:"player_name,omitempty"`
+	DurationSec  int     `json:"duration_sec,omitempty"`
+	ChargeTarget int     `json:"charge_target,omitempty"`
+	ChargeCount  int     `json:"charge_count,omitempty"`
+	BurstMult    float64 `json:"burst_mult,omitempty"`
+	KillCount    int     `json:"kill_count,omitempty"`
+	TotalReward  int     `json:"total_reward,omitempty"`
 }

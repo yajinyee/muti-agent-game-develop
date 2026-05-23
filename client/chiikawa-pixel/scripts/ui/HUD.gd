@@ -339,6 +339,7 @@ func _ready() -> void:
 	_init_lucky_meteor_shower_panel()        # 幸運星際隕石魚系統面板（DAY-253）
 	_init_lucky_dragon_king_panel()          # 幸運龍王降臨魚系統面板（DAY-254）
 	_init_lucky_rift_panel()                 # 幸運時空裂縫魚系統面板（DAY-255）
+	_init_lucky_server_charge_panel()        # 幸運全服充能魚系統面板（DAY-256）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4838,3 +4839,21 @@ func _init_lucky_rift_panel() -> void:
 func _on_lucky_rift(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_rift_panel):
 		_lucky_rift_panel.handle_lucky_rift(data)
+
+# ─── 幸運全服充能魚系統面板（DAY-256）────────────────────────────────────────
+
+const LuckyServerChargePanelScript = preload("res://scripts/ui/LuckyServerChargePanel.gd")
+var _lucky_server_charge_panel = null
+
+func _init_lucky_server_charge_panel() -> void:
+	var panel = LuckyServerChargePanelScript.new()
+	panel.name = "LuckyServerChargePanel"
+	panel.layer = 29
+	add_child(panel)
+	_lucky_server_charge_panel = panel
+	if GameManager.has_signal("lucky_server_charge"):
+		GameManager.lucky_server_charge.connect(_on_lucky_server_charge)
+
+func _on_lucky_server_charge(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_server_charge_panel):
+		_lucky_server_charge_panel.handle_lucky_server_charge(data)

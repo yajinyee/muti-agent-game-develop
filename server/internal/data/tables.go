@@ -785,6 +785,12 @@ var Targets = map[string]*TargetDef{
 	//   - 18 秒後「裂縫崩塌」：場上所有目標 HP -50%，全服 AOE 獎勵（×2.5 倍率，全服共享）
 	//   - 個人冷卻 22 秒；全服冷卻 35 秒
 	"T213": {ID: "T213", Name: "幸運時空裂縫魚", Type: TargetTypeSpecial, MultiplierMin: 50, MultiplierMax: 91, HP: 90, SpawnWeight: 3, Speed: 32, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_rift"},
+	// T214 幸運全服充能魚（DAY-256）— 業界原創「全服共同充能→全服大爆發」機制
+	//   - 擊破 T214 後，全服所有玩家共同累積「充能值」（每次任何玩家擊破任何目標 +1）
+	//   - 充能值達到 20 時「全服大爆發」：全場所有目標 100% 擊破（×2.0 倍率，全服共享）
+	//   - 若 30 秒內未達到 20 → 「充能失敗」：已累積充能值 × 0.5 倍率（安慰獎，全服共享）
+	//   - 個人冷卻 30 秒；全服冷卻 50 秒
+	"T214": {ID: "T214", Name: "幸運全服充能魚", Type: TargetTypeSpecial, MultiplierMin: 51, MultiplierMax: 93, HP: 91, SpawnWeight: 3, Speed: 31, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_server_charge"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

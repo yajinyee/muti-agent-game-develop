@@ -229,6 +229,7 @@ type Game struct {
 	LuckyMeteorShower       *luckyMeteorShowerManager         // 幸運星際隕石魚系統管理器（DAY-253）
 	LuckyDragonKing         *luckyDragonKingManager           // 幸運龍王降臨魚系統管理器（DAY-254）
 	LuckyRift               *luckyRiftManager                 // 幸運時空裂縫魚系統管理器（DAY-255）
+	LuckyServerCharge       *luckyServerChargeManager         // 幸運全服充能魚系統管理器（DAY-256）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -434,6 +435,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyMeteorShower:       newLuckyMeteorShowerManager(),
 		LuckyDragonKing:         newLuckyDragonKingManager(),
 		LuckyRift:               newLuckyRiftManager(),
+		LuckyServerCharge:       newLuckyServerChargeManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2271,6 +2273,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運時空裂縫魚：擊破 T213 時觸發時空裂縫（DAY-255）
 	if isLuckyRiftFish(t.DefID) {
 		go g.tryLuckyRiftFish(p)
+	}
+	// 幸運全服充能魚：擊破 T214 時觸發全服充能（DAY-256）
+	if isLuckyServerChargeFish(t.DefID) {
+		go g.tryLuckyServerChargeFish(p)
+	}
+	// 幸運全服充能魚：任何非 T214 擊破都累積充能值（DAY-256）
+	if !isLuckyServerChargeFish(t.DefID) {
+		g.notifyServerChargeKill()
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
