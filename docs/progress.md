@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-261 幸運時間膠囊魚系統）
+## 最後更新：2026-05-24（DAY-262 幸運累積大獎池魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-262 更新（自主觸發）：** 幸運累積大獎池魚系統（Lucky Progressive Jackpot Fish）✅
+  - **業界依據：** Progressive Jackpot 是 2026 年捕魚機最熱門的留存機制（Fishing Fortune, Ocean King, Jackpot Fishing by Jili），讓玩家有「每一槍都在累積大獎池」的動力；[Fishing Fortune](https://fishingfortune.app/) 的 multiplier cascade 和 progressive jackpot pools 是 2026 年最熱門設計
+  - **設計：** 全服所有玩家每次擊破任何目標時，自動累積「大獎池」（每次 +1%）；擊破 T220 後，大獎池立即「爆發」：按貢獻比例分配給所有玩家；貢獻比例 = 玩家本局累積擊破次數 / 全服總擊破次數；大獎池最小值 = 100；大獎池上限 = 10000；每 10 秒廣播大獎池金額；個人冷卻 60 秒；全服冷卻 90 秒
+  - **設計差異：** 與全服充能（T214，合作達到目標數爆發）不同，累積大獎池是「持續累積」，讓玩家有「每一槍都在累積大獎池」的動力；「貢獻比例分配」讓打得多的玩家獲得更多，公平且有激勵效果；「大獎池即時顯示（右上角常駐）」讓玩家看到「大獎池現在有多少」，製造「快要爆發了」的期待感；「擊破 T220 立即爆發」讓玩家有「要趕快找到 T220」的動機；「全服廣播大獎池金額（每10秒）」讓所有玩家都知道「現在大獎池有多少」；「貢獻排行榜廣播」讓玩家看到「誰貢獻最多」，製造競爭感
+  - server/internal/game/lucky_progressive_jackpot_handler.go：luckyProgressiveJackpotManager（個人冷卻/全服冷卻/pool/contributions/lastBroadcastAt）；jackpotContribution（playerID/playerName/kills）；isLuckyProgressiveJackpotFish（T220）；accumulateJackpot（每次擊破累積1%/記錄玩家貢獻）；getPool（執行緒安全取得池金額）；shouldBroadcastPool（每10秒廣播判斷）；tryLuckyProgressiveJackpotFish（擊破後觸發/按貢獻比例分配/個人通知+全服廣播+全服公告）；broadcastJackpotPool（定期廣播大獎池金額）
+  - server/internal/data/tables.go：新增 T220 幸運累積大獎池魚（57-105x/HP97/SpawnWeight2/Speed25/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyProgressiveJackpot；LuckyProgressiveJackpotPayload（3種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyProgressiveJackpot + case 處理
+  - server/internal/game/game.go：LuckyProgressiveJackpot *luckyProgressiveJackpotManager；handleKill 加入 isLuckyProgressiveJackpotFish 分支 + accumulateJackpot（所有非T220擊破）；updateNormalPlay 加入 broadcastJackpotPool（每10秒）
+  - client/chiikawa-pixel/scripts/ui/LuckyProgressiveJackpotPanel.gd：金色大獎主題面板（右上角常駐大獎池顯示/大獎池越大顏色越亮/快速脈衝；jackpot_burst 全螢幕三次強閃光+「💰 大獎池爆發！」大字+個人貢獻比例+結算彈窗；jackpot_burst_broadcast 全服廣播橫幅）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_progressive_jackpot 訊號 + _handle_lucky_progressive_jackpot
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyProgressiveJackpotPanelScript（layer=35）
+  - 累積設計：每次擊破任何非T220目標 +1%；最小值 100；上限 10000；每 10 秒廣播
+  - 爆發設計：按貢獻比例分配；貢獻 = 本局擊破次數/全服總擊破次數；觸發玩家確保在列表中
+  - 視覺設計：金色大獎主題（#FFD700 金 + #FF8C00 橙金 + #1A1A2E 深藍黑 + #00FF88 綠）；右上角常駐大獎池顯示（池≥5000白色快速脈衝/池≥2000橙金/其他金色）；結算彈窗含貢獻比例和個人分配
+  - 全服廣播：大獎池每10秒更新/大獎池爆發全服廣播
+  - 全服公告：爆發時公告（金色，含觸發者/池金額/最高獎勵者）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-261 更新（自主觸發）：** 幸運時間膠囊魚系統（Lucky Time Capsule Fish）✅
   - **業界依據：** 業界原創「時間膠囊+預存獎勵+追加存入+膠囊開啟」機制，2026 年業界最熱門「時間+記憶+回放」主題，讓玩家有「打開時間膠囊，看看裡面藏了什麼驚喜」的期待感
   - **設計：** 擊破 T219 後，Server 為觸發玩家「封存」當前場上最高倍率目標的獎勵（×2.5 倍率）；膠囊封存期間（15 秒），玩家每次擊破任何目標都會「追加存入」（×0.5 倍率，最多 5 次）；15 秒後「膠囊開啟」：一次性發放所有存入的獎勵（封存獎勵 + 追加獎勵）；個人冷卻 28 秒；全服冷卻 45 秒

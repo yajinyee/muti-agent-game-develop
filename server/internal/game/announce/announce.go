@@ -100,6 +100,7 @@ const (
 	EventLuckyZodiacFate          EventType = "lucky_zodiac_fate"          // 幸運星座命運魚觸發（DAY-259）
 	EventLuckyTreasureHunter      EventType = "lucky_treasure_hunter"      // 幸運寶藏獵人魚觸發（DAY-260）
 	EventLuckyTimeCapsule         EventType = "lucky_time_capsule"         // 幸運時間膠囊魚觸發（DAY-261）
+	EventLuckyProgressiveJackpot  EventType = "lucky_progressive_jackpot"  // 幸運累積大獎池魚觸發（DAY-262）
 )
 
 // Priority 公告優先級
@@ -1686,6 +1687,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 5000
+
+	case EventLuckyProgressiveJackpot:
+		msg := "💰 幸運累積大獎池魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FFD700"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "💰 大獎池爆發！"
+		message = msg
+		icon = "💰"
+		color = c
+		priority = PriorityHigh
+		duration = 6000
 
 	default:
 		title = "📢 公告"

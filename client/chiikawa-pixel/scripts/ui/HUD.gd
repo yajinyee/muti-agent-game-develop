@@ -345,6 +345,7 @@ func _ready() -> void:
 	_init_lucky_zodiac_fate_panel()          # 幸運星座命運魚系統面板（DAY-259）
 	_init_lucky_treasure_hunter_panel()     # 幸運寶藏獵人魚系統面板（DAY-260）
 	_init_lucky_time_capsule_panel()        # 幸運時間膠囊魚系統面板（DAY-261）
+	_init_lucky_progressive_jackpot_panel() # 幸運累積大獎池魚系統面板（DAY-262）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4952,3 +4953,21 @@ func _init_lucky_time_capsule_panel() -> void:
 func _on_lucky_time_capsule(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_time_capsule_panel):
 		_lucky_time_capsule_panel.handle_lucky_time_capsule(data)
+
+# ─── 幸運累積大獎池魚系統面板（DAY-262）──────────────────────────────────────
+
+const LuckyProgressiveJackpotPanelScript = preload("res://scripts/ui/LuckyProgressiveJackpotPanel.gd")
+var _lucky_progressive_jackpot_panel = null
+
+func _init_lucky_progressive_jackpot_panel() -> void:
+	var panel = LuckyProgressiveJackpotPanelScript.new()
+	panel.name = "LuckyProgressiveJackpotPanel"
+	panel.layer = 35
+	add_child(panel)
+	_lucky_progressive_jackpot_panel = panel
+	if GameManager.has_signal("lucky_progressive_jackpot"):
+		GameManager.lucky_progressive_jackpot.connect(_on_lucky_progressive_jackpot)
+
+func _on_lucky_progressive_jackpot(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_progressive_jackpot_panel):
+		_lucky_progressive_jackpot_panel.handle_lucky_progressive_jackpot(data)

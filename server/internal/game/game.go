@@ -235,6 +235,7 @@ type Game struct {
 	LuckyZodiacFate         *luckyZodiacFateManager           // 幸運星座命運魚系統管理器（DAY-259）
 	LuckyTreasureHunter     *luckyTreasureHunterManager       // 幸運寶藏獵人魚系統管理器（DAY-260）
 	LuckyTimeCapsule        *luckyTimeCapsuleManager          // 幸運時間膠囊魚系統管理器（DAY-261）
+	LuckyProgressiveJackpot *luckyProgressiveJackpotManager   // 幸運累積大獎池魚系統管理器（DAY-262）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -446,6 +447,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyZodiacFate:         newLuckyZodiacFateManager(),
 		LuckyTreasureHunter:     newLuckyTreasureHunterManager(),
 		LuckyTimeCapsule:        newLuckyTimeCapsuleManager(),
+		LuckyProgressiveJackpot: newLuckyProgressiveJackpotManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2338,6 +2340,15 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if !isLuckyTimeCapsuleFish(t.DefID) && g.LuckyTimeCapsule.isTimeCapsuleActive(p.ID) {
 		go g.notifyTimeCapsuleKill(p, t)
 	}
+	// 幸運累積大獎池魚：擊破 T220 時觸發大獎池爆發（DAY-262）
+	if isLuckyProgressiveJackpotFish(t.DefID) {
+		go g.tryLuckyProgressiveJackpotFish(p)
+	}
+	// 幸運累積大獎池魚：每次擊破任何非 T220 目標時累積大獎池（DAY-262）
+	if !isLuckyProgressiveJackpotFish(t.DefID) {
+		finalRewardForJackpot := int(float64(g.getAvgBetCost()) * t.Multiplier)
+		g.LuckyProgressiveJackpot.accumulateJackpot(p, finalRewardForJackpot)
+	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
 		go g.notifyEchoKill(p, t, t.InstanceID)
@@ -2696,6 +2707,8 @@ func (g *Game) updateNormalPlay() {
 	go g.tickRouletteCrabWheel()
 	// Rapid Respin session 過期檢查（每次 update，DAY-121）
 	g.checkRespinSessionExpiry()
+	// 幸運累積大獎池廣播（每 10 秒，DAY-262）
+	go g.broadcastJackpotPool()
 }
 
 // spawnTarget 生成目標

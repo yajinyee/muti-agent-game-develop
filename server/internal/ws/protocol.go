@@ -602,6 +602,7 @@ const (
 	MsgLuckyZodiacFate             MessageType = "lucky_zodiac_fate"                 // 幸運星座命運魚廣播（Server→Client，DAY-259）
 	MsgLuckyTreasureHunter         MessageType = "lucky_treasure_hunter"              // 幸運寶藏獵人魚廣播（Server→Client，DAY-260）
 	MsgLuckyTimeCapsule            MessageType = "lucky_time_capsule"                 // 幸運時間膠囊魚廣播（Server→Client，DAY-261）
+	MsgLuckyProgressiveJackpot     MessageType = "lucky_progressive_jackpot"          // 幸運累積大獎池魚廣播（Server→Client，DAY-262）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5969,4 +5970,24 @@ type LuckyTimeCapsulePayload struct {
 	Reward       int     `json:"reward,omitempty"`
 	TargetName   string  `json:"target_name,omitempty"`
 	TotalReward  int     `json:"total_reward,omitempty"`
+}
+
+// LuckyProgressiveJackpotPayload 幸運累積大獎池魚廣播（Server → Client，DAY-262）
+// Event 類型：
+//   - jackpot_update：大獎池定期廣播（全服，Pool）
+//   - jackpot_burst：大獎池爆發（個人，PlayerID/PlayerName/TriggerName/Pool/Kills/TotalKills/Pct/Reward）
+//   - jackpot_burst_broadcast：大獎池爆發全服廣播（TriggerName/Pool/TopName/TopReward/PlayerCount）
+type LuckyProgressiveJackpotPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	TriggerName string  `json:"trigger_name,omitempty"`
+	Pool        int     `json:"pool,omitempty"`
+	Kills       int     `json:"kills,omitempty"`
+	TotalKills  int     `json:"total_kills,omitempty"`
+	Pct         float64 `json:"pct,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
+	TopName     string  `json:"top_name,omitempty"`
+	TopReward   int     `json:"top_reward,omitempty"`
+	PlayerCount int     `json:"player_count,omitempty"`
 }
