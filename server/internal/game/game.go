@@ -208,6 +208,7 @@ type Game struct {
 	LuckyMagnetFish    *luckyMagnetFishManager     // 幸運磁力魚系統管理器（DAY-232）
 	LuckyEchoFish      *luckyEchoFishManager       // 幸運回聲魚系統管理器（DAY-233）
 	LuckyVortexFish    *luckyVortexFishManager     // 幸運漩渦魚系統管理器（DAY-234）
+	LuckyTimeBombFish  *luckyTimeBombFishManager   // 幸運時間炸彈魚系統管理器（DAY-235）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -392,6 +393,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyMagnetFish:    newLuckyMagnetFishManager(),
 		LuckyEchoFish:      newLuckyEchoFishManager(),
 		LuckyVortexFish:    newLuckyVortexFishManager(),
+		LuckyTimeBombFish:  newLuckyTimeBombFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1418,6 +1420,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if vortexBoost > 1.0 {
 		finalReward = int(float64(finalReward) * vortexBoost)
 	}
+	// 套用幸運時間炸彈魚提前引爆倍率加成（DAY-235，×2.0 乘法，個人，炸彈目標）
+	timeBombMult := g.getLuckyTimeBombEarlyMult(t.InstanceID)
+	if timeBombMult > 1.0 {
+		finalReward = int(float64(finalReward) * timeBombMult)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -2016,6 +2023,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運漩渦魚：擊破 T192 本身時觸發漩渦模式（DAY-234）
 	if isLuckyVortexFish(t.DefID) {
 		go g.tryLuckyVortexFish(p)
+	}
+	// 幸運時間炸彈魚：擊破 T193 本身時觸發時間炸彈（DAY-235）
+	if isLuckyTimeBombFish(t.DefID) {
+		go g.tryLuckyTimeBombFish(p)
+	}
+	// 幸運時間炸彈魚：炸彈目標被玩家提前引爆（DAY-235）
+	if g.isTimeBombTarget(t.InstanceID) {
+		g.notifyTimeBombKill(p, t.InstanceID, t.X, t.Y)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

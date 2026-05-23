@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-234 幸運漩渦魚系統）
+## 最後更新：2026-05-23（DAY-235 幸運時間炸彈魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,27 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-232 更新（自主觸發）：** 幸運磁力魚系統（Lucky Magnet Fish）✅
+- **DAY-235 更新（自主觸發）：** 幸運時間炸彈魚系統（Lucky Time Bomb Fish）✅
+  - **業界依據：** 業界原創「倒數計時+提前引爆+連鎖爆炸」機制
+  - **設計：** 擊破 T193 後，場上隨機 4 個目標被「時間炸彈標記」（倒數 8 秒）；倒數結束時自動爆炸（80% 擊破機率，×1.6 倍率，個人獎勵）；玩家可以「提前引爆」（射擊命中炸彈目標）：立即爆炸 + 引爆周圍 150px 內目標（60% 機率，×1.2 倍率）；提前引爆的目標獲得 ×2.0 倍率加成（比等待爆炸更高）；個人冷卻 20 秒
+  - **設計差異：** 與鏈鎖爆炸魚（DAY-226，引爆標記+連鎖）不同，時間炸彈是「倒數計時」，讓玩家有「要不要等倒數還是提前引爆」的策略決策；「提前引爆」讓玩家有「主動控制爆炸時機」的掌控感；「連鎖爆炸」讓提前引爆有額外獎勵，鼓勵積極射擊；「倒數 8 秒」讓玩家有緊迫感，不能無限等待；全服廣播炸彈標記讓所有玩家都看到炸彈位置，製造「全服競爭引爆」的社交感
+  - server/internal/game/lucky_time_bomb_fish_handler.go：luckyTimeBombFishManager（個人冷卻/bombTargets/currentInstanceID）；timeBombEntry（instanceID/expiresAt）；isLuckyTimeBombFish（T193）；isTimeBombTarget；getLuckyTimeBombEarlyMult（×2.0）；removeTimeBombEntry；notifyTimeBombKill（提前引爆廣播+連鎖爆炸）；doTimeBombChain（150px/60%/×1.2/個人獎勵）；tryLuckyTimeBombFish（擊破後觸發/隨機4個目標/全服廣播/全服公告）；runTimeBombFuse（每秒倒數廣播/goroutine）；doTimeBombAutoExplode（80%擊破/×1.6/個人獎勵）
+  - server/internal/data/tables.go：新增 T193 幸運時間炸彈魚（30-58x/HP68/SpawnWeight3/Speed50/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyTimeBombFish；LuckyTimeBombFishPayload（bomb_placed/bomb_countdown/bomb_early_detonate/bomb_chain_blast/bomb_auto_explode）
+  - server/internal/game/announce/announce.go：新增 EventLuckyTimeBombFish + case 處理
+  - server/internal/game/game.go：LuckyTimeBombFish *luckyTimeBombFishManager；handleKill 加入 getLuckyTimeBombEarlyMult 乘法加成 + notifyTimeBombKill + isLuckyTimeBombFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyTimeBombFishPanel.gd：紅橙炸彈主題面板（bomb_placed 紅色雙閃光+頂部橫幅+「💣 時間炸彈！」大字+倍率說明+計時條；bomb_countdown 倒數更新+最後3秒橙色閃爍；bomb_early_detonate 橙色強閃光+「💥 提前引爆！×2.0」大字+爆炸圓圈；bomb_chain_blast 全螢幕三次強閃光+「💥 連鎖爆炸！」大字+結算彈窗；bomb_auto_explode 紅色閃光+「💣 自動爆炸！」提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_time_bomb_fish 訊號 + _handle_lucky_time_bomb_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyTimeBombFishPanelScript（layer=10）
+  - 炸彈設計：隨機 4 個目標；倒數 8 秒；每秒廣播倒數；個人冷卻 20 秒
+  - 提前引爆設計：×2.0 乘法；連鎖 150px；60% 擊破機率；×1.2 倍率；個人獎勵
+  - 自動爆炸設計：80% 擊破機率；×1.6 倍率；個人獎勵
+  - 視覺設計：紅橙炸彈主題（#E74C3C + #C0392B + #F1948A + #FDEDEC）；底部計時條（紅→深紅漸變）；爆炸圓圈（擴散+淡出）；結算彈窗右側滑入；最後3秒橙色閃爍
+  - 全服廣播：炸彈放置/每秒倒數/提前引爆/連鎖爆炸/自動爆炸全服廣播
+  - 全服公告：觸發時公告（紅色）
+  - build/vet 全部通過（零錯誤零警告）
+
+- **DAY-234 更新（自主觸發）：** 幸運漩渦魚系統（Lucky Vortex Fish）✅
   - **業界依據：** 業界原創「磁力聚集+磁力爆發」機制
   - **設計：** 擊破 T190 後觸發「磁力場」（12 秒）：場上所有目標物被「磁力吸引」，每 1.5 秒向場景中央移動（聚集效果）；磁力場期間擊破任何目標獲得 ×1.8 倍率加成；12 秒後「磁力爆發」：所有聚集在中央區域（半徑 200px）的目標 75% 擊破機率（0.80x 倍率，全服共享）；個人冷卻 20 秒；全服冷卻 30 秒
   - **設計差異：** 與黑洞魚（DAY-221，重力傷害+奇點爆炸，HP 損失）不同，磁力魚是「聚集移動+磁力爆發」，讓玩家有「等目標聚集再打」的策略感；「磁力吸引」讓目標物緩慢移動到中央，製造「魚群聚集」的視覺爽感；「磁力爆發」讓玩家有「等待→爆發」的高潮設計；全服廣播磁力場讓所有玩家都往中央打，製造「全服聚焦」的社交感；與傳送魚（DAY-223，瞬間移動）不同，磁力魚是「緩慢聚集」，讓玩家有「看著魚群聚集」的期待感

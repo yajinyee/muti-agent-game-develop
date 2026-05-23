@@ -640,6 +640,13 @@ var Targets = map[string]*TargetDef{
 	//   - 8 秒後「漩渦爆發」：漩渦範圍內所有目標 70% 擊破機率（0.75x 倍率，全服共享）
 	//   - 個人冷卻 20 秒；全服冷卻 30 秒
 	"T192": {ID: "T192", Name: "幸運漩渦魚", Type: TargetTypeSpecial, MultiplierMin: 32, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_vortex"},
+	// T193 幸運時間炸彈魚（DAY-235）— 業界原創「倒數計時+提前引爆+連鎖爆炸」機制
+	//   - 擊破 T193 後，場上隨機 4 個目標被「時間炸彈標記」（倒數 8 秒）
+	//   - 倒數結束時自動爆炸（80% 擊破機率，×1.6 倍率，個人獎勵）
+	//   - 玩家可以「提前引爆」（射擊命中炸彈目標）：立即爆炸 + 引爆周圍 150px 內目標（60% 機率，×1.2 倍率）
+	//   - 提前引爆的目標獲得 ×2.0 倍率加成（比等待爆炸更高）
+	//   - 個人冷卻 20 秒
+	"T193": {ID: "T193", Name: "幸運時間炸彈魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 58, HP: 68, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_time_bomb"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

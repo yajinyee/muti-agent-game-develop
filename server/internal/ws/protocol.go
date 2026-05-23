@@ -574,6 +574,7 @@ const (
 	MsgLuckyMagnetFish     MessageType = "lucky_magnet_fish"     // 幸運磁力魚廣播（Server→Client，DAY-232）
 	MsgLuckyEchoFish       MessageType = "lucky_echo_fish"       // 幸運回聲魚廣播（Server→Client，DAY-233）
 	MsgLuckyVortexFish     MessageType = "lucky_vortex_fish"     // 幸運漩渦魚廣播（Server→Client，DAY-234）
+	MsgLuckyTimeBombFish   MessageType = "lucky_time_bomb_fish"  // 幸運時間炸彈魚廣播（Server→Client，DAY-235）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5296,4 +5297,37 @@ type LuckyVortexFishPayload struct {
 	KilledCount  int         `json:"killed_count,omitempty"`
 	TotalReward  int         `json:"total_reward,omitempty"`
 	BlastResults interface{} `json:"blast_results,omitempty"` // []blastResultPayload
+}
+
+// LuckyTimeBombFishPayload 幸運時間炸彈魚廣播（Server → Client，DAY-235）
+//
+// Events:
+//
+//	"bomb_placed"        — 炸彈標記放置（全服廣播，含炸彈目標列表）
+//	"bomb_countdown"     — 倒數更新（每秒，全服廣播）
+//	"bomb_early_detonate"— 提前引爆（玩家射擊命中，全服廣播）
+//	"bomb_chain_blast"   — 連鎖爆炸（提前引爆後，全服廣播）
+//	"bomb_auto_explode"  — 自動爆炸（倒數結束，全服廣播）
+type LuckyTimeBombFishPayload struct {
+	Event        string      `json:"event"`
+	PlayerID     string      `json:"player_id,omitempty"`
+	PlayerName   string      `json:"player_name,omitempty"`
+	InstanceID   string      `json:"instance_id,omitempty"`
+	TargetID     string      `json:"target_id,omitempty"`
+	BombCount    int         `json:"bomb_count,omitempty"`
+	FuseSec      int         `json:"fuse_sec,omitempty"`
+	Remaining    int         `json:"remaining,omitempty"`
+	BombTargets  interface{} `json:"bomb_targets,omitempty"`  // []bombTarget
+	EarlyMult    float64     `json:"early_mult,omitempty"`
+	AutoMult     float64     `json:"auto_mult,omitempty"`
+	Mult         float64     `json:"mult,omitempty"`
+	X            float64     `json:"x,omitempty"`
+	Y            float64     `json:"y,omitempty"`
+	SourceX      float64     `json:"source_x,omitempty"`
+	SourceY      float64     `json:"source_y,omitempty"`
+	Killed       bool        `json:"killed,omitempty"`
+	Reward       int         `json:"reward,omitempty"`
+	KilledCount  int         `json:"killed_count,omitempty"`
+	TotalReward  int         `json:"total_reward,omitempty"`
+	ChainResults interface{} `json:"chain_results,omitempty"` // []chainResultPayload
 }
