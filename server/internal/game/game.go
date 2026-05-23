@@ -238,6 +238,7 @@ type Game struct {
 	LuckyProgressiveJackpot *luckyProgressiveJackpotManager   // 幸運累積大獎池魚系統管理器（DAY-262）
 	LuckyElementFusion      *luckyElementFusionManager         // 幸運元素融合魚系統管理器（DAY-263）
 	LuckyKarmaCycle         *luckyKarmaCycleManager            // 幸運命運輪迴魚系統管理器（DAY-264）
+	LuckySpeedRaceFish      *luckySpeedRaceFishManager         // 幸運競速賽魚系統管理器（DAY-265）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -452,6 +453,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyProgressiveJackpot: newLuckyProgressiveJackpotManager(),
 		LuckyElementFusion:      newLuckyElementFusionManager(),
 		LuckyKarmaCycle:         newLuckyKarmaCycleManager(),
+		LuckySpeedRaceFish:      newLuckySpeedRaceFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1569,6 +1571,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if guildWarBoostMult > 1.0 {
 		finalReward = int(float64(finalReward) * guildWarBoostMult)
 	}
+	// 套用幸運競速賽魚排名倍率加成（DAY-265，×4.0/2.5/1.8/1.2 乘法，個人，結算後 5 秒）
+	speedRaceBoostMult := g.LuckySpeedRaceFish.getLuckySpeedRaceBoostMult(p.ID)
+	if speedRaceBoostMult > 1.0 {
+		finalReward = int(float64(finalReward) * speedRaceBoostMult)
+	}
 	// 套用幸運星座命運魚星座祝福/庇護倍率加成（DAY-259，×3.0/1.5 乘法，個人，祝福/庇護期間）
 	zodiacMult := g.LuckyZodiacFate.getLuckyZodiacFateMult(p.ID)
 	if zodiacMult > 1.0 {
@@ -2370,6 +2377,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運命運輪迴魚：玩家在命運輪迴中擊破任何非 T222 目標時累積業力（DAY-264）
 	if !isLuckyKarmaCycleFish(t.DefID) && g.LuckyKarmaCycle.isKarmaCycleActive(p.ID) {
 		go g.notifyKarmaCycleKill(p)
+	}
+	// 幸運競速賽魚：擊破 T223 時觸發競速賽（DAY-265）
+	if isLuckySpeedRaceFish(t.DefID) {
+		go g.tryLuckySpeedRaceFish(p)
+	}
+	// 幸運競速賽魚：競速賽進行中，任何玩家擊破任何非 T223 目標時累積積分（DAY-265）
+	if !isLuckySpeedRaceFish(t.DefID) && g.LuckySpeedRaceFish.isSpeedRaceActive() {
+		g.notifyLuckySpeedRaceKill(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

@@ -810,6 +810,12 @@ var Targets = map[string]*TargetDef{
 	"T220": {ID: "T220", Name: "幸運累積大獎池魚", Type: TargetTypeSpecial, MultiplierMin: 57, MultiplierMax: 105, HP: 97, SpawnWeight: 2, Speed: 25, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_progressive_jackpot"},
 	"T221": {ID: "T221", Name: "幸運元素融合魚", Type: TargetTypeSpecial, MultiplierMin: 58, MultiplierMax: 107, HP: 98, SpawnWeight: 2, Speed: 24, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_element_fusion"},
 	"T222": {ID: "T222", Name: "幸運命運輪迴魚", Type: TargetTypeSpecial, MultiplierMin: 59, MultiplierMax: 109, HP: 99, SpawnWeight: 2, Speed: 23, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_karma_cycle"},
+	// T223 幸運競速賽魚（DAY-265）— 業界原創「全服即時競速+排行榜爆發」機制
+	//   - 擊破 T223 後，觸發「全服競速賽」（持續 30 秒）
+	//   - 所有玩家競爭擊破數，每次擊破 +1 積分，每 5 秒廣播即時排行榜（前 3 名）
+	//   - 結算：第 1 名 ×4.0、第 2 名 ×2.5、第 3 名 ×1.8、其他 ×1.2 安慰獎（5 秒加成）
+	//   - 個人冷卻 40 秒；全服冷卻 60 秒
+	"T223": {ID: "T223", Name: "幸運競速賽魚", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 111, HP: 100, SpawnWeight: 2, Speed: 22, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_speed_race_fish"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

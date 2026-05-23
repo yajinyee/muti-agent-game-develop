@@ -348,6 +348,7 @@ func _ready() -> void:
 	_init_lucky_progressive_jackpot_panel() # 幸運累積大獎池魚系統面板（DAY-262）
 	_init_lucky_element_fusion_panel()      # 幸運元素融合魚系統面板（DAY-263）
 	_init_lucky_karma_cycle_panel()         # 幸運命運輪迴魚系統面板（DAY-264）
+	_init_lucky_speed_race_fish_panel()     # 幸運競速賽魚系統面板（DAY-265）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5005,3 +5006,19 @@ func _init_lucky_karma_cycle_panel() -> void:
 func _on_lucky_karma_cycle(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_karma_cycle_panel):
 		_lucky_karma_cycle_panel.handle_event(data)
+
+const LuckySpeedRaceFishPanelScript = preload("res://scripts/ui/LuckySpeedRaceFishPanel.gd")
+var _lucky_speed_race_fish_panel = null
+
+func _init_lucky_speed_race_fish_panel() -> void:
+	var panel = LuckySpeedRaceFishPanelScript.new()
+	panel.name = "LuckySpeedRaceFishPanel"
+	panel.layer = 38
+	add_child(panel)
+	_lucky_speed_race_fish_panel = panel
+	if GameManager.has_signal("lucky_speed_race_fish"):
+		GameManager.lucky_speed_race_fish.connect(_on_lucky_speed_race_fish)
+
+func _on_lucky_speed_race_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_speed_race_fish_panel):
+		_lucky_speed_race_fish_panel.handle_event(data)

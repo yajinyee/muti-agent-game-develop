@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-264 幸運命運輪迴魚系統）
+## 最後更新：2026-05-24（DAY-265 幸運競速賽魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-265 更新（自主觸發）：** 幸運競速賽魚系統（Lucky Speed Race Fish）✅
+  - **業界依據：** Fishing Frenzy Chapter 3（2026）Speed Race 機制，2026 年最熱門個人競速方向，讓玩家有「我要打最多魚拿第一」的個人榮耀感
+  - **設計：** 擊破 T223 後，觸發「全服競速賽」（持續 30 秒）；所有玩家競爭擊破數，每次擊破 +1 積分；每 5 秒廣播即時排行榜（前 3 名）；結算時：第 1 名 ×4.0、第 2 名 ×2.5、第 3 名 ×1.8、其他 ×1.2 安慰獎（5 秒加成）；個人冷卻 40 秒；全服冷卻 60 秒
+  - **設計差異：** 與公會戰（T215，分隊競爭）不同，競速賽是「個人競速」，讓玩家有「我要打最多魚拿第一」的個人榮耀感；「即時排行榜每 5 秒廣播」讓玩家看到「我現在第幾名」，製造「要趕快多打幾條」的緊迫感；「第 1 名 ×4.0」是目前個人競爭類最高倍率，製造「拿第一超值」的動力；「所有人都有 ×1.2 安慰獎」確保即使沒進前三也有收益，降低挫敗感；「全服廣播最終排行榜」讓所有玩家看到「誰是冠軍」，製造社交話題感
+  - server/internal/game/lucky_speed_race_fish_handler.go：luckySpeedRaceFishManager（個人冷卻/全服冷卻/activeSession/raceBoosts）；speedRaceEntry（playerID/playerName/score）；speedRaceSession（triggerPlayerID/triggerPlayerName/expiresAt/scores）；isLuckySpeedRaceFish（T223）；isSpeedRaceActive；getLuckySpeedRaceBoostMult（×4.0/2.5/1.8/1.2 乘法）；notifyLuckySpeedRaceKill（任何非T223擊破都累積積分）；tryLuckySpeedRaceFish（擊破後觸發/個人訊息+全服廣播+全服公告）；getSpeedRaceLeaderboard（依積分降序排列）；runSpeedRaceSession（goroutine 每5秒排行榜廣播/30秒後結算）；doSpeedRaceSettle（排名倍率加成/全服廣播/全服公告）
+  - server/internal/data/tables.go：新增 T223 幸運競速賽魚（60-111x/HP100/SpawnWeight2/Speed22/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckySpeedRaceFish；SpeedRaceLeaderboardEntry（Rank/PlayerName/Score/Mult）；LuckySpeedRaceFishPayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckySpeedRaceFish + case 處理
+  - server/internal/game/game.go：LuckySpeedRaceFish *luckySpeedRaceFishManager；handleKill 加入 isLuckySpeedRaceFish 分支 + notifyLuckySpeedRaceKill（所有非T223擊破）+ getLuckySpeedRaceBoostMult 倍率加成
+  - client/chiikawa-pixel/scripts/ui/LuckySpeedRaceFishPanel.gd：橙紅競速主題面板（race_start 橙紅三次強閃光+頂部橫幅+「🏁 競速賽開始！」大字+右側排行榜面板+計時條；race_broadcast 頂部小橫幅；race_leaderboard 即時排行榜更新（🥇🥈🥉+名字+擊破數）+輕微閃光；race_result 全螢幕三次強閃光+「🏆 冠軍！×4.0」大字+結算彈窗（含前3名排行+倍率+總人數））
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_speed_race_fish 訊號 + _handle_lucky_speed_race_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckySpeedRaceFishPanelScript（layer=38）
+  - 競速設計：30 秒時限；每次擊破 +1 積分；每 5 秒廣播前 3 名；個人冷卻 40 秒；全服冷卻 60 秒
+  - 排名設計：第 1 名 ×4.0；第 2 名 ×2.5；第 3 名 ×1.8；其他 ×1.2；加成持續 5 秒
+  - 視覺設計：橙紅競速主題（#FF6B35 橙紅 + #FFD700 金 + #FF4500 火橙 + #FFF3E0 奶油）；右側排行榜面板（金色邊框，🥇🥈🥉 emoji）；右側豎向計時條（x=-268 與其他計時條錯開，剩餘時間少時變金色）；結算彈窗右側滑入（含前3名/倍率/總人數）
+  - 全服廣播：競速賽啟動/每5秒排行榜/結算全服廣播
+  - 全服公告：觸發時公告（橙紅色）；結算公告（金色，含冠軍名稱/擊破數/倍率）
+  - build/vet 全部通過（零錯誤零警告）
+  - **命名衝突修復：** speedrace_handler.go 已有 notifySpeedRaceKill，新方法改名為 notifyLuckySpeedRaceKill 避免衝突
 - **DAY-264 更新（自主觸發）：** 幸運命運輪迴魚系統（Lucky Karma Cycle Fish）✅
   - **業界依據：** 業界原創「業力累積+命運爆發」機制，2026 年最熱門「命運輪迴+業力」主題，讓玩家有「每一槍都在累積業力，業力滿了觸發命運爆發」的宿命感
   - **設計：** 擊破 T222 後，觸發「命運輪迴」（持續 20 秒）；玩家每次擊破任何目標，累積「業力值」（每次 +1，最多 10）；業力值達到 10 → 「命運爆發」：業力值 × ×1.5 倍率（個人，最高 ×15.0）；20 秒後未達到 10 → 「業力結算」：已累積業力值 × ×1.2 倍率（個人）；個人冷卻 30 秒；全服冷卻 50 秒

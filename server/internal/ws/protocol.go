@@ -605,6 +605,7 @@ const (
 	MsgLuckyProgressiveJackpot     MessageType = "lucky_progressive_jackpot"          // 幸運累積大獎池魚廣播（Server→Client，DAY-262）
 	MsgLuckyElementFusion          MessageType = "lucky_element_fusion"               // 幸運元素融合魚廣播（Server→Client，DAY-263）
 	MsgLuckyKarmaCycle             MessageType = "lucky_karma_cycle"                  // 幸運命運輪迴魚廣播（Server→Client，DAY-264）
+	MsgLuckySpeedRaceFish          MessageType = "lucky_speed_race_fish"               // 幸運競速賽魚廣播（Server→Client，DAY-265）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6046,4 +6047,34 @@ type LuckyKarmaCyclePayload struct {
 	Duration    int     `json:"duration,omitempty"`
 	Mult        float64 `json:"mult,omitempty"`
 	Reward      int     `json:"reward,omitempty"`
+}
+
+// SpeedRaceLeaderboardEntry 競速賽排行榜條目
+type SpeedRaceLeaderboardEntry struct {
+	Rank       int     `json:"rank"`
+	PlayerName string  `json:"player_name"`
+	Score      int     `json:"score"`
+	Mult       float64 `json:"mult,omitempty"`
+}
+
+// LuckySpeedRaceFishPayload 幸運競速賽魚廣播（Server → Client，DAY-265）
+// Event 類型：
+//   - race_start：競速賽啟動（個人，PlayerID/PlayerName/DurationSec/Rank1Mult/Rank2Mult/Rank3Mult/OtherMult）
+//   - race_broadcast：全服廣播競速賽（PlayerName/DurationSec/Rank1Mult/Rank2Mult/Rank3Mult/OtherMult）
+//   - race_leaderboard：即時排行榜廣播（每 5 秒，Leaderboard 前 3 名）
+//   - race_result：競速賽結算（全服廣播，PlayerName/WinnerName/WinnerScore/Leaderboard/TotalPlayers/Rank1Mult/BoostSec）
+type LuckySpeedRaceFishPayload struct {
+	Event        string                      `json:"event"`
+	PlayerID     string                      `json:"player_id,omitempty"`
+	PlayerName   string                      `json:"player_name,omitempty"`
+	DurationSec  int                         `json:"duration_sec,omitempty"`
+	Rank1Mult    float64                     `json:"rank1_mult,omitempty"`
+	Rank2Mult    float64                     `json:"rank2_mult,omitempty"`
+	Rank3Mult    float64                     `json:"rank3_mult,omitempty"`
+	OtherMult    float64                     `json:"other_mult,omitempty"`
+	Leaderboard  []SpeedRaceLeaderboardEntry `json:"leaderboard,omitempty"`
+	WinnerName   string                      `json:"winner_name,omitempty"`
+	WinnerScore  int                         `json:"winner_score,omitempty"`
+	TotalPlayers int                         `json:"total_players,omitempty"`
+	BoostSec     int                         `json:"boost_sec,omitempty"`
 }

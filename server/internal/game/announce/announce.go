@@ -103,6 +103,7 @@ const (
 	EventLuckyProgressiveJackpot  EventType = "lucky_progressive_jackpot"  // 幸運累積大獎池魚觸發（DAY-262）
 	EventLuckyElementFusion       EventType = "lucky_element_fusion"       // 幸運元素融合魚觸發（DAY-263）
 	EventLuckyKarmaCycle          EventType = "lucky_karma_cycle"          // 幸運命運輪迴魚觸發（DAY-264）
+	EventLuckySpeedRaceFish       EventType = "lucky_speed_race_fish"      // 幸運競速賽魚觸發（DAY-265）
 )
 
 // Priority 公告優先級
@@ -1746,6 +1747,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "☯️ 幸運命運輪迴魚！"
 		message = msg
 		icon = "☯️"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckySpeedRaceFish:
+		msg := "🏁 幸運競速賽魚觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FF6B35"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🏁 競速賽！"
+		message = msg
+		icon = "🏁"
 		color = c
 		priority = PriorityHigh
 		duration = 5000
