@@ -226,6 +226,7 @@ type Game struct {
 	LuckyMirrorSplit        *luckyMirrorSplitManager          // 幸運鏡像分裂魚系統管理器（DAY-250）
 	LuckyQuantumEntangle    *luckyQuantumEntangleManager      // 幸運量子糾纏魚系統管理器（DAY-251）
 	LuckyWeaponEvo          *luckyWeaponEvoManager            // 幸運武器進化魚系統管理器（DAY-252）
+	LuckyMeteorShower       *luckyMeteorShowerManager         // 幸運星際隕石魚系統管理器（DAY-253）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -428,6 +429,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyMirrorSplit:        newLuckyMirrorSplitManager(),
 		LuckyQuantumEntangle:    newLuckyQuantumEntangleManager(),
 		LuckyWeaponEvo:          newLuckyWeaponEvoManager(),
+		LuckyMeteorShower:       newLuckyMeteorShowerManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2248,6 +2250,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運武器進化魚：擊破 T210 時觸發武器進化（或升級）（DAY-252）
 	if isLuckyWeaponEvoFish(t.DefID) {
 		go g.tryLuckyWeaponEvoFish(p)
+	}
+	// 幸運星際隕石魚：擊破 T211 時觸發隕石雨（DAY-253）
+	if isLuckyMeteorShowerFish(t.DefID) {
+		go g.tryLuckyMeteorShowerFish(p.ID, p.DisplayName)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

@@ -593,6 +593,7 @@ const (
 	MsgLuckyMirrorSplit            MessageType = "lucky_mirror_split"             // 幸運鏡像分裂魚廣播（Server→Client，DAY-250）
 	MsgLuckyQuantumEntangle        MessageType = "lucky_quantum_entangle"          // 幸運量子糾纏魚廣播（Server→Client，DAY-251）
 	MsgLuckyWeaponEvo              MessageType = "lucky_weapon_evo"                // 幸運武器進化魚廣播（Server→Client，DAY-252）
+	MsgLuckyMeteorShower           MessageType = "lucky_meteor_shower"              // 幸運星際隕石魚廣播（Server→Client，DAY-253）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5753,4 +5754,26 @@ type LuckyWeaponEvoPayload struct {
 	BurstCount  int     `json:"burst_count,omitempty"`
 	TotalReward int     `json:"total_reward,omitempty"`
 	BurstMult   float64 `json:"burst_mult,omitempty"`
+}
+
+// LuckyMeteorShowerPayload 幸運星際隕石魚廣播（Server → Client，DAY-253）
+// Event 類型：
+//   - meteor_start：隕石雨開始（全服廣播，PlayerName/DurationSec/BombMult/FinalMult）
+//   - meteor_bomb：隕石轟炸命中（全服廣播，PlayerName/InstanceID/TargetName/Round/Mult/Reward/X/Y）
+//   - meteor_combo：隕石連擊（全服廣播，PlayerName/InstanceID/TargetName/Mult/Reward/X/Y）
+//   - meteor_final：最終隕石（全服廣播，PlayerName/InstanceID/TargetName/Mult/Reward/X/Y）
+//   - meteor_end：隕石雨結束（全服廣播，PlayerName）
+type LuckyMeteorShowerPayload struct {
+	Event       string  `json:"event"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	InstanceID  string  `json:"instance_id,omitempty"`
+	TargetName  string  `json:"target_name,omitempty"`
+	Round       int     `json:"round,omitempty"`
+	DurationSec int     `json:"duration_sec,omitempty"`
+	Mult        float64 `json:"mult,omitempty"`
+	BombMult    float64 `json:"bomb_mult,omitempty"`
+	FinalMult   float64 `json:"final_mult,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
+	X           float64 `json:"x,omitempty"`
+	Y           float64 `json:"y,omitempty"`
 }

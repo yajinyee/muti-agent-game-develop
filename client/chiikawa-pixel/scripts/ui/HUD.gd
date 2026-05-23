@@ -336,6 +336,7 @@ func _ready() -> void:
 	_init_lucky_mirror_split_panel()         # 幸運鏡像分裂魚系統面板（DAY-250）
 	_init_lucky_quantum_entangle_panel()     # 幸運量子糾纏魚系統面板（DAY-251）
 	_init_lucky_weapon_evo_panel()           # 幸運武器進化魚系統面板（DAY-252）
+	_init_lucky_meteor_shower_panel()        # 幸運星際隕石魚系統面板（DAY-253）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4781,3 +4782,21 @@ func _init_lucky_weapon_evo_panel() -> void:
 func _on_lucky_weapon_evo(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_weapon_evo_panel):
 		_lucky_weapon_evo_panel.handle_lucky_weapon_evo(data)
+
+# ─── 幸運星際隕石魚系統面板（DAY-253）────────────────────────────────────────
+
+const LuckyMeteorShowerPanelScript = preload("res://scripts/ui/LuckyMeteorShowerPanel.gd")
+var _lucky_meteor_shower_panel = null
+
+func _init_lucky_meteor_shower_panel() -> void:
+	var panel = LuckyMeteorShowerPanelScript.new()
+	panel.name = "LuckyMeteorShowerPanel"
+	panel.layer = 26
+	add_child(panel)
+	_lucky_meteor_shower_panel = panel
+	if GameManager.has_signal("lucky_meteor_shower"):
+		GameManager.lucky_meteor_shower.connect(_on_lucky_meteor_shower)
+
+func _on_lucky_meteor_shower(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_meteor_shower_panel):
+		_lucky_meteor_shower_panel.handle_lucky_meteor_shower(data)

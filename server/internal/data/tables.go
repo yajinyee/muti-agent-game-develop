@@ -764,6 +764,13 @@ var Targets = map[string]*TargetDef{
 	//   - 進化結束時「武器爆發」：自動 3 連射（×1.2 倍率，個人獎勵）
 	//   - 個人冷卻 18 秒；全服冷卻 25 秒
 	"T210": {ID: "T210", Name: "幸運武器進化魚", Type: TargetTypeSpecial, MultiplierMin: 47, MultiplierMax: 85, HP: 87, SpawnWeight: 3, Speed: 35, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_weapon_evo"},
+	// T211 幸運星際隕石魚（DAY-253）— 業界原創「隕石雨+隨機轟炸+隕石連擊+最終隕石」機制
+	//   - 擊破 T211 後，天空降下「隕石雨」（持續 8 秒）
+	//   - 每 1 秒隨機轟炸場上 2 個目標（70% 擊破機率，×1.3 倍率，全服共享）
+	//   - 若連續 3 次都命中同一個目標 → 「隕石連擊」：×3.0 倍率（全服大獎）
+	//   - 8 秒後「最終隕石」：場上最高 HP 目標被 100% 擊破（×2.0 倍率，全服共享）
+	//   - 個人冷卻 20 秒；全服冷卻 30 秒
+	"T211": {ID: "T211", Name: "幸運星際隕石魚", Type: TargetTypeSpecial, MultiplierMin: 48, MultiplierMax: 87, HP: 88, SpawnWeight: 3, Speed: 34, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_meteor_shower"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

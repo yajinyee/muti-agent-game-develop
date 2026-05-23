@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-252 幸運武器進化魚系統）
+## 最後更新：2026-05-24（DAY-253 幸運星際隕石魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-253 更新（自主觸發）：** 幸運星際隕石魚系統（Lucky Meteor Shower Fish）✅
+  - **業界依據：** 業界原創「隕石雨+隨機轟炸+隕石連擊+最終隕石」機制，2026 年業界最熱門 AOE 全服共享方向
+  - **設計：** 擊破 T211 後，天空降下「隕石雨」（持續 8 秒）；每 1 秒隨機轟炸場上 2 個目標（70% 擊破機率，×1.3 倍率，全服共享）；若連續 3 次都命中同一個目標 → 「隕石連擊」：×3.0 倍率（全服大獎）；8 秒後「最終隕石」：場上最高 HP 目標被 100% 擊破（×2.0 倍率，全服共享）；個人冷卻 20 秒；全服冷卻 30 秒
+  - **設計差異：** 與黑洞爆炸魚（T207，吸收+能量爆炸）不同，隕石雨是「隨機轟炸」，讓玩家看到「隕石從天而降砸中魚」的視覺爽感；「隕石連擊」讓玩家有「要看哪條魚被連續砸中」的期待感，製造「哇，那條魚被砸了 3 次」的驚嘆感；「最終隕石」讓玩家有「等待→最後一擊」的高潮設計，確保最高 HP 目標被消滅；「全服共享獎勵」讓所有玩家都受益，製造「全服一起看隕石雨」的社交感；「70% 擊破機率」讓玩家有「這次會不會砸中」的刺激感，不是 100% 確定
+  - server/internal/game/lucky_meteor_shower_handler.go：luckyMeteorShowerManager（個人冷卻/全服冷卻/activeSession）；meteorShowerSession（triggerPlayerID/triggerPlayerName/expiresAt/hitStreak）；isLuckyMeteorShowerFish（T211）；isMeteorShowerActive；tryLuckyMeteorShowerFish（擊破後觸發/全服廣播/全服公告）；runMeteorShower（goroutine 每1秒轟炸/8秒後最終隕石）；doMeteorBomb（隨機選2個目標/70%擊破/×1.3倍率/全服共享/連擊追蹤）；doMeteorCombo（連續3次命中/×3.0倍率/全服大獎/廣播）；doMeteorFinalStrike（最高HP目標/100%擊破/×2.0倍率/全服共享/廣播）
+  - server/internal/data/tables.go：新增 T211 幸運星際隕石魚（48-87x/HP88/SpawnWeight3/Speed34/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyMeteorShower；LuckyMeteorShowerPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyMeteorShower + case 處理
+  - server/internal/game/game.go：LuckyMeteorShower *luckyMeteorShowerManager；handleKill 加入 isLuckyMeteorShowerFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyMeteorShowerPanel.gd：深紅隕石主題面板（meteor_start 深紅三次強閃光+頂部橫幅+「☄️ 星際隕石雨！」大字+計時條；meteor_bomb 深紅閃光+「☄️ 第N輪 轟炸命中！×1.3」浮動文字+隕石落點特效；meteor_combo 全螢幕三次強閃光+「☄️ 隕石連擊！×3.0」大字+連擊計數器；meteor_final 全螢幕三次強閃光+「☄️ 最終隕石！×2.0」大字+結算彈窗；meteor_end 計時條淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_meteor_shower 訊號 + _handle_lucky_meteor_shower
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyMeteorShowerPanelScript（layer=26）
+  - 隕石雨設計：每 1 秒轟炸；隨機 2 個目標；70% 擊破機率；持續 8 秒；個人冷卻 20 秒；全服冷卻 30 秒
+  - 轟炸設計：×1.3 倍率；全服共享獎勵；Fisher-Yates 隨機打亂
+  - 連擊設計：連續 3 次命中同一目標；×3.0 倍率；全服大獎；全服公告
+  - 最終隕石設計：最高 HP 目標；100% 擊破；×2.0 倍率；全服共享；全服公告
+  - 視覺設計：深紅隕石主題（#C0392B + #E74C3C + #E67E22 + #F39C12）；隕石落點特效（圓圈擴散+淡出，普通40px/連擊64px/最終96px）；連擊計數器（☄️ 連擊 ×N，脈衝動畫）；右側豎向計時條（深紅，x=-128 與其他計時條錯開）；最終隕石結算彈窗右側滑入
+  - 全服廣播：隕石雨開始/每次轟炸命中/隕石連擊/最終隕石/結束全服廣播
+  - 全服公告：觸發時公告（深紅色）；隕石連擊公告（橙紅色）；最終隕石公告（深紅色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-252 更新（自主觸發）：** 幸運武器進化魚系統（Lucky Weapon Evolution Fish）✅
   - **業界依據：** 業界原創「武器進化+穿透+武器爆發」機制，Royal Fishing 2026 三層大廳+武器升級趨勢
   - **設計：** 擊破 T210 後，玩家武器「進化」（持續 12 秒）；等級 2：命中率+30%，倍率 ×1.5；進化期間再次擊破 T210 → 等級 3：穿透效果（子彈穿透第一個目標繼續飛行），倍率 ×2.5；進化結束時「武器爆發」：自動 3 連射（×1.2 倍率，個人獎勵）；個人冷卻 18 秒；全服冷卻 25 秒
