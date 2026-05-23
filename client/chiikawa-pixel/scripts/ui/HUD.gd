@@ -352,6 +352,7 @@ func _ready() -> void:
 	_init_lucky_chain_explosion_panel()     # 幸運連鎖爆炸魚系統面板（DAY-266）
 	_init_lucky_multiplier_stack_panel()    # 幸運倍率疊加魚系統面板（DAY-267）
 	_init_lucky_countdown_bomb_panel()      # 幸運倒數炸彈魚系統面板（DAY-268）
+	_init_lucky_spin_wheel_panel()          # 幸運輪盤魚系統面板（DAY-269）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5073,3 +5074,19 @@ func _init_lucky_countdown_bomb_panel() -> void:
 func _on_lucky_countdown_bomb(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_countdown_bomb_panel):
 		_lucky_countdown_bomb_panel.handle_event(data)
+
+const LuckySpinWheelPanelScript = preload("res://scripts/ui/LuckySpinWheelPanel.gd")
+var _lucky_spin_wheel_panel = null
+
+func _init_lucky_spin_wheel_panel() -> void:
+	var panel = LuckySpinWheelPanelScript.new()
+	panel.name = "LuckySpinWheelPanel"
+	panel.layer = 42
+	add_child(panel)
+	_lucky_spin_wheel_panel = panel
+	if GameManager.has_signal("lucky_spin_wheel"):
+		GameManager.lucky_spin_wheel.connect(_on_lucky_spin_wheel)
+
+func _on_lucky_spin_wheel(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_spin_wheel_panel):
+		_lucky_spin_wheel_panel.handle_event(data)

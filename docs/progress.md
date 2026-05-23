@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-268 幸運倒數炸彈魚系統）
+## 最後更新：2026-05-24（DAY-269 幸運輪盤魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-268 更新（自主觸發）：** 幸運倒數炸彈魚系統（Lucky Countdown Bomb Fish）✅
+- **DAY-269 更新（自主觸發）：** 幸運輪盤魚系統（Lucky Spin Wheel Fish）✅
+  - **業界依據：** Royal Fishing ChainLong King Wheel 個人輪盤版本，2026 年最熱門「輪盤+倍率」機制
+  - **設計：** 擊破 T227 後，觸發「個人幸運輪盤」（5 個扇區：×2.0/×3.0/×5.0/×8.0/×0.5，機率：35%/30%/20%/10%/5%）；Server 隨機決定結果，廣播給觸發玩家；結果倍率套用到觸發玩家接下來 8 秒的所有擊破（個人）；個人冷卻 25 秒；全服冷卻 40 秒
+  - **設計差異：** 與競速賽（T223，排名競爭）不同，輪盤是「個人運氣」，讓玩家有「轉輪盤，看看這次是幾倍」的期待感；「5 個扇區不同倍率」讓每次觸發都有不同結果；「×8.0 最高倍率（10% 機率）」讓玩家有「要是轉到 8 倍就賺大了」的期待感；「×0.5 懲罰扇區（5% 機率）」讓輪盤有風險感；「8 秒加成期間」讓玩家有「要趁 8 秒內多打幾條魚」的緊迫感
+  - server/internal/game/lucky_spin_wheel_handler.go：luckySpinWheelManager（個人冷卻/全服冷卻/activeBoosts）；spinWheelSector（mult/weight）；spinWheelBoost（playerID/mult/expiresAt/killCount/totalReward）；isLuckySpinWheelFish（T227）；getLuckySpinWheelMult（供 handleKill 使用）；spinWheel（隨機抽取扇區）；tryLuckySpinWheelFish（擊破後觸發/0.8秒延遲/個人訊息+全服廣播+全服公告）；notifySpinWheelBoostKill（加成期間擊破通知）；runSpinWheelTimeout（goroutine 8秒後結算）
+  - server/internal/data/tables.go：新增 T227 幸運輪盤魚（64-119x/HP104/SpawnWeight2/Speed18/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckySpinWheel；LuckySpinWheelPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckySpinWheel + case 處理
+  - server/internal/game/game.go：LuckySpinWheel *luckySpinWheelManager；handleKill 加入 isLuckySpinWheelFish 分支 + getLuckySpinWheelMult 倍率套用 + notifySpinWheelBoostKill
+  - client/chiikawa-pixel/scripts/ui/LuckySpinWheelPanel.gd：粉金輪盤主題面板（spin_start 粉紅三次強閃光+頂部橫幅+「🎡 幸運輪盤！」大字；spin_result 根據倍率決定閃光強度+倍率指示器+計時條；spin_boost_kill 輕微閃光+浮動文字；spin_expire 結算提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_spin_wheel 訊號 + _handle_lucky_spin_wheel
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckySpinWheelPanelScript（layer=42）
+  - 扇區設計：×2.0（35%）/×3.0（30%）/×5.0（20%）/×8.0（10%）/×0.5（5%）
+  - 加成設計：8 秒持續；個人倍率套用；個人冷卻 25 秒；全服冷卻 40 秒
+  - 視覺設計：粉金輪盤主題（#FF69B4 粉紅 + #FFD700 金 + #FF4500 火橙 + #00FF88 翠綠 + 懲罰紅）；倍率指示器（🎡 ×N.N，右上角，顏色隨倍率變化）；右側豎向計時條（粉紅，x=-296 與其他計時條錯開）
+  - 全服廣播：輪盤觸發/輪盤結果全服廣播
+  - 全服公告：觸發時公告（粉紅色）；×5.0 以上公告（金色）
+  - build/vet 全部通過（零錯誤零警告）
   - **業界依據：** 業界原創「倒數充能+全服爆炸」機制，結合「倒數計時+全服合力充能+爆炸獎勵」三個元素，製造全服社交緊迫感
   - **設計：** 擊破 T226 後，場上出現「倒數炸彈」（10 秒倒數）；倒數期間，任何玩家每次擊破任何目標，炸彈充能 +1（最多 10 次）；10 秒後炸彈爆炸：充能數 × ×1.5 倍率（全服共享 AOE）；若充能達到 10 次，提前引爆：×3.0 倍率（全服大獎）；個人冷卻 28 秒；全服冷卻 45 秒
   - **設計差異：** 與倍率疊加（T225，個人累積）不同，倒數炸彈是「全服合力充能」，讓所有玩家有「快快快，還差幾個！」的緊迫感；「充能數 × ×1.5」讓玩家有「充能越多爆炸越強」的動力；「滿充能提前引爆 ×3.0」讓玩家有「要趁 10 秒內全服打滿 10 個目標」的策略感；「倒數計時器全服廣播」讓所有玩家看到「還剩幾秒」，製造緊迫感；「充能進度全服廣播」讓所有玩家看到「現在充能了幾個」，製造「快滿了！」的期待感

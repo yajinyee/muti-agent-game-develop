@@ -242,6 +242,7 @@ type Game struct {
 	LuckyChainExplosion     *luckyChainExplosionManager        // 幸運連鎖爆炸魚系統管理器（DAY-266）
 	LuckyMultiplierStack    *luckyMultiplierStackManager       // 幸運倍率疊加魚系統管理器（DAY-267）
 	LuckyCountdownBomb      *luckyCountdownBombManager         // 幸運倒數炸彈魚系統管理器（DAY-268）
+	LuckySpinWheel          *luckySpinWheelManager             // 幸運輪盤魚系統管理器（DAY-269）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -460,6 +461,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyChainExplosion:     newLuckyChainExplosionManager(),
 		LuckyMultiplierStack:    newLuckyMultiplierStackManager(),
 		LuckyCountdownBomb:      newLuckyCountdownBombManager(),
+		LuckySpinWheel:          newLuckySpinWheelManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1582,6 +1584,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if speedRaceBoostMult > 1.0 {
 		finalReward = int(float64(finalReward) * speedRaceBoostMult)
 	}
+	// 套用幸運輪盤魚輪盤加成倍率（DAY-269，×0.5/2.0/3.0/5.0/8.0 乘法，個人，8 秒）
+	spinWheelMult := g.LuckySpinWheel.getLuckySpinWheelMult(p.ID)
+	if spinWheelMult != 1.0 && !isLuckySpinWheelFish(t.DefID) {
+		finalReward = int(float64(finalReward) * spinWheelMult)
+		if finalReward < 0 {
+			finalReward = 0
+		}
+	}
 	// 套用幸運星座命運魚星座祝福/庇護倍率加成（DAY-259，×3.0/1.5 乘法，個人，祝福/庇護期間）
 	zodiacMult := g.LuckyZodiacFate.getLuckyZodiacFateMult(p.ID)
 	if zodiacMult > 1.0 {
@@ -2415,6 +2425,21 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運倒數炸彈魚：倒數炸彈活躍時，任何玩家擊破任何非 T226 目標時充能（DAY-268）
 	if !isLuckyCountdownBombFish(t.DefID) && g.LuckyCountdownBomb.isCountdownBombActive() {
 		go g.notifyCountdownBombKill(p)
+	}
+	// 幸運輪盤魚：擊破 T227 時觸發輪盤（DAY-269）
+	if isLuckySpinWheelFish(t.DefID) {
+		go g.tryLuckySpinWheelFish(p)
+	}
+	// 幸運輪盤魚：輪盤加成期間擊破任何非 T227 目標時，記錄加成擊破（DAY-269）
+	if !isLuckySpinWheelFish(t.DefID) {
+		spinMult := g.LuckySpinWheel.getLuckySpinWheelMult(p.ID)
+		if spinMult != 1.0 {
+			targetName := t.DefID
+			if t.Def != nil {
+				targetName = t.Def.Name
+			}
+			go g.notifySpinWheelBoostKill(p, targetName, finalReward)
+		}
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

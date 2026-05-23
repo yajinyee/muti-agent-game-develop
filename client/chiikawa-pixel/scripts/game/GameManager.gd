@@ -273,6 +273,7 @@ signal lucky_speed_race_fish(data: Dictionary)        # 幸運競速賽魚系統
 signal lucky_chain_explosion(data: Dictionary)        # 幸運連鎖爆炸魚系統（DAY-266）
 signal lucky_multiplier_stack(data: Dictionary)       # 幸運倍率疊加魚系統（DAY-267）
 signal lucky_countdown_bomb(data: Dictionary)         # 幸運倒數炸彈魚系統（DAY-268）
+signal lucky_spin_wheel(data: Dictionary)             # 幸運輪盤魚系統（DAY-269）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -786,6 +787,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_multiplier_stack(payload)
 		"lucky_countdown_bomb":
 			_handle_lucky_countdown_bomb(payload)
+		"lucky_spin_wheel":
+			_handle_lucky_spin_wheel(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3964,3 +3967,19 @@ func _handle_lucky_countdown_bomb(payload: Dictionary) -> void:
 			var mult: float = payload.get("mult", 1.0)
 			var is_burst: bool = payload.get("is_burst", false)
 			print("[GameManager] CountdownBomb explode! charge=%d mult=%.1f burst=%s" % [charge_count, mult, str(is_burst)])
+
+## 幸運輪盤魚系統（DAY-269）
+func _handle_lucky_spin_wheel(payload: Dictionary) -> void:
+	emit_signal("lucky_spin_wheel", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"spin_start":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] SpinWheel start! trigger=%s" % player_name)
+		"spin_result":
+			var result_mult: float = payload.get("result_mult", 1.0)
+			print("[GameManager] SpinWheel result! mult=%.1f" % result_mult)
+		"spin_expire":
+			var total_reward: int = payload.get("total_reward", 0)
+			var kill_count: int = payload.get("kill_count", 0)
+			print("[GameManager] SpinWheel expire! reward=%d kills=%d" % [total_reward, kill_count])
