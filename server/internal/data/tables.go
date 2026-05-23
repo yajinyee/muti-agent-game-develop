@@ -587,6 +587,13 @@ var Targets = map[string]*TargetDef{
 	//   - 被引爆的目標如果也有引爆標記，繼續連鎖（最多 3 層連鎖）
 	//   - 連鎖爆炸獎勵給觸發者；個人冷卻 20 秒
 	"T184": {ID: "T184", Name: "幸運鏈鎖爆炸魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 58, HP: 68, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_chain_bomb"},
+	// T185 幸運鏡像時空魚（DAY-227）— 業界原創「時間倒流」機制
+	// 設計：擊破 T185 後觸發「時間倒流」（8 秒）：
+	//   - 場上所有目標物 HP 回滿（MaxHP）
+	//   - 時間倒流期間擊破任何目標獲得 ×2.0 倍率加成（乘法）
+	//   - 8 秒後「時間崩潰」：所有目標 HP -40%
+	//   - 個人冷卻 25 秒
+	"T185": {ID: "T185", Name: "幸運鏡像時空魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 47, Lifetime: 15, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_mirror_time"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

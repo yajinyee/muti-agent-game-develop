@@ -566,6 +566,7 @@ const (
 	MsgLuckySplitFish      MessageType = "lucky_split_fish"      // 幸運分裂魚廣播（Server→Client，DAY-224）
 	MsgLuckyChargeFish     MessageType = "lucky_charge_fish"     // 幸運充能魚廣播（Server→Client，DAY-225）
 	MsgLuckyChainBomb      MessageType = "lucky_chain_bomb"      // 幸運鏈鎖爆炸魚廣播（Server→Client，DAY-226）
+	MsgLuckyMirrorTime     MessageType = "lucky_mirror_time"     // 幸運鏡像時空魚廣播（Server→Client，DAY-227）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5070,6 +5071,24 @@ type LuckyChargeFishPayload struct {
 	DurationSec int     `json:"duration_sec,omitempty"`
 	BurstMult   float64 `json:"burst_mult,omitempty"`
 	Reward      int     `json:"reward,omitempty"`
+}
+
+// LuckyMirrorTimePayload 幸運鏡像時空魚廣播（Server → Client，DAY-227）
+//
+// Events:
+//
+//	"time_rewind_start" — 時間倒流開始（全服廣播）
+//	"time_collapse"     — 時間崩潰（全服廣播）
+type LuckyMirrorTimePayload struct {
+	Event         string  `json:"event"`
+	InstanceID    string  `json:"instance_id,omitempty"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	BoostMult     float64 `json:"boost_mult,omitempty"`
+	DurationSec   int     `json:"duration_sec,omitempty"`
+	RewindCount   int     `json:"rewind_count,omitempty"`
+	CollapseCount int     `json:"collapse_count,omitempty"`
+	CollapseRatio float64 `json:"collapse_ratio,omitempty"`
 }
 
 // LuckyChainBombPayload 幸運鏈鎖爆炸魚廣播（Server → Client，DAY-226）

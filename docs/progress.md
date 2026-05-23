@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-226 幸運鏈鎖爆炸魚系統）
+## 最後更新：2026-05-23（DAY-227 幸運鏡像時空魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-227 更新（自主觸發）：** 幸運鏡像時空魚系統（Lucky Mirror Time Fish）✅
+  - **業界依據：** 業界原創「時間倒流」機制
+  - **設計：** 擊破 T185 後觸發「時間倒流」（8 秒）：場上所有目標物 HP 回滿（MaxHP）；時間倒流期間擊破任何目標獲得 ×2.0 倍率加成（乘法）；8 秒後「時間崩潰」：所有目標 HP -40%；個人冷卻 25 秒
+  - **設計差異：** 與時間凍結魚（DAY-212，全場靜止）不同，時間倒流是「HP 回滿但倍率翻倍」；與傳送魚（DAY-223，全場瞬間移動）不同，時間倒流是「HP 狀態回溯」；「HP 回滿但倍率 ×2.0」讓玩家有「要趁 HP 回滿前趕快打」的緊迫感；「時間崩潰 HP -40%」讓玩家有「等待→爆發」的高潮設計
+  - server/internal/game/lucky_mirror_time_handler.go：luckyMirrorTimeManager（個人冷卻/active/activeUntil/instanceID）；isLuckyMirrorTimeFish（T185）；isLuckyMirrorTimeActive；getLuckyMirrorTimeBoost（×2.0 乘法）；tryLuckyMirrorTimeFish（擊破後觸發/所有目標HP回滿/全服廣播/8秒後時間崩潰HP-40%）
+  - server/internal/data/tables.go：新增 T185 幸運鏡像時空魚（35-65x/HP75/SpawnWeight3/Speed47/Lifetime15）
+  - server/internal/ws/protocol.go：新增 MsgLuckyMirrorTime；LuckyMirrorTimePayload（time_rewind_start/time_collapse）
+  - server/internal/game/announce/announce.go：新增 EventLuckyMirrorTimeFish + case 處理
+  - server/internal/game/game.go：LuckyMirrorTime *luckyMirrorTimeManager；handleKill 加入 getLuckyMirrorTimeBoost 乘法加成 + isLuckyMirrorTimeFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyMirrorTimePanel.gd：天藍時空主題面板（time_rewind_start 天藍三次強閃光+頂部橫幅+「⏪ 時間倒流！」大字+計時條+倍率提示；time_collapse 橙色閃光+「💥 時間崩潰！」大字+HP-40%提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_mirror_time 訊號 + _handle_lucky_mirror_time
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyMirrorTimePanelScript（layer=18）
+  - 時間倒流設計：所有目標 HP 回滿；×2.0 倍率加成 8 秒；個人冷卻 25 秒
+  - 時間崩潰設計：所有目標 HP -40%（保留 1）；8 秒後自動觸發
+  - 視覺設計：天藍時空主題（#00BFFF + #87CEEB + #E0F8FF + #FF6B35）；底部計時條（天藍→橙色漸變）；倍率提示閃爍動畫
+  - 全服廣播：時間倒流開始/時間崩潰全服廣播
+  - 全服公告：觸發時公告（天藍色）；崩潰時公告（橙色）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-226 更新（自主觸發）：** 幸運鏈鎖爆炸魚系統（Lucky Chain Bomb Fish）✅
   - **業界依據：** 業界原創「連鎖爆炸」機制
   - **設計：** 擊破 T184 後，場上隨機 3 個目標被「引爆標記」；引爆標記目標被擊破後，立即引爆周圍 200px 內所有目標（60% 擊破機率，×1.5 倍率）；被引爆的目標如果也有引爆標記，繼續連鎖（最多 3 層連鎖）；個人冷卻 20 秒

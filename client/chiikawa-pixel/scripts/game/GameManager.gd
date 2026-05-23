@@ -229,6 +229,7 @@ signal lucky_teleport_fish(data: Dictionary)        # 幸運傳送魚系統（DA
 signal lucky_split_fish(data: Dictionary)           # 幸運分裂魚系統（DAY-224）
 signal lucky_charge_fish(data: Dictionary)          # 幸運充能魚系統（DAY-225）
 signal lucky_chain_bomb(data: Dictionary)           # 幸運鏈鎖爆炸魚系統（DAY-226）
+signal lucky_mirror_time(data: Dictionary)          # 幸運鏡像時空魚系統（DAY-227）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -658,6 +659,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_charge_fish(payload)
 		"lucky_chain_bomb":
 			_handle_lucky_chain_bomb(payload)
+		"lucky_mirror_time":
+			_handle_lucky_mirror_time(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2836,3 +2839,16 @@ func _handle_lucky_chain_bomb(payload: Dictionary) -> void:
 			print("[GameManager] Chain bomb blast! layer=%d reward=%d" % [chain_layer, total_reward])
 		"chain_bomb_expire":
 			print("[GameManager] Chain bomb marks expired")
+
+## 處理幸運鏡像時空魚系統（DAY-227）
+func _handle_lucky_mirror_time(payload: Dictionary) -> void:
+	emit_signal("lucky_mirror_time", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"time_rewind_start":
+			var rewind_count: int = payload.get("rewind_count", 0)
+			var boost_mult: float = payload.get("boost_mult", 2.0)
+			print("[GameManager] Time rewind started! rewound=%d boost=×%.1f" % [rewind_count, boost_mult])
+		"time_collapse":
+			var collapse_count: int = payload.get("collapse_count", 0)
+			print("[GameManager] Time collapse! %d targets HP -40%%" % collapse_count)
