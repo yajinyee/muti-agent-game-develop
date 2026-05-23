@@ -228,6 +228,7 @@ signal lucky_resonance_fish(data: Dictionary)       # 幸運共鳴魚系統（DA
 signal lucky_teleport_fish(data: Dictionary)        # 幸運傳送魚系統（DAY-223）
 signal lucky_split_fish(data: Dictionary)           # 幸運分裂魚系統（DAY-224）
 signal lucky_charge_fish(data: Dictionary)          # 幸運充能魚系統（DAY-225）
+signal lucky_chain_bomb(data: Dictionary)           # 幸運鏈鎖爆炸魚系統（DAY-226）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -655,6 +656,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_split_fish(payload)
 		"lucky_charge_fish":
 			_handle_lucky_charge_fish(payload)
+		"lucky_chain_bomb":
+			_handle_lucky_chain_bomb(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2814,3 +2817,22 @@ func _handle_lucky_charge_fish(payload: Dictionary) -> void:
 			print("[GameManager] Charge burst triggered! reward=%d" % reward)
 		"charge_end":
 			print("[GameManager] Charge mode ended")
+
+## 處理幸運鏈鎖爆炸魚系統（DAY-226）
+func _handle_lucky_chain_bomb(payload: Dictionary) -> void:
+	emit_signal("lucky_chain_bomb", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"chain_bomb_start":
+			var marked_count: int = payload.get("marked", []).size()
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Chain bomb started by %s, marked=%d" % [player_name, marked_count])
+		"chain_bomb_trigger":
+			var chain_layer: int = payload.get("chain_layer", 1)
+			print("[GameManager] Chain bomb triggered! layer=%d" % chain_layer)
+		"chain_bomb_blast":
+			var total_reward: int = payload.get("total_reward", 0)
+			var chain_layer: int = payload.get("chain_layer", 1)
+			print("[GameManager] Chain bomb blast! layer=%d reward=%d" % [chain_layer, total_reward])
+		"chain_bomb_expire":
+			print("[GameManager] Chain bomb marks expired")

@@ -199,6 +199,7 @@ type Game struct {
 	LuckyTeleportFish  *luckyTeleportFishManager   // 幸運傳送魚系統管理器（DAY-223）
 	LuckySplitFish     *luckySplitFishManager      // 幸運分裂魚系統管理器（DAY-224）
 	LuckyChargeFish    *luckyChargeFishManager     // 幸運充能魚系統管理器（DAY-225）
+	LuckyChainBomb     *luckyChainBombManager      // 幸運鏈鎖爆炸魚系統管理器（DAY-226）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -374,6 +375,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyTeleportFish:  newLuckyTeleportFishManager(),
 		LuckySplitFish:     newLuckySplitFishManager(),
 		LuckyChargeFish:    newLuckyChargeFishManager(),
+		LuckyChainBomb:     newLuckyChainBombManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1339,6 +1341,12 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		finalReward = int(float64(finalReward) * chargeBurst)
 		go g.notifyLuckyChargeBurstUsed(p, chargeInstanceID, finalReward)
 	}
+	// 套用幸運鏈鎖爆炸魚引爆標記倍率（DAY-226，×1.5 乘法，個人，引爆標記目標）
+	chainBombMult := g.getLuckyChainBombMult(t.InstanceID)
+	if chainBombMult > 1.0 {
+		finalReward = int(float64(finalReward) * chainBombMult)
+		go g.notifyChainBombKill(p, t)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1901,6 +1909,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運充能魚：擊破 T183 本身時觸發充能模式（DAY-225）
 	if isLuckyChargeFish(t.DefID) {
 		go g.tryLuckyChargeFish(p)
+	}
+	// 幸運鏈鎖爆炸魚：擊破 T184 本身時觸發引爆標記（DAY-226）
+	if isLuckyChainBombFish(t.DefID) {
+		go g.tryLuckyChainBombFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-225 幸運充能魚系統）
+## 最後更新：2026-05-23（DAY-226 幸運鏈鎖爆炸魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,20 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-226 更新（自主觸發）：** 幸運鏈鎖爆炸魚系統（Lucky Chain Bomb Fish）✅
+  - **業界依據：** 業界原創「連鎖爆炸」機制
+  - **設計：** 擊破 T184 後，場上隨機 3 個目標被「引爆標記」；引爆標記目標被擊破後，立即引爆周圍 200px 內所有目標（60% 擊破機率，×1.5 倍率）；被引爆的目標如果也有引爆標記，繼續連鎖（最多 3 層連鎖）；個人冷卻 20 秒
+  - **設計差異：** 與感染魚（DAY-219，動態蔓延，時間驅動）不同，鏈鎖爆炸是「空間爆炸」，即時觸發；與分裂魚（DAY-224，一魚分三）不同，鏈鎖爆炸是「引爆周圍目標」，空間策略感更強；「連鎖最多 3 層」讓玩家有「要把魚聚集在一起才能最大化連鎖」的策略感；「引爆標記」讓玩家有「要先打哪個引爆目標」的選擇感
+  - server/internal/game/lucky_chain_bomb_handler.go：luckyChainBombManager（個人冷卻/markedTargets/currentInstanceID）；chainBombMark（instanceID/expiresAt）；isLuckyChainBombFish（T184）；isChainBombMarked；removeChainBombMark；getLuckyChainBombMult（×1.5）；tryLuckyChainBombFish；doChainBombExplosion（200px/60%/最多3層遞迴）；notifyChainBombKill；ChainBombBlastResult
+  - server/internal/data/tables.go：新增 T184 幸運鏈鎖爆炸魚（30-58x/HP68/SpawnWeight3/Speed50/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyChainBomb；LuckyChainBombPayload（chain_bomb_start/chain_bomb_trigger/chain_bomb_blast/chain_bomb_expire）
+  - server/internal/game/announce/announce.go：新增 EventLuckyChainBombFish + case 處理
+  - server/internal/game/game.go：LuckyChainBomb *luckyChainBombManager；handleKill 加入 getLuckyChainBombMult + notifyChainBombKill + isLuckyChainBombFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyChainBombPanel.gd：橙紅爆炸主題面板（chain_bomb_start/chain_bomb_trigger/chain_bomb_blast/chain_bomb_expire）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_chain_bomb 訊號 + _handle_lucky_chain_bomb
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyChainBombPanelScript（layer=19）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-225 更新（自主觸發）：** 幸運充能魚系統（Lucky Charge Fish）✅
   - **業界依據：** Royal Fishing「Power Up mechanic amplifies rewards up to 200x」+ Ice Fishing「random boosts up to x500」+ 業界原創「射擊充能→爆發」機制
   - **設計：** 擊破 T183 後觸發「充能模式」（12 秒）：玩家的每次射擊都累積「充能值」（+1/shot）；充能值達到 10 → 自動觸發「充能爆發」：下一次擊破任何目標獲得 ×5.0 倍率加成（一次性）；充能爆發後重置，可再次累積（12 秒內可觸發多次）；個人冷卻 22 秒；個人機制（不是全服）

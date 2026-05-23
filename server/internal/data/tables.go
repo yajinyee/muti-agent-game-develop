@@ -581,6 +581,12 @@ var Targets = map[string]*TargetDef{
 	//   - 充能爆發後重置，可再次累積（12 秒內可觸發多次）
 	//   - 個人冷卻 22 秒
 	"T183": {ID: "T183", Name: "幸運充能魚", Type: TargetTypeSpecial, MultiplierMin: 32, MultiplierMax: 62, HP: 72, SpawnWeight: 3, Speed: 49, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_charge"},
+	// T184 幸運鏈鎖爆炸魚（DAY-226）— 業界原創「連鎖爆炸」機制
+	// 設計：擊破 T184 後，場上隨機 3 個目標被「引爆標記」：
+	//   - 引爆標記目標被擊破後，立即引爆周圍 200px 內所有目標（60% 擊破機率，×1.5 倍率）
+	//   - 被引爆的目標如果也有引爆標記，繼續連鎖（最多 3 層連鎖）
+	//   - 連鎖爆炸獎勵給觸發者；個人冷卻 20 秒
+	"T184": {ID: "T184", Name: "幸運鏈鎖爆炸魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 58, HP: 68, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_chain_bomb"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

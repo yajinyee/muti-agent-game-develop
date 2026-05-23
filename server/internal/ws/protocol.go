@@ -565,6 +565,7 @@ const (
 	MsgLuckyTeleportFish   MessageType = "lucky_teleport_fish"   // 幸運傳送魚廣播（Server→Client，DAY-223）
 	MsgLuckySplitFish      MessageType = "lucky_split_fish"      // 幸運分裂魚廣播（Server→Client，DAY-224）
 	MsgLuckyChargeFish     MessageType = "lucky_charge_fish"     // 幸運充能魚廣播（Server→Client，DAY-225）
+	MsgLuckyChainBomb      MessageType = "lucky_chain_bomb"      // 幸運鏈鎖爆炸魚廣播（Server→Client，DAY-226）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5069,4 +5070,28 @@ type LuckyChargeFishPayload struct {
 	DurationSec int     `json:"duration_sec,omitempty"`
 	BurstMult   float64 `json:"burst_mult,omitempty"`
 	Reward      int     `json:"reward,omitempty"`
+}
+
+// LuckyChainBombPayload 幸運鏈鎖爆炸魚廣播（Server → Client，DAY-226）
+//
+// Events:
+//
+//	"chain_bomb_start"   — 引爆標記建立（全服廣播）
+//	"chain_bomb_trigger" — 引爆標記目標被擊破，連鎖開始（全服廣播）
+//	"chain_bomb_blast"   — 連鎖爆炸結果（全服廣播）
+//	"chain_bomb_expire"  — 引爆標記過期（全服廣播）
+type LuckyChainBombPayload struct {
+	Event       string      `json:"event"`
+	InstanceID  string      `json:"instance_id,omitempty"`
+	PlayerID    string      `json:"player_id,omitempty"`
+	PlayerName  string      `json:"player_name,omitempty"`
+	Marked      interface{} `json:"marked,omitempty"`
+	DurationSec int         `json:"duration_sec,omitempty"`
+	TriggerID   string      `json:"trigger_id,omitempty"`
+	TriggerX    float64     `json:"trigger_x,omitempty"`
+	TriggerY    float64     `json:"trigger_y,omitempty"`
+	ChainLayer  int         `json:"chain_layer,omitempty"`
+	BlastRadius float64     `json:"blast_radius,omitempty"`
+	Results     interface{} `json:"results,omitempty"`
+	TotalReward int         `json:"total_reward,omitempty"`
 }

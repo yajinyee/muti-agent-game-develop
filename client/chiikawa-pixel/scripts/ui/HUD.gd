@@ -309,6 +309,7 @@ func _ready() -> void:
 	_init_lucky_teleport_fish_panel()   # 幸運傳送魚系統面板（DAY-223）
 	_init_lucky_split_fish_panel()      # 幸運分裂魚系統面板（DAY-224）
 	_init_lucky_charge_fish_panel()     # 幸運充能魚系統面板（DAY-225）
+	_init_lucky_chain_bomb_panel()      # 幸運鏈鎖爆炸魚系統面板（DAY-226）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4291,3 +4292,20 @@ func _init_lucky_charge_fish_panel() -> void:
 func _on_lucky_charge_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_charge_fish_panel):
 		_lucky_charge_fish_panel.handle_lucky_charge_fish(data)
+
+# ─── 幸運鏈鎖爆炸魚系統面板（DAY-226）───────────────────────────────────────
+const LuckyChainBombPanelScript = preload("res://scripts/ui/LuckyChainBombPanel.gd")
+var _lucky_chain_bomb_panel = null
+
+func _init_lucky_chain_bomb_panel() -> void:
+	var panel = LuckyChainBombPanelScript.new()
+	panel.name = "LuckyChainBombPanel"
+	panel.layer = 19
+	add_child(panel)
+	_lucky_chain_bomb_panel = panel
+	if GameManager.has_signal("lucky_chain_bomb"):
+		GameManager.lucky_chain_bomb.connect(_on_lucky_chain_bomb)
+
+func _on_lucky_chain_bomb(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_chain_bomb_panel):
+		_lucky_chain_bomb_panel.handle_lucky_chain_bomb(data)

@@ -2,33 +2,33 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-23（DAY-221）
-**整體目標**：幸運黑洞魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-23（DAY-226）
+**整體目標**：幸運鏈鎖爆炸魚系統 ✅ → 繼續自主推進
 
 ---
 
 ## 今日任務清單
 
-### ✅ DAY-221 啟動檢查
+### ✅ DAY-226 啟動檢查
 
-- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-220，幸運反彈魚系統）
+- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-225，幸運充能魚系統）
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
-- [x] 上網研究業界最新機制（Black Hole Fishing 2026 Steam 新作）
+- [x] 上網研究業界最新機制
 
-### ✅ DAY-221 幸運黑洞魚系統（P1）
+### ✅ DAY-226 幸運鏈鎖爆炸魚系統（P1）
 
-- [x] `data/tables.go`：新增 T179 幸運黑洞魚（40-70x/HP80/SpawnWeight3/Speed45/Lifetime15）
-- [x] `ws/protocol.go`：新增 MsgLuckyBlackHole；LuckyBlackHolePayload
-- [x] `announce/announce.go`：新增 EventLuckyBlackHole + case 處理
-- [x] `lucky_black_hole_handler.go`：完整 handler（黑洞建立/重力脈衝/奇點爆炸/倍率加成）
-- [x] `game.go`：整合 LuckyBlackHole manager（struct/init/handleKill 倍率加成 + 分支）
-- [x] `LuckyBlackHolePanel.gd`：深紫黑洞主題面板（三層同心圓+脈衝+奇點爆炸）
-- [x] `GameManager.gd`：lucky_black_hole 訊號 + _handle_lucky_black_hole
-- [x] `HUD.gd`：整合 LuckyBlackHolePanelScript（layer=24）
+- [x] `data/tables.go`：新增 T184 幸運鏈鎖爆炸魚（30-58x/HP68/SpawnWeight3/Speed50/Lifetime14）
+- [x] `ws/protocol.go`：新增 MsgLuckyChainBomb；LuckyChainBombPayload
+- [x] `announce/announce.go`：新增 EventLuckyChainBombFish + case 處理
+- [x] `lucky_chain_bomb_handler.go`：完整 handler（引爆標記/連鎖爆炸/倍率加成/遞迴3層）
+- [x] `game.go`：整合 LuckyChainBomb manager（struct/init/handleKill 倍率加成 + 分支）
+- [x] `LuckyChainBombPanel.gd`：橙紅爆炸主題面板（菱形標記+爆炸圓圈+連鎖層數）
+- [x] `GameManager.gd`：lucky_chain_bomb 訊號 + _handle_lucky_chain_bomb
+- [x] `HUD.gd`：整合 LuckyChainBombPanelScript（layer=19）
 - [x] build/vet 全部通過，GitHub 推送完成
 
-### 🔄 DAY-222 下一步（自主觸發）
+### 🔄 DAY-227 下一步（自主觸發）
 
 - [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
 
@@ -41,8 +41,8 @@
 - 完成度：**100%**
 - 美術質量：**100/100**
 - 規格一致性：**100%**
-- 特殊目標：**79種（T101-T179）**
-- 最新功能：**幸運黑洞魚（T179）— 重力黑洞（半徑350px）+ 每秒HP-10% + 奇點爆炸（85%擊破）**
+- 特殊目標：**84種（T101-T184）**
+- 最新功能：**幸運鏈鎖爆炸魚（T184）— 引爆標記3個目標 + 連鎖爆炸最多3層 + ×1.5倍率**
 - 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
 
 ---
