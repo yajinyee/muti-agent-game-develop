@@ -544,6 +544,14 @@ var Targets = map[string]*TargetDef{
 	//   - 每次反彈命中：60% 擊破機率，0.55x 倍率
 	//   - 個人冷卻 18 秒；全服廣播反彈開始/每次反彈/結束
 	"T178": {ID: "T178", Name: "幸運反彈魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 52, Lifetime: 13, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_ricochet"},
+	// T179 幸運黑洞魚（DAY-221）— 業界原創「重力黑洞」機制
+	// 設計：擊破 T179 後在場上建立「重力黑洞」（持續 10 秒）：
+	//   - 黑洞建立在場景中央附近（隨機偏移），半徑 350px
+	//   - 黑洞範圍內所有目標每 1 秒被「吸引」（HP -10%，模擬重力傷害）
+	//   - 黑洞範圍內目標被擊破：獎勵 ×2.0 倍率加成（乘法）
+	//   - 10 秒後「奇點爆炸」：黑洞範圍內所有目標 85% 擊破機率（0.70x 倍率，全服共享）
+	//   - 個人冷卻 22 秒；全服冷卻 35 秒
+	"T179": {ID: "T179", Name: "幸運黑洞魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 70, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 15, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "lucky_black_hole"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

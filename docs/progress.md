@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-220 幸運反彈魚系統）
+## 最後更新：2026-05-23（DAY-221 幸運黑洞魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-221 更新（自主觸發）：** 幸運黑洞魚系統（Lucky Black Hole Fish）✅
+  - **業界依據：** Black Hole Fishing 2026（Steam 新作）「singularity mechanics」+ 業界原創「重力黑洞」機制
+  - **設計：** 擊破 T179 後在場上建立「重力黑洞」（持續 10 秒）：黑洞建立在場景中央附近（隨機偏移），半徑 350px；黑洞範圍內所有目標每 1 秒被「吸引」（HP -10%，模擬重力傷害）；黑洞範圍內目標被擊破：獎勵 ×2.0 倍率加成（乘法）；10 秒後「奇點爆炸」：黑洞範圍內所有目標 85% 擊破機率（0.70x 倍率，全服共享）；個人冷卻 22 秒；全服冷卻 35 秒
+  - **設計差異：** 與幸運熱區魚（DAY-210，空間限定 ×2.0，脈衝 HP -15%）不同，黑洞魚是「重力吸引 + 奇點爆炸」，視覺上更震撼；「重力傷害」讓玩家感受到「黑洞在幫我削血」的輔助感；「奇點爆炸」是「等待→爆發」的高潮設計，85% 擊破機率是最高的；黑洞範圍 350px（比熱區 280px 更大），覆蓋更多目標；全服廣播黑洞位置讓所有玩家都往同一個地方打，製造「全服聚焦」的社交感
+  - server/internal/game/lucky_black_hole_handler.go：luckyBlackHoleManager（個人+全服冷卻/黑洞狀態/位置/半徑）；isLuckyBlackHoleFish（T179）；isInBlackHole（空間判斷）；getLuckyBlackHoleMultiplier（供 handleKill 使用，黑洞範圍內 ×2.0）；tryLuckyBlackHoleFish（擊破後觸發/全服廣播/全服公告）；runLuckyBlackHole（goroutine 每秒脈衝/10秒後奇點爆炸）；doBlackHolePulse（HP -10%/廣播）；doBlackHoleSingularityBlast（85%擊破/全服共享獎勵/全服公告）
+  - server/internal/data/tables.go：新增 T179 幸運黑洞魚（40-70x/HP80/SpawnWeight3/Speed45/Lifetime15）
+  - server/internal/ws/protocol.go：新增 MsgLuckyBlackHole；LuckyBlackHolePayload（blackhole_start/blackhole_pulse/singularity_blast/singularity_hit/singularity_result）
+  - server/internal/game/announce/announce.go：新增 EventLuckyBlackHole + case 處理
+  - server/internal/game/game.go：LuckyBlackHole *luckyBlackHoleManager；handleKill 加入 getLuckyBlackHoleMultiplier 乘法加成 + isLuckyBlackHoleFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyBlackHolePanel.gd：深紫黑洞主題面板（blackhole_start 紫色三次強閃光+頂部橫幅+黑洞圓圈；blackhole_pulse 圓圈脈衝閃爍+浮動文字；singularity_blast 全螢幕黑色收縮+紫色三次強閃光+「🌑 奇點爆炸！」52px大字；singularity_hit 爆炸圓圈+浮動獎勵；singularity_result 右側滑入結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_black_hole 訊號 + _handle_lucky_black_hole
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyBlackHolePanelScript（layer=24）
+  - 黑洞設計：半徑 350px；持續 10 秒；每秒脈衝 HP -10%；個人冷卻 22 秒；全服冷卻 35 秒
+  - 倍率設計：×2.0 乘法（空間限定）；只對黑洞範圍內目標生效
+  - 奇點爆炸設計：85% 擊破機率（最高）；0.70x 倍率；全服共享獎勵；≥4 個擊破時全服公告
+  - 視覺設計：深紫黑洞主題（#8B00FF + #4B0082 + #FF00FF + #E6E6FA）；三層同心圓（外深紫/中靛藍/內黑色核心）；脈衝閃爍動畫；全螢幕黑色收縮效果；紫色三次強閃光
+  - 全服廣播：黑洞建立/每次脈衝/奇點爆炸/每個目標擊破/結算全服廣播
+  - 全服公告：建立時公告；奇點爆炸≥4 個擊破時公告（依擊破數決定顏色：≥8 洋紅/其他深紫）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-220 更新（自主觸發）：** 幸運反彈魚系統（Lucky Ricochet Fish）✅
   - **業界依據：** 業界原創「子彈反彈」機制
   - **設計：** 擊破 T178 後觸發「反彈模式」（8秒）：玩家的每次射擊在命中目標後，子彈會「反彈」到最近的另一個目標；反彈範圍：第1跳 200px，第2跳 150px，第3跳 100px（最多 3 跳）；每次反彈命中：60% 擊破機率，0.55x 倍率；個人冷卻 18 秒

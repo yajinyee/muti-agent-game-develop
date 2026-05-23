@@ -59,6 +59,7 @@ const (
 	EventLuckyEvolutionFish       EventType = "lucky_evolution_fish"      // 幸運進化魚觸發（DAY-218）
 	EventLuckyInfectionFish       EventType = "lucky_infection_fish"      // 幸運連鎖感染魚觸發（DAY-219）
 	EventLuckyRicochetFish        EventType = "lucky_ricochet_fish"       // 幸運反彈魚觸發（DAY-220）
+	EventLuckyBlackHole           EventType = "lucky_black_hole"          // 幸運黑洞魚觸發（DAY-221）
 )
 
 // Priority 公告優先級
@@ -825,6 +826,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityNormal
 		duration = 4000
+
+	case EventLuckyBlackHole:
+		msg := "🌑 黑洞召喚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#8B00FF"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🌑 幸運黑洞魚！"
+		message = msg
+		icon = "🌑"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
 
 	default:
 		title = "📢 公告"

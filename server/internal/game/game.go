@@ -194,6 +194,7 @@ type Game struct {
 	LuckyEvolutionFish *luckyEvolutionFishManager  // 幸運進化魚系統管理器（DAY-218）
 	LuckyInfectionFish *luckyInfectionFishManager  // 幸運連鎖感染魚系統管理器（DAY-219）
 	LuckyRicochetFish  *luckyRicochetFishManager   // 幸運反彈魚系統管理器（DAY-220）
+	LuckyBlackHole     *luckyBlackHoleManager      // 幸運黑洞魚系統管理器（DAY-221）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -364,6 +365,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyEvolutionFish: newLuckyEvolutionFishManager(),
 		LuckyInfectionFish: newLuckyInfectionFishManager(),
 		LuckyRicochetFish:  newLuckyRicochetFishManager(),
+		LuckyBlackHole:     newLuckyBlackHoleManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1297,6 +1299,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if infectionMult > 1.0 {
 		finalReward = int(float64(finalReward) * infectionMult)
 	}
+	// 套用幸運黑洞魚空間倍率加成（DAY-221，×2.0 乘法，黑洞範圍內目標被擊破時）
+	blackHoleMult := g.getLuckyBlackHoleMultiplier(t.X, t.Y)
+	if blackHoleMult > 1.0 {
+		finalReward = int(float64(finalReward) * blackHoleMult)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1839,6 +1846,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isLuckyRicochetFish(t.DefID) {
 		go g.tryLuckyRicochetFish(p)
 	}
+	// 幸運黑洞魚：擊破 T179 本身時觸發黑洞（DAY-221）
+	if isLuckyBlackHoleFish(t.DefID) {
+		go g.tryLuckyBlackHoleFish(p)
+	}
+	// 幸運黑洞魚：黑洞範圍內目標被擊破時，倍率加成已在 finalMult 計算（DAY-221）
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)

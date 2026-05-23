@@ -560,6 +560,7 @@ const (
 	MsgLuckyEvolutionFish  MessageType = "lucky_evolution_fish"  // 幸運進化魚廣播（Server→Client，DAY-218）
 	MsgLuckyInfectionFish  MessageType = "lucky_infection_fish"  // 幸運連鎖感染魚廣播（Server→Client，DAY-219）
 	MsgLuckyRicochetFish   MessageType = "lucky_ricochet_fish"   // 幸運反彈魚廣播（Server→Client，DAY-220）
+	MsgLuckyBlackHole      MessageType = "lucky_black_hole"      // 幸運黑洞魚廣播（Server→Client，DAY-221）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4906,6 +4907,33 @@ type LuckyRicochetFishPayload struct {
 	X           float64 `json:"x,omitempty"`
 	Y           float64 `json:"y,omitempty"`
 }
+
+// LuckyBlackHolePayload 幸運黑洞魚廣播（Server → Client，DAY-221）
+//
+// Events:
+//
+//	"blackhole_start"     — 黑洞建立（全服廣播）
+//	"blackhole_pulse"     — 重力脈衝（每秒，全服廣播）
+//	"singularity_blast"   — 奇點爆炸開始（全服廣播）
+//	"singularity_hit"     — 單個目標被奇點擊破（全服廣播）
+//	"singularity_result"  — 奇點爆炸結算（全服廣播）
+type LuckyBlackHolePayload struct {
+	Event         string  `json:"event"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	InstanceID    string  `json:"instance_id,omitempty"`
+	X             float64 `json:"x,omitempty"`
+	Y             float64 `json:"y,omitempty"`
+	Radius        float64 `json:"radius,omitempty"`
+	DurationSec   int     `json:"duration_sec,omitempty"`
+	PulseNum      int     `json:"pulse_num,omitempty"`
+	AffectedCount int     `json:"affected_count,omitempty"`
+	TargetID      string  `json:"target_id,omitempty"`
+	Reward        int     `json:"reward,omitempty"`
+	KilledCount   int     `json:"killed_count,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
+}
+
 type InfectionTargetInfo struct {
 	InstanceID string  `json:"instance_id"`
 	Layer      int     `json:"layer"`

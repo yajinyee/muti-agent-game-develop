@@ -222,6 +222,7 @@ signal lucky_auction_fish(data: Dictionary)         # 幸運拍賣魚系統（DA
 signal lucky_evolution_fish(data: Dictionary)       # 幸運進化魚系統（DAY-218）
 signal lucky_infection_fish(data: Dictionary)       # 幸運連鎖感染魚系統（DAY-219）
 signal lucky_ricochet_fish(data: Dictionary)        # 幸運反彈魚系統（DAY-220）
+signal lucky_black_hole(data: Dictionary)           # 幸運黑洞魚系統（DAY-221）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -639,6 +640,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_infection_fish(payload)
 		"lucky_ricochet_fish":
 			_handle_lucky_ricochet_fish(payload)
+		"lucky_black_hole":
+			_handle_lucky_black_hole(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2691,3 +2694,22 @@ func _handle_lucky_ricochet_fish(payload: Dictionary) -> void:
 		"ricochet_end":
 			var player_name: String = payload.get("player_name", "")
 			print("[GameManager] Ricochet mode ended for %s" % player_name)
+
+## 處理幸運黑洞魚系統（DAY-221）
+func _handle_lucky_black_hole(payload: Dictionary) -> void:
+	emit_signal("lucky_black_hole", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"blackhole_start":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Black hole created by %s" % player_name)
+		"blackhole_pulse":
+			var pulse_num: int = payload.get("pulse_num", 1)
+			var affected: int = payload.get("affected_count", 0)
+			print("[GameManager] Black hole pulse #%d: affected=%d" % [pulse_num, affected])
+		"singularity_blast":
+			print("[GameManager] Singularity blast triggered!")
+		"singularity_result":
+			var killed_count: int = payload.get("killed_count", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Singularity result: killed=%d reward=%d" % [killed_count, total_reward])

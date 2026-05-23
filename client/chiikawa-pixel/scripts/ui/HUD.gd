@@ -304,6 +304,7 @@ func _ready() -> void:
 	_init_lucky_evolution_fish_panel()  # 幸運進化魚系統面板（DAY-218）
 	_init_lucky_infection_fish_panel()  # 幸運連鎖感染魚系統面板（DAY-219）
 	_init_lucky_ricochet_fish_panel()   # 幸運反彈魚系統面板（DAY-220）
+	_init_lucky_black_hole_panel()      # 幸運黑洞魚系統面板（DAY-221）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4201,3 +4202,20 @@ func _init_lucky_ricochet_fish_panel() -> void:
 func _on_lucky_ricochet_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_ricochet_fish_panel):
 		_lucky_ricochet_fish_panel.handle_lucky_ricochet_fish(data)
+
+# ─── 幸運黑洞魚系統面板（DAY-221）───────────────────────────────────────────
+const LuckyBlackHolePanelScript = preload("res://scripts/ui/LuckyBlackHolePanel.gd")
+var _lucky_black_hole_panel = null
+
+func _init_lucky_black_hole_panel() -> void:
+	var panel = LuckyBlackHolePanelScript.new()
+	panel.name = "LuckyBlackHolePanel"
+	panel.layer = 24
+	add_child(panel)
+	_lucky_black_hole_panel = panel
+	if GameManager.has_signal("lucky_black_hole"):
+		GameManager.lucky_black_hole.connect(_on_lucky_black_hole)
+
+func _on_lucky_black_hole(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_black_hole_panel):
+		_lucky_black_hole_panel.handle_lucky_black_hole(data)
