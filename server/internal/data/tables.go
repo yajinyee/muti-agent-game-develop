@@ -815,7 +815,11 @@ var Targets = map[string]*TargetDef{
 	//   - 所有玩家競爭擊破數，每次擊破 +1 積分，每 5 秒廣播即時排行榜（前 3 名）
 	//   - 結算：第 1 名 ×4.0、第 2 名 ×2.5、第 3 名 ×1.8、其他 ×1.2 安慰獎（5 秒加成）
 	//   - 個人冷卻 40 秒；全服冷卻 60 秒
-	"T223": {ID: "T223", Name: "幸運競速賽魚", Type: TargetTypeSpecial, MultiplierMin: 60, MultiplierMax: 111, HP: 100, SpawnWeight: 2, Speed: 22, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_speed_race_fish"},
+	// T224 幸運連鎖爆炸魚（DAY-266）— 業界原創「連鎖爆炸+空間擴散+三層引爆」機制
+	//   - 擊破 T224 後，第 1 層隨機引爆 1 個目標（×2.0），200px 內 HP-50%，40% 機率二次引爆（×1.5）
+	//   - 第 2 層：150px 內 HP-30%，25% 機率三次引爆（×1.2）；最多 3 層連鎖
+	//   - 個人冷卻 22 秒；全服冷卻 35 秒
+	"T224": {ID: "T224", Name: "幸運連鎖爆炸魚", Type: TargetTypeSpecial, MultiplierMin: 61, MultiplierMax: 113, HP: 101, SpawnWeight: 2, Speed: 21, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_chain_explosion"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

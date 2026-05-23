@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-265 幸運競速賽魚系統）
+## 最後更新：2026-05-24（DAY-266 幸運連鎖爆炸魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-266 更新（自主觸發）：** 幸運連鎖爆炸魚系統（Lucky Chain Explosion Fish）✅
+  - **業界依據：** Ocean King 3 的 Chain Explosion 系統，2026 年最熱門 AOE 連鎖方向，讓玩家有「一炸帶一片」的連鎖快感
+  - **設計：** 擊破 T224 後，第 1 層隨機引爆 1 個目標（×2.0，全服共享）；200px 內 HP-50%，各自 40% 機率二次引爆（×1.5）；第 2 層：150px 內 HP-30%，各自 25% 機率三次引爆（×1.2）；最多 3 層連鎖；個人冷卻 22 秒；全服冷卻 35 秒
+  - **設計差異：** 與隕石雨（T211，隨機轟炸）不同，連鎖爆炸是「空間擴散」，讓玩家看到「爆炸從一點向外擴散」的視覺爽感；「三層連鎖」讓玩家有「一炸帶一片，一片再帶一片」的連鎖快感；「40%/25% 機率引爆」讓每次爆炸都有不確定性，製造「這次會不會連鎖」的期待感；「距離衰減（200→150px）」讓爆炸有「中心強、邊緣弱」的真實感；「全服廣播爆炸位置和連鎖數」讓所有玩家看到「爆炸在哪裡、連鎖了幾層」，製造社交感
+  - server/internal/game/lucky_chain_explosion_handler.go：luckyChainExplosionManager（個人冷卻/全服冷卻）；targetSnapshot（instanceID/defID/name/x/y/hp/multiplier）；isLuckyChainExplosionFish（T224）；tryLuckyChainExplosionFish（擊破後觸發/個人訊息+全服廣播+全服公告）；runChainExplosion（goroutine 三層連鎖邏輯）；doExplosionKill（爆炸擊破/給予獎勵/廣播kill事件）；applyExplosionDamage（HP百分比傷害/廣播HP更新）；findTargetsInRange（距離範圍內目標搜尋）
+  - server/internal/data/tables.go：新增 T224 幸運連鎖爆炸魚（61-113x/HP101/SpawnWeight2/Speed21/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyChainExplosion；LuckyChainExplosionPayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyChainExplosion + case 處理
+  - server/internal/game/game.go：LuckyChainExplosion *luckyChainExplosionManager；handleKill 加入 isLuckyChainExplosionFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyChainExplosionPanel.gd：火焰爆炸主題面板（explosion_start 火橙三次強閃光+頂部橫幅+「💥 連鎖爆炸！」大字+層數計數器；explosion_broadcast 頂部小橫幅；explosion_layer 爆炸圓圈特效+浮動文字+層數計數器更新+脈衝動畫；explosion_result 全螢幕閃光+「💥 N層連鎖！」大字+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_chain_explosion 訊號 + _handle_lucky_chain_explosion
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyChainExplosionPanelScript（layer=39）
+  - 第 1 層設計：隨機 1 個目標；×2.0 倍率；全服共享；200px 範圍 HP-50%；40% 機率二次引爆
+  - 第 2 層設計：×1.5 倍率；全服共享；150px 範圍 HP-30%；25% 機率三次引爆
+  - 第 3 層設計：×1.2 倍率；全服共享；直接擊破
+  - 視覺設計：火焰爆炸主題（#FF4500 火橙 + #FF6B35 橙紅 + #FFD700 金 + #FF0000 紅）；爆炸圓圈特效（擴散+淡出，層數越高越大）；層數計數器（右上角，顏色隨層數變化：火橙→橙紅→金）；結算彈窗右側滑入（含層數/引爆數/總獎勵）
+  - 全服廣播：連鎖爆炸觸發/每層爆炸（含位置/引爆數/獎勵）/最終結算全服廣播
+  - 全服公告：觸發時公告（火橙色）；3 層連鎖時公告（金色，含引爆數/總獎勵）
+  - build/vet 全部通過（零錯誤零警告）
+  - **技術修正：** t.Name → t.Def.Name（target.Target 無 Name 欄位）；p.GetBetCost() → p.GetBetDef().BetCost；MsgTargetKilled → MsgTargetKill；TargetKilledPayload → TargetKillPayload
 - **DAY-265 更新（自主觸發）：** 幸運競速賽魚系統（Lucky Speed Race Fish）✅
   - **業界依據：** Fishing Frenzy Chapter 3（2026）Speed Race 機制，2026 年最熱門個人競速方向，讓玩家有「我要打最多魚拿第一」的個人榮耀感
   - **設計：** 擊破 T223 後，觸發「全服競速賽」（持續 30 秒）；所有玩家競爭擊破數，每次擊破 +1 積分；每 5 秒廣播即時排行榜（前 3 名）；結算時：第 1 名 ×4.0、第 2 名 ×2.5、第 3 名 ×1.8、其他 ×1.2 安慰獎（5 秒加成）；個人冷卻 40 秒；全服冷卻 60 秒

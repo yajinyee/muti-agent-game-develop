@@ -349,6 +349,7 @@ func _ready() -> void:
 	_init_lucky_element_fusion_panel()      # 幸運元素融合魚系統面板（DAY-263）
 	_init_lucky_karma_cycle_panel()         # 幸運命運輪迴魚系統面板（DAY-264）
 	_init_lucky_speed_race_fish_panel()     # 幸運競速賽魚系統面板（DAY-265）
+	_init_lucky_chain_explosion_panel()     # 幸運連鎖爆炸魚系統面板（DAY-266）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5022,3 +5023,19 @@ func _init_lucky_speed_race_fish_panel() -> void:
 func _on_lucky_speed_race_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_speed_race_fish_panel):
 		_lucky_speed_race_fish_panel.handle_event(data)
+
+const LuckyChainExplosionPanelScript = preload("res://scripts/ui/LuckyChainExplosionPanel.gd")
+var _lucky_chain_explosion_panel = null
+
+func _init_lucky_chain_explosion_panel() -> void:
+	var panel = LuckyChainExplosionPanelScript.new()
+	panel.name = "LuckyChainExplosionPanel"
+	panel.layer = 39
+	add_child(panel)
+	_lucky_chain_explosion_panel = panel
+	if GameManager.has_signal("lucky_chain_explosion"):
+		GameManager.lucky_chain_explosion.connect(_on_lucky_chain_explosion)
+
+func _on_lucky_chain_explosion(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_chain_explosion_panel):
+		_lucky_chain_explosion_panel.handle_event(data)

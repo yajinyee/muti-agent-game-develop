@@ -239,6 +239,7 @@ type Game struct {
 	LuckyElementFusion      *luckyElementFusionManager         // 幸運元素融合魚系統管理器（DAY-263）
 	LuckyKarmaCycle         *luckyKarmaCycleManager            // 幸運命運輪迴魚系統管理器（DAY-264）
 	LuckySpeedRaceFish      *luckySpeedRaceFishManager         // 幸運競速賽魚系統管理器（DAY-265）
+	LuckyChainExplosion     *luckyChainExplosionManager        // 幸運連鎖爆炸魚系統管理器（DAY-266）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -454,6 +455,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyElementFusion:      newLuckyElementFusionManager(),
 		LuckyKarmaCycle:         newLuckyKarmaCycleManager(),
 		LuckySpeedRaceFish:      newLuckySpeedRaceFishManager(),
+		LuckyChainExplosion:     newLuckyChainExplosionManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2385,6 +2387,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運競速賽魚：競速賽進行中，任何玩家擊破任何非 T223 目標時累積積分（DAY-265）
 	if !isLuckySpeedRaceFish(t.DefID) && g.LuckySpeedRaceFish.isSpeedRaceActive() {
 		g.notifyLuckySpeedRaceKill(p)
+	}
+	// 幸運連鎖爆炸魚：擊破 T224 時觸發連鎖爆炸（DAY-266）
+	if isLuckyChainExplosionFish(t.DefID) {
+		go g.tryLuckyChainExplosionFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

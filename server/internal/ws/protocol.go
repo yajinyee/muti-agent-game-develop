@@ -606,6 +606,7 @@ const (
 	MsgLuckyElementFusion          MessageType = "lucky_element_fusion"               // 幸運元素融合魚廣播（Server→Client，DAY-263）
 	MsgLuckyKarmaCycle             MessageType = "lucky_karma_cycle"                  // 幸運命運輪迴魚廣播（Server→Client，DAY-264）
 	MsgLuckySpeedRaceFish          MessageType = "lucky_speed_race_fish"               // 幸運競速賽魚廣播（Server→Client，DAY-265）
+	MsgLuckyChainExplosion         MessageType = "lucky_chain_explosion"                // 幸運連鎖爆炸魚廣播（Server→Client，DAY-266）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6077,4 +6078,31 @@ type LuckySpeedRaceFishPayload struct {
 	WinnerScore  int                         `json:"winner_score,omitempty"`
 	TotalPlayers int                         `json:"total_players,omitempty"`
 	BoostSec     int                         `json:"boost_sec,omitempty"`
+}
+
+// LuckyChainExplosionPayload 幸運連鎖爆炸魚廣播（Server → Client，DAY-266）
+// Event 類型：
+//   - explosion_start：觸發連鎖爆炸（個人，PlayerID/PlayerName/Layer1Mult/Layer2Mult/Layer3Mult）
+//   - explosion_broadcast：全服廣播（PlayerName/Layer1Mult）
+//   - explosion_layer：每層爆炸廣播（PlayerName/Layer/TargetName/X/Y/Mult/Reward/Range/AffectedCount/ExplodeCount）
+//   - explosion_result：最終結算（PlayerName/TotalLayers/TotalExplode/TotalReward）
+type LuckyChainExplosionPayload struct {
+	Event         string  `json:"event"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	Layer         int     `json:"layer,omitempty"`
+	TargetName    string  `json:"target_name,omitempty"`
+	X             float64 `json:"x,omitempty"`
+	Y             float64 `json:"y,omitempty"`
+	Mult          float64 `json:"mult,omitempty"`
+	Layer1Mult    float64 `json:"layer1_mult,omitempty"`
+	Layer2Mult    float64 `json:"layer2_mult,omitempty"`
+	Layer3Mult    float64 `json:"layer3_mult,omitempty"`
+	Reward        int     `json:"reward,omitempty"`
+	Range         float64 `json:"range,omitempty"`
+	AffectedCount int     `json:"affected_count,omitempty"`
+	ExplodeCount  int     `json:"explode_count,omitempty"`
+	TotalLayers   int     `json:"total_layers,omitempty"`
+	TotalExplode  int     `json:"total_explode,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
 }
