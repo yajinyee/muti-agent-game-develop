@@ -634,6 +634,12 @@ var Targets = map[string]*TargetDef{
 	//   - 分身 HP = 原 HP × 50%，倍率遞增：第1層 ×1.5 → 第2層 ×2.0 → 第3層 ×2.5
 	//   - 最多 3 層連鎖回聲；個人冷卻 18 秒
 	"T191": {ID: "T191", Name: "幸運回聲魚", Type: TargetTypeSpecial, MultiplierMin: 28, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 52, Lifetime: 13, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "lucky_echo"},
+	// T192 幸運漩渦魚（DAY-234）— 業界原創「漩渦旋轉+反向射擊」機制
+	//   - 擊破 T192 後觸發「漩渦模式」（8 秒）：場景中央半徑 300px 內目標每 2 秒繞中心旋轉 45 度
+	//   - 漩渦模式期間擊破任何目標獲得 ×2.2 倍率加成（乘法）
+	//   - 8 秒後「漩渦爆發」：漩渦範圍內所有目標 70% 擊破機率（0.75x 倍率，全服共享）
+	//   - 個人冷卻 20 秒；全服冷卻 30 秒
+	"T192": {ID: "T192", Name: "幸運漩渦魚", Type: TargetTypeSpecial, MultiplierMin: 32, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_vortex"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

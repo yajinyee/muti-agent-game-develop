@@ -236,6 +236,7 @@ signal lucky_storm_fish(data: Dictionary)           # 幸運風暴魚系統（DA
 signal lucky_boomerang_fish(data: Dictionary)       # 幸運迴旋鏢魚系統（DAY-231）
 signal lucky_magnet_fish(data: Dictionary)          # 幸運磁力魚系統（DAY-232）
 signal lucky_echo_fish(data: Dictionary)            # 幸運回聲魚系統（DAY-233）
+signal lucky_vortex_fish(data: Dictionary)          # 幸運漩渦魚系統（DAY-234）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -679,6 +680,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_magnet_fish(payload)
 		"lucky_echo_fish":
 			_handle_lucky_echo_fish(payload)
+		"lucky_vortex_fish":
+			_handle_lucky_vortex_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3007,3 +3010,37 @@ func _handle_lucky_echo_fish(payload: Dictionary) -> void:
 		"echo_expire":
 			var echo_instance_id: String = payload.get("echo_instance_id", "")
 			print("[GameManager] Echo expired! instanceID=%s" % echo_instance_id)
+
+## 幸運漩渦魚系統（DAY-234）
+func _handle_lucky_vortex_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_vortex_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"vortex_start":
+			var player_name: String = payload.get("player_name", "")
+			var kill_boost: float = payload.get("kill_boost", 2.2)
+			print("[GameManager] Vortex started! player=%s boost=x%.1f" % [player_name, kill_boost])
+		"vortex_rotate":
+			var rotate_num: int = payload.get("rotate_num", 1)
+			var rotated_count: int = payload.get("rotated_count", 0)
+			print("[GameManager] Vortex rotate#%d: %d targets rotated" % [rotate_num, rotated_count])
+			# 同步目標物旋轉後的位置
+			var positions: Array = payload.get("positions", [])
+			_sync_vortex_positions(positions)
+		"vortex_blast":
+			var killed_count: int = payload.get("killed_count", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Vortex blast! killed=%d total_reward=%d" % [killed_count, total_reward])
+		"vortex_end":
+			print("[GameManager] Vortex ended!")
+
+## 同步漩渦旋轉後的目標物位置（DAY-234）
+func _sync_vortex_positions(positions: Array) -> void:
+	for pos_info in positions:
+		var target_id: String = pos_info.get("id", "")
+		var new_x: float = pos_info.get("x", 0.0)
+		var new_y: float = pos_info.get("y", 0.0)
+		if target_id.is_empty():
+			continue
+		# 複用 target_teleported 訊號同步位置（平滑移動）
+		emit_signal("target_teleported", target_id, Vector2(new_x, new_y))
