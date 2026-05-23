@@ -330,6 +330,7 @@ func _ready() -> void:
 	_init_lucky_flag_fish_panel()       # 幸運奪旗魚系統面板（DAY-244）
 	_init_lucky_phantom_fish_panel()    # 幸運幽靈魚系統面板（DAY-245）
 	_init_lucky_crystal_ball_fish_panel() # 幸運水晶球魚系統面板（DAY-246）
+	_init_lucky_time_rewind_panel()       # 幸運時光倒流魚系統面板（DAY-247）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4669,3 +4670,20 @@ func _init_lucky_crystal_ball_fish_panel() -> void:
 func _on_lucky_crystal_ball_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_crystal_ball_fish_panel):
 		_lucky_crystal_ball_fish_panel.handle_lucky_crystal_ball_fish(data)
+
+# ─── 幸運時光倒流魚系統面板（DAY-247）───────────────────────────────────────────
+const LuckyTimeRewindPanelScript = preload("res://scripts/ui/LuckyTimeRewindPanel.gd")
+var _lucky_time_rewind_panel = null
+
+func _init_lucky_time_rewind_panel() -> void:
+	var panel = LuckyTimeRewindPanelScript.new()
+	panel.name = "LuckyTimeRewindPanel"
+	panel.layer = 20
+	add_child(panel)
+	_lucky_time_rewind_panel = panel
+	if GameManager.has_signal("lucky_time_rewind"):
+		GameManager.lucky_time_rewind.connect(_on_lucky_time_rewind)
+
+func _on_lucky_time_rewind(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_time_rewind_panel):
+		_lucky_time_rewind_panel.handle_lucky_time_rewind(data)

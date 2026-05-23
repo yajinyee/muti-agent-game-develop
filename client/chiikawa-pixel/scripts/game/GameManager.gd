@@ -251,6 +251,7 @@ signal lucky_prophecy_fish(data: Dictionary)        # 幸運預言魚系統（DA
 signal lucky_flag_fish(data: Dictionary)            # 幸運奪旗魚系統（DAY-244）
 signal lucky_phantom_fish(data: Dictionary)         # 幸運幽靈魚系統（DAY-245）
 signal lucky_crystal_ball_fish(data: Dictionary)    # 幸運水晶球魚系統（DAY-246）
+signal lucky_time_rewind(data: Dictionary)           # 幸運時光倒流魚系統（DAY-247）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -720,6 +721,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_phantom_fish(payload)
 		"lucky_crystal_ball_fish":
 			_handle_lucky_crystal_ball_fish(payload)
+		"lucky_time_rewind":
+			_handle_lucky_time_rewind(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3383,3 +3386,28 @@ func _handle_lucky_crystal_ball_fish(payload: Dictionary) -> void:
 			var blast_count: int = payload.get("blast_count", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Crystal end! hits=%d blasts=%d total=%d" % [hit_count, blast_count, total_reward])
+
+## 幸運時光倒流魚系統（DAY-247）
+func _handle_lucky_time_rewind(payload: Dictionary) -> void:
+	emit_signal("lucky_time_rewind", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"rewind_start":
+			var replay_count: int = payload.get("replay_count", 0)
+			var replay_mult: float = payload.get("replay_mult", 1.6)
+			var restored_count: int = payload.get("restored_count", 0)
+			print("[GameManager] Time rewind started! replay=%d mult=x%.1f restored=%d" % [replay_count, replay_mult, restored_count])
+		"rewind_broadcast":
+			var player_name: String = payload.get("player_name", "")
+			var replay_count: int = payload.get("replay_count", 0)
+			print("[GameManager] Time rewind broadcast! player=%s replay=%d" % [player_name, replay_count])
+		"rewind_replay":
+			var target_name: String = payload.get("target_name", "")
+			var reward: int = payload.get("reward", 0)
+			var replay_idx: int = payload.get("replay_idx", 1)
+			var total_count: int = payload.get("total_count", 1)
+			print("[GameManager] Time rewind replay! [%d/%d] %s reward=%d" % [replay_idx, total_count, target_name, reward])
+		"rewind_end":
+			var replay_count: int = payload.get("replay_count", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Time rewind end! replay=%d total=%d" % [replay_count, total_reward])

@@ -721,6 +721,13 @@ var Targets = map[string]*TargetDef{
 	//   - 8 秒後「水晶爆炸」：所有未擊破的水晶預言目標自動爆炸（×1.8 倍率，個人獎勵）
 	//   - 個人冷卻 20 秒；全服冷卻 30 秒
 	"T204": {ID: "T204", Name: "幸運水晶球魚", Type: TargetTypeSpecial, MultiplierMin: 41, MultiplierMax: 73, HP: 81, SpawnWeight: 3, Speed: 41, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_crystal_ball"},
+	// T205 幸運時光倒流魚（DAY-247）— 業界原創「時光倒流+過去擊破重現」機制
+	//   - 擊破 T205 後，Server 重播玩家「過去 10 秒內」擊破的最多 5 個目標
+	//   - 每個重播目標以 ×1.6 倍率給予個人獎勵（不需要再次射擊，直接結算）
+	//   - 同時場上所有目標 HP 恢復到 60%（讓玩家有更多目標可打）
+	//   - 重播動畫：每個目標間隔 400ms 依序「閃現→爆炸」，製造「時光倒流」的視覺感
+	//   - 個人冷卻 25 秒；全服冷卻 40 秒
+	"T205": {ID: "T205", Name: "幸運時光倒流魚", Type: TargetTypeSpecial, MultiplierMin: 42, MultiplierMax: 75, HP: 82, SpawnWeight: 3, Speed: 40, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_time_rewind"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

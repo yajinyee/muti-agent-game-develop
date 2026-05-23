@@ -587,6 +587,7 @@ const (
 	MsgLuckyFlagFish         MessageType = "lucky_flag_fish"          // 幸運奪旗魚廣播（Server→Client，DAY-244）
 	MsgLuckyPhantomFish      MessageType = "lucky_phantom_fish"       // 幸運幽靈魚廣播（Server→Client，DAY-245）
 	MsgLuckyCrystalBallFish  MessageType = "lucky_crystal_ball_fish"  // 幸運水晶球魚廣播（Server→Client，DAY-246）
+	MsgLuckyTimeRewind       MessageType = "lucky_time_rewind"        // 幸運時光倒流魚廣播（Server→Client，DAY-247）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5602,4 +5603,28 @@ type LuckyCrystalBallFishPayload struct {
 	HitCount    int      `json:"hit_count,omitempty"`
 	BlastCount  int      `json:"blast_count,omitempty"`
 	TotalReward int      `json:"total_reward,omitempty"`
+}
+
+// LuckyTimeRewindPayload 幸運時光倒流魚廣播（Server → Client，DAY-247）
+// Event 類型：
+//   - rewind_start：時光倒流啟動（個人訊息，PlayerID/ReplayCount/ReplayTargetIDs/ReplayNames/ReplayMult/RestoredCount/HPRestorePct）
+//   - rewind_broadcast：全服廣播時光倒流啟動（PlayerName/ReplayCount）
+//   - rewind_replay：每個重播目標（個人訊息，TargetID/TargetName/ReplayMult/Reward/ReplayIdx/TotalCount）
+//   - rewind_end：時光倒流結束（個人訊息，ReplayCount/TotalReward）
+type LuckyTimeRewindPayload struct {
+	Event           string   `json:"event"`
+	PlayerID        string   `json:"player_id,omitempty"`
+	PlayerName      string   `json:"player_name,omitempty"`
+	TargetID        string   `json:"target_id,omitempty"`
+	TargetName      string   `json:"target_name,omitempty"`
+	ReplayTargetIDs []string `json:"replay_target_ids,omitempty"`
+	ReplayNames     []string `json:"replay_names,omitempty"`
+	ReplayCount     int      `json:"replay_count,omitempty"`
+	ReplayMult      float64  `json:"replay_mult,omitempty"`
+	RestoredCount   int      `json:"restored_count,omitempty"`
+	HPRestorePct    int      `json:"hp_restore_pct,omitempty"`
+	Reward          int      `json:"reward,omitempty"`
+	TotalReward     int      `json:"total_reward,omitempty"`
+	ReplayIdx       int      `json:"replay_idx,omitempty"`
+	TotalCount      int      `json:"total_count,omitempty"`
 }

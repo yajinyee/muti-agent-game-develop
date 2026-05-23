@@ -220,6 +220,7 @@ type Game struct {
 	LuckyFlagFish      *luckyFlagFishManager          // 幸運奪旗魚系統管理器（DAY-244）
 	LuckyPhantomFish   *luckyPhantomFishManager        // 幸運幽靈魚系統管理器（DAY-245）
 	LuckyCrystalBallFish *luckyCrystalBallFishManager   // 幸運水晶球魚系統管理器（DAY-246）
+	LuckyTimeRewind      *luckyTimeRewindManager          // 幸運時光倒流魚系統管理器（DAY-247）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -416,6 +417,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyFlagFish:      newLuckyFlagFishManager(),
 		LuckyPhantomFish:   newLuckyPhantomFishManager(),
 		LuckyCrystalBallFish: newLuckyCrystalBallFishManager(),
+		LuckyTimeRewind:    newLuckyTimeRewindManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2178,6 +2180,18 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		if crystalOwner == p.ID {
 			go g.notifyCrystalBallKill(p, t.InstanceID, finalReward)
 		}
+	}
+	// 幸運時光倒流魚：擊破 T205 本身時觸發時光倒流（DAY-247）
+	if isLuckyTimeRewindFish(t.DefID) {
+		go g.tryLuckyTimeRewindFish(p)
+	}
+	// 幸運時光倒流魚：記錄所有擊破歷史（DAY-247，供時光倒流重播使用）
+	if !isLuckyTimeRewindFish(t.DefID) {
+		name := t.DefID
+		if def, ok := data.Targets[t.DefID]; ok {
+			name = def.Name
+		}
+		g.LuckyTimeRewind.recordKillHistory(p.ID, t.InstanceID, t.DefID, name, int(t.Multiplier))
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

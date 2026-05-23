@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-246 幸運水晶球魚系統）
+## 最後更新：2026-05-23（DAY-247 幸運時光倒流魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-247 更新（自主觸發）：** 幸運時光倒流魚系統（Lucky Time Rewind Fish）✅
+  - **業界依據：** 業界原創「時光倒流+過去擊破重現」機制
+  - **設計：** 擊破 T205 後，Server 重播玩家「過去 10 秒內」擊破的最多 5 個目標；每個重播目標以 ×1.6 倍率給予個人獎勵（不需要再次射擊，直接結算）；同時場上所有目標 HP 恢復到 60%（讓玩家有更多目標可打）；重播動畫：每個目標間隔 400ms 依序「閃現→爆炸」，製造「時光倒流」的視覺感；個人冷卻 25 秒；全服冷卻 40 秒
+  - **設計差異：** 與時間凍結魚（DAY-212，全場靜止）不同，時光倒流是「重現過去擊破」，讓玩家有「剛才打的那些魚又回來了」的驚喜感；與鏡面時空魚（DAY-227，鏡像+時間）不同，時光倒流是「真正的歷史重播」，讓玩家有「我的每一槍都有意義」的成就感；「HP 恢復 60%」讓玩家在時光倒流後有更多目標可打，延長爽感；「間隔 400ms 依序爆炸」讓玩家看到「時光倒流」的視覺效果，不是一次全爆；全服廣播讓其他玩家看到「有人觸發了時光倒流」，製造羨慕感
+  - server/internal/game/lucky_time_rewind_handler.go：luckyTimeRewindManager（個人冷卻/全服冷卻/killHistory）；killRecord（instanceID/defID/name/mult/killedAt）；isLuckyTimeRewindFish（T205）；recordKillHistory（記錄擊破歷史/清理過期記錄）；getRecentKills（取最近 N 筆）；tryLuckyTimeRewindFish（擊破後觸發/取歷史/HP恢復/個人訊息+全服廣播+全服公告）；doTimeRewindHPRestore（場上所有目標 HP 恢復到 60%）；runTimeRewindReplay（goroutine 每 400ms 重播一個目標/個人獎勵/結束通知）
+  - server/internal/data/tables.go：新增 T205 幸運時光倒流魚（42-75x/HP82/SpawnWeight3/Speed40/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyTimeRewind；LuckyTimeRewindPayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyTimeRewind + case 處理
+  - server/internal/game/game.go：LuckyTimeRewind *luckyTimeRewindManager；handleKill 加入 isLuckyTimeRewindFish 分支 + recordKillHistory（所有非 T205 擊破都記錄）
+  - client/chiikawa-pixel/scripts/ui/LuckyTimeRewindPanel.gd：紫色時光主題面板（rewind_start 紫色三次強閃光+頂部橫幅+「⏪ 時光倒流！」大字+重播目標列表+HP恢復提示；rewind_broadcast 頂部小橫幅；rewind_replay 紫色閃光+「⏪ [N/M] 目標名 ×1.6 +獎勵」浮動文字；rewind_end 三次強閃光+「⏪ 時光倒流結束！」大字+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_time_rewind 訊號 + _handle_lucky_time_rewind
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyTimeRewindPanelScript（layer=20）
+  - 歷史記錄設計：過去 10 秒；最多 5 個目標；個人冷卻 25 秒；全服冷卻 40 秒
+  - 重播設計：×1.6 倍率；每 400ms 一個；個人獎勵；≥3 個時全服公告
+  - HP 恢復設計：場上所有目標恢復到 60%（若當前 HP < 60% 才恢復）
+  - 視覺設計：紫色時光主題（#9B59B6 + #8E44AD + #D7BDE2 + #F5EEF8）；右側重播目標列表（3秒後淡出）；浮動文字帶序號（[N/M]）；結算彈窗右側滑入
+  - 全服廣播：時光倒流啟動（全服）/每個重播（個人）/結束（個人）
+  - 全服公告：觸發時公告（紫色）；結束≥3個時公告（深紫色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-246 更新（自主觸發）：** 幸運水晶球魚系統（Lucky Crystal Ball Fish）✅
   - **業界依據：** 業界原創「預測未來+命中率提升」機制
   - **設計：** 擊破 T204 後，Server「預測」場上 3 個目標為「水晶預言目標」（持續 8 秒）；玩家射擊水晶預言目標時，命中率提升至 100%（必中）；每次必中擊破獲得 ×2.5 倍率加成（個人獎勵）；8 秒後「水晶爆炸」：所有未擊破的水晶預言目標自動爆炸（×1.8 倍率，個人獎勵）；個人冷卻 20 秒；全服冷卻 30 秒
