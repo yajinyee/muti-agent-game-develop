@@ -322,6 +322,7 @@ func _ready() -> void:
 	_init_lucky_mirror_world_panel()    # 幸運鏡面世界魚系統面板（DAY-236）
 	_init_lucky_freeze_world_panel()    # 幸運冰凍世界魚系統面板（DAY-237）
 	_init_lucky_gravity_flip_panel()    # 幸運重力反轉魚系統面板（DAY-238）
+	_init_lucky_synergy_burst_panel()   # 幸運共鳴爆發魚系統面板（DAY-239）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4525,3 +4526,20 @@ func _init_lucky_gravity_flip_panel() -> void:
 func _on_lucky_gravity_flip(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_gravity_flip_panel):
 		_lucky_gravity_flip_panel.handle_lucky_gravity_flip(data)
+
+# ─── 幸運共鳴爆發魚系統面板（DAY-239）───────────────────────────────────────────
+const LuckySynergyBurstPanelScript = preload("res://scripts/ui/LuckySynergyBurstPanel.gd")
+var _lucky_synergy_burst_panel = null
+
+func _init_lucky_synergy_burst_panel() -> void:
+	var panel = LuckySynergyBurstPanelScript.new()
+	panel.name = "LuckySynergyBurstPanel"
+	panel.layer = 6
+	add_child(panel)
+	_lucky_synergy_burst_panel = panel
+	if GameManager.has_signal("lucky_synergy_burst"):
+		GameManager.lucky_synergy_burst.connect(_on_lucky_synergy_burst)
+
+func _on_lucky_synergy_burst(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_synergy_burst_panel):
+		_lucky_synergy_burst_panel.handle_lucky_synergy_burst(data)

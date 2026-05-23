@@ -77,6 +77,7 @@ const (
 	EventLuckyMirrorWorld         EventType = "lucky_mirror_world"        // 幸運鏡面世界魚觸發（DAY-236）
 	EventLuckyFreezeWorld         EventType = "lucky_freeze_world"        // 幸運冰凍世界魚觸發（DAY-237）
 	EventLuckyGravityFlip         EventType = "lucky_gravity_flip"        // 幸運重力反轉魚觸發（DAY-238）
+	EventLuckySynergyBurst        EventType = "lucky_synergy_burst"       // 幸運共鳴爆發魚觸發（DAY-239）
 )
 
 // Priority 公告優先級
@@ -1203,6 +1204,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 4000
+
+	case EventLuckySynergyBurst:
+		msg := "✨ 共鳴爆發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FF6B9D"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "✨ 幸運共鳴爆發魚！"
+		message = msg
+		icon = "✨"
+		color = c
+		priority = PriorityHigh
+		duration = 4500
 
 	default:
 		title = "📢 公告"

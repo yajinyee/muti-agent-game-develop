@@ -212,6 +212,7 @@ type Game struct {
 	LuckyMirrorWorld   *luckyMirrorWorldManager    // 幸運鏡面世界魚系統管理器（DAY-236）
 	LuckyFreezeWorld   *luckyFreezeWorldManager    // 幸運冰凍世界魚系統管理器（DAY-237）
 	LuckyGravityFlip   *luckyGravityFlipManager    // 幸運重力反轉魚系統管理器（DAY-238）
+	LuckySynergyBurst  *luckySynergyBurstManager   // 幸運共鳴爆發魚系統管理器（DAY-239）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -400,6 +401,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyMirrorWorld:   newLuckyMirrorWorldManager(),
 		LuckyFreezeWorld:   newLuckyFreezeWorldManager(),
 		LuckyGravityFlip:   newLuckyGravityFlipManager(),
+		LuckySynergyBurst:  newLuckySynergyBurstManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1446,6 +1448,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if gravityFlipBoost > 1.0 {
 		finalReward = int(float64(finalReward) * gravityFlipBoost)
 	}
+	// 套用幸運共鳴爆發魚共鳴爆發額外倍率（DAY-239，×1.3-1.8 乘法，個人，共鳴期間）
+	synergyMult := g.getLuckySynergyBurstMult(p.ID)
+	if synergyMult > 1.0 {
+		finalReward = int(float64(finalReward) * synergyMult)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -2064,6 +2071,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運重力反轉魚：擊破 T196 本身時觸發重力反轉（DAY-238）
 	if isLuckyGravityFlipFish(t.DefID) {
 		go g.tryLuckyGravityFlipFish(p)
+	}
+	// 幸運共鳴爆發魚：擊破 T197 本身時觸發共鳴爆發（DAY-239）
+	if isLuckySynergyBurstFish(t.DefID) {
+		go g.tryLuckySynergyBurstFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

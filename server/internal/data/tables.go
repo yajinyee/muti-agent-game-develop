@@ -665,6 +665,13 @@ var Targets = map[string]*TargetDef{
 	//   - 10 秒後「重力崩潰」：所有目標 HP -45%（保留最少 1），Y 座標恢復
 	//   - 個人冷卻 22 秒；全服冷卻 32 秒
 	"T196": {ID: "T196", Name: "幸運重力反轉魚", Type: TargetTypeSpecial, MultiplierMin: 31, MultiplierMax: 59, HP: 69, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_gravity_flip"},
+	// T197 幸運共鳴爆發魚（DAY-239）— 業界原創「多效疊加共鳴爆發」機制
+	//   - 擊破 T197 後，偵測場上當前同時啟動的幸運效果數量
+	//   - ≥2 個效果 → 共鳴爆發：所有效果倍率額外 ×1.5，持續 6 秒
+	//   - 1 個效果 → 小型共鳴：該效果倍率 ×1.3，持續 4 秒
+	//   - 0 個效果 → 基礎爆發：全場 HP -30%，個人 ×1.8 倍率加成 5 秒
+	//   - 個人冷卻 25 秒；全服冷卻 40 秒
+	"T197": {ID: "T197", Name: "幸運共鳴爆發魚", Type: TargetTypeSpecial, MultiplierMin: 33, MultiplierMax: 62, HP: 72, SpawnWeight: 3, Speed: 48, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_synergy_burst"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

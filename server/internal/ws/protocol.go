@@ -578,6 +578,7 @@ const (
 	MsgLuckyMirrorWorld    MessageType = "lucky_mirror_world"    // 幸運鏡面世界魚廣播（Server→Client，DAY-236）
 	MsgLuckyFreezeWorld    MessageType = "lucky_freeze_world"    // 幸運冰凍世界魚廣播（Server→Client，DAY-237）
 	MsgLuckyGravityFlip   MessageType = "lucky_gravity_flip"   // 幸運重力反轉魚廣播（Server→Client，DAY-238）
+	MsgLuckySynergyBurst  MessageType = "lucky_synergy_burst"  // 幸運共鳴爆發魚廣播（Server→Client，DAY-239）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5385,4 +5386,23 @@ type LuckyGravityFlipPayload struct {
 	KillBoost      float64     `json:"kill_boost,omitempty"`
 	Positions      interface{} `json:"positions,omitempty"`      // []flippedPos
 	CollapsedCount int         `json:"collapsed_count,omitempty"`
+}
+
+// LuckySynergyBurstPayload 幸運共鳴爆發魚廣播（Server → Client，DAY-239）
+//
+// Events:
+//
+//	"synergy_full"  — 共鳴爆發（≥2 效果，全服廣播）
+//	"synergy_small" — 小型共鳴（1 效果，全服廣播）
+//	"synergy_base"  — 基礎爆發（0 效果，全服廣播）
+//	"synergy_end"   — 共鳴結束（全服廣播）
+type LuckySynergyBurstPayload struct {
+	Event        string   `json:"event"`
+	PlayerID     string   `json:"player_id,omitempty"`
+	PlayerName   string   `json:"player_name,omitempty"`
+	EffectCount  int      `json:"effect_count,omitempty"`
+	EffectNames  []string `json:"effect_names,omitempty"`
+	ExtraMult    float64  `json:"extra_mult,omitempty"`
+	DurationSec  int      `json:"duration_sec,omitempty"`
+	DamagedCount int      `json:"damaged_count,omitempty"`
 }

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-238 幸運重力反轉魚系統）
+## 最後更新：2026-05-23（DAY-239 幸運共鳴爆發魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-239 更新（自主觸發）：** 幸運共鳴爆發魚系統（Lucky Synergy Burst Fish）✅
+  - **業界依據：** 業界原創「多效疊加共鳴爆發」機制
+  - **設計：** 擊破 T197 後，偵測場上當前同時啟動的幸運效果數量（冰凍世界/鏡面世界/重力反轉/磁力場/漩渦/時間凍結/時間倒流）；≥2 個效果 → 共鳴爆發：所有效果倍率額外 ×1.5，持續 6 秒；1 個效果 → 小型共鳴：該效果倍率 ×1.3，持續 4 秒；0 個效果 → 基礎爆發：全場 HP -30%，個人 ×1.8 倍率加成 5 秒；個人冷卻 25 秒；全服冷卻 40 秒
+  - **設計差異：** 與幸運共鳴魚（DAY-222，全服合力射擊累積能量）不同，共鳴爆發魚是「偵測現有效果疊加」，讓玩家有「要先觸發多個幸運魚，再打共鳴爆發魚」的策略深度；「效果越多，爆發越強」讓玩家有「組合技」的成就感；「基礎爆發」確保即使沒有其他效果也有獎勵，降低挫敗感；全服廣播讓所有玩家都看到共鳴爆發的效果數量，製造「哇，同時有這麼多效果」的驚嘆感
+  - server/internal/game/lucky_synergy_burst_handler.go：luckySynergyBurstManager（個人冷卻/全服冷卻/activePlayers）；synergyBurstSession（burstType/activeUntil/extraMult/effectCount）；isLuckySynergyBurstFish（T197）；getLuckySynergyBurstMult（供 handleKill 使用）；countActiveEffects（偵測 7 種效果）；tryLuckySynergyBurstFish；doSynergyFullBurst（≥2 效果/×1.5/6秒）；doSynergySmallBurst（1 效果/×1.3/4秒）；doSynergyBaseBurst（0 效果/HP-30%/×1.8/5秒）
+  - server/internal/data/tables.go：新增 T197 幸運共鳴爆發魚（33-62x/HP72/SpawnWeight3/Speed48/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckySynergyBurst；LuckySynergyBurstPayload（synergy_full/synergy_small/synergy_base/synergy_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckySynergyBurst + case 處理
+  - server/internal/game/game.go：LuckySynergyBurst *luckySynergyBurstManager；handleKill 加入 getLuckySynergyBurstMult 乘法加成 + isLuckySynergyBurstFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckySynergyBurstPanel.gd：粉紅共鳴主題面板（synergy_full 粉紅三次強閃光+頂部橫幅+「✨ 共鳴爆發！」52px大字+效果列表+計時條；synergy_small 紫色閃光+「✨ 小型共鳴！」40px大字+效果名稱；synergy_base 橙色閃光+「✨ 基礎爆發！」40px大字+HP-30%提示；synergy_end 計時條清除）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_synergy_burst 訊號 + _handle_lucky_synergy_burst
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckySynergyBurstPanelScript（layer=6）
+  - 共鳴爆發設計：偵測 7 種效果（鏡面世界/冰凍世界/重力反轉/磁力場/漩渦/時間凍結/時間倒流）；個人冷卻 25 秒；全服冷卻 40 秒
+  - 倍率設計：共鳴爆發 ×1.5（疊加到現有效果）；小型共鳴 ×1.3；基礎爆發 ×1.8（個人）
+  - 視覺設計：粉紅共鳴主題（#FF6B9D + #C39BD3 + #F8C8DC + #FFF0F8）；計時條位置 y-16（避免與其他計時條重疊）；三種爆發類型各有不同顏色和大小
+  - 全服廣播：共鳴爆發/小型共鳴/基礎爆發/結束全服廣播
+  - 全服公告：觸發時公告（依爆發類型決定顏色：共鳴爆發粉紅/小型共鳴紫色/基礎爆發橙色）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-238 更新（自主觸發）：** 幸運重力反轉魚系統（Lucky Gravity Flip Fish）✅
   - **業界依據：** 業界原創「重力反轉+上下顛倒移動+重力崩潰」機制
   - **設計：** 擊破 T196 後觸發「重力反轉」（10 秒）：場上所有目標 Y 座標以場景中央（Y=300）為軸翻轉；重力反轉期間擊破任何目標獲得 ×2.1 倍率加成（乘法）；10 秒後「重力崩潰」：所有目標 HP -45%（保留最少 1），Y 座標恢復；個人冷卻 22 秒；全服冷卻 32 秒
