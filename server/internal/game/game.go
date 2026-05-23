@@ -237,6 +237,7 @@ type Game struct {
 	LuckyTimeCapsule        *luckyTimeCapsuleManager          // 幸運時間膠囊魚系統管理器（DAY-261）
 	LuckyProgressiveJackpot *luckyProgressiveJackpotManager   // 幸運累積大獎池魚系統管理器（DAY-262）
 	LuckyElementFusion      *luckyElementFusionManager         // 幸運元素融合魚系統管理器（DAY-263）
+	LuckyKarmaCycle         *luckyKarmaCycleManager            // 幸運命運輪迴魚系統管理器（DAY-264）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -450,6 +451,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyTimeCapsule:        newLuckyTimeCapsuleManager(),
 		LuckyProgressiveJackpot: newLuckyProgressiveJackpotManager(),
 		LuckyElementFusion:      newLuckyElementFusionManager(),
+		LuckyKarmaCycle:         newLuckyKarmaCycleManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2360,6 +2362,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		if elem, ok := g.LuckyElementFusion.isElementFragmentTarget(t.InstanceID); ok {
 			go g.notifyElementFragmentKill(p, t.InstanceID, elem, t.Multiplier)
 		}
+	}
+	// 幸運命運輪迴魚：擊破 T222 時觸發命運輪迴（DAY-264）
+	if isLuckyKarmaCycleFish(t.DefID) {
+		go g.tryLuckyKarmaCycleFish(p)
+	}
+	// 幸運命運輪迴魚：玩家在命運輪迴中擊破任何非 T222 目標時累積業力（DAY-264）
+	if !isLuckyKarmaCycleFish(t.DefID) && g.LuckyKarmaCycle.isKarmaCycleActive(p.ID) {
+		go g.notifyKarmaCycleKill(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

@@ -604,6 +604,7 @@ const (
 	MsgLuckyTimeCapsule            MessageType = "lucky_time_capsule"                 // 幸運時間膠囊魚廣播（Server→Client，DAY-261）
 	MsgLuckyProgressiveJackpot     MessageType = "lucky_progressive_jackpot"          // 幸運累積大獎池魚廣播（Server→Client，DAY-262）
 	MsgLuckyElementFusion          MessageType = "lucky_element_fusion"               // 幸運元素融合魚廣播（Server→Client，DAY-263）
+	MsgLuckyKarmaCycle             MessageType = "lucky_karma_cycle"                  // 幸運命運輪迴魚廣播（Server→Client，DAY-264）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6024,4 +6025,25 @@ type LuckyElementFusionPayload struct {
 	Duration       int                   `json:"duration,omitempty"`
 	Mult           float64               `json:"mult,omitempty"`
 	Reward         int                   `json:"reward,omitempty"`
+}
+
+// LuckyKarmaCyclePayload 幸運命運輪迴魚廣播（Server → Client，DAY-264）
+// Event 類型：
+//   - karma_start：觸發命運輪迴（個人，TriggerName/Duration/MaxKarma）
+//   - karma_broadcast：全服廣播（TriggerName/Duration）
+//   - karma_update：業力更新（個人，PlayerID/Karma/MaxKarma）
+//   - karma_burst：命運爆發（個人，PlayerID/Karma/Mult/Reward）
+//   - karma_burst_broadcast：命運爆發全服廣播（PlayerName/Karma/Mult/Reward）
+//   - karma_settle：業力結算（個人，PlayerID/Karma/Mult/Reward）
+//   - karma_expire：業力消散（個人，PlayerID/Karma=0）
+type LuckyKarmaCyclePayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	TriggerName string  `json:"trigger_name,omitempty"`
+	Karma       int     `json:"karma,omitempty"`
+	MaxKarma    int     `json:"max_karma,omitempty"`
+	Duration    int     `json:"duration,omitempty"`
+	Mult        float64 `json:"mult,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
 }

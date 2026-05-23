@@ -249,6 +249,7 @@ func (g *Game) notifyElementFragmentKill(p *player.Player, instanceID string, el
 	m.mu.Lock()
 	session, ok := m.activeSessions[p.ID]
 	if !ok {
+		// 用 fragment 的 expiresAt 確保 session 不超過碎片存活時間
 		session = &elementFusionSession{
 			playerID:   p.ID,
 			playerName: p.DisplayName,

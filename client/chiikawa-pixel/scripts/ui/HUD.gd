@@ -347,6 +347,7 @@ func _ready() -> void:
 	_init_lucky_time_capsule_panel()        # 幸運時間膠囊魚系統面板（DAY-261）
 	_init_lucky_progressive_jackpot_panel() # 幸運累積大獎池魚系統面板（DAY-262）
 	_init_lucky_element_fusion_panel()      # 幸運元素融合魚系統面板（DAY-263）
+	_init_lucky_karma_cycle_panel()         # 幸運命運輪迴魚系統面板（DAY-264）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4988,3 +4989,19 @@ func _init_lucky_element_fusion_panel() -> void:
 func _on_lucky_element_fusion(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_element_fusion_panel):
 		_lucky_element_fusion_panel.handle_event(data)
+
+const LuckyKarmaCyclePanelScript = preload("res://scripts/ui/LuckyKarmaCyclePanel.gd")
+var _lucky_karma_cycle_panel = null
+
+func _init_lucky_karma_cycle_panel() -> void:
+	var panel = LuckyKarmaCyclePanelScript.new()
+	panel.name = "LuckyKarmaCyclePanel"
+	panel.layer = 37
+	add_child(panel)
+	_lucky_karma_cycle_panel = panel
+	if GameManager.has_signal("lucky_karma_cycle"):
+		GameManager.lucky_karma_cycle.connect(_on_lucky_karma_cycle)
+
+func _on_lucky_karma_cycle(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_karma_cycle_panel):
+		_lucky_karma_cycle_panel.handle_event(data)

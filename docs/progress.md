@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-263 幸運元素融合魚系統）
+## 最後更新：2026-05-24（DAY-264 幸運命運輪迴魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-264 更新（自主觸發）：** 幸運命運輪迴魚系統（Lucky Karma Cycle Fish）✅
+  - **業界依據：** 業界原創「業力累積+命運爆發」機制，2026 年最熱門「命運輪迴+業力」主題，讓玩家有「每一槍都在累積業力，業力滿了觸發命運爆發」的宿命感
+  - **設計：** 擊破 T222 後，觸發「命運輪迴」（持續 20 秒）；玩家每次擊破任何目標，累積「業力值」（每次 +1，最多 10）；業力值達到 10 → 「命運爆發」：業力值 × ×1.5 倍率（個人，最高 ×15.0）；20 秒後未達到 10 → 「業力結算」：已累積業力值 × ×1.2 倍率（個人）；個人冷卻 30 秒；全服冷卻 50 秒
+  - **設計差異：** 與元素融合（T221，確定性收集三種元素）不同，命運輪迴是「累積型爆發」，讓玩家有「每一槍都在累積業力，業力滿了就爆發」的宿命感；「業力值 × ×1.5 最高 ×15.0」讓玩家有「要趁 20 秒內打滿 10 個目標」的緊迫感；「業力結算 ×1.2 × 業力值」確保即使沒打滿也有收益；「業力計數器即時顯示」讓玩家看到「業力現在有幾個」，製造「快滿了！」的期待感；「全服廣播命運爆發」讓所有玩家看到「有人業力滿了爆發了」，製造羨慕感
+  - server/internal/game/lucky_karma_cycle_handler.go：luckyKarmaCycleManager（個人冷卻/全服冷卻/activeSessions）；karmaCycleSession（playerID/playerName/karma/expiresAt）；isLuckyKarmaCycleFish（T222）；isKarmaCycleActive（供 handleKill 使用）；tryLuckyKarmaCycleFish（擊破後觸發/個人訊息+全服廣播+全服公告）；notifyKarmaCycleKill（業力+1/達到10觸發爆發）；doKarmaBurst（×15.0倍率/個人大獎/全服廣播/全服公告）；runKarmaCycleTimeout（goroutine 20秒後業力結算）
+  - server/internal/data/tables.go：新增 T222 幸運命運輪迴魚（59-109x/HP99/SpawnWeight2/Speed23/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyKarmaCycle；LuckyKarmaCyclePayload（7種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyKarmaCycle + case 處理
+  - server/internal/game/game.go：LuckyKarmaCycle *luckyKarmaCycleManager；handleKill 加入 isLuckyKarmaCycleFish 分支 + isKarmaCycleActive 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyKarmaCyclePanel.gd：紫金命運主題面板（karma_start 紫色三次強閃光+頂部橫幅+「☯️ 命運輪迴！」大字+業力計數器（右上角）+業力進度條（底部）+計時條；karma_broadcast 頂部小橫幅；karma_update 業力顏色閃光+計數器更新+接近滿時脈衝動畫；karma_burst 全螢幕三次強閃光+「☯️ 命運爆發！×15.0」大字+結算彈窗；karma_burst_broadcast 全服廣播橫幅；karma_settle 橙色閃光+「☯️ 業力結算 N/10 ×M」大字+結算彈窗；karma_expire 計時條淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_karma_cycle 訊號 + _handle_lucky_karma_cycle
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyKarmaCyclePanelScript（layer=37）
+  - 業力設計：每次擊破 +1；最大 10；個人冷卻 30 秒；全服冷卻 50 秒；持續 20 秒
+  - 爆發設計：業力值 × ×1.5；最高 ×15.0；個人大獎；全服廣播；全服公告
+  - 結算設計：業力值 × ×1.2；個人獎勵；超時後自動結算
+  - 視覺設計：紫金命運主題（#9B59B6 紫 + #FFD700 金 + #FFA500 橙 + #E8DAEF 淡紫白）；業力計數器（右上角，業力顏色隨進度變化：紫→橙→金）；底部業力進度條（顏色隨業力變化）；右側豎向計時條（x=-254 與其他計時條錯開）；結算彈窗右側滑入（含業力/倍率/獎勵）
+  - 全服廣播：命運輪迴觸發/命運爆發全服廣播
+  - 全服公告：觸發時公告（紫色）；命運爆發公告（金色）
+  - build/vet 全部通過（零錯誤零警告）
+  - **同步修正 DAY-263 bug：** T221 元素融合 session 的 expiresAt 現在正確使用觸發時的 expiresAt，而非 time.Now().Add()，確保 session 不超過碎片存活時間
 - **DAY-263 更新（自主觸發）：** 幸運元素融合魚系統（Lucky Element Fusion Fish）✅
   - **業界依據：** Royal Fishing 的 Element Combo 系統，2026 年最熱門「元素組合+融合爆發」機制，讓玩家有「集齊三種元素觸發大爆發」的策略感
   - **設計：** 擊破 T221 後，Server 隨機將「火/水/風」三種元素碎片各 1 個分配給場上 3 個目標；玩家擊破帶有元素碎片的目標，收集對應元素（個人）；集齊 3 種不同元素 → 「元素融合爆發」：×6.0 倍率（個人最高）；只集齊 2 種 → 「部分融合」：×2.5 倍率；只集齊 1 種 → 「元素殘留」：×1.3 倍率；元素碎片存活 25 秒；個人冷卻 35 秒；全服冷卻 55 秒
