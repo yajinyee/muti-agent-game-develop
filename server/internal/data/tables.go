@@ -838,6 +838,13 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 28 秒；全服冷卻 45 秒
 	"T226": {ID: "T226", Name: "幸運倒數炸彈魚", Type: TargetTypeSpecial, MultiplierMin: 63, MultiplierMax: 117, HP: 103, SpawnWeight: 2, Speed: 19, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_countdown_bomb"},
 
+	// T227 幸運輪盤魚（DAY-269）— Royal Fishing ChainLong King Wheel 個人輪盤版本
+	//   - 擊破 T227 後，觸發「個人幸運輪盤」（5 個扇區：×2.0/×3.0/×5.0/×8.0/×0.5）
+	//   - Server 隨機決定結果，廣播給觸發玩家
+	//   - 結果倍率套用到觸發玩家接下來 8 秒的所有擊破（個人）
+	//   - 個人冷卻 25 秒；全服冷卻 40 秒
+	"T227": {ID: "T227", Name: "幸運輪盤魚", Type: TargetTypeSpecial, MultiplierMin: 64, MultiplierMax: 119, HP: 104, SpawnWeight: 2, Speed: 18, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_spin_wheel"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

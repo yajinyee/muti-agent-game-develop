@@ -609,6 +609,7 @@ const (
 	MsgLuckyChainExplosion         MessageType = "lucky_chain_explosion"                // 幸運連鎖爆炸魚廣播（Server→Client，DAY-266）
 	MsgLuckyMultiplierStack        MessageType = "lucky_multiplier_stack"               // 幸運倍率疊加魚廣播（Server→Client，DAY-267）
 	MsgLuckyCountdownBomb          MessageType = "lucky_countdown_bomb"                 // 幸運倒數炸彈魚廣播（Server→Client，DAY-268）
+	MsgLuckySpinWheel              MessageType = "lucky_spin_wheel"                     // 幸運輪盤魚廣播（Server→Client，DAY-269）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6152,4 +6153,26 @@ type LuckyCountdownBombPayload struct {
 	Mult        float64 `json:"mult,omitempty"`         // 爆炸倍率
 	TotalReward int     `json:"total_reward,omitempty"` // 全服總獎勵
 	IsBurst     bool    `json:"is_burst,omitempty"`     // 是否為滿充能爆炸
+}
+
+// LuckySpinWheelPayload 幸運輪盤魚廣播（Server → Client，DAY-269）
+// Event 類型：
+//   - spin_start：觸發輪盤（個人，PlayerID/PlayerName/Sectors）
+//   - spin_broadcast：全服廣播（PlayerName）
+//   - spin_result：輪盤結果（個人，ResultMult/SectorIndex/Duration）
+//   - spin_boost_kill：加成期間擊破（個人，TargetName/Reward/CurrentMult）
+//   - spin_expire：加成結束（個人，TotalReward/KillCount）
+type LuckySpinWheelPayload struct {
+	Event       string    `json:"event"`
+	PlayerID    string    `json:"player_id,omitempty"`
+	PlayerName  string    `json:"player_name,omitempty"`
+	Sectors     []float64 `json:"sectors,omitempty"`     // 輪盤扇區倍率列表
+	ResultMult  float64   `json:"result_mult,omitempty"` // 輪盤結果倍率
+	SectorIndex int       `json:"sector_index,omitempty"`// 結果扇區索引（0-4）
+	Duration    float64   `json:"duration,omitempty"`    // 加成持續秒數
+	TargetName  string    `json:"target_name,omitempty"` // 本次擊破目標名稱
+	Reward      int       `json:"reward,omitempty"`      // 本次擊破獎勵
+	CurrentMult float64   `json:"current_mult,omitempty"`// 當前加成倍率
+	TotalReward int       `json:"total_reward,omitempty"`// 加成期間總獎勵
+	KillCount   int       `json:"kill_count,omitempty"`  // 加成期間擊破數
 }
