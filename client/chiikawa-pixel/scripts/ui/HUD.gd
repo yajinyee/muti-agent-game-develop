@@ -319,6 +319,7 @@ func _ready() -> void:
 	_init_lucky_echo_fish_panel()       # 幸運回聲魚系統面板（DAY-233）
 	_init_lucky_vortex_fish_panel()     # 幸運漩渦魚系統面板（DAY-234）
 	_init_lucky_time_bomb_fish_panel()  # 幸運時間炸彈魚系統面板（DAY-235）
+	_init_lucky_mirror_world_panel()    # 幸運鏡面世界魚系統面板（DAY-236）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4471,3 +4472,20 @@ func _init_lucky_time_bomb_fish_panel() -> void:
 func _on_lucky_time_bomb_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_time_bomb_fish_panel):
 		_lucky_time_bomb_fish_panel.handle_lucky_time_bomb_fish(data)
+
+# ─── 幸運鏡面世界魚系統面板（DAY-236）───────────────────────────────────────────
+const LuckyMirrorWorldPanelScript = preload("res://scripts/ui/LuckyMirrorWorldPanel.gd")
+var _lucky_mirror_world_panel = null
+
+func _init_lucky_mirror_world_panel() -> void:
+	var panel = LuckyMirrorWorldPanelScript.new()
+	panel.name = "LuckyMirrorWorldPanel"
+	panel.layer = 9
+	add_child(panel)
+	_lucky_mirror_world_panel = panel
+	if GameManager.has_signal("lucky_mirror_world"):
+		GameManager.lucky_mirror_world.connect(_on_lucky_mirror_world)
+
+func _on_lucky_mirror_world(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_mirror_world_panel):
+		_lucky_mirror_world_panel.handle_lucky_mirror_world(data)

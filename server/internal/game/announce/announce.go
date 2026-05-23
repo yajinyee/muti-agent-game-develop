@@ -74,6 +74,7 @@ const (
 	EventLuckyEchoFish            EventType = "lucky_echo_fish"           // 幸運回聲魚觸發（DAY-233）
 	EventLuckyVortexFish          EventType = "lucky_vortex_fish"         // 幸運漩渦魚觸發（DAY-234）
 	EventLuckyTimeBombFish        EventType = "lucky_time_bomb_fish"      // 幸運時間炸彈魚觸發（DAY-235）
+	EventLuckyMirrorWorld         EventType = "lucky_mirror_world"        // 幸運鏡面世界魚觸發（DAY-236）
 )
 
 // Priority 公告優先級
@@ -1137,6 +1138,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "💣 幸運時間炸彈魚！"
 		message = msg
 		icon = "💣"
+		color = c
+		priority = PriorityHigh
+		duration = 4000
+
+	case EventLuckyMirrorWorld:
+		msg := "🪞 鏡面世界！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#8E44AD"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🪞 幸運鏡面世界魚！"
+		message = msg
+		icon = "🪞"
 		color = c
 		priority = PriorityHigh
 		duration = 4000

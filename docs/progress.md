@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-235 幸運時間炸彈魚系統）
+## 最後更新：2026-05-23（DAY-236 幸運鏡面世界魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-236 更新（自主觸發）：** 幸運鏡面世界魚系統（Lucky Mirror World Fish）✅
+  - **業界依據：** 業界原創「全場鏡像反轉+鏡面崩潰」機制
+  - **設計：** 擊破 T194 後觸發「鏡面世界」（10 秒）：場上所有目標物 X 座標以場景中央（X=500）為軸鏡像反轉；鏡面世界期間擊破任何目標獲得 ×2.3 倍率加成（乘法）；10 秒後「鏡面崩潰」：所有目標 HP -35%（保留最少 1）；個人冷卻 22 秒；全服冷卻 35 秒
+  - **設計差異：** 與傳送魚（DAY-223，全場瞬間移動到隨機位置）不同，鏡面魚是「對稱翻轉」，讓玩家有「要重新瞄準鏡像位置」的空間感；「鏡像反轉」讓玩家感受到「世界顛倒了」的視覺衝擊；×2.3 倍率加成（全場有效）讓玩家有「趕快在 10 秒內多打」的緊迫感；「鏡面崩潰 HP -35%」讓玩家有「等待→爆發」的高潮設計；全服廣播鏡像位置讓所有玩家都看到目標的新位置，製造「全服一起重新瞄準」的社交感
+  - server/internal/game/lucky_mirror_world_handler.go：luckyMirrorWorldManager（個人冷卻/全服冷卻/鏡面世界狀態/instanceID）；isLuckyMirrorWorldFish（T194）；isMirrorWorldActive；getLuckyMirrorWorldBoost（×2.3 乘法）；tryLuckyMirrorWorldFish（擊破後觸發/鏡像反轉/全服廣播/全服公告）；doMirrorFlip（所有目標 X 座標鏡像/邊界限制/回傳位置列表）；runLuckyMirrorWorld（goroutine 10秒後觸發崩潰）；doMirrorCollapse（HP -35%/保留最少1/全服廣播/全服公告）
+  - server/internal/data/tables.go：新增 T194 幸運鏡面世界魚（32-60x/HP70/SpawnWeight3/Speed50/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyMirrorWorld；LuckyMirrorWorldPayload（mirror_start/mirror_collapse/mirror_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyMirrorWorld + case 處理
+  - server/internal/game/game.go：LuckyMirrorWorld *luckyMirrorWorldManager；handleKill 加入 getLuckyMirrorWorldBoost 乘法加成 + isLuckyMirrorWorldFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyMirrorWorldPanel.gd：紫色鏡面主題面板（mirror_start 紫色三次強閃光+頂部橫幅+「🪞 鏡面世界！」大字+計時條+鏡面線；mirror_collapse 全螢幕白色強閃光+「🪞 鏡面崩潰！」大字+HP-35%提示；mirror_end 紫色淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_mirror_world 訊號 + _handle_lucky_mirror_world + _sync_mirror_positions
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyMirrorWorldPanelScript（layer=9）
+  - 鏡面世界設計：X 座標以 X=500 為軸鏡像；持續 10 秒；個人冷卻 22 秒；全服冷卻 35 秒
+  - 鏡面崩潰設計：HP -35%；保留最少 1；10 秒後自動觸發
+  - 視覺設計：紫色鏡面主題（#8E44AD + #6C3483 + #D7BDE2 + #F5EEF8）；場景中央垂直鏡面線（閃爍動畫）；底部計時條（紫→深紫漸變）；全螢幕白色強閃光（鏡面破碎感）
+  - 位置同步：複用 target_teleported 訊號平滑移動目標到鏡像位置
+  - 全服廣播：鏡面世界開始（含所有目標鏡像後位置）/鏡面崩潰/鏡面世界結束全服廣播
+  - 全服公告：觸發時公告（紫色）；崩潰時公告（深紫色）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-235 更新（自主觸發）：** 幸運時間炸彈魚系統（Lucky Time Bomb Fish）✅
   - **業界依據：** 業界原創「倒數計時+提前引爆+連鎖爆炸」機制
   - **設計：** 擊破 T193 後，場上隨機 4 個目標被「時間炸彈標記」（倒數 8 秒）；倒數結束時自動爆炸（80% 擊破機率，×1.6 倍率，個人獎勵）；玩家可以「提前引爆」（射擊命中炸彈目標）：立即爆炸 + 引爆周圍 150px 內目標（60% 機率，×1.2 倍率）；提前引爆的目標獲得 ×2.0 倍率加成（比等待爆炸更高）；個人冷卻 20 秒

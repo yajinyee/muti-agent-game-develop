@@ -238,6 +238,7 @@ signal lucky_magnet_fish(data: Dictionary)          # 幸運磁力魚系統（DA
 signal lucky_echo_fish(data: Dictionary)            # 幸運回聲魚系統（DAY-233）
 signal lucky_vortex_fish(data: Dictionary)          # 幸運漩渦魚系統（DAY-234）
 signal lucky_time_bomb_fish(data: Dictionary)       # 幸運時間炸彈魚系統（DAY-235）
+signal lucky_mirror_world(data: Dictionary)         # 幸運鏡面世界魚系統（DAY-236）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -685,6 +686,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_vortex_fish(payload)
 		"lucky_time_bomb_fish":
 			_handle_lucky_time_bomb_fish(payload)
+		"lucky_mirror_world":
+			_handle_lucky_mirror_world(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3075,3 +3078,32 @@ func _handle_lucky_time_bomb_fish(payload: Dictionary) -> void:
 			var killed: bool = payload.get("killed", false)
 			var reward: int = payload.get("reward", 0)
 			print("[GameManager] Auto explode: target=%s killed=%s reward=%d" % [target_id, str(killed), reward])
+
+## 幸運鏡面世界魚系統（DAY-236）
+func _handle_lucky_mirror_world(payload: Dictionary) -> void:
+	emit_signal("lucky_mirror_world", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"mirror_start":
+			var player_name: String = payload.get("player_name", "")
+			var kill_boost: float = payload.get("kill_boost", 2.3)
+			print("[GameManager] Mirror world started! player=%s boost=x%.1f" % [player_name, kill_boost])
+			# 同步所有目標物的鏡像後位置
+			var positions: Array = payload.get("positions", [])
+			_sync_mirror_positions(positions)
+		"mirror_collapse":
+			var collapsed_count: int = payload.get("collapsed_count", 0)
+			print("[GameManager] Mirror collapse! affected=%d targets" % collapsed_count)
+		"mirror_end":
+			print("[GameManager] Mirror world ended!")
+
+## 同步鏡像反轉後的目標物位置（DAY-236）
+func _sync_mirror_positions(positions: Array) -> void:
+	for pos_info in positions:
+		var target_id: String = pos_info.get("id", "")
+		var new_x: float = pos_info.get("x", 0.0)
+		var new_y: float = pos_info.get("y", 0.0)
+		if target_id.is_empty():
+			continue
+		# 複用 target_teleported 訊號同步位置（平滑移動）
+		emit_signal("target_teleported", target_id, Vector2(new_x, new_y))

@@ -575,6 +575,7 @@ const (
 	MsgLuckyEchoFish       MessageType = "lucky_echo_fish"       // 幸運回聲魚廣播（Server→Client，DAY-233）
 	MsgLuckyVortexFish     MessageType = "lucky_vortex_fish"     // 幸運漩渦魚廣播（Server→Client，DAY-234）
 	MsgLuckyTimeBombFish   MessageType = "lucky_time_bomb_fish"  // 幸運時間炸彈魚廣播（Server→Client，DAY-235）
+	MsgLuckyMirrorWorld    MessageType = "lucky_mirror_world"    // 幸運鏡面世界魚廣播（Server→Client，DAY-236）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5330,4 +5331,21 @@ type LuckyTimeBombFishPayload struct {
 	KilledCount  int         `json:"killed_count,omitempty"`
 	TotalReward  int         `json:"total_reward,omitempty"`
 	ChainResults interface{} `json:"chain_results,omitempty"` // []chainResultPayload
+}
+
+// LuckyMirrorWorldPayload 幸運鏡面世界魚廣播（Server → Client，DAY-236）
+//
+// Events:
+//
+//	"mirror_start"    — 鏡面世界開始（全服廣播，含所有目標鏡像後位置）
+//	"mirror_collapse" — 鏡面崩潰（全服廣播，HP -35%）
+//	"mirror_end"      — 鏡面世界結束（全服廣播）
+type LuckyMirrorWorldPayload struct {
+	Event          string      `json:"event"`
+	PlayerID       string      `json:"player_id,omitempty"`
+	PlayerName     string      `json:"player_name,omitempty"`
+	DurationSec    int         `json:"duration_sec,omitempty"`
+	KillBoost      float64     `json:"kill_boost,omitempty"`
+	Positions      interface{} `json:"positions,omitempty"`      // []mirroredPos
+	CollapsedCount int         `json:"collapsed_count,omitempty"`
 }

@@ -647,6 +647,12 @@ var Targets = map[string]*TargetDef{
 	//   - 提前引爆的目標獲得 ×2.0 倍率加成（比等待爆炸更高）
 	//   - 個人冷卻 20 秒
 	"T193": {ID: "T193", Name: "幸運時間炸彈魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 58, HP: 68, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_time_bomb"},
+	// T194 幸運鏡面世界魚（DAY-236）— 業界原創「全場鏡像反轉+鏡面崩潰」機制
+	//   - 擊破 T194 後觸發「鏡面世界」（10 秒）：場上所有目標 X 座標以場景中央為軸鏡像反轉
+	//   - 鏡面世界期間擊破任何目標獲得 ×2.3 倍率加成（乘法）
+	//   - 10 秒後「鏡面崩潰」：所有目標 HP -35%（保留最少 1）
+	//   - 個人冷卻 22 秒；全服冷卻 35 秒
+	"T194": {ID: "T194", Name: "幸運鏡面世界魚", Type: TargetTypeSpecial, MultiplierMin: 32, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_mirror_world"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
