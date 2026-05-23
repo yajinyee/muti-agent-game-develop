@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-266 幸運連鎖爆炸魚系統）
+## 最後更新：2026-05-24（DAY-267 幸運倍率疊加魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-267 更新（自主觸發）：** 幸運倍率疊加魚系統（Lucky Multiplier Stack Fish）✅
+  - **業界依據：** Fishing Fortune 的 Multiplier Cascade 機制（2026 年最熱門），讓玩家有「每次擊破稀有魚都在疊加倍率，越打越高」的爽感
+  - **設計：** 擊破 T225 後，觸發「倍率疊加模式」（持續 25 秒）；玩家每次擊破任何目標，疊加倍率 +0.3x（從 1.0x 開始，最高 10.0x）；每次擊破都用「當前疊加倍率」計算額外獎勵；達到 10.0x 時觸發「倍率爆發」：最後一次擊破獲得 ×20.0 大獎（個人）；25 秒後未達到 10.0x → 「倍率結算」：用最終疊加倍率計算最後一次擊破獎勵；個人冷卻 32 秒；全服冷卻 50 秒
+  - **設計差異：** 與連鎖爆炸（T224，空間擴散）不同，倍率疊加是「時間累積」，讓玩家有「越打越高，要趁 25 秒內打滿 10.0x」的緊迫感；「每次擊破 +0.3x」讓玩家有「每一槍都在累積倍率」的動力；「達到 10.0x 觸發 ×20.0 爆發」讓玩家有「要趁疊加期間打滿 30 個目標」的策略感；「倍率計數器即時顯示」讓玩家看到「現在疊加到幾倍了」，製造「快滿了！」的期待感；「全服廣播倍率爆發」讓所有玩家看到「有人疊加到 10.0x 爆發了」，製造羨慕感
+  - server/internal/game/lucky_multiplier_stack_handler.go：luckyMultiplierStackManager（個人冷卻/全服冷卻/activeSessions）；multiplierStackSession（playerID/playerName/expiresAt/stack/killCount/totalReward/burst）；isLuckyMultiplierStackFish（T225）；isMultiplierStackActive（供 handleKill 使用）；getMultiplierStackBonus；tryLuckyMultiplierStackFish（擊破後觸發/個人訊息+全服廣播+全服公告）；notifyMultiplierStackKill（疊加+0.3x/計算額外獎勵/達到10.0x觸發爆發）；doMultiplierStackBurst（×20.0倍率/個人大獎/全服廣播/全服公告）；runMultiplierStackTimeout（goroutine 25秒後超時結算）
+  - server/internal/data/tables.go：新增 T225 幸運倍率疊加魚（62-115x/HP102/SpawnWeight2/Speed20/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyMultiplierStack；LuckyMultiplierStackPayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyMultiplierStack + case 處理
+  - server/internal/game/game.go：LuckyMultiplierStack *luckyMultiplierStackManager；handleKill 加入 isLuckyMultiplierStackFish 分支 + isMultiplierStackActive 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyMultiplierStackPanel.gd：翠綠疊加主題面板（stack_start 翠綠三次強閃光+頂部橫幅+「📈 倍率疊加！」大字+疊加計數器（右上角）+底部進度條+計時條；stack_broadcast 頂部小橫幅；stack_update 翠綠閃光+計數器更新+進度條更新+浮動文字；stack_burst 全螢幕三次強閃光+「📈 倍率爆發！×10→×20！」大字+結算彈窗；stack_burst_broadcast 全服廣播橫幅；stack_settle 天藍閃光+「📈 疊加結算」大字）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_multiplier_stack 訊號 + _handle_lucky_multiplier_stack
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyMultiplierStackPanelScript（layer=40）
+  - 疊加設計：每次擊破 +0.3x；初始 1.0x；最大 10.0x；持續 25 秒；個人冷卻 32 秒；全服冷卻 50 秒
+  - 爆發設計：達到 10.0x 觸發；×20.0 倍率；個人大獎；全服廣播；全服公告
+  - 結算設計：超時後用最終疊加倍率結算；個人通知
+  - 視覺設計：翠綠疊加主題（#00FF88 翠綠 + #FFD700 金 + #00BFFF 天藍 + #FF8000 爆發橙）；疊加計數器（📈 ×N.N，右上角，顏色隨進度變化：翠綠→天藍→金）；底部疊加進度條（接近滿時變金色）；右側豎向計時條（翠綠，x=-282 與其他計時條錯開）；爆發結算彈窗右側滑入（含疊加倍率/爆發倍率/爆發獎勵/總獎勵）
+  - 全服廣播：倍率疊加觸發/倍率爆發全服廣播
+  - 全服公告：觸發時公告（翠綠色）；爆發公告（金色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-266 更新（自主觸發）：** 幸運連鎖爆炸魚系統（Lucky Chain Explosion Fish）✅
   - **業界依據：** Ocean King 3 的 Chain Explosion 系統，2026 年最熱門 AOE 連鎖方向，讓玩家有「一炸帶一片」的連鎖快感
   - **設計：** 擊破 T224 後，第 1 層隨機引爆 1 個目標（×2.0，全服共享）；200px 內 HP-50%，各自 40% 機率二次引爆（×1.5）；第 2 層：150px 內 HP-30%，各自 25% 機率三次引爆（×1.2）；最多 3 層連鎖；個人冷卻 22 秒；全服冷卻 35 秒

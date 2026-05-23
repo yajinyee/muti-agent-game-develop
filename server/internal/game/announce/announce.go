@@ -105,6 +105,7 @@ const (
 	EventLuckyKarmaCycle          EventType = "lucky_karma_cycle"          // 幸運命運輪迴魚觸發（DAY-264）
 	EventLuckySpeedRaceFish       EventType = "lucky_speed_race_fish"      // 幸運競速賽魚觸發（DAY-265）
 	EventLuckyChainExplosion      EventType = "lucky_chain_explosion"      // 幸運連鎖爆炸魚觸發（DAY-266）
+	EventLuckyMultiplierStack     EventType = "lucky_multiplier_stack"     // 幸運倍率疊加魚觸發（DAY-267）
 )
 
 // Priority 公告優先級
@@ -1788,6 +1789,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "💥 連鎖爆炸！"
 		message = msg
 		icon = "💥"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyMultiplierStack:
+		msg := "📈 幸運倍率疊加魚觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#00FF88"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "📈 倍率疊加！"
+		message = msg
+		icon = "📈"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

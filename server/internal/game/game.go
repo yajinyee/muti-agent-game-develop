@@ -240,6 +240,7 @@ type Game struct {
 	LuckyKarmaCycle         *luckyKarmaCycleManager            // 幸運命運輪迴魚系統管理器（DAY-264）
 	LuckySpeedRaceFish      *luckySpeedRaceFishManager         // 幸運競速賽魚系統管理器（DAY-265）
 	LuckyChainExplosion     *luckyChainExplosionManager        // 幸運連鎖爆炸魚系統管理器（DAY-266）
+	LuckyMultiplierStack    *luckyMultiplierStackManager       // 幸運倍率疊加魚系統管理器（DAY-267）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -456,6 +457,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyKarmaCycle:         newLuckyKarmaCycleManager(),
 		LuckySpeedRaceFish:      newLuckySpeedRaceFishManager(),
 		LuckyChainExplosion:     newLuckyChainExplosionManager(),
+		LuckyMultiplierStack:    newLuckyMultiplierStackManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2391,6 +2393,18 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運連鎖爆炸魚：擊破 T224 時觸發連鎖爆炸（DAY-266）
 	if isLuckyChainExplosionFish(t.DefID) {
 		go g.tryLuckyChainExplosionFish(p)
+	}
+	// 幸運倍率疊加魚：擊破 T225 時觸發倍率疊加（DAY-267）
+	if isLuckyMultiplierStackFish(t.DefID) {
+		go g.tryLuckyMultiplierStackFish(p)
+	}
+	// 幸運倍率疊加魚：玩家在疊加模式中擊破任何非 T225 目標時，累積疊加倍率並給予額外獎勵（DAY-267）
+	if !isLuckyMultiplierStackFish(t.DefID) && g.LuckyMultiplierStack.isMultiplierStackActive(p.ID) {
+		targetName := t.DefID
+		if t.Def != nil {
+			targetName = t.Def.Name
+		}
+		go g.notifyMultiplierStackKill(p, targetName, finalReward)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

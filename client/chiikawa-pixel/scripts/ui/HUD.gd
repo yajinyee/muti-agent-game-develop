@@ -350,6 +350,7 @@ func _ready() -> void:
 	_init_lucky_karma_cycle_panel()         # 幸運命運輪迴魚系統面板（DAY-264）
 	_init_lucky_speed_race_fish_panel()     # 幸運競速賽魚系統面板（DAY-265）
 	_init_lucky_chain_explosion_panel()     # 幸運連鎖爆炸魚系統面板（DAY-266）
+	_init_lucky_multiplier_stack_panel()    # 幸運倍率疊加魚系統面板（DAY-267）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5039,3 +5040,19 @@ func _init_lucky_chain_explosion_panel() -> void:
 func _on_lucky_chain_explosion(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_chain_explosion_panel):
 		_lucky_chain_explosion_panel.handle_event(data)
+
+const LuckyMultiplierStackPanelScript = preload("res://scripts/ui/LuckyMultiplierStackPanel.gd")
+var _lucky_multiplier_stack_panel = null
+
+func _init_lucky_multiplier_stack_panel() -> void:
+	var panel = LuckyMultiplierStackPanelScript.new()
+	panel.name = "LuckyMultiplierStackPanel"
+	panel.layer = 40
+	add_child(panel)
+	_lucky_multiplier_stack_panel = panel
+	if GameManager.has_signal("lucky_multiplier_stack"):
+		GameManager.lucky_multiplier_stack.connect(_on_lucky_multiplier_stack)
+
+func _on_lucky_multiplier_stack(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_multiplier_stack_panel):
+		_lucky_multiplier_stack_panel.handle_event(data)

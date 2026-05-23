@@ -271,6 +271,7 @@ signal lucky_element_fusion(data: Dictionary)         # 幸運元素融合魚系
 signal lucky_karma_cycle(data: Dictionary)            # 幸運命運輪迴魚系統（DAY-264）
 signal lucky_speed_race_fish(data: Dictionary)        # 幸運競速賽魚系統（DAY-265）
 signal lucky_chain_explosion(data: Dictionary)        # 幸運連鎖爆炸魚系統（DAY-266）
+signal lucky_multiplier_stack(data: Dictionary)       # 幸運倍率疊加魚系統（DAY-267）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -780,6 +781,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_speed_race_fish(payload)
 		"lucky_chain_explosion":
 			_handle_lucky_chain_explosion(payload)
+		"lucky_multiplier_stack":
+			_handle_lucky_multiplier_stack(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3918,3 +3921,25 @@ func _handle_lucky_chain_explosion(payload: Dictionary) -> void:
 			var total_explode: int = payload.get("total_explode", 1)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] ChainExplosion result! layers=%d explode=%d reward=%d" % [total_layers, total_explode, total_reward])
+
+## 幸運倍率疊加魚系統（DAY-267）
+func _handle_lucky_multiplier_stack(payload: Dictionary) -> void:
+	emit_signal("lucky_multiplier_stack", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"stack_start":
+			var player_name: String = payload.get("player_name", "")
+			var max_stack: float = payload.get("max_stack", 10.0)
+			print("[GameManager] MultiplierStack start! trigger=%s max=%.0f" % [player_name, max_stack])
+		"stack_update":
+			var current_stack: float = payload.get("current_stack", 1.0)
+			var kill_count: int = payload.get("kill_count", 0)
+			print("[GameManager] MultiplierStack update! stack=%.1f kills=%d" % [current_stack, kill_count])
+		"stack_burst":
+			var total_stack: float = payload.get("total_stack", 10.0)
+			var burst_reward: int = payload.get("burst_reward", 0)
+			print("[GameManager] MultiplierStack burst! stack=%.0f reward=%d" % [total_stack, burst_reward])
+		"stack_settle":
+			var final_stack: float = payload.get("final_stack", 1.0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] MultiplierStack settle! stack=%.1f reward=%d" % [final_stack, total_reward])

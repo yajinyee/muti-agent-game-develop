@@ -607,6 +607,7 @@ const (
 	MsgLuckyKarmaCycle             MessageType = "lucky_karma_cycle"                  // 幸運命運輪迴魚廣播（Server→Client，DAY-264）
 	MsgLuckySpeedRaceFish          MessageType = "lucky_speed_race_fish"               // 幸運競速賽魚廣播（Server→Client，DAY-265）
 	MsgLuckyChainExplosion         MessageType = "lucky_chain_explosion"                // 幸運連鎖爆炸魚廣播（Server→Client，DAY-266）
+	MsgLuckyMultiplierStack        MessageType = "lucky_multiplier_stack"               // 幸運倍率疊加魚廣播（Server→Client，DAY-267）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6105,4 +6106,29 @@ type LuckyChainExplosionPayload struct {
 	TotalLayers   int     `json:"total_layers,omitempty"`
 	TotalExplode  int     `json:"total_explode,omitempty"`
 	TotalReward   int     `json:"total_reward,omitempty"`
+}
+
+// LuckyMultiplierStackPayload 幸運倍率疊加魚廣播（Server → Client，DAY-267）
+// Event 類型：
+//   - stack_start：觸發倍率疊加（個人，PlayerID/PlayerName/MaxStack/BurstMult/Duration）
+//   - stack_broadcast：全服廣播（PlayerName）
+//   - stack_update：每次擊破疊加更新（個人，CurrentStack/KillCount/Reward/TargetName）
+//   - stack_burst：達到最大疊加觸發爆發（個人，TotalStack/BurstReward/TotalReward）
+//   - stack_burst_broadcast：爆發全服廣播（PlayerName/TotalStack/BurstReward）
+//   - stack_settle：超時結算（個人，FinalStack/KillCount/TotalReward）
+type LuckyMultiplierStackPayload struct {
+	Event        string  `json:"event"`
+	PlayerID     string  `json:"player_id,omitempty"`
+	PlayerName   string  `json:"player_name,omitempty"`
+	CurrentStack float64 `json:"current_stack,omitempty"` // 當前疊加倍率
+	MaxStack     float64 `json:"max_stack,omitempty"`     // 最大疊加倍率（10.0x）
+	BurstMult    float64 `json:"burst_mult,omitempty"`    // 爆發倍率（20.0x）
+	Duration     float64 `json:"duration,omitempty"`      // 持續秒數
+	KillCount    int     `json:"kill_count,omitempty"`    // 本次疊加期間擊破數
+	TargetName   string  `json:"target_name,omitempty"`   // 本次擊破目標名稱
+	Reward       int     `json:"reward,omitempty"`        // 本次擊破獎勵
+	TotalStack   float64 `json:"total_stack,omitempty"`   // 最終疊加倍率（結算時）
+	BurstReward  int     `json:"burst_reward,omitempty"`  // 爆發獎勵
+	FinalStack   float64 `json:"final_stack,omitempty"`   // 超時時的最終疊加倍率
+	TotalReward  int     `json:"total_reward,omitempty"`  // 總獎勵
 }

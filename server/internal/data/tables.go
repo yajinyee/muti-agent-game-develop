@@ -820,6 +820,16 @@ var Targets = map[string]*TargetDef{
 	//   - 第 2 層：150px 內 HP-30%，25% 機率三次引爆（×1.2）；最多 3 層連鎖
 	//   - 個人冷卻 22 秒；全服冷卻 35 秒
 	"T224": {ID: "T224", Name: "幸運連鎖爆炸魚", Type: TargetTypeSpecial, MultiplierMin: 61, MultiplierMax: 113, HP: 101, SpawnWeight: 2, Speed: 21, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_chain_explosion"},
+
+	// T225 幸運倍率疊加魚（DAY-267）— Fishing Fortune Multiplier Cascade 機制
+	//   - 擊破 T225 後，觸發「倍率疊加模式」（持續 25 秒）
+	//   - 玩家每次擊破任何目標，疊加倍率 +0.3x（從 1.0x 開始，最高 10.0x）
+	//   - 每次擊破都用「當前疊加倍率」計算獎勵
+	//   - 達到 10.0x 時觸發「倍率爆發」：最後一次擊破獲得 ×20.0 大獎（個人）
+	//   - 25 秒後未達到 10.0x → 「倍率結算」：用最終疊加倍率計算最後一次擊破獎勵
+	//   - 個人冷卻 32 秒；全服冷卻 50 秒
+	"T225": {ID: "T225", Name: "幸運倍率疊加魚", Type: TargetTypeSpecial, MultiplierMin: 62, MultiplierMax: 115, HP: 102, SpawnWeight: 2, Speed: 20, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_multiplier_stack"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
