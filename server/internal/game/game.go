@@ -1458,7 +1458,8 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if synergyMult > 1.0 {
 		finalReward = int(float64(finalReward) * synergyMult)
 	}
-	// 套用幸運賭注魚賭注倍率（DAY-240，×0.3-10.0 乘法，個人，一次性消耗）
+	// 套用幸運賭注魚賭注倍率（DAY-240，×0.0-8.0 乘法，個人，一次性消耗）
+	// 失敗時 mult=0.0（歸零），成功時 mult=2.0/4.0/8.0
 	betMult := g.getLuckyBetFishMult(p.ID)
 	if betMult != 1.0 {
 		finalReward = int(float64(finalReward) * betMult)

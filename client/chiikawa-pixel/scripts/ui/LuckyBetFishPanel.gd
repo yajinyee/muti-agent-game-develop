@@ -1,6 +1,11 @@
 ## LuckyBetFishPanel.gd — 幸運賭注魚系統面板（DAY-240）
 ## 業界原創「玩家主動風險決策+賭注翻倍」機制
 ##
+## 數值設計（三選項期望值相同 2.0x，差異只在方差）：
+##   - 選擇 A（保守）：×2.0，100% 成功 → 期望值 2.0x
+##   - 選擇 B（激進）：×4.0，50% 成功，失敗歸零 → 期望值 2.0x
+##   - 選擇 C（瘋狂）：×8.0，25% 成功，失敗歸零 → 期望值 2.0x
+##
 ## 視覺設計：
 ##   - 紫金賭注主題（#9B59B6 + #F39C12 + #FFD700 + #F5EEF8）
 ##   - bet_start：紫色雙閃光 + 賭注選擇介面（三個按鈕 A/B/C）+ 倒數計時條
@@ -199,9 +204,9 @@ func _create_bet_button(parent: Control, choice: String, option: Dictionary, pos
 	# 失敗倍率（只有 B/C 顯示）
 	if choice != "A":
 		var fail_label = Label.new()
-		fail_label.text = "失敗 ×%.1f" % fail_mult
+		fail_label.text = "失敗 ×0（歸零）" if fail_mult == 0.0 else "失敗 ×%.1f" % fail_mult
 		fail_label.add_theme_font_size_override("font_size", 10)
-		fail_label.add_theme_color_override("font_color", Color(0.7, 0.5, 0.5))
+		fail_label.add_theme_color_override("font_color", Color(0.8, 0.3, 0.3))
 		fail_label.position = Vector2(10, 104)
 		container.add_child(fail_label)
 

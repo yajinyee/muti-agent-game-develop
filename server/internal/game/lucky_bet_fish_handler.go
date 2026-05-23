@@ -33,20 +33,22 @@ const (
 	LuckyBetFishPersonalCD   = 30 * time.Second // 個人冷卻
 	LuckyBetFishDecisionTime = 10 * time.Second // 決策時間
 
-	// 選擇 A（保守）
+	// 選擇 A（保守）— 期望值 ×2.0，零風險
 	LuckyBetFishAMult    = 2.0  // 倍率
 	LuckyBetFishAChance  = 1.0  // 成功機率（100%）
 	LuckyBetFishAFailMult = 1.0 // 失敗倍率（不會失敗）
 
-	// 選擇 B（激進）
-	LuckyBetFishBMult    = 5.0  // 倍率
+	// 選擇 B（激進）— 期望值 ×2.0，高方差
+	// 0.5 × 4.0 + 0.5 × 0.0 = 2.0x（與 A 相同期望值）
+	LuckyBetFishBMult    = 4.0  // 倍率
 	LuckyBetFishBChance  = 0.50 // 成功機率（50%）
-	LuckyBetFishBFailMult = 0.5 // 失敗倍率
+	LuckyBetFishBFailMult = 0.0 // 失敗倍率（歸零，真實風險）
 
-	// 選擇 C（瘋狂）
-	LuckyBetFishCMult    = 10.0 // 倍率
+	// 選擇 C（瘋狂）— 期望值 ×2.0，極高方差
+	// 0.25 × 8.0 + 0.75 × 0.0 = 2.0x（與 A 相同期望值）
+	LuckyBetFishCMult    = 8.0  // 倍率
 	LuckyBetFishCChance  = 0.25 // 成功機率（25%）
-	LuckyBetFishCFailMult = 0.3 // 失敗倍率
+	LuckyBetFishCFailMult = 0.0 // 失敗倍率（歸零，真實風險）
 )
 
 // betChoice 賭注選擇
@@ -92,6 +94,7 @@ func isLuckyBetFish(defID string) bool {
 
 // getLuckyBetFishMult 取得賭注倍率（供 handleKill 使用）
 // 回傳倍率並消耗 session（一次性）
+// 注意：失敗時回傳 0.0（歸零），成功時回傳 2.0/4.0/8.0，未觸發時回傳 1.0
 func (g *Game) getLuckyBetFishMult(playerID string) float64 {
 	mgr := g.LuckyBetFish
 	mgr.mu.Lock()
@@ -99,9 +102,6 @@ func (g *Game) getLuckyBetFishMult(playerID string) float64 {
 
 	sess, ok := mgr.sessions[playerID]
 	if !ok || !sess.decided {
-		return 1.0
-	}
-	if sess.pendingMult <= 0 {
 		return 1.0
 	}
 
@@ -144,7 +144,7 @@ func (g *Game) notifyBetChoice(p *player.Player, choice betChoice) {
 			mult = LuckyBetFishBMult
 			success = true
 		} else {
-			mult = LuckyBetFishBFailMult
+			mult = LuckyBetFishBFailMult // 0.0 = 歸零（失去這次擊破獎勵）
 			success = false
 		}
 	case BetChoiceC:
@@ -153,7 +153,7 @@ func (g *Game) notifyBetChoice(p *player.Player, choice betChoice) {
 			mult = LuckyBetFishCMult
 			success = true
 		} else {
-			mult = LuckyBetFishCFailMult
+			mult = LuckyBetFishCFailMult // 0.0 = 歸零（失去這次擊破獎勵）
 			success = false
 		}
 	default:
