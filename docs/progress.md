@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-227 幸運鏡像時空魚系統）
+## 最後更新：2026-05-23（DAY-228 幸運量子魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-228 更新（自主觸發）：** 幸運量子魚系統（Lucky Quantum Fish）✅
+  - **業界依據：** 業界原創「量子疊加態」機制
+  - **設計：** 擊破 T186 後觸發「量子疊加」：場上隨機 4 個目標進入「量子態」（同時疊加高倍率 ×3.0 和低倍率 ×0.8）；玩家「觀測」（射擊命中）量子態目標時，50% 機率坍縮為高倍率（×3.0），50% 機率坍縮為低倍率（×0.8）；量子態持續 10 秒；10 秒後所有未被觀測的量子態目標「量子爆炸」（70% 擊破機率，倍率隨機 ×1.0-×4.0）；個人冷卻 20 秒
+  - **設計差異：** 與彩虹稜鏡魚（DAY-213，染色固定倍率）不同，量子魚是「不確定性」，讓玩家有「要不要賭一把」的刺激感；與幸運鏡像魚（DAY-215，複製分身）不同，量子魚是「疊加態坍縮」，每次觀測結果不同；「50% 高倍率 / 50% 低倍率」讓玩家有「薛丁格的魚」的緊張感；「量子爆炸隨機倍率 ×1.0-×4.0」讓未被觀測的目標有驚喜感；視覺上量子態目標在高倍率（洋紅）和低倍率（灰色）之間閃爍
+  - server/internal/game/lucky_quantum_fish_handler.go：luckyQuantumFishManager（個人冷卻/quantumTargets/currentInstanceID）；quantumEntry（instanceID/expiresAt）；isLuckyQuantumFish（T186）；isQuantumTarget；getLuckyQuantumCollapseMult（50% ×3.0 / 50% ×0.8）；removeQuantumEntry；notifyQuantumKill（坍縮廣播）；tryLuckyQuantumFish（擊破後觸發/隨機4個目標/全服廣播/10秒後量子爆炸）
+  - server/internal/data/tables.go：新增 T186 幸運量子魚（32-60x/HP70/SpawnWeight3/Speed48/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyQuantumFish；LuckyQuantumFishPayload（quantum_start/quantum_collapse/quantum_blast）
+  - server/internal/game/announce/announce.go：新增 EventLuckyQuantumFish + case 處理
+  - server/internal/game/game.go：LuckyQuantumFish *luckyQuantumFishManager；handleKill 加入 isQuantumTarget + getLuckyQuantumCollapseMult 乘法加成 + notifyQuantumKill + removeQuantumEntry + isLuckyQuantumFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyQuantumFishPanel.gd：紫色量子主題面板（quantum_start 紫色三次強閃光+頂部橫幅+「⚛️ 量子疊加！」大字+計時條+倍率說明；quantum_collapse 高倍率洋紅閃光+大字/低倍率灰色閃光+小字；quantum_blast 三次強閃光+「⚛️ 量子爆炸！」大字+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_quantum_fish 訊號 + _handle_lucky_quantum_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyQuantumFishPanelScript（layer=17）
+  - 量子疊加設計：隨機 4 個目標；持續 10 秒；個人冷卻 20 秒；50% 高倍率 / 50% 低倍率
+  - 量子爆炸設計：70% 擊破機率；倍率隨機 ×1.0-×4.0；≥2 個爆炸時全服公告
+  - 視覺設計：紫色量子主題（#9B59B6 + #D7BDE2 + #FF00FF + #F5EEF8）；底部計時條（紫→洋紅漸變）；高倍率洋紅/低倍率灰色視覺差異
+  - 全服廣播：量子疊加開始/每次坍縮/量子爆炸全服廣播
+  - 全服公告：觸發時公告（紫色）；爆炸≥2 個時公告（依爆炸數決定顏色：≥3 洋紅/其他紫色）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-227 更新（自主觸發）：** 幸運鏡像時空魚系統（Lucky Mirror Time Fish）✅
   - **業界依據：** 業界原創「時間倒流」機制
   - **設計：** 擊破 T185 後觸發「時間倒流」（8 秒）：場上所有目標物 HP 回滿（MaxHP）；時間倒流期間擊破任何目標獲得 ×2.0 倍率加成（乘法）；8 秒後「時間崩潰」：所有目標 HP -40%；個人冷卻 25 秒

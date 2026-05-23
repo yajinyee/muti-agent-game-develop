@@ -230,6 +230,7 @@ signal lucky_split_fish(data: Dictionary)           # 幸運分裂魚系統（DA
 signal lucky_charge_fish(data: Dictionary)          # 幸運充能魚系統（DAY-225）
 signal lucky_chain_bomb(data: Dictionary)           # 幸運鏈鎖爆炸魚系統（DAY-226）
 signal lucky_mirror_time(data: Dictionary)          # 幸運鏡像時空魚系統（DAY-227）
+signal lucky_quantum_fish(data: Dictionary)         # 幸運量子魚系統（DAY-228）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -661,6 +662,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_chain_bomb(payload)
 		"lucky_mirror_time":
 			_handle_lucky_mirror_time(payload)
+		"lucky_quantum_fish":
+			_handle_lucky_quantum_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2852,3 +2855,22 @@ func _handle_lucky_mirror_time(payload: Dictionary) -> void:
 		"time_collapse":
 			var collapse_count: int = payload.get("collapse_count", 0)
 			print("[GameManager] Time collapse! %d targets HP -40%%" % collapse_count)
+
+## 處理幸運量子魚系統（DAY-228）
+func _handle_lucky_quantum_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_quantum_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"quantum_start":
+			var quantum_count: int = payload.get("quantum_count", 0)
+			var high_mult: float = payload.get("high_mult", 3.0)
+			var low_mult: float = payload.get("low_mult", 0.8)
+			print("[GameManager] Quantum superposition! count=%d high=×%.1f low=×%.1f" % [quantum_count, high_mult, low_mult])
+		"quantum_collapse":
+			var collapse_high: bool = payload.get("collapse_high", false)
+			var collapse_mult: float = payload.get("collapse_mult", 1.0)
+			print("[GameManager] Quantum collapse! high=%s mult=×%.1f" % [str(collapse_high), collapse_mult])
+		"quantum_blast":
+			var blast_count: int = payload.get("blast_count", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Quantum blast! count=%d reward=%d" % [blast_count, total_reward])

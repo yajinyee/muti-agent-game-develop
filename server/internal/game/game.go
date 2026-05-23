@@ -201,6 +201,7 @@ type Game struct {
 	LuckyChargeFish    *luckyChargeFishManager     // 幸運充能魚系統管理器（DAY-225）
 	LuckyChainBomb     *luckyChainBombManager      // 幸運鏈鎖爆炸魚系統管理器（DAY-226）
 	LuckyMirrorTime    *luckyMirrorTimeManager     // 幸運鏡像時空魚系統管理器（DAY-227）
+	LuckyQuantumFish   *luckyQuantumFishManager    // 幸運量子魚系統管理器（DAY-228）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -378,6 +379,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyChargeFish:    newLuckyChargeFishManager(),
 		LuckyChainBomb:     newLuckyChainBombManager(),
 		LuckyMirrorTime:    newLuckyMirrorTimeManager(),
+		LuckyQuantumFish:   newLuckyQuantumFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1354,6 +1356,15 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if mirrorTimeBoost > 1.0 {
 		finalReward = int(float64(finalReward) * mirrorTimeBoost)
 	}
+	// 套用幸運量子魚坍縮倍率（DAY-228，×3.0 或 ×0.8 乘法，個人，量子態目標）
+	if g.isQuantumTarget(t.InstanceID) {
+		quantumMult, isQuantum := g.getLuckyQuantumCollapseMult(t.InstanceID)
+		if isQuantum {
+			finalReward = int(float64(finalReward) * quantumMult)
+			go g.notifyQuantumKill(p, t.InstanceID, quantumMult, finalReward)
+			g.removeQuantumEntry(t.InstanceID)
+		}
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1924,6 +1935,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運鏡像時空魚：擊破 T185 本身時觸發時間倒流（DAY-227）
 	if isLuckyMirrorTimeFish(t.DefID) {
 		go g.tryLuckyMirrorTimeFish(p)
+	}
+	// 幸運量子魚：擊破 T186 本身時觸發量子疊加（DAY-228）
+	if isLuckyQuantumFish(t.DefID) {
+		go g.tryLuckyQuantumFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {

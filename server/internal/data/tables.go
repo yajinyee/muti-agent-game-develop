@@ -594,6 +594,13 @@ var Targets = map[string]*TargetDef{
 	//   - 8 秒後「時間崩潰」：所有目標 HP -40%
 	//   - 個人冷卻 25 秒
 	"T185": {ID: "T185", Name: "幸運鏡像時空魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 47, Lifetime: 15, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_mirror_time"},
+	// T186 幸運量子魚（DAY-228）— 業界原創「量子疊加態」機制
+	// 設計：擊破 T186 後觸發「量子疊加」：
+	//   - 場上隨機 4 個目標進入「量子態」（同時疊加高倍率 ×3.0 和低倍率 ×0.8）
+	//   - 玩家「觀測」（射擊命中）量子態目標時，50% 機率坍縮為高倍率（×3.0），50% 機率坍縮為低倍率（×0.8）
+	//   - 量子態持續 10 秒；10 秒後所有未被觀測的量子態目標「量子爆炸」（70% 擊破機率，倍率隨機 ×1.0-×4.0）
+	//   - 個人冷卻 20 秒；全服廣播量子態建立/坍縮/爆炸
+	"T186": {ID: "T186", Name: "幸運量子魚", Type: TargetTypeSpecial, MultiplierMin: 32, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 48, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_quantum"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

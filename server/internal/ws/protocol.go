@@ -567,6 +567,7 @@ const (
 	MsgLuckyChargeFish     MessageType = "lucky_charge_fish"     // 幸運充能魚廣播（Server→Client，DAY-225）
 	MsgLuckyChainBomb      MessageType = "lucky_chain_bomb"      // 幸運鏈鎖爆炸魚廣播（Server→Client，DAY-226）
 	MsgLuckyMirrorTime     MessageType = "lucky_mirror_time"     // 幸運鏡像時空魚廣播（Server→Client，DAY-227）
+	MsgLuckyQuantumFish    MessageType = "lucky_quantum_fish"    // 幸運量子魚廣播（Server→Client，DAY-228）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5113,4 +5114,29 @@ type LuckyChainBombPayload struct {
 	BlastRadius float64     `json:"blast_radius,omitempty"`
 	Results     interface{} `json:"results,omitempty"`
 	TotalReward int         `json:"total_reward,omitempty"`
+}
+
+// LuckyQuantumFishPayload 幸運量子魚廣播（Server → Client，DAY-228）
+//
+// Events:
+//
+//	"quantum_start"     — 量子疊加開始（全服廣播）
+//	"quantum_collapse"  — 量子態坍縮（玩家觀測後，全服廣播）
+//	"quantum_blast"     — 量子爆炸結算（全服廣播）
+type LuckyQuantumFishPayload struct {
+	Event         string      `json:"event"`
+	InstanceID    string      `json:"instance_id,omitempty"`
+	PlayerID      string      `json:"player_id,omitempty"`
+	PlayerName    string      `json:"player_name,omitempty"`
+	QuantumCount  int         `json:"quantum_count,omitempty"`
+	DurationSec   int         `json:"duration_sec,omitempty"`
+	HighMult      float64     `json:"high_mult,omitempty"`
+	LowMult       float64     `json:"low_mult,omitempty"`
+	TargetID      string      `json:"target_id,omitempty"`
+	CollapseHigh  bool        `json:"collapse_high,omitempty"`
+	CollapseMult  float64     `json:"collapse_mult,omitempty"`
+	CollapseReward int        `json:"collapse_reward,omitempty"`
+	BlastResults  interface{} `json:"blast_results,omitempty"`
+	TotalReward   int         `json:"total_reward,omitempty"`
+	BlastCount    int         `json:"blast_count,omitempty"`
 }
