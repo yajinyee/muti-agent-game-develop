@@ -342,6 +342,7 @@ func _ready() -> void:
 	_init_lucky_server_charge_panel()        # 幸運全服充能魚系統面板（DAY-256）
 	_init_lucky_guild_war_panel()            # 幸運公會戰魚系統面板（DAY-257）
 	_init_lucky_lightning_storm_panel()      # 幸運閃電風暴魚系統面板（DAY-258）
+	_init_lucky_zodiac_fate_panel()          # 幸運星座命運魚系統面板（DAY-259）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4895,3 +4896,21 @@ func _init_lucky_lightning_storm_panel() -> void:
 func _on_lucky_lightning_storm(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_lightning_storm_panel):
 		_lucky_lightning_storm_panel.handle_lucky_lightning_storm(data)
+
+# ─── 幸運星座命運魚系統面板（DAY-259）────────────────────────────────────────
+
+const LuckyZodiacFatePanelScript = preload("res://scripts/ui/LuckyZodiacFatePanel.gd")
+var _lucky_zodiac_fate_panel = null
+
+func _init_lucky_zodiac_fate_panel() -> void:
+	var panel = LuckyZodiacFatePanelScript.new()
+	panel.name = "LuckyZodiacFatePanel"
+	panel.layer = 32
+	add_child(panel)
+	_lucky_zodiac_fate_panel = panel
+	if GameManager.has_signal("lucky_zodiac_fate"):
+		GameManager.lucky_zodiac_fate.connect(_on_lucky_zodiac_fate)
+
+func _on_lucky_zodiac_fate(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_zodiac_fate_panel):
+		_lucky_zodiac_fate_panel.handle_lucky_zodiac_fate(data)

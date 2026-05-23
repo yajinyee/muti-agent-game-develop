@@ -599,6 +599,7 @@ const (
 	MsgLuckyServerCharge           MessageType = "lucky_server_charge"              // 幸運全服充能魚廣播（Server→Client，DAY-256）
 	MsgLuckyGuildWar               MessageType = "lucky_guild_war"                  // 幸運公會戰魚廣播（Server→Client，DAY-257）
 	MsgLuckyLightningStorm         MessageType = "lucky_lightning_storm"             // 幸運閃電風暴魚廣播（Server→Client，DAY-258）
+	MsgLuckyZodiacFate             MessageType = "lucky_zodiac_fate"                 // 幸運星座命運魚廣播（Server→Client，DAY-259）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5897,4 +5898,28 @@ type LuckyLightningStormPayload struct {
 	StartX        float64 `json:"start_x,omitempty"`
 	StartY        float64 `json:"start_y,omitempty"`
 	AffectedCount int     `json:"affected_count,omitempty"`
+}
+
+// LuckyZodiacFatePayload 幸運星座命運魚廣播（Server → Client，DAY-259）
+// Event 類型：
+//   - zodiac_start：星座命運啟動（個人訊息，PlayerID/PlayerName/Zodiac/ZodiacEmoji/ZodiacColor/BoostType/BoostMult/BoostDuration/MarkCount/MarkMult/MarkDuration）
+//   - zodiac_broadcast：全服廣播（PlayerName/Zodiac/ZodiacEmoji/ZodiacColor/BlessedCount/MarkCount/MarkMult）
+//   - zodiac_mark_kill：星座標記擊破（全服廣播，PlayerName/TargetName/MarkMult/TotalReward）
+//   - zodiac_end：星座標記結束（全服廣播，PlayerName/Zodiac/ZodiacEmoji）
+type LuckyZodiacFatePayload struct {
+	Event         string  `json:"event"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	Zodiac        string  `json:"zodiac,omitempty"`
+	ZodiacEmoji   string  `json:"zodiac_emoji,omitempty"`
+	ZodiacColor   string  `json:"zodiac_color,omitempty"`
+	BoostType     string  `json:"boost_type,omitempty"`    // "bless" 或 "shield"
+	BoostMult     float64 `json:"boost_mult,omitempty"`
+	BoostDuration int     `json:"boost_duration,omitempty"`
+	MarkCount     int     `json:"mark_count,omitempty"`
+	MarkMult      float64 `json:"mark_mult,omitempty"`
+	MarkDuration  int     `json:"mark_duration,omitempty"`
+	BlessedCount  int     `json:"blessed_count,omitempty"`
+	TargetName    string  `json:"target_name,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
 }

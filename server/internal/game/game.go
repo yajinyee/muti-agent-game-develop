@@ -232,6 +232,7 @@ type Game struct {
 	LuckyServerCharge       *luckyServerChargeManager         // 幸運全服充能魚系統管理器（DAY-256）
 	LuckyGuildWar           *luckyGuildWarManager             // 幸運公會戰魚系統管理器（DAY-257）
 	LuckyLightningStorm     *luckyLightningStormManager       // 幸運閃電風暴魚系統管理器（DAY-258）
+	LuckyZodiacFate         *luckyZodiacFateManager           // 幸運星座命運魚系統管理器（DAY-259）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -440,6 +441,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyServerCharge:       newLuckyServerChargeManager(),
 		LuckyGuildWar:           newLuckyGuildWarManager(),
 		LuckyLightningStorm:     newLuckyLightningStormManager(),
+		LuckyZodiacFate:         newLuckyZodiacFateManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1557,6 +1559,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if guildWarBoostMult > 1.0 {
 		finalReward = int(float64(finalReward) * guildWarBoostMult)
 	}
+	// 套用幸運星座命運魚星座祝福/庇護倍率加成（DAY-259，×3.0/1.5 乘法，個人，祝福/庇護期間）
+	zodiacMult := g.LuckyZodiacFate.getLuckyZodiacFateMult(p.ID)
+	if zodiacMult > 1.0 {
+		finalReward = int(float64(finalReward) * zodiacMult)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -2302,6 +2309,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運閃電風暴魚：擊破 T216 時觸發閃電風暴（DAY-258）
 	if isLuckyLightningStormFish(t.DefID) {
 		go g.tryLuckyLightningStormFish(p)
+	}
+	// 幸運星座命運魚：擊破 T217 時觸發星座命運（DAY-259）
+	if isLuckyZodiacFateFish(t.DefID) {
+		go g.tryLuckyZodiacFateFish(p)
+	}
+	// 幸運星座命運魚：星座標記目標被擊破時給予全服獎勵（DAY-259）
+	if !isLuckyZodiacFateFish(t.DefID) && g.LuckyZodiacFate.isZodiacMarkTarget(t.InstanceID) {
+		go g.notifyZodiacMarkKill(p, t)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

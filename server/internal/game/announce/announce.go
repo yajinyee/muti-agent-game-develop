@@ -97,6 +97,7 @@ const (
 	EventLuckyServerCharge        EventType = "lucky_server_charge"        // 幸運全服充能魚觸發（DAY-256）
 	EventLuckyGuildWar            EventType = "lucky_guild_war"            // 幸運公會戰魚觸發（DAY-257）
 	EventLuckyLightningStorm      EventType = "lucky_lightning_storm"      // 幸運閃電風暴魚觸發（DAY-258）
+	EventLuckyZodiacFate          EventType = "lucky_zodiac_fate"          // 幸運星座命運魚觸發（DAY-259）
 )
 
 // Priority 公告優先級
@@ -1620,6 +1621,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "⚡ 閃電風暴！"
 		message = msg
 		icon = "⚡"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyZodiacFate:
+		msg := "✨ 幸運星座命運魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FFD700"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "✨ 星座命運！"
+		message = msg
+		icon = "✨"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

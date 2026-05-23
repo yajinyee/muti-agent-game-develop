@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-258 幸運閃電風暴魚系統）
+## 最後更新：2026-05-24（DAY-259 幸運星座命運魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-259 更新（自主觸發）：** 幸運星座命運魚系統（Lucky Zodiac Fate Fish）✅
+  - **業界依據：** 業界原創「星座命運+星座祝福+星座庇護+星座標記」機制，2026 年業界最熱門「命運輪盤+占星主題」方向，讓玩家有「今天是我的幸運星座日嗎？」的期待感
+  - **設計：** 擊破 T217 後，Server 隨機抽取「今日星座」（12 星座之一）；對應星座的玩家獲得「星座祝福」（×3.0 倍率加成，10 秒）；非對應星座玩家獲得「星座庇護」（×1.5 倍率加成，5 秒）；同時場上隨機 3 個目標被「星座標記」（持續 15 秒），擊破標記目標獲得 ×2.0 倍率（全服共享）；個人冷卻 28 秒；全服冷卻 45 秒
+  - **設計差異：** 與龍王降臨（T212，龍息攻擊+護盾+爆發）不同，星座命運是「命運分配」，讓玩家有「今天是我的幸運星座嗎？」的期待感；「星座祝福 ×3.0」讓對應星座玩家有「今天是我的幸運日！」的爽感；「星座庇護 ×1.5」確保所有玩家都有收益，不會讓非對應星座玩家感到被排除；「星座標記 ×2.0 全服共享」讓所有玩家都有「要趕快打標記目標」的動機；「12 星座隨機抽取」讓每次觸發都有不同的星座，增加多樣性和話題性；全服廣播「今日星座」讓所有玩家都知道「這次是什麼星座」，製造社交討論感
+  - server/internal/game/lucky_zodiac_fate_handler.go：luckyZodiacFateManager（個人冷卻/全服冷卻/activeMarks/blessBoosts/shieldBoosts）；zodiacMarkEntry（instanceID/defID/expiresAt）；isLuckyZodiacFateFish（T217）；isZodiacMarkTarget（供 handleKill 使用）；removeZodiacMark；getLuckyZodiacFateMult（×3.0/1.5 乘法）；tryLuckyZodiacFateFish（擊破後觸發/隨機星座/分配祝福庇護/選3個標記目標/個人訊息+全服廣播+全服公告）；notifyZodiacMarkKill（標記目標被擊破/×2.0倍率/全服共享/廣播）；runZodiacMarkTimeout（goroutine 15秒後清理剩餘標記/廣播結束）
+  - server/internal/data/tables.go：新增 T217 幸運星座命運魚（54-99x/HP94/SpawnWeight3/Speed28/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyZodiacFate；LuckyZodiacFatePayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyZodiacFate + case 處理
+  - server/internal/game/game.go：LuckyZodiacFate *luckyZodiacFateManager；handleKill 加入 isLuckyZodiacFateFish 分支 + isZodiacMarkTarget 分支 + getLuckyZodiacFateMult 倍率加成
+  - client/chiikawa-pixel/scripts/ui/LuckyZodiacFatePanel.gd：星空紫金主題面板（zodiac_start 紫色三次強閃光+頂部橫幅+「✨ 星座命運！」大字+星座符號+祝福/庇護指示器（脈衝動畫）+計時條；zodiac_broadcast 頂部小橫幅；zodiac_mark_kill 金色閃光+「✨ 星座標記擊破！×2.0」浮動文字；zodiac_end 計時條淡出+結算提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_zodiac_fate 訊號 + _handle_lucky_zodiac_fate
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyZodiacFatePanelScript（layer=32）
+  - 星座設計：12 星座隨機抽取；依玩家 ID hash 決定玩家星座（確保一致性）；個人冷卻 28 秒；全服冷卻 45 秒
+  - 祝福設計：對應星座玩家 ×3.0 倍率加成 10 秒；非對應星座玩家 ×1.5 倍率加成 5 秒
+  - 標記設計：隨機 3 個目標；持續 15 秒；×2.0 倍率；全服共享獎勵
+  - 視覺設計：星空紫金主題（#9B59B6 紫 + #FFD700 金 + #87CEEB 天藍 + #FFF3E0 奶油）；祝福/庇護指示器（脈衝透明度動畫，祝福金色/庇護天藍）；右側豎向計時條（星座顏色，x=-212 與其他計時條錯開）；12 星座各有對應 emoji 和顏色
+  - 全服廣播：星座命運啟動/標記目標被擊破/標記結束全服廣播
+  - 全服公告：觸發時公告（星座對應顏色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-258 更新（自主觸發）：** 幸運閃電風暴魚系統（Lucky Lightning Storm Fish）✅
   - **業界依據：** Royal Fishing 業界原創「閃電連鎖跳躍+超級閃電」機制，2026 年最熱門連鎖反應方向
   - **設計：** 擊破 T216 後，觸發「閃電風暴」（持續 12 秒）；每 1.5 秒「閃電跳躍」：從隨機目標出發，連鎖跳躍到最近的 3 個目標（×1.3 倍率，全服共享）；累計跳躍達到 5 跳 → 「超級閃電」：×3.0 倍率（全服大獎）；12 秒後「閃電爆炸」：場上所有目標 HP -40%；個人冷卻 20 秒；全服冷卻 32 秒

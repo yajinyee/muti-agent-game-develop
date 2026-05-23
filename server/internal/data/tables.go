@@ -804,6 +804,7 @@ var Targets = map[string]*TargetDef{
 	//   - 12 秒後「閃電爆炸」：場上所有目標 HP -40%（全服共享）
 	//   - 個人冷卻 20 秒；全服冷卻 32 秒
 	"T216": {ID: "T216", Name: "幸運閃電風暴魚", Type: TargetTypeSpecial, MultiplierMin: 53, MultiplierMax: 97, HP: 93, SpawnWeight: 3, Speed: 29, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_lightning_storm"},
+	"T217": {ID: "T217", Name: "幸運星座命運魚", Type: TargetTypeSpecial, MultiplierMin: 54, MultiplierMax: 99, HP: 94, SpawnWeight: 3, Speed: 28, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_zodiac_fate"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
