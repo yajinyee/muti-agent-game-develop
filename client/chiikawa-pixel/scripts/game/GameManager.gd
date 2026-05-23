@@ -265,6 +265,7 @@ signal lucky_guild_war(data: Dictionary)             # 幸運公會戰魚系統�
 signal lucky_lightning_storm(data: Dictionary)       # 幸運閃電風暴魚系統（DAY-258）
 signal lucky_zodiac_fate(data: Dictionary)           # 幸運星座命運魚系統（DAY-259）
 signal lucky_treasure_hunter(data: Dictionary)       # 幸運寶藏獵人魚系統（DAY-260）
+signal lucky_time_capsule(data: Dictionary)          # 幸運時間膠囊魚系統（DAY-261）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -762,6 +763,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_zodiac_fate(payload)
 		"lucky_treasure_hunter":
 			_handle_lucky_treasure_hunter(payload)
+		"lucky_time_capsule":
+			_handle_lucky_time_capsule(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3770,3 +3773,30 @@ func _handle_lucky_treasure_hunter(payload: Dictionary) -> void:
 			var fragments: int = payload.get("fragments", 0)
 			var reward: int = payload.get("reward", 0)
 			print("[GameManager] TreasureHunter timeout! fragments=%d consolation=%d" % [fragments, reward])
+
+## 幸運時間膠囊魚系統（DAY-261）
+func _handle_lucky_time_capsule(payload: Dictionary) -> void:
+	emit_signal("lucky_time_capsule", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"capsule_start":
+			var duration_sec: int = payload.get("duration_sec", 15)
+			var seal_target: String = payload.get("seal_target", "")
+			var seal_mult: float = payload.get("seal_mult", 2.5)
+			print("[GameManager] TimeCapsule started! duration=%ds seal=%s x%.1f" % [duration_sec, seal_target, seal_mult])
+		"capsule_broadcast":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] TimeCapsule broadcast! player=%s" % player_name)
+		"capsule_deposit":
+			var deposit_count: int = payload.get("deposit_count", 0)
+			var max_deposits: int = payload.get("max_deposits", 5)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] TimeCapsule deposit! %d/%d reward=%d" % [deposit_count, max_deposits, reward])
+		"capsule_open":
+			var total_reward: int = payload.get("total_reward", 0)
+			var deposit_count: int = payload.get("deposit_count", 0)
+			print("[GameManager] TimeCapsule OPEN! deposits=%d total=%d" % [deposit_count, total_reward])
+		"capsule_open_broadcast":
+			var player_name: String = payload.get("player_name", "")
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] TimeCapsule open broadcast! player=%s total=%d" % [player_name, total_reward])

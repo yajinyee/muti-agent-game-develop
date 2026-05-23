@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-260 幸運寶藏獵人魚系統）
+## 最後更新：2026-05-24（DAY-261 幸運時間膠囊魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-261 更新（自主觸發）：** 幸運時間膠囊魚系統（Lucky Time Capsule Fish）✅
+  - **業界依據：** 業界原創「時間膠囊+預存獎勵+追加存入+膠囊開啟」機制，2026 年業界最熱門「時間+記憶+回放」主題，讓玩家有「打開時間膠囊，看看裡面藏了什麼驚喜」的期待感
+  - **設計：** 擊破 T219 後，Server 為觸發玩家「封存」當前場上最高倍率目標的獎勵（×2.5 倍率）；膠囊封存期間（15 秒），玩家每次擊破任何目標都會「追加存入」（×0.5 倍率，最多 5 次）；15 秒後「膠囊開啟」：一次性發放所有存入的獎勵（封存獎勵 + 追加獎勵）；個人冷卻 28 秒；全服冷卻 45 秒
+  - **設計差異：** 與時光倒流（T205，重播過去擊破）不同，時間膠囊是「預存未來獎勵」，讓玩家有「打開時間膠囊，看看裡面藏了什麼驚喜」的期待感；「封存最高倍率目標 ×2.5」讓玩家有「要趁膠囊期間找到高倍率目標」的動機；「追加存入 ×0.5 最多 5 次」讓玩家有「要趁 15 秒內多打幾條魚」的緊迫感；「15 秒後一次性開啟」製造「等待→開啟」的高潮設計；「追加存入計數器」讓玩家即時看到「膠囊裡存了幾個獎勵」；全服廣播「有人觸發了時間膠囊」讓其他玩家看到，製造羨慕感；全服廣播「有人開啟了時間膠囊」讓所有玩家看到，製造「我也想觸發」的動機
+  - server/internal/game/lucky_time_capsule_handler.go：luckyTimeCapsuleManager（個人冷卻/全服冷卻/activeSessions）；timeCapsuleSession（playerID/playerName/expiresAt/sealReward/sealTarget/deposits）；timeCapsuleDeposit（targetName/reward）；isLuckyTimeCapsuleFish（T219）；isTimeCapsuleActive（供 handleKill 使用）；tryLuckyTimeCapsuleFish（擊破後觸發/封存最高倍率目標/個人訊息+全服廣播+全服公告）；notifyTimeCapsuleKill（追加存入/×0.5倍率/最多5次/個人通知）；runTimeCapsuleTimeout（goroutine 15秒後開啟膠囊/發放總獎勵/個人通知+全服廣播+全服公告）；findHighestMultTarget（找場上最高倍率目標）
+  - server/internal/data/tables.go：新增 T219 幸運時間膠囊魚（56-103x/HP96/SpawnWeight3/Speed26/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyTimeCapsule；LuckyTimeCapsulePayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyTimeCapsule + case 處理
+  - server/internal/game/game.go：LuckyTimeCapsule *luckyTimeCapsuleManager；handleKill 加入 isLuckyTimeCapsuleFish 分支 + isTimeCapsuleActive 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyTimeCapsulePanel.gd：深藍時間主題面板（capsule_start 天藍三次強閃光+頂部橫幅+「⏳ 時間膠囊！」大字+追加存入計數器（右上角脈衝動畫）+計時條；capsule_broadcast 頂部小橫幅；capsule_deposit 天藍閃光+「⏳ 追加存入！N/5 ×0.5」浮動文字+計數器更新；capsule_open 全螢幕三次強閃光+「⏳ 膠囊開啟！」大字+結算彈窗；capsule_open_broadcast 全服廣播橫幅）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_time_capsule 訊號 + _handle_lucky_time_capsule
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyTimeCapsulePanelScript（layer=34）
+  - 封存設計：找場上最高倍率目標；×2.5 倍率；個人獎勵；觸發時立即封存
+  - 追加設計：每次擊破任何非T219目標；×0.5 倍率；最多 5 次；個人獎勵
+  - 開啟設計：15 秒後自動開啟；封存獎勵 + 所有追加獎勵；個人通知；全服廣播；全服公告（總獎勵≥50時）
+  - 視覺設計：深藍時間主題（#4A90D9 天藍 + #1A3A5C 深藍 + #FFD700 金 + #E8F4FD 淡藍白 + #00BFFF 青藍）；追加存入計數器（⏳ 存入 N/5，右上角，脈衝透明度動畫，接近滿時變金色）；右側豎向計時條（天藍，x=-240 與其他計時條錯開）；膠囊開啟結算彈窗右側滑入（含封存目標/封存倍率/追加次數/總獎勵）
+  - 全服廣播：膠囊封存啟動/膠囊開啟全服廣播
+  - 全服公告：觸發時公告（天藍色）；開啟時公告（金色，總獎勵≥50時）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-260 更新（自主觸發）：** 幸運寶藏獵人魚系統（Lucky Treasure Hunter Fish）✅
   - **業界依據：** Ocean King 系列最熱門「寶藏地圖碎片+挖掘+寶藏爆發」機制，2026 年業界最熱門「探索+發現」主題，讓玩家有「每一槍都可能發現寶藏」的期待感
   - **設計：** 擊破 T218 後，Server 為觸發玩家啟動「寶藏獵人模式」（持續 20 秒）；玩家每次擊破任何目標，有 30% 機率「發現碎片」（個人獎勵 ×1.8）；集齊 3 個碎片 → 「寶藏爆發」：×5.0 倍率大獎（個人）；20 秒後未集齊 → 「寶藏消失」：已收集碎片數 × ×1.2 安慰獎（個人）；個人冷卻 30 秒；全服冷卻 48 秒

@@ -344,6 +344,7 @@ func _ready() -> void:
 	_init_lucky_lightning_storm_panel()      # 幸運閃電風暴魚系統面板（DAY-258）
 	_init_lucky_zodiac_fate_panel()          # 幸運星座命運魚系統面板（DAY-259）
 	_init_lucky_treasure_hunter_panel()     # 幸運寶藏獵人魚系統面板（DAY-260）
+	_init_lucky_time_capsule_panel()        # 幸運時間膠囊魚系統面板（DAY-261）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4933,3 +4934,21 @@ func _init_lucky_treasure_hunter_panel() -> void:
 func _on_lucky_treasure_hunter(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_treasure_hunter_panel):
 		_lucky_treasure_hunter_panel.handle_lucky_treasure_hunter(data)
+
+# ─── 幸運時間膠囊魚系統面板（DAY-261）────────────────────────────────────────
+
+const LuckyTimeCapsulePanelScript = preload("res://scripts/ui/LuckyTimeCapsulePanel.gd")
+var _lucky_time_capsule_panel = null
+
+func _init_lucky_time_capsule_panel() -> void:
+	var panel = LuckyTimeCapsulePanelScript.new()
+	panel.name = "LuckyTimeCapsulePanel"
+	panel.layer = 34
+	add_child(panel)
+	_lucky_time_capsule_panel = panel
+	if GameManager.has_signal("lucky_time_capsule"):
+		GameManager.lucky_time_capsule.connect(_on_lucky_time_capsule)
+
+func _on_lucky_time_capsule(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_time_capsule_panel):
+		_lucky_time_capsule_panel.handle_lucky_time_capsule(data)

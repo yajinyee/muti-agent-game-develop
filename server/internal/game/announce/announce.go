@@ -99,6 +99,7 @@ const (
 	EventLuckyLightningStorm      EventType = "lucky_lightning_storm"      // 幸運閃電風暴魚觸發（DAY-258）
 	EventLuckyZodiacFate          EventType = "lucky_zodiac_fate"          // 幸運星座命運魚觸發（DAY-259）
 	EventLuckyTreasureHunter      EventType = "lucky_treasure_hunter"      // 幸運寶藏獵人魚觸發（DAY-260）
+	EventLuckyTimeCapsule         EventType = "lucky_time_capsule"         // 幸運時間膠囊魚觸發（DAY-261）
 )
 
 // Priority 公告優先級
@@ -1662,6 +1663,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🗺️ 寶藏獵人！"
 		message = msg
 		icon = "🗺️"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyTimeCapsule:
+		msg := "⏳ 幸運時間膠囊魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#4A90D9"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "⏳ 時間膠囊！"
+		message = msg
+		icon = "⏳"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

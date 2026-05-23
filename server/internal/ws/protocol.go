@@ -601,6 +601,7 @@ const (
 	MsgLuckyLightningStorm         MessageType = "lucky_lightning_storm"             // 幸運閃電風暴魚廣播（Server→Client，DAY-258）
 	MsgLuckyZodiacFate             MessageType = "lucky_zodiac_fate"                 // 幸運星座命運魚廣播（Server→Client，DAY-259）
 	MsgLuckyTreasureHunter         MessageType = "lucky_treasure_hunter"              // 幸運寶藏獵人魚廣播（Server→Client，DAY-260）
+	MsgLuckyTimeCapsule            MessageType = "lucky_time_capsule"                 // 幸運時間膠囊魚廣播（Server→Client，DAY-261）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5945,4 +5946,27 @@ type LuckyTreasureHunterPayload struct {
 	Fragments   int     `json:"fragments,omitempty"`
 	Reward      int     `json:"reward,omitempty"`
 	TargetName  string  `json:"target_name,omitempty"`
+}
+
+// LuckyTimeCapsulePayload 幸運時間膠囊魚廣播（Server → Client，DAY-261）
+// Event 類型：
+//   - capsule_start：膠囊封存啟動（個人訊息，PlayerID/PlayerName/DurationSec/SealTarget/SealMult/SealReward/MaxDeposits/DepositMult）
+//   - capsule_broadcast：全服廣播（PlayerName/SealTarget/SealMult）
+//   - capsule_deposit：追加存入（個人，PlayerName/DepositCount/MaxDeposits/DepositMult/Reward/TargetName）
+//   - capsule_open：膠囊開啟（個人，PlayerID/PlayerName/SealTarget/SealMult/SealReward/DepositCount/MaxDeposits/TotalReward）
+//   - capsule_open_broadcast：膠囊開啟全服廣播（PlayerName/SealTarget/DepositCount/TotalReward）
+type LuckyTimeCapsulePayload struct {
+	Event        string  `json:"event"`
+	PlayerID     string  `json:"player_id,omitempty"`
+	PlayerName   string  `json:"player_name,omitempty"`
+	DurationSec  int     `json:"duration_sec,omitempty"`
+	SealTarget   string  `json:"seal_target,omitempty"`
+	SealMult     float64 `json:"seal_mult,omitempty"`
+	SealReward   int     `json:"seal_reward,omitempty"`
+	MaxDeposits  int     `json:"max_deposits,omitempty"`
+	DepositMult  float64 `json:"deposit_mult,omitempty"`
+	DepositCount int     `json:"deposit_count,omitempty"`
+	Reward       int     `json:"reward,omitempty"`
+	TargetName   string  `json:"target_name,omitempty"`
+	TotalReward  int     `json:"total_reward,omitempty"`
 }

@@ -234,6 +234,7 @@ type Game struct {
 	LuckyLightningStorm     *luckyLightningStormManager       // 幸運閃電風暴魚系統管理器（DAY-258）
 	LuckyZodiacFate         *luckyZodiacFateManager           // 幸運星座命運魚系統管理器（DAY-259）
 	LuckyTreasureHunter     *luckyTreasureHunterManager       // 幸運寶藏獵人魚系統管理器（DAY-260）
+	LuckyTimeCapsule        *luckyTimeCapsuleManager          // 幸運時間膠囊魚系統管理器（DAY-261）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -444,6 +445,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyLightningStorm:     newLuckyLightningStormManager(),
 		LuckyZodiacFate:         newLuckyZodiacFateManager(),
 		LuckyTreasureHunter:     newLuckyTreasureHunterManager(),
+		LuckyTimeCapsule:        newLuckyTimeCapsuleManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2327,6 +2329,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運寶藏獵人魚：寶藏獵人模式中擊破任何非 T218 目標時嘗試發現碎片（DAY-260）
 	if !isLuckyTreasureHunterFish(t.DefID) && g.LuckyTreasureHunter.isTreasureHunterActive(p.ID) {
 		go g.notifyTreasureHunterKill(p, t)
+	}
+	// 幸運時間膠囊魚：擊破 T219 時觸發時間膠囊（DAY-261）
+	if isLuckyTimeCapsuleFish(t.DefID) {
+		go g.tryLuckyTimeCapsuleFish(p)
+	}
+	// 幸運時間膠囊魚：膠囊封存期間擊破任何非 T219 目標時追加存入（DAY-261）
+	if !isLuckyTimeCapsuleFish(t.DefID) && g.LuckyTimeCapsule.isTimeCapsuleActive(p.ID) {
+		go g.notifyTimeCapsuleKill(p, t)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
