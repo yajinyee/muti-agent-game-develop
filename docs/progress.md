@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-222 幸運共鳴魚系統）
+## 最後更新：2026-05-23（DAY-223 幸運傳送魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-223 更新（自主觸發）：** 幸運傳送魚系統（Lucky Teleport Fish）✅
+  - **業界依據：** Royal Fishing 2026「Immortal Boss mechanic」+ 業界原創「傳送混亂」機制
+  - **設計：** 擊破 T181 後觸發「傳送漩渦」（10 秒）：場上所有目標物立即隨機傳送到新位置（瞬間移動）；傳送後 3 秒內擊破任何目標：獎勵 ×2.5 倍率加成（「傳送混亂」加成）；每 3 秒再次傳送（最多 4 次傳送）；個人冷卻 20 秒；全服廣播傳送事件
+  - **設計差異：** 與時間凍結魚（DAY-212，全場靜止）不同，傳送魚是「全場瞬間移動」，讓玩家有「趕快在傳送後 3 秒內打」的緊迫感；每次傳送都是新的機會，讓玩家保持高度專注；視覺上所有魚瞬間移動，製造「混亂爽感」；「傳送混亂加成」讓玩家有「傳送後立刻打」的強烈動機；全服廣播傳送位置讓所有玩家都看到魚的新位置，製造「全服一起搶打」的社交感
+  - server/internal/game/lucky_teleport_fish_handler.go：luckyTeleportFishManager（個人冷卻/傳送漩渦狀態/傳送混亂加成）；isLuckyTeleportFish（T181）；getLuckyTeleportBonus（供 handleKill 使用，傳送後 3 秒內 ×2.5 乘法加成）；tryLuckyTeleportFish（擊破後觸發/全服廣播/全服公告）；runLuckyTeleportWaves（goroutine 4 次傳送波次/每 3 秒/設定傳送混亂加成）；doLuckyTeleport（執行傳送/隨機新位置/回傳位置列表）
+  - server/internal/data/tables.go：新增 T181 幸運傳送魚（30-60x/HP70/SpawnWeight3/Speed50/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyTeleportFish；TeleportTargetInfo；LuckyTeleportFishPayload（teleport_start/teleport_wave/teleport_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyTeleportFish + case 處理
+  - server/internal/game/game.go：LuckyTeleportFish *luckyTeleportFishManager；handleKill 加入 getLuckyTeleportBonus 乘法加成 + isLuckyTeleportFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyTeleportFishPanel.gd：紫色傳送主題面板（teleport_start 紫色三次強閃光+頂部橫幅+計時條；teleport_wave 全螢幕紫色閃光+「🌀 傳送！」大字+傳送混亂加成提示+漩渦位置標記；teleport_end 紫色淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_teleport_fish 訊號 + target_teleported 訊號 + _handle_lucky_teleport_fish + _sync_teleport_positions
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyTeleportFishPanelScript（layer=22）
+  - 傳送設計：最多 4 次傳送；每 3 秒一次；X 範圍 100-900px；Y 範圍 80-520px；個人冷卻 20 秒
+  - 傳送混亂加成設計：×2.5 乘法；傳送後 3 秒內有效；所有在線玩家同時獲得加成
+  - 視覺設計：紫色傳送主題（#9B59B6 + #8E44AD + #D7BDE2 + #F5EEF8）；漩渦位置標記（旋轉+縮放+淡出）；底部計時條（紫→深紫漸變）；金色傳送混亂加成提示
+  - 全服廣播：傳送開始/每次傳送波次（含新位置列表）/傳送結束全服廣播
+  - 全服公告：傳送開始時公告（紫色）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-222 更新（自主觸發）：** 幸運共鳴魚系統（Lucky Resonance Fish）✅
   - **業界依據：** Fishing Frenzy Chapter 3 2026「Guild Wars + cooperative mechanics」+ 業界原創「全服共鳴貢獻比例分配」機制
   - **設計：** 擊破 T180 後觸發「共鳴模式」（15 秒）：全服所有玩家的每次射擊都累積「共鳴能量」（+1/shot）；共鳴能量達到 30 點 → 觸發「共鳴爆發」：全場 HP -50% + 全服 ×1.8 倍率加成 6 秒；共鳴爆發獎勵按「貢獻比例」分配（射擊越多，分到越多）；15 秒內未達到 30 點 → 觸發「小型共鳴」：全場 HP -25% + 全服 ×1.3 倍率加成 3 秒；全服冷卻 40 秒

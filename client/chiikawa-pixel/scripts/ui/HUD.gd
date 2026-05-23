@@ -306,6 +306,7 @@ func _ready() -> void:
 	_init_lucky_ricochet_fish_panel()   # 幸運反彈魚系統面板（DAY-220）
 	_init_lucky_black_hole_panel()      # 幸運黑洞魚系統面板（DAY-221）
 	_init_lucky_resonance_fish_panel()  # 幸運共鳴魚系統面板（DAY-222）
+	_init_lucky_teleport_fish_panel()   # 幸運傳送魚系統面板（DAY-223）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4237,3 +4238,20 @@ func _init_lucky_resonance_fish_panel() -> void:
 func _on_lucky_resonance_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_resonance_fish_panel):
 		_lucky_resonance_fish_panel.handle_lucky_resonance_fish(data)
+
+# ─── 幸運傳送魚系統面板（DAY-223）───────────────────────────────────────────
+const LuckyTeleportFishPanelScript = preload("res://scripts/ui/LuckyTeleportFishPanel.gd")
+var _lucky_teleport_fish_panel = null
+
+func _init_lucky_teleport_fish_panel() -> void:
+	var panel = LuckyTeleportFishPanelScript.new()
+	panel.name = "LuckyTeleportFishPanel"
+	panel.layer = 22
+	add_child(panel)
+	_lucky_teleport_fish_panel = panel
+	if GameManager.has_signal("lucky_teleport_fish"):
+		GameManager.lucky_teleport_fish.connect(_on_lucky_teleport_fish)
+
+func _on_lucky_teleport_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_teleport_fish_panel):
+		_lucky_teleport_fish_panel.handle_lucky_teleport_fish(data)

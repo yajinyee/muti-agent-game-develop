@@ -560,6 +560,13 @@ var Targets = map[string]*TargetDef{
 	//   - 15 秒內未達到 30 點 → 觸發「小型共鳴」：全場 HP -25% + 全服 ×1.3 倍率加成 3 秒
 	//   - 全服冷卻 40 秒
 	"T180": {ID: "T180", Name: "幸運共鳴魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 48, Lifetime: 15, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_resonance"},
+	// T181 幸運傳送魚（DAY-223）— 業界原創「傳送混亂」機制
+	// 設計：擊破 T181 後觸發「傳送漩渦」（10 秒）：
+	//   - 場上所有目標物立即隨機傳送到新位置（瞬間移動）
+	//   - 傳送後 3 秒內擊破任何目標：獎勵 ×2.5 倍率加成（「傳送混亂」加成）
+	//   - 每 3 秒再次傳送（最多 4 次傳送）
+	//   - 個人冷卻 20 秒
+	"T181": {ID: "T181", Name: "幸運傳送魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_teleport"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

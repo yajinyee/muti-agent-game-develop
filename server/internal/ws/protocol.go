@@ -562,6 +562,7 @@ const (
 	MsgLuckyRicochetFish   MessageType = "lucky_ricochet_fish"   // 幸運反彈魚廣播（Server→Client，DAY-220）
 	MsgLuckyBlackHole      MessageType = "lucky_black_hole"      // 幸運黑洞魚廣播（Server→Client，DAY-221）
 	MsgLuckyResonanceFish  MessageType = "lucky_resonance_fish"  // 幸運共鳴魚廣播（Server→Client，DAY-222）
+	MsgLuckyTeleportFish   MessageType = "lucky_teleport_fish"   // 幸運傳送魚廣播（Server→Client，DAY-223）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4995,4 +4996,31 @@ type LuckyResonanceFishPayload struct {
 	BoostSec      int     `json:"boost_sec,omitempty"`
 	AffectedCount int     `json:"affected_count,omitempty"`
 	RewardPool    int     `json:"reward_pool,omitempty"`
+}
+
+// LuckyTeleportFishPayload 幸運傳送魚廣播（Server → Client，DAY-223）
+//
+// Events:
+//
+//	"teleport_start" — 傳送漩渦開始（全服廣播）
+//	"teleport_wave"  — 傳送波次（每 3 秒，全服廣播，含新位置列表）
+//	"teleport_end"   — 傳送漩渦結束（全服廣播）
+type LuckyTeleportFishPayload struct {
+	Event       string                 `json:"event"`
+	InstanceID  string                 `json:"instance_id,omitempty"`
+	PlayerID    string                 `json:"player_id,omitempty"`
+	PlayerName  string                 `json:"player_name,omitempty"`
+	DurationSec int                    `json:"duration_sec,omitempty"`
+	Wave        int                    `json:"wave,omitempty"`
+	MaxWaves    int                    `json:"max_waves,omitempty"`
+	Targets     []TeleportTargetInfo   `json:"targets,omitempty"`
+	BonusSec    int                    `json:"bonus_sec,omitempty"`
+	BonusMult   float64                `json:"bonus_mult,omitempty"`
+}
+
+// TeleportTargetInfo 傳送目標資訊（DAY-223）
+type TeleportTargetInfo struct {
+	TargetID string  `json:"target_id"`
+	NewX     float64 `json:"new_x"`
+	NewY     float64 `json:"new_y"`
 }

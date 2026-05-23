@@ -196,6 +196,7 @@ type Game struct {
 	LuckyRicochetFish  *luckyRicochetFishManager   // 幸運反彈魚系統管理器（DAY-220）
 	LuckyBlackHole     *luckyBlackHoleManager      // 幸運黑洞魚系統管理器（DAY-221）
 	LuckyResonanceFish *luckyResonanceFishManager  // 幸運共鳴魚系統管理器（DAY-222）
+	LuckyTeleportFish  *luckyTeleportFishManager   // 幸運傳送魚系統管理器（DAY-223）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -368,6 +369,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyRicochetFish:  newLuckyRicochetFishManager(),
 		LuckyBlackHole:     newLuckyBlackHoleManager(),
 		LuckyResonanceFish: newLuckyResonanceFishManager(),
+		LuckyTeleportFish:  newLuckyTeleportFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1313,6 +1315,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if resonanceBoost > 1.0 {
 		finalReward = int(float64(finalReward) * resonanceBoost)
 	}
+	// 套用幸運傳送魚傳送混亂倍率加成（DAY-223，×2.5 乘法，個人，傳送後 3 秒內）
+	teleportBonus := g.getLuckyTeleportBonus(p)
+	if teleportBonus > 1.0 {
+		finalReward = int(float64(finalReward) * teleportBonus)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1863,6 +1870,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運共鳴魚：擊破 T180 本身時觸發共鳴模式（DAY-222）
 	if isLuckyResonanceFish(t.DefID) {
 		go g.tryLuckyResonanceFish(p)
+	}
+	// 幸運傳送魚：擊破 T181 本身時觸發傳送漩渦（DAY-223）
+	if isLuckyTeleportFish(t.DefID) {
+		go g.tryLuckyTeleportFish(p)
 	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
