@@ -340,6 +340,7 @@ func _ready() -> void:
 	_init_lucky_dragon_king_panel()          # 幸運龍王降臨魚系統面板（DAY-254）
 	_init_lucky_rift_panel()                 # 幸運時空裂縫魚系統面板（DAY-255）
 	_init_lucky_server_charge_panel()        # 幸運全服充能魚系統面板（DAY-256）
+	_init_lucky_guild_war_panel()            # 幸運公會戰魚系統面板（DAY-257）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4857,3 +4858,21 @@ func _init_lucky_server_charge_panel() -> void:
 func _on_lucky_server_charge(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_server_charge_panel):
 		_lucky_server_charge_panel.handle_lucky_server_charge(data)
+
+# ─── 幸運公會戰魚系統面板（DAY-257）────────────────────────────────────────
+
+const LuckyGuildWarPanelScript = preload("res://scripts/ui/LuckyGuildWarPanel.gd")
+var _lucky_guild_war_panel = null
+
+func _init_lucky_guild_war_panel() -> void:
+	var panel = LuckyGuildWarPanelScript.new()
+	panel.name = "LuckyGuildWarPanel"
+	panel.layer = 30
+	add_child(panel)
+	_lucky_guild_war_panel = panel
+	if GameManager.has_signal("lucky_guild_war"):
+		GameManager.lucky_guild_war.connect(_on_lucky_guild_war)
+
+func _on_lucky_guild_war(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_guild_war_panel):
+		_lucky_guild_war_panel.handle_lucky_guild_war(data)

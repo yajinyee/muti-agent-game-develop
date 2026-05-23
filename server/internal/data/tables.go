@@ -791,6 +791,12 @@ var Targets = map[string]*TargetDef{
 	//   - 若 30 秒內未達到 20 → 「充能失敗」：已累積充能值 × 0.5 倍率（安慰獎，全服共享）
 	//   - 個人冷卻 30 秒；全服冷卻 50 秒
 	"T214": {ID: "T214", Name: "幸運全服充能魚", Type: TargetTypeSpecial, MultiplierMin: 51, MultiplierMax: 93, HP: 91, SpawnWeight: 3, Speed: 31, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_server_charge"},
+	// T215 幸運公會戰魚（DAY-257）— 業界原創「全服分隊競爭→勝隊爆發」機制
+	//   - 擊破 T215 後，全服玩家自動分成兩隊（紅隊/藍隊，依玩家 ID 奇偶分配）
+	//   - 30 秒內競爭擊破數，每次擊破為己隊累積積分
+	//   - 勝隊全員 ×2.5 倍率加成（5 秒）；敗隊 ×1.2 安慰獎；平局 ×1.8
+	//   - 個人冷卻 35 秒；全服冷卻 55 秒
+	"T215": {ID: "T215", Name: "幸運公會戰魚", Type: TargetTypeSpecial, MultiplierMin: 52, MultiplierMax: 95, HP: 92, SpawnWeight: 3, Speed: 30, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_guild_war"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

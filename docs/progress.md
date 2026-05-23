@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-256 幸運全服充能魚系統）
+## 最後更新：2026-05-24（DAY-257 幸運公會戰魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-257 更新（自主觸發）：** 幸運公會戰魚系統（Lucky Guild War Fish）✅
+  - **業界依據：** 業界原創「全服分隊競爭→勝隊爆發」機制，Fishing Frenzy Chapter 3（2026-05-14）Guild Wars 最新趨勢，讓捕魚變成「團隊運動」
+  - **設計：** 擊破 T215 後，全服玩家自動分成兩隊（紅隊/藍隊，依玩家 ID 奇偶分配）；30 秒內競爭擊破數，每次擊破為己隊累積積分；每 5 秒廣播即時比分；勝隊全員 ×2.5 倍率加成（5 秒）；敗隊 ×1.2 安慰獎；平局 ×1.8；個人冷卻 35 秒；全服冷卻 55 秒
+  - **設計差異：** 與全服充能（T214，所有玩家合作）不同，公會戰是「玩家分隊競爭」，讓玩家有「我要幫紅隊贏」的歸屬感和競爭動力；「依玩家 ID 奇偶分隊」讓分隊自動且公平；「每 5 秒比分廣播」讓玩家即時看到「哪隊領先」，製造「要趕快多打幾條」的緊迫感；「敗隊也有 ×1.2 安慰獎」確保即使輸了也有收益；「平局 ×1.8」鼓勵雙隊勢均力敵；觸發玩家獲得「戰爭發起者」稱號廣播
+  - server/internal/game/lucky_guild_war_handler.go：luckyGuildWarManager（個人冷卻/全服冷卻/activeSession/warBoosts）；guildWarSession（triggerPlayerID/triggerPlayerName/expiresAt/redScore/blueScore）；isLuckyGuildWarFish（T215）；getPlayerTeam（依ID奇偶分隊）；getLuckyGuildWarBoostMult（×2.5/1.2/1.8 乘法）；notifyLuckyGuildWarKill（任何非T215擊破都累積積分）；tryLuckyGuildWarFish（擊破後觸發/個人訊息+全服廣播+全服公告）；runGuildWarSession（goroutine 每5秒比分廣播/30秒後結算）；doGuildWarSettle（勝隊/敗隊/平局倍率加成/廣播/公告）
+  - server/internal/data/tables.go：新增 T215 幸運公會戰魚（52-95x/HP92/SpawnWeight3/Speed30/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyGuildWar；LuckyGuildWarPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyGuildWar + case 處理
+  - server/internal/game/game.go：LuckyGuildWar *luckyGuildWarManager；handleKill 加入 isLuckyGuildWarFish 分支 + notifyLuckyGuildWarKill（所有非T215擊破）+ getLuckyGuildWarBoostMult 倍率加成
+  - client/chiikawa-pixel/scripts/ui/LuckyGuildWarPanel.gd：紅藍公會戰主題面板（war_start 紅色三次強閃光+頂部橫幅+「⚔️ 公會戰！」大字+隊伍指示器（脈衝動畫）+比分面板+計時條；war_broadcast 頂部小橫幅+比分面板；war_score 即時比分更新（領先隊伍放大動畫）；war_result 全螢幕三次強閃光+「⚔️ 勝隊！×2.5」大字+結算彈窗；war_draw 紫色閃光+「⚔️ 平局！×1.8」大字+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_guild_war 訊號 + _handle_lucky_guild_war
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyGuildWarPanelScript（layer=30）
+  - 分隊設計：依玩家 ID 最後一位奇偶分隊；紅隊（偶數/a/c/e）；藍隊（奇數/b/d/f）
+  - 競爭設計：30 秒時限；每次擊破 +1 積分；每 5 秒廣播比分；個人冷卻 35 秒；全服冷卻 55 秒
+  - 結算設計：勝隊 ×2.5 倍率加成 5 秒；敗隊 ×1.2 安慰獎；平局 ×1.8 雙隊加成
+  - 視覺設計：紅藍公會戰主題（#DC143C 紅 + #1E90FF 藍 + #FFD700 金 + #9370DB 平局紫）；右側比分面板（金色邊框）；右上角隊伍指示器（脈衝動畫）；右側豎向計時條（x=-184 與其他計時條錯開）；結算彈窗右側滑入
+  - 全服廣播：公會戰啟動/每5秒比分/勝負結算/平局結算全服廣播
+  - 全服公告：觸發時公告（紅色）；勝隊公告（紅/藍色）；平局公告（紫色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-256 更新（自主觸發）：** 幸運全服充能魚系統（Lucky Server Charge Fish）✅
   - **業界依據：** 業界原創「全服共同充能→全服大爆發」機制，2026 年業界最熱門多人合作集體感方向
   - **設計：** 擊破 T214 後，全服所有玩家共同累積「充能值」（每次任何玩家擊破任何目標 +1）；充能值達到 20 時「全服大爆發」：全場所有目標 100% 擊破（×2.0 倍率，全服共享）；若 30 秒內未達到 20 → 「充能失敗」：已累積充能值 × 0.5 倍率（安慰獎，全服共享）；每次充能 +1 時廣播進度；個人冷卻 30 秒；全服冷卻 50 秒

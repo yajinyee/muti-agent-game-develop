@@ -2,32 +2,32 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-23（DAY-246）
-**整體目標**：幸運水晶球魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-24（DAY-257）
+**整體目標**：幸運公會戰魚系統 ✅ → 繼續自主推進
 
 ---
 
 ## 今日任務清單
 
-### ✅ DAY-246 啟動檢查
+### ✅ DAY-257 啟動檢查
 
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
-- [x] 上網研究業界最新機制（預測未來+命中率提升）
+- [x] 上網研究業界最新機制（Fishing Frenzy Chapter 3 Guild Wars 2026-05-14）
 
-### ✅ DAY-246 幸運水晶球魚系統（P1）
+### ✅ DAY-257 幸運公會戰魚系統（P1）
 
-- [x] `data/tables.go`：新增 T204 幸運水晶球魚（41-73x/HP81/SpawnWeight3/Speed41/Lifetime14）
-- [x] `ws/protocol.go`：新增 MsgLuckyCrystalBallFish；LuckyCrystalBallFishPayload（5種事件）
-- [x] `announce/announce.go`：新增 EventLuckyCrystalBallFish + case 處理
-- [x] `lucky_crystal_ball_fish_handler.go`：完整 handler（水晶預言/必中擊破/水晶爆炸）
-- [x] `game.go`：整合 LuckyCrystalBallFish manager（struct/init/handleKill 2個分支）
-- [x] `LuckyCrystalBallFishPanel.gd`：青綠水晶主題面板（目標標記+計時條+結算彈窗）
-- [x] `GameManager.gd`：lucky_crystal_ball_fish 訊號 + _handle_lucky_crystal_ball_fish
-- [x] `HUD.gd`：整合 LuckyCrystalBallFishPanelScript（layer=19）
+- [x] `data/tables.go`：新增 T215 幸運公會戰魚（52-95x/HP92/SpawnWeight3/Speed30/Lifetime14）
+- [x] `ws/protocol.go`：新增 MsgLuckyGuildWar；LuckyGuildWarPayload（5種事件）
+- [x] `announce/announce.go`：新增 EventLuckyGuildWar + case 處理
+- [x] `lucky_guild_war_handler.go`：完整 handler（分隊/積分/比分廣播/結算/倍率加成）
+- [x] `game.go`：整合 LuckyGuildWar manager（struct/init/handleKill 3個分支）
+- [x] `LuckyGuildWarPanel.gd`：紅藍公會戰主題面板（隊伍指示器+比分面板+計時條+結算彈窗）
+- [x] `GameManager.gd`：lucky_guild_war 訊號 + _handle_lucky_guild_war
+- [x] `HUD.gd`：整合 LuckyGuildWarPanelScript（layer=30）
 - [x] build/vet 全部通過，GitHub 推送完成
 
-### 🔄 DAY-247 下一步（自主觸發）
+### 🔄 DAY-258 下一步（自主觸發）
 
 - [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
 
@@ -40,217 +40,6 @@
 - 完成度：**100%**
 - 美術質量：**100/100**
 - 規格一致性：**100%**
-- 特殊目標：**104種（T101-T204）**
-- 最新功能：**幸運水晶球魚（T204）— 3個目標必中，×2.5倍率，8秒後水晶爆炸×1.8**
-- 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
-
----
-
-
-
----
-
-## 今日任務清單
-
-### ✅ DAY-229 啟動檢查
-
-- [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
-- [x] go vet ./... 確認無警告（VET OK）
-- [x] 上網研究業界最新機制
-
-### ✅ DAY-229 幸運寄生魚系統（P1）
-
-- [x] `data/tables.go`：新增 T187 幸運寄生魚（30-58x/HP68/SpawnWeight3/Speed50/Lifetime14）
-- [x] `ws/protocol.go`：新增 MsgLuckyParasiteFish；LuckyParasiteFishPayload（5種事件）
-- [x] `announce/announce.go`：新增 EventLuckyParasiteFish + case 處理
-- [x] `lucky_parasite_fish_handler.go`：完整 handler（寄生附著/HP損失/跳躍/倍率加成）
-- [x] `game.go`：整合 LuckyParasiteFish manager（struct/init/handleKill 倍率加成 + 分支）
-- [x] `LuckyParasiteFishPanel.gd`：綠色寄生主題面板（HP損失浮動文字+跳躍提示+擊破倍率）
-- [x] `GameManager.gd`：lucky_parasite_fish 訊號 + _handle_lucky_parasite_fish
-- [x] `HUD.gd`：整合 LuckyParasiteFishPanelScript（layer=16）
-- [x] build/vet 全部通過，GitHub 推送完成
-
-### 🔄 DAY-230 下一步（自主觸發）
-
-- [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
-
----
-
-## 每日自問（Game Director 必填）
-
-> **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
-
-- 完成度：**100%**
-- 美術質量：**100/100**
-- 規格一致性：**100%**
-- 特殊目標：**87種（T101-T187）**
-- 最新功能：**幸運寄生魚（T187）— 寄生附著3個目標，每2秒HP-8%，跳躍最多2次，×2.2倍率**
-- 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
-
----
-
-
----
-
-## 今日任務清單
-
-### ✅ DAY-218 啟動檢查
-
-- [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
-- [x] go vet ./... 確認無警告（VET OK）
-- [x] 上網研究業界最新機制
-
-### ✅ DAY-218 幸運進化魚系統（P1）
-
-- [x] `data/tables.go`：新增 T176 幸運進化魚（40-70x/HP90/SpawnWeight3/Speed45/Lifetime18）
-- [x] `ws/protocol.go`：新增 MsgLuckyEvolutionFish；LuckyEvolutionFishPayload
-- [x] `announce/announce.go`：新增 EventLuckyEvolutionFish + case 處理
-- [x] `lucky_evolution_fish_handler.go`：完整 handler（三段進化/命中累積/終極爆發/倍率加成）
-- [x] `game.go`：整合 LuckyEvolutionFish manager（struct/init/handleKill/handleAttack/spawnTarget/gameLoop）
-- [x] `LuckyEvolutionFishPanel.gd`：三段進化主題面板（命中進度條+進化大字+終極爆發）
-- [x] `GameManager.gd`：lucky_evolution_fish 訊號 + _handle_lucky_evolution_fish
-- [x] `HUD.gd`：整合 LuckyEvolutionFishPanelScript（layer=27）
-- [x] build/vet 全部通過
-
-### 🔄 DAY-219 下一步（自主觸發）
-
-- [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
-
----
-
-## 每日自問（Game Director 必填）
-
-> **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
-
-- 完成度：**100%**
-- 美術質量：**100/100**
-- 規格一致性：**100%**
-- 特殊目標：**76種（T101-T176）**
-- 最新功能：**幸運進化魚（T176）— 三段進化（命中累積），終極爆發全場 HP -60% + ×4.0 倍率加成**
-- 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
-
----
-
-
-## 今日任務清單
-
-### ✅ DAY-213 啟動檢查
-
-- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-212，時間凍結魚系統）
-- [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
-- [x] go vet ./... 確認無警告（VET OK）
-- [x] 確認 GitHub 最新 commit（DAY-212 已推送）
-
-### ✅ DAY-213 彩虹稜鏡魚系統（P1）
-
-- [x] `data/tables.go`：新增 T171 彩虹稜鏡魚（35-65x/HP75/SpawnWeight3/Speed50/Lifetime14）
-- [x] `ws/protocol.go`：新增 MsgRainbowPrism；PrismColoredTargetInfo；RainbowPrismPayload
-- [x] `announce/announce.go`：新增 EventRainbowPrism + case 處理
-- [x] `rainbow_prism_handler.go`：完整 handler（染色/倍率加成/彩虹爆炸/全服廣播）
-- [x] `game.go`：整合 RainbowPrism manager（struct/init/handleKill 倍率加成 + 分支）
-- [x] `RainbowPrismPanel.gd`：彩虹主題面板（染色開始+顏色圖例+彩虹爆炸）
-- [x] `GameManager.gd`：rainbow_prism 訊號 + _handle_rainbow_prism
-- [x] `HUD.gd`：整合 RainbowPrismPanelScript（layer=32）
-- [x] build/vet 全部通過，GitHub 推送完成
-
-### 🔄 DAY-214 下一步（自主觸發）
-
-- [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
-- [ ] 執行自我評估循環
-
----
-
-## 每日自問（Game Director 必填）
-
-> **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
-
-- 完成度：**100%**
-- 美術質量：**100/100**
-- 規格一致性：**100%**
-- 特殊目標：**71種（T101-T171）**
-- 最新功能：**彩虹稜鏡魚（T171）— 5色染色 + 顏色對應倍率 + 彩虹爆炸**
-- 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
-
-
-
----
-
-## 今日任務清單
-
-### ✅ DAY-211 啟動檢查
-
-- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-210，幸運熱區魚空間策略系統）
-- [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
-- [x] go vet ./... 確認無警告（VET OK）
-- [x] 確認 GitHub 最新 commit（DAY-210 已推送）
-
-### ✅ DAY-211 幸運三叉魚互動三轉盤系統（P1）
-
-- [x] `data/tables.go`：新增 T169 幸運三叉魚（35-60x/HP70/SpawnWeight4/Speed48/Lifetime13）
-- [x] `ws/protocol.go`：新增 MsgLuckyTrident/MsgLuckyTridentStop；LuckyTridentPayload
-- [x] `lucky_trident_handler.go`：完整 handler（三轉盤/結算/特效/倍率加成）
-- [x] `game.go`：整合 LuckyTrident manager（struct/init/handleKill/HandleMessage）
-- [x] `LuckyTridentPanel.gd`：三叉紫金主題面板（三轉盤+停止按鈕+結算彈窗）
-- [x] `GameManager.gd`：lucky_trident 訊號 + _handle_lucky_trident
-- [x] `HUD.gd`：整合 LuckyTridentPanelScript（layer=34）
-- [x] build/vet 全部通過，GitHub 推送完成
-
-### 🔄 DAY-212 下一步（自主觸發）
-
-- [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
-- [ ] 執行自我評估循環
-
----
-
-## 每日自問（Game Director 必填）
-
-> **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
-
-- 完成度：**100%**
-- 美術質量：**100/100**
-- 規格一致性：**100%**
-- 特殊目標：**69種（T101-T169）**
-- 最新功能：**幸運三叉魚互動三轉盤（T169）— 三個獨立轉盤，三重疊加獎勵**
-- 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
-
----
-
-## 今日任務清單
-
-### ✅ DAY-210 啟動檢查
-
-- [x] 讀取 docs/progress.md 確認上次完成狀態（100%，DAY-210，幸運熱區魚空間策略系統）
-- [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
-- [x] go vet ./... 確認無警告（VET OK）
-- [x] 確認 GitHub 最新 commit（DAY-210 已推送）
-
-### ✅ DAY-210 幸運熱區魚空間策略系統（P1）
-
-- [x] `data/tables.go`：新增 T168 幸運熱區魚（30-55x/HP65/SpawnWeight4/Speed50/Lifetime13）
-- [x] `ws/protocol.go`：新增 MsgLuckyHotZone；LuckyHotZonePayload（zone_start/zone_pulse/zone_blast）
-- [x] `lucky_hot_zone_handler.go`：完整 handler（熱區建立/脈衝/爆炸/全服廣播/空間倍率加成）
-- [x] `game.go`：整合 LuckyHotZone manager（struct/init/handleKill 倍率加成 + 分支）
-- [x] `LuckyHotZonePanel.gd`：橙火熱區主題面板（三層同心圓+脈衝+爆炸）
-- [x] `GameManager.gd`：lucky_hot_zone 訊號 + _handle_lucky_hot_zone
-- [x] `HUD.gd`：整合 LuckyHotZonePanelScript（layer=35）
-- [x] build/vet 全部通過，GitHub 推送完成
-
-### 🔄 DAY-211 進行中（自主觸發）
-
-- [ ] 研究業界最新功能，找出下一個最值得實作的機制
-- [ ] 實作 DAY-211 新特殊目標
-- [ ] build/vet 驗證
-- [ ] GitHub 推送
-
----
-
-## 每日自問（Game Director 必填）
-
-> **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
-
-- 完成度：**100%**
-- 美術質量：**100/100**
-- 規格一致性：**100%**
-- 特殊目標：**68種（T101-T168）**
-- 最新功能：**幸運熱區魚空間策略（T168）— 空間限定 ×2.0 倍率 + 熱區爆炸清場**
+- 特殊目標：**115種（T101-T215）**
+- 最新功能：**幸運公會戰魚（T215）— 全服分隊競爭，勝隊 ×2.5 倍率加成 5 秒**
 - 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**

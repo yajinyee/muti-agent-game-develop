@@ -597,6 +597,7 @@ const (
 	MsgLuckyDragonKing             MessageType = "lucky_dragon_king"                // 幸運龍王降臨魚廣播（Server→Client，DAY-254）
 	MsgLuckyRift                   MessageType = "lucky_rift"                       // 幸運時空裂縫魚廣播（Server→Client，DAY-255）
 	MsgLuckyServerCharge           MessageType = "lucky_server_charge"              // 幸運全服充能魚廣播（Server→Client，DAY-256）
+	MsgLuckyGuildWar               MessageType = "lucky_guild_war"                  // 幸運公會戰魚廣播（Server→Client，DAY-257）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5849,4 +5850,26 @@ type LuckyServerChargePayload struct {
 	BurstMult    float64 `json:"burst_mult,omitempty"`
 	KillCount    int     `json:"kill_count,omitempty"`
 	TotalReward  int     `json:"total_reward,omitempty"`
+}
+
+// LuckyGuildWarPayload 幸運公會戰魚廣播（Server → Client，DAY-257）
+// Event 類型：
+//   - war_start：公會戰啟動（個人訊息，PlayerID/PlayerName/PlayerTeam/DurationSec/WinMult/LoseMult/DrawMult）
+//   - war_broadcast：全服廣播公會戰（PlayerName/DurationSec/WinMult/LoseMult/DrawMult）
+//   - war_score：即時比分廣播（每 5 秒，RedScore/BlueScore）
+//   - war_result：公會戰結算（全服廣播，PlayerName/RedScore/BlueScore/WinTeam/WinMult/LoseMult/BoostSec）
+//   - war_draw：平局結算（全服廣播，PlayerName/RedScore/BlueScore/WinMult/BoostSec）
+type LuckyGuildWarPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	PlayerTeam  int     `json:"player_team,omitempty"` // 0=紅隊, 1=藍隊
+	DurationSec int     `json:"duration_sec,omitempty"`
+	WinMult     float64 `json:"win_mult,omitempty"`
+	LoseMult    float64 `json:"lose_mult,omitempty"`
+	DrawMult    float64 `json:"draw_mult,omitempty"`
+	RedScore    int     `json:"red_score,omitempty"`
+	BlueScore   int     `json:"blue_score,omitempty"`
+	WinTeam     int     `json:"win_team,omitempty"` // 0=紅隊, 1=藍隊
+	BoostSec    int     `json:"boost_sec,omitempty"`
 }
