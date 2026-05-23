@@ -579,8 +579,9 @@ const (
 	MsgLuckyFreezeWorld    MessageType = "lucky_freeze_world"    // 幸運冰凍世界魚廣播（Server→Client，DAY-237）
 	MsgLuckyGravityFlip   MessageType = "lucky_gravity_flip"   // 幸運重力反轉魚廣播（Server→Client，DAY-238）
 	MsgLuckySynergyBurst  MessageType = "lucky_synergy_burst"  // 幸運共鳴爆發魚廣播（Server→Client，DAY-239）
-	MsgLuckyBetFish       MessageType = "lucky_bet_fish"       // 幸運賭注魚廣播（Server→Client，DAY-240）
-	MsgLuckyBetChoice     MessageType = "lucky_bet_choice"     // 玩家賭注選擇（Client→Server，DAY-240）
+	MsgLuckyBetFish          MessageType = "lucky_bet_fish"           // 幸運賭注魚廣播（Server→Client，DAY-240）
+	MsgLuckyBetChoice        MessageType = "lucky_bet_choice"         // 玩家賭注選擇（Client→Server，DAY-240）
+	MsgLuckyChainReaction    MessageType = "lucky_chain_reaction"     // 幸運連鎖反應魚廣播（Server→Client，DAY-241）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5446,4 +5447,28 @@ type LuckyBetFishPayload struct {
 type LuckyBetChoicePayload struct {
 	Choice     string `json:"choice"`      // "A" / "B" / "C"
 	InstanceID string `json:"instance_id"` // 防止重複提交
+}
+
+// LuckyChainReactionPayload 幸運連鎖反應魚廣播（Server → Client，DAY-241）
+// Event 類型：
+//   - chain_start：連鎖起點標記（StarterID/StarterDef/MaxLayers/BaseMult）
+//   - chain_explode：本層連鎖引爆（Layer/TargetID/TargetDef/Mult/Reward/FromX/FromY/ToX/ToY）
+//   - chain_broken：連鎖中斷（Layer，範圍內無目標）
+//   - chain_complete：連鎖完成（Layer=MaxLayers）
+type LuckyChainReactionPayload struct {
+	Event      string  `json:"event"`
+	PlayerName string  `json:"player_name,omitempty"`
+	StarterID  string  `json:"starter_id,omitempty"`  // 連鎖起點 instanceID
+	StarterDef string  `json:"starter_def,omitempty"` // 連鎖起點 defID
+	MaxLayers  int     `json:"max_layers,omitempty"`
+	BaseMult   float64 `json:"base_mult,omitempty"`
+	Layer      int     `json:"layer,omitempty"`       // 當前層數
+	TargetID   string  `json:"target_id,omitempty"`   // 被引爆目標 instanceID
+	TargetDef  string  `json:"target_def,omitempty"`  // 被引爆目標 defID
+	Mult       float64 `json:"mult,omitempty"`        // 本層倍率
+	Reward     int     `json:"reward,omitempty"`      // 本層獎勵
+	FromX      float64 `json:"from_x,omitempty"`      // 連鎖起始 X
+	FromY      float64 `json:"from_y,omitempty"`      // 連鎖起始 Y
+	ToX        float64 `json:"to_x,omitempty"`        // 被引爆目標 X
+	ToY        float64 `json:"to_y,omitempty"`        // 被引爆目標 Y
 }

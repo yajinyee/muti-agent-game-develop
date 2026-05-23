@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-240 幸運賭注魚系統）
+## 最後更新：2026-05-23（DAY-241 幸運連鎖反應魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,11 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-241 更新（自主觸發）：** 幸運連鎖反應魚系統（Lucky Chain Reaction Fish）✅
+  - **業界依據：** 業界原創「多米諾骨牌效應」機制
+  - **設計：** 擊破 T199 後，場上隨機選 1 個目標作為「連鎖起點」（標記持續 15 秒）；玩家擊破連鎖起點後，自動引爆距離最近的目標（100% 擊破，×1.4 倍率）；被引爆的目標再引爆下一個最近目標（×1.3 倍率）；連鎖最多 8 層，每層倍率遞減 0.1（×1.4 → ×1.3 → ... → ×0.7）；每層引爆間隔 400ms，製造「多米諾骨牌」的視覺爽感；個人冷卻 25 秒
+  - **設計差異：** 與鏈鎖爆炸魚（T184，空間爆炸，60% 機率）不同，連鎖反應是「100% 確定引爆，但倍率遞減」，讓玩家有「看著連鎖一層一層爆開」的期待感；「8 層連鎖」讓玩家有「要把魚排成一排才能最大化連鎖」的策略感；「倍率遞減」確保 RTP 平衡（期望值 = 1.4+1.3+...+0.7 = 8.4 層平均 1.05x）；全服廣播每一層讓所有玩家都看到連鎖進度，製造「全服一起數層數」的社交感；連鎖中斷（範圍內無目標）讓玩家有「要把魚排密一點」的策略動機
+  - server/internal/game/lucky_chain_reaction_handler.go：luckyChainReactionManager（個人冷卻/chainStarters/chainActive）；chainReactionEntry（instanceID/expiresAt）；isLuckyChainReactionFish（T199）；isChainReactionStarter；removeChainReactionStarter；getLuckyChainReactionStarterMult（×1.4，供 handleKill 使用）；tryLuckyChainReactionFish（擊破後觸發/隨機選起點/全服廣播/全服公告）；notifyChainReactionKill（玩家擊破起點時觸發連鎖）；runChainReaction（goroutine 遞迴/每層 400ms 延遲/找最近目標/100% 擊破/倍率遞減/廣播每層）
+  - server/internal/data/tables.go：新增 T199 幸運連鎖反應魚（36-67x/HP76/SpawnWeight3/Speed46/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyChainReaction；LuckyChainReactionPayload（chain_start/chain_explode/chain_broken/chain_complete）
+  - server/internal/game/announce/announce.go：新增 EventLuckyChainReaction + case 處理
+  - server/internal/game/game.go：LuckyChainReaction *luckyChainReactionManager；handleKill 加入 getLuckyChainReactionStarterMult 乘法加成 + isLuckyChainReactionFish 分支 + isChainReactionStarter 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyChainReactionPanel.gd：橙紅連鎖主題面板（chain_start 橙色雙閃光+頂部橫幅+「🔗 連鎖起點標記！」大字+倍率說明+右上角層數計數器；chain_explode 每層閃光+連鎖線動畫+層數計數器更新+倍率浮動文字+左側層數標記；chain_broken 灰色提示；chain_complete 三次強閃光+「🔗 連鎖完成！8層！」大字+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_chain_reaction 訊號 + _handle_lucky_chain_reaction
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyChainReactionPanelScript（layer=4）
+  - 連鎖設計：最多 8 層；每層 400ms 間隔；搜尋範圍 350px；個人冷卻 25 秒
+  - 倍率設計：×1.4 → ×1.3 → ×1.2 → ×1.1 → ×1.0 → ×0.9 → ×0.8 → ×0.7（8層）；起點擊破也有 ×1.4 加成
+  - 視覺設計：橙紅連鎖主題（#FF6B35 + #FF4500 + #FFD700 + #FFF0E6）；連鎖線（多個小點模擬）；右上角層數計數器（閃爍動畫）；結算彈窗右側滑入
+  - 全服廣播：連鎖起點標記/每層引爆（含位置/倍率/獎勵）/連鎖中斷/連鎖完成全服廣播
+  - 全服公告：觸發時公告（橙紅色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-240 更新（自主觸發）：** 幸運賭注魚系統（Lucky Bet Fish）✅
-  - **業界依據：** 業界原創「玩家主動風險決策+賭注翻倍」機制
-  - **設計：** 擊破 T198 後，玩家面臨「賭注選擇」（10 秒決策時間）；選擇 A（保守）：下一次擊破 ×2.0 倍率，100% 觸發；選擇 B（激進）：下一次擊破 ×5.0 倍率，50% 觸發；失敗則 ×0.5 倍率；選擇 C（瘋狂）：下一次擊破 ×10.0 倍率，25% 觸發；失敗則 ×0.3 倍率；10 秒內未選擇 → 自動選擇 A；個人冷卻 30 秒
-  - **設計差異：** 與幸運量子魚（DAY-228，50% 機率坍縮，玩家無法選擇）不同，賭注魚是「玩家主動選擇風險等級」，讓玩家有「我要不要賭一把」的真實賭注感；「保守/激進/瘋狂」三個選項讓不同風格的玩家都有對應策略；「失敗懲罰」讓選擇 B/C 有真實風險，不是無腦選最高倍率；「10 秒決策時間」製造緊迫感；全服廣播玩家的選擇和結果，製造「看他敢不敢賭」的社交觀看感
-  - server/internal/game/lucky_bet_fish_handler.go：luckyBetFishManager（個人冷卻/sessions）；betSession（choice/decideUntil/pendingMult/decided/instanceID）；isLuckyBetFish（T198）；getLuckyBetFishMult（供 handleKill 使用，一次性消耗）；notifyBetChoice（玩家選擇/計算結果/廣播）；tryLuckyBetFish（擊破後觸發/建立 session/個人訊息/全服廣播/10秒後自動選 A）；handleLuckyBetChoice（處理 Client 選擇訊息）
   - server/internal/data/tables.go：新增 T198 幸運賭注魚（35-65x/HP75/SpawnWeight3/Speed47/Lifetime14）
   - server/internal/ws/protocol.go：新增 MsgLuckyBetFish/MsgLuckyBetChoice；BetOption；LuckyBetFishPayload（bet_start/bet_broadcast/bet_decided/bet_timeout）；LuckyBetChoicePayload
   - server/internal/game/announce/announce.go：新增 EventLuckyBetFish + case 處理

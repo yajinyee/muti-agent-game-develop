@@ -679,6 +679,14 @@ var Targets = map[string]*TargetDef{
 	//   - 選擇 C（瘋狂）：下一次擊破 ×10.0 倍率，25% 觸發；失敗則 ×0.3 倍率
 	//   - 10 秒內未選擇 → 自動選擇 A；個人冷卻 30 秒
 	"T198": {ID: "T198", Name: "幸運賭注魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 47, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_bet"},
+	// T199 幸運連鎖反應魚（DAY-241）— 業界原創「多米諾骨牌效應」機制
+	//   - 擊破 T199 後，場上隨機選 1 個目標作為「連鎖起點」（標記持續 15 秒）
+	//   - 玩家擊破連鎖起點後，自動引爆距離最近的目標（100% 擊破，×1.4 倍率）
+	//   - 被引爆的目標再引爆下一個最近目標（×1.3 倍率）
+	//   - 連鎖最多 8 層，每層倍率遞減 0.1（×1.4 → ×1.3 → ... → ×0.7）
+	//   - 每層引爆間隔 400ms，製造「多米諾骨牌」的視覺爽感
+	//   - 個人冷卻 25 秒
+	"T199": {ID: "T199", Name: "幸運連鎖反應魚", Type: TargetTypeSpecial, MultiplierMin: 36, MultiplierMax: 67, HP: 76, SpawnWeight: 3, Speed: 46, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_chain_reaction"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

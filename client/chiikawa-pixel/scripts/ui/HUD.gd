@@ -324,6 +324,7 @@ func _ready() -> void:
 	_init_lucky_gravity_flip_panel()    # 幸運重力反轉魚系統面板（DAY-238）
 	_init_lucky_synergy_burst_panel()   # 幸運共鳴爆發魚系統面板（DAY-239）
 	_init_lucky_bet_fish_panel()        # 幸運賭注魚系統面板（DAY-240）
+	_init_lucky_chain_reaction_panel()  # 幸運連鎖反應魚系統面板（DAY-241）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4561,3 +4562,20 @@ func _init_lucky_bet_fish_panel() -> void:
 func _on_lucky_bet_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_bet_fish_panel):
 		_lucky_bet_fish_panel.handle_lucky_bet_fish(data)
+
+# ─── 幸運連鎖反應魚系統面板（DAY-241）───────────────────────────────────────────
+const LuckyChainReactionPanelScript = preload("res://scripts/ui/LuckyChainReactionPanel.gd")
+var _lucky_chain_reaction_panel = null
+
+func _init_lucky_chain_reaction_panel() -> void:
+	var panel = LuckyChainReactionPanelScript.new()
+	panel.name = "LuckyChainReactionPanel"
+	panel.layer = 4
+	add_child(panel)
+	_lucky_chain_reaction_panel = panel
+	if GameManager.has_signal("lucky_chain_reaction"):
+		GameManager.lucky_chain_reaction.connect(_on_lucky_chain_reaction)
+
+func _on_lucky_chain_reaction(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_chain_reaction_panel):
+		_lucky_chain_reaction_panel.handle_lucky_chain_reaction(data)
