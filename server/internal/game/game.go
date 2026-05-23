@@ -217,6 +217,7 @@ type Game struct {
 	LuckyChainReaction *luckyChainReactionManager   // 幸運連鎖反應魚系統管理器（DAY-241）
 	LuckyCloneFish     *luckyCloneFishManager        // 幸運分身魚系統管理器（DAY-242）
 	LuckyProphecyFish  *luckyProphecyFishManager     // 幸運預言魚系統管理器（DAY-243）
+	LuckyFlagFish      *luckyFlagFishManager          // 幸運奪旗魚系統管理器（DAY-244）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -410,6 +411,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyChainReaction: newLuckyChainReactionManager(),
 		LuckyCloneFish:     newLuckyCloneFishManager(),
 		LuckyProphecyFish:  newLuckyProphecyFishManager(),
+		LuckyFlagFish:      newLuckyFlagFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1123,6 +1125,11 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 		go g.doCloneShots(p, 0, t.Y, t.X, t.Y, t.InstanceID)
 	}
 
+	// 幸運奪旗魚：命中旗幟目標時累積搶旗積分（DAY-244）
+	if result.IsHit && t != nil && !result.IsKill && g.isFlagTarget(t.InstanceID) {
+		g.recordFlagHit(p.ID, p.DisplayName)
+	}
+
 	// 龍龜不死 Boss：命中時直接給獎勵（DAY-186）
 	if result.IsHit && t != nil && isDragonTurtle(t.DefID) {
 		go g.notifyDragonTurtleHit(p, t.InstanceID)
@@ -1488,6 +1495,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	prophecyMult := g.getLuckyProphecyMult(p.ID, t.InstanceID)
 	if prophecyMult > 1.0 {
 		finalReward = int(float64(finalReward) * prophecyMult)
+	}
+	// 套用幸運奪旗魚倍率（DAY-244，×4.0/2.0/1.5 乘法，個人，擊破旗幟目標時）
+	flagMult := g.getFlagWinnerMult(p.ID, t.InstanceID)
+	if flagMult > 1.0 {
+		finalReward = int(float64(finalReward) * flagMult)
 	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
@@ -2137,6 +2149,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if g.isProphecyTarget(p.ID, t.InstanceID) {
 		go g.notifyProphecyKill(p, t.InstanceID, finalReward)
 	}
+	// 幸運奪旗魚：擊破 T202 本身時觸發搶旗（DAY-244）
+	if isLuckyFlagFish(t.DefID) {
+		go g.tryLuckyFlagFish(p)
+	}
+	// 幸運奪旗魚：玩家擊破旗幟目標時觸發奪旗結算（DAY-244）
+	if g.isFlagTarget(t.InstanceID) {
+		go g.notifyFlagTargetKill(p, t.InstanceID, finalReward)
+	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
 		go g.notifyEchoKill(p, t, t.InstanceID)
@@ -2292,6 +2312,8 @@ func (g *Game) updateNormalPlay() {
 			go g.notifyEchoTargetExpire(id)
 			// 幸運預言魚：預言目標消失時嘗試轉移預言（DAY-243）
 			go g.notifyProphecyTargetGone(id)
+			// 幸運奪旗魚：旗幟目標消失時觸發自動爆炸（DAY-244）
+			go g.notifyFlagTargetGone(id)
 		}
 	}
 	targetCount := len(g.Targets)

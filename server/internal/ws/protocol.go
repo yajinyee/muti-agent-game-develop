@@ -584,6 +584,7 @@ const (
 	MsgLuckyChainReaction    MessageType = "lucky_chain_reaction"     // 幸運連鎖反應魚廣播（Server→Client，DAY-241）
 	MsgLuckyCloneFish        MessageType = "lucky_clone_fish"         // 幸運分身魚廣播（Server→Client，DAY-242）
 	MsgLuckyProphecyFish     MessageType = "lucky_prophecy_fish"      // 幸運預言魚廣播（Server→Client，DAY-243）
+	MsgLuckyFlagFish         MessageType = "lucky_flag_fish"          // 幸運奪旗魚廣播（Server→Client，DAY-244）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5522,4 +5523,31 @@ type LuckyProphecyFishPayload struct {
 	TransferCount int     `json:"transfer_count,omitempty"`
 	AffectedCount int     `json:"affected_count,omitempty"`
 	HPLossPct     float64 `json:"hp_loss_pct,omitempty"`
+}
+
+// LuckyFlagFishPayload 幸運奪旗魚廣播（Server → Client，DAY-244）
+// Event 類型：
+//   - flag_start：搶旗開始（全服廣播，PlayerName/TargetID/TargetDefID/X/Y/DurationSec/WinnerMult/SecondMult/ThirdMult）
+//   - flag_rank_update：即時排名更新（全服廣播，TargetID/RankList/RemainingSec）
+//   - flag_captured：旗幟目標被擊破（全服廣播，PlayerID/PlayerName/TargetID/Reward/KillerMult/KillerRank/RankList）
+//   - flag_timeout：搶旗時間到（全服廣播，TargetID/RankList）
+//   - flag_escaped：旗幟目標消失（全服廣播，TargetID）
+//   - flag_auto_blast：旗幟目標自動爆炸（全服廣播，TargetID/Reward/KillerMult）
+type LuckyFlagFishPayload struct {
+	Event        string                   `json:"event"`
+	PlayerID     string                   `json:"player_id,omitempty"`
+	PlayerName   string                   `json:"player_name,omitempty"`
+	TargetID     string                   `json:"target_id,omitempty"`
+	TargetDefID  string                   `json:"target_def_id,omitempty"`
+	X            float64                  `json:"x,omitempty"`
+	Y            float64                  `json:"y,omitempty"`
+	DurationSec  int                      `json:"duration_sec,omitempty"`
+	WinnerMult   float64                  `json:"winner_mult,omitempty"`
+	SecondMult   float64                  `json:"second_mult,omitempty"`
+	ThirdMult    float64                  `json:"third_mult,omitempty"`
+	KillerMult   float64                  `json:"killer_mult,omitempty"`
+	KillerRank   int                      `json:"killer_rank,omitempty"`
+	Reward       int                      `json:"reward,omitempty"`
+	RankList     []map[string]interface{} `json:"rank_list,omitempty"`
+	RemainingSec int                      `json:"remaining_sec,omitempty"`
 }

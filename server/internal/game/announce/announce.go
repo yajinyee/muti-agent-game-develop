@@ -82,6 +82,7 @@ const (
 	EventLuckyChainReaction       EventType = "lucky_chain_reaction"      // 幸運連鎖反應魚觸發（DAY-241）
 	EventLuckyCloneFish           EventType = "lucky_clone_fish"          // 幸運分身魚觸發（DAY-242）
 	EventLuckyProphecyFish        EventType = "lucky_prophecy_fish"       // 幸運預言魚觸發（DAY-243）
+	EventLuckyFlagFish            EventType = "lucky_flag_fish"           // 幸運奪旗魚觸發（DAY-244）
 )
 
 // Priority 公告優先級
@@ -1308,6 +1309,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 4000
+
+	case EventLuckyFlagFish:
+		msg := "🚩 幸運奪旗魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#E74C3C"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🚩 全服搶旗！"
+		message = msg
+		icon = "🚩"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
 
 	default:
 		title = "📢 公告"

@@ -248,6 +248,7 @@ signal lucky_bet_fish(data: Dictionary)             # 幸運賭注魚系統（DA
 signal lucky_chain_reaction(data: Dictionary)       # 幸運連鎖反應魚系統（DAY-241）
 signal lucky_clone_fish(data: Dictionary)           # 幸運分身魚系統（DAY-242）
 signal lucky_prophecy_fish(data: Dictionary)        # 幸運預言魚系統（DAY-243）
+signal lucky_flag_fish(data: Dictionary)            # 幸運奪旗魚系統（DAY-244）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -711,6 +712,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_clone_fish(payload)
 		"lucky_prophecy_fish":
 			_handle_lucky_prophecy_fish(payload)
+		"lucky_flag_fish":
+			_handle_lucky_flag_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3292,3 +3295,29 @@ func _handle_lucky_prophecy_fish(payload: Dictionary) -> void:
 			var player_name: String = payload.get("player_name", "")
 			var affected_count: int = payload.get("affected_count", 0)
 			print("[GameManager] Prophecy failed! player=%s affected=%d targets" % [player_name, affected_count])
+
+## 幸運奪旗魚系統（DAY-244）
+func _handle_lucky_flag_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_flag_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"flag_start":
+			var player_name: String = payload.get("player_name", "")
+			var duration_sec: int = payload.get("duration_sec", 15)
+			var winner_mult: float = payload.get("winner_mult", 4.0)
+			print("[GameManager] Flag started! player=%s duration=%ds winner_mult=x%.1f" % [player_name, duration_sec, winner_mult])
+		"flag_rank_update":
+			var rank_list: Array = payload.get("rank_list", [])
+			var remaining: int = payload.get("remaining_sec", 0)
+			print("[GameManager] Flag rank update! %d players, %ds remaining" % [rank_list.size(), remaining])
+		"flag_captured":
+			var player_name: String = payload.get("player_name", "")
+			var killer_rank: int = payload.get("killer_rank", 1)
+			var killer_mult: float = payload.get("killer_mult", 4.0)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Flag captured! player=%s rank=%d mult=x%.1f reward=%d" % [player_name, killer_rank, killer_mult, reward])
+		"flag_timeout":
+			print("[GameManager] Flag timeout!")
+		"flag_auto_blast":
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Flag auto blast! reward=%d" % reward)

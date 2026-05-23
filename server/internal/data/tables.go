@@ -700,6 +700,13 @@ var Targets = map[string]*TargetDef{
 	//   - 若 12 秒後仍未擊破 → 「預言失敗」，全場 HP -20%（安慰獎）
 	//   - 個人冷卻 20 秒
 	"T201": {ID: "T201", Name: "幸運預言魚", Type: TargetTypeSpecial, MultiplierMin: 38, MultiplierMax: 69, HP: 78, SpawnWeight: 3, Speed: 44, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_prophecy"},
+	// T202 幸運奪旗魚（DAY-244）— 業界原創「全服搶旗競爭」機制
+	//   - 擊破 T202 後，場上最高倍率目標被「旗幟標記」（持續 15 秒）
+	//   - 所有玩家射擊旗幟目標，每次命中累積「搶旗積分」（+1/命中）
+	//   - 每 3 秒廣播即時排名；15 秒後積分最高者獲得 ×4.0 倍率加成
+	//   - 第 2 名 ×2.0，第 3 名 ×1.5；無人命中 → 自動爆炸全服共享
+	//   - 個人冷卻 25 秒；全服冷卻 40 秒
+	"T202": {ID: "T202", Name: "幸運奪旗魚", Type: TargetTypeSpecial, MultiplierMin: 39, MultiplierMax: 70, HP: 79, SpawnWeight: 3, Speed: 43, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_flag"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

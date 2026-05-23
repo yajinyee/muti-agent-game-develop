@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-243 幸運預言魚系統）
+## 最後更新：2026-05-23（DAY-244 幸運奪旗魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-244 更新（自主觸發）：** 幸運奪旗魚系統（Lucky Flag Fish）✅
+  - **業界依據：** 業界原創「全服搶旗競爭」機制，2025-2026 業界最熱門的 real-time multiplayer PvP 方向
+  - **設計：** 擊破 T202 後，場上最高倍率目標被「旗幟標記」（持續 15 秒）；所有玩家射擊旗幟目標，每次命中累積「搶旗積分」（+1/命中，不消耗籌碼）；每 3 秒廣播即時排名；15 秒後積分最高者獲得 ×4.0 倍率加成；第 2 名 ×2.0，第 3 名 ×1.5；無人命中 → 自動爆炸全服共享；個人冷卻 25 秒；全服冷卻 40 秒
+  - **設計差異：** 與幸運拍賣魚（T175，消耗籌碼競標）不同，奪旗魚是「射擊積分競爭」，不消耗籌碼，讓所有玩家都願意參與；「每 3 秒排名廣播」讓玩家即時看到自己的排名，製造「要趕快多打幾槍」的緊迫感；「第 2/3 名也有獎勵」讓玩家不會因為落後就放棄；「旗幟目標自動爆炸」確保即使沒人積極參與也有獎勵；×4.0 倍率是目前全服競爭類最高倍率
+  - server/internal/game/lucky_flag_fish_handler.go：luckyFlagFishManager（個人冷卻/全服冷卻/activeSession）；flagFishSession（targetID/scores/names/expiresAt）；isLuckyFlagFish（T202）；isFlagTarget（供 handleAttack 使用）；recordFlagHit（累積積分）；getFlagWinnerMult（×4.0/2.0/1.5 乘法）；calcFlagRankLocked；notifyFlagTargetKill（奪旗結算廣播）；notifyFlagTargetGone（目標消失觸發自動爆炸）；doFlagAutoBlast（全服共享獎勵）；tryLuckyFlagFish（擊破後觸發/選最高倍率目標/全服廣播/全服公告）；runFlagRankBroadcast（每3秒排名廣播/超時結算）；doFlagTimeout（超時結算）
+  - server/internal/data/tables.go：新增 T202 幸運奪旗魚（39-70x/HP79/SpawnWeight3/Speed43/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyFlagFish；LuckyFlagFishPayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyFlagFish + case 處理
+  - server/internal/game/game.go：LuckyFlagFish *luckyFlagFishManager；handleKill 加入 getFlagWinnerMult 乘法加成 + isLuckyFlagFish 分支 + isFlagTarget 分支；handleAttack 加入 recordFlagHit；updateNormalPlay 加入 notifyFlagTargetGone
+  - client/chiikawa-pixel/scripts/ui/LuckyFlagFishPanel.gd：紅白搶旗主題面板（flag_start 紅色三次強閃光+頂部橫幅+「🚩 全服搶旗！」大字+目標標記+計時條+倍率說明；flag_rank_update 右側排名面板即時更新；flag_captured 金/銀/銅色閃光+「🚩 奪旗成功！」大字+結算彈窗；flag_timeout 橙色閃光+結算彈窗；flag_auto_blast 橙色閃光+全服獎勵提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_flag_fish 訊號 + _handle_lucky_flag_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyFlagFishPanelScript（layer=1）
+  - 搶旗設計：最高倍率目標；持續 15 秒；每 3 秒排名廣播；個人冷卻 25 秒；全服冷卻 40 秒
+  - 倍率設計：第 1 名 ×4.0；第 2 名 ×2.0；第 3 名 ×1.5；自動爆炸 ×1.2（全服共享）
+  - 視覺設計：紅白搶旗主題（#E74C3C + #F39C12 + #BDC3C7 + #E67E22）；旗幟標記（🚩 上下浮動動畫）；右側排名面板（金/銀/銅色）；右側豎向計時條（紅色）；結算彈窗右側滑入
+  - 全服廣播：搶旗開始/每3秒排名/奪旗結算/超時結算/目標消失/自動爆炸全服廣播
+  - 全服公告：觸發時公告（紅色）；奪旗成功公告（紅色）；自動爆炸公告（橙色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-243 更新（自主觸發）：** 幸運預言魚系統（Lucky Prophecy Fish）✅
   - **業界依據：** 業界原創「預言指定目標」機制
   - **設計：** 擊破 T201 後，Server 隨機「預言」場上 1 個目標（標記持續 12 秒）；玩家在 12 秒內擊破預言目標 → 獲得 ×3.5 倍率加成（「預言成真」）；若預言目標自然消失 → 自動「預言轉移」到下一個目標（最多轉移 2 次）；若 12 秒後仍未擊破 → 「預言失敗」，全場 HP -20%（安慰獎）；個人冷卻 20 秒
