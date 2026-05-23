@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-257 幸運公會戰魚系統）
+## 最後更新：2026-05-24（DAY-258 幸運閃電風暴魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-258 更新（自主觸發）：** 幸運閃電風暴魚系統（Lucky Lightning Storm Fish）✅
+  - **業界依據：** Royal Fishing 業界原創「閃電連鎖跳躍+超級閃電」機制，2026 年最熱門連鎖反應方向
+  - **設計：** 擊破 T216 後，觸發「閃電風暴」（持續 12 秒）；每 1.5 秒「閃電跳躍」：從隨機目標出發，連鎖跳躍到最近的 3 個目標（×1.3 倍率，全服共享）；累計跳躍達到 5 跳 → 「超級閃電」：×3.0 倍率（全服大獎）；12 秒後「閃電爆炸」：場上所有目標 HP -40%；個人冷卻 20 秒；全服冷卻 32 秒
+  - **設計差異：** 與閃電鰻（已有，單條連鎖）不同，閃電風暴是「多輪連鎖跳躍」，讓玩家看到「閃電在魚群中不斷跳躍」的視覺爽感；「連鎖達到 5 跳觸發超級閃電」讓玩家有「要趁風暴期間多打魚讓閃電有更多目標跳」的策略感；「×3.0 超級閃電」是目前連鎖類最高倍率；「閃電爆炸 HP -40%」讓玩家在風暴結束後有「全場魚都快死了，趕快打」的緊迫感
+  - server/internal/game/lucky_lightning_storm_handler.go：luckyLightningStormManager（個人冷卻/全服冷卻/activeSession）；lightningStormSession（triggerPlayerID/triggerPlayerName/expiresAt/totalJumps）；isLuckyLightningStormFish（T216）；tryLuckyLightningStormFish（擊破後觸發/個人訊息+全服廣播+全服公告）；runLightningStorm（goroutine 每1.5秒跳躍/12秒後爆炸）；doLightningJump（隨機起始目標/貪心選最近3個/×1.3倍率/全服共享/累計跳躍）；doSuperLightning（累計5跳/最高倍率目標/×3.0/全服大獎/廣播/公告）；doLightningBlast（HP-40%/廣播/公告）
+  - server/internal/data/tables.go：新增 T216 幸運閃電風暴魚（53-97x/HP93/SpawnWeight3/Speed29/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyLightningStorm；LuckyLightningStormPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyLightningStorm + case 處理
+  - server/internal/game/game.go：LuckyLightningStorm *luckyLightningStormManager；handleKill 加入 isLuckyLightningStormFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyLightningStormPanel.gd：金黃閃電主題面板（storm_start 金色三次強閃光+頂部橫幅+「⚡ 閃電風暴！」大字+跳躍計數器（脈衝動畫）+計時條；storm_broadcast 頂部小橫幅+計數器；storm_jump 金色閃光+「⚡ 第N輪 跳躍M個！×1.3」浮動文字+計數器更新；super_lightning 全螢幕三次強閃光+「⚡ 超級閃電！×3.0」大字+結算彈窗；storm_blast 天藍閃光+「⚡ 閃電爆炸！HP-40%」大字）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_lightning_storm 訊號 + _handle_lucky_lightning_storm
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyLightningStormPanelScript（layer=31）
+  - 跳躍設計：每 1.5 秒；隨機起始目標；貪心選最近 3 個；×1.3 倍率；全服共享；持續 12 秒
+  - 超級閃電設計：累計 5 跳觸發；最高倍率目標；×3.0 倍率；全服大獎；全服公告
+  - 爆炸設計：HP -40%；≥5 個時全服公告
+  - 視覺設計：金黃閃電主題（#FFD700 金 + #FFFFFF 白 + #87CEEB 天藍 + #FFF3E0 奶油）；跳躍計數器（⚡ 跳躍 N/5，脈衝動畫，接近超級閃電時變白色）；右側豎向計時條（金色，x=-198 與其他計時條錯開）；超級閃電結算彈窗右側滑入
+  - 全服廣播：風暴啟動/每次跳躍（含起始位置/跳數/獎勵）/超級閃電/閃電爆炸全服廣播
+  - 全服公告：觸發時公告（金色）；超級閃電公告（白色）；爆炸≥5個時公告（天藍色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-257 更新（自主觸發）：** 幸運公會戰魚系統（Lucky Guild War Fish）✅
   - **業界依據：** 業界原創「全服分隊競爭→勝隊爆發」機制，Fishing Frenzy Chapter 3（2026-05-14）Guild Wars 最新趨勢，讓捕魚變成「團隊運動」
   - **設計：** 擊破 T215 後，全服玩家自動分成兩隊（紅隊/藍隊，依玩家 ID 奇偶分配）；30 秒內競爭擊破數，每次擊破為己隊累積積分；每 5 秒廣播即時比分；勝隊全員 ×2.5 倍率加成（5 秒）；敗隊 ×1.2 安慰獎；平局 ×1.8；個人冷卻 35 秒；全服冷卻 55 秒

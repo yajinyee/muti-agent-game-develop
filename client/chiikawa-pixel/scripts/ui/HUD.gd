@@ -341,6 +341,7 @@ func _ready() -> void:
 	_init_lucky_rift_panel()                 # 幸運時空裂縫魚系統面板（DAY-255）
 	_init_lucky_server_charge_panel()        # 幸運全服充能魚系統面板（DAY-256）
 	_init_lucky_guild_war_panel()            # 幸運公會戰魚系統面板（DAY-257）
+	_init_lucky_lightning_storm_panel()      # 幸運閃電風暴魚系統面板（DAY-258）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4876,3 +4877,21 @@ func _init_lucky_guild_war_panel() -> void:
 func _on_lucky_guild_war(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_guild_war_panel):
 		_lucky_guild_war_panel.handle_lucky_guild_war(data)
+
+# ─── 幸運閃電風暴魚系統面板（DAY-258）────────────────────────────────────────
+
+const LuckyLightningStormPanelScript = preload("res://scripts/ui/LuckyLightningStormPanel.gd")
+var _lucky_lightning_storm_panel = null
+
+func _init_lucky_lightning_storm_panel() -> void:
+	var panel = LuckyLightningStormPanelScript.new()
+	panel.name = "LuckyLightningStormPanel"
+	panel.layer = 31
+	add_child(panel)
+	_lucky_lightning_storm_panel = panel
+	if GameManager.has_signal("lucky_lightning_storm"):
+		GameManager.lucky_lightning_storm.connect(_on_lucky_lightning_storm)
+
+func _on_lucky_lightning_storm(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_lightning_storm_panel):
+		_lucky_lightning_storm_panel.handle_lucky_lightning_storm(data)

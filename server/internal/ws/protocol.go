@@ -598,6 +598,7 @@ const (
 	MsgLuckyRift                   MessageType = "lucky_rift"                       // 幸運時空裂縫魚廣播（Server→Client，DAY-255）
 	MsgLuckyServerCharge           MessageType = "lucky_server_charge"              // 幸運全服充能魚廣播（Server→Client，DAY-256）
 	MsgLuckyGuildWar               MessageType = "lucky_guild_war"                  // 幸運公會戰魚廣播（Server→Client，DAY-257）
+	MsgLuckyLightningStorm         MessageType = "lucky_lightning_storm"             // 幸運閃電風暴魚廣播（Server→Client，DAY-258）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5872,4 +5873,28 @@ type LuckyGuildWarPayload struct {
 	BlueScore   int     `json:"blue_score,omitempty"`
 	WinTeam     int     `json:"win_team,omitempty"` // 0=紅隊, 1=藍隊
 	BoostSec    int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyLightningStormPayload 幸運閃電風暴魚廣播（Server → Client，DAY-258）
+// Event 類型：
+//   - storm_start：風暴啟動（個人訊息，PlayerID/PlayerName/DurationSec/JumpMult/SuperMult/SuperThresh）
+//   - storm_broadcast：全服廣播風暴（PlayerName/DurationSec/JumpMult/SuperMult）
+//   - storm_jump：閃電跳躍（全服廣播，PlayerName/Round/JumpCount/TotalJumps/JumpMult/TotalReward/StartX/StartY）
+//   - super_lightning：超級閃電（全服廣播，PlayerName/SuperMult/TotalReward/TotalJumps）
+//   - storm_blast：閃電爆炸（全服廣播，PlayerName/AffectedCount/TotalJumps）
+type LuckyLightningStormPayload struct {
+	Event         string  `json:"event"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	DurationSec   int     `json:"duration_sec,omitempty"`
+	JumpMult      float64 `json:"jump_mult,omitempty"`
+	SuperMult     float64 `json:"super_mult,omitempty"`
+	SuperThresh   int     `json:"super_thresh,omitempty"`
+	Round         int     `json:"round,omitempty"`
+	JumpCount     int     `json:"jump_count,omitempty"`
+	TotalJumps    int     `json:"total_jumps,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
+	StartX        float64 `json:"start_x,omitempty"`
+	StartY        float64 `json:"start_y,omitempty"`
+	AffectedCount int     `json:"affected_count,omitempty"`
 }
