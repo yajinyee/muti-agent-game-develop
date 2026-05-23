@@ -226,6 +226,7 @@ signal lucky_ricochet_fish(data: Dictionary)        # 幸運反彈魚系統（DA
 signal lucky_black_hole(data: Dictionary)           # 幸運黑洞魚系統（DAY-221）
 signal lucky_resonance_fish(data: Dictionary)       # 幸運共鳴魚系統（DAY-222）
 signal lucky_teleport_fish(data: Dictionary)        # 幸運傳送魚系統（DAY-223）
+signal lucky_split_fish(data: Dictionary)           # 幸運分裂魚系統（DAY-224）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -649,6 +650,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_resonance_fish(payload)
 		"lucky_teleport_fish":
 			_handle_lucky_teleport_fish(payload)
+		"lucky_split_fish":
+			_handle_lucky_split_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2771,3 +2774,19 @@ func _sync_teleport_positions(targets: Array) -> void:
 			continue
 		# 通知 TargetManager 更新目標位置
 		emit_signal("target_teleported", target_id, Vector2(new_x, new_y))
+
+## 處理幸運分裂魚系統（DAY-224）
+func _handle_lucky_split_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_split_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"split_start":
+			var player_name: String = payload.get("player_name", "")
+			var frags: Array = payload.get("fragments", [])
+			print("[GameManager] Split fish triggered by %s, fragments=%d" % [player_name, frags.size()])
+		"split_blast":
+			var blast_count: int = payload.get("blast_count", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Split blast: count=%d reward=%d" % [blast_count, total_reward])
+		"split_end":
+			print("[GameManager] Split fish ended (all fragments killed by players)")

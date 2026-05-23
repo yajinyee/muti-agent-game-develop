@@ -563,6 +563,7 @@ const (
 	MsgLuckyBlackHole      MessageType = "lucky_black_hole"      // 幸運黑洞魚廣播（Server→Client，DAY-221）
 	MsgLuckyResonanceFish  MessageType = "lucky_resonance_fish"  // 幸運共鳴魚廣播（Server→Client，DAY-222）
 	MsgLuckyTeleportFish   MessageType = "lucky_teleport_fish"   // 幸運傳送魚廣播（Server→Client，DAY-223）
+	MsgLuckySplitFish      MessageType = "lucky_split_fish"      // 幸運分裂魚廣播（Server→Client，DAY-224）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5023,4 +5024,25 @@ type TeleportTargetInfo struct {
 	TargetID string  `json:"target_id"`
 	NewX     float64 `json:"new_x"`
 	NewY     float64 `json:"new_y"`
+}
+
+// LuckySplitFishPayload 幸運分裂魚廣播（Server → Client，DAY-224）
+//
+// Events:
+//
+//	"split_start" — 分裂爆炸開始（全服廣播，含碎片位置列表）
+//	"split_blast" — 二次爆炸結算（全服廣播）
+//	"split_end"   — 分裂結束（全服廣播）
+type LuckySplitFishPayload struct {
+	Event       string              `json:"event"`
+	InstanceID  string              `json:"instance_id,omitempty"`
+	PlayerID    string              `json:"player_id,omitempty"`
+	PlayerName  string              `json:"player_name,omitempty"`
+	OriginX     float64             `json:"origin_x,omitempty"`
+	OriginY     float64             `json:"origin_y,omitempty"`
+	Fragments   interface{}         `json:"fragments,omitempty"`
+	DurationSec int                 `json:"duration_sec,omitempty"`
+	KillMult    float64             `json:"kill_mult,omitempty"`
+	BlastCount  int                 `json:"blast_count,omitempty"`
+	TotalReward int                 `json:"total_reward,omitempty"`
 }

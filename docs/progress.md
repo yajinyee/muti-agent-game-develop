@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-223 幸運傳送魚系統）
+## 最後更新：2026-05-23（DAY-224 幸運分裂魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-223 更新（自主觸發）：** 幸運傳送魚系統（Lucky Teleport Fish）✅
+- **DAY-224 更新（自主觸發）：** 幸運分裂魚系統（Lucky Split Fish）✅
+  - **業界依據：** 業界原創「一魚分三」機制
+  - **設計：** 擊破 T182 後觸發「分裂爆炸」：T182 分裂成 3 個「分裂碎片」（HP = 原 HP × 30%，倍率 ×1.8）；分裂碎片在場上存活 8 秒，被擊破獲得 ×1.8 倍率加成（乘法）；8 秒後所有未被擊破的分裂碎片「二次爆炸」（65% 擊破機率，0.60x 倍率）；個人冷卻 18 秒；全服廣播分裂事件
+  - **設計差異：** 與幸運鏡像魚（DAY-215，複製分身 HP 50%，×1.5）不同，分裂魚是「一魚分三」，讓玩家有「打一個得三個機會」的爽感；分裂碎片 HP 只有 30%，更容易擊破，讓玩家有「快速連殺」的節奏感；分裂碎片倍率 ×1.8，比鏡像魚（×1.5）更高；「二次爆炸」讓玩家有「等待→爆發」的高潮設計；全服廣播讓所有玩家都看到分裂碎片，製造「全服競爭搶打碎片」的社交感
+  - server/internal/game/lucky_split_fish_handler.go：luckySplitFishManager（個人冷卻/activeFragments）；isLuckySplitFish（T182）；getLuckySplitFragmentMult（供 handleKill 使用，分裂碎片 ×1.8 乘法加成）；removeLuckySplitFragment（碎片被擊破後移除）；tryLuckySplitFish（擊破後觸發/生成3個分裂碎片目標/全服廣播/全服公告）；runLuckySplitBlast（8秒後二次爆炸/65%擊破機率/0.60x倍率/全服廣播）
+  - server/internal/data/tables.go：新增 T182 幸運分裂魚（28-55x/HP65/SpawnWeight4/Speed52/Lifetime13）
+  - server/internal/ws/protocol.go：新增 MsgLuckySplitFish；LuckySplitFishPayload（split_start/split_blast/split_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckySplitFish + case 處理
+  - server/internal/game/game.go：LuckySplitFish *luckySplitFishManager；handleKill 加入 getLuckySplitFragmentMult 乘法加成 + removeLuckySplitFragment + isLuckySplitFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckySplitFishPanel.gd：橙紅分裂主題面板（split_start 橙紅三次強閃光+頂部橫幅+分裂爆炸中心特效+碎片菱形標記；split_blast 全螢幕橙紅三次強閃光+「💥 二次爆炸！」大字+結算彈窗；split_end 橙色淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_split_fish 訊號 + _handle_lucky_split_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckySplitFishPanelScript（layer=21）
+  - 分裂設計：3 個碎片；HP = 原 HP × 30%；倍率 = 原倍率 × 1.8；存活 8 秒；個人冷卻 18 秒；散佈半徑 120px
+  - 二次爆炸設計：65% 擊破機率；0.60x 倍率；獎勵給觸發者；≥2 個爆炸時全服公告
+  - 視覺設計：橙紅分裂主題（#FF6B35 + #FF4500 + #FFD700 + #FFF0E6）；放射狀爆炸圓圈；菱形碎片標記（閃爍動畫）；底部計時條（橙紅→深橙漸變）
+  - 全服廣播：分裂開始（含碎片位置）/二次爆炸結算/分裂結束全服廣播
+  - 全服公告：分裂開始時公告；二次爆炸≥2 個時公告（依爆炸數決定顏色：≥3 深橙/其他橙紅）
+  - build/vet 全部通過（零錯誤零警告）
+
+
   - **業界依據：** Royal Fishing 2026「Immortal Boss mechanic」+ 業界原創「傳送混亂」機制
   - **設計：** 擊破 T181 後觸發「傳送漩渦」（10 秒）：場上所有目標物立即隨機傳送到新位置（瞬間移動）；傳送後 3 秒內擊破任何目標：獎勵 ×2.5 倍率加成（「傳送混亂」加成）；每 3 秒再次傳送（最多 4 次傳送）；個人冷卻 20 秒；全服廣播傳送事件
   - **設計差異：** 與時間凍結魚（DAY-212，全場靜止）不同，傳送魚是「全場瞬間移動」，讓玩家有「趕快在傳送後 3 秒內打」的緊迫感；每次傳送都是新的機會，讓玩家保持高度專注；視覺上所有魚瞬間移動，製造「混亂爽感」；「傳送混亂加成」讓玩家有「傳送後立刻打」的強烈動機；全服廣播傳送位置讓所有玩家都看到魚的新位置，製造「全服一起搶打」的社交感

@@ -567,6 +567,13 @@ var Targets = map[string]*TargetDef{
 	//   - 每 3 秒再次傳送（最多 4 次傳送）
 	//   - 個人冷卻 20 秒
 	"T181": {ID: "T181", Name: "幸運傳送魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_teleport"},
+	// T182 幸運分裂魚（DAY-224）— 業界原創「一魚分三」機制
+	// 設計：擊破 T182 後觸發「分裂爆炸」：
+	//   - T182 分裂成 3 個「分裂碎片」（HP = 原 HP × 30%，倍率 ×1.8）
+	//   - 分裂碎片在場上存活 8 秒，被擊破獲得 ×1.8 倍率加成（乘法）
+	//   - 8 秒後所有未被擊破的分裂碎片「二次爆炸」（65% 擊破機率，0.60x 倍率）
+	//   - 個人冷卻 18 秒
+	"T182": {ID: "T182", Name: "幸運分裂魚", Type: TargetTypeSpecial, MultiplierMin: 28, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 52, Lifetime: 13, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "lucky_split"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
