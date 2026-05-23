@@ -603,6 +603,7 @@ const (
 	MsgLuckyTreasureHunter         MessageType = "lucky_treasure_hunter"              // 幸運寶藏獵人魚廣播（Server→Client，DAY-260）
 	MsgLuckyTimeCapsule            MessageType = "lucky_time_capsule"                 // 幸運時間膠囊魚廣播（Server→Client，DAY-261）
 	MsgLuckyProgressiveJackpot     MessageType = "lucky_progressive_jackpot"          // 幸運累積大獎池魚廣播（Server→Client，DAY-262）
+	MsgLuckyElementFusion          MessageType = "lucky_element_fusion"               // 幸運元素融合魚廣播（Server→Client，DAY-263）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5990,4 +5991,37 @@ type LuckyProgressiveJackpotPayload struct {
 	TopName     string  `json:"top_name,omitempty"`
 	TopReward   int     `json:"top_reward,omitempty"`
 	PlayerCount int     `json:"player_count,omitempty"`
+}
+
+// ElementFragmentInfo 元素碎片資訊（DAY-263）
+type ElementFragmentInfo struct {
+	InstanceID string `json:"instance_id"`
+	DefID      string `json:"def_id"`
+	Element    string `json:"element"` // "fire" / "water" / "wind"
+}
+
+// LuckyElementFusionPayload 幸運元素融合魚廣播（Server → Client，DAY-263）
+// Event 類型：
+//   - fusion_start：觸發元素融合（個人，TriggerName/FragmentCount/Duration）
+//   - fusion_broadcast：全服廣播元素碎片位置（TriggerName/Fragments/Duration）
+//   - fragment_collect：玩家收集元素碎片（個人，PlayerID/PlayerName/Element/CollectedCount/CollectedList/FragmentReward）
+//   - fusion_burst：集齊 3 種元素爆發（個人，PlayerID/PlayerName/CollectedCount/Mult/Reward）
+//   - fusion_partial：集齊 2 種元素部分融合（個人，PlayerID/PlayerName/CollectedCount/Mult/Reward）
+//   - fusion_single：集齊 1 種元素殘留（個人，PlayerID/PlayerName/CollectedCount/Mult/Reward）
+//   - fusion_burst_broadcast：全融合全服廣播（PlayerName/Mult/Reward）
+//   - fusion_expire：元素碎片消失（全服）
+type LuckyElementFusionPayload struct {
+	Event          string                `json:"event"`
+	PlayerID       string                `json:"player_id,omitempty"`
+	PlayerName     string                `json:"player_name,omitempty"`
+	TriggerName    string                `json:"trigger_name,omitempty"`
+	Element        string                `json:"element,omitempty"`
+	CollectedCount int                   `json:"collected_count,omitempty"`
+	CollectedList  []string              `json:"collected_list,omitempty"`
+	FragmentCount  int                   `json:"fragment_count,omitempty"`
+	FragmentReward int                   `json:"fragment_reward,omitempty"`
+	Fragments      []ElementFragmentInfo `json:"fragments,omitempty"`
+	Duration       int                   `json:"duration,omitempty"`
+	Mult           float64               `json:"mult,omitempty"`
+	Reward         int                   `json:"reward,omitempty"`
 }

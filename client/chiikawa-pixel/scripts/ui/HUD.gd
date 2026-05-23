@@ -346,6 +346,7 @@ func _ready() -> void:
 	_init_lucky_treasure_hunter_panel()     # 幸運寶藏獵人魚系統面板（DAY-260）
 	_init_lucky_time_capsule_panel()        # 幸運時間膠囊魚系統面板（DAY-261）
 	_init_lucky_progressive_jackpot_panel() # 幸運累積大獎池魚系統面板（DAY-262）
+	_init_lucky_element_fusion_panel()      # 幸運元素融合魚系統面板（DAY-263）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4971,3 +4972,19 @@ func _init_lucky_progressive_jackpot_panel() -> void:
 func _on_lucky_progressive_jackpot(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_progressive_jackpot_panel):
 		_lucky_progressive_jackpot_panel.handle_lucky_progressive_jackpot(data)
+
+const LuckyElementFusionPanelScript = preload("res://scripts/ui/LuckyElementFusionPanel.gd")
+var _lucky_element_fusion_panel = null
+
+func _init_lucky_element_fusion_panel() -> void:
+	var panel = LuckyElementFusionPanelScript.new()
+	panel.name = "LuckyElementFusionPanel"
+	panel.layer = 36
+	add_child(panel)
+	_lucky_element_fusion_panel = panel
+	if GameManager.has_signal("lucky_element_fusion"):
+		GameManager.lucky_element_fusion.connect(_on_lucky_element_fusion)
+
+func _on_lucky_element_fusion(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_element_fusion_panel):
+		_lucky_element_fusion_panel.handle_event(data)

@@ -808,6 +808,7 @@ var Targets = map[string]*TargetDef{
 	"T218": {ID: "T218", Name: "幸運寶藏獵人魚", Type: TargetTypeSpecial, MultiplierMin: 55, MultiplierMax: 101, HP: 95, SpawnWeight: 3, Speed: 27, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_treasure_hunter"},
 	"T219": {ID: "T219", Name: "幸運時間膠囊魚", Type: TargetTypeSpecial, MultiplierMin: 56, MultiplierMax: 103, HP: 96, SpawnWeight: 3, Speed: 26, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_time_capsule"},
 	"T220": {ID: "T220", Name: "幸運累積大獎池魚", Type: TargetTypeSpecial, MultiplierMin: 57, MultiplierMax: 105, HP: 97, SpawnWeight: 2, Speed: 25, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_progressive_jackpot"},
+	"T221": {ID: "T221", Name: "幸運元素融合魚", Type: TargetTypeSpecial, MultiplierMin: 58, MultiplierMax: 107, HP: 98, SpawnWeight: 2, Speed: 24, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_element_fusion"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

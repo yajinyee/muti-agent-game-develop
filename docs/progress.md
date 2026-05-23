@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-262 幸運累積大獎池魚系統）
+## 最後更新：2026-05-24（DAY-263 幸運元素融合魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-263 更新（自主觸發）：** 幸運元素融合魚系統（Lucky Element Fusion Fish）✅
+  - **業界依據：** Royal Fishing 的 Element Combo 系統，2026 年最熱門「元素組合+融合爆發」機制，讓玩家有「集齊三種元素觸發大爆發」的策略感
+  - **設計：** 擊破 T221 後，Server 隨機將「火/水/風」三種元素碎片各 1 個分配給場上 3 個目標；玩家擊破帶有元素碎片的目標，收集對應元素（個人）；集齊 3 種不同元素 → 「元素融合爆發」：×6.0 倍率（個人最高）；只集齊 2 種 → 「部分融合」：×2.5 倍率；只集齊 1 種 → 「元素殘留」：×1.3 倍率；元素碎片存活 25 秒；個人冷卻 35 秒；全服冷卻 55 秒
+  - **設計差異：** 與寶藏獵人（T218，30%機率發現碎片）不同，元素融合是「確定性收集」，讓玩家有「我知道那條魚有元素，要趕快打」的策略感；「三種元素各有主題色（火紅/水藍/風綠）」讓玩家一眼看出「哪條魚有什麼元素」；「×6.0 全融合」是目前個人類最高倍率，製造「哇，集齊了！」的爽感；「部分融合也有獎勵」確保即使沒集齊也有收益，降低挫敗感；「全服廣播元素分配位置」讓所有玩家都看到「哪條魚有元素」，製造「全服一起搶」的競爭感
+  - server/internal/game/lucky_element_fusion_handler.go：luckyElementFusionManager（個人冷卻/全服冷卻/activeFragments/activeSessions）；elementFragmentEntry（instanceID/defID/element/expiresAt）；elementFusionSession（playerID/playerName/collected/expiresAt）；isLuckyElementFusionFish（T221）；isElementFragmentTarget（供 handleKill 使用）；removeFragment；tryLuckyElementFusionFish（擊破後觸發/隨機分配三種元素/個人訊息+全服廣播+全服公告）；notifyElementFragmentKill（收集元素/碎片獎勵×0.5/集齊3種觸發爆發）；doElementFusionBurst（×6.0/2.5/1.3倍率/個人獎勵/全融合時全服廣播+全服公告）；runElementFusionTimeout（goroutine 25秒後清理/超時session結算）
+  - server/internal/data/tables.go：新增 T221 幸運元素融合魚（58-107x/HP98/SpawnWeight2/Speed24/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyElementFusion；ElementFragmentInfo（InstanceID/DefID/Element）；LuckyElementFusionPayload（8種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyElementFusion + case 處理
+  - server/internal/game/game.go：LuckyElementFusion *luckyElementFusionManager；handleKill 加入 isLuckyElementFusionFish 分支 + isElementFragmentTarget 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyElementFusionPanel.gd：火/水/風三元素主題面板（fusion_start 橙色三次強閃光+頂部橫幅+「🔥💧🌪️ 元素融合！」；fusion_broadcast 全服廣播橫幅；fragment_collect 元素顏色閃光+「元素名 收集 N/3 ×0.5」浮動文字；fusion_burst 全螢幕三次強閃光+「🔥💧🌪️ 元素全融合！×6.0」大字+結算彈窗；fusion_partial 金色閃光+「⚡ 部分融合！×2.5」；fusion_single 灰色閃光+「✨ 元素殘留！×1.3」；fusion_burst_broadcast 全服廣播橫幅；fusion_expire 碎片消失提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_element_fusion 訊號 + _handle_lucky_element_fusion
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyElementFusionPanelScript（layer=36）
+  - 元素設計：火（🔥 #FF4500 紅橙）/水（💧 #00BFFF 天藍）/風（🌪️ #00FF88 翠綠）；各 1 個碎片分配給場上 3 個目標；存活 25 秒
+  - 收集設計：擊破帶碎片目標；碎片獎勵 ×0.5；個人收集；集齊 3 種觸發爆發
+  - 爆發設計：全融合 ×6.0（個人最高）；部分融合 ×2.5；元素殘留 ×1.3；全融合時全服廣播+全服公告
+  - 超時設計：25 秒後清理碎片；有 session 的玩家按已收集數量結算
+  - 視覺設計：橙紅元素主題（#FF4500 火紅 + #00BFFF 天藍 + #00FF88 翠綠 + #FFD700 金）；元素顏色閃光（收集時）；結算彈窗右側滑入（含倍率/獎勵）
+  - 全服廣播：元素融合觸發（含碎片位置）/全融合爆發全服廣播
+  - 全服公告：觸發時公告（橙紅色）；全融合爆發公告（金色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-262 更新（自主觸發）：** 幸運累積大獎池魚系統（Lucky Progressive Jackpot Fish）✅
   - **業界依據：** Progressive Jackpot 是 2026 年捕魚機最熱門的留存機制（Fishing Fortune, Ocean King, Jackpot Fishing by Jili），讓玩家有「每一槍都在累積大獎池」的動力；[Fishing Fortune](https://fishingfortune.app/) 的 multiplier cascade 和 progressive jackpot pools 是 2026 年最熱門設計
   - **設計：** 全服所有玩家每次擊破任何目標時，自動累積「大獎池」（每次 +1%）；擊破 T220 後，大獎池立即「爆發」：按貢獻比例分配給所有玩家；貢獻比例 = 玩家本局累積擊破次數 / 全服總擊破次數；大獎池最小值 = 100；大獎池上限 = 10000；每 10 秒廣播大獎池金額；個人冷卻 60 秒；全服冷卻 90 秒

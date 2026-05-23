@@ -1,4 +1,4 @@
-// Package announce 全服公告系統（DAY-097）
+﻿// Package announce 全服公告系統（DAY-097）
 // 當重大事件發生時，廣播全服通知，增加社交感和緊張感
 package announce
 
@@ -101,6 +101,7 @@ const (
 	EventLuckyTreasureHunter      EventType = "lucky_treasure_hunter"      // 幸運寶藏獵人魚觸發（DAY-260）
 	EventLuckyTimeCapsule         EventType = "lucky_time_capsule"         // 幸運時間膠囊魚觸發（DAY-261）
 	EventLuckyProgressiveJackpot  EventType = "lucky_progressive_jackpot"  // 幸運累積大獎池魚觸發（DAY-262）
+	EventLuckyElementFusion       EventType = "lucky_element_fusion"       // 幸運元素融合魚觸發（DAY-263）
 )
 
 // Priority 公告優先級
@@ -1707,6 +1708,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 6000
+
+	case EventLuckyElementFusion:
+		msg := "🔥💧🌪️ 幸運元素融合魚觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FF6B35"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🔥💧🌪️ 幸運元素融合魚！"
+		message = msg
+		icon = "🔥"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
 
 	default:
 		title = "📢 公告"

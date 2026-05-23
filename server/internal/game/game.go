@@ -236,6 +236,7 @@ type Game struct {
 	LuckyTreasureHunter     *luckyTreasureHunterManager       // 幸運寶藏獵人魚系統管理器（DAY-260）
 	LuckyTimeCapsule        *luckyTimeCapsuleManager          // 幸運時間膠囊魚系統管理器（DAY-261）
 	LuckyProgressiveJackpot *luckyProgressiveJackpotManager   // 幸運累積大獎池魚系統管理器（DAY-262）
+	LuckyElementFusion      *luckyElementFusionManager         // 幸運元素融合魚系統管理器（DAY-263）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -448,6 +449,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyTreasureHunter:     newLuckyTreasureHunterManager(),
 		LuckyTimeCapsule:        newLuckyTimeCapsuleManager(),
 		LuckyProgressiveJackpot: newLuckyProgressiveJackpotManager(),
+		LuckyElementFusion:      newLuckyElementFusionManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2348,6 +2350,16 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if !isLuckyProgressiveJackpotFish(t.DefID) {
 		finalRewardForJackpot := int(float64(g.getAvgBetCost()) * t.Multiplier)
 		g.LuckyProgressiveJackpot.accumulateJackpot(p, finalRewardForJackpot)
+	}
+	// 幸運元素融合魚：擊破 T221 時觸發元素融合系統（DAY-263）
+	if isLuckyElementFusionFish(t.DefID) {
+		go g.tryLuckyElementFusionFish(p)
+	}
+	// 幸運元素融合魚：擊破帶有元素碎片的目標時收集元素（DAY-263）
+	if !isLuckyElementFusionFish(t.DefID) {
+		if elem, ok := g.LuckyElementFusion.isElementFragmentTarget(t.InstanceID); ok {
+			go g.notifyElementFragmentKill(p, t.InstanceID, elem, t.Multiplier)
+		}
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
