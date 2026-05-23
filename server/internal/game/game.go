@@ -206,6 +206,7 @@ type Game struct {
 	LuckyStormFish     *luckyStormFishManager      // 幸運風暴魚系統管理器（DAY-230）
 	LuckyBoomerangFish *luckyBoomerangFishManager  // 幸運迴旋鏢魚系統管理器（DAY-231）
 	LuckyMagnetFish    *luckyMagnetFishManager     // 幸運磁力魚系統管理器（DAY-232）
+	LuckyEchoFish      *luckyEchoFishManager       // 幸運回聲魚系統管理器（DAY-233）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -388,6 +389,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyStormFish:     newLuckyStormFishManager(),
 		LuckyBoomerangFish: newLuckyBoomerangFishManager(),
 		LuckyMagnetFish:    newLuckyMagnetFishManager(),
+		LuckyEchoFish:      newLuckyEchoFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1404,6 +1406,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if magnetBoost > 1.0 {
 		finalReward = int(float64(finalReward) * magnetBoost)
 	}
+	// 套用幸運回聲魚分身倍率加成（DAY-233，×1.5/2.0/2.5 乘法，個人，回聲分身擊破）
+	echoMult, isEchoKill, _ := g.getLuckyEchoKillMult(t.InstanceID)
+	if isEchoKill && echoMult > 1.0 {
+		finalReward = int(float64(finalReward) * echoMult)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -1995,6 +2002,19 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isLuckyMagnetFish(t.DefID) {
 		go g.tryLuckyMagnetFish(p)
 	}
+	// 幸運回聲魚：擊破 T191 本身時觸發回聲模式（DAY-233）
+	if isLuckyEchoFish(t.DefID) {
+		go g.tryLuckyEchoFish(p)
+	}
+	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
+	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
+		go g.notifyEchoKill(p, t, t.InstanceID)
+	}
+	// 幸運回聲魚：擊破回聲分身時，觸發下一層回聲（DAY-233）
+	if isEcho, echoEntry := g.isEchoTarget(t.InstanceID); isEcho {
+		g.removeEchoEntry(t.InstanceID)
+		go g.notifyEchoTargetKill(p, t, t.InstanceID, echoEntry.layer)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)
@@ -2137,6 +2157,8 @@ func (g *Game) updateNormalPlay() {
 			if isLuckyEvolutionFish(t.DefID) {
 				go g.notifyLuckyEvolutionFishLeave(id)
 			}
+			// 幸運回聲魚：回聲分身消失時清除記錄（DAY-233）
+			go g.notifyEchoTargetExpire(id)
 		}
 	}
 	targetCount := len(g.Targets)

@@ -316,6 +316,7 @@ func _ready() -> void:
 	_init_lucky_storm_fish_panel()      # 幸運風暴魚系統面板（DAY-230）
 	_init_lucky_boomerang_fish_panel()  # 幸運迴旋鏢魚系統面板（DAY-231）
 	_init_lucky_magnet_fish_panel()     # 幸運磁力魚系統面板（DAY-232）
+	_init_lucky_echo_fish_panel()       # 幸運回聲魚系統面板（DAY-233）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4417,3 +4418,20 @@ func _init_lucky_magnet_fish_panel() -> void:
 func _on_lucky_magnet_fish(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_magnet_fish_panel):
 		_lucky_magnet_fish_panel.handle_lucky_magnet_fish(data)
+
+# ─── 幸運回聲魚系統面板（DAY-233）───────────────────────────────────────────
+const LuckyEchoFishPanelScript = preload("res://scripts/ui/LuckyEchoFishPanel.gd")
+var _lucky_echo_fish_panel = null
+
+func _init_lucky_echo_fish_panel() -> void:
+	var panel = LuckyEchoFishPanelScript.new()
+	panel.name = "LuckyEchoFishPanel"
+	panel.layer = 12
+	add_child(panel)
+	_lucky_echo_fish_panel = panel
+	if GameManager.has_signal("lucky_echo_fish"):
+		GameManager.lucky_echo_fish.connect(_on_lucky_echo_fish)
+
+func _on_lucky_echo_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_echo_fish_panel):
+		_lucky_echo_fish_panel.handle_lucky_echo_fish(data)

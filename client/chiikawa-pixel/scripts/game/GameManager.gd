@@ -235,6 +235,7 @@ signal lucky_parasite_fish(data: Dictionary)        # 幸運寄生魚系統（DA
 signal lucky_storm_fish(data: Dictionary)           # 幸運風暴魚系統（DAY-230）
 signal lucky_boomerang_fish(data: Dictionary)       # 幸運迴旋鏢魚系統（DAY-231）
 signal lucky_magnet_fish(data: Dictionary)          # 幸運磁力魚系統（DAY-232）
+signal lucky_echo_fish(data: Dictionary)            # 幸運回聲魚系統（DAY-233）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -676,6 +677,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_boomerang_fish(payload)
 		"lucky_magnet_fish":
 			_handle_lucky_magnet_fish(payload)
+		"lucky_echo_fish":
+			_handle_lucky_echo_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2981,3 +2984,26 @@ func _sync_magnet_positions(positions: Array) -> void:
 			continue
 		# 複用傳送魚的 target_teleported 訊號同步位置（平滑移動）
 		emit_signal("target_teleported", target_id, Vector2(new_x, new_y))
+
+## 幸運回聲魚系統（DAY-233）
+func _handle_lucky_echo_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_echo_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"echo_ready":
+			print("[GameManager] Echo mode activated! (personal)")
+		"echo_broadcast":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Echo mode broadcast! player=%s" % player_name)
+		"echo_spawn":
+			var layer_num: int = payload.get("layer", 1)
+			var echo_instance_id: String = payload.get("echo_instance_id", "")
+			var mult_label: String = payload.get("mult_label", "×1.5")
+			print("[GameManager] Echo spawn! layer=%d instanceID=%s mult=%s" % [layer_num, echo_instance_id, mult_label])
+		"echo_spawn_personal":
+			var layer_num: int = payload.get("layer", 1)
+			var mult_label: String = payload.get("mult_label", "×1.5")
+			print("[GameManager] Echo spawn personal! layer=%d mult=%s" % [layer_num, mult_label])
+		"echo_expire":
+			var echo_instance_id: String = payload.get("echo_instance_id", "")
+			print("[GameManager] Echo expired! instanceID=%s" % echo_instance_id)

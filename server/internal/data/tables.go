@@ -629,6 +629,11 @@ var Targets = map[string]*TargetDef{
 	//   - 12 秒後「磁力爆發」：中央區域（半徑 200px）所有目標 75% 擊破機率（0.80x 倍率，全服共享）
 	//   - 個人冷卻 20 秒；全服冷卻 30 秒
 	"T190": {ID: "T190", Name: "幸運磁力魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 58, HP: 68, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_magnet"},
+	// T191 幸運回聲魚（DAY-233）— 業界原創「回聲分身+層疊倍率」機制
+	//   - 擊破 T191 後，玩家的下一次擊破會產生「回聲分身」
+	//   - 分身 HP = 原 HP × 50%，倍率遞增：第1層 ×1.5 → 第2層 ×2.0 → 第3層 ×2.5
+	//   - 最多 3 層連鎖回聲；個人冷卻 18 秒
+	"T191": {ID: "T191", Name: "幸運回聲魚", Type: TargetTypeSpecial, MultiplierMin: 28, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 52, Lifetime: 13, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "lucky_echo"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

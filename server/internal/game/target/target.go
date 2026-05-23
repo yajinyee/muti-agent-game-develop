@@ -69,6 +69,9 @@ type Target struct {
 	// 品質等級（DAY-070）
 	Quality     Quality
 	QualityColor string
+	// 回聲分身（DAY-233）
+	IsEcho    bool // 是否為回聲分身
+	EchoLayer int  // 回聲層數（1-3）
 }
 
 // NewTarget 建立新目標實例

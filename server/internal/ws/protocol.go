@@ -572,6 +572,7 @@ const (
 	MsgLuckyStormFish      MessageType = "lucky_storm_fish"      // 幸運風暴魚廣播（Server→Client，DAY-230）
 	MsgLuckyBoomerangFish  MessageType = "lucky_boomerang_fish"  // 幸運迴旋鏢魚廣播（Server→Client，DAY-231）
 	MsgLuckyMagnetFish     MessageType = "lucky_magnet_fish"     // 幸運磁力魚廣播（Server→Client，DAY-232）
+	MsgLuckyEchoFish       MessageType = "lucky_echo_fish"       // 幸運回聲魚廣播（Server→Client，DAY-233）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5246,4 +5247,27 @@ type LuckyMagnetFishPayload struct {
 	KilledCount int         `json:"killed_count,omitempty"`
 	TotalReward int         `json:"total_reward,omitempty"`
 	BlastResults interface{} `json:"blast_results,omitempty"` // []blastResultPayload
+}
+
+// LuckyEchoFishPayload 幸運回聲魚廣播（Server → Client，DAY-233）
+//
+// Events:
+//
+//	"echo_ready"          — 回聲模式啟動（個人訊息）
+//	"echo_broadcast"      — 回聲模式廣播（全服小橫幅）
+//	"echo_spawn"          — 回聲分身生成（全服廣播，含位置/HP/倍率）
+//	"echo_spawn_personal" — 回聲分身生成提示（個人訊息）
+//	"echo_expire"         — 回聲分身消失（全服廣播）
+type LuckyEchoFishPayload struct {
+	Event          string  `json:"event"`
+	PlayerID       string  `json:"player_id,omitempty"`
+	PlayerName     string  `json:"player_name,omitempty"`
+	Layer          int     `json:"layer,omitempty"`
+	EchoInstanceID string  `json:"echo_instance_id,omitempty"`
+	OriginalID     string  `json:"original_id,omitempty"`
+	EchoX          float64 `json:"echo_x,omitempty"`
+	EchoY          float64 `json:"echo_y,omitempty"`
+	EchoHP         int     `json:"echo_hp,omitempty"`
+	EchoMult       float64 `json:"echo_mult,omitempty"`
+	MultLabel      string  `json:"mult_label,omitempty"`
 }

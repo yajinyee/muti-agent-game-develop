@@ -71,6 +71,7 @@ const (
 	EventLuckyStormFish           EventType = "lucky_storm_fish"          // 幸運風暴魚觸發（DAY-230）
 	EventLuckyBoomerangFish       EventType = "lucky_boomerang_fish"      // 幸運迴旋鏢魚觸發（DAY-231）
 	EventLuckyMagnetFish          EventType = "lucky_magnet_fish"         // 幸運磁力魚觸發（DAY-232）
+	EventLuckyEchoFish            EventType = "lucky_echo_fish"           // 幸運回聲魚觸發（DAY-233）
 )
 
 // Priority 公告優先級
@@ -1077,6 +1078,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 4000
+
+	case EventLuckyEchoFish:
+		msg := "🔊 回聲模式觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#9B59B6"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🔊 幸運回聲魚！"
+		message = msg
+		icon = "🔊"
+		color = c
+		priority = PriorityHigh
+		duration = 3500
 
 	default:
 		title = "📢 公告"
