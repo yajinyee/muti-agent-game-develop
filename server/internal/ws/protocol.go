@@ -586,6 +586,7 @@ const (
 	MsgLuckyProphecyFish     MessageType = "lucky_prophecy_fish"      // 幸運預言魚廣播（Server→Client，DAY-243）
 	MsgLuckyFlagFish         MessageType = "lucky_flag_fish"          // 幸運奪旗魚廣播（Server→Client，DAY-244）
 	MsgLuckyPhantomFish      MessageType = "lucky_phantom_fish"       // 幸運幽靈魚廣播（Server→Client，DAY-245）
+	MsgLuckyCrystalBallFish  MessageType = "lucky_crystal_ball_fish"  // 幸運水晶球魚廣播（Server→Client，DAY-246）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5577,4 +5578,28 @@ type LuckyPhantomFishPayload struct {
 	Reward          int     `json:"reward,omitempty"`
 	GhostCount      int     `json:"ghost_count,omitempty"`
 	TotalReward     int     `json:"total_reward,omitempty"`
+}
+
+// LuckyCrystalBallFishPayload 幸運水晶球魚廣播（Server → Client，DAY-246）
+// Event 類型：
+//   - crystal_start：水晶預言啟動（個人訊息，PlayerID/TargetIDs/DurationSec/HitMult/BlastMult）
+//   - crystal_broadcast：全服廣播水晶預言啟動（PlayerName）
+//   - crystal_hit：水晶預言目標被必中擊破（個人訊息，TargetID/Reward/HitMult）
+//   - crystal_blast：水晶爆炸（個人訊息，TargetID/Reward/BlastMult）
+//   - crystal_end：水晶預言結束（個人訊息，HitCount/BlastCount/TotalReward）
+type LuckyCrystalBallFishPayload struct {
+	Event       string   `json:"event"`
+	PlayerID    string   `json:"player_id,omitempty"`
+	PlayerName  string   `json:"player_name,omitempty"`
+	TargetID    string   `json:"target_id,omitempty"`
+	TargetIDs   []string `json:"target_ids,omitempty"`
+	X           float64  `json:"x,omitempty"`
+	Y           float64  `json:"y,omitempty"`
+	DurationSec int      `json:"duration_sec,omitempty"`
+	HitMult     float64  `json:"hit_mult,omitempty"`
+	BlastMult   float64  `json:"blast_mult,omitempty"`
+	Reward      int      `json:"reward,omitempty"`
+	HitCount    int      `json:"hit_count,omitempty"`
+	BlastCount  int      `json:"blast_count,omitempty"`
+	TotalReward int      `json:"total_reward,omitempty"`
 }

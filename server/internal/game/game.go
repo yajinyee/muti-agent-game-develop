@@ -219,6 +219,7 @@ type Game struct {
 	LuckyProphecyFish  *luckyProphecyFishManager     // 幸運預言魚系統管理器（DAY-243）
 	LuckyFlagFish      *luckyFlagFishManager          // 幸運奪旗魚系統管理器（DAY-244）
 	LuckyPhantomFish   *luckyPhantomFishManager        // 幸運幽靈魚系統管理器（DAY-245）
+	LuckyCrystalBallFish *luckyCrystalBallFishManager   // 幸運水晶球魚系統管理器（DAY-246）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -414,6 +415,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyProphecyFish:  newLuckyProphecyFishManager(),
 		LuckyFlagFish:      newLuckyFlagFishManager(),
 		LuckyPhantomFish:   newLuckyPhantomFishManager(),
+		LuckyCrystalBallFish: newLuckyCrystalBallFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2166,6 +2168,16 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運幽靈魚：玩家在幽靈護盾期間擊破任何目標時，留下幽靈殘影（DAY-245）
 	if !isLuckyPhantomFish(t.DefID) && g.LuckyPhantomFish.isPhantomShieldActive(p.ID) {
 		go g.createPhantomGhost(p, t.DefID, t.X, t.Y)
+	}
+	// 幸運水晶球魚：擊破 T204 本身時觸發水晶預言（DAY-246）
+	if isLuckyCrystalBallFish(t.DefID) {
+		go g.tryLuckyCrystalBallFish(p)
+	}
+	// 幸運水晶球魚：玩家擊破水晶預言目標時觸發必中獎勵（DAY-246）
+	if isCrystal, crystalOwner := g.LuckyCrystalBallFish.isCrystalBallTarget(t.InstanceID); isCrystal {
+		if crystalOwner == p.ID {
+			go g.notifyCrystalBallKill(p, t.InstanceID, finalReward)
+		}
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

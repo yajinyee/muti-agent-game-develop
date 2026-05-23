@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-245 幸運幽靈魚系統）
+## 最後更新：2026-05-23（DAY-246 幸運水晶球魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-246 更新（自主觸發）：** 幸運水晶球魚系統（Lucky Crystal Ball Fish）✅
+  - **業界依據：** 業界原創「預測未來+命中率提升」機制
+  - **設計：** 擊破 T204 後，Server「預測」場上 3 個目標為「水晶預言目標」（持續 8 秒）；玩家射擊水晶預言目標時，命中率提升至 100%（必中）；每次必中擊破獲得 ×2.5 倍率加成（個人獎勵）；8 秒後「水晶爆炸」：所有未擊破的水晶預言目標自動爆炸（×1.8 倍率，個人獎勵）；個人冷卻 20 秒；全服冷卻 30 秒
+  - **設計差異：** 與預言魚（T201，指定 1 個目標×3.5）不同，水晶球魚是「3 個目標全部必中」，讓玩家有「趕快把這 3 條魚全打掉」的緊迫感；「必中」讓玩家感受到「這 8 秒我不會浪費任何一槍」的掌控感；「×2.5 倍率」比普通擊破高，讓玩家有「要集中打這 3 條」的動機；「水晶爆炸」確保即使沒打完也有獎勵，降低挫敗感；全服廣播讓其他玩家看到「有人觸發了水晶預言」，製造羨慕感
+  - server/internal/game/lucky_crystal_ball_fish_handler.go：luckyCrystalBallFishManager（個人冷卻/全服冷卻/activeSessions）；crystalBallSession（playerID/expiresAt/targets/hitCount/blastCount/totalReward）；crystalBallEntry（instanceID/defID/X/Y/expiresAt）；isLuckyCrystalBallFish（T204）；isCrystalBallTarget（供 handleKill 使用）；removeCrystalBallTarget；tryLuckyCrystalBallFish（擊破後觸發/隨機3個目標/個人訊息+全服廣播/全服公告）；notifyCrystalBallKill（必中擊破/×2.5倍率/個人獎勵）；runLuckyCrystalBall（goroutine 8秒後觸發爆炸）；doCrystalBallBlast（剩餘目標爆炸/×1.8倍率/個人獎勵/≥2個時全服公告）
+  - server/internal/data/tables.go：新增 T204 幸運水晶球魚（41-73x/HP81/SpawnWeight3/Speed41/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyCrystalBallFish；LuckyCrystalBallFishPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyCrystalBallFish + case 處理
+  - server/internal/game/game.go：LuckyCrystalBallFish *luckyCrystalBallFishManager；handleKill 加入 isLuckyCrystalBallFish 分支 + isCrystalBallTarget 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyCrystalBallFishPanel.gd：青綠水晶主題面板（crystal_start 青綠三次強閃光+頂部橫幅+「🔮 水晶預言！」大字+計時條+倍率說明；crystal_broadcast 頂部小橫幅；crystal_hit 金色浮動文字；crystal_blast 青綠浮動文字；crystal_end 三次強閃光+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_crystal_ball_fish 訊號 + _handle_lucky_crystal_ball_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyCrystalBallFishPanelScript（layer=19）
+  - 預言設計：隨機 3 個目標；持續 8 秒；個人冷卻 20 秒；全服冷卻 30 秒
+  - 必中設計：100% 命中率；×2.5 倍率；個人獎勵
+  - 爆炸設計：×1.8 倍率；個人獎勵；≥2 個時全服公告
+  - 視覺設計：青綠水晶主題（#1ABC9C + #16A085 + #A3E4D7 + #E8F8F5）；右側豎向計時條（青綠，與幽靈魚計時條錯開）；結算彈窗右側滑入
+  - 全服廣播：預言啟動（全服）/必中擊破（個人）/水晶爆炸（個人）/預言結束（個人）
+  - 全服公告：觸發時公告（青綠色）；結束≥2個時公告（深青綠色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-245 更新（自主觸發）：** 幸運幽靈魚系統（Lucky Phantom Fish）✅
   - **業界依據：** 業界原創「幽靈殘影+死亡後復活攻擊」機制
   - **設計：** 擊破 T203 後，玩家獲得「幽靈護盾」（12 秒）；護盾期間，玩家每次擊破任何目標，目標留下「幽靈殘影」（持續 5 秒）；幽靈殘影可被再次擊破（50% 機率，×1.5 倍率，個人獎勵）；12 秒後「幽靈爆發」：所有場上幽靈殘影同時爆炸（100% 擊破，×2.0 倍率，個人獎勵）；個人冷卻 22 秒；全服冷卻 35 秒

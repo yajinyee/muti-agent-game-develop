@@ -2,32 +2,32 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-23（DAY-245）
-**整體目標**：幸運幽靈魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-23（DAY-246）
+**整體目標**：幸運水晶球魚系統 ✅ → 繼續自主推進
 
 ---
 
 ## 今日任務清單
 
-### ✅ DAY-245 啟動檢查
+### ✅ DAY-246 啟動檢查
 
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
-- [x] 上網研究業界最新機制（幽靈殘影+死亡後復活攻擊）
+- [x] 上網研究業界最新機制（預測未來+命中率提升）
 
-### ✅ DAY-245 幸運幽靈魚系統（P1）
+### ✅ DAY-246 幸運水晶球魚系統（P1）
 
-- [x] `data/tables.go`：新增 T203 幸運幽靈魚（40-72x/HP80/SpawnWeight3/Speed42/Lifetime14）
-- [x] `ws/protocol.go`：新增 MsgLuckyPhantomFish；LuckyPhantomFishPayload（6種事件）
-- [x] `announce/announce.go`：新增 EventLuckyPhantomFish + case 處理
-- [x] `lucky_phantom_fish_handler.go`：完整 handler（幽靈護盾/殘影生成/殘影擊破/幽靈爆發）
-- [x] `game.go`：整合 LuckyPhantomFish manager（struct/init/handleKill 2個分支）
-- [x] `LuckyPhantomFishPanel.gd`：幽靈紫主題面板（殘影標記+計時條+爆發結算彈窗）
-- [x] `GameManager.gd`：lucky_phantom_fish 訊號 + _handle_lucky_phantom_fish
-- [x] `HUD.gd`：整合 LuckyPhantomFishPanelScript（layer=18）
+- [x] `data/tables.go`：新增 T204 幸運水晶球魚（41-73x/HP81/SpawnWeight3/Speed41/Lifetime14）
+- [x] `ws/protocol.go`：新增 MsgLuckyCrystalBallFish；LuckyCrystalBallFishPayload（5種事件）
+- [x] `announce/announce.go`：新增 EventLuckyCrystalBallFish + case 處理
+- [x] `lucky_crystal_ball_fish_handler.go`：完整 handler（水晶預言/必中擊破/水晶爆炸）
+- [x] `game.go`：整合 LuckyCrystalBallFish manager（struct/init/handleKill 2個分支）
+- [x] `LuckyCrystalBallFishPanel.gd`：青綠水晶主題面板（目標標記+計時條+結算彈窗）
+- [x] `GameManager.gd`：lucky_crystal_ball_fish 訊號 + _handle_lucky_crystal_ball_fish
+- [x] `HUD.gd`：整合 LuckyCrystalBallFishPanelScript（layer=19）
 - [x] build/vet 全部通過，GitHub 推送完成
 
-### 🔄 DAY-246 下一步（自主觸發）
+### 🔄 DAY-247 下一步（自主觸發）
 
 - [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
 
@@ -40,8 +40,8 @@
 - 完成度：**100%**
 - 美術質量：**100/100**
 - 規格一致性：**100%**
-- 特殊目標：**103種（T101-T203）**
-- 最新功能：**幸運幽靈魚（T203）— 幽靈護盾12秒，殘影×1.5，爆發×2.0**
+- 特殊目標：**104種（T101-T204）**
+- 最新功能：**幸運水晶球魚（T204）— 3個目標必中，×2.5倍率，8秒後水晶爆炸×1.8**
 - 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
 
 ---

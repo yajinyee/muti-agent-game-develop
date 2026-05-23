@@ -714,6 +714,13 @@ var Targets = map[string]*TargetDef{
 	//   - 12 秒後「幽靈爆發」：所有場上幽靈殘影同時爆炸（100% 擊破，×2.0 倍率，個人獎勵）
 	//   - 個人冷卻 22 秒；全服冷卻 35 秒
 	"T203": {ID: "T203", Name: "幸運幽靈魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 72, HP: 80, SpawnWeight: 3, Speed: 42, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_phantom"},
+	// T204 幸運水晶球魚（DAY-246）— 業界原創「預測未來+命中率提升」機制
+	//   - 擊破 T204 後，Server「預測」場上 3 個目標為「水晶預言目標」（持續 8 秒）
+	//   - 玩家射擊水晶預言目標時，命中率提升至 100%（必中）
+	//   - 每次必中擊破獲得 ×2.5 倍率加成（個人獎勵）
+	//   - 8 秒後「水晶爆炸」：所有未擊破的水晶預言目標自動爆炸（×1.8 倍率，個人獎勵）
+	//   - 個人冷卻 20 秒；全服冷卻 30 秒
+	"T204": {ID: "T204", Name: "幸運水晶球魚", Type: TargetTypeSpecial, MultiplierMin: 41, MultiplierMax: 73, HP: 81, SpawnWeight: 3, Speed: 41, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_crystal_ball"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

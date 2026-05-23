@@ -250,6 +250,7 @@ signal lucky_clone_fish(data: Dictionary)           # 幸運分身魚系統（DA
 signal lucky_prophecy_fish(data: Dictionary)        # 幸運預言魚系統（DAY-243）
 signal lucky_flag_fish(data: Dictionary)            # 幸運奪旗魚系統（DAY-244）
 signal lucky_phantom_fish(data: Dictionary)         # 幸運幽靈魚系統（DAY-245）
+signal lucky_crystal_ball_fish(data: Dictionary)    # 幸運水晶球魚系統（DAY-246）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -717,6 +718,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_flag_fish(payload)
 		"lucky_phantom_fish":
 			_handle_lucky_phantom_fish(payload)
+		"lucky_crystal_ball_fish":
+			_handle_lucky_crystal_ball_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3353,3 +3356,30 @@ func _handle_lucky_phantom_fish(payload: Dictionary) -> void:
 			print("[GameManager] Phantom burst! ghosts=%d total_reward=%d" % [ghost_count, total_reward])
 		"phantom_end":
 			print("[GameManager] Phantom shield ended!")
+
+## 幸運水晶球魚系統（DAY-246）
+func _handle_lucky_crystal_ball_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_crystal_ball_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"crystal_start":
+			var target_ids: Array = payload.get("target_ids", [])
+			var hit_mult: float = payload.get("hit_mult", 2.5)
+			var duration_sec: int = payload.get("duration_sec", 8)
+			print("[GameManager] Crystal ball started! targets=%d hit_mult=x%.1f duration=%ds" % [target_ids.size(), hit_mult, duration_sec])
+		"crystal_broadcast":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Crystal broadcast! player=%s" % player_name)
+		"crystal_hit":
+			var target_id: String = payload.get("target_id", "")
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Crystal hit! target=%s reward=%d" % [target_id, reward])
+		"crystal_blast":
+			var target_id: String = payload.get("target_id", "")
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Crystal blast! target=%s reward=%d" % [target_id, reward])
+		"crystal_end":
+			var hit_count: int = payload.get("hit_count", 0)
+			var blast_count: int = payload.get("blast_count", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Crystal end! hits=%d blasts=%d total=%d" % [hit_count, blast_count, total_reward])
