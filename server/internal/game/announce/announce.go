@@ -90,6 +90,7 @@ const (
 	EventLuckyBlackHoleExplosion  EventType = "lucky_black_hole_explosion" // 幸運黑洞爆炸魚觸發（DAY-249）
 	EventLuckyMirrorSplit         EventType = "lucky_mirror_split"         // 幸運鏡像分裂魚觸發（DAY-250）
 	EventLuckyQuantumEntangle     EventType = "lucky_quantum_entangle"     // 幸運量子糾纏魚觸發（DAY-251）
+	EventLuckyWeaponEvo           EventType = "lucky_weapon_evo"           // 幸運武器進化魚觸發（DAY-252）
 )
 
 // Priority 公告優先級
@@ -1473,6 +1474,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "⚛️ 量子糾纏！"
 		message = msg
 		icon = "⚛️"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyWeaponEvo:
+		msg := "⚔️ 幸運武器進化魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#E67E22"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "⚔️ 武器進化！"
+		message = msg
+		icon = "⚔️"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

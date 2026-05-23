@@ -225,6 +225,7 @@ type Game struct {
 	LuckyBlackHoleExplosion *luckyBlackHoleExplosionManager  // 幸運黑洞爆炸魚系統管理器（DAY-249）
 	LuckyMirrorSplit        *luckyMirrorSplitManager          // 幸運鏡像分裂魚系統管理器（DAY-250）
 	LuckyQuantumEntangle    *luckyQuantumEntangleManager      // 幸運量子糾纏魚系統管理器（DAY-251）
+	LuckyWeaponEvo          *luckyWeaponEvoManager            // 幸運武器進化魚系統管理器（DAY-252）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -426,6 +427,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyBlackHoleExplosion: newLuckyBlackHoleExplosionManager(),
 		LuckyMirrorSplit:        newLuckyMirrorSplitManager(),
 		LuckyQuantumEntangle:    newLuckyQuantumEntangleManager(),
+		LuckyWeaponEvo:          newLuckyWeaponEvoManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1139,6 +1141,14 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 		go g.doCloneShots(p, 0, t.Y, t.X, t.Y, t.InstanceID)
 	}
 
+	// 幸運武器進化魚：等級 3 穿透效果（DAY-252）
+	// 命中目標後，子彈繼續飛行命中後方目標
+	if result.IsHit && t != nil && !result.IsKill {
+		if active, level := g.LuckyWeaponEvo.isWeaponEvoActive(p.ID); active && level >= 3 {
+			go g.notifyWeaponEvoPierce(p, t)
+		}
+	}
+
 	// 幸運奪旗魚：命中旗幟目標時累積搶旗積分（DAY-244）
 	if result.IsHit && t != nil && !result.IsKill && g.isFlagTarget(t.InstanceID) {
 		g.recordFlagHit(p.ID, p.DisplayName)
@@ -1519,6 +1529,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	tornadoBoost := g.LuckyTornado.getLuckyTornadoBoost()
 	if tornadoBoost > 1.0 {
 		finalReward = int(float64(finalReward) * tornadoBoost)
+	}
+	// 套用幸運武器進化魚武器進化倍率加成（DAY-252，×1.5/2.5 乘法，個人，進化期間）
+	weaponEvoMult := g.LuckyWeaponEvo.getLuckyWeaponEvoMult(p.ID)
+	if weaponEvoMult > 1.0 {
+		finalReward = int(float64(finalReward) * weaponEvoMult)
 	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
@@ -2229,6 +2244,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運量子糾纏魚：擊破糾纏目標時觸發同步爆炸或量子共鳴（DAY-251）
 	if isEntangled, sessionID := g.LuckyQuantumEntangle.isQuantumEntangleTarget(t.InstanceID); isEntangled && sessionID != "" {
 		go g.notifyQuantumEntangleKill(p, t.InstanceID, sessionID)
+	}
+	// 幸運武器進化魚：擊破 T210 時觸發武器進化（或升級）（DAY-252）
+	if isLuckyWeaponEvoFish(t.DefID) {
+		go g.tryLuckyWeaponEvoFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

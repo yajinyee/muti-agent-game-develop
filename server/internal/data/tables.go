@@ -757,6 +757,13 @@ var Targets = map[string]*TargetDef{
 	//   - 20 秒後未擊破 → 「量子衰變」：兩個目標 HP -60%（安慰獎）
 	//   - 個人冷卻 25 秒；全服冷卻 40 秒
 	"T209": {ID: "T209", Name: "幸運量子糾纏魚", Type: TargetTypeSpecial, MultiplierMin: 46, MultiplierMax: 83, HP: 86, SpawnWeight: 3, Speed: 36, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_quantum_entangle"},
+	// T210 幸運武器進化魚（DAY-252）— 業界原創「武器進化+穿透+武器爆發」機制
+	//   - 擊破 T210 後，玩家武器「進化」（持續 12 秒）
+	//   - 等級 2：命中率 +30%，倍率 ×1.5（乘法）
+	//   - 進化期間再次擊破 T210 → 等級 3：穿透效果，倍率 ×2.5
+	//   - 進化結束時「武器爆發」：自動 3 連射（×1.2 倍率，個人獎勵）
+	//   - 個人冷卻 18 秒；全服冷卻 25 秒
+	"T210": {ID: "T210", Name: "幸運武器進化魚", Type: TargetTypeSpecial, MultiplierMin: 47, MultiplierMax: 85, HP: 87, SpawnWeight: 3, Speed: 35, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_weapon_evo"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

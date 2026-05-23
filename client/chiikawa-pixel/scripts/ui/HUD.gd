@@ -335,6 +335,7 @@ func _ready() -> void:
 	_init_lucky_black_hole_explosion_panel() # 幸運黑洞爆炸魚系統面板（DAY-249）
 	_init_lucky_mirror_split_panel()         # 幸運鏡像分裂魚系統面板（DAY-250）
 	_init_lucky_quantum_entangle_panel()     # 幸運量子糾纏魚系統面板（DAY-251）
+	_init_lucky_weapon_evo_panel()           # 幸運武器進化魚系統面板（DAY-252）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4762,3 +4763,21 @@ func _init_lucky_quantum_entangle_panel() -> void:
 func _on_lucky_quantum_entangle(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_quantum_entangle_panel):
 		_lucky_quantum_entangle_panel.handle_lucky_quantum_entangle(data)
+
+# ─── 幸運武器進化魚系統面板（DAY-252）────────────────────────────────────────
+
+const LuckyWeaponEvoPanelScript = preload("res://scripts/ui/LuckyWeaponEvoPanel.gd")
+var _lucky_weapon_evo_panel = null
+
+func _init_lucky_weapon_evo_panel() -> void:
+	var panel = LuckyWeaponEvoPanelScript.new()
+	panel.name = "LuckyWeaponEvoPanel"
+	panel.layer = 25
+	add_child(panel)
+	_lucky_weapon_evo_panel = panel
+	if GameManager.has_signal("lucky_weapon_evo"):
+		GameManager.lucky_weapon_evo.connect(_on_lucky_weapon_evo)
+
+func _on_lucky_weapon_evo(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_weapon_evo_panel):
+		_lucky_weapon_evo_panel.handle_lucky_weapon_evo(data)

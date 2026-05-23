@@ -592,6 +592,7 @@ const (
 	MsgLuckyBlackHoleExplosion     MessageType = "lucky_black_hole_explosion"     // 幸運黑洞爆炸魚廣播（Server→Client，DAY-249）
 	MsgLuckyMirrorSplit            MessageType = "lucky_mirror_split"             // 幸運鏡像分裂魚廣播（Server→Client，DAY-250）
 	MsgLuckyQuantumEntangle        MessageType = "lucky_quantum_entangle"          // 幸運量子糾纏魚廣播（Server→Client，DAY-251）
+	MsgLuckyWeaponEvo              MessageType = "lucky_weapon_evo"                // 幸運武器進化魚廣播（Server→Client，DAY-252）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5729,4 +5730,27 @@ type LuckyQuantumEntanglePayload struct {
 	TimeDiffMs      int         `json:"time_diff_ms,omitempty"`
 	DecayCount      int         `json:"decay_count,omitempty"`
 	DecayHP         int         `json:"decay_hp,omitempty"`
+}
+
+// LuckyWeaponEvoPayload 幸運武器進化魚廣播（Server → Client，DAY-252）
+// Event 類型：
+//   - weapon_evo_start：進化啟動（個人訊息，PlayerID/Level/DurationSec/Mult/HitBonus）
+//   - weapon_evo_broadcast：全服廣播進化（PlayerName/Level/Mult）
+//   - weapon_evo_upgrade：武器升級到等級 3（個人訊息，PlayerID/Level/Mult）
+//   - weapon_evo_pierce：穿透命中（全服廣播，PlayerName/InstanceID/Mult/Reward）
+//   - weapon_evo_burst：武器爆發（全服廣播，PlayerName/BurstCount/TotalReward/BurstMult）
+//   - weapon_evo_end：進化結束（個人訊息，PlayerName/BurstCount/TotalReward/BurstMult）
+type LuckyWeaponEvoPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	Level       int     `json:"level,omitempty"`
+	DurationSec int     `json:"duration_sec,omitempty"`
+	Mult        float64 `json:"mult,omitempty"`
+	HitBonus    float64 `json:"hit_bonus,omitempty"`
+	InstanceID  string  `json:"instance_id,omitempty"`
+	Reward      int     `json:"reward,omitempty"`
+	BurstCount  int     `json:"burst_count,omitempty"`
+	TotalReward int     `json:"total_reward,omitempty"`
+	BurstMult   float64 `json:"burst_mult,omitempty"`
 }

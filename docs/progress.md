@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-251 幸運量子糾纏魚系統）
+## 最後更新：2026-05-23（DAY-252 幸運武器進化魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-252 更新（自主觸發）：** 幸運武器進化魚系統（Lucky Weapon Evolution Fish）✅
+  - **業界依據：** 業界原創「武器進化+穿透+武器爆發」機制，Royal Fishing 2026 三層大廳+武器升級趨勢
+  - **設計：** 擊破 T210 後，玩家武器「進化」（持續 12 秒）；等級 2：命中率+30%，倍率 ×1.5；進化期間再次擊破 T210 → 等級 3：穿透效果（子彈穿透第一個目標繼續飛行），倍率 ×2.5；進化結束時「武器爆發」：自動 3 連射（×1.2 倍率，個人獎勵）；個人冷卻 18 秒；全服冷卻 25 秒
+  - **設計差異：** 與充能魚（T183，累積能量爆發）不同，武器進化是「持續強化武器」，讓玩家有「這 12 秒我的武器更強」的掌控感；「等級 3 穿透」讓玩家有「要趁穿透期間打一排魚」的策略感；「武器爆發 3 連射」讓玩家有「進化結束前的最後爆發」的高潮設計；「再次擊破 T210 升級」讓玩家有「要趁進化期間找到另一條 T210」的動機；全服廣播讓其他玩家看到「有人武器進化了」，製造羨慕感
+  - server/internal/game/lucky_weapon_evolution_handler.go：luckyWeaponEvoManager（個人冷卻/全服冷卻/activeSessions）；weaponEvoSession（playerID/level/expiresAt）；isLuckyWeaponEvoFish（T210）；isWeaponEvoActive（供 handleAttack/handleKill 使用）；getLuckyWeaponEvoMult（×1.5/2.5 乘法）；tryUpgradeWeaponEvo（進化期間再次擊破升級）；tryLuckyWeaponEvoFish（擊破後觸發/個人訊息+全服廣播+全服公告）；notifyWeaponEvoUpgrade（升級到等級3/廣播）；notifyWeaponEvoPierce（穿透命中/60%機率/×0.8倍率/個人獎勵）；runWeaponEvoDuration（goroutine 12秒後武器爆發）；doWeaponEvoBurst（找最高倍率3個目標/×1.2倍率/個人獎勵/廣播）
+  - server/internal/data/tables.go：新增 T210 幸運武器進化魚（47-85x/HP87/SpawnWeight3/Speed35/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyWeaponEvo；LuckyWeaponEvoPayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyWeaponEvo + case 處理
+  - server/internal/game/game.go：LuckyWeaponEvo *luckyWeaponEvoManager；handleKill 加入 isLuckyWeaponEvoFish 分支 + getLuckyWeaponEvoMult 倍率加成；handleAttack 加入等級3穿透效果（notifyWeaponEvoPierce）
+  - client/chiikawa-pixel/scripts/ui/LuckyWeaponEvoPanel.gd：橙紅武器主題面板（weapon_evo_start 橙色三次強閃光+頂部橫幅+「⚔️ 武器進化！等級2」大字+武器等級指示器（脈衝動畫）+計時條；weapon_evo_broadcast 頂部小橫幅；weapon_evo_upgrade 紅色強閃光+「⚔️ 武器升級！等級3 穿透！」大字；weapon_evo_pierce 橙色閃光+「⚔️ 穿透命中！×0.8」浮動文字；weapon_evo_burst 全螢幕三次強閃光+「⚔️ 武器爆發！3連射！」大字；weapon_evo_end 計時條淡出+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_weapon_evo 訊號 + _handle_lucky_weapon_evo
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyWeaponEvoPanelScript（layer=25）
+  - 進化設計：等級 2（命中率+30%，×1.5）；等級 3（穿透，×2.5）；持續 12 秒；個人冷卻 18 秒；全服冷卻 25 秒
+  - 穿透設計：搜尋後方 300px；Y 偏差 ≤100px；60% 擊破機率；×0.8 倍率；個人獎勵
+  - 武器爆發設計：最高倍率 3 個目標；×1.2 倍率；個人獎勵；≥2 個時全服公告
+  - 視覺設計：橙紅武器主題（#E67E22 + #E74C3C + #FAD7A0 + #FFF3E0）；武器等級指示器（⚔️ LV2/3，脈衝縮放動畫）；右側豎向計時條（橙色，x=-114 與其他計時條錯開）；結算彈窗右側滑入
+  - 全服廣播：進化啟動/升級到等級3/穿透命中/武器爆發全服廣播
+  - 全服公告：觸發時公告（橙色）；升級到等級3公告（紅色）；爆發≥2個時公告（紅色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-251 更新（自主觸發）：** 幸運量子糾纏魚系統（Lucky Quantum Entangle Fish）✅
   - **業界依據：** 業界原創「量子糾纏+同步爆炸+量子共鳴」機制，2026 年最熱門多玩家社交互動方向
   - **設計：** 擊破 T209 後，場上隨機 2 個目標被「量子糾纏」（持續 20 秒）；任何玩家擊破其中一個 → 另一個立刻「同步爆炸」（×1.8 倍率，全服共享）；若兩個在 1.5 秒內被不同玩家擊破 → 觸發「量子共鳴」：全服 ×3.5 倍率大獎；20 秒後未擊破 → 「量子衰變」：兩個目標 HP -60%（安慰獎）；個人冷卻 25 秒；全服冷卻 40 秒
