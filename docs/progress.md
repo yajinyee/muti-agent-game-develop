@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-231 幸運迴旋鏢魚系統）
+## 最後更新：2026-05-23（DAY-232 幸運磁力魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-231 更新（自主觸發）：** 幸運迴旋鏢魚系統（Lucky Boomerang Fish）✅
+- **DAY-232 更新（自主觸發）：** 幸運磁力魚系統（Lucky Magnet Fish）✅
+  - **業界依據：** 業界原創「磁力聚集+磁力爆發」機制
+  - **設計：** 擊破 T190 後觸發「磁力場」（12 秒）：場上所有目標物被「磁力吸引」，每 1.5 秒向場景中央移動（聚集效果）；磁力場期間擊破任何目標獲得 ×1.8 倍率加成；12 秒後「磁力爆發」：所有聚集在中央區域（半徑 200px）的目標 75% 擊破機率（0.80x 倍率，全服共享）；個人冷卻 20 秒；全服冷卻 30 秒
+  - **設計差異：** 與黑洞魚（DAY-221，重力傷害+奇點爆炸，HP 損失）不同，磁力魚是「聚集移動+磁力爆發」，讓玩家有「等目標聚集再打」的策略感；「磁力吸引」讓目標物緩慢移動到中央，製造「魚群聚集」的視覺爽感；「磁力爆發」讓玩家有「等待→爆發」的高潮設計；全服廣播磁力場讓所有玩家都往中央打，製造「全服聚焦」的社交感；與傳送魚（DAY-223，瞬間移動）不同，磁力魚是「緩慢聚集」，讓玩家有「看著魚群聚集」的期待感
+  - server/internal/game/lucky_magnet_fish_handler.go：luckyMagnetFishManager（個人冷卻/全服冷卻/磁力場狀態/instanceID）；isLuckyMagnetFish（T190）；isMagnetActive（供 handleKill 使用）；getLuckyMagnetBoost（×1.8 乘法）；tryLuckyMagnetFish（擊破後觸發/全服廣播/全服公告）；runLuckyMagnetField（goroutine 每1.5秒磁力吸引/12秒後磁力爆發）；doMagnetPull（所有目標向中央移動60px/廣播位置）；doMagnetBlast（中央200px範圍/75%擊破/全服共享獎勵/全服公告）
+  - server/internal/data/tables.go：新增 T190 幸運磁力魚（30-58x/HP68/SpawnWeight3/Speed50/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyMagnetFish；LuckyMagnetFishPayload（magnet_start/magnet_pull/magnet_blast/magnet_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyMagnetFish + case 處理
+  - server/internal/game/game.go：LuckyMagnetFish *luckyMagnetFishManager；handleKill 加入 getLuckyMagnetBoost 乘法加成 + isLuckyMagnetFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyMagnetFishPanel.gd：藍色磁力主題面板（magnet_start 藍色雙閃光+頂部橫幅+「🧲 磁力場啟動！」大字+中央磁力圓圈+計時條；magnet_pull 藍色閃光+「🧲 磁力吸引！」提示+移動目標數；magnet_blast 全螢幕三次強閃光+「🧲 磁力爆發！」大字+結算彈窗；magnet_end 藍色淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_magnet_fish 訊號 + _handle_lucky_magnet_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyMagnetFishPanelScript（layer=13）
+  - 磁力場設計：每 1.5 秒吸引；每次移動 60px；個人冷卻 20 秒；全服冷卻 30 秒；持續 12 秒
+  - 磁力爆發設計：中央半徑 200px；75% 擊破機率；0.80x 倍率；全服共享獎勵；≥3 個擊破時全服公告
+  - 視覺設計：藍色磁力主題（#3498DB + #2980B9 + #AED6F1 + #EBF5FB）；中央磁力圓圈（脈衝動畫）；底部計時條（藍→深藍漸變）；三次強閃光（藍→白→青）；結算彈窗右側滑入
+  - 全服廣播：磁力場開始/每次磁力吸引（含移動後位置）/磁力爆發/磁力場結束全服廣播
+  - 全服公告：觸發時公告（藍色）；爆發≥3 個擊破時公告（依擊破數決定顏色：≥6 青綠/其他藍色）
+  - build/vet 全部通過（零錯誤零警告）
+
   - **業界依據：** 業界原創「迴旋鏢來回穿透」機制
   - **設計：** 擊破 T189 後觸發「迴旋鏢模式」（10 秒）：玩家的每次射擊發射「迴旋鏢子彈」，命中目標後折返，沿反方向繼續飛行，最多來回 3 次；每次命中 70% 擊破機率，0.65x 倍率（個人獎勵）；個人冷卻 18 秒
   - **設計差異：** 與反彈魚（DAY-220，命中後跳到最近目標，範圍遞減）不同，迴旋鏢是「直線來回穿透」，讓玩家有「要瞄準一排魚」的策略感；「折返」讓玩家感受到「一槍打多個目標」的爽感；「最多 3 次折返」確保 RTP 平衡；「10 秒迴旋鏢模式」讓玩家有「趕快在 10 秒內多打幾槍」的緊迫感

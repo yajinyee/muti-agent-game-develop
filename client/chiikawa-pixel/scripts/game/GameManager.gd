@@ -234,6 +234,7 @@ signal lucky_quantum_fish(data: Dictionary)         # 幸運量子魚系統（DA
 signal lucky_parasite_fish(data: Dictionary)        # 幸運寄生魚系統（DAY-229）
 signal lucky_storm_fish(data: Dictionary)           # 幸運風暴魚系統（DAY-230）
 signal lucky_boomerang_fish(data: Dictionary)       # 幸運迴旋鏢魚系統（DAY-231）
+signal lucky_magnet_fish(data: Dictionary)          # 幸運磁力魚系統（DAY-232）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -673,6 +674,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_storm_fish(payload)
 		"lucky_boomerang_fish":
 			_handle_lucky_boomerang_fish(payload)
+		"lucky_magnet_fish":
+			_handle_lucky_magnet_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2945,3 +2948,22 @@ func _handle_lucky_boomerang_fish(payload: Dictionary) -> void:
 		"boomerang_end":
 			var player_name: String = payload.get("player_name", "")
 			print("[GameManager] Boomerang mode ended! player=%s" % player_name)
+
+func _handle_lucky_magnet_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_magnet_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"magnet_start":
+			var player_name: String = payload.get("player_name", "")
+			var kill_boost: float = payload.get("kill_boost", 1.8)
+			print("[GameManager] Magnet field started! player=%s boost=x%.1f" % [player_name, kill_boost])
+		"magnet_pull":
+			var pull_num: int = payload.get("pull_num", 1)
+			var moved_count: int = payload.get("moved_count", 0)
+			print("[GameManager] Magnet pull#%d: %d targets moved" % [pull_num, moved_count])
+		"magnet_blast":
+			var killed_count: int = payload.get("killed_count", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] Magnet blast! killed=%d total_reward=%d" % [killed_count, total_reward])
+		"magnet_end":
+			print("[GameManager] Magnet field ended!")

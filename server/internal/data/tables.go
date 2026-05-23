@@ -622,6 +622,13 @@ var Targets = map[string]*TargetDef{
 	//   - 每次命中：70% 擊破機率，0.65x 倍率（個人獎勵）
 	//   - 個人冷卻 18 秒
 	"T189": {ID: "T189", Name: "幸運迴旋鏢魚", Type: TargetTypeSpecial, MultiplierMin: 28, MultiplierMax: 55, HP: 65, SpawnWeight: 4, Speed: 52, Lifetime: 13, LaborGain: 11, DifficultyFactor: 16.0, SpecialBehavior: "lucky_boomerang"},
+	// T190 幸運磁力魚（DAY-232）— 業界原創「磁力聚集+磁力爆發」機制
+	// 設計：擊破 T190 後觸發「磁力場」（12 秒）：
+	//   - 場上所有目標物被「磁力吸引」，每 1.5 秒向場景中央移動（聚集效果）
+	//   - 磁力場期間擊破任何目標獲得 ×1.8 倍率加成（乘法）
+	//   - 12 秒後「磁力爆發」：中央區域（半徑 200px）所有目標 75% 擊破機率（0.80x 倍率，全服共享）
+	//   - 個人冷卻 20 秒；全服冷卻 30 秒
+	"T190": {ID: "T190", Name: "幸運磁力魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 58, HP: 68, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_magnet"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

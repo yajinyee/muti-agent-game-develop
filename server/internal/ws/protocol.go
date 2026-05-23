@@ -571,6 +571,7 @@ const (
 	MsgLuckyParasiteFish   MessageType = "lucky_parasite_fish"   // 幸運寄生魚廣播（Server→Client，DAY-229）
 	MsgLuckyStormFish      MessageType = "lucky_storm_fish"      // 幸運風暴魚廣播（Server→Client，DAY-230）
 	MsgLuckyBoomerangFish  MessageType = "lucky_boomerang_fish"  // 幸運迴旋鏢魚廣播（Server→Client，DAY-231）
+	MsgLuckyMagnetFish     MessageType = "lucky_magnet_fish"     // 幸運磁力魚廣播（Server→Client，DAY-232）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5220,4 +5221,29 @@ type LuckyBoomerangFishPayload struct {
 	Y           float64 `json:"y,omitempty"`
 	DirX        float64 `json:"dir_x,omitempty"`
 	DirY        float64 `json:"dir_y,omitempty"`
+}
+
+// LuckyMagnetFishPayload 幸運磁力魚廣播（Server → Client，DAY-232）
+//
+// Events:
+//
+//	"magnet_start" — 磁力場開始（全服廣播）
+//	"magnet_pull"  — 磁力吸引（每 1.5 秒，含移動後位置，全服廣播）
+//	"magnet_blast" — 磁力爆發（全服廣播）
+//	"magnet_end"   — 磁力場結束（全服廣播）
+type LuckyMagnetFishPayload struct {
+	Event       string      `json:"event"`
+	PlayerID    string      `json:"player_id,omitempty"`
+	PlayerName  string      `json:"player_name,omitempty"`
+	DurationSec int         `json:"duration_sec,omitempty"`
+	KillBoost   float64     `json:"kill_boost,omitempty"`
+	CenterX     float64     `json:"center_x,omitempty"`
+	CenterY     float64     `json:"center_y,omitempty"`
+	BlastRadius float64     `json:"blast_radius,omitempty"`
+	PullNum     int         `json:"pull_num,omitempty"`
+	MovedCount  int         `json:"moved_count,omitempty"`
+	Positions   interface{} `json:"positions,omitempty"`   // []targetPos
+	KilledCount int         `json:"killed_count,omitempty"`
+	TotalReward int         `json:"total_reward,omitempty"`
+	BlastResults interface{} `json:"blast_results,omitempty"` // []blastResultPayload
 }
