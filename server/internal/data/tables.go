@@ -693,6 +693,13 @@ var Targets = map[string]*TargetDef{
 	//   - 分身子彈搜尋範圍：偏移方向 300px 內最近目標
 	//   - 個人冷卻 20 秒
 	"T200": {ID: "T200", Name: "幸運分身魚", Type: TargetTypeSpecial, MultiplierMin: 37, MultiplierMax: 68, HP: 77, SpawnWeight: 3, Speed: 45, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_clone"},
+	// T201 幸運預言魚（DAY-243）— 業界原創「預言指定目標」機制
+	//   - 擊破 T201 後，Server 隨機「預言」場上 1 個目標（標記持續 12 秒）
+	//   - 玩家在 12 秒內擊破預言目標 → 獲得 ×3.5 倍率加成（「預言成真」）
+	//   - 若預言目標自然消失 → 自動「預言轉移」到下一個目標（最多轉移 2 次）
+	//   - 若 12 秒後仍未擊破 → 「預言失敗」，全場 HP -20%（安慰獎）
+	//   - 個人冷卻 20 秒
+	"T201": {ID: "T201", Name: "幸運預言魚", Type: TargetTypeSpecial, MultiplierMin: 38, MultiplierMax: 69, HP: 78, SpawnWeight: 3, Speed: 44, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_prophecy"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

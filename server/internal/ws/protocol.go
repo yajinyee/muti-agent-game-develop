@@ -583,6 +583,7 @@ const (
 	MsgLuckyBetChoice        MessageType = "lucky_bet_choice"         // 玩家賭注選擇（Client→Server，DAY-240）
 	MsgLuckyChainReaction    MessageType = "lucky_chain_reaction"     // 幸運連鎖反應魚廣播（Server→Client，DAY-241）
 	MsgLuckyCloneFish        MessageType = "lucky_clone_fish"         // 幸運分身魚廣播（Server→Client，DAY-242）
+	MsgLuckyProphecyFish     MessageType = "lucky_prophecy_fish"      // 幸運預言魚廣播（Server→Client，DAY-243）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5496,4 +5497,29 @@ type LuckyCloneFishPayload struct {
 	Y           float64 `json:"y,omitempty"`
 	DirX        float64 `json:"dir_x,omitempty"`
 	DirY        float64 `json:"dir_y,omitempty"`
+}
+
+// LuckyProphecyFishPayload 幸運預言魚廣播（Server → Client，DAY-243）
+// Event 類型：
+//   - prophecy_start：預言開始（個人訊息，TargetID/TargetDefID/X/Y/DurationSec/KillMult）
+//   - prophecy_broadcast：全服廣播有人觸發預言（PlayerName/TargetID/TargetDefID/X/Y/DurationSec）
+//   - prophecy_fulfilled：預言成真（個人訊息，TargetID/Reward/KillMult）
+//   - prophecy_broadcast_fulfilled：全服廣播預言成真（PlayerName/TargetID/Reward/KillMult）
+//   - prophecy_transfer：預言轉移（個人訊息，TargetID/TargetDefID/X/Y/TransferCount/KillMult）
+//   - prophecy_broadcast_transfer：全服廣播預言轉移（PlayerName/TargetID/TargetDefID/X/Y/TransferCount）
+//   - prophecy_fail：預言失敗（全服廣播，PlayerName/AffectedCount/HPLossPct）
+type LuckyProphecyFishPayload struct {
+	Event         string  `json:"event"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	TargetID      string  `json:"target_id,omitempty"`
+	TargetDefID   string  `json:"target_def_id,omitempty"`
+	X             float64 `json:"x,omitempty"`
+	Y             float64 `json:"y,omitempty"`
+	DurationSec   int     `json:"duration_sec,omitempty"`
+	KillMult      float64 `json:"kill_mult,omitempty"`
+	Reward        int     `json:"reward,omitempty"`
+	TransferCount int     `json:"transfer_count,omitempty"`
+	AffectedCount int     `json:"affected_count,omitempty"`
+	HPLossPct     float64 `json:"hp_loss_pct,omitempty"`
 }

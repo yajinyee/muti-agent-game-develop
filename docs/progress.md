@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-242 幸運分身魚系統）
+## 最後更新：2026-05-23（DAY-243 幸運預言魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-243 更新（自主觸發）：** 幸運預言魚系統（Lucky Prophecy Fish）✅
+  - **業界依據：** 業界原創「預言指定目標」機制
+  - **設計：** 擊破 T201 後，Server 隨機「預言」場上 1 個目標（標記持續 12 秒）；玩家在 12 秒內擊破預言目標 → 獲得 ×3.5 倍率加成（「預言成真」）；若預言目標自然消失 → 自動「預言轉移」到下一個目標（最多轉移 2 次）；若 12 秒後仍未擊破 → 「預言失敗」，全場 HP -20%（安慰獎）；個人冷卻 20 秒
+  - **設計差異：** 與時間炸彈魚（T193，倒數計時+提前引爆）不同，預言魚是「指定目標」，讓玩家有「要集中火力打那條魚」的聚焦感；「預言轉移」讓玩家不會因為目標消失而完全失去機會，降低挫敗感；「預言失敗 HP -20%」讓玩家有「要趕快打，不然全場魚都受傷」的緊迫感；全服廣播讓其他玩家也知道「有人在追那條魚」，製造社交感；×3.5 倍率是目前個人指定目標類最高倍率
+  - server/internal/game/lucky_prophecy_fish_handler.go：luckyProphecyFishManager（個人冷卻/activeProphecies）；prophecyEntry（playerID/targetID/targetDefID/targetX/targetY/transferCount/expiresAt）；isLuckyProphecyFish（T201）；isProphecyTarget（供 handleKill 使用）；getLuckyProphecyMult（×3.5 乘法）；removeProphecyEntry；notifyProphecyKill（預言成真廣播）；notifyProphecyTargetGone（目標消失時嘗試轉移）；tryTransferProphecy（轉移到新目標/最多2次/超過則失敗）；doProphecyFail（全場HP-20%/廣播/公告）；tryLuckyProphecyFish（擊破後觸發/隨機選目標/全服廣播/全服公告/12秒後失敗）
+  - server/internal/data/tables.go：新增 T201 幸運預言魚（38-69x/HP78/SpawnWeight3/Speed44/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyProphecyFish；LuckyProphecyFishPayload（7種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyProphecyFish + case 處理
+  - server/internal/game/game.go：LuckyProphecyFish *luckyProphecyFishManager；handleKill 加入 getLuckyProphecyMult 乘法加成 + isLuckyProphecyFish 分支 + isProphecyTarget 分支；updateNormalPlay 加入 notifyProphecyTargetGone
+  - client/chiikawa-pixel/scripts/ui/LuckyProphecyFishPanel.gd：紫金預言主題面板（prophecy_start 紫色三次強閃光+頂部橫幅+「🔮 預言降臨！」大字+目標標記+計時條；prophecy_fulfilled 金色三次強閃光+「🔮 預言成真！×3.5」大字+結算彈窗；prophecy_transfer 橙色閃光+「🔮 預言轉移！」提示+新目標標記；prophecy_fail 灰色閃光+「🔮 預言失敗！HP-20%」提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_prophecy_fish 訊號 + _handle_lucky_prophecy_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyProphecyFishPanelScript（layer=2）
+  - 預言設計：隨機 1 個目標；持續 12 秒；最多轉移 2 次；個人冷卻 20 秒
+  - 倍率設計：×3.5 乘法（個人，預言成真時）
+  - 失敗設計：全場 HP -20%（保留最少 1）；12 秒後自動觸發
+  - 視覺設計：紫金預言主題（#9B59B6 + #F39C12 + #E67E22 + #7F8C8D）；目標標記（🔮 閃爍動畫）；右側豎向計時條（紫色，從上往下縮短）；結算彈窗右側滑入
+  - 全服廣播：預言開始/預言成真/預言轉移/預言失敗全服廣播
+  - 全服公告：觸發時公告（紫色）；成真時公告（金色）；失敗時公告（灰色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-242 更新（自主觸發）：** 幸運分身魚系統（Lucky Clone Fish）✅
   - **業界依據：** 業界原創「三方向同時射擊」機制
   - **設計：** 擊破 T200 後觸發「分身模式」（8 秒）：玩家的每次射擊同時產生 2 個「分身子彈」，分別向左右各偏移 30 度飛出；分身子彈命中目標：60% 擊破機率，×0.7 倍率（個人獎勵）；分身子彈搜尋範圍：偏移方向 300px 內最近目標；個人冷卻 20 秒

@@ -216,6 +216,7 @@ type Game struct {
 	LuckyBetFish       *luckyBetFishManager         // 幸運賭注魚系統管理器（DAY-240）
 	LuckyChainReaction *luckyChainReactionManager   // 幸運連鎖反應魚系統管理器（DAY-241）
 	LuckyCloneFish     *luckyCloneFishManager        // 幸運分身魚系統管理器（DAY-242）
+	LuckyProphecyFish  *luckyProphecyFishManager     // 幸運預言魚系統管理器（DAY-243）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -408,6 +409,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyBetFish:       newLuckyBetFishManager(),
 		LuckyChainReaction: newLuckyChainReactionManager(),
 		LuckyCloneFish:     newLuckyCloneFishManager(),
+		LuckyProphecyFish:  newLuckyProphecyFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1482,6 +1484,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if chainReactionStarterMult > 1.0 {
 		finalReward = int(float64(finalReward) * chainReactionStarterMult)
 	}
+	// 套用幸運預言魚倍率（DAY-243，×3.5 乘法，個人，擊破預言目標時）
+	prophecyMult := g.getLuckyProphecyMult(p.ID, t.InstanceID)
+	if prophecyMult > 1.0 {
+		finalReward = int(float64(finalReward) * prophecyMult)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -2122,6 +2129,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if isLuckyCloneFish(t.DefID) {
 		go g.tryLuckyCloneFish(p)
 	}
+	// 幸運預言魚：擊破 T201 本身時觸發預言（DAY-243）
+	if isLuckyProphecyFish(t.DefID) {
+		go g.tryLuckyProphecyFish(p)
+	}
+	// 幸運預言魚：玩家擊破預言目標時觸發預言成真（DAY-243）
+	if g.isProphecyTarget(p.ID, t.InstanceID) {
+		go g.notifyProphecyKill(p, t.InstanceID, finalReward)
+	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
 		go g.notifyEchoKill(p, t, t.InstanceID)
@@ -2275,6 +2290,8 @@ func (g *Game) updateNormalPlay() {
 			}
 			// 幸運回聲魚：回聲分身消失時清除記錄（DAY-233）
 			go g.notifyEchoTargetExpire(id)
+			// 幸運預言魚：預言目標消失時嘗試轉移預言（DAY-243）
+			go g.notifyProphecyTargetGone(id)
 		}
 	}
 	targetCount := len(g.Targets)

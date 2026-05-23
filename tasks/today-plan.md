@@ -2,33 +2,32 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-23（DAY-233）
-**整體目標**：幸運回聲魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-23（DAY-243）
+**整體目標**：幸運預言魚系統 ✅ → 繼續自主推進
 
 ---
 
 ## 今日任務清單
 
-### ✅ DAY-233 啟動檢查
+### ✅ DAY-243 啟動檢查
 
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
 - [x] 上網研究業界最新機制
 
-### ✅ DAY-233 幸運回聲魚系統（P1）
+### ✅ DAY-243 幸運預言魚系統（P1）
 
-- [x] `data/tables.go`：新增 T191 幸運回聲魚（28-55x/HP65/SpawnWeight4/Speed52/Lifetime13）
-- [x] `target/target.go`：新增 IsEcho bool + EchoLayer int 欄位
-- [x] `ws/protocol.go`：新增 MsgLuckyEchoFish；LuckyEchoFishPayload（5種事件）
-- [x] `announce/announce.go`：新增 EventLuckyEchoFish + case 處理
-- [x] `lucky_echo_fish_handler.go`：完整 handler（回聲模式/分身生成/層疊倍率/過期清理）
-- [x] `game.go`：整合 LuckyEchoFish manager（struct/init/handleKill 倍率加成 + 3個分支/updateNormalPlay 過期清理）
-- [x] `LuckyEchoFishPanel.gd`：紫色回聲主題面板（分身標記+層數倍率+個人提示）
-- [x] `GameManager.gd`：lucky_echo_fish 訊號 + _handle_lucky_echo_fish
-- [x] `HUD.gd`：整合 LuckyEchoFishPanelScript（layer=12）
+- [x] `data/tables.go`：新增 T201 幸運預言魚（38-69x/HP78/SpawnWeight3/Speed44/Lifetime14）
+- [x] `ws/protocol.go`：新增 MsgLuckyProphecyFish；LuckyProphecyFishPayload（7種事件）
+- [x] `announce/announce.go`：新增 EventLuckyProphecyFish + case 處理
+- [x] `lucky_prophecy_fish_handler.go`：完整 handler（預言標記/轉移/成真/失敗/倍率加成）
+- [x] `game.go`：整合 LuckyProphecyFish manager（struct/init/handleKill 倍率加成 + 3個分支/updateNormalPlay 目標消失通知）
+- [x] `LuckyProphecyFishPanel.gd`：紫金預言主題面板（目標標記+計時條+成真彈窗+轉移提示+失敗提示）
+- [x] `GameManager.gd`：lucky_prophecy_fish 訊號 + _handle_lucky_prophecy_fish
+- [x] `HUD.gd`：整合 LuckyProphecyFishPanelScript（layer=2）
 - [x] build/vet 全部通過，GitHub 推送完成
 
-### 🔄 DAY-234 下一步（自主觸發）
+### 🔄 DAY-244 下一步（自主觸發）
 
 - [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
 
@@ -41,8 +40,8 @@
 - 完成度：**100%**
 - 美術質量：**100/100**
 - 規格一致性：**100%**
-- 特殊目標：**91種（T101-T191）**
-- 最新功能：**幸運回聲魚（T191）— 連鎖回聲分身，層疊倍率 ×1.5/2.0/2.5**
+- 特殊目標：**101種（T101-T201）**
+- 最新功能：**幸運預言魚（T201）— 預言指定目標，×3.5 倍率，最多轉移 2 次，失敗 HP -20%**
 - 最高倍率機制：**千龍王輪盤最高 1000x（全遊戲最高）**
 
 ---

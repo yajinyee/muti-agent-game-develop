@@ -247,6 +247,7 @@ signal lucky_synergy_burst(data: Dictionary)        # 幸運共鳴爆發魚系�
 signal lucky_bet_fish(data: Dictionary)             # 幸運賭注魚系統（DAY-240）
 signal lucky_chain_reaction(data: Dictionary)       # 幸運連鎖反應魚系統（DAY-241）
 signal lucky_clone_fish(data: Dictionary)           # 幸運分身魚系統（DAY-242）
+signal lucky_prophecy_fish(data: Dictionary)        # 幸運預言魚系統（DAY-243）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -708,6 +709,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_chain_reaction(payload)
 		"lucky_clone_fish":
 			_handle_lucky_clone_fish(payload)
+		"lucky_prophecy_fish":
+			_handle_lucky_prophecy_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3265,3 +3268,27 @@ func _handle_lucky_clone_fish(payload: Dictionary) -> void:
 		"clone_end":
 			var player_name: String = payload.get("player_name", "")
 			print("[GameManager] Clone mode ended! player=%s" % player_name)
+
+## 幸運預言魚系統（DAY-243）
+func _handle_lucky_prophecy_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_prophecy_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"prophecy_start":
+			var player_name: String = payload.get("player_name", "")
+			var target_id: String = payload.get("target_id", "")
+			var duration_sec: int = payload.get("duration_sec", 12)
+			var kill_mult: float = payload.get("kill_mult", 3.5)
+			print("[GameManager] Prophecy started! player=%s target=%s duration=%ds mult=x%.1f" % [player_name, target_id, duration_sec, kill_mult])
+		"prophecy_fulfilled":
+			var kill_mult: float = payload.get("kill_mult", 3.5)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Prophecy fulfilled! mult=x%.1f reward=%d" % [kill_mult, reward])
+		"prophecy_transfer":
+			var new_target_id: String = payload.get("target_id", "")
+			var transfer_count: int = payload.get("transfer_count", 1)
+			print("[GameManager] Prophecy transferred to target=%s (transfer #%d)" % [new_target_id, transfer_count])
+		"prophecy_fail":
+			var player_name: String = payload.get("player_name", "")
+			var affected_count: int = payload.get("affected_count", 0)
+			print("[GameManager] Prophecy failed! player=%s affected=%d targets" % [player_name, affected_count])

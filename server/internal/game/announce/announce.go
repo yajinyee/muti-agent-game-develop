@@ -81,6 +81,7 @@ const (
 	EventLuckyBetFish             EventType = "lucky_bet_fish"            // 幸運賭注魚觸發（DAY-240）
 	EventLuckyChainReaction       EventType = "lucky_chain_reaction"      // 幸運連鎖反應魚觸發（DAY-241）
 	EventLuckyCloneFish           EventType = "lucky_clone_fish"          // 幸運分身魚觸發（DAY-242）
+	EventLuckyProphecyFish        EventType = "lucky_prophecy_fish"       // 幸運預言魚觸發（DAY-243）
 )
 
 // Priority 公告優先級
@@ -1284,6 +1285,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "👥 分身模式！"
 		message = msg
 		icon = "👥"
+		color = c
+		priority = PriorityHigh
+		duration = 4000
+
+	case EventLuckyProphecyFish:
+		msg := "🔮 幸運預言魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#9B59B6"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🔮 預言降臨！"
+		message = msg
+		icon = "🔮"
 		color = c
 		priority = PriorityHigh
 		duration = 4000
