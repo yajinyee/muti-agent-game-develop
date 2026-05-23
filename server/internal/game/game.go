@@ -213,6 +213,7 @@ type Game struct {
 	LuckyFreezeWorld   *luckyFreezeWorldManager    // 幸運冰凍世界魚系統管理器（DAY-237）
 	LuckyGravityFlip   *luckyGravityFlipManager    // 幸運重力反轉魚系統管理器（DAY-238）
 	LuckySynergyBurst  *luckySynergyBurstManager   // 幸運共鳴爆發魚系統管理器（DAY-239）
+	LuckyBetFish       *luckyBetFishManager         // 幸運賭注魚系統管理器（DAY-240）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -402,6 +403,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyFreezeWorld:   newLuckyFreezeWorldManager(),
 		LuckyGravityFlip:   newLuckyGravityFlipManager(),
 		LuckySynergyBurst:  newLuckySynergyBurstManager(),
+		LuckyBetFish:       newLuckyBetFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -930,6 +932,9 @@ func (g *Game) HandleMessage(clientID string, msg *ws.Message) {
 	// 幸運拍賣魚競標出價（DAY-217）
 	case ws.MsgLuckyAuctionBid:
 		g.handleLuckyAuctionBid(p)
+	// 幸運賭注魚選擇（DAY-240）
+	case ws.MsgLuckyBetChoice:
+		g.handleLuckyBetChoice(p, msg)
 	}
 }
 
@@ -1452,6 +1457,14 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	synergyMult := g.getLuckySynergyBurstMult(p.ID)
 	if synergyMult > 1.0 {
 		finalReward = int(float64(finalReward) * synergyMult)
+	}
+	// 套用幸運賭注魚賭注倍率（DAY-240，×0.3-10.0 乘法，個人，一次性消耗）
+	betMult := g.getLuckyBetFishMult(p.ID)
+	if betMult != 1.0 {
+		finalReward = int(float64(finalReward) * betMult)
+		if finalReward < 0 {
+			finalReward = 0
+		}
 	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
@@ -2075,6 +2088,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運共鳴爆發魚：擊破 T197 本身時觸發共鳴爆發（DAY-239）
 	if isLuckySynergyBurstFish(t.DefID) {
 		go g.tryLuckySynergyBurstFish(p)
+	}
+	// 幸運賭注魚：擊破 T198 本身時觸發賭注選擇（DAY-240）
+	if isLuckyBetFish(t.DefID) {
+		go g.tryLuckyBetFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

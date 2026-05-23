@@ -78,6 +78,7 @@ const (
 	EventLuckyFreezeWorld         EventType = "lucky_freeze_world"        // 幸運冰凍世界魚觸發（DAY-237）
 	EventLuckyGravityFlip         EventType = "lucky_gravity_flip"        // 幸運重力反轉魚觸發（DAY-238）
 	EventLuckySynergyBurst        EventType = "lucky_synergy_burst"       // 幸運共鳴爆發魚觸發（DAY-239）
+	EventLuckyBetFish             EventType = "lucky_bet_fish"            // 幸運賭注魚觸發（DAY-240）
 )
 
 // Priority 公告優先級
@@ -1224,6 +1225,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 4500
+
+	case EventLuckyBetFish:
+		msg := "🎲 幸運賭注魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#9B59B6"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🎲 幸運賭注魚！"
+		message = msg
+		icon = "🎲"
+		color = c
+		priority = PriorityHigh
+		duration = 4000
 
 	default:
 		title = "📢 公告"

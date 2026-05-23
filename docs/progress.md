@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-239 幸運共鳴爆發魚系統）
+## 最後更新：2026-05-23（DAY-240 幸運賭注魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-240 更新（自主觸發）：** 幸運賭注魚系統（Lucky Bet Fish）✅
+  - **業界依據：** 業界原創「玩家主動風險決策+賭注翻倍」機制
+  - **設計：** 擊破 T198 後，玩家面臨「賭注選擇」（10 秒決策時間）；選擇 A（保守）：下一次擊破 ×2.0 倍率，100% 觸發；選擇 B（激進）：下一次擊破 ×5.0 倍率，50% 觸發；失敗則 ×0.5 倍率；選擇 C（瘋狂）：下一次擊破 ×10.0 倍率，25% 觸發；失敗則 ×0.3 倍率；10 秒內未選擇 → 自動選擇 A；個人冷卻 30 秒
+  - **設計差異：** 與幸運量子魚（DAY-228，50% 機率坍縮，玩家無法選擇）不同，賭注魚是「玩家主動選擇風險等級」，讓玩家有「我要不要賭一把」的真實賭注感；「保守/激進/瘋狂」三個選項讓不同風格的玩家都有對應策略；「失敗懲罰」讓選擇 B/C 有真實風險，不是無腦選最高倍率；「10 秒決策時間」製造緊迫感；全服廣播玩家的選擇和結果，製造「看他敢不敢賭」的社交觀看感
+  - server/internal/game/lucky_bet_fish_handler.go：luckyBetFishManager（個人冷卻/sessions）；betSession（choice/decideUntil/pendingMult/decided/instanceID）；isLuckyBetFish（T198）；getLuckyBetFishMult（供 handleKill 使用，一次性消耗）；notifyBetChoice（玩家選擇/計算結果/廣播）；tryLuckyBetFish（擊破後觸發/建立 session/個人訊息/全服廣播/10秒後自動選 A）；handleLuckyBetChoice（處理 Client 選擇訊息）
+  - server/internal/data/tables.go：新增 T198 幸運賭注魚（35-65x/HP75/SpawnWeight3/Speed47/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyBetFish/MsgLuckyBetChoice；BetOption；LuckyBetFishPayload（bet_start/bet_broadcast/bet_decided/bet_timeout）；LuckyBetChoicePayload
+  - server/internal/game/announce/announce.go：新增 EventLuckyBetFish + case 處理
+  - server/internal/game/game.go：LuckyBetFish *luckyBetFishManager；handleKill 加入 getLuckyBetFishMult 乘法加成 + isLuckyBetFish 分支；HandleMessage 加入 MsgLuckyBetChoice 路由
+  - client/chiikawa-pixel/scripts/ui/LuckyBetFishPanel.gd：紫金賭注主題面板（bet_start 紫色雙閃光+賭注選擇介面三按鈕+倒數計時條；bet_broadcast 頂部小橫幅；bet_decided 結果閃光+大字顯示成功/失敗；bet_timeout 橙色超時提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_bet_fish 訊號 + _handle_lucky_bet_fish + send_bet_choice
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyBetFishPanelScript（layer=5）
+  - 賭注設計：選擇 A（×2.0/100%）；選擇 B（×5.0/50%/失敗×0.5）；選擇 C（×10.0/25%/失敗×0.3）；10 秒決策時間；個人冷卻 30 秒
+  - 視覺設計：紫金賭注主題（#9B59B6 + #F39C12 + #E74C3C + #27AE60）；三個選項按鈕（保守綠/激進橙/瘋狂紅）；倒數計時條（紫→消失）；結果大字（成功=對應顏色/失敗=灰色）
+  - 全服廣播：觸發廣播/決策結果（含成功/失敗/倍率）/超時自動選擇全服廣播
+  - 全服公告：觸發時公告（紫色）；決策結果公告（成功=對應顏色/失敗=灰色）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-239 更新（自主觸發）：** 幸運共鳴爆發魚系統（Lucky Synergy Burst Fish）✅
   - **業界依據：** 業界原創「多效疊加共鳴爆發」機制
   - **設計：** 擊破 T197 後，偵測場上當前同時啟動的幸運效果數量（冰凍世界/鏡面世界/重力反轉/磁力場/漩渦/時間凍結/時間倒流）；≥2 個效果 → 共鳴爆發：所有效果倍率額外 ×1.5，持續 6 秒；1 個效果 → 小型共鳴：該效果倍率 ×1.3，持續 4 秒；0 個效果 → 基礎爆發：全場 HP -30%，個人 ×1.8 倍率加成 5 秒；個人冷卻 25 秒；全服冷卻 40 秒

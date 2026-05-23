@@ -579,6 +579,8 @@ const (
 	MsgLuckyFreezeWorld    MessageType = "lucky_freeze_world"    // 幸運冰凍世界魚廣播（Server→Client，DAY-237）
 	MsgLuckyGravityFlip   MessageType = "lucky_gravity_flip"   // 幸運重力反轉魚廣播（Server→Client，DAY-238）
 	MsgLuckySynergyBurst  MessageType = "lucky_synergy_burst"  // 幸運共鳴爆發魚廣播（Server→Client，DAY-239）
+	MsgLuckyBetFish       MessageType = "lucky_bet_fish"       // 幸運賭注魚廣播（Server→Client，DAY-240）
+	MsgLuckyBetChoice     MessageType = "lucky_bet_choice"     // 玩家賭注選擇（Client→Server，DAY-240）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5405,4 +5407,43 @@ type LuckySynergyBurstPayload struct {
 	ExtraMult    float64  `json:"extra_mult,omitempty"`
 	DurationSec  int      `json:"duration_sec,omitempty"`
 	DamagedCount int      `json:"damaged_count,omitempty"`
+}
+
+// BetOption 賭注選項（DAY-240）
+type BetOption struct {
+	Choice        string  `json:"choice"`         // "A" / "B" / "C"
+	Label         string  `json:"label"`          // "保守" / "激進" / "瘋狂"
+	Mult          float64 `json:"mult"`           // 成功倍率
+	SuccessChance float64 `json:"success_chance"` // 成功機率（0.0-1.0）
+	FailMult      float64 `json:"fail_mult"`      // 失敗倍率
+}
+
+// LuckyBetFishPayload 幸運賭注魚廣播（Server → Client，DAY-240）
+//
+// Events:
+//
+//	"bet_start"     — 觸發賭注選擇（個人訊息，含三個選項）
+//	"bet_broadcast" — 通知全服有人觸發賭注魚
+//	"bet_decided"   — 玩家決策結果（全服廣播）
+//	"bet_timeout"   — 超時自動選擇 A（全服廣播）
+type LuckyBetFishPayload struct {
+	Event         string    `json:"event"`
+	PlayerID      string    `json:"player_id,omitempty"`
+	PlayerName    string    `json:"player_name,omitempty"`
+	InstanceID    string    `json:"instance_id,omitempty"`
+	DecisionSec   int       `json:"decision_sec,omitempty"`   // 決策時間（秒）
+	OptionA       BetOption `json:"option_a,omitempty"`       // 選項 A
+	OptionB       BetOption `json:"option_b,omitempty"`       // 選項 B
+	OptionC       BetOption `json:"option_c,omitempty"`       // 選項 C
+	Choice        string    `json:"choice,omitempty"`         // 玩家選擇（"A"/"B"/"C"）
+	ChoiceLabel   string    `json:"choice_label,omitempty"`   // 選擇標籤
+	Success       bool      `json:"success,omitempty"`        // 是否成功
+	ResultMult    float64   `json:"result_mult,omitempty"`    // 結果倍率
+	SuccessChance float64   `json:"success_chance,omitempty"` // 成功機率
+}
+
+// LuckyBetChoicePayload 玩家賭注選擇（Client → Server，DAY-240）
+type LuckyBetChoicePayload struct {
+	Choice     string `json:"choice"`      // "A" / "B" / "C"
+	InstanceID string `json:"instance_id"` // 防止重複提交
 }

@@ -323,6 +323,7 @@ func _ready() -> void:
 	_init_lucky_freeze_world_panel()    # 幸運冰凍世界魚系統面板（DAY-237）
 	_init_lucky_gravity_flip_panel()    # 幸運重力反轉魚系統面板（DAY-238）
 	_init_lucky_synergy_burst_panel()   # 幸運共鳴爆發魚系統面板（DAY-239）
+	_init_lucky_bet_fish_panel()        # 幸運賭注魚系統面板（DAY-240）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4543,3 +4544,20 @@ func _init_lucky_synergy_burst_panel() -> void:
 func _on_lucky_synergy_burst(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_synergy_burst_panel):
 		_lucky_synergy_burst_panel.handle_lucky_synergy_burst(data)
+
+# ─── 幸運賭注魚系統面板（DAY-240）───────────────────────────────────────────
+const LuckyBetFishPanelScript = preload("res://scripts/ui/LuckyBetFishPanel.gd")
+var _lucky_bet_fish_panel = null
+
+func _init_lucky_bet_fish_panel() -> void:
+	var panel = LuckyBetFishPanelScript.new()
+	panel.name = "LuckyBetFishPanel"
+	panel.layer = 5
+	add_child(panel)
+	_lucky_bet_fish_panel = panel
+	if GameManager.has_signal("lucky_bet_fish"):
+		GameManager.lucky_bet_fish.connect(_on_lucky_bet_fish)
+
+func _on_lucky_bet_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_bet_fish_panel):
+		_lucky_bet_fish_panel.handle_lucky_bet_fish(data)

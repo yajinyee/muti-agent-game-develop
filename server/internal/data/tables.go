@@ -672,6 +672,13 @@ var Targets = map[string]*TargetDef{
 	//   - 0 個效果 → 基礎爆發：全場 HP -30%，個人 ×1.8 倍率加成 5 秒
 	//   - 個人冷卻 25 秒；全服冷卻 40 秒
 	"T197": {ID: "T197", Name: "幸運共鳴爆發魚", Type: TargetTypeSpecial, MultiplierMin: 33, MultiplierMax: 62, HP: 72, SpawnWeight: 3, Speed: 48, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_synergy_burst"},
+	// T198 幸運賭注魚（DAY-240）— 業界原創「玩家主動風險決策+賭注翻倍」機制
+	//   - 擊破 T198 後，玩家面臨「賭注選擇」（10 秒決策時間）
+	//   - 選擇 A（保守）：下一次擊破 ×2.0 倍率，100% 觸發
+	//   - 選擇 B（激進）：下一次擊破 ×5.0 倍率，50% 觸發；失敗則 ×0.5 倍率
+	//   - 選擇 C（瘋狂）：下一次擊破 ×10.0 倍率，25% 觸發；失敗則 ×0.3 倍率
+	//   - 10 秒內未選擇 → 自動選擇 A；個人冷卻 30 秒
+	"T198": {ID: "T198", Name: "幸運賭注魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 47, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_bet"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
