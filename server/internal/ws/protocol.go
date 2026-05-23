@@ -576,6 +576,7 @@ const (
 	MsgLuckyVortexFish     MessageType = "lucky_vortex_fish"     // 幸運漩渦魚廣播（Server→Client，DAY-234）
 	MsgLuckyTimeBombFish   MessageType = "lucky_time_bomb_fish"  // 幸運時間炸彈魚廣播（Server→Client，DAY-235）
 	MsgLuckyMirrorWorld    MessageType = "lucky_mirror_world"    // 幸運鏡面世界魚廣播（Server→Client，DAY-236）
+	MsgLuckyFreezeWorld    MessageType = "lucky_freeze_world"    // 幸運冰凍世界魚廣播（Server→Client，DAY-237）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5348,4 +5349,22 @@ type LuckyMirrorWorldPayload struct {
 	KillBoost      float64     `json:"kill_boost,omitempty"`
 	Positions      interface{} `json:"positions,omitempty"`      // []mirroredPos
 	CollapsedCount int         `json:"collapsed_count,omitempty"`
+}
+
+// LuckyFreezeWorldPayload 幸運冰凍世界魚廣播（Server → Client，DAY-237）
+//
+// Events:
+//
+//	"freeze_start" — 冰凍世界開始（全服廣播，含冰凍目標數）
+//	"freeze_crack" — 冰裂爆發（全服廣播，HP -50%）
+//	"freeze_end"   — 冰凍世界結束（全服廣播）
+type LuckyFreezeWorldPayload struct {
+	Event        string  `json:"event"`
+	PlayerID     string  `json:"player_id,omitempty"`
+	PlayerName   string  `json:"player_name,omitempty"`
+	DurationSec  int     `json:"duration_sec,omitempty"`
+	KillBoost    float64 `json:"kill_boost,omitempty"`
+	SpeedFactor  float64 `json:"speed_factor,omitempty"`
+	FrozenCount  int     `json:"frozen_count,omitempty"`
+	CrackedCount int     `json:"cracked_count,omitempty"`
 }

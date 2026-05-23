@@ -320,6 +320,7 @@ func _ready() -> void:
 	_init_lucky_vortex_fish_panel()     # 幸運漩渦魚系統面板（DAY-234）
 	_init_lucky_time_bomb_fish_panel()  # 幸運時間炸彈魚系統面板（DAY-235）
 	_init_lucky_mirror_world_panel()    # 幸運鏡面世界魚系統面板（DAY-236）
+	_init_lucky_freeze_world_panel()    # 幸運冰凍世界魚系統面板（DAY-237）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4489,3 +4490,20 @@ func _init_lucky_mirror_world_panel() -> void:
 func _on_lucky_mirror_world(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_mirror_world_panel):
 		_lucky_mirror_world_panel.handle_lucky_mirror_world(data)
+
+# ─── 幸運冰凍世界魚系統面板（DAY-237）───────────────────────────────────────────
+const LuckyFreezeWorldPanelScript = preload("res://scripts/ui/LuckyFreezeWorldPanel.gd")
+var _lucky_freeze_world_panel = null
+
+func _init_lucky_freeze_world_panel() -> void:
+	var panel = LuckyFreezeWorldPanelScript.new()
+	panel.name = "LuckyFreezeWorldPanel"
+	panel.layer = 8
+	add_child(panel)
+	_lucky_freeze_world_panel = panel
+	if GameManager.has_signal("lucky_freeze_world"):
+		GameManager.lucky_freeze_world.connect(_on_lucky_freeze_world)
+
+func _on_lucky_freeze_world(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_freeze_world_panel):
+		_lucky_freeze_world_panel.handle_lucky_freeze_world(data)

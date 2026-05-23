@@ -653,6 +653,12 @@ var Targets = map[string]*TargetDef{
 	//   - 10 秒後「鏡面崩潰」：所有目標 HP -35%（保留最少 1）
 	//   - 個人冷卻 22 秒；全服冷卻 35 秒
 	"T194": {ID: "T194", Name: "幸運鏡面世界魚", Type: TargetTypeSpecial, MultiplierMin: 32, MultiplierMax: 60, HP: 70, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_mirror_world"},
+	// T195 幸運冰凍世界魚（DAY-237）— 業界原創「全場冰凍+冰裂爆發」機制
+	//   - 擊破 T195 後觸發「冰凍世界」（8 秒）：場上所有目標移動速度降低 80%
+	//   - 冰凍世界期間擊破任何目標獲得 ×2.0 倍率加成（乘法）
+	//   - 8 秒後「冰裂爆發」：所有目標 HP -50%（保留最少 1），速度恢復
+	//   - 個人冷卻 20 秒；全服冷卻 30 秒
+	"T195": {ID: "T195", Name: "幸運冰凍世界魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 58, HP: 68, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_freeze_world"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

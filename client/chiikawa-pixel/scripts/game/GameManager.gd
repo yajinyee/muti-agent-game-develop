@@ -11,6 +11,8 @@ signal target_spawned(target_data: Dictionary)
 signal target_updated(update_data: Dictionary)
 signal target_killed(kill_data: Dictionary)
 signal target_teleported(target_id: String, new_pos: Vector2)  # 傳送魚位置同步（DAY-223）
+signal freeze_world_started(speed_factor: float)               # 冰凍世界開始（DAY-237）
+signal freeze_world_ended()                                    # 冰凍世界結束（DAY-237）
 signal attack_result(result: Dictionary)
 signal reward_received(reward: Dictionary)
 signal player_updated(player_data: Dictionary)
@@ -239,6 +241,7 @@ signal lucky_echo_fish(data: Dictionary)            # 幸運回聲魚系統（DA
 signal lucky_vortex_fish(data: Dictionary)          # 幸運漩渦魚系統（DAY-234）
 signal lucky_time_bomb_fish(data: Dictionary)       # 幸運時間炸彈魚系統（DAY-235）
 signal lucky_mirror_world(data: Dictionary)         # 幸運鏡面世界魚系統（DAY-236）
+signal lucky_freeze_world(data: Dictionary)         # 幸運冰凍世界魚系統（DAY-237）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -688,6 +691,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_time_bomb_fish(payload)
 		"lucky_mirror_world":
 			_handle_lucky_mirror_world(payload)
+		"lucky_freeze_world":
+			_handle_lucky_freeze_world(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3107,3 +3112,24 @@ func _sync_mirror_positions(positions: Array) -> void:
 			continue
 		# 複用 target_teleported 訊號同步位置（平滑移動）
 		emit_signal("target_teleported", target_id, Vector2(new_x, new_y))
+
+## 幸運冰凍世界魚系統（DAY-237）
+func _handle_lucky_freeze_world(payload: Dictionary) -> void:
+	emit_signal("lucky_freeze_world", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"freeze_start":
+			var player_name: String = payload.get("player_name", "")
+			var kill_boost: float = payload.get("kill_boost", 2.0)
+			var frozen_count: int = payload.get("frozen_count", 0)
+			var speed_factor: float = payload.get("speed_factor", 0.2)
+			print("[GameManager] Freeze world started! player=%s boost=x%.1f frozen=%d speed_factor=%.1f" % [player_name, kill_boost, frozen_count, speed_factor])
+			# 通知 TargetManager 降低所有目標速度
+			emit_signal("freeze_world_started", speed_factor)
+		"freeze_crack":
+			var cracked_count: int = payload.get("cracked_count", 0)
+			print("[GameManager] Ice crack! affected=%d targets" % cracked_count)
+		"freeze_end":
+			print("[GameManager] Freeze world ended! Speed restored.")
+			# 通知 TargetManager 恢復所有目標速度
+			emit_signal("freeze_world_ended")

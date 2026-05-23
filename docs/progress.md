@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-236 幸運鏡面世界魚系統）
+## 最後更新：2026-05-23（DAY-237 幸運冰凍世界魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-237 更新（自主觸發）：** 幸運冰凍世界魚系統（Lucky Freeze World Fish）✅
+  - **業界依據：** 業界原創「全場冰凍+冰裂爆發」機制
+  - **設計：** 擊破 T195 後觸發「冰凍世界」（8 秒）：場上所有目標移動速度降低 80%（幾乎靜止）；冰凍世界期間擊破任何目標獲得 ×2.0 倍率加成（乘法）；8 秒後「冰裂爆發」：所有目標 HP -50%（保留最少 1），速度恢復；個人冷卻 20 秒；全服冷卻 30 秒
+  - **設計差異：** 與時間凍結魚（DAY-212，全場完全靜止）不同，冰凍世界是「速度降低 80%」，目標仍在緩慢移動，讓玩家有「要趁目標慢的時候趕快打」的緊迫感；「冰裂爆發 HP -50%」比鏡面崩潰（-35%）更強，讓玩家有更大的爆發感；×2.0 倍率加成（全場有效）讓玩家有「趁冰凍期間多打」的動機；全服廣播冰凍狀態讓所有玩家都知道目標變慢了，製造「全服一起趁機打」的社交感
+  - server/internal/game/lucky_freeze_world_handler.go：luckyFreezeWorldManager（個人冷卻/全服冷卻/冰凍世界狀態/instanceID）；isLuckyFreezeWorldFish（T195）；isFreezeWorldActive；getLuckyFreezeWorldBoost（×2.0 乘法）；tryLuckyFreezeWorldFish（擊破後觸發/廣播冰凍/全服公告）；applyFreezeWorldSpeed（計算冰凍目標數）；restoreFreezeWorldSpeed（速度恢復由 Client 端處理）；runLuckyFreezeWorld（goroutine 8秒後觸發冰裂）；doFreezeWorldCrack（HP -50%/保留最少1/全服廣播/全服公告）
+  - server/internal/data/tables.go：新增 T195 幸運冰凍世界魚（30-58x/HP68/SpawnWeight3/Speed50/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyFreezeWorld；LuckyFreezeWorldPayload（freeze_start/freeze_crack/freeze_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyFreezeWorld + case 處理
+  - server/internal/game/game.go：LuckyFreezeWorld *luckyFreezeWorldManager；handleKill 加入 getLuckyFreezeWorldBoost 乘法加成 + isLuckyFreezeWorldFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyFreezeWorldPanel.gd：冰藍主題面板（freeze_start 冰藍三次強閃光+頂部橫幅+「❄️ 冰凍世界！」大字+計時條+四角冰晶；freeze_crack 全螢幕白色強閃光+「❄️ 冰裂爆發！」大字+HP-50%提示；freeze_end 速度恢復提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_freeze_world 訊號 + freeze_world_started/ended 訊號 + _handle_lucky_freeze_world
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyFreezeWorldPanelScript（layer=8）
+  - 冰凍設計：速度降低 80%（Client 端處理）；持續 8 秒；個人冷卻 20 秒；全服冷卻 30 秒
+  - 冰裂爆發設計：HP -50%；保留最少 1；8 秒後自動觸發
+  - 視覺設計：冰藍主題（#5DADE2 + #2E86C1 + #AED6F1 + #EBF5FB）；四角冰晶（閃爍動畫）；底部計時條（冰藍→深藍漸變）；全螢幕白色強閃光（冰裂感）
+  - 全服廣播：冰凍世界開始/冰裂爆發/冰凍世界結束全服廣播
+  - 全服公告：觸發時公告（冰藍色）；冰裂時公告（深藍色）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-236 更新（自主觸發）：** 幸運鏡面世界魚系統（Lucky Mirror World Fish）✅
   - **業界依據：** 業界原創「全場鏡像反轉+鏡面崩潰」機制
   - **設計：** 擊破 T194 後觸發「鏡面世界」（10 秒）：場上所有目標物 X 座標以場景中央（X=500）為軸鏡像反轉；鏡面世界期間擊破任何目標獲得 ×2.3 倍率加成（乘法）；10 秒後「鏡面崩潰」：所有目標 HP -35%（保留最少 1）；個人冷卻 22 秒；全服冷卻 35 秒
