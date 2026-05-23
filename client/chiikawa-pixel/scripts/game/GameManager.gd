@@ -223,6 +223,7 @@ signal lucky_evolution_fish(data: Dictionary)       # 幸運進化魚系統（DA
 signal lucky_infection_fish(data: Dictionary)       # 幸運連鎖感染魚系統（DAY-219）
 signal lucky_ricochet_fish(data: Dictionary)        # 幸運反彈魚系統（DAY-220）
 signal lucky_black_hole(data: Dictionary)           # 幸運黑洞魚系統（DAY-221）
+signal lucky_resonance_fish(data: Dictionary)       # 幸運共鳴魚系統（DAY-222）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -642,6 +643,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_ricochet_fish(payload)
 		"lucky_black_hole":
 			_handle_lucky_black_hole(payload)
+		"lucky_resonance_fish":
+			_handle_lucky_resonance_fish(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -2713,3 +2716,25 @@ func _handle_lucky_black_hole(payload: Dictionary) -> void:
 			var killed_count: int = payload.get("killed_count", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] Singularity result: killed=%d reward=%d" % [killed_count, total_reward])
+
+## 處理幸運共鳴魚系統（DAY-222）
+func _handle_lucky_resonance_fish(payload: Dictionary) -> void:
+	emit_signal("lucky_resonance_fish", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"resonance_start":
+			var player_name: String = payload.get("player_name", "")
+			print("[GameManager] Resonance mode started by %s" % player_name)
+		"resonance_progress":
+			var count: int = payload.get("count", 0)
+			var target: int = payload.get("target", 30)
+			print("[GameManager] Resonance progress: %d/%d" % [count, target])
+		"resonance_burst":
+			var total_shots: int = payload.get("total_shots", 0)
+			print("[GameManager] Resonance burst! total_shots=%d" % total_shots)
+		"resonance_small_burst":
+			print("[GameManager] Small resonance burst triggered")
+		"resonance_result":
+			var affected: int = payload.get("affected_count", 0)
+			var pool: int = payload.get("reward_pool", 0)
+			print("[GameManager] Resonance result: affected=%d pool=%d" % [affected, pool])

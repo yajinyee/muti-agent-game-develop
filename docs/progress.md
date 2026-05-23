@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-221 幸運黑洞魚系統）
+## 最後更新：2026-05-23（DAY-222 幸運共鳴魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,27 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-221 更新（自主觸發）：** 幸運黑洞魚系統（Lucky Black Hole Fish）✅
+- **DAY-222 更新（自主觸發）：** 幸運共鳴魚系統（Lucky Resonance Fish）✅
+  - **業界依據：** Fishing Frenzy Chapter 3 2026「Guild Wars + cooperative mechanics」+ 業界原創「全服共鳴貢獻比例分配」機制
+  - **設計：** 擊破 T180 後觸發「共鳴模式」（15 秒）：全服所有玩家的每次射擊都累積「共鳴能量」（+1/shot）；共鳴能量達到 30 點 → 觸發「共鳴爆發」：全場 HP -50% + 全服 ×1.8 倍率加成 6 秒；共鳴爆發獎勵按「貢獻比例」分配（射擊越多，分到越多）；15 秒內未達到 30 點 → 觸發「小型共鳴」：全場 HP -25% + 全服 ×1.3 倍率加成 3 秒；全服冷卻 40 秒
+  - **設計差異：** 與深海龍王（DAY-208，全服合力蓄力，20 點，12 秒）不同，共鳴魚是「貢獻比例分配獎勵」，讓玩家有「我射擊越多，我分到越多」的個人動機；「共鳴能量進度條」讓全服玩家看到「還差幾槍就爆發」的期待感；「貢獻比例分配」讓積極射擊的玩家獲得更多獎勵，製造「競爭合作」的社交感；「小型共鳴」確保即使未達目標也有獎勵，降低挫敗感
+  - server/internal/game/lucky_resonance_fish_handler.go：luckyResonanceFishManager（全服冷卻/共鳴狀態/atomic resonanceCount/貢獻記錄/倍率加成）；isLuckyResonanceFish（T180）；getLuckyResonanceBoost（供 handleKill 使用，共鳴爆發期間 ×1.3-1.8）；notifyResonanceShot（每次射擊累積/每 5 點廣播/達到目標觸發爆發）；tryLuckyResonanceFish（擊破後觸發/全服廣播/全服公告）；triggerResonanceBurst（共鳴爆發/小型共鳴/HP削減/貢獻比例分配/全服廣播）
+  - server/internal/data/tables.go：新增 T180 幸運共鳴魚（35-65x/HP75/SpawnWeight3/Speed48/Lifetime15）
+  - server/internal/ws/protocol.go：新增 MsgLuckyResonanceFish；LuckyResonanceFishPayload（resonance_start/resonance_progress/resonance_burst/resonance_small_burst/resonance_result/resonance_boost_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyResonanceFish + case 處理
+  - server/internal/game/game.go：LuckyResonanceFish *luckyResonanceFishManager；handleKill 加入 getLuckyResonanceBoost 乘法加成 + isLuckyResonanceFish 分支；handleAttack 加入 notifyResonanceShot（共鳴模式中每次射擊累積）
+  - client/chiikawa-pixel/scripts/ui/LuckyResonanceFishPanel.gd：天藍共鳴主題面板（resonance_start 天藍三次強閃光+頂部橫幅+共鳴進度條；resonance_progress 進度條更新+每5點閃光+「還差N槍」提示；resonance_burst 全螢幕三次強閃光+「🎵 共鳴爆發！」52px大字+倍率計時條；resonance_small_burst 青色閃光+「🎵 小型共鳴！」40px大字；resonance_result 右側滑入結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_resonance_fish 訊號 + _handle_lucky_resonance_fish
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyResonanceFishPanelScript（layer=23）
+  - 共鳴設計：目標 30 點；每次射擊 +1；每 5 點廣播；atomic 操作確保並發安全；全服冷卻 40 秒
+  - 共鳴爆發設計：全場 HP -50%；×1.8 倍率加成 6 秒；貢獻比例分配獎勵池
+  - 小型共鳴設計：全場 HP -25%；×1.3 倍率加成 3 秒；15 秒未達目標時觸發
+  - 視覺設計：天藍共鳴主題（#00BFFF + #00FFFF + #87CEEB + #E0F8FF）；底部共鳴進度條（天藍→青漸變）；三次天藍強閃光；倍率計時條底部
+  - 全服廣播：共鳴開始/每5點進度/共鳴爆發/小型共鳴/結算/倍率結束全服廣播
+  - 全服公告：共鳴開始時公告；爆發時公告（依是否完整爆發決定顏色：完整青色/小型天藍）
+  - build/vet 全部通過（零錯誤零警告）
+
+
   - **業界依據：** Black Hole Fishing 2026（Steam 新作）「singularity mechanics」+ 業界原創「重力黑洞」機制
   - **設計：** 擊破 T179 後在場上建立「重力黑洞」（持續 10 秒）：黑洞建立在場景中央附近（隨機偏移），半徑 350px；黑洞範圍內所有目標每 1 秒被「吸引」（HP -10%，模擬重力傷害）；黑洞範圍內目標被擊破：獎勵 ×2.0 倍率加成（乘法）；10 秒後「奇點爆炸」：黑洞範圍內所有目標 85% 擊破機率（0.70x 倍率，全服共享）；個人冷卻 22 秒；全服冷卻 35 秒
   - **設計差異：** 與幸運熱區魚（DAY-210，空間限定 ×2.0，脈衝 HP -15%）不同，黑洞魚是「重力吸引 + 奇點爆炸」，視覺上更震撼；「重力傷害」讓玩家感受到「黑洞在幫我削血」的輔助感；「奇點爆炸」是「等待→爆發」的高潮設計，85% 擊破機率是最高的；黑洞範圍 350px（比熱區 280px 更大），覆蓋更多目標；全服廣播黑洞位置讓所有玩家都往同一個地方打，製造「全服聚焦」的社交感

@@ -552,6 +552,14 @@ var Targets = map[string]*TargetDef{
 	//   - 10 秒後「奇點爆炸」：黑洞範圍內所有目標 85% 擊破機率（0.70x 倍率，全服共享）
 	//   - 個人冷卻 22 秒；全服冷卻 35 秒
 	"T179": {ID: "T179", Name: "幸運黑洞魚", Type: TargetTypeSpecial, MultiplierMin: 40, MultiplierMax: 70, HP: 80, SpawnWeight: 3, Speed: 45, Lifetime: 15, LaborGain: 14, DifficultyFactor: 16.0, SpecialBehavior: "lucky_black_hole"},
+	// T180 幸運共鳴魚（DAY-222）— 業界原創「全服共鳴」機制
+	// 設計：擊破 T180 後觸發「共鳴模式」（15 秒）：
+	//   - 全服所有玩家的每次射擊都累積「共鳴能量」（+1/shot）
+	//   - 共鳴能量達到 30 點 → 觸發「共鳴爆發」：全場 HP -50% + 全服 ×1.8 倍率加成 6 秒
+	//   - 共鳴爆發獎勵按「貢獻比例」分配（射擊越多，分到越多）
+	//   - 15 秒內未達到 30 點 → 觸發「小型共鳴」：全場 HP -25% + 全服 ×1.3 倍率加成 3 秒
+	//   - 全服冷卻 40 秒
+	"T180": {ID: "T180", Name: "幸運共鳴魚", Type: TargetTypeSpecial, MultiplierMin: 35, MultiplierMax: 65, HP: 75, SpawnWeight: 3, Speed: 48, Lifetime: 15, LaborGain: 13, DifficultyFactor: 16.0, SpecialBehavior: "lucky_resonance"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

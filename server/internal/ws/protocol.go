@@ -561,6 +561,7 @@ const (
 	MsgLuckyInfectionFish  MessageType = "lucky_infection_fish"  // 幸運連鎖感染魚廣播（Server→Client，DAY-219）
 	MsgLuckyRicochetFish   MessageType = "lucky_ricochet_fish"   // 幸運反彈魚廣播（Server→Client，DAY-220）
 	MsgLuckyBlackHole      MessageType = "lucky_black_hole"      // 幸運黑洞魚廣播（Server→Client，DAY-221）
+	MsgLuckyResonanceFish  MessageType = "lucky_resonance_fish"  // 幸運共鳴魚廣播（Server→Client，DAY-222）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -4969,4 +4970,29 @@ type LuckyInfectionFishPayload struct {
 	TotalKilled     int                    `json:"total_killed,omitempty"`
 	TotalReward     int                    `json:"total_reward,omitempty"`
 	Color           string                 `json:"color,omitempty"`
+}
+
+// LuckyResonanceFishPayload 幸運共鳴魚廣播（Server → Client，DAY-222）
+//
+// Events:
+//
+//	"resonance_start"      — 共鳴模式開始（全服廣播）
+//	"resonance_progress"   — 共鳴能量進度（每 5 點，全服廣播）
+//	"resonance_burst"      — 共鳴爆發（達到 30 點，全服廣播）
+//	"resonance_small_burst"— 小型共鳴（15 秒未達到，全服廣播）
+//	"resonance_result"     — 爆發結算（全服廣播）
+//	"resonance_boost_end"  — 倍率加成結束（全服廣播）
+type LuckyResonanceFishPayload struct {
+	Event         string  `json:"event"`
+	InstanceID    string  `json:"instance_id,omitempty"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	Count         int     `json:"count,omitempty"`
+	Target        int     `json:"target,omitempty"`
+	DurationSec   int     `json:"duration_sec,omitempty"`
+	TotalShots    int     `json:"total_shots,omitempty"`
+	BoostMult     float64 `json:"boost_mult,omitempty"`
+	BoostSec      int     `json:"boost_sec,omitempty"`
+	AffectedCount int     `json:"affected_count,omitempty"`
+	RewardPool    int     `json:"reward_pool,omitempty"`
 }

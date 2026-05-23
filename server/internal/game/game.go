@@ -195,6 +195,7 @@ type Game struct {
 	LuckyInfectionFish *luckyInfectionFishManager  // 幸運連鎖感染魚系統管理器（DAY-219）
 	LuckyRicochetFish  *luckyRicochetFishManager   // 幸運反彈魚系統管理器（DAY-220）
 	LuckyBlackHole     *luckyBlackHoleManager      // 幸運黑洞魚系統管理器（DAY-221）
+	LuckyResonanceFish *luckyResonanceFishManager  // 幸運共鳴魚系統管理器（DAY-222）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -366,6 +367,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyInfectionFish: newLuckyInfectionFishManager(),
 		LuckyRicochetFish:  newLuckyRicochetFishManager(),
 		LuckyBlackHole:     newLuckyBlackHoleManager(),
+		LuckyResonanceFish: newLuckyResonanceFishManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -935,6 +937,8 @@ func (g *Game) handleAttack(p *player.Player, msg *ws.Message) {
 	go g.notifyDragonWrathShot(p)
 	// 深海龍王：蓄力模式中每次射擊累積龍怒值（DAY-208）
 	go g.notifyDragonKingShot()
+	// 幸運共鳴魚：共鳴模式中每次射擊累積共鳴能量（DAY-222）
+	go g.notifyResonanceShot(p)
 	// 不死 BOSS：每次射擊嘗試命中（DAY-129）
 	go g.tryImmortalBossHit(p)
 	// 覺醒 BOSS：每次射擊嘗試命中（DAY-130）
@@ -1303,6 +1307,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	blackHoleMult := g.getLuckyBlackHoleMultiplier(t.X, t.Y)
 	if blackHoleMult > 1.0 {
 		finalReward = int(float64(finalReward) * blackHoleMult)
+	}
+	// 套用幸運共鳴魚倍率加成（DAY-222，×1.3-1.8 乘法，全服共享，共鳴爆發期間）
+	resonanceBoost := g.getLuckyResonanceBoost()
+	if resonanceBoost > 1.0 {
+		finalReward = int(float64(finalReward) * resonanceBoost)
 	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
@@ -1851,6 +1860,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 		go g.tryLuckyBlackHoleFish(p)
 	}
 	// 幸運黑洞魚：黑洞範圍內目標被擊破時，倍率加成已在 finalMult 計算（DAY-221）
+	// 幸運共鳴魚：擊破 T180 本身時觸發共鳴模式（DAY-222）
+	if isLuckyResonanceFish(t.DefID) {
+		go g.tryLuckyResonanceFish(p)
+	}
 	// S-Rank 傳說目標召喚深淵巨鯨：擊破傳說品質目標後 15% 機率觸發（DAY-165）
 	if t.Quality == target.QualityLegendary && !isAbyssWhale(t.DefID) {
 		go g.tryLegendarySummonWhale(p, t.X, t.Y)
