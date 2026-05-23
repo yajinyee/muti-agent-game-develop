@@ -227,6 +227,7 @@ type Game struct {
 	LuckyQuantumEntangle    *luckyQuantumEntangleManager      // 幸運量子糾纏魚系統管理器（DAY-251）
 	LuckyWeaponEvo          *luckyWeaponEvoManager            // 幸運武器進化魚系統管理器（DAY-252）
 	LuckyMeteorShower       *luckyMeteorShowerManager         // 幸運星際隕石魚系統管理器（DAY-253）
+	LuckyDragonKing         *luckyDragonKingManager           // 幸運龍王降臨魚系統管理器（DAY-254）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -430,6 +431,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyQuantumEntangle:    newLuckyQuantumEntangleManager(),
 		LuckyWeaponEvo:          newLuckyWeaponEvoManager(),
 		LuckyMeteorShower:       newLuckyMeteorShowerManager(),
+		LuckyDragonKing:         newLuckyDragonKingManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1537,6 +1539,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if weaponEvoMult > 1.0 {
 		finalReward = int(float64(finalReward) * weaponEvoMult)
 	}
+	// 套用幸運龍王降臨魚龍王爆發倍率加成（DAY-254，×3.0 乘法，個人，爆發後 5 秒）
+	dragonKingBurstMult := g.LuckyDragonKing.getLuckyDragonKingBurstMult(p.ID)
+	if dragonKingBurstMult > 1.0 {
+		finalReward = int(float64(finalReward) * dragonKingBurstMult)
+	}
 	// 套用彩虹鯊魚爆發倍率（DAY-180，乘法，全服共享，每個目標倍率不同）
 	rainbowSharkMult := g.getRainbowSharkMult(t.InstanceID)
 	if rainbowSharkMult > 1.0 {
@@ -2254,6 +2261,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運星際隕石魚：擊破 T211 時觸發隕石雨（DAY-253）
 	if isLuckyMeteorShowerFish(t.DefID) {
 		go g.tryLuckyMeteorShowerFish(p.ID, p.DisplayName)
+	}
+	// 幸運龍王降臨魚：擊破 T212 時觸發龍王降臨（DAY-254）
+	if isLuckyDragonKingFish(t.DefID) {
+		go g.tryLuckyDragonKingFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

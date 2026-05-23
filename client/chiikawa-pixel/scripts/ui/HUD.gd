@@ -337,6 +337,7 @@ func _ready() -> void:
 	_init_lucky_quantum_entangle_panel()     # 幸運量子糾纏魚系統面板（DAY-251）
 	_init_lucky_weapon_evo_panel()           # 幸運武器進化魚系統面板（DAY-252）
 	_init_lucky_meteor_shower_panel()        # 幸運星際隕石魚系統面板（DAY-253）
+	_init_lucky_dragon_king_panel()          # 幸運龍王降臨魚系統面板（DAY-254）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -4800,3 +4801,21 @@ func _init_lucky_meteor_shower_panel() -> void:
 func _on_lucky_meteor_shower(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_meteor_shower_panel):
 		_lucky_meteor_shower_panel.handle_lucky_meteor_shower(data)
+
+# ─── 幸運龍王降臨魚系統面板（DAY-254）────────────────────────────────────────
+
+const LuckyDragonKingPanelScript = preload("res://scripts/ui/LuckyDragonKingPanel.gd")
+var _lucky_dragon_king_panel = null
+
+func _init_lucky_dragon_king_panel() -> void:
+	var panel = LuckyDragonKingPanelScript.new()
+	panel.name = "LuckyDragonKingPanel"
+	panel.layer = 27
+	add_child(panel)
+	_lucky_dragon_king_panel = panel
+	if GameManager.has_signal("lucky_dragon_king"):
+		GameManager.lucky_dragon_king.connect(_on_lucky_dragon_king)
+
+func _on_lucky_dragon_king(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_dragon_king_panel):
+		_lucky_dragon_king_panel.handle_lucky_dragon_king(data)

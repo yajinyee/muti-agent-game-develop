@@ -771,6 +771,13 @@ var Targets = map[string]*TargetDef{
 	//   - 8 秒後「最終隕石」：場上最高 HP 目標被 100% 擊破（×2.0 倍率，全服共享）
 	//   - 個人冷卻 20 秒；全服冷卻 30 秒
 	"T211": {ID: "T211", Name: "幸運星際隕石魚", Type: TargetTypeSpecial, MultiplierMin: 48, MultiplierMax: 87, HP: 88, SpawnWeight: 3, Speed: 34, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_meteor_shower"},
+	// T212 幸運龍王降臨魚（DAY-254）— 業界原創「龍王降臨+龍息攻擊+龍王護盾+龍王爆發」機制
+	//   - 擊破 T212 後，「龍王降臨」（持續 15 秒）
+	//   - 每 2 秒「龍息攻擊」：隨機選 3 個目標，80% 擊破機率，×1.4 倍率（全服共享）
+	//   - 龍王降臨期間，觸發玩家獲得「龍王護盾」（下一次免費射擊）
+	//   - 15 秒後「龍王爆發」：場上所有目標 HP -60%，觸發玩家獲得 ×3.0 倍率加成（個人，5 秒）
+	//   - 個人冷卻 25 秒；全服冷卻 40 秒
+	"T212": {ID: "T212", Name: "幸運龍王降臨魚", Type: TargetTypeSpecial, MultiplierMin: 49, MultiplierMax: 89, HP: 89, SpawnWeight: 3, Speed: 33, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_dragon_king"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

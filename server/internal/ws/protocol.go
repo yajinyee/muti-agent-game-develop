@@ -594,6 +594,7 @@ const (
 	MsgLuckyQuantumEntangle        MessageType = "lucky_quantum_entangle"          // 幸運量子糾纏魚廣播（Server→Client，DAY-251）
 	MsgLuckyWeaponEvo              MessageType = "lucky_weapon_evo"                // 幸運武器進化魚廣播（Server→Client，DAY-252）
 	MsgLuckyMeteorShower           MessageType = "lucky_meteor_shower"              // 幸運星際隕石魚廣播（Server→Client，DAY-253）
+	MsgLuckyDragonKing             MessageType = "lucky_dragon_king"                // 幸運龍王降臨魚廣播（Server→Client，DAY-254）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5776,4 +5777,27 @@ type LuckyMeteorShowerPayload struct {
 	Reward      int     `json:"reward,omitempty"`
 	X           float64 `json:"x,omitempty"`
 	Y           float64 `json:"y,omitempty"`
+}
+
+// LuckyDragonKingPayload 幸運龍王降臨魚廣播（Server → Client，DAY-254）
+// Event 類型：
+//   - dragon_king_start：龍王降臨啟動（個人訊息，PlayerID/PlayerName/DurationSec/BreathMult/BurstMult/HasShield）
+//   - dragon_king_broadcast：全服廣播降臨（PlayerName/BreathMult）
+//   - dragon_breath：龍息攻擊（全服廣播，PlayerName/BreathNum/HitCount/Mult/TotalReward）
+//   - dragon_king_burst：龍王爆發（個人訊息，PlayerID/PlayerName/DrainCount/BurstMult/BurstSec）
+//   - dragon_king_burst_broadcast：龍王爆發全服廣播（PlayerName/DrainCount）
+type LuckyDragonKingPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	DurationSec int     `json:"duration_sec,omitempty"`
+	BreathMult  float64 `json:"breath_mult,omitempty"`
+	BurstMult   float64 `json:"burst_mult,omitempty"`
+	BurstSec    int     `json:"burst_sec,omitempty"`
+	HasShield   bool    `json:"has_shield,omitempty"`
+	BreathNum   int     `json:"breath_num,omitempty"`
+	HitCount    int     `json:"hit_count,omitempty"`
+	Mult        float64 `json:"mult,omitempty"`
+	TotalReward int     `json:"total_reward,omitempty"`
+	DrainCount  int     `json:"drain_count,omitempty"`
 }

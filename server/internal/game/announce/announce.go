@@ -92,6 +92,7 @@ const (
 	EventLuckyQuantumEntangle     EventType = "lucky_quantum_entangle"     // 幸運量子糾纏魚觸發（DAY-251）
 	EventLuckyWeaponEvo           EventType = "lucky_weapon_evo"           // 幸運武器進化魚觸發（DAY-252）
 	EventLuckyMeteorShower        EventType = "lucky_meteor_shower"        // 幸運星際隕石魚觸發（DAY-253）
+	EventLuckyDragonKing          EventType = "lucky_dragon_king"          // 幸運龍王降臨魚觸發（DAY-254）
 )
 
 // Priority 公告優先級
@@ -1515,6 +1516,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "☄️ 星際隕石雨！"
 		message = msg
 		icon = "☄️"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyDragonKing:
+		msg := "🐉 幸運龍王降臨魚！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#8B0000"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🐉 龍王降臨！"
+		message = msg
+		icon = "🐉"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

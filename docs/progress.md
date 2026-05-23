@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-253 幸運星際隕石魚系統）
+## 最後更新：2026-05-24（DAY-254 幸運龍王降臨魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-254 更新（自主觸發）：** 幸運龍王降臨魚系統（Lucky Dragon King Fish）✅
+  - **業界依據：** 業界原創「龍王降臨+龍息攻擊+龍王護盾+龍王爆發」機制，Royal Fishing 2026 三層大廳+龍王主題趨勢
+  - **設計：** 擊破 T212 後，「龍王降臨」（持續 15 秒）；每 2 秒「龍息攻擊」：隨機選 3 個目標，80% 擊破機率，×1.4 倍率（全服共享）；龍王降臨期間，觸發玩家獲得「龍王護盾」（護盾指示器+脈衝動畫）；15 秒後「龍王爆發」：場上所有目標 HP -60%，觸發玩家獲得 ×3.0 倍率加成（個人，5 秒）；個人冷卻 25 秒；全服冷卻 40 秒
+  - **設計差異：** 與隕石雨（T211，隨機轟炸+連擊）不同，龍王降臨是「龍息定向攻擊」，每次選 3 個目標，更有「龍在選擇獵物」的感覺；「龍王護盾」讓觸發玩家有「我有龍王保護」的安心感，是遊戲中唯一的防禦型機制；「龍王爆發 HP -60%」讓玩家在爆發後有「全場魚都快死了，趕快打」的緊迫感；「×3.0 個人倍率加成 5 秒」讓觸發玩家在爆發後有「黃金 5 秒」的爆發感；全服廣播讓所有玩家看到「龍王降臨了」，製造「全服一起看龍王」的社交感
+  - server/internal/game/lucky_dragon_king_handler.go：luckyDragonKingManager（個人冷卻/全服冷卻/activeSession/burstBoosts/dragonShields）；dragonKingSession（triggerPlayerID/triggerPlayerName/expiresAt/breathCount）；isLuckyDragonKingFish（T212）；isDragonKingActive；getLuckyDragonKingBurstMult（×3.0 乘法，供 handleKill 使用）；hasDragonShield/consumeDragonShield；tryLuckyDragonKingFish（擊破後觸發/護盾/全服廣播/全服公告）；runDragonKingDescent（goroutine 每2秒龍息/15秒後爆發）；doDragonBreath（隨機選3個目標/80%擊破/×1.4倍率/全服共享）；doDragonKingBurst（HP-60%/×3.0個人倍率5秒/全服廣播/全服公告）
+  - server/internal/data/tables.go：新增 T212 幸運龍王降臨魚（49-89x/HP89/SpawnWeight3/Speed33/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyDragonKing；LuckyDragonKingPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyDragonKing + case 處理
+  - server/internal/game/game.go：LuckyDragonKing *luckyDragonKingManager；handleKill 加入 isLuckyDragonKingFish 分支 + getLuckyDragonKingBurstMult 倍率加成
+  - client/chiikawa-pixel/scripts/ui/LuckyDragonKingPanel.gd：深紅龍王主題面板（dragon_king_start 深紅三次強閃光+頂部橫幅+「🐉 龍王降臨！」大字+護盾指示器（脈衝動畫）+計時條；dragon_king_broadcast 頂部小橫幅；dragon_breath 深紅閃光+「🐉 第N次龍息！命中M個！×1.4」浮動文字；dragon_king_burst 全螢幕三次強閃光+「🐉 龍王爆發！×3.0 黃金5秒！」大字+爆發倍率計時條+結算彈窗；dragon_king_burst_broadcast 全服廣播橫幅）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_dragon_king 訊號 + _handle_lucky_dragon_king
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyDragonKingPanelScript（layer=27）
+  - 龍息設計：每 2 秒攻擊；隨機 3 個目標；80% 擊破機率；×1.4 倍率；全服共享；持續 15 秒
+  - 護盾設計：觸發玩家獲得龍王護盾；護盾指示器（🛡️ 龍王護盾，脈衝動畫）；爆發時清除
+  - 爆發設計：場上所有目標 HP -60%；觸發玩家 ×3.0 倍率加成 5 秒；全服廣播；全服公告
+  - 視覺設計：深紅龍王主題（#8B0000 + #FF4500 + #FFD700 + #FFF8DC）；護盾指示器（🛡️ 脈衝透明度動畫）；爆發倍率計時條（金色，短暫）；右側豎向計時條（深紅，x=-142 與其他計時條錯開）；結算彈窗右側滑入
+  - 全服廣播：龍王降臨/每次龍息攻擊/龍王爆發全服廣播
+  - 全服公告：觸發時公告（深紅色）；龍王爆發公告（火焰橙色）
+  - build/vet 全部通過（零錯誤零警告）
 - **DAY-253 更新（自主觸發）：** 幸運星際隕石魚系統（Lucky Meteor Shower Fish）✅
   - **業界依據：** 業界原創「隕石雨+隨機轟炸+隕石連擊+最終隕石」機制，2026 年業界最熱門 AOE 全服共享方向
   - **設計：** 擊破 T211 後，天空降下「隕石雨」（持續 8 秒）；每 1 秒隨機轟炸場上 2 個目標（70% 擊破機率，×1.3 倍率，全服共享）；若連續 3 次都命中同一個目標 → 「隕石連擊」：×3.0 倍率（全服大獎）；8 秒後「最終隕石」：場上最高 HP 目標被 100% 擊破（×2.0 倍率，全服共享）；個人冷卻 20 秒；全服冷卻 30 秒
