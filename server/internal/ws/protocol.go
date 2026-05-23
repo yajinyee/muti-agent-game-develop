@@ -577,6 +577,7 @@ const (
 	MsgLuckyTimeBombFish   MessageType = "lucky_time_bomb_fish"  // 幸運時間炸彈魚廣播（Server→Client，DAY-235）
 	MsgLuckyMirrorWorld    MessageType = "lucky_mirror_world"    // 幸運鏡面世界魚廣播（Server→Client，DAY-236）
 	MsgLuckyFreezeWorld    MessageType = "lucky_freeze_world"    // 幸運冰凍世界魚廣播（Server→Client，DAY-237）
+	MsgLuckyGravityFlip   MessageType = "lucky_gravity_flip"   // 幸運重力反轉魚廣播（Server→Client，DAY-238）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -5367,4 +5368,21 @@ type LuckyFreezeWorldPayload struct {
 	SpeedFactor  float64 `json:"speed_factor,omitempty"`
 	FrozenCount  int     `json:"frozen_count,omitempty"`
 	CrackedCount int     `json:"cracked_count,omitempty"`
+}
+
+// LuckyGravityFlipPayload 幸運重力反轉魚廣播（Server → Client，DAY-238）
+//
+// Events:
+//
+//	"gravity_start"    — 重力反轉開始（全服廣播，含所有目標翻轉後位置）
+//	"gravity_collapse" — 重力崩潰（全服廣播，HP -45%）
+//	"gravity_end"      — 重力反轉結束（全服廣播）
+type LuckyGravityFlipPayload struct {
+	Event          string      `json:"event"`
+	PlayerID       string      `json:"player_id,omitempty"`
+	PlayerName     string      `json:"player_name,omitempty"`
+	DurationSec    int         `json:"duration_sec,omitempty"`
+	KillBoost      float64     `json:"kill_boost,omitempty"`
+	Positions      interface{} `json:"positions,omitempty"`      // []flippedPos
+	CollapsedCount int         `json:"collapsed_count,omitempty"`
 }

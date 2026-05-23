@@ -242,6 +242,7 @@ signal lucky_vortex_fish(data: Dictionary)          # 幸運漩渦魚系統（DA
 signal lucky_time_bomb_fish(data: Dictionary)       # 幸運時間炸彈魚系統（DAY-235）
 signal lucky_mirror_world(data: Dictionary)         # 幸運鏡面世界魚系統（DAY-236）
 signal lucky_freeze_world(data: Dictionary)         # 幸運冰凍世界魚系統（DAY-237）
+signal lucky_gravity_flip(data: Dictionary)         # 幸運重力反轉魚系統（DAY-238）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -693,6 +694,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_mirror_world(payload)
 		"lucky_freeze_world":
 			_handle_lucky_freeze_world(payload)
+		"lucky_gravity_flip":
+			_handle_lucky_gravity_flip(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3133,3 +3136,30 @@ func _handle_lucky_freeze_world(payload: Dictionary) -> void:
 			print("[GameManager] Freeze world ended! Speed restored.")
 			# 通知 TargetManager 恢復所有目標速度
 			emit_signal("freeze_world_ended")
+
+## 幸運重力反轉魚系統（DAY-238）
+func _handle_lucky_gravity_flip(payload: Dictionary) -> void:
+	emit_signal("lucky_gravity_flip", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"gravity_start":
+			var player_name: String = payload.get("player_name", "")
+			var kill_boost: float = payload.get("kill_boost", 2.1)
+			var positions = payload.get("positions", [])
+			print("[GameManager] Gravity flip started! player=%s boost=x%.1f targets=%d" % [player_name, kill_boost, positions.size()])
+			# 同步目標 Y 座標翻轉位置
+			_sync_gravity_positions(positions)
+		"gravity_collapse":
+			var collapsed_count: int = payload.get("collapsed_count", 0)
+			print("[GameManager] Gravity collapse! affected=%d targets" % collapsed_count)
+		"gravity_end":
+			print("[GameManager] Gravity flip ended! Positions restored.")
+
+## 同步重力翻轉後的目標位置（DAY-238）
+func _sync_gravity_positions(positions: Array) -> void:
+	for pos_data in positions:
+		var target_id: String = pos_data.get("id", "")
+		var new_x: float = pos_data.get("x", 0.0)
+		var new_y: float = pos_data.get("y", 0.0)
+		if target_id != "":
+			emit_signal("target_teleported", target_id, new_x, new_y)

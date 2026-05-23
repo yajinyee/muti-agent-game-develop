@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-23（DAY-237 幸運冰凍世界魚系統）
+## 最後更新：2026-05-23（DAY-238 幸運重力反轉魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-238 更新（自主觸發）：** 幸運重力反轉魚系統（Lucky Gravity Flip Fish）✅
+  - **業界依據：** 業界原創「重力反轉+上下顛倒移動+重力崩潰」機制
+  - **設計：** 擊破 T196 後觸發「重力反轉」（10 秒）：場上所有目標 Y 座標以場景中央（Y=300）為軸翻轉；重力反轉期間擊破任何目標獲得 ×2.1 倍率加成（乘法）；10 秒後「重力崩潰」：所有目標 HP -45%（保留最少 1），Y 座標恢復；個人冷卻 22 秒；全服冷卻 32 秒
+  - **設計差異：** 與鏡面世界魚（DAY-236，X 座標翻轉）不同，重力反轉是「Y 座標翻轉」，讓玩家有「要重新瞄準上下顛倒的位置」的空間感；「上下顛倒」讓玩家感受到「世界倒過來了」的視覺衝擊，比左右鏡像更有衝擊感；×2.1 倍率加成（全場有效）讓玩家有「趕快在 10 秒內多打」的緊迫感；「重力崩潰 HP -45%」比鏡面崩潰（-35%）更強，讓玩家有更大的爆發感；全服廣播翻轉位置讓所有玩家都看到目標的新位置，製造「全服一起重新瞄準」的社交感
+  - server/internal/game/lucky_gravity_flip_handler.go：luckyGravityFlipManager（個人冷卻/全服冷卻/重力反轉狀態/instanceID）；isLuckyGravityFlipFish（T196）；isGravityFlipActive；getLuckyGravityFlipBoost（×2.1 乘法）；tryLuckyGravityFlipFish（擊破後觸發/Y座標翻轉/全服廣播/全服公告）；doGravityFlip（所有目標 Y 座標翻轉/邊界限制/回傳位置列表）；runLuckyGravityFlip（goroutine 10秒後觸發崩潰）；doGravityCollapse（HP -45%/保留最少1/全服廣播/全服公告）
+  - server/internal/data/tables.go：新增 T196 幸運重力反轉魚（31-59x/HP69/SpawnWeight3/Speed50/Lifetime14）
+  - server/internal/ws/protocol.go：新增 MsgLuckyGravityFlip；LuckyGravityFlipPayload（gravity_start/gravity_collapse/gravity_end）
+  - server/internal/game/announce/announce.go：新增 EventLuckyGravityFlip + case 處理
+  - server/internal/game/game.go：LuckyGravityFlip *luckyGravityFlipManager；handleKill 加入 getLuckyGravityFlipBoost 乘法加成 + isLuckyGravityFlipFish 分支
+  - client/chiikawa-pixel/scripts/ui/LuckyGravityFlipPanel.gd：橙棕重力主題面板（gravity_start 橙色三次強閃光+頂部橫幅+「🔄 重力反轉！」大字+計時條+場景中央水平線+左右翻轉箭頭；gravity_collapse 全螢幕橙色強閃光+「🔄 重力崩潰！」大字+HP-45%提示；gravity_end 重力恢復提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_gravity_flip 訊號 + _handle_lucky_gravity_flip + _sync_gravity_positions
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyGravityFlipPanelScript（layer=7）
+  - 重力反轉設計：Y 座標以 Y=300 為軸翻轉；持續 10 秒；個人冷卻 22 秒；全服冷卻 32 秒
+  - 重力崩潰設計：HP -45%；保留最少 1；10 秒後自動觸發
+  - 視覺設計：橙棕重力主題（#E67E22 + #D35400 + #FAD7A0 + #FFF3E0）；場景中央水平線（閃爍動畫）；左右翻轉箭頭（⇅）；底部計時條（橙→深橙漸變）；全螢幕橙色強閃光（重力崩潰感）
+  - 位置同步：複用 target_teleported 訊號平滑移動目標到翻轉後位置
+  - 全服廣播：重力反轉開始（含所有目標翻轉後位置）/重力崩潰/重力反轉結束全服廣播
+  - 全服公告：觸發時公告（橙色）；崩潰時公告（深橙色）
+  - build/vet 全部通過（零錯誤零警告）
+
 - **DAY-237 更新（自主觸發）：** 幸運冰凍世界魚系統（Lucky Freeze World Fish）✅
   - **業界依據：** 業界原創「全場冰凍+冰裂爆發」機制
   - **設計：** 擊破 T195 後觸發「冰凍世界」（8 秒）：場上所有目標移動速度降低 80%（幾乎靜止）；冰凍世界期間擊破任何目標獲得 ×2.0 倍率加成（乘法）；8 秒後「冰裂爆發」：所有目標 HP -50%（保留最少 1），速度恢復；個人冷卻 20 秒；全服冷卻 30 秒

@@ -659,6 +659,12 @@ var Targets = map[string]*TargetDef{
 	//   - 8 秒後「冰裂爆發」：所有目標 HP -50%（保留最少 1），速度恢復
 	//   - 個人冷卻 20 秒；全服冷卻 30 秒
 	"T195": {ID: "T195", Name: "幸運冰凍世界魚", Type: TargetTypeSpecial, MultiplierMin: 30, MultiplierMax: 58, HP: 68, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_freeze_world"},
+	// T196 幸運重力反轉魚（DAY-238）— 業界原創「重力反轉+上下顛倒移動+重力崩潰」機制
+	//   - 擊破 T196 後觸發「重力反轉」（10 秒）：場上所有目標 Y 座標以場景中央（Y=300）為軸翻轉
+	//   - 重力反轉期間擊破任何目標獲得 ×2.1 倍率加成（乘法）
+	//   - 10 秒後「重力崩潰」：所有目標 HP -45%（保留最少 1），Y 座標恢復
+	//   - 個人冷卻 22 秒；全服冷卻 32 秒
+	"T196": {ID: "T196", Name: "幸運重力反轉魚", Type: TargetTypeSpecial, MultiplierMin: 31, MultiplierMax: 59, HP: 69, SpawnWeight: 3, Speed: 50, Lifetime: 14, LaborGain: 12, DifficultyFactor: 16.0, SpecialBehavior: "lucky_gravity_flip"},
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
