@@ -359,6 +359,7 @@ func _ready() -> void:
 	_init_lucky_resonance_wave_panel()      # 幸運共鳴波魚系統面板（DAY-273）
 	_init_lucky_fortune_prophecy_panel()    # 幸運命運預言魚系統面板（DAY-274）
 	_init_lucky_luck_totem_panel()          # 幸運幸運圖騰魚系統面板（DAY-275）
+	_init_lucky_golden_hurricane_panel()    # 幸運黃金颶風魚系統面板（DAY-276）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5192,3 +5193,19 @@ func _init_lucky_luck_totem_panel() -> void:
 func _on_lucky_luck_totem(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_luck_totem_panel):
 		_lucky_luck_totem_panel.handle(data)
+
+const LuckyGoldenHurricanePanelScript = preload("res://scripts/ui/LuckyGoldenHurricanePanel.gd")
+var _lucky_golden_hurricane_panel = null
+
+func _init_lucky_golden_hurricane_panel() -> void:
+	var panel = LuckyGoldenHurricanePanelScript.new()
+	panel.name = "LuckyGoldenHurricanePanel"
+	panel.layer = 49
+	add_child(panel)
+	_lucky_golden_hurricane_panel = panel
+	if GameManager.has_signal("lucky_golden_hurricane"):
+		GameManager.lucky_golden_hurricane.connect(_on_lucky_golden_hurricane)
+
+func _on_lucky_golden_hurricane(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_golden_hurricane_panel):
+		_lucky_golden_hurricane_panel.handle(data)

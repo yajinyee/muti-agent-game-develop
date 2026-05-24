@@ -249,6 +249,7 @@ type Game struct {
 	LuckyResonanceWave      *luckyResonanceWaveManager         // 幸運共鳴波魚系統管理器（DAY-273）
 	LuckyFortuneProphecy    *luckyFortuneProphecyManager       // 幸運命運預言魚系統管理器（DAY-274）
 	LuckyLuckTotem          *luckyLuckTotemManager             // 幸運幸運圖騰魚系統管理器（DAY-275）
+	LuckyGoldenHurricane    *luckyGoldenHurricaneManager       // 幸運黃金颶風魚系統管理器（DAY-276）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -474,6 +475,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyResonanceWave:      newLuckyResonanceWaveManager(),
 		LuckyFortuneProphecy:    newLuckyFortuneProphecyManager(),
 		LuckyLuckTotem:          newLuckyLuckTotemManager(),
+		LuckyGoldenHurricane:    newLuckyGoldenHurricaneManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1668,6 +1670,17 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			go g.notifyLuckTotemKill(p, totemBonus)
 		}
 	}
+	// 套用幸運黃金颶風魚累積倍率（DAY-276，觸發玩家每次擊破套用累積倍率，颶風期間）
+	if !isLuckyGoldenHurricaneFish(t.DefID) {
+		hurricaneMult := g.getGoldenHurricaneMult(p.ID)
+		if hurricaneMult > 1.0 {
+			hurricaneBonus := int(float64(finalReward) * (hurricaneMult - 1.0))
+			if hurricaneBonus > 0 {
+				finalReward += hurricaneBonus
+				g.recordGoldenHurricaneReward(p.ID, hurricaneBonus)
+			}
+		}
+	}
 	// 套用幸運星座命運魚星座祝福/庇護倍率加成（DAY-259，×3.0/1.5 乘法，個人，祝福/庇護期間）
 	zodiacMult := g.LuckyZodiacFate.getLuckyZodiacFateMult(p.ID)
 	if zodiacMult > 1.0 {
@@ -2548,6 +2561,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運幸運圖騰魚：擊破 T233 時觸發幸運圖騰（DAY-275）
 	if isLuckyLuckTotemFish(t.DefID) {
 		go g.tryLuckyLuckTotemFish(p)
+	}
+	// 幸運黃金颶風魚：擊破 T234 時觸發黃金颶風（DAY-276）
+	if isLuckyGoldenHurricaneFish(t.DefID) {
+		go g.tryLuckyGoldenHurricaneFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

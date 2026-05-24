@@ -892,6 +892,14 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 30 秒；全服冷卻 50 秒
 	"T233": {ID: "T233", Name: "幸運幸運圖騰魚", Type: TargetTypeSpecial, MultiplierMin: 70, MultiplierMax: 131, HP: 110, SpawnWeight: 2, Speed: 12, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_luck_totem"},
 
+	// T234 幸運黃金颶風魚（DAY-276）— Royal Fishing Jili 2026「AOE 旋風掃場」機制進化版
+	//   - 擊破 T234 後，觸發「黃金颶風」（螺旋掃場，持續 6 秒）
+	//   - 颶風以螺旋路徑掃過整個場地，路徑上所有目標 HP -30%
+	//   - 颶風每掃過一個目標，觸發玩家獲得 ×1.5 倍率加成（累積，最高 ×8.0）
+	//   - 6 秒後颶風結算：廣播掃過目標數/累積倍率/總獎勵
+	//   - 個人冷卻 28 秒；全服冷卻 45 秒
+	"T234": {ID: "T234", Name: "幸運黃金颶風魚", Type: TargetTypeSpecial, MultiplierMin: 71, MultiplierMax: 133, HP: 111, SpawnWeight: 2, Speed: 11, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_golden_hurricane"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

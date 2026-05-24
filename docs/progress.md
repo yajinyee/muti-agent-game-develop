@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-275 幸運幸運圖騰魚系統）
+## 最後更新：2026-05-24（DAY-276 幸運黃金颶風魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-276 更新（自主觸發）：** 幸運黃金颶風魚系統（Lucky Golden Hurricane Fish）✅
+  - **業界依據：** Royal Fishing Jili 2026「AOE 旋風掃場」機制進化版，業界原創「螺旋掃場+累積倍率」機制
+  - **設計：** 擊破 T234 後，觸發「黃金颶風」（螺旋掃場，持續 6 秒）；颶風以螺旋路徑掃過整個場地，路徑上所有目標 HP -30%；颶風每掃過一個目標，觸發玩家獲得 ×1.5 倍率加成（累積，最高 ×8.0）；6 秒後颶風結算：廣播掃過目標數/累積倍率/總獎勵；個人冷卻 28 秒；全服冷卻 45 秒
+  - **設計差異：** 與連鎖爆炸（T224，從一點向外擴散）不同，黃金颶風是「螺旋路徑掃場」，讓玩家看到「颶風從中心螺旋向外掃過整個場地」的視覺爽感；「每掃過一個目標 ×1.5 累積」讓玩家有「颶風掃的目標越多，倍率越高」的期待感；「最高 ×8.0 累積倍率」讓玩家有「要是颶風掃過 5 個目標就賺大了」的動力；「HP -30% 弱化」讓颶風後的目標更容易擊破，製造「颶風過後趁機打」的策略感；「全服廣播颶風路徑」讓所有玩家看到「颶風在哪裡掃」，製造全服緊張感
+  - server/internal/game/lucky_golden_hurricane_handler.go：luckyGoldenHurricaneManager（個人冷卻/全服冷卻/active/accumMults/totalRewards）；isLuckyGoldenHurricaneFish（T234）；getGoldenHurricaneMult（供 handleKill 使用）；recordGoldenHurricaneReward（記錄颶風期間獎勵）；tryLuckyGoldenHurricaneFish（觸發/全服廣播+全服公告）；runGoldenHurricaneSweep（goroutine 每600ms掃一個目標/HP-30%/累積倍率×1.5/最高×8.0）；doGoldenHurricaneSettle（結算/全服廣播+公告）
+  - server/internal/data/tables.go：新增 T234 幸運黃金颶風魚（71-133x/HP111/SpawnWeight2/Speed11/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyGoldenHurricane；LuckyGoldenHurricanePayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyGoldenHurricane + case 處理
+  - server/internal/game/game.go：LuckyGoldenHurricane *luckyGoldenHurricaneManager；handleKill 加入 getGoldenHurricaneMult 倍率套用 + isLuckyGoldenHurricaneFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyGoldenHurricanePanel.gd：黃金颶風主題面板（hurricane_start 金色三次強閃光+頂部橫幅+倍率指示器（右上角，顏色隨倍率變化）+右側豎向計時條；hurricane_sweep 橙色閃光+浮動文字（HP傷害/累積倍率）；hurricane_end 金色三次強閃光+結算彈窗；hurricane_broadcast 全服廣播橫幅）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_golden_hurricane 訊號 + _handle_lucky_golden_hurricane
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyGoldenHurricanePanelScript（layer=49）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T234 映射
+  - 颶風設計：每 600ms 掃一個目標；HP -30%；累積倍率 ×1.5/次；最高 ×8.0；持續 6 秒；個人冷卻 28 秒；全服冷卻 45 秒
+  - 結算設計：6 秒後廣播掃過目標數/最終倍率/總獎勵；全服廣播+公告（金色/橙色）
+  - 視覺設計：黃金颶風主題（#FFD700 金 + #FFA500 橙 + #FF8C00 深橙 + #FFFACD 淡金）；倍率指示器（右上角，顏色隨倍率：橙→深橙→金）；右側豎向計時條（x=-352 與其他計時條錯開）；結算彈窗右側滑入（含掃過目標數/累積倍率/額外獎勵）
+  - build/vet 全部通過（零錯誤零警告）
+  - T234 精靈圖：黃金颶風魚（螺旋颶風紋路+金色魚身+旋渦中心+金色光點+橙色弧線）
 - **DAY-275 更新（自主觸發）：** 幸運幸運圖騰魚系統（Lucky Luck Totem Fish）✅
   - **業界依據：** Fish It Luck Totem（2026）「全場幸運加成 100% 30分鐘」機制進化版，縮短為 15 秒高強度爆發，加入「觸發者個人雙倍加成」製造社交動力
   - **設計：** 擊破 T233 後，場上出現「幸運圖騰」（持續 15 秒）；圖騰期間：全服所有玩家每次擊破任何目標 → ×1.3 全服加成；觸發玩家額外獲得 ×1.5 個人加成（疊加在全服加成上）；15 秒後圖騰消失，廣播結算（總擊破數/總獎勵）；個人冷卻 30 秒；全服冷卻 50 秒

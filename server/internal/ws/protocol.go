@@ -616,6 +616,7 @@ const (
 	MsgLuckyResonanceWave          MessageType = "lucky_resonance_wave"                  // 幸運共鳴波魚廣播（Server→Client，DAY-273）
 	MsgLuckyFortuneProphecy        MessageType = "lucky_fortune_prophecy"                // 幸運命運預言魚廣播（Server→Client，DAY-274）
 	MsgLuckyLuckTotem              MessageType = "lucky_luck_totem"                      // 幸運幸運圖騰魚廣播（Server→Client，DAY-275）
+	MsgLuckyGoldenHurricane        MessageType = "lucky_golden_hurricane"                // 幸運黃金颶風魚廣播（Server→Client，DAY-276）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6313,4 +6314,25 @@ type LuckyLuckTotemPayload struct {
 	BonusReward   int     `json:"bonus_reward,omitempty"`   // 圖騰期間額外獎勵
 	TotalKills    int     `json:"total_kills,omitempty"`    // 圖騰期間總擊破數
 	TotalReward   int     `json:"total_reward,omitempty"`   // 圖騰期間總獎勵
+}
+
+// LuckyGoldenHurricanePayload 幸運黃金颶風魚廣播（Server → Client，DAY-276）
+// Event 類型：
+//   - hurricane_start：颶風開始（全服，PlayerID/PlayerName/DurationSec/TargetCount）
+//   - hurricane_sweep：颶風掃過目標（全服，InstanceID/DefID/HPDamage/AccumMult）
+//   - hurricane_end：颶風結算（全服，PlayerID/PlayerName/SweptCount/FinalMult/TotalReward）
+//   - hurricane_broadcast：全服廣播橫幅（PlayerName/SweptCount/FinalMult）
+type LuckyGoldenHurricanePayload struct {
+	Event        string  `json:"event"`
+	PlayerID     string  `json:"player_id,omitempty"`
+	PlayerName   string  `json:"player_name,omitempty"`
+	DurationSec  int     `json:"duration_sec,omitempty"`   // 颶風持續秒數
+	TargetCount  int     `json:"target_count,omitempty"`   // 場上目標數
+	InstanceID   string  `json:"instance_id,omitempty"`    // 被掃過的目標 instanceID
+	DefID        string  `json:"def_id,omitempty"`         // 被掃過的目標 defID
+	HPDamage     int     `json:"hp_damage,omitempty"`      // HP 傷害量
+	AccumMult    float64 `json:"accum_mult,omitempty"`     // 當前累積倍率
+	SweptCount   int     `json:"swept_count,omitempty"`    // 總掃過目標數
+	FinalMult    float64 `json:"final_mult,omitempty"`     // 最終累積倍率
+	TotalReward  int     `json:"total_reward,omitempty"`   // 颶風期間總獎勵
 }
