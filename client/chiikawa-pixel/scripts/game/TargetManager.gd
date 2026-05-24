@@ -135,10 +135,12 @@ const TARGET_SPRITES = {
 	"T220": "res://assets/sprites/targets/T220_progjakpot.png",
 	"T221": "res://assets/sprites/targets/T221_elemfusion.png",
 	"T222": "res://assets/sprites/targets/T222_karmacycle.png",
+	"T223": "res://assets/sprites/targets/T223_speedrace.png",
 	"T224": "res://assets/sprites/targets/T224_chainexp.png",
 	"T225": "res://assets/sprites/targets/T225_multstk.png",
 	"T226": "res://assets/sprites/targets/T226_cntbomb.png",
 	"T227": "res://assets/sprites/targets/T227_spinwheel.png",
+	"T228": "res://assets/sprites/targets/T228_mirrorduel.png",
 	"B001": "res://assets/sprites/targets/B001_boss.png",
 }
 
