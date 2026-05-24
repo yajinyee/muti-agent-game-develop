@@ -245,6 +245,7 @@ type Game struct {
 	LuckySpinWheel          *luckySpinWheelManager             // 幸運輪盤魚系統管理器（DAY-269）
 	LuckyMirrorDuel         *luckyMirrorDuelManager            // 幸運鏡像對決魚系統管理器（DAY-270）
 	LuckyReroll             *luckyRerollManager                // 幸運倍率重擲魚系統管理器（DAY-271）
+	LuckyQualityMutation    *luckyQualityMutationManager       // 幸運品質突變魚系統管理器（DAY-272）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -466,6 +467,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckySpinWheel:          newLuckySpinWheelManager(),
 		LuckyMirrorDuel:         newLuckyMirrorDuelManager(),
 		LuckyReroll:             newLuckyRerollManager(),
+		LuckyQualityMutation:    newLuckyQualityMutationManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1614,6 +1616,19 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			}
 		}
 	}
+	// 套用幸運品質突變魚品質倍率（DAY-272，×1.0 到 ×10.0，個人，下一次擊破）
+	if !isLuckyQualityMutationFish(t.DefID) {
+		if qualityMult, hasQuality, _ := g.LuckyQualityMutation.getQualityMutationMult(p.ID); hasQuality {
+			if session, ok := g.LuckyQualityMutation.consumeQualityMutationSession(p.ID); ok {
+				finalReward = int(float64(finalReward) * qualityMult)
+				targetName := t.DefID
+				if t.Def != nil {
+					targetName = t.Def.Name
+				}
+				go g.notifyQualityMutationKill(p, targetName, finalReward, session.quality)
+			}
+		}
+	}
 	// 套用幸運星座命運魚星座祝福/庇護倍率加成（DAY-259，×3.0/1.5 乘法，個人，祝福/庇護期間）
 	zodiacMult := g.LuckyZodiacFate.getLuckyZodiacFateMult(p.ID)
 	if zodiacMult > 1.0 {
@@ -2478,6 +2493,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運倍率重擲魚：擊破 T229 時觸發重擲（DAY-271）
 	if isLuckyRerollFish(t.DefID) {
 		go g.tryLuckyRerollFish(p)
+	}
+	// 幸運品質突變魚：擊破 T230 時觸發品質突變（DAY-272）
+	if isLuckyQualityMutationFish(t.DefID) {
+		go g.tryLuckyQualityMutationFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

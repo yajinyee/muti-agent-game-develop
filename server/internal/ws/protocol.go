@@ -612,6 +612,7 @@ const (
 	MsgLuckySpinWheel              MessageType = "lucky_spin_wheel"                     // 幸運輪盤魚廣播（Server→Client，DAY-269）
 	MsgLuckyMirrorDuel             MessageType = "lucky_mirror_duel"                    // 幸運鏡像對決魚廣播（Server→Client，DAY-270）
 	MsgLuckyReroll                 MessageType = "lucky_reroll"                         // 幸運倍率重擲魚廣播（Server→Client，DAY-271）
+	MsgLuckyQualityMutation        MessageType = "lucky_quality_mutation"                // 幸運品質突變魚廣播（Server→Client，DAY-272）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6226,4 +6227,23 @@ type LuckyRerollPayload struct {
 	MaxRolls   int       `json:"max_rolls,omitempty"`  // 最多重擲次數
 	TargetName string    `json:"target_name,omitempty"`// 命中目標名稱
 	Reward     int       `json:"reward,omitempty"`     // 最終獎勵
+}
+
+// LuckyQualityMutationPayload 幸運品質突變魚廣播（Server → Client，DAY-272）
+// Event 類型：
+//   - mutation_start：品質突變開始（個人，PlayerID/PlayerName/Quality/QualityMult/QualityColor/QualityEmoji）
+//   - mutation_broadcast：全服廣播（PlayerName/Quality/QualityMult/QualityColor/QualityEmoji，Legendary+才廣播）
+//   - mutation_used：品質突變被使用（個人，TargetName/Reward/Quality/QualityMult/QualityColor/QualityEmoji）
+//   - mutation_result_broadcast：全服廣播結果（PlayerName/Quality/QualityMult/Reward，Mythic才廣播）
+//   - mutation_expire：session 超時（個人，PlayerID）
+type LuckyQualityMutationPayload struct {
+	Event        string  `json:"event"`
+	PlayerID     string  `json:"player_id,omitempty"`
+	PlayerName   string  `json:"player_name,omitempty"`
+	Quality      string  `json:"quality,omitempty"`       // 品質等級名稱（normal/rare/epic/legendary/mythic）
+	QualityMult  float64 `json:"quality_mult,omitempty"`  // 品質倍率
+	QualityColor string  `json:"quality_color,omitempty"` // 品質顏色（#RRGGBB）
+	QualityEmoji string  `json:"quality_emoji,omitempty"` // 品質 emoji
+	TargetName   string  `json:"target_name,omitempty"`   // 命中目標名稱
+	Reward       int     `json:"reward,omitempty"`        // 最終獎勵
 }

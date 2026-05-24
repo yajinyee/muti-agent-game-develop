@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-271 幸運倍率重擲魚系統）
+## 最後更新：2026-05-24（DAY-272 幸運品質突變魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-272 更新（自主觸發）：** 幸運品質突變魚系統（Lucky Quality Mutation Fish）✅
+  - **業界依據：** Fishing Frenzy Chapter 3（2026-05-11）Quality Roll 系統 + Fisch Roblox Mutation 機制（150+ 種突變，0.1x 到 17x 倍率），2026 年最熱門「品質突變+稀有度分層」機制
+  - **設計：** 擊破 T230 後，觸發「品質突變」：Server 為觸發玩家的下一次擊破「品質突變」（5個品質等級）；Normal（40%）×1.0 / Rare（30%）×1.8 / Epic（18%）×3.5 / Legendary（9%）×6.0 / Mythic（3%）×10.0；品質效果持續到下一次擊破（一次性）；Mythic 品質全服廣播；個人冷卻 18 秒；全服冷卻 30 秒
+  - **設計差異：** 與重擲（T229，動態累積最高值）不同，品質突變是「一次性稀有度抽取」，讓玩家有「這次突變是什麼品質？」的期待感；「5個品質等級（Normal/Rare/Epic/Legendary/Mythic）」讓玩家有「Normal 到 Mythic 的稀有度層次感」；「Mythic ×10.0（3% 機率）」讓玩家有「要是突變到 Mythic 就賺大了」的期待感；「品質顏色視覺（灰/藍/紫/橙/彩虹）」讓玩家一眼看出突變品質；「Mythic 全服廣播」讓所有玩家看到「有人突變到 Mythic！」，製造羨慕感
+  - server/internal/game/lucky_quality_mutation_handler.go：luckyQualityMutationManager（個人冷卻/全服冷卻/activeSessions）；qualityTier（Name/Mult/Weight/Color/Emoji）；qualityMutationSession（playerID/playerName/quality/expiresAt/used）；isLuckyQualityMutationFish（T230）；rollQuality（加權隨機抽取品質等級）；getQualityMutationMult（供 handleKill 使用）；consumeQualityMutationSession；tryLuckyQualityMutationFish（品質突變觸發/個人訊息+Legendary+全服廣播+Mythic全服公告）；notifyQualityMutationKill（品質突變命中通知/Mythic全服廣播+公告/Legendary公告）
+  - server/internal/data/tables.go：新增 T230 幸運品質突變魚（67-125x/HP107/SpawnWeight2/Speed15/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyQualityMutation；LuckyQualityMutationPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyQualityMutation + case 處理
+  - server/internal/game/game.go：LuckyQualityMutation *luckyQualityMutationManager；handleKill 加入 isLuckyQualityMutationFish 分支 + getQualityMutationMult/consumeQualityMutationSession 倍率套用 + isLuckyQualityMutationFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyQualityMutationPanel.gd：品質主題面板（mutation_start 品質顏色閃光+頂部橫幅+「品質突變！」大字+等待指示器（Mythic彩虹循環/其他脈衝）；mutation_broadcast 全服廣播橫幅（Legendary+）；mutation_used 閃光+「×N.N 命中！」大字+結算彈窗；mutation_result_broadcast 全服廣播橫幅（Mythic）；mutation_expire 超時提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_quality_mutation 訊號 + _handle_lucky_quality_mutation
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyQualityMutationPanelScript（layer=45）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T230 映射
+  - 品質設計：Normal（40%）×1.0 / Rare（30%）×1.8 / Epic（18%）×3.5 / Legendary（9%）×6.0 / Mythic（3%）×10.0
+  - 廣播設計：Legendary+ 觸發時全服廣播；Mythic 命中時全服廣播+公告
+  - 視覺設計：品質顏色系統（灰/藍/紫/橙/彩虹粉）；Mythic 等待指示器彩虹色循環動畫；結算彈窗右側滑入（含品質等級/倍率/目標/獎勵）
+  - build/vet 全部通過（零錯誤零警告）
+  - T230 精靈圖：彩虹品質突變魚（彩虹光環+五色品質點+白色魚身+突變星芒+彩虹光點）
 - **DAY-271 更新（自主觸發）：** 幸運倍率重擲魚系統（Lucky Multiplier Reroll Fish）✅
   - **業界依據：** GONE Fishing 2026-05-03 patch「4.25x multiplier reroll → 5x-10x max win formula」，2026 年最新 RNG 設計趨勢
   - **設計：** 擊破 T229 後，觸發「倍率重擲」：Server 為觸發玩家的下一次擊破重擲倍率（最多 3 次，取最高值）；每次重擲有 40% 機率提升倍率（×1.5 到 ×4.0 隨機）；最終用最高倍率計算獎勵（個人）；至少保證 ×1.5；個人冷卻 20 秒；全服冷卻 35 秒

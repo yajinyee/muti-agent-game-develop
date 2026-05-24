@@ -110,6 +110,7 @@ const (
 	EventLuckySpinWheel           EventType = "lucky_spin_wheel"           // 幸運輪盤魚觸發（DAY-269）
 	EventLuckyMirrorDuel          EventType = "lucky_mirror_duel"          // 幸運鏡像對決魚觸發（DAY-270）
 	EventLuckyReroll              EventType = "lucky_reroll"               // 幸運倍率重擲魚觸發（DAY-271）
+	EventLuckyQualityMutation     EventType = "lucky_quality_mutation"     // 幸運品質突變魚觸發（DAY-272）
 )
 
 // Priority 公告優先級
@@ -1893,6 +1894,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🎲 倍率重擲！"
 		message = msg
 		icon = "🎲"
+		color = c
+		priority = PriorityHigh
+		duration = 4500
+
+	case EventLuckyQualityMutation:
+		msg := "✨ 幸運品質突變觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FF69B4"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "✨ 品質突變！"
+		message = msg
+		icon = "✨"
 		color = c
 		priority = PriorityHigh
 		duration = 4500

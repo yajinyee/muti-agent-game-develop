@@ -861,6 +861,13 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 20 秒；全服冷卻 35 秒
 	"T229": {ID: "T229", Name: "幸運倍率重擲魚", Type: TargetTypeSpecial, MultiplierMin: 66, MultiplierMax: 123, HP: 106, SpawnWeight: 2, Speed: 16, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_reroll"},
 
+	// T230 幸運品質突變魚（DAY-272）— Fishing Frenzy Chapter 3 Quality Roll 系統 + Fisch Mutation 機制
+	//   - 擊破 T230 後，觸發「品質突變」：Server 為觸發玩家的下一次擊破「品質突變」
+	//   - Normal（40%）×1.0 / Rare（30%）×1.8 / Epic（18%）×3.5 / Legendary（9%）×6.0 / Mythic（3%）×10.0
+	//   - 品質效果持續到下一次擊破（一次性）；Mythic 品質全服廣播
+	//   - 個人冷卻 18 秒；全服冷卻 30 秒
+	"T230": {ID: "T230", Name: "幸運品質突變魚", Type: TargetTypeSpecial, MultiplierMin: 67, MultiplierMax: 125, HP: 107, SpawnWeight: 2, Speed: 15, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_quality_mutation"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
