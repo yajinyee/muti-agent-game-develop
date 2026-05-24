@@ -262,6 +262,7 @@ type Game struct {
 	LuckyKraken             *luckyKrakenManager                // 幸運深海克拉肯魚系統管理器（DAY-286）
 	LuckyCosmicPulse        *luckyCosmicPulseManager           // 幸運宇宙脈衝魚系統管理器（DAY-287）
 	LuckyDomino             *luckyDominoManager                // 幸運多米諾魚系統管理器（DAY-288）
+	LuckyImmortalBoss       *luckyImmortalBossManager          // 幸運永生 BOSS 魚系統管理器（DAY-289）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -500,6 +501,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyKraken:             newLuckyKrakenManager(),
 		LuckyCosmicPulse:        newLuckyCosmicPulseManager(),
 		LuckyDomino:             newLuckyDominoManager(),
+		LuckyImmortalBoss:       newLuckyImmortalBossManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2728,6 +2730,24 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運多米諾魚：擊破 T246 時觸發多米諾（DAY-288）
 	if isLuckyDominoFish(t.DefID) {
 		go g.tryLuckyDominoFish(p)
+	}
+	// 幸運永生 BOSS 魚：全服永生終結加成套用（DAY-289）
+	if immortalEndMult := g.LuckyImmortalBoss.getImmortalBossEndMult(); immortalEndMult > 1.0 {
+		immortalBonus := int(float64(finalReward) * (immortalEndMult - 1.0))
+		finalReward += immortalBonus
+	}
+	// 幸運永生 BOSS 魚：永生 BOSS 被擊破時連鎖復活（DAY-289）
+	if isImmortal, immortalMult := g.LuckyImmortalBoss.isImmortalBossTarget(t.InstanceID); isImmortal {
+		killMult := g.notifyImmortalBossKill(p, t.InstanceID)
+		_ = immortalMult
+		if killMult > 1.0 {
+			immortalKillBonus := int(float64(finalReward) * (killMult - 1.0))
+			finalReward += immortalKillBonus
+		}
+	}
+	// 幸運永生 BOSS 魚：擊破 T247 時觸發永生 BOSS（DAY-289）
+	if isLuckyImmortalBossFish(t.DefID) {
+		go g.tryLuckyImmortalBossFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

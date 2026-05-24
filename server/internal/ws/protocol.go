@@ -629,6 +629,7 @@ const (
 	MsgLuckyKraken                 MessageType = "lucky_kraken"                          // 幸運深海克拉肯魚廣播（Server→Client，DAY-286）
 	MsgLuckyCosmicPulse            MessageType = "lucky_cosmic_pulse"                    // 幸運宇宙脈衝魚廣播（Server→Client，DAY-287）
 	MsgLuckyDomino                 MessageType = "lucky_domino"                          // 幸運多米諾魚廣播（Server→Client，DAY-288）
+	MsgLuckyImmortalBoss           MessageType = "lucky_immortal_boss"                   // 幸運永生 BOSS 魚廣播（Server→Client，DAY-289）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6548,8 +6549,32 @@ type LuckyPhoenixRebirthPayload struct {
 	Remaining       int                        `json:"remaining,omitempty"`         // 消散時剩餘未擊破數
 }
 
+// LuckyImmortalBossPayload 幸運永生 BOSS 魚廣播（Server → Client，DAY-289）
+// 業界依據：Royal Fishing Jili「Immortal Boss mechanic — consecutive wins 50X-150X until they leave」
+// Event 類型：
+//   - immortal_start：永生 BOSS 降臨（全服，TriggerPlayerID/TriggerPlayerName/X/Y/LivesLeft/CurrentMult/TimeoutSec）
+//   - immortal_kill：永生 BOSS 被擊破（全服，TriggerPlayerID/TriggerPlayerName/KillCount/KillMult/NextMult/LivesLeft/X/Y）
+//   - immortal_revive：永生 BOSS 復活（全服，LivesLeft/CurrentMult/X/Y）
+//   - immortal_end：永生終結（全服，TriggerPlayerID/TriggerPlayerName/GlobalMult/GlobalDurationSec/KillCount）
+//   - immortal_end_expire：永生終結加成結束（全服）
+//   - immortal_timeout：永生 BOSS 超時消散（全服，KillCount/LivesLeft）
+type LuckyImmortalBossPayload struct {
+	Event             string  `json:"event"`
+	TriggerPlayerID   string  `json:"trigger_player_id,omitempty"`
+	TriggerPlayerName string  `json:"trigger_player_name,omitempty"`
+	X                 float64 `json:"x,omitempty"`
+	Y                 float64 `json:"y,omitempty"`
+	LivesLeft         int     `json:"lives_left,omitempty"`
+	CurrentMult       float64 `json:"current_mult,omitempty"`
+	TimeoutSec        int     `json:"timeout_sec,omitempty"`
+	KillCount         int     `json:"kill_count,omitempty"`
+	KillMult          float64 `json:"kill_mult,omitempty"`
+	NextMult          float64 `json:"next_mult,omitempty"`
+	GlobalMult        float64 `json:"global_mult,omitempty"`
+	GlobalDurationSec int     `json:"global_duration_sec,omitempty"`
+}
+
 // LuckyDominoPayload 幸運多米諾魚廣播（Server → Client，DAY-288）
-// 業界依據：Fishing Fortune 2026「multiplier cascade system」+ Royal Fishing「chain reactions」
 // Event 類型：
 //   - domino_start：多米諾觸發（全服，PlayerID/PlayerName/Targets/TotalCount）
 //   - domino_knock：骨牌推倒（全服，PlayerID/PlayerName/KnockedIdx/TotalCount/AccumMult）

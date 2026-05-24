@@ -1531,3 +1531,7 @@
 {"ts":1779623922076,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"d0096723-177b-47af-a301-d3f2eed960e0"}}
 {"ts":1779624207075,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"261bfb08-3975-4d90-b327-00a646a52b83"}}
 {"ts":1779624266651,"event":"room_summary","player_id":"system","room_id":"room-001","data":{"stats":{"room_id":"room-001","start_time":"2026-05-24T19:16:57.2742248+08:00","last_update":"2026-05-24T20:03:27.0757796+08:00","total_players":1,"peak_players":1,"current_players":0,"total_attacks":0,"total_hits":0,"total_kills":0,"total_bet":0,"total_reward":0,"overall_rtp":0,"boss_spawn_count":11,"boss_kill_count":0,"bonus_count":0}}}
+{"ts":1779624881171,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"9678e939-1540-4702-b1de-3d43187b034b"}}
+{"ts":1779625172172,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"a189822d-a530-42d5-838a-e03089530b72"}}
+{"ts":1779625438271,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"462808dd-0163-4a82-a4b0-b0380a756049"}}
+{"ts":1779625694272,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"f81c8661-4581-4705-b35d-10da38ba6452"}}

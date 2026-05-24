@@ -127,6 +127,7 @@ const (
 	EventLuckyKraken              EventType = "lucky_kraken"               // 幸運深海克拉肯魚觸發（DAY-286）
 	EventLuckyCosmicPulse         EventType = "lucky_cosmic_pulse"         // 幸運宇宙脈衝魚觸發（DAY-287）
 	EventLuckyDomino              EventType = "lucky_domino"               // 幸運多米諾魚觸發（DAY-288）
+	EventLuckyImmortalBoss        EventType = "lucky_immortal_boss"        // 幸運永生 BOSS 魚觸發（DAY-289）
 )
 
 // Priority 公告優先級
@@ -2253,6 +2254,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 7000
+
+	case EventLuckyImmortalBoss:
+		msg := "⚡💀 永生 BOSS 降臨！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#8B0000"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "⚡💀 永生 BOSS！"
+		message = msg
+		icon = "💀"
+		color = c
+		priority = PriorityHigh
+		duration = 8000
 
 	default:
 		title = "📢 公告"

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-288 幸運多米諾魚系統）
+## 最後更新：2026-05-24（DAY-289 幸運永生 BOSS 魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-289 更新（自主觸發）：** 幸運永生 BOSS 魚系統（Lucky Immortal Boss Fish）✅
+  - **業界依據：** Royal Fishing Jili「Immortal Boss mechanic — Golden Toad and Ancient Crocodile bosses appear randomly and award consecutive wins ranging from 50X to 150X until they leave the screen」— 業界原創「永生 BOSS 降臨 + 5 條命連續復活 + 倍率遞增 + 最終爆發」機制
+  - **設計：** 擊破 T247 後，召喚「永生 BOSS」（在場上隨機位置出現，持續 18 秒）；永生 BOSS 有 5 條命（每次被擊破後立即復活，HP 恢復 100%）；每次擊破永生 BOSS → 觸發玩家獲得 ×2.0 獎勵（第1次）；每次復活時，擊破倍率提升 +0.5x（第1次 ×2.0 → 第2次 ×2.5 → ... → 第5次 ×4.0）；若 5 條命全部在 18 秒內耗盡 → 「永生終結」：全服 ×3.5 加成 8 秒；全服廣播永生 BOSS 位置和每次復活；個人冷卻 32 秒；全服冷卻 50 秒
+  - **設計差異：** 與多米諾（T246，場上 5 個目標依序連鎖倒下）不同，永生 BOSS 是「同一個目標反覆復活」；「每次復活倍率 +0.5x」讓玩家有「越打越值錢，要撐到第 5 次」的動力；「5 條命全部耗盡觸發永生終結」讓玩家有「要趁 18 秒內打完 5 次」的緊迫感；「全服 ×3.5 加成 8 秒」是最高全服加成之一，製造「全服一起爽」的社交感；「全服廣播永生 BOSS 位置」讓所有玩家看到「永生 BOSS 在哪裡」，製造全服搶打感
+  - server/internal/game/lucky_immortal_boss_handler.go：luckyImmortalBossManager（個人冷卻/全服冷卻/activeSession/endBoost）；immortalBossEndBoost（mult/expiresAt）；immortalBossSession（triggerPlayerID/triggerPlayerName/instanceID/livesLeft/killCount/currentMult/x/y/expiresAt/settled）；isLuckyImmortalBossFish（T247）；getImmortalBossEndMult（供 handleKill 使用）；isImmortalBossTarget（判斷是否為永生 BOSS 目標）；tryLuckyImmortalBossFish（觸發/隨機位置/建立會話/全服廣播+公告）；notifyImmortalBossKill（擊破通知/倍率遞增/5條命耗盡觸發永生終結）；doImmortalBossEnd（全服×3.5加成8秒/全服廣播+公告）；runImmortalBossTimeout（goroutine 18秒後超時結算）
+  - server/internal/data/tables.go：新增 T247 幸運永生 BOSS 魚（84-159x/HP124/SpawnWeight2/Speed4/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyImmortalBoss；LuckyImmortalBossPayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyImmortalBoss + case 處理（PriorityHigh）
+  - server/internal/game/game.go：LuckyImmortalBoss *luckyImmortalBossManager；handleKill 加入 getImmortalBossEndMult 全服倍率套用 + isImmortalBossTarget 永生 BOSS 擊破分支 + isLuckyImmortalBossFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyImmortalBossPanel.gd：永生主題面板（immortal_start 深紅三次強閃光+頂部橫幅+條命指示器（右上角，條命數/下次倍率）；immortal_kill 火橙閃光+浮動文字+指示器更新；immortal_revive 紅色閃光+復活提示；immortal_end 全螢幕三次強閃光+「永生終結！全服×3.5！」大字+終結指示器（脈衝動畫+倒數計時）；immortal_end_expire 終結加成結束淡出；immortal_timeout 超時消散提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_immortal_boss 訊號 + _handle_lucky_immortal_boss
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyImmortalBossPanelScript（layer=62）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T247 映射
+  - 永生 BOSS 設計：5 條命；每次復活倍率 +0.5x（×2.0→×2.5→×3.0→×3.5→×4.0）；18 秒時限；個人冷卻 32 秒；全服冷卻 50 秒
+  - 永生終結設計：5 條命全部耗盡觸發；全服 ×3.5 加成 8 秒；全服廣播+公告（深紅/金色）
+  - 視覺設計：永生主題（#8B0000 深紅 + #FF0000 紅 + #FF4500 火橙 + #FFD700 金 + #FFFFFF 白）；條命指示器（右上角，條命數/下次倍率，顏色隨條命數：紅→火橙→金）；終結指示器（脈衝動畫+倒數計時）
+  - build/vet 全部通過（零錯誤零警告）
+  - T247 精靈圖：永生 BOSS 魚（圓形深紅漸層魚身+5個金色生命之心+深紅光環+火焰光芒+金色王冠符文+紅色永生之眼+火橙魚尾+金色永生核心）非透明像素 37.0%
 - **DAY-288 更新（自主觸發）：** 幸運多米諾魚系統（Lucky Domino Fish）✅
   - **業界依據：** Fishing Fortune 2026「multiplier cascade system — consecutive rare catches within 90s, building from 2x up to 500x」+ Royal Fishing Jili「chain reactions that jump between nearby fish」— 業界原創「多米諾骨牌連鎖+場上目標依序倒下+最終爆發」機制
   - **設計：** 擊破 T246 後，場上隨機選 5 個目標設為「多米諾骨牌」；第 1 個骨牌立即 HP -80%（幾乎必死）；若被擊破 → 連鎖推倒第 2 個（HP -80%）→ 依序推倒到第 5 個；每推倒一個骨牌，觸發玩家獲得 ×1.5 累積倍率（最高 ×7.5）；若 5 個骨牌全部在 20 秒內被推倒 → 「多米諾完美」：全服 ×2.5 加成 7 秒；全服廣播骨牌位置和連鎖結果；個人冷卻 26 秒；全服冷卻 42 秒

@@ -26,6 +26,10 @@ var _boss_active: bool = false
 var _boss_timer_node: Control = null
 var _last_labor_value: int = 0
 
+# Lucky Panel 系統（DAY-289）
+const LuckyImmortalBossPanelScript = preload("res://scripts/ui/LuckyImmortalBossPanel.gd")
+var _lucky_immortal_boss_panel = null
+
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
 	GameManager.game_state_changed.connect(_on_game_state_changed)
@@ -49,6 +53,12 @@ func _ready() -> void:
 	_reward_popup_base_y = reward_popup.position.y
 	_update_ui()
 	_create_disconnect_overlay()
+
+	# 初始化 Lucky Immortal Boss Panel（DAY-289）
+	_lucky_immortal_boss_panel = LuckyImmortalBossPanelScript.new()
+	get_tree().root.add_child(_lucky_immortal_boss_panel)
+	if GameManager.has_signal("lucky_immortal_boss"):
+		GameManager.lucky_immortal_boss.connect(_on_lucky_immortal_boss)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -372,3 +382,8 @@ func _on_daily_bonus_received(bonus_data: Dictionary) -> void:
 		if is_instance_valid(popup):
 			popup.queue_free()
 	)
+
+# ---- 幸運永生 BOSS 魚（DAY-289）----
+func _on_lucky_immortal_boss(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_immortal_boss_panel):
+		_lucky_immortal_boss_panel.handle_event(data)

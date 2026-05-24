@@ -1001,6 +1001,12 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 26 秒；全服冷卻 42 秒
 	"T246": {ID: "T246", Name: "幸運多米諾魚", Type: TargetTypeSpecial, MultiplierMin: 83, MultiplierMax: 157, HP: 123, SpawnWeight: 2, Speed: 5, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_domino"},
 
+	// T247 幸運永生 BOSS 魚（DAY-289）
+	// 業界依據：Royal Fishing Jili「Immortal Boss mechanic — consecutive wins 50X-150X until they leave the screen」
+	// 設計：擊破後召喚永生 BOSS（5 條命，每次復活倍率 +0.5x，第1次 ×2.0 → 第5次 ×4.0）
+	//       5 條命全部耗盡 → 永生終結：全服 ×3.5 加成 8 秒
+	"T247": {ID: "T247", Name: "幸運永生 BOSS 魚", Type: TargetTypeSpecial, MultiplierMin: 84, MultiplierMax: 159, HP: 124, SpawnWeight: 2, Speed: 4, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_immortal_boss"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

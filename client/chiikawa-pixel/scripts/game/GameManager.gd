@@ -293,6 +293,7 @@ signal lucky_phoenix_rebirth(data: Dictionary)         # 幸運鳳凰涅槃魚�
 signal lucky_kraken(data: Dictionary)                  # 幸運深海克拉肯魚系統（DAY-286）
 signal lucky_cosmic_pulse(data: Dictionary)            # 幸運宇宙脈衝魚系統（DAY-287）
 signal lucky_domino(data: Dictionary)                  # 幸運多米諾魚系統（DAY-288）
+signal lucky_immortal_boss(data: Dictionary)           # 幸運永生 BOSS 魚系統（DAY-289）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -846,6 +847,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_cosmic_pulse(payload)
 		"lucky_domino":
 			_handle_lucky_domino(payload)
+		"lucky_immortal_boss":
+			_handle_lucky_immortal_boss(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4440,3 +4443,31 @@ func _handle_lucky_domino(payload: Dictionary) -> void:
 			var knocked_idx: int = payload.get("knocked_idx", 0)
 			var total_count: int = payload.get("total_count", 5)
 			print("[GameManager] Domino end knocked=%d/%d" % [knocked_idx, total_count])
+
+## 幸運永生 BOSS 魚系統（DAY-289）
+func _handle_lucky_immortal_boss(payload: Dictionary) -> void:
+	emit_signal("lucky_immortal_boss", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"immortal_start":
+			var player_name: String = payload.get("trigger_player_name", "???")
+			var lives_left: int = payload.get("lives_left", 5)
+			print("[GameManager] ImmortalBoss start! player=%s lives=%d" % [player_name, lives_left])
+		"immortal_kill":
+			var kill_count: int = payload.get("kill_count", 1)
+			var kill_mult: float = payload.get("kill_mult", 2.0)
+			var lives_left: int = payload.get("lives_left", 4)
+			print("[GameManager] ImmortalBoss kill #%d mult=%.1f lives=%d" % [kill_count, kill_mult, lives_left])
+		"immortal_revive":
+			var lives_left: int = payload.get("lives_left", 4)
+			var current_mult: float = payload.get("current_mult", 2.5)
+			print("[GameManager] ImmortalBoss revive! lives=%d next_mult=%.1f" % [lives_left, current_mult])
+		"immortal_end":
+			var player_name: String = payload.get("trigger_player_name", "???")
+			var global_mult: float = payload.get("global_mult", 3.5)
+			print("[GameManager] ImmortalBoss END! player=%s global_mult=%.1f" % [player_name, global_mult])
+		"immortal_end_expire":
+			print("[GameManager] ImmortalBoss end boost expired")
+		"immortal_timeout":
+			var kill_count: int = payload.get("kill_count", 0)
+			print("[GameManager] ImmortalBoss timeout! kills=%d" % kill_count)
