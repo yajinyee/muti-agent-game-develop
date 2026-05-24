@@ -226,10 +226,14 @@ func (g *Game) selectDominoTargets(n int) []*dominoTarget {
 		if t == nil || t.HP <= 0 {
 			continue
 		}
+		name := t.DefID
+		if t.Def != nil {
+			name = t.Def.Name
+		}
 		candidates = append(candidates, &dominoTarget{
 			instanceID: t.InstanceID,
 			defID:      t.DefID,
-			name:       t.Name,
+			name:       name,
 			x:          t.X,
 			y:          t.Y,
 		})

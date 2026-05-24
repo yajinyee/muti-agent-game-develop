@@ -1,5 +1,5 @@
 {
-  "enabled": false,
+  "enabled": true,
   "name": "Auto Git Push",
   "description": "每次 Kiro agent 停止後，自動 commit 並 push 最新進度到 GitHub",
   "version": "1",
