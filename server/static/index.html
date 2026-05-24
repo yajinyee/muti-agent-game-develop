@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>吉伊卡哇：像素大討伐</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { background: #0a1628; color: #fff; font-family: monospace; overflow: hidden; }
+#game { position: relative; width: 1280px; height: 720px; margin: 0 auto; background: #0d1f3c; border: 2px solid #1a3a6b; overflow: hidden; cursor: crosshair; }
+#bg { position: absolute; inset: 0; background: linear-gradient(180deg, #0a1628 0%, #0d2040 40%, #0a1830 100%); }
+#hud-top { position: absolute; top: 0; left: 0; right: 0; height: 40px; background: rgba(0,0,0,0.7); display: flex; align-items: center; padding: 0 12px; gap: 20px; z-index: 100; font-size: 14px; }
+#hud-bottom { position: absolute; bottom: 0; left: 0; right: 0; height: 50px; background: rgba(0,0,0,0.7); display: flex; align-items: center; padding: 0 12px; gap: 8px; z-index: 100; }
+.btn { padding: 6px 14px; background: #1a3a6b; border: 1px solid #2a5a9b; color: #fff; cursor: pointer; font-family: monospace; font-size: 13px; border-radius: 3px; }
+.btn:hover { background: #2a5a9b; }
+.btn.active { background: #1a7a1a; border-color: #2aaa2a; color: #0f0; }
+#labor-bar-bg { width: 180px; height: 16px; background: #222; border: 1px solid #444; border-radius: 2px; }
+#labor-bar { height: 100%; background: #2a8a2a; border-radius: 2px; transition: width 0.3s; }
+#canvas { position: absolute; top: 40px; left: 0; right: 0; bottom: 50px; }
+#status { position: absolute; top: 8px; right: 12px; font-size: 13px; color: #aaa; }
+#announce { position: absolute; top: 60px; left: 50%; transform: translateX(-50%); font-size: 22px; font-weight: bold; color: #ffd700; text-shadow: 0 0 10px #ffd700; opacity: 0; transition: opacity 0.3s; pointer-events: none; z-index: 200; white-space: nowrap; }
+#reward-popup { position: absolute; top: 300px; left: 50%; transform: translateX(-50%); font-size: 28px; font-weight: bold; opacity: 0; pointer-events: none; z-index: 200; }
+#disconnect { position: absolute; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; flex-direction: column; gap: 12px; z-index: 300; font-size: 20px; color: #f44; }
+</style>
+</head>
+<body>
+<div id="game">
+  <div id="bg"></div>
+  <div id="hud-top">
+    <span id="coins">💰 10000</span>
+    <span id="bet-info">BET LV1 (1)</span>
+    <span id="char-name" style="color:#ffaacc">Chiikawa</span>
+    <div id="labor-bar-bg"><div id="labor-bar" style="width:0%"></div></div>
+    <span id="labor-text">0/100</span>
+    <span id="status">NORMAL PLAY</span>
+  </div>
+  <canvas id="canvas"></canvas>
+  <div id="hud-bottom">
+    <button class="btn" onclick="sendBetChange(-1)">BET -</button>
+    <button class="btn" onclick="sendBetChange(1)">BET +</button>
+    <button class="btn" id="auto-btn" onclick="toggleAuto()">AUTO</button>
+    <button class="btn" onclick="sendLock('')">🔓 LOCK</button>
+    <button class="btn" onclick="send('trigger_boss',{})">BOSS</button>
+    <button class="btn" onclick="send('trigger_bonus',{})">BONUS</button>
+  </div>
+  <div id="announce"></div>
+  <div id="reward-popup"></div>
+  <div id="disconnect">
+    <div>📡 DISCONNECTED</div>
+    <div style="font-size:14px;color:#aaa">Reconnecting...</div>
+  </div>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
