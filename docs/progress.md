@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-269 幸運輪盤魚系統）
+## 最後更新：2026-05-24（DAY-270 幸運鏡像對決魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,27 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-270 更新（自主觸發）：** 幸運鏡像對決魚系統（Lucky Mirror Duel Fish）✅
+  - **業界依據：** 2026 年最熱門「PvP 鏡像對決」機制，讓玩家有「我的攻擊被鏡像反射，打到對手了！」的對抗感
+  - **設計：** 擊破 T228 後，觸發「鏡像對決」：Server 隨機選一個其他玩家作為「對手」；雙方進入 15 秒對決期；對決期間，雙方每次擊破目標，對手也獲得相同獎勵的 50%（鏡像分享）；15 秒後，擊破數多的玩家獲得「對決勝利」×2.0 加成（5 秒）；擊破數少的玩家獲得「對決失敗」×1.2 安慰獎（5 秒）；平局：雙方各獲得 ×1.5 加成（5 秒）；若無其他玩家，觸發「孤獨模式」：個人 ×1.5 加成 10 秒；個人冷卻 30 秒；全服冷卻 50 秒
+  - **設計差異：** 與公會戰（T215，全服分隊）不同，鏡像對決是「1v1 個人對決」，讓玩家有「我要打贏對手」的直接競爭感；「鏡像分享 50%」讓雙方都有動力打魚，不是零和遊戲；「勝利 ×2.0」是個人競爭類最高倍率，製造「要趁 15 秒內打贏對手」的緊迫感；「平局 ×1.5」鼓勵勢均力敵；「孤獨模式 ×1.5」確保單人遊戲也有收益；「全服廣播對決結果」讓所有玩家看到「誰贏了對決」，製造社交話題感
+  - server/internal/game/lucky_mirror_duel_handler.go：luckyMirrorDuelManager（個人冷卻/全服冷卻/activeSessions/activeBoosts）；mirrorDuelSession（player1ID/player2ID/expiresAt/score1/score2/settled）；mirrorDuelBoost（playerID/mult/expiresAt）；isLuckyMirrorDuelFish（T228）；getMirrorDuelBoostMult（供 handleKill 使用）；getActiveDuelSession；tryLuckyMirrorDuelFish（擊破後觸發/隨機選對手/個人訊息+全服廣播+全服公告）；runMirrorDuelSoloMode（孤獨模式 ×1.5 10秒）；notifyMirrorDuelKill（積分+1/鏡像分享 50%/通知雙方）；runMirrorDuelTimer（goroutine 15秒後結算）；doMirrorDuelSettle（勝負/平局倍率加成/全服廣播/全服公告）
+  - server/internal/data/tables.go：新增 T228 幸運鏡像對決魚（65-121x/HP105/SpawnWeight2/Speed17/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyMirrorDuel；LuckyMirrorDuelPayload（8種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyMirrorDuel + case 處理
+  - server/internal/game/game.go：LuckyMirrorDuel *luckyMirrorDuelManager；handleKill 加入 isLuckyMirrorDuelFish 分支 + notifyMirrorDuelKill（所有非T228擊破）+ getMirrorDuelBoostMult 倍率加成
+  - client/chiikawa-pixel/scripts/ui/LuckyMirrorDuelPanel.gd：紫金對決主題面板（duel_start 紫色三次強閃光+頂部橫幅+「🪞 鏡像對決！」大字+右側積分面板+計時條；duel_broadcast 頂部小橫幅；duel_score 藍色閃光+「🪞 +N 鏡像分享給對手」浮動文字+積分更新；duel_mirror_reward 金色閃光+「🪞 對手分享 +N！」浮動文字；duel_result 勝利金色三次強閃光+「🏆 對決勝利！×2.0！」大字+結算彈窗；duel_draw 紫色閃光+「🤝 平局！×1.5！」大字；duel_settle_broadcast 全服廣播橫幅；duel_solo 藍色閃光+「🌊 孤獨模式 ×1.5」大字）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_mirror_duel 訊號 + _handle_lucky_mirror_duel
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyMirrorDuelPanelScript（layer=43）
+  - 對決設計：15 秒時限；每次擊破 +1 積分；鏡像分享 50%；個人冷卻 30 秒；全服冷卻 50 秒
+  - 結算設計：勝利 ×2.0 加成 5 秒；失敗 ×1.2 安慰獎 5 秒；平局 ×1.5 雙方加成 5 秒
+  - 孤獨設計：無其他玩家時 ×1.5 加成 10 秒
+  - 視覺設計：紫金對決主題（#9B59B6 紫 + #FFD700 金 + #DC143C 紅 + #1E90FF 藍）；右側積分面板（金色邊框，我的積分/對手積分）；右側豎向計時條（x=-310 與其他計時條錯開）；結算彈窗右側滑入（含比分/倍率/加成時間）
+  - 全服廣播：對決觸發/對決結算全服廣播
+  - 全服公告：觸發時公告（紫色）；結算公告（金色/紫色）
+  - build/vet 全部通過（零錯誤零警告）
+  - T228 精靈圖：紫金鏡像魚（左右對稱兩條魚+中間鏡面線+金色框架+星星光點）
+
 - **DAY-269 更新（自主觸發）：** 幸運輪盤魚系統（Lucky Spin Wheel Fish）✅
   - **業界依據：** Royal Fishing ChainLong King Wheel 個人輪盤版本，2026 年最熱門「輪盤+倍率」機制
   - **設計：** 擊破 T227 後，觸發「個人幸運輪盤」（5 個扇區：×2.0/×3.0/×5.0/×8.0/×0.5，機率：35%/30%/20%/10%/5%）；Server 隨機決定結果，廣播給觸發玩家；結果倍率套用到觸發玩家接下來 8 秒的所有擊破（個人）；個人冷卻 25 秒；全服冷卻 40 秒

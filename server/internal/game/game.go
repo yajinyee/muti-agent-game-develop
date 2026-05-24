@@ -243,6 +243,7 @@ type Game struct {
 	LuckyMultiplierStack    *luckyMultiplierStackManager       // 幸運倍率疊加魚系統管理器（DAY-267）
 	LuckyCountdownBomb      *luckyCountdownBombManager         // 幸運倒數炸彈魚系統管理器（DAY-268）
 	LuckySpinWheel          *luckySpinWheelManager             // 幸運輪盤魚系統管理器（DAY-269）
+	LuckyMirrorDuel         *luckyMirrorDuelManager            // 幸運鏡像對決魚系統管理器（DAY-270）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -462,6 +463,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyMultiplierStack:    newLuckyMultiplierStackManager(),
 		LuckyCountdownBomb:      newLuckyCountdownBombManager(),
 		LuckySpinWheel:          newLuckySpinWheelManager(),
+		LuckyMirrorDuel:         newLuckyMirrorDuelManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1592,6 +1594,11 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			finalReward = 0
 		}
 	}
+	// 套用幸運鏡像對決魚結算加成倍率（DAY-270，×2.0/1.2/1.5 乘法，個人，5 秒）
+	mirrorDuelMult := g.LuckyMirrorDuel.getMirrorDuelBoostMult(p.ID)
+	if mirrorDuelMult > 1.0 && !isLuckyMirrorDuelFish(t.DefID) {
+		finalReward = int(float64(finalReward) * mirrorDuelMult)
+	}
 	// 套用幸運星座命運魚星座祝福/庇護倍率加成（DAY-259，×3.0/1.5 乘法，個人，祝福/庇護期間）
 	zodiacMult := g.LuckyZodiacFate.getLuckyZodiacFateMult(p.ID)
 	if zodiacMult > 1.0 {
@@ -2439,6 +2446,18 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 				targetName = t.Def.Name
 			}
 			go g.notifySpinWheelBoostKill(p, targetName, finalReward)
+		}
+	}
+	// 幸運鏡像對決魚：擊破 T228 時觸發對決（DAY-270）
+	if isLuckyMirrorDuelFish(t.DefID) {
+		go g.tryLuckyMirrorDuelFish(p)
+	}
+	// 幸運鏡像對決魚：對決期間擊破任何非 T228 目標時，通知積分+鏡像分享（DAY-270）
+	if !isLuckyMirrorDuelFish(t.DefID) {
+		shareReward := g.notifyMirrorDuelKill(p, finalReward)
+		if shareReward > 0 {
+			// 給對手發放鏡像分享獎勵（由 notifyMirrorDuelKill 內部處理通知）
+			_ = shareReward
 		}
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）

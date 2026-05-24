@@ -845,6 +845,15 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 25 秒；全服冷卻 40 秒
 	"T227": {ID: "T227", Name: "幸運輪盤魚", Type: TargetTypeSpecial, MultiplierMin: 64, MultiplierMax: 119, HP: 104, SpawnWeight: 2, Speed: 18, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_spin_wheel"},
 
+	// T228 幸運鏡像對決魚（DAY-270）— 2026 年最熱門「PvP 鏡像對決」機制
+	//   - 擊破 T228 後，觸發「鏡像對決」：Server 隨機選一個其他玩家作為對手
+	//   - 雙方進入 15 秒對決期；對決期間，雙方每次擊破目標，對手也獲得相同獎勵的 50%（鏡像分享）
+	//   - 15 秒後，擊破數多的玩家獲得「對決勝利」×2.0 加成（5 秒）
+	//   - 擊破數少的玩家獲得「對決失敗」×1.2 安慰獎（5 秒）；平局：雙方各獲得 ×1.5 加成（5 秒）
+	//   - 若無其他玩家，觸發「孤獨模式」：個人 ×1.5 加成 10 秒
+	//   - 個人冷卻 30 秒；全服冷卻 50 秒
+	"T228": {ID: "T228", Name: "幸運鏡像對決魚", Type: TargetTypeSpecial, MultiplierMin: 65, MultiplierMax: 121, HP: 105, SpawnWeight: 2, Speed: 17, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_mirror_duel"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

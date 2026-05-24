@@ -353,6 +353,7 @@ func _ready() -> void:
 	_init_lucky_multiplier_stack_panel()    # 幸運倍率疊加魚系統面板（DAY-267）
 	_init_lucky_countdown_bomb_panel()      # 幸運倒數炸彈魚系統面板（DAY-268）
 	_init_lucky_spin_wheel_panel()          # 幸運輪盤魚系統面板（DAY-269）
+	_init_lucky_mirror_duel_panel()         # 幸運鏡像對決魚系統面板（DAY-270）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5090,3 +5091,19 @@ func _init_lucky_spin_wheel_panel() -> void:
 func _on_lucky_spin_wheel(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_spin_wheel_panel):
 		_lucky_spin_wheel_panel.handle_event(data)
+
+const LuckyMirrorDuelPanelScript = preload("res://scripts/ui/LuckyMirrorDuelPanel.gd")
+var _lucky_mirror_duel_panel = null
+
+func _init_lucky_mirror_duel_panel() -> void:
+	var panel = LuckyMirrorDuelPanelScript.new()
+	panel.name = "LuckyMirrorDuelPanel"
+	panel.layer = 43
+	add_child(panel)
+	_lucky_mirror_duel_panel = panel
+	if GameManager.has_signal("lucky_mirror_duel"):
+		GameManager.lucky_mirror_duel.connect(_on_lucky_mirror_duel)
+
+func _on_lucky_mirror_duel(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_mirror_duel_panel):
+		_lucky_mirror_duel_panel.handle(data)

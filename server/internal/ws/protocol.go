@@ -610,6 +610,7 @@ const (
 	MsgLuckyMultiplierStack        MessageType = "lucky_multiplier_stack"               // 幸運倍率疊加魚廣播（Server→Client，DAY-267）
 	MsgLuckyCountdownBomb          MessageType = "lucky_countdown_bomb"                 // 幸運倒數炸彈魚廣播（Server→Client，DAY-268）
 	MsgLuckySpinWheel              MessageType = "lucky_spin_wheel"                     // 幸運輪盤魚廣播（Server→Client，DAY-269）
+	MsgLuckyMirrorDuel             MessageType = "lucky_mirror_duel"                    // 幸運鏡像對決魚廣播（Server→Client，DAY-270）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6175,4 +6176,35 @@ type LuckySpinWheelPayload struct {
 	CurrentMult float64   `json:"current_mult,omitempty"`// 當前加成倍率
 	TotalReward int       `json:"total_reward,omitempty"`// 加成期間總獎勵
 	KillCount   int       `json:"kill_count,omitempty"`  // 加成期間擊破數
+}
+
+// LuckyMirrorDuelPayload 幸運鏡像對決魚廣播（Server → Client，DAY-270）
+// Event 類型：
+//   - duel_start：對決開始（個人，PlayerID/PlayerName/OpponentID/OpponentName/Duration/ShareRatio/IsChallenger）
+//   - duel_broadcast：全服廣播（PlayerName/OpponentName）
+//   - duel_score：積分更新（個人，MyScore/OpponentScore/ShareReward）
+//   - duel_mirror_reward：收到鏡像分享獎勵（個人，OpponentName/ShareReward/MyScore/OpponentScore）
+//   - duel_result：對決結算（個人，IsWinner/MyScore/OpponentScore/ResultMult/Duration）
+//   - duel_draw：平局（個人，MyScore/OpponentScore/ResultMult/Duration）
+//   - duel_settle_broadcast：全服廣播結算（PlayerName/OpponentName/Score1/Score2/WinnerName/WinMult）
+//   - duel_solo：孤獨模式（個人，SoloMult/Duration）
+type LuckyMirrorDuelPayload struct {
+	Event        string  `json:"event"`
+	PlayerID     string  `json:"player_id,omitempty"`
+	PlayerName   string  `json:"player_name,omitempty"`
+	OpponentID   string  `json:"opponent_id,omitempty"`
+	OpponentName string  `json:"opponent_name,omitempty"`
+	Duration     float64 `json:"duration,omitempty"`     // 對決/加成持續秒數
+	ShareRatio   float64 `json:"share_ratio,omitempty"`  // 鏡像分享比例
+	IsChallenger bool    `json:"is_challenger,omitempty"`// 是否為挑戰者
+	ShareReward  int     `json:"share_reward,omitempty"` // 鏡像分享獎勵
+	MyScore      int     `json:"my_score,omitempty"`     // 我的積分
+	OpponentScore int    `json:"opponent_score,omitempty"`// 對手積分
+	IsWinner     bool    `json:"is_winner,omitempty"`    // 是否勝利
+	ResultMult   float64 `json:"result_mult,omitempty"`  // 結算倍率
+	Score1       int     `json:"score1,omitempty"`       // 全服廣播用
+	Score2       int     `json:"score2,omitempty"`       // 全服廣播用
+	WinnerName   string  `json:"winner_name,omitempty"`  // 勝者名稱（空=平局）
+	WinMult      float64 `json:"win_mult,omitempty"`     // 勝者倍率
+	SoloMult     float64 `json:"solo_mult,omitempty"`    // 孤獨模式倍率
 }

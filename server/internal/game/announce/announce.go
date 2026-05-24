@@ -108,6 +108,7 @@ const (
 	EventLuckyMultiplierStack     EventType = "lucky_multiplier_stack"     // 幸運倍率疊加魚觸發（DAY-267）
 	EventLuckyCountdownBomb       EventType = "lucky_countdown_bomb"       // 幸運倒數炸彈魚觸發（DAY-268）
 	EventLuckySpinWheel           EventType = "lucky_spin_wheel"           // 幸運輪盤魚觸發（DAY-269）
+	EventLuckyMirrorDuel          EventType = "lucky_mirror_duel"          // 幸運鏡像對決魚觸發（DAY-270）
 )
 
 // Priority 公告優先級
@@ -1851,6 +1852,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🎡 幸運輪盤！"
 		message = msg
 		icon = "🎡"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyMirrorDuel:
+		msg := "🪞 幸運鏡像對決觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#9B59B6"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🪞 鏡像對決！"
+		message = msg
+		icon = "🪞"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

@@ -274,6 +274,7 @@ signal lucky_chain_explosion(data: Dictionary)        # 幸運連鎖爆炸魚系
 signal lucky_multiplier_stack(data: Dictionary)       # 幸運倍率疊加魚系統（DAY-267）
 signal lucky_countdown_bomb(data: Dictionary)         # 幸運倒數炸彈魚系統（DAY-268）
 signal lucky_spin_wheel(data: Dictionary)             # 幸運輪盤魚系統（DAY-269）
+signal lucky_mirror_duel(data: Dictionary)            # 幸運鏡像對決魚系統（DAY-270）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -789,6 +790,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_countdown_bomb(payload)
 		"lucky_spin_wheel":
 			_handle_lucky_spin_wheel(payload)
+		"lucky_mirror_duel":
+			_handle_lucky_mirror_duel(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -3983,3 +3986,23 @@ func _handle_lucky_spin_wheel(payload: Dictionary) -> void:
 			var total_reward: int = payload.get("total_reward", 0)
 			var kill_count: int = payload.get("kill_count", 0)
 			print("[GameManager] SpinWheel expire! reward=%d kills=%d" % [total_reward, kill_count])
+
+## 幸運鏡像對決魚系統（DAY-270）
+func _handle_lucky_mirror_duel(payload: Dictionary) -> void:
+	emit_signal("lucky_mirror_duel", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"duel_start":
+			var opp: String = payload.get("opponent_name", "???")
+			var is_challenger: bool = payload.get("is_challenger", false)
+			print("[GameManager] MirrorDuel start! vs=%s challenger=%s" % [opp, is_challenger])
+		"duel_result":
+			var is_winner: bool = payload.get("is_winner", false)
+			var mult: float = payload.get("result_mult", 1.0)
+			print("[GameManager] MirrorDuel result! winner=%s mult=%.1f" % [is_winner, mult])
+		"duel_draw":
+			var mult: float = payload.get("result_mult", 1.5)
+			print("[GameManager] MirrorDuel draw! mult=%.1f" % mult)
+		"duel_solo":
+			var mult: float = payload.get("solo_mult", 1.5)
+			print("[GameManager] MirrorDuel solo! mult=%.1f" % mult)
