@@ -252,6 +252,7 @@ type Game struct {
 	LuckyGoldenHurricane    *luckyGoldenHurricaneManager       // 幸運黃金颶風魚系統管理器（DAY-276）
 	LuckyLightningHammer    *luckyLightningHammerManager       // 幸運閃電錘魚系統管理器（DAY-277）
 	LuckyTimeRift           *luckyTimeRiftManager              // 幸運時間裂縫魚系統管理器（DAY-278）
+	LuckyRainbowBridge      *luckyRainbowBridgeManager         // 幸運彩虹橋魚系統管理器（DAY-279）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -480,6 +481,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyGoldenHurricane:    newLuckyGoldenHurricaneManager(),
 		LuckyLightningHammer:    newLuckyLightningHammerManager(),
 		LuckyTimeRift:           newLuckyTimeRiftManager(),
+		LuckyRainbowBridge:      newLuckyRainbowBridgeManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2585,6 +2587,19 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運時間裂縫魚：裂縫複製體被擊破時結算（DAY-278）
 	if g.LuckyTimeRift.isRiftClone(t.InstanceID) {
 		go g.notifyRiftCloneKill(p, t)
+	}
+	// 幸運彩虹橋魚：擊破 T237 時觸發彩虹橋（DAY-279）
+	if isLuckyRainbowBridgeFish(t.DefID) {
+		go g.tryLuckyRainbowBridgeFish(p)
+	}
+	// 幸運彩虹橋魚：彩虹橋目標被擊破時觸發連鎖傷害（DAY-279）
+	if g.LuckyRainbowBridge.isRainbowBridgeTarget(t.InstanceID) {
+		go g.notifyRainbowBridgeKill(p, t.InstanceID)
+	}
+	// 幸運彩虹橋魚：彩虹爆發期間擊破任何目標，套用全服倍率（DAY-279）
+	rainbowBurstMult := g.LuckyRainbowBridge.getRainbowBridgeBurstMult()
+	if rainbowBurstMult > 1.0 {
+		finalReward = int(float64(finalReward) * rainbowBurstMult)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

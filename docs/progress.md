@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-278 幸運時間裂縫魚系統）
+## 最後更新：2026-05-24（DAY-279 幸運彩虹橋魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,7 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
-- **DAY-278 更新（自主觸發）：** 幸運時間裂縫魚系統（Lucky Time Rift Fish）✅
+- **DAY-279 更新（自主觸發）：** 幸運彩虹橋魚系統（Lucky Rainbow Bridge Fish）✅
+  - **業界依據：** 業界原創「彩虹橋連接+跨目標連鎖傷害+彩虹爆發」機制，結合「連接特定目標+打一個傷其他+全部打完爆發」三個元素，製造「打這條魚，另外兩條也會受傷」的策略感
+  - **設計：** 擊破 T237 後，Server 在場上隨機選 3 個目標，用「彩虹橋」連接；彩虹橋期間（12 秒），任何玩家擊破這 3 個目標中的任何一個 → 其他 2 個目標也獲得 HP -40%（連鎖傷害）；若 3 個目標都在 12 秒內被擊破 → 觸發「彩虹爆發」：全服 ×2.0 加成 6 秒；若 12 秒後未全部擊破 → 「彩虹消散」：剩餘目標 HP -60%（安慰獎）；全服廣播彩虹橋連接的目標和爆發結果；個人冷卻 25 秒；全服冷卻 40 秒
+  - **設計差異：** 與連鎖爆炸（T224，從一點向外擴散）不同，彩虹橋是「連接特定目標」，讓玩家有「打這條魚，另外兩條也會受傷」的策略感；「3 個目標全部擊破觸發彩虹爆發」讓玩家有「要趁 12 秒內打完 3 條」的緊迫感；「全服 ×2.0 加成 6 秒」讓所有玩家都受益，製造「全服一起爽」的社交感；「彩虹消散 HP -60%」確保即使沒打完也有收益，降低挫敗感；「全服廣播彩虹橋目標」讓所有玩家看到「哪 3 條魚被連接了」，製造策略感
+  - server/internal/game/lucky_rainbow_bridge_handler.go：luckyRainbowBridgeManager（個人冷卻/全服冷卻/activeSession/burstBoost）；rainbowBridgeSession（triggerPlayerID/triggerPlayerName/targetIIDs/targetNames/killedIIDs/expiresAt/settled）；rainbowBurstBoost（mult/expiresAt）；isLuckyRainbowBridgeFish（T237）；getRainbowBridgeBurstMult（供 handleKill 使用）；isRainbowBridgeTarget（判斷是否為彩虹橋連接目標）；tryLuckyRainbowBridgeFish（觸發/選取3個目標/全服廣播+全服公告）；notifyRainbowBridgeKill（連鎖傷害/HP-40%/廣播/全部擊破觸發爆發）；runRainbowBridgeTimer（goroutine 12秒後彩虹消散）；doRainbowBridgeBurst（全服×2.0加成6秒/全服廣播+公告）
+  - server/internal/data/tables.go：新增 T237 幸運彩虹橋魚（74-139x/HP114/SpawnWeight2/Speed8/Lifetime16）
+  - server/internal/ws/protocol.go：MsgLuckyRainbowBridge + LuckyRainbowBridgePayload（5種事件）已存在
+  - server/internal/game/announce/announce.go：新增 EventLuckyRainbowBridge + case 處理
+  - server/internal/game/game.go：LuckyRainbowBridge *luckyRainbowBridgeManager；handleKill 加入 isLuckyRainbowBridgeFish 觸發分支 + isRainbowBridgeTarget 連鎖分支 + getRainbowBridgeBurstMult 全服倍率套用
+  - client/chiikawa-pixel/scripts/ui/LuckyRainbowBridgePanel.gd：彩虹橋主題面板（bridge_start 彩虹三次強閃光+頂部橫幅+橋指示器（右上角，擊破數/總數）；bridge_chain 輕微彩虹閃光+浮動文字；bridge_burst 全螢幕彩虹三次強閃光+「彩虹爆發！全服×2.0！」大字+結算彈窗+爆發指示器（彩虹循環動畫）；bridge_burst_end 爆發結束；bridge_fade 灰色閃光+消散文字）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_rainbow_bridge 訊號 + _handle_lucky_rainbow_bridge
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyRainbowBridgePanelScript（layer=52）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T237 映射
+  - 彩虹橋設計：3 個目標；HP -40% 連鎖傷害；12 秒時限；個人冷卻 25 秒；全服冷卻 40 秒
+  - 爆發設計：全部擊破觸發；全服 ×2.0 加成 6 秒；全服廣播+公告（金色）
+  - 消散設計：12 秒後未全部擊破；剩餘目標 HP -60%；全服廣播+公告（灰色）
+  - 視覺設計：彩虹橋主題（#FF69B4 粉紅 + #FFD700 金 + #00BFFF 天藍 + #7FFF00 草綠 + #FF8C00 橙）；橋指示器（右上角，擊破數/總數，顏色隨進度：天藍→橙→金）；爆發指示器（彩虹循環動畫）；結算彈窗右側滑入（含觸發者/全服倍率/持續時間）
+  - build/vet 全部通過（零錯誤零警告）
+  - T237 精靈圖：彩虹橋魚（彩虹漸層魚身+三條彩虹弧橋+連接光點+彩虹光點散落+金色光暈）
+  - **修復：** DAY-279 handler 已存在但 game.go/announce.go 缺少對應欄位和事件定義，本次補齊所有缺口
   - **業界依據：** 業界原創「時間裂縫+最高倍率重現+裂縫複製體」機制，結合「歷史記錄+即時獎勵+場上複製體」三個元素，製造「我最好的那次擊破被時間裂縫記住了」的成就感
   - **設計：** 擊破 T236 後，Server 查找玩家過去 30 秒內「最高倍率的那次擊破記錄」；立即給予觸發玩家 ×2.5 加成（個人，基於最高倍率目標的 bet × mult × 2.5）；同時在場上生成一個「裂縫複製體」（同種類目標，HP 只有 30%，擊破給 ×3.0 大獎）；若過去 30 秒無擊破記錄 → 給予 ×1.5 保底獎勵 + 生成隨機裂縫複製體；全服廣播「時間裂縫重現了什麼目標/倍率」；個人冷卻 20 秒；全服冷卻 32 秒
   - **設計差異：** 與時光倒流（T205，重播最近 5 個目標 ×1.6）不同，時間裂縫是「找最高倍率那次」，讓玩家有「我最好的那次擊破被時間裂縫記住了」的成就感；「裂縫複製體 HP 30%」讓玩家有「這條很容易打，要趕快打」的緊迫感；「裂縫複製體擊破 ×3.0」讓玩家有「打裂縫複製體比打普通魚更值」的策略感；「全服廣播裂縫複製體出現位置」讓所有玩家看到「有人觸發了時間裂縫，裂縫複製體在哪裡」；「30 秒歷史視窗」比時光倒流的 10 秒更長，讓玩家有更多機會觸發高倍率重現

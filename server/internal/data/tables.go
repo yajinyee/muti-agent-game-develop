@@ -918,6 +918,15 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 20 秒；全服冷卻 32 秒
 	"T236": {ID: "T236", Name: "幸運時間裂縫魚", Type: TargetTypeSpecial, MultiplierMin: 73, MultiplierMax: 137, HP: 113, SpawnWeight: 2, Speed: 9, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_time_rift"},
 
+	// T237 幸運彩虹橋魚（DAY-279）— 業界原創「彩虹橋連接+跨目標連鎖傷害+彩虹爆發」機制
+	//   - 擊破 T237 後，Server 在場上隨機選 3 個目標，用「彩虹橋」連接
+	//   - 彩虹橋期間（12 秒），任何玩家擊破這 3 個目標中的任何一個
+	//     → 其他 2 個目標也獲得 HP -40%（連鎖傷害）
+	//   - 若 3 個目標都在 12 秒內被擊破 → 觸發「彩虹爆發」：全服 ×2.0 加成 6 秒
+	//   - 若 12 秒後未全部擊破 → 「彩虹消散」：剩餘目標 HP -60%（安慰獎）
+	//   - 個人冷卻 25 秒；全服冷卻 40 秒
+	"T237": {ID: "T237", Name: "幸運彩虹橋魚", Type: TargetTypeSpecial, MultiplierMin: 74, MultiplierMax: 139, HP: 114, SpawnWeight: 2, Speed: 8, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_rainbow_bridge"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

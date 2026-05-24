@@ -619,6 +619,7 @@ const (
 	MsgLuckyGoldenHurricane        MessageType = "lucky_golden_hurricane"                // 幸運黃金颶風魚廣播（Server→Client，DAY-276）
 	MsgLuckyLightningHammer        MessageType = "lucky_lightning_hammer"                // 幸運閃電錘魚廣播（Server→Client，DAY-277）
 	MsgLuckyTimeRift               MessageType = "lucky_time_rift"                       // 幸運時間裂縫魚廣播（Server→Client，DAY-278）
+	MsgLuckyRainbowBridge          MessageType = "lucky_rainbow_bridge"                  // 幸運彩虹橋魚廣播（Server→Client，DAY-279）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6380,4 +6381,27 @@ type LuckyTimeRiftPayload struct {
 	CloneInstanceID string  `json:"clone_instance_id,omitempty"` // 裂縫複製體 instanceID
 	CloneKillMult   float64 `json:"clone_kill_mult,omitempty"`   // 裂縫複製體擊破倍率（3.0）
 	CloneReward     int     `json:"clone_reward,omitempty"`      // 裂縫複製體擊破獎勵
+}
+
+// LuckyRainbowBridgePayload 幸運彩虹橋魚廣播（Server → Client，DAY-279）
+// Event 類型：
+//   - bridge_start：彩虹橋觸發（全服，PlayerID/PlayerName/TargetIIDs/TargetNames/Duration）
+//   - bridge_chain：連鎖傷害（全服，PlayerName/KilledIID/OtherIIDs/KilledCount/TotalCount）
+//   - bridge_burst：彩虹爆發（全服，PlayerName/BurstMult/BurstSeconds）
+//   - bridge_burst_end：彩虹爆發結束（全服）
+//   - bridge_fade：彩虹消散（全服，PlayerName/KilledCount/TotalCount/FadedCount）
+type LuckyRainbowBridgePayload struct {
+	Event        string   `json:"event"`
+	PlayerID     string   `json:"player_id,omitempty"`
+	PlayerName   string   `json:"player_name,omitempty"`
+	TargetIIDs   []string `json:"target_iids,omitempty"`   // 彩虹橋連接的目標 instanceID 列表
+	TargetNames  []string `json:"target_names,omitempty"`  // 彩虹橋連接的目標名稱列表
+	Duration     int      `json:"duration,omitempty"`      // 持續時間（秒）
+	KilledIID    string   `json:"killed_iid,omitempty"`    // 被擊破的目標 instanceID
+	OtherIIDs    []string `json:"other_iids,omitempty"`    // 其他受連鎖傷害的目標
+	KilledCount  int      `json:"killed_count,omitempty"`  // 已擊破數
+	TotalCount   int      `json:"total_count,omitempty"`   // 總目標數
+	FadedCount   int      `json:"faded_count,omitempty"`   // 消散目標數
+	BurstMult    float64  `json:"burst_mult,omitempty"`    // 彩虹爆發倍率
+	BurstSeconds int      `json:"burst_seconds,omitempty"` // 彩虹爆發持續秒數
 }

@@ -362,6 +362,7 @@ func _ready() -> void:
 	_init_lucky_golden_hurricane_panel()    # 幸運黃金颶風魚系統面板（DAY-276）
 	_init_lucky_lightning_hammer_panel()    # 幸運閃電錘魚系統面板（DAY-277）
 	_init_lucky_time_rift_panel()           # 幸運時間裂縫魚系統面板（DAY-278）
+	_init_lucky_rainbow_bridge_panel()      # 幸運彩虹橋魚系統面板（DAY-279）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5243,3 +5244,19 @@ func _init_lucky_time_rift_panel() -> void:
 func _on_lucky_time_rift(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_time_rift_panel):
 		_lucky_time_rift_panel.handle(data)
+
+const LuckyRainbowBridgePanelScript = preload("res://scripts/ui/LuckyRainbowBridgePanel.gd")
+var _lucky_rainbow_bridge_panel = null
+
+func _init_lucky_rainbow_bridge_panel() -> void:
+	var panel = LuckyRainbowBridgePanelScript.new()
+	panel.name = "LuckyRainbowBridgePanel"
+	panel.layer = 52
+	add_child(panel)
+	_lucky_rainbow_bridge_panel = panel
+	if GameManager.has_signal("lucky_rainbow_bridge"):
+		GameManager.lucky_rainbow_bridge.connect(_on_lucky_rainbow_bridge)
+
+func _on_lucky_rainbow_bridge(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_rainbow_bridge_panel):
+		_lucky_rainbow_bridge_panel.handle(data)

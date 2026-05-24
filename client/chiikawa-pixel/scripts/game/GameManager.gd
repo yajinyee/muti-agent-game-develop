@@ -283,6 +283,7 @@ signal lucky_luck_totem(data: Dictionary)             # 幸運幸運圖騰魚系
 signal lucky_golden_hurricane(data: Dictionary)       # 幸運黃金颶風魚系統（DAY-276）
 signal lucky_lightning_hammer(data: Dictionary)       # 幸運閃電錘魚系統（DAY-277）
 signal lucky_time_rift(data: Dictionary)              # 幸運時間裂縫魚系統（DAY-278）
+signal lucky_rainbow_bridge(data: Dictionary)          # 幸運彩虹橋魚系統（DAY-279）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -816,6 +817,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_lightning_hammer(payload)
 		"lucky_time_rift":
 			_handle_lucky_time_rift(payload)
+		"lucky_rainbow_bridge":
+			_handle_lucky_rainbow_bridge(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4150,3 +4153,31 @@ func _handle_lucky_time_rift(payload: Dictionary) -> void:
 			var player_name: String = payload.get("player_name", "???")
 			var clone_reward: int = payload.get("clone_reward", 0)
 			print("[GameManager] TimeRift clone broadcast! player=%s reward=%d" % [player_name, clone_reward])
+
+## 幸運彩虹橋魚系統（DAY-279）
+func _handle_lucky_rainbow_bridge(payload: Dictionary) -> void:
+	emit_signal("lucky_rainbow_bridge", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"bridge_start":
+			var player_name: String = payload.get("player_name", "???")
+			var target_names: Array = payload.get("target_names", [])
+			var duration: int = payload.get("duration", 12)
+			print("[GameManager] RainbowBridge started! player=%s targets=%s duration=%d" % [player_name, str(target_names), duration])
+		"bridge_chain":
+			var player_name: String = payload.get("player_name", "???")
+			var killed_count: int = payload.get("killed_count", 0)
+			var total_count: int = payload.get("total_count", 3)
+			print("[GameManager] RainbowBridge chain! player=%s killed=%d/%d" % [player_name, killed_count, total_count])
+		"bridge_burst":
+			var player_name: String = payload.get("player_name", "???")
+			var burst_mult: float = payload.get("burst_mult", 2.0)
+			var burst_seconds: int = payload.get("burst_seconds", 6)
+			print("[GameManager] RainbowBridge BURST! player=%s mult=x%.1f seconds=%d" % [player_name, burst_mult, burst_seconds])
+		"bridge_burst_end":
+			print("[GameManager] RainbowBridge burst ended!")
+		"bridge_fade":
+			var player_name: String = payload.get("player_name", "???")
+			var killed_count: int = payload.get("killed_count", 0)
+			var total_count: int = payload.get("total_count", 3)
+			print("[GameManager] RainbowBridge fade! player=%s killed=%d/%d" % [player_name, killed_count, total_count])
