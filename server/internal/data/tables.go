@@ -943,6 +943,15 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 20 秒；全服冷卻 35 秒
 	"T239": {ID: "T239", Name: "幸運黃金突變魚", Type: TargetTypeSpecial, MultiplierMin: 76, MultiplierMax: 143, HP: 116, SpawnWeight: 2, Speed: 6, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_gold_mutation"},
 
+	// T240 幸運星爆魚（DAY-282）— 業界原創「星爆連鎖+全場星雨+倍率爆炸」機制
+	//   - 擊破 T240 後，場上隨機生成 5-8 個「星爆點」
+	//   - 每個星爆點在 3 秒內依序爆炸，爆炸半徑內所有目標 HP -35%
+	//   - 每個爆炸給觸發玩家 ×1.3 累積倍率（最高 ×6.0）
+	//   - 若有 2 個以上星爆點在 0.5 秒內同時爆炸 → 觸發「星爆共鳴」：全服 ×2.0 加成 5 秒
+	//   - 全服廣播星爆位置和爆炸結果
+	//   - 個人冷卻 24 秒；全服冷卻 40 秒
+	"T240": {ID: "T240", Name: "幸運星爆魚", Type: TargetTypeSpecial, MultiplierMin: 77, MultiplierMax: 145, HP: 117, SpawnWeight: 2, Speed: 5, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_star_burst"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-281 幸運黃金突變魚系統）
+## 最後更新：2026-05-24（DAY-282 幸運星爆魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-282 更新（自主觸發）：** 幸運星爆魚系統（Lucky Star Burst Fish）✅
+  - **業界依據：** 業界原創「星爆連鎖+全場星雨+倍率爆炸」機制，結合「多點爆炸+累積倍率+共鳴爆發」三個元素，製造「5-8 個星爆點同時炸，全場魚都受傷」的爽感
+  - **設計：** 擊破 T240 後，場上隨機生成 5-8 個「星爆點」；每個星爆點依序在 3 秒內爆炸，爆炸時場上所有目標 HP -35%；每個爆炸給觸發玩家 ×1.3 累積倍率（最高 ×6.0）；若有 2 個以上星爆點在 0.5 秒內同時爆炸 → 觸發「星爆共鳴」：全服 ×2.0 加成 5 秒；全服廣播星爆位置和爆炸結果；個人冷卻 24 秒；全服冷卻 40 秒
+  - **設計差異：** 與黃金颶風（T234，螺旋掃場 HP-30%）不同，星爆是「多點同時爆炸」，讓玩家有「5-8 個星爆點同時炸，全場魚都受傷」的爽感；「累積倍率 ×1.3/次，最高 ×6.0」讓玩家有「爆炸越多倍率越高」的期待感；「星爆共鳴（2個以上同時爆炸）」讓玩家有「要是多個星爆點同時炸就觸發共鳴」的驚喜感；「全服 ×2.0 加成 5 秒」讓所有玩家都受益，製造「全服一起爽」的社交感；「全服廣播星爆結果」讓所有玩家看到「有幾個星爆點炸了，命中幾條魚」
+  - server/internal/game/lucky_star_burst_handler.go：luckyStarBurstManager（個人冷卻/全服冷卻/resonanceBoost）；starBurstResonanceBoost（mult/expiresAt）；isLuckyStarBurstFish（T240）；getStarBurstResonanceMult（供 handleKill 使用）；tryLuckyStarBurstFish（觸發/決定5-8個星爆點/全服廣播+全服公告）；runStarBurstSequence（goroutine 每400ms爆炸一個/HP-35%/累積倍率×1.3/最高×6.0/共鳴判定/結算）；doStarBurstResonance（全服×2.0加成5秒/全服廣播+公告）
+  - server/internal/data/tables.go：新增 T240 幸運星爆魚（77-145x/HP117/SpawnWeight2/Speed5/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyStarBurst；LuckyStarBurstPayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyStarBurst + case 處理
+  - server/internal/game/game.go：LuckyStarBurst *luckyStarBurstManager；handleKill 加入 isLuckyStarBurstFish 觸發分支 + getStarBurstResonanceMult 全服倍率套用
+  - client/chiikawa-pixel/scripts/ui/LuckyStarBurstPanel.gd：星爆主題面板（burst_start 天藍+金色三次強閃光+頂部橫幅+星爆指示器（右上角，星爆點數/累積倍率）；burst_explode 顏色隨倍率閃光+浮動文字+指示器更新；burst_resonance 全螢幕彩色三次強閃光+「星爆共鳴！全服×2.0！」大字+共鳴指示器（彩虹循環動畫）；burst_end 結算彈窗右側滑入）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_star_burst 訊號 + _handle_lucky_star_burst
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyStarBurstPanelScript（layer=55）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T240 映射
+  - 星爆設計：5-8 個星爆點；每 400ms 爆炸一個；HP -35%；累積倍率 ×1.3/次；最高 ×6.0；個人冷卻 24 秒；全服冷卻 40 秒
+  - 共鳴設計：2 個以上星爆點在 0.5 秒內爆炸觸發；全服 ×2.0 加成 5 秒；全服廣播+公告（金色）
+  - 結算設計：廣播爆炸次數/命中目標數/最終倍率/總獎勵；×3.0 以上顯示結算彈窗
+  - 視覺設計：星爆主題（#FFD700 金 + #00BFFF 天藍 + #FF69B4 粉紅 + #7FFF00 草綠 + #FFFFFF 白）；星爆指示器（右上角，星爆點數/累積倍率，顏色隨倍率：天藍→粉紅→橙→金）；共鳴指示器（彩虹循環動畫，倒數計時）；結算彈窗右側滑入（含爆炸次數/命中目標/最終倍率/獎勵）
+  - build/vet 全部通過（零錯誤零警告）
+  - T240 精靈圖：星爆魚（五角星魚身+8方向爆炸光芒+5個天藍星爆點+金色光環+彩色星點散落+天藍魚眼+橙色魚尾）
 - **DAY-281 更新（自主觸發）：** 幸運黃金突變魚系統（Lucky Gold Mutation Fish）✅
   - **業界依據：** Fisch Roblox「Lucky Gold Mutation（6.14×）」+ Fishing Legend 2025「高倍率目標」機制，業界原創「黃金突變+全場感染+突變連鎖」機制
   - **設計：** 擊破 T239 後，觸發「黃金突變」：Server 隨機選場上 2-4 個目標，讓它們「突變為黃金版本」（HP 降低 50%，擊破倍率 ×3.0）；突變目標有 30% 機率在被擊破時「感染」相鄰目標（也突變，HP 降低 50%，擊破倍率 ×2.0）；突變持續 15 秒；全服廣播突變目標位置；個人冷卻 20 秒；全服冷卻 35 秒

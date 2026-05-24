@@ -622,6 +622,7 @@ const (
 	MsgLuckyRainbowBridge          MessageType = "lucky_rainbow_bridge"                  // 幸運彩虹橋魚廣播（Server→Client，DAY-279）
 	MsgLuckyRareChain              MessageType = "lucky_rare_chain"                      // 幸運連鎖稀有魚廣播（Server→Client，DAY-280）
 	MsgLuckyGoldMutation           MessageType = "lucky_gold_mutation"                   // 幸運黃金突變魚廣播（Server→Client，DAY-281）
+	MsgLuckyStarBurst              MessageType = "lucky_star_burst"                      // 幸運星爆魚廣播（Server→Client，DAY-282）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6444,4 +6445,27 @@ type LuckyGoldMutationPayload struct {
 	KillMult    float64  `json:"kill_mult,omitempty"`     // 擊破倍率
 	Duration    int      `json:"duration,omitempty"`      // 持續時間（秒）
 	KilledIID   string   `json:"killed_iid,omitempty"`    // 被擊破的目標 instanceID
+}
+
+// LuckyStarBurstPayload 幸運星爆魚廣播（Server → Client，DAY-282）
+// Event 類型：
+//   - burst_start：星爆觸發（全服，PlayerID/PlayerName/BurstCount/AccumMult/Duration）
+//   - burst_explode：星爆點爆炸（全服，BurstIndex/HitCount/AccumMult）
+//   - burst_resonance：星爆共鳴觸發（全服，GlobalMult/GlobalDuration）
+//   - burst_end：星爆結算（全服，PlayerName/TotalBursts/TotalHits/FinalMult/TotalReward）
+type LuckyStarBurstPayload struct {
+	Event          string  `json:"event"`
+	PlayerID       string  `json:"player_id,omitempty"`
+	PlayerName     string  `json:"player_name,omitempty"`
+	BurstCount     int     `json:"burst_count,omitempty"`     // 星爆點數量
+	AccumMult      float64 `json:"accum_mult,omitempty"`      // 累積倍率
+	Duration       int     `json:"duration,omitempty"`        // 持續時間（秒）
+	BurstIndex     int     `json:"burst_index,omitempty"`     // 第幾個星爆點（1-based）
+	HitCount       int     `json:"hit_count,omitempty"`       // 本次爆炸命中目標數
+	GlobalMult     float64 `json:"global_mult,omitempty"`     // 全服倍率加成
+	GlobalDuration int     `json:"global_duration,omitempty"` // 全服加成持續時間（秒）
+	TotalBursts    int     `json:"total_bursts,omitempty"`    // 總爆炸次數
+	TotalHits      int     `json:"total_hits,omitempty"`      // 總命中目標數
+	FinalMult      float64 `json:"final_mult,omitempty"`      // 最終累積倍率
+	TotalReward    int     `json:"total_reward,omitempty"`    // 總獎勵
 }

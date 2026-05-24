@@ -286,6 +286,7 @@ signal lucky_time_rift(data: Dictionary)              # 幸運時間裂縫魚系
 signal lucky_rainbow_bridge(data: Dictionary)          # 幸運彩虹橋魚系統（DAY-279）
 signal lucky_rare_chain(data: Dictionary)              # 幸運連鎖稀有魚系統（DAY-280）
 signal lucky_gold_mutation(data: Dictionary)           # 幸運黃金突變魚系統（DAY-281）
+signal lucky_star_burst(data: Dictionary)              # 幸運星爆魚系統（DAY-282）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -825,6 +826,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_rare_chain(payload)
 		"lucky_gold_mutation":
 			_handle_lucky_gold_mutation(payload)
+		"lucky_star_burst":
+			_handle_lucky_star_burst(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4239,3 +4242,29 @@ func _handle_lucky_gold_mutation(payload: Dictionary) -> void:
 			print("[GameManager] GoldMutation infect! player=%s mult=x%.1f" % [player_name, kill_mult])
 		"mutation_expire":
 			print("[GameManager] GoldMutation expired!")
+
+## 幸運星爆魚系統（DAY-282）
+func _handle_lucky_star_burst(payload: Dictionary) -> void:
+	emit_signal("lucky_star_burst", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"burst_start":
+			var player_name: String = payload.get("player_name", "???")
+			var burst_count: int = payload.get("burst_count", 5)
+			print("[GameManager] StarBurst started! player=%s count=%d" % [player_name, burst_count])
+		"burst_explode":
+			var burst_index: int = payload.get("burst_index", 1)
+			var hit_count: int = payload.get("hit_count", 0)
+			var accum_mult: float = payload.get("accum_mult", 1.0)
+			print("[GameManager] StarBurst explode! index=%d hits=%d mult=x%.2f" % [burst_index, hit_count, accum_mult])
+		"burst_resonance":
+			var global_mult: float = payload.get("global_mult", 2.0)
+			var global_dur: int = payload.get("global_duration", 5)
+			print("[GameManager] StarBurst RESONANCE! global x%.1f for %ds" % [global_mult, global_dur])
+		"burst_end":
+			var player_name: String = payload.get("player_name", "???")
+			var total_bursts: int = payload.get("total_bursts", 0)
+			var total_hits: int = payload.get("total_hits", 0)
+			var final_mult: float = payload.get("final_mult", 1.0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] StarBurst end! player=%s bursts=%d hits=%d mult=x%.2f reward=%d" % [player_name, total_bursts, total_hits, final_mult, total_reward])

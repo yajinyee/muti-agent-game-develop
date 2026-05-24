@@ -255,6 +255,7 @@ type Game struct {
 	LuckyRainbowBridge      *luckyRainbowBridgeManager         // 幸運彩虹橋魚系統管理器（DAY-279）
 	LuckyRareChain          *luckyRareChainManager             // 幸運連鎖稀有魚系統管理器（DAY-280）
 	LuckyGoldMutation       *luckyGoldMutationManager          // 幸運黃金突變魚系統管理器（DAY-281）
+	LuckyStarBurst          *luckyStarBurstManager             // 幸運星爆魚系統管理器（DAY-282）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -486,6 +487,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyRainbowBridge:      newLuckyRainbowBridgeManager(),
 		LuckyRareChain:          newLuckyRareChainManager(),
 		LuckyGoldMutation:       newLuckyGoldMutationManager(),
+		LuckyStarBurst:          newLuckyStarBurstManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2635,6 +2637,17 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			finalReward += goldReward
 			g.LuckyGoldMutation.removeGoldMutation(t.InstanceID)
 			go g.notifyGoldMutationKill(p, t.InstanceID, goldMult)
+		}
+	}
+	// 幸運星爆魚：擊破 T240 時觸發星爆（DAY-282）
+	if isLuckyStarBurstFish(t.DefID) {
+		go g.tryLuckyStarBurstFish(p)
+	}
+	// 幸運星爆魚：星爆共鳴期間擊破任何目標，套用全服倍率（DAY-282）
+	if !isLuckyStarBurstFish(t.DefID) {
+		if resonanceMult := g.LuckyStarBurst.getStarBurstResonanceMult(); resonanceMult > 1.0 {
+			resonanceReward := int(float64(finalReward) * (resonanceMult - 1.0))
+			finalReward += resonanceReward
 		}
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
