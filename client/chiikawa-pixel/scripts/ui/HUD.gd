@@ -72,8 +72,9 @@ func _ready() -> void:
 		GameManager.lucky_wrath_charge.connect(_on_lucky_wrath_charge)
 
 	# 初始化側錄系統（DAY-291）
+	# CanvasLayer 必須加到 root，不能作為另一個 CanvasLayer 的子節點
 	_screen_recorder = ScreenRecorderScript.new()
-	add_child(_screen_recorder)
+	get_tree().root.add_child(_screen_recorder)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
