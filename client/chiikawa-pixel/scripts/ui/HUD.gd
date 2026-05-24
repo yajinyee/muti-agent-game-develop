@@ -1,6 +1,9 @@
 ﻿## HUD.gd — 核心 UI（精簡版，移除所有損壞的 Panel）
-## 保留：基本 HUD、BOSS 計時器、獎勵彈窗、斷線提示
+## 保留：基本 HUD、BOSS 計時器、獎勵彈窗、斷線提示、側錄按鈕
 extends CanvasLayer
+
+const ScreenRecorderScript = preload("res://scripts/ui/ScreenRecorder.gd")
+var _screen_recorder = null
 
 # ---- 核心 UI 節點 ----
 @onready var coins_label: Label = $TopBar/CoinsLabel
@@ -67,6 +70,10 @@ func _ready() -> void:
 	get_tree().root.add_child(_lucky_wrath_charge_panel)
 	if GameManager.has_signal("lucky_wrath_charge"):
 		GameManager.lucky_wrath_charge.connect(_on_lucky_wrath_charge)
+
+	# 初始化側錄系統（DAY-291）
+	_screen_recorder = ScreenRecorderScript.new()
+	add_child(_screen_recorder)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
