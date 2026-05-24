@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-287 幸運宇宙脈衝魚系統）
+## 最後更新：2026-05-24（DAY-288 幸運多米諾魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-288 更新（自主觸發）：** 幸運多米諾魚系統（Lucky Domino Fish）✅
+  - **業界依據：** Fishing Fortune 2026「multiplier cascade system — consecutive rare catches within 90s, building from 2x up to 500x」+ Royal Fishing Jili「chain reactions that jump between nearby fish」— 業界原創「多米諾骨牌連鎖+場上目標依序倒下+最終爆發」機制
+  - **設計：** 擊破 T246 後，場上隨機選 5 個目標設為「多米諾骨牌」；第 1 個骨牌立即 HP -80%（幾乎必死）；若被擊破 → 連鎖推倒第 2 個（HP -80%）→ 依序推倒到第 5 個；每推倒一個骨牌，觸發玩家獲得 ×1.5 累積倍率（最高 ×7.5）；若 5 個骨牌全部在 20 秒內被推倒 → 「多米諾完美」：全服 ×2.5 加成 7 秒；全服廣播骨牌位置和連鎖結果；個人冷卻 26 秒；全服冷卻 42 秒
+  - **設計差異：** 與宇宙脈衝（T245，同心圓擴散波）不同，多米諾是「場上特定目標依序連鎖倒下」；「HP -80% 弱化」讓骨牌目標幾乎必死，玩家有「快去打第一個骨牌，後面會連鎖」的緊迫感；「每推倒一個 ×1.5 累積」讓玩家有「要把 5 個骨牌全部推倒才能拿到 ×7.5」的動力；「多米諾完美（全部推倒）→ 全服 ×2.5」製造「全服一起爽」的社交感；「全服廣播骨牌位置」讓所有玩家看到「哪 5 條魚是骨牌」，製造全服搶打感
+  - server/internal/game/lucky_domino_handler.go：luckyDominoManager（個人冷卻/全服冷卻/activeSession/perfectBoost）；dominoPerfectBoost（mult/expiresAt）；dominoTarget（instanceID/defID/name/x/y/knocked）；dominoSession（triggerPlayerID/triggerPlayerName/targets/currentIdx/accumMult/expiresAt/settled）；isLuckyDominoFish（T246）；getDominoPerfectMult（供 handleKill 使用）；isDominoTarget（判斷是否為骨牌目標）；tryLuckyDominoFish（觸發/選取5個骨牌/HP-80%/全服廣播+公告）；selectDominoTargets（隨機選取n個目標）；applyDominoKnock（HP-80%/廣播HP更新）；notifyDominoKill（骨牌擊破/連鎖推倒下一個/全部推倒觸發完美）；doDominoPerfect（全服×2.5加成7秒/全服廣播+公告）；runDominoTimeout（goroutine 20秒後超時結算）
+  - server/internal/data/tables.go：新增 T246 幸運多米諾魚（83-157x/HP123/SpawnWeight2/Speed5/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyDomino；DominoTargetInfo；LuckyDominoPayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyDomino + case 處理（PriorityHigh）
+  - server/internal/game/game.go：LuckyDomino *luckyDominoManager；handleKill 加入 getDominoPerfectMult 全服倍率套用 + isDominoTarget 骨牌擊破分支 + isLuckyDominoFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyDominoPanel.gd：多米諾主題面板（domino_start 棕色三次強閃光+頂部橫幅+骨牌指示器（右上角，推倒數/累積倍率）；domino_knock 橙棕閃光+浮動文字+指示器更新；domino_next 下一個骨牌提示；domino_perfect 全螢幕三次強閃光+「完美！全服×2.5！」大字+完美指示器（脈衝動畫+倒數計時）；domino_perfect_end 完美結束淡出；domino_end 超時結算）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_domino 訊號 + _handle_lucky_domino
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyDominoPanelScript（layer=61）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T246 映射
+  - 骨牌設計：5 個目標；HP -80%；每推倒一個 ×1.5 累積；最高 ×7.5；20 秒時限；個人冷卻 26 秒；全服冷卻 42 秒
+  - 完美設計：5 個骨牌全部推倒觸發；全服 ×2.5 加成 7 秒；全服廣播+公告（深紅棕/金色）
+  - 視覺設計：多米諾主題（#4A0000 深紅棕 + #8B4513 棕 + #D2691E 橙棕 + #FFD700 金 + #FFFFFF 白）；骨牌指示器（右上角，推倒數/累積倍率，顏色隨進度：白→橙棕→金）；完美指示器（脈衝動畫+倒數計時）
+  - build/vet 全部通過（零錯誤零警告）
+  - T246 精靈圖：多米諾魚（深紅棕漸層橢圓魚身+多米諾骨牌紋路（左3點/右5點）+連鎖光環+金色點數+橙棕魚尾）非透明像素 52.4%
 - **DAY-287 更新（自主觸發）：** 幸運宇宙脈衝魚系統（Lucky Cosmic Pulse Fish）✅
   - **業界依據：** TaDa Gaming 2026「Cosmic」主題 + Fishing Fortune 2026「pulse wave mechanics」— 業界原創「宇宙脈衝波+全場共振+脈衝連鎖爆發」機制
   - **設計：** 擊破 T245 後，發出「宇宙脈衝波」（從場地中心向外擴散）；脈衝波分 3 層（每 800ms 一層），每層命中範圍內所有目標 HP -20%；每層命中目標數 × 0.2 = 累積倍率加成（最高 ×5.0）；若 3 層脈衝波命中目標總數 ≥ 15 → 「宇宙共振」：全服 ×2.2 加成 6 秒；全服廣播脈衝波擴散和命中結果；個人冷卻 24 秒；全服冷卻 40 秒

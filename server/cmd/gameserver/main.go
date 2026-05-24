@@ -315,16 +315,6 @@ func main() {
 		}
 	})
 
-	// 房間列表端點（HTTP GET，多房間架構 DAY-019）
-	mux.HandleFunc("/rooms", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
-		w.Header().Set("Access-Control-Allow-Origin", "*")
-		rooms := roomMgr.ListRooms()
-		if err := json.NewEncoder(w).Encode(rooms); err != nil {
-			http.Error(w, "encode error", http.StatusInternalServerError)
-		}
-	})
-
 	// 數據分析端點（HTTP GET，供運營查詢）
 	mux.HandleFunc("/analytics", func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "application/json")

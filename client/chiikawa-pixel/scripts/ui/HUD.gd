@@ -371,6 +371,7 @@ func _ready() -> void:
 	_init_lucky_phoenix_rebirth_panel()     # 幸運鳳凰涅槃魚系統面板（DAY-285）
 	_init_lucky_kraken_panel()              # 幸運深海克拉肯魚系統面板（DAY-286）
 	_init_lucky_cosmic_pulse_panel()        # 幸運宇宙脈衝魚系統面板（DAY-287）
+	_init_lucky_domino_panel()              # 幸運多米諾魚系統面板（DAY-288）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5396,3 +5397,19 @@ func _init_lucky_cosmic_pulse_panel() -> void:
 func _on_lucky_cosmic_pulse(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_cosmic_pulse_panel):
 		_lucky_cosmic_pulse_panel.handle_event(data)
+
+const LuckyDominoPanelScript = preload("res://scripts/ui/LuckyDominoPanel.gd")
+var _lucky_domino_panel = null
+
+func _init_lucky_domino_panel() -> void:
+	var panel = LuckyDominoPanelScript.new()
+	panel.name = "LuckyDominoPanel"
+	panel.layer = 61
+	add_child(panel)
+	_lucky_domino_panel = panel
+	if GameManager.has_signal("lucky_domino"):
+		GameManager.lucky_domino.connect(_on_lucky_domino)
+
+func _on_lucky_domino(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_domino_panel):
+		_lucky_domino_panel.handle_event(data)
