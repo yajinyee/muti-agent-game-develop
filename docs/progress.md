@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-270 幸運鏡像對決魚系統）
+## 最後更新：2026-05-24（DAY-271 幸運倍率重擲魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-271 更新（自主觸發）：** 幸運倍率重擲魚系統（Lucky Multiplier Reroll Fish）✅
+  - **業界依據：** GONE Fishing 2026-05-03 patch「4.25x multiplier reroll → 5x-10x max win formula」，2026 年最新 RNG 設計趨勢
+  - **設計：** 擊破 T229 後，觸發「倍率重擲」：Server 為觸發玩家的下一次擊破重擲倍率（最多 3 次，取最高值）；每次重擲有 40% 機率提升倍率（×1.5 到 ×4.0 隨機）；最終用最高倍率計算獎勵（個人）；至少保證 ×1.5；個人冷卻 20 秒；全服冷卻 35 秒
+  - **設計差異：** 與輪盤（T227，固定扇區）不同，重擲是「動態累積最高值」，讓玩家有「再擲一次，說不定更高！」的期待感；「最多 3 次重擲取最高值」讓玩家有「每次重擲都可能更好」的動力；「40% 機率提升」讓重擲有不確定性；「×1.5 到 ×4.0 隨機提升」讓每次重擲的提升幅度也有驚喜感；「即時顯示每次重擲結果」讓玩家看到「第 1 擲 ×1.8，第 2 擲 ×3.2，第 3 擲 ×2.1 → 最終 ×3.2」的過程
+  - server/internal/game/lucky_reroll_handler.go：luckyRerollManager（個人冷卻/全服冷卻/activeSessions）；rerollSession（playerID/rolls/bestMult/expiresAt/used）；isLuckyRerollFish（T229）；getRerollMult（供 handleKill 使用）；consumeRerollSession；tryLuckyRerollFish（3次重擲/取最高值/保證×1.5/個人訊息+全服廣播+全服公告）；notifyRerollKill（重擲命中通知/×3.0以上全服廣播+公告）
+  - server/internal/data/tables.go：新增 T229 幸運倍率重擲魚（66-123x/HP106/SpawnWeight2/Speed16/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyReroll；LuckyRerollPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyReroll + case 處理
+  - server/internal/game/game.go：LuckyReroll *luckyRerollManager；handleKill 加入 isLuckyRerollFish 分支 + getRerollMult/consumeRerollSession 倍率套用
+  - client/chiikawa-pixel/scripts/ui/LuckyRerollPanel.gd：橙金骰子主題面板（reroll_start 橙色三次強閃光+頂部橫幅+「🎲 倍率重擲！」大字+右側三次重擲結果面板+等待指示器脈衝；reroll_broadcast 頂部小橫幅；reroll_used 閃光+「🎲 ×N.N 命中！」大字+結算彈窗；reroll_result_broadcast 全服廣播橫幅；reroll_expire 超時提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_reroll 訊號 + _handle_lucky_reroll
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyRerollPanelScript（layer=44）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T229 映射
+  - 重擲設計：3 次重擲取最高值；40% 機率提升；×1.5 到 ×4.0 隨機；保證最低 ×1.5；個人冷卻 20 秒；全服冷卻 35 秒
+  - 視覺設計：橙金骰子主題（#FF8C00 橙 + #FFD700 金 + #FF4500 火橙）；右側重擲結果面板（顯示三次結果+最高值標記★）；右側等待指示器（脈衝動畫，顯示 🎲 ×N.N）；結算彈窗右側滑入（含三次結果/最高倍率/目標/獎勵）
+  - 全服廣播：重擲觸發/×3.0以上命中全服廣播
+  - 全服公告：觸發時公告（橙色）；×3.0以上命中公告（金色）
+  - build/vet 全部通過（零錯誤零警告）
+  - T229 精靈圖：橙金骰子魚（橙金色魚身+骰子面+重擲箭頭+星星光點）
 - **DAY-270 更新（自主觸發）：** 幸運鏡像對決魚系統（Lucky Mirror Duel Fish）✅
   - **業界依據：** 2026 年最熱門「PvP 鏡像對決」機制，讓玩家有「我的攻擊被鏡像反射，打到對手了！」的對抗感
   - **設計：** 擊破 T228 後，觸發「鏡像對決」：Server 隨機選一個其他玩家作為「對手」；雙方進入 15 秒對決期；對決期間，雙方每次擊破目標，對手也獲得相同獎勵的 50%（鏡像分享）；15 秒後，擊破數多的玩家獲得「對決勝利」×2.0 加成（5 秒）；擊破數少的玩家獲得「對決失敗」×1.2 安慰獎（5 秒）；平局：雙方各獲得 ×1.5 加成（5 秒）；若無其他玩家，觸發「孤獨模式」：個人 ×1.5 加成 10 秒；個人冷卻 30 秒；全服冷卻 50 秒
