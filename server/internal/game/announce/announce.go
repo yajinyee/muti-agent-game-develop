@@ -109,6 +109,7 @@ const (
 	EventLuckyCountdownBomb       EventType = "lucky_countdown_bomb"       // 幸運倒數炸彈魚觸發（DAY-268）
 	EventLuckySpinWheel           EventType = "lucky_spin_wheel"           // 幸運輪盤魚觸發（DAY-269）
 	EventLuckyMirrorDuel          EventType = "lucky_mirror_duel"          // 幸運鏡像對決魚觸發（DAY-270）
+	EventLuckyReroll              EventType = "lucky_reroll"               // 幸運倍率重擲魚觸發（DAY-271）
 )
 
 // Priority 公告優先級
@@ -1875,6 +1876,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 5000
+
+	case EventLuckyReroll:
+		msg := "🎲 幸運倍率重擲觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FF8C00"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🎲 倍率重擲！"
+		message = msg
+		icon = "🎲"
+		color = c
+		priority = PriorityHigh
+		duration = 4500
 
 	default:
 		title = "📢 公告"

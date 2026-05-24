@@ -275,6 +275,7 @@ signal lucky_multiplier_stack(data: Dictionary)       # 幸運倍率疊加魚系
 signal lucky_countdown_bomb(data: Dictionary)         # 幸運倒數炸彈魚系統（DAY-268）
 signal lucky_spin_wheel(data: Dictionary)             # 幸運輪盤魚系統（DAY-269）
 signal lucky_mirror_duel(data: Dictionary)            # 幸運鏡像對決魚系統（DAY-270）
+signal lucky_reroll(data: Dictionary)                 # 幸運倍率重擲魚系統（DAY-271）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -792,6 +793,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_spin_wheel(payload)
 		"lucky_mirror_duel":
 			_handle_lucky_mirror_duel(payload)
+		"lucky_reroll":
+			_handle_lucky_reroll(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4006,3 +4009,18 @@ func _handle_lucky_mirror_duel(payload: Dictionary) -> void:
 		"duel_solo":
 			var mult: float = payload.get("solo_mult", 1.5)
 			print("[GameManager] MirrorDuel solo! mult=%.1f" % mult)
+
+## 幸運倍率重擲魚系統（DAY-271）
+func _handle_lucky_reroll(payload: Dictionary) -> void:
+	emit_signal("lucky_reroll", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"reroll_start":
+			var best_mult: float = payload.get("best_mult", 1.0)
+			print("[GameManager] Reroll start! best_mult=%.1f" % best_mult)
+		"reroll_used":
+			var best_mult: float = payload.get("best_mult", 1.0)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] Reroll used! mult=%.1f reward=%d" % [best_mult, reward])
+		"reroll_expire":
+			print("[GameManager] Reroll expired!")

@@ -611,6 +611,7 @@ const (
 	MsgLuckyCountdownBomb          MessageType = "lucky_countdown_bomb"                 // 幸運倒數炸彈魚廣播（Server→Client，DAY-268）
 	MsgLuckySpinWheel              MessageType = "lucky_spin_wheel"                     // 幸運輪盤魚廣播（Server→Client，DAY-269）
 	MsgLuckyMirrorDuel             MessageType = "lucky_mirror_duel"                    // 幸運鏡像對決魚廣播（Server→Client，DAY-270）
+	MsgLuckyReroll                 MessageType = "lucky_reroll"                         // 幸運倍率重擲魚廣播（Server→Client，DAY-271）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6207,4 +6208,22 @@ type LuckyMirrorDuelPayload struct {
 	WinnerName   string  `json:"winner_name,omitempty"`  // 勝者名稱（空=平局）
 	WinMult      float64 `json:"win_mult,omitempty"`     // 勝者倍率
 	SoloMult     float64 `json:"solo_mult,omitempty"`    // 孤獨模式倍率
+}
+
+// LuckyRerollPayload 幸運倍率重擲魚廣播（Server → Client，DAY-271）
+// Event 類型：
+//   - reroll_start：重擲開始（個人，PlayerID/PlayerName/Rolls/BestMult/MaxRolls）
+//   - reroll_broadcast：全服廣播（PlayerName/BestMult）
+//   - reroll_used：重擲被使用（個人，TargetName/Reward/BestMult/Rolls）
+//   - reroll_result_broadcast：全服廣播結果（PlayerName/BestMult/Reward）
+//   - reroll_expire：session 超時（個人，PlayerID）
+type LuckyRerollPayload struct {
+	Event      string    `json:"event"`
+	PlayerID   string    `json:"player_id,omitempty"`
+	PlayerName string    `json:"player_name,omitempty"`
+	Rolls      []float64 `json:"rolls,omitempty"`      // 每次重擲的倍率結果（3個）
+	BestMult   float64   `json:"best_mult,omitempty"`  // 最高倍率
+	MaxRolls   int       `json:"max_rolls,omitempty"`  // 最多重擲次數
+	TargetName string    `json:"target_name,omitempty"`// 命中目標名稱
+	Reward     int       `json:"reward,omitempty"`     // 最終獎勵
 }

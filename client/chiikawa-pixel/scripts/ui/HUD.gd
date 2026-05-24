@@ -354,6 +354,7 @@ func _ready() -> void:
 	_init_lucky_countdown_bomb_panel()      # 幸運倒數炸彈魚系統面板（DAY-268）
 	_init_lucky_spin_wheel_panel()          # 幸運輪盤魚系統面板（DAY-269）
 	_init_lucky_mirror_duel_panel()         # 幸運鏡像對決魚系統面板（DAY-270）
+	_init_lucky_reroll_panel()              # 幸運倍率重擲魚系統面板（DAY-271）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5107,3 +5108,19 @@ func _init_lucky_mirror_duel_panel() -> void:
 func _on_lucky_mirror_duel(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_mirror_duel_panel):
 		_lucky_mirror_duel_panel.handle(data)
+
+const LuckyRerollPanelScript = preload("res://scripts/ui/LuckyRerollPanel.gd")
+var _lucky_reroll_panel = null
+
+func _init_lucky_reroll_panel() -> void:
+	var panel = LuckyRerollPanelScript.new()
+	panel.name = "LuckyRerollPanel"
+	panel.layer = 44
+	add_child(panel)
+	_lucky_reroll_panel = panel
+	if GameManager.has_signal("lucky_reroll"):
+		GameManager.lucky_reroll.connect(_on_lucky_reroll)
+
+func _on_lucky_reroll(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_reroll_panel):
+		_lucky_reroll_panel.handle(data)

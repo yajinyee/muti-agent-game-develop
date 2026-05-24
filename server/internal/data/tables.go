@@ -854,6 +854,13 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 30 秒；全服冷卻 50 秒
 	"T228": {ID: "T228", Name: "幸運鏡像對決魚", Type: TargetTypeSpecial, MultiplierMin: 65, MultiplierMax: 121, HP: 105, SpawnWeight: 2, Speed: 17, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_mirror_duel"},
 
+	// T229 幸運倍率重擲魚（DAY-271）— GONE Fishing 2026 最新「multiplier reroll」機制
+	//   - 擊破 T229 後，觸發「倍率重擲」：Server 為觸發玩家的下一次擊破重擲倍率（最多 3 次，取最高值）
+	//   - 每次重擲有 40% 機率提升倍率（×1.5 到 ×4.0 隨機）
+	//   - 最終用最高倍率計算獎勵（個人）；至少保證 ×1.5
+	//   - 個人冷卻 20 秒；全服冷卻 35 秒
+	"T229": {ID: "T229", Name: "幸運倍率重擲魚", Type: TargetTypeSpecial, MultiplierMin: 66, MultiplierMax: 123, HP: 106, SpawnWeight: 2, Speed: 16, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_reroll"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
