@@ -1,0 +1,560 @@
+[
+  {
+    "file": "frame_000.0s.jpg",
+    "size": "1614x904",
+    "brightness_mean": 49.57518628483074,
+    "brightness_std": 25.161819665952727,
+    "region_colors": {
+      "r00": [
+        102.2,
+        42.3,
+        15.4
+      ],
+      "r01": [
+        100.6,
+        40.9,
+        13.9
+      ],
+      "r02": [
+        101.0,
+        43.3,
+        16.1
+      ],
+      "r10": [
+        110.9,
+        48.2,
+        15.1
+      ],
+      "r11": [
+        111.6,
+        51.3,
+        18.2
+      ],
+      "r12": [
+        110.3,
+        48.7,
+        16.6
+      ],
+      "r20": [
+        110.2,
+        57.9,
+        27.3
+      ],
+      "r21": [
+        119.6,
+        70.2,
+        38.6
+      ],
+      "r22": [
+        116.8,
+        66.6,
+        35.7
+      ]
+    },
+    "top_bar_brightness": 45.27693618339529,
+    "bottom_bar_brightness": 88.00229244114003,
+    "non_background_ratio": 0.129,
+    "white_pixel_ratio": 0.006,
+    "effect_pixel_ratio": 0.007,
+    "red_pixel_ratio": 0.006,
+    "gold_pixel_ratio": 0.011,
+    "ui_button_brightness": 68.0,
+    "rec_zone_brightness": 52.8
+  },
+  {
+    "file": "frame_001.0s.jpg",
+    "size": "1614x904",
+    "brightness_mean": 49.680819653255256,
+    "brightness_std": 25.811574115410888,
+    "region_colors": {
+      "r00": [
+        102.4,
+        42.4,
+        15.4
+      ],
+      "r01": [
+        100.7,
+        40.8,
+        13.7
+      ],
+      "r02": [
+        100.9,
+        43.8,
+        16.2
+      ],
+      "r10": [
+        111.7,
+        49.0,
+        16.5
+      ],
+      "r11": [
+        110.7,
+        49.9,
+        15.8
+      ],
+      "r12": [
+        110.4,
+        49.1,
+        16.9
+      ],
+      "r20": [
+        110.1,
+        57.9,
+        27.2
+      ],
+      "r21": [
+        119.6,
+        70.1,
+        38.4
+      ],
+      "r22": [
+        116.6,
+        67.8,
+        37.3
+      ]
+    },
+    "top_bar_brightness": 45.658596654275094,
+    "bottom_bar_brightness": 87.8475629904998,
+    "non_background_ratio": 0.131,
+    "white_pixel_ratio": 0.006,
+    "effect_pixel_ratio": 0.008,
+    "red_pixel_ratio": 0.006,
+    "gold_pixel_ratio": 0.012,
+    "ui_button_brightness": 67.9,
+    "rec_zone_brightness": 52.7
+  },
+  {
+    "file": "frame_002.0s.jpg",
+    "size": "1614x904",
+    "brightness_mean": 49.69953929115812,
+    "brightness_std": 25.56662121793598,
+    "region_colors": {
+      "r00": [
+        102.5,
+        42.4,
+        15.5
+      ],
+      "r01": [
+        101.1,
+        41.3,
+        14.5
+      ],
+      "r02": [
+        100.7,
+        45.0,
+        16.7
+      ],
+      "r10": [
+        111.1,
+        48.2,
+        15.0
+      ],
+      "r11": [
+        111.6,
+        48.8,
+        16.4
+      ],
+      "r12": [
+        110.6,
+        49.1,
+        16.8
+      ],
+      "r20": [
+        110.1,
+        57.8,
+        27.3
+      ],
+      "r21": [
+        119.6,
+        70.0,
+        38.5
+      ],
+      "r22": [
+        116.6,
+        67.8,
+        37.5
+      ]
+    },
+    "top_bar_brightness": 45.75814745972738,
+    "bottom_bar_brightness": 87.82556794712929,
+    "non_background_ratio": 0.133,
+    "white_pixel_ratio": 0.006,
+    "effect_pixel_ratio": 0.008,
+    "red_pixel_ratio": 0.006,
+    "gold_pixel_ratio": 0.012,
+    "ui_button_brightness": 67.9,
+    "rec_zone_brightness": 52.9
+  },
+  {
+    "file": "frame_003.0s.jpg",
+    "size": "1614x904",
+    "brightness_mean": 49.066660224144925,
+    "brightness_std": 24.163686836407233,
+    "region_colors": {
+      "r00": [
+        102.5,
+        42.5,
+        15.5
+      ],
+      "r01": [
+        100.8,
+        40.9,
+        13.7
+      ],
+      "r02": [
+        101.6,
+        41.9,
+        14.9
+      ],
+      "r10": [
+        111.1,
+        48.2,
+        15.0
+      ],
+      "r11": [
+        110.6,
+        48.6,
+        16.5
+      ],
+      "r12": [
+        110.6,
+        48.6,
+        15.5
+      ],
+      "r20": [
+        110.1,
+        57.8,
+        27.3
+      ],
+      "r21": [
+        119.8,
+        70.3,
+        39.0
+      ],
+      "r22": [
+        117.4,
+        64.9,
+        34.7
+      ]
+    },
+    "top_bar_brightness": 45.88344175960347,
+    "bottom_bar_brightness": 87.82556794712929,
+    "non_background_ratio": 0.125,
+    "white_pixel_ratio": 0.006,
+    "effect_pixel_ratio": 0.005,
+    "red_pixel_ratio": 0.005,
+    "gold_pixel_ratio": 0.011,
+    "ui_button_brightness": 67.9,
+    "rec_zone_brightness": 52.9
+  },
+  {
+    "file": "frame_005.0s.jpg",
+    "size": "1614x904",
+    "brightness_mean": 49.46443111162286,
+    "brightness_std": 25.068070470436332,
+    "region_colors": {
+      "r00": [
+        102.5,
+        42.5,
+        15.5
+      ],
+      "r01": [
+        100.8,
+        40.9,
+        13.7
+      ],
+      "r02": [
+        101.4,
+        41.8,
+        15.5
+      ],
+      "r10": [
+        111.1,
+        48.2,
+        15.0
+      ],
+      "r11": [
+        110.7,
+        48.9,
+        17.2
+      ],
+      "r12": [
+        109.3,
+        53.5,
+        17.3
+      ],
+      "r20": [
+        110.1,
+        57.8,
+        27.3
+      ],
+      "r21": [
+        119.6,
+        70.1,
+        38.6
+      ],
+      "r22": [
+        117.1,
+        64.7,
+        35.6
+      ]
+    },
+    "top_bar_brightness": 45.88943618339529,
+    "bottom_bar_brightness": 87.8944857496902,
+    "non_background_ratio": 0.129,
+    "white_pixel_ratio": 0.006,
+    "effect_pixel_ratio": 0.008,
+    "red_pixel_ratio": 0.007,
+    "gold_pixel_ratio": 0.012,
+    "ui_button_brightness": 67.9,
+    "rec_zone_brightness": 52.9
+  },
+  {
+    "file": "frame_008.0s.jpg",
+    "size": "1614x904",
+    "brightness_mean": 49.663524223881744,
+    "brightness_std": 25.499539136371,
+    "region_colors": {
+      "r00": [
+        102.6,
+        42.5,
+        15.6
+      ],
+      "r01": [
+        100.8,
+        40.9,
+        13.7
+      ],
+      "r02": [
+        102.1,
+        42.6,
+        16.0
+      ],
+      "r10": [
+        111.1,
+        48.2,
+        15.0
+      ],
+      "r11": [
+        111.5,
+        49.4,
+        17.7
+      ],
+      "r12": [
+        109.9,
+        53.9,
+        18.2
+      ],
+      "r20": [
+        109.5,
+        58.1,
+        26.8
+      ],
+      "r21": [
+        119.6,
+        70.1,
+        38.6
+      ],
+      "r22": [
+        117.1,
+        64.7,
+        35.4
+      ]
+    },
+    "top_bar_brightness": 46.00689281288724,
+    "bottom_bar_brightness": 87.78823833126808,
+    "non_background_ratio": 0.132,
+    "white_pixel_ratio": 0.006,
+    "effect_pixel_ratio": 0.009,
+    "red_pixel_ratio": 0.006,
+    "gold_pixel_ratio": 0.012,
+    "ui_button_brightness": 67.6,
+    "rec_zone_brightness": 52.9
+  },
+  {
+    "file": "frame_012.0s.jpg",
+    "size": "1614x904",
+    "brightness_mean": 49.761974865940715,
+    "brightness_std": 25.72633793728889,
+    "region_colors": {
+      "r00": [
+        102.6,
+        42.5,
+        15.6
+      ],
+      "r01": [
+        100.8,
+        40.9,
+        13.7
+      ],
+      "r02": [
+        101.9,
+        43.2,
+        16.2
+      ],
+      "r10": [
+        111.1,
+        48.2,
+        15.0
+      ],
+      "r11": [
+        110.5,
+        48.6,
+        16.7
+      ],
+      "r12": [
+        110.5,
+        55.3,
+        19.2
+      ],
+      "r20": [
+        109.5,
+        58.1,
+        26.8
+      ],
+      "r21": [
+        119.7,
+        70.2,
+        38.5
+      ],
+      "r22": [
+        116.9,
+        64.8,
+        36.0
+      ]
+    },
+    "top_bar_brightness": 46.03872366790582,
+    "bottom_bar_brightness": 87.82660057827344,
+    "non_background_ratio": 0.134,
+    "white_pixel_ratio": 0.006,
+    "effect_pixel_ratio": 0.011,
+    "red_pixel_ratio": 0.006,
+    "gold_pixel_ratio": 0.012,
+    "ui_button_brightness": 67.6,
+    "rec_zone_brightness": 52.9
+  },
+  {
+    "file": "frame_016.0s.jpg",
+    "size": "1614x904",
+    "brightness_mean": 20.539368605454484,
+    "brightness_std": 24.903475296030088,
+    "region_colors": {
+      "r00": [
+        39.4,
+        16.7,
+        10.5
+      ],
+      "r01": [
+        38.8,
+        16.0,
+        7.5
+      ],
+      "r02": [
+        38.5,
+        17.2,
+        10.6
+      ],
+      "r10": [
+        40.6,
+        17.1,
+        5.6
+      ],
+      "r11": [
+        43.7,
+        23.4,
+        8.7
+      ],
+      "r12": [
+        41.7,
+        21.9,
+        8.9
+      ],
+      "r20": [
+        42.2,
+        23.6,
+        13.4
+      ],
+      "r21": [
+        50.9,
+        31.4,
+        21.6
+      ],
+      "r22": [
+        43.2,
+        22.8,
+        16.0
+      ]
+    },
+    "top_bar_brightness": 27.085858116480793,
+    "bottom_bar_brightness": 38.946891780256095,
+    "non_background_ratio": 0.075,
+    "white_pixel_ratio": 0.006,
+    "effect_pixel_ratio": 0.013,
+    "red_pixel_ratio": 0.016,
+    "gold_pixel_ratio": 0.001,
+    "ui_button_brightness": 39.4,
+    "rec_zone_brightness": 32.8
+  },
+  {
+    "file": "frame_020.0s.jpg",
+    "size": "1614x904",
+    "brightness_mean": 20.826817476505358,
+    "brightness_std": 26.052102258910253,
+    "region_colors": {
+      "r00": [
+        40.6,
+        17.6,
+        11.1
+      ],
+      "r01": [
+        38.2,
+        16.0,
+        9.0
+      ],
+      "r02": [
+        38.8,
+        18.0,
+        10.3
+      ],
+      "r10": [
+        40.9,
+        18.0,
+        7.5
+      ],
+      "r11": [
+        43.6,
+        23.2,
+        7.4
+      ],
+      "r12": [
+        41.9,
+        22.8,
+        10.1
+      ],
+      "r20": [
+        41.9,
+        22.8,
+        13.2
+      ],
+      "r21": [
+        51.1,
+        31.5,
+        22.7
+      ],
+      "r22": [
+        43.1,
+        22.6,
+        14.9
+      ]
+    },
+    "top_bar_brightness": 27.080498760842627,
+    "bottom_bar_brightness": 38.02440107393639,
+    "non_background_ratio": 0.077,
+    "white_pixel_ratio": 0.006,
+    "effect_pixel_ratio": 0.014,
+    "red_pixel_ratio": 0.016,
+    "gold_pixel_ratio": 0.002,
+    "ui_button_brightness": 36.4,
+    "rec_zone_brightness": 32.8
+  }
+]
