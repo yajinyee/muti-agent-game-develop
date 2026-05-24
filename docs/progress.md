@@ -1,14 +1,24 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-25（DAY-292 T106-T110 幸運特殊魚系統）
+## 最後更新：2026-05-25（DAY-293 T111-T112 覺醒鳳凰+全場震盪幸運魚系統）
 
 ## 自我評估（誠實版）
-- **Server 實際目標物數量：** 17 種（T001-T006 基礎 + T101-T105 特殊 + T106-T110 新特殊 + B001 BOSS）
-- **Lucky 系統數量：** 5 個（連鎖閃電/螃蟹魚雷/渦旋海葵/黃金龍魚輪盤/雷霆龍蝦）
+- **Server 實際目標物數量：** 19 種（T001-T006 基礎 + T101-T112 特殊 + B001 BOSS）
+- **Lucky 系統數量：** 7 個（連鎖閃電/螃蟹魚雷/渦旋海葵/黃金龍魚輪盤/雷霆龍蝦/覺醒鳳凰/全場震盪）
 - **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
 - **Client 腳本：** GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake
-- **美術資產：** T001-T110 精靈圖 + B001 BOSS + 3 個角色 idle 圖
-- **完成度（誠實）：** 基礎遊戲循環完整，Lucky 系統 5 個，待繼續擴充
+- **美術資產：** T001-T112 精靈圖 + B001 BOSS + 3 個角色 idle 圖
+- **完成度（誠實）：** 基礎遊戲循環完整，Lucky 系統 7 個，持續擴充中
+
+## DAY-293 更新（2026-05-25）：T111-T112 覺醒鳳凰+全場震盪幸運魚系統 ✅
+- **業界依據：** Royal Fishing Jili「Rainbow Phoenix Power Up 6x-10x boost」+ Classic Arcade Fishing「explosion rate upgrade + shockwave bomb」
+- **T111 幸運覺醒鳳凰魚（90x）：** 擊破後觸發「覺醒模式」：玩家下 5 次攻擊每次 Power Up 6x-10x 隨機；5 次全部命中 → 「完美覺醒」：全服 ×2.0 加成 8 秒；個人冷卻 20 秒；全服冷卻 35 秒
+- **T112 幸運全場震盪魚（75x）：** 擊破後全場所有目標 HP -35%；觸發玩家 10 秒攻擊力 ×2.0；震盪命中 ≥ 10 個目標 → 「超級震盪」：全服 ×1.8 加成 6 秒；個人冷卻 18 秒；全服冷卻 30 秒
+- **Server：** 2 個獨立 handler 檔案 + game.go 整合 + protocol 新增 2 個訊息類型 + tables.go 新增 2 個目標
+- **Client：** GameManager 新增 2 個訊號 + TargetManager 新增 T111-T112 映射 + HUD 新增 2 個事件處理
+- **美術：** T111 精靈圖（92.5% 非透明像素）+ T112 精靈圖（91.5% 非透明像素）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 推送完成（commit: 198af86）**
 
 ## DAY-292 更新（2026-05-25）：T106-T110 幸運特殊魚系統 ✅
 - **業界依據：** Royal Fishing Jili「Thunder Shark chain lightning」+ Jackpot Fishing「Crab Torpedoes AOE」+ Jackpot Fishing「Sea Anemone whirlpool」+ Royal Fishing「ChainLong King dual-ring roulette」+ Royal Fishing「Thunderbolt Lobster 15s free play」

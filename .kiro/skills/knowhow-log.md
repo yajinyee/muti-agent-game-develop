@@ -3736,3 +3736,26 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **架構模式：** 每個 Lucky 系統獨立 handler 檔案，在 game.go 的 handleKill 中觸發
 - **冷卻設計：** 個人冷卻（15-25 秒）+ 全服冷卻（25-40 秒），防止濫用
 - **Client 整合：** GameManager 新增訊號 → HUD 接收並顯示 Banner + 音效 + 震動
+
+## 12. GIT_TMPDIR 設定解決 git add 失敗
+- **問題：** `git add` 報 `error: unable to create temporary file: No such file or directory`
+- **原因：** `.git/tmp` 目錄被 Norton 或其他程式佔用，git 無法建立暫存檔
+- **解決：** 設定 `$env:GIT_TMPDIR = "d:\Kiro\.git\tmp"` 後再執行 git 指令
+- **教訓：** Windows 上 git 操作失敗時，先確認 GIT_TMPDIR 設定
+
+## 13. Python 多版本環境問題
+- **問題：** `python` 指令指向 `C:\msys64\mingw64\bin\python.exe`（MSYS2 版本），沒有 pip
+- **原因：** PATH 中 MSYS2 的 python 優先於 Python 3.12
+- **解決：** 使用完整路徑 `C:\Users\yajinyee0306\AppData\Local\Programs\Python\Python312\python.exe`
+- **教訓：** Windows 多 Python 環境時，用完整路徑確保使用正確版本
+
+## 14. 覺醒鳳凰 Power Up 設計模式
+- **發現：** 「玩家下 N 次攻擊有加成」的設計需要在 handleKill 中消耗 session，而不是在 handleAttack 中
+- **原因：** handleAttack 在 isKill 分支後才能確認命中，Power Up 應該在命中時觸發
+- **解決：** `consumeAwakenedPhoenixShot(playerID, isHit=true, betCost)` 在 isKill 分支中呼叫
+- **教訓：** 「命中加成」類機制要在 isKill 後處理，「射擊加成」類機制要在 handleAttack 開始時處理
+
+## 15. Lucky 系統 goroutine 安全設計
+- **發現：** Lucky handler 的 goroutine 需要在 g.mu.Lock() 外執行（避免死鎖），但需要在 Lock 內讀取玩家資料
+- **解決：** 先在 Lock 內讀取必要資料（betCost、playerID），解鎖後在 goroutine 中執行耗時操作
+- **教訓：** goroutine 中需要 g.mu.Lock() 時，要確保不會和外層 Lock 形成死鎖
