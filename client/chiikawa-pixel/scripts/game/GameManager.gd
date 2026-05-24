@@ -282,6 +282,7 @@ signal lucky_fortune_prophecy(data: Dictionary)       # 幸運命運預言魚系
 signal lucky_luck_totem(data: Dictionary)             # 幸運幸運圖騰魚系統（DAY-275）
 signal lucky_golden_hurricane(data: Dictionary)       # 幸運黃金颶風魚系統（DAY-276）
 signal lucky_lightning_hammer(data: Dictionary)       # 幸運閃電錘魚系統（DAY-277）
+signal lucky_time_rift(data: Dictionary)              # 幸運時間裂縫魚系統（DAY-278）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -813,6 +814,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_golden_hurricane(payload)
 		"lucky_lightning_hammer":
 			_handle_lucky_lightning_hammer(payload)
+		"lucky_time_rift":
+			_handle_lucky_time_rift(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4121,3 +4124,29 @@ func _handle_lucky_lightning_hammer(payload: Dictionary) -> void:
 			var kill_count: int = payload.get("kill_count", 0)
 			var final_mult: float = payload.get("final_mult", 1.0)
 			print("[GameManager] LightningHammer ended! hits=%d kills=%d finalMult=x%.1f" % [hit_count, kill_count, final_mult])
+
+## 幸運時間裂縫魚系統（DAY-278）
+func _handle_lucky_time_rift(payload: Dictionary) -> void:
+	emit_signal("lucky_time_rift", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"rift_start":
+			var has_best_kill: bool = payload.get("has_best_kill", false)
+			var replay_name: String = payload.get("replay_name", "???")
+			var replay_mult: int = payload.get("replay_mult", 2)
+			var rift_mult: float = payload.get("rift_mult", 2.5)
+			var immediate_reward: int = payload.get("immediate_reward", 0)
+			print("[GameManager] TimeRift started! hasBest=%s replay=%s x%d riftMult=x%.1f reward=%d" % [str(has_best_kill), replay_name, replay_mult, rift_mult, immediate_reward])
+		"rift_broadcast":
+			var player_name: String = payload.get("player_name", "???")
+			var replay_name: String = payload.get("replay_name", "???")
+			var immediate_reward: int = payload.get("immediate_reward", 0)
+			print("[GameManager] TimeRift broadcast! player=%s replay=%s reward=%d" % [player_name, replay_name, immediate_reward])
+		"rift_clone_kill":
+			var clone_kill_mult: float = payload.get("clone_kill_mult", 3.0)
+			var clone_reward: int = payload.get("clone_reward", 0)
+			print("[GameManager] TimeRift clone killed! mult=x%.1f reward=%d" % [clone_kill_mult, clone_reward])
+		"rift_clone_broadcast":
+			var player_name: String = payload.get("player_name", "???")
+			var clone_reward: int = payload.get("clone_reward", 0)
+			print("[GameManager] TimeRift clone broadcast! player=%s reward=%d" % [player_name, clone_reward])

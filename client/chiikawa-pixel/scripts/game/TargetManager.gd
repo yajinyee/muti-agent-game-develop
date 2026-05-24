@@ -148,6 +148,7 @@ const TARGET_SPRITES = {
 	"T233": "res://assets/sprites/targets/T233_luck_totem.png",
 	"T234": "res://assets/sprites/targets/T234_golden_hurricane.png",
 	"T235": "res://assets/sprites/targets/T235_lightning_hammer.png",
+	"T236": "res://assets/sprites/targets/T236_time_rift.png",
 	"B001": "res://assets/sprites/targets/B001_boss.png",
 }
 

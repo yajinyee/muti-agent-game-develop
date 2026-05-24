@@ -618,6 +618,7 @@ const (
 	MsgLuckyLuckTotem              MessageType = "lucky_luck_totem"                      // 幸運幸運圖騰魚廣播（Server→Client，DAY-275）
 	MsgLuckyGoldenHurricane        MessageType = "lucky_golden_hurricane"                // 幸運黃金颶風魚廣播（Server→Client，DAY-276）
 	MsgLuckyLightningHammer        MessageType = "lucky_lightning_hammer"                // 幸運閃電錘魚廣播（Server→Client，DAY-277）
+	MsgLuckyTimeRift               MessageType = "lucky_time_rift"                       // 幸運時間裂縫魚廣播（Server→Client，DAY-278）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6358,4 +6359,25 @@ type LuckyLightningHammerPayload struct {
 	KillCount    int     `json:"kill_count,omitempty"`     // 直接擊破數
 	FinalMult    float64 `json:"final_mult,omitempty"`     // 最終累積倍率
 	TotalReward  int     `json:"total_reward,omitempty"`   // 總獎勵
+}
+
+// LuckyTimeRiftPayload 幸運時間裂縫魚廣播（Server → Client，DAY-278）
+// Event 類型：
+//   - rift_start：時間裂縫觸發（個人，HasBestKill/ReplayDefID/ReplayName/ReplayMult/RiftMult/ImmediateReward/CloneInstanceID/CloneKillMult）
+//   - rift_broadcast：全服廣播橫幅（PlayerName/ReplayName/ReplayMult/RiftMult/ImmediateReward/CloneInstanceID）
+//   - rift_clone_kill：裂縫複製體被擊破（個人，PlayerID/PlayerName/ReplayName/CloneKillMult/CloneReward）
+//   - rift_clone_broadcast：裂縫複製體擊破全服廣播（PlayerName/ReplayName/CloneReward）
+type LuckyTimeRiftPayload struct {
+	Event           string  `json:"event"`
+	PlayerID        string  `json:"player_id,omitempty"`
+	PlayerName      string  `json:"player_name,omitempty"`
+	HasBestKill     bool    `json:"has_best_kill,omitempty"`     // 是否有最高倍率記錄
+	ReplayDefID     string  `json:"replay_def_id,omitempty"`     // 重現目標 defID
+	ReplayName      string  `json:"replay_name,omitempty"`       // 重現目標名稱
+	ReplayMult      int     `json:"replay_mult,omitempty"`       // 重現目標倍率
+	RiftMult        float64 `json:"rift_mult,omitempty"`         // 時間裂縫加成倍率（2.5 或 1.5）
+	ImmediateReward int     `json:"immediate_reward,omitempty"`  // 即時獎勵
+	CloneInstanceID string  `json:"clone_instance_id,omitempty"` // 裂縫複製體 instanceID
+	CloneKillMult   float64 `json:"clone_kill_mult,omitempty"`   // 裂縫複製體擊破倍率（3.0）
+	CloneReward     int     `json:"clone_reward,omitempty"`      // 裂縫複製體擊破獎勵
 }

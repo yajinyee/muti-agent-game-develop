@@ -251,6 +251,7 @@ type Game struct {
 	LuckyLuckTotem          *luckyLuckTotemManager             // 幸運幸運圖騰魚系統管理器（DAY-275）
 	LuckyGoldenHurricane    *luckyGoldenHurricaneManager       // 幸運黃金颶風魚系統管理器（DAY-276）
 	LuckyLightningHammer    *luckyLightningHammerManager       // 幸運閃電錘魚系統管理器（DAY-277）
+	LuckyTimeRift           *luckyTimeRiftManager              // 幸運時間裂縫魚系統管理器（DAY-278）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -478,6 +479,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyLuckTotem:          newLuckyLuckTotemManager(),
 		LuckyGoldenHurricane:    newLuckyGoldenHurricaneManager(),
 		LuckyLightningHammer:    newLuckyLightningHammerManager(),
+		LuckyTimeRift:           newLuckyTimeRiftManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2571,6 +2573,18 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運閃電錘魚：擊破 T235 時觸發閃電錘（DAY-277）
 	if isLuckyLightningHammerFish(t.DefID) {
 		go g.tryLuckyLightningHammerFish(p)
+	}
+	// 幸運時間裂縫魚：擊破 T236 時觸發時間裂縫（DAY-278）
+	if isLuckyTimeRiftFish(t.DefID) {
+		go g.tryLuckyTimeRiftFish(p)
+	}
+	// 幸運時間裂縫魚：記錄擊破歷史（非 T236 目標，供時間裂縫查找最高倍率）（DAY-278）
+	if !isLuckyTimeRiftFish(t.DefID) {
+		g.LuckyTimeRift.recordRiftKillHistory(p.ID, t.InstanceID, t.DefID, t.Def.Name, int(t.Def.MultiplierMin))
+	}
+	// 幸運時間裂縫魚：裂縫複製體被擊破時結算（DAY-278）
+	if g.LuckyTimeRift.isRiftClone(t.InstanceID) {
+		go g.notifyRiftCloneKill(p, t)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

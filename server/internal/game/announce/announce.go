@@ -116,6 +116,7 @@ const (
 	EventLuckyLuckTotem           EventType = "lucky_luck_totem"           // 幸運幸運圖騰魚觸發（DAY-275）
 	EventLuckyGoldenHurricane     EventType = "lucky_golden_hurricane"     // 幸運黃金颶風魚觸發（DAY-276）
 	EventLuckyLightningHammer     EventType = "lucky_lightning_hammer"     // 幸運閃電錘魚觸發（DAY-277）
+	EventLuckyTimeRift            EventType = "lucky_time_rift"            // 幸運時間裂縫魚觸發（DAY-278）
 )
 
 // Priority 公告優先級
@@ -2019,6 +2020,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "⚡ 閃電錘！"
 		message = msg
 		icon = "⚡"
+		color = c
+		priority = PriorityHigh
+		duration = 4500
+
+	case EventLuckyTimeRift:
+		msg := "🌀 時間裂縫觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#9B59B6"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🌀 時間裂縫！"
+		message = msg
+		icon = "🌀"
 		color = c
 		priority = PriorityHigh
 		duration = 4500

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-277 幸運閃電錘魚系統）
+## 最後更新：2026-05-24（DAY-278 幸運時間裂縫魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,26 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-278 更新（自主觸發）：** 幸運時間裂縫魚系統（Lucky Time Rift Fish）✅
+  - **業界依據：** 業界原創「時間裂縫+最高倍率重現+裂縫複製體」機制，結合「歷史記錄+即時獎勵+場上複製體」三個元素，製造「我最好的那次擊破被時間裂縫記住了」的成就感
+  - **設計：** 擊破 T236 後，Server 查找玩家過去 30 秒內「最高倍率的那次擊破記錄」；立即給予觸發玩家 ×2.5 加成（個人，基於最高倍率目標的 bet × mult × 2.5）；同時在場上生成一個「裂縫複製體」（同種類目標，HP 只有 30%，擊破給 ×3.0 大獎）；若過去 30 秒無擊破記錄 → 給予 ×1.5 保底獎勵 + 生成隨機裂縫複製體；全服廣播「時間裂縫重現了什麼目標/倍率」；個人冷卻 20 秒；全服冷卻 32 秒
+  - **設計差異：** 與時光倒流（T205，重播最近 5 個目標 ×1.6）不同，時間裂縫是「找最高倍率那次」，讓玩家有「我最好的那次擊破被時間裂縫記住了」的成就感；「裂縫複製體 HP 30%」讓玩家有「這條很容易打，要趕快打」的緊迫感；「裂縫複製體擊破 ×3.0」讓玩家有「打裂縫複製體比打普通魚更值」的策略感；「全服廣播裂縫複製體出現位置」讓所有玩家看到「有人觸發了時間裂縫，裂縫複製體在哪裡」；「30 秒歷史視窗」比時光倒流的 10 秒更長，讓玩家有更多機會觸發高倍率重現
+  - server/internal/game/lucky_time_rift_handler.go：luckyTimeRiftManager（個人冷卻/全服冷卻/killHistory/riftClones）；riftKillRecord（instanceID/defID/name/mult/killedAt）；isLuckyTimeRiftFish（T236）；isRiftClone（裂縫複製體識別）；recordRiftKillHistory（記錄擊破歷史，由 handleKill 呼叫）；getBestKill（取得過去 30 秒最高倍率擊破）；tryLuckyTimeRiftFish（觸發/即時獎勵/生成裂縫複製體/個人訊息+全服廣播+全服公告）；spawnRiftClone（生成裂縫複製體/HP 30%/速度 70%/紫色光暈）；notifyRiftCloneKill（裂縫複製體擊破結算/×3.0/個人通知+全服廣播+全服公告）
+  - server/internal/data/tables.go：新增 T236 幸運時間裂縫魚（73-137x/HP113/SpawnWeight2/Speed9/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyTimeRift；LuckyTimeRiftPayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyTimeRift + case 處理
+  - server/internal/game/game.go：LuckyTimeRift *luckyTimeRiftManager；handleKill 加入 isLuckyTimeRiftFish 觸發分支 + recordRiftKillHistory（所有非T236擊破）+ isRiftClone 裂縫複製體擊破分支
+  - client/chiikawa-pixel/scripts/ui/LuckyTimeRiftPanel.gd：紫金時間裂縫主題面板（rift_start 紫色三次強閃光+頂部橫幅+裂縫指示器（右上角，重現倍率/裂縫複製體倍率）+即時獎勵浮動文字+裂縫複製體提示；rift_broadcast 全服廣播橫幅；rift_clone_kill 金色三次強閃光+「裂縫複製體擊破！×3.0 大獎！」大字+結算彈窗；rift_clone_broadcast 全服廣播橫幅）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_time_rift 訊號 + _handle_lucky_time_rift
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyTimeRiftPanelScript（layer=51）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T236 映射
+  - 歷史視窗設計：30 秒（比時光倒流 10 秒更長）；記錄所有非 T236 擊破；取最高倍率
+  - 即時獎勵設計：有記錄 ×2.5；無記錄 ×1.5 保底；基於 bet × mult × riftMult
+  - 裂縫複製體設計：HP 30%；速度 70%；存活 12 秒；擊破 ×3.0；紫色光暈
+  - 廣播設計：觸發時全服廣播+公告（紫色/藍色）；裂縫複製體擊破時全服廣播+公告（金色）
+  - 視覺設計：紫金時間裂縫主題（#9B59B6 紫 + #FFD700 金 + #3498DB 藍 + #E8DAEF 淡紫白）；裂縫指示器（右上角，重現倍率/裂縫複製體倍率雙行顯示）；結算彈窗右側滑入（含目標名稱/裂縫倍率/裂縫大獎）
+  - build/vet 全部通過（零錯誤零警告）
+  - T236 精靈圖：紫色時間裂縫魚（裂縫鋸齒紋路+沙漏符文+紫色魚身+時間光點+裂縫光暈）
 - **DAY-277 更新（自主觸發）：** 幸運閃電錘魚系統（Lucky Lightning Hammer Fish）✅
   - **業界依據：** Battle of Luck「Lucky Slammer」機制（2026）進化版，業界原創「瞬間多目標錘擊+累積倍率」機制
   - **設計：** 擊破 T235 後，觸發「閃電錘」：瞬間選定場上 3-6 個目標；對每個目標造成「閃電錘擊」（HP -60%，30% 機率直接擊破）；每個被錘擊的目標，觸發玩家獲得 ×1.2 倍率加成（累積）；被直接擊破的目標，額外給予 ×2.0 倍率獎勵；全服廣播錘擊結果；個人冷卻 22 秒；全服冷卻 35 秒

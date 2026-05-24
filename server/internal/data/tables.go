@@ -909,6 +909,15 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 22 秒；全服冷卻 35 秒
 	"T235": {ID: "T235", Name: "幸運閃電錘魚", Type: TargetTypeSpecial, MultiplierMin: 72, MultiplierMax: 135, HP: 112, SpawnWeight: 2, Speed: 10, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_lightning_hammer"},
 
+	// T236 幸運時間裂縫魚（DAY-278）— 業界原創「時間裂縫+最高倍率重現+裂縫複製體」機制
+	//   - 擊破 T236 後，Server 查找玩家過去 30 秒內「最高倍率的那次擊破記錄」
+	//   - 立即給予觸發玩家 ×2.5 加成（個人，基於最高倍率目標的 bet × mult × 2.5）
+	//   - 同時在場上生成一個「裂縫複製體」（同種類目標，HP 只有 30%，擊破給 ×3.0 大獎）
+	//   - 若過去 30 秒無擊破記錄 → 給予 ×1.5 保底獎勵 + 生成隨機裂縫複製體
+	//   - 全服廣播「時間裂縫重現了什麼目標/倍率」
+	//   - 個人冷卻 20 秒；全服冷卻 32 秒
+	"T236": {ID: "T236", Name: "幸運時間裂縫魚", Type: TargetTypeSpecial, MultiplierMin: 73, MultiplierMax: 137, HP: 113, SpawnWeight: 2, Speed: 9, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_time_rift"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
