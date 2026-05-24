@@ -2,8 +2,57 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-24（DAY-289）
-**整體目標**：幸運永生 BOSS 魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-25（DAY-292）
+**整體目標**：T106-T110 幸運特殊魚系統 ✅ → 繼續自主推進
+
+---
+
+## 今日任務清單
+
+### ✅ DAY-292 啟動檢查
+
+- [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
+- [x] go vet ./... 確認無警告（VET OK）
+- [x] 確認 progress.md 真實狀態（發現虛假 100% 問題，已修正）
+- [x] 上網研究業界最新機制（Royal Fishing Jili + Jackpot Fishing 2026）
+
+### ✅ DAY-292 T106-T110 幸運特殊魚系統（P1）
+
+- [x] `data/tables.go`：新增 T106-T110 + GoldenDragonWeights 輪盤權重
+- [x] `protocol/messages.go`：新增 5 個 Lucky 訊息類型 + 5 個 Payload 定義
+- [x] `target.go`：新增 T109 黃金龍魚倍率計算（rollGoldenDragonMult）
+- [x] `lucky_chain_lightning_handler.go`：T106 連鎖閃電（3條魚 HP-50%，完美連鎖 ×2.0）
+- [x] `lucky_crab_torpedo_handler.go`：T107 螃蟹魚雷（3次 AOE 爆炸 r=150px HP-40%）
+- [x] `lucky_vortex_handler.go`：T108 渦旋海葵（5秒渦旋 HP-30% + 爆炸 HP-20%）
+- [x] `lucky_golden_dragon_handler.go`：T109 黃金龍魚輪盤（雙環最高 350x）
+- [x] `lucky_thunder_lobster_handler.go`：T110 雷霆龍蝦（15秒免費自動射擊）
+- [x] `game.go`：整合 5 個 Lucky manager（struct/init/handleKill 觸發分支）
+- [x] `GameManager.gd`：新增 5 個 Lucky 訊號 + 訊息路由
+- [x] `TargetManager.gd`：新增 T106-T110 Sprite 映射和備用顏色
+- [x] `HUD.gd`：新增 Lucky Banner + Announce 系統 + 5 個 Lucky 事件處理
+- [x] `generate_t106_t110_sprites.py`：T106-T110 精靈圖（31-38% 非透明像素）
+- [x] build/vet 全部通過，GitHub 推送完成（commit: 659deea）
+
+### 🔄 DAY-293 下一步（自主觸發）
+
+- [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
+- [ ] 考慮新增 BOSS Phase 2 系統（BOSS 血量 < 50% 時進入狂暴模式）
+- [ ] 考慮新增排行榜系統（Server /leaderboard 端點）
+
+---
+
+## 每日自問（Game Director 必填）
+
+> **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
+
+- 完成度（誠實）：**基礎遊戲循環完整，Lucky 系統 5 個，持續擴充中**
+- 美術質量：**60/100**（精靈圖程式生成，品質中等，待 AI 生成提升）
+- 規格一致性：**基礎功能一致，進階功能持續補充**
+- 特殊目標：**17 種（T001-T006 + T101-T110 + B001）**
+- 最新功能：**T106-T110 幸運特殊魚（連鎖閃電/螃蟹魚雷/渦旋海葵/黃金龍魚輪盤/雷霆龍蝦）**
+- 最高倍率機制：**T109 黃金龍魚輪盤最高 350x**
+
+
 
 ---
 

@@ -1,14 +1,29 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-291 幸運時空裂縫魚系統）
+## 最後更新：2026-05-25（DAY-292 T106-T110 幸運特殊魚系統）
 
-## 自我評估
-- **完成度：100%**
-- **美術質量：100/100**
-- **規格一致性：100%**
-- **Gameplay Feel：100/100**
-- **整體信心：100/100**
-- **DAY-291 更新（自主觸發）：** 幸運時空裂縫魚系統（Lucky Time Rift Fish）✅
+## 自我評估（誠實版）
+- **Server 實際目標物數量：** 17 種（T001-T006 基礎 + T101-T105 特殊 + T106-T110 新特殊 + B001 BOSS）
+- **Lucky 系統數量：** 5 個（連鎖閃電/螃蟹魚雷/渦旋海葵/黃金龍魚輪盤/雷霆龍蝦）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **Client 腳本：** GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake
+- **美術資產：** T001-T110 精靈圖 + B001 BOSS + 3 個角色 idle 圖
+- **完成度（誠實）：** 基礎遊戲循環完整，Lucky 系統 5 個，待繼續擴充
+
+## DAY-292 更新（2026-05-25）：T106-T110 幸運特殊魚系統 ✅
+- **業界依據：** Royal Fishing Jili「Thunder Shark chain lightning」+ Jackpot Fishing「Crab Torpedoes AOE」+ Jackpot Fishing「Sea Anemone whirlpool」+ Royal Fishing「ChainLong King dual-ring roulette」+ Royal Fishing「Thunderbolt Lobster 15s free play」
+- **T106 幸運連鎖閃電魚（60x）：** 擊破後連鎖閃電攻擊附近 3 條魚（HP -50%），每條命中 +1.5x 累積，完美連鎖額外 ×2.0；個人冷卻 15 秒；全服冷卻 25 秒
+- **T107 幸運螃蟹魚雷（70x）：** 擊破後 3 次 AOE 爆炸（r=150px，HP -40%），每次命中 +1.8x 累積；個人冷卻 18 秒；全服冷卻 30 秒
+- **T108 幸運渦旋海葵（80x）：** 擊破後全場渦旋 5 秒（每秒 HP -6%）+ 渦旋爆炸（HP -20%）；個人冷卻 20 秒；全服冷卻 35 秒
+- **T109 幸運黃金龍魚（80-350x）：** 擊破後雙環輪盤（內環 2-14x × 外環 5-35x = 最高 350x）；個人冷卻 25 秒；全服冷卻 40 秒
+- **T110 幸運雷霆龍蝦（100x）：** 擊破後 15 秒免費自動射擊（每 0.5 秒一次，不扣 bet_cost）；個人冷卻 22 秒；全服冷卻 38 秒
+- **Server：** 5 個獨立 handler 檔案 + game.go 整合 + protocol 新增 5 個訊息類型 + tables.go 新增 5 個目標 + GoldenDragonWeights 輪盤權重
+- **Client：** GameManager 新增 5 個訊號 + TargetManager 新增 T106-T110 映射 + HUD 新增 Lucky Banner + Announce 系統
+- **美術：** T106-T110 精靈圖（31-38% 非透明像素）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 推送完成（commit: 659deea）**
+
+
   - **業界依據：** Fishing Fortune 2026「Time Freeze mechanic — all fish freeze in place for 8 seconds, allowing players to target high-value fish without them escaping」— 業界原創「時空裂縫 + 全場凍結 + 凍結期間傷害加倍 + 裂縫爆炸」機制
   - **設計：** 擊破 T249 後，觸發「時空裂縫」：全場所有目標凍結 8 秒（停止移動）；凍結期間，所有目標受到的傷害 ×2.0（凍結加成）；凍結結束時，場上所有目標 HP -30%（裂縫爆炸）；若凍結期間玩家擊破 ≥ 5 個目標 → 「時空完美」：全服 ×2.5 加成 6 秒；個人冷卻 22 秒；全服冷卻 38 秒
   - **設計差異：** 與幸運冰凍世界（T237，全場 HP -40% 一次性）不同，時空裂縫是「凍結 + 傷害加倍 + 爆炸」三段；「凍結期間傷害 ×2.0」讓玩家有「要趁凍結期間瘋狂打魚，每一發都值兩發」的動力；「凍結結束 HP -30%」讓玩家有「凍結結束後還有一波爆炸，雙重收益」的驚喜感；「擊破 ≥ 5 個觸發時空完美」讓玩家有「要趁 8 秒內打完 5 條魚」的緊迫感；「全服廣播凍結狀態」讓所有玩家看到「現在全場凍結，快去打魚」的社交感

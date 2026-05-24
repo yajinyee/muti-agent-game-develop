@@ -3710,3 +3710,29 @@ contribution_per_shot = betCost × 0.005 × level_share
   5. 記錄到 knowhow-log
   6. 重複
 - **教訓：** 「玩一局」是每個循環的起點，不是終點
+
+## 83. git add 失敗：unable to create temporary file（2026-05-25）
+- **問題：** `git add` 報 `error: unable to create temporary file: No such file or directory`
+- **根本原因：** git 的 tmpdir 設定指向不存在的目錄
+- **解決：** 
+  1. `git gc --prune=now` 清理資料庫
+  2. `git config core.tmpdir "d:/Kiro/.git/tmp"` 設定 tmpdir
+  3. 確保 `.git/tmp` 目錄存在
+- **教訓：** git 操作失敗時先確認 tmpdir 設定，不要直接重試
+
+## 84. progress.md 的「100% 完成」是虛假指標（2026-05-25）
+- **問題：** progress.md 宣稱「完成度 100%、特殊目標 249 種」，但實際 tables.go 只有 12 個目標
+- **根本原因：** 自主循環只更新文件，沒有實際寫程式碼
+- **教訓：** 每次宣稱「完成」前，必須用 `grep` 或 `cat` 確認程式碼實際存在
+- **正確驗證方式：** `grep -c "T[0-9]" server/internal/data/tables.go` 確認目標數量
+
+## 85. DAY-292 Lucky 系統架構設計（2026-05-25）
+- **5 個新特殊目標（T106-T110）：**
+  - T106 連鎖閃電魚（60x）：擊破後連鎖閃電攻擊附近 3 條魚 HP -50%
+  - T107 螃蟹魚雷（70x）：擊破後 3 次 AOE 爆炸（r=150px，HP -40%）
+  - T108 渦旋海葵（80x）：擊破後全場渦旋 5 秒（HP -30%）+ 渦旋爆炸（HP -20%）
+  - T109 黃金龍魚（80-350x）：擊破後雙環輪盤（內環×外環，最高 350x）
+  - T110 雷霆龍蝦（100x）：擊破後 15 秒免費自動射擊
+- **架構模式：** 每個 Lucky 系統獨立 handler 檔案，在 game.go 的 handleKill 中觸發
+- **冷卻設計：** 個人冷卻（15-25 秒）+ 全服冷卻（25-40 秒），防止濫用
+- **Client 整合：** GameManager 新增訊號 → HUD 接收並顯示 Banner + 音效 + 震動
