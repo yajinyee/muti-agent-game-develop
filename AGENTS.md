@@ -1,219 +1,202 @@
-# Multi-Agent Game Studio v2.0 — 重構架構說明
+# Multi-Agent Game Studio v3.0 — 完整架構
 
 ## 專案概覽
-
-**遊戲名稱**：吉伊卡哇：像素大討伐（捕魚機）  
-**技術棧**：Go + WebSocket（Port 7777）/ Godot 4.6.2（HTML5 匯出）  
-**架構版本**：v2.0（2026-05-24 重構，從技術棧分工改為體驗循環分工）
-
----
-
-## 為什麼重構
-
-v1.0 的 12 個 Agent 按技術棧分工（Go Agent、Godot Agent），導致：
-1. Godot Client Agent 一個人負責 UI、玩法、WebSocket、效能、資產整合——5 個人的工作量
-2. 沒有任何 Agent 的職責是「確認 Server↔Client 端對端真的通」
-3. 沒有任何 Agent 負責「玩起來好不好玩」
-4. 250 天的功能堆疊，沒有一次被玩家視角驗證過
-
-v2.0 改為**按體驗循環分工**：每個功能必須走完「設計→實作→整合→玩家驗證→優化」才算完成。
+**遊戲**：吉伊卡哇：像素大討伐（捕魚機）  
+**技術棧**：Go + WebSocket（Port 7777）/ Godot 4.6.2（HTML5）  
+**架構版本**：v3.0（2026-05-24，術業有專攻——每個子系統有自己的 Agent）
 
 ---
 
-## 新架構圖（20 個 Agent）
+## 設計原則
+
+> **術業有專攻。** 每個子系統、每個美術環節、每個製作方式，都有自己的 Agent。
+> Agent 越專精，輸出品質越高，問題越容易定位。
+
+---
+
+## 完整 Agent 清單（38 個）
+
+### 🎯 決策層（2個）
+| Agent | 職責 |
+|-------|------|
+| `game-director` | 技術架構決策、任務優先級、風險管理 |
+| `player-experience-director` | 玩家體驗決策、爽感設計、體驗循環完整性 |
+
+---
+
+### 📐 設計層（4個）
+| Agent | 職責 |
+|-------|------|
+| `spec-architect` | Server↔Client 協定一致性、規格文件 |
+| `balance-agent` | RTP 模擬、數值平衡、獎勵結構 |
+| `gameplay-design-agent` | 核心玩法設計、特殊機制設計、手感規格 |
+| `target-design-agent` | 目標物設計：倍率、HP、行為、視覺主題 |
+
+---
+
+### ⚙️ Server 實作層（4個）
+| Agent | 職責 | 主要檔案 |
+|-------|------|---------|
+| `server-core-agent` | 遊戲主循環、狀態機、玩家管理 | `game.go`, `hub.go` |
+| `server-combat-agent` | 擊破判定、RTP 計算、獎勵分配 | `combat.go`, `target.go` |
+| `server-event-agent` | BOSS 系統、Bonus 系統、特殊事件 | `boss.go`, `bonus.go`, `lucky_*.go` |
+| `server-infra-agent` | WebSocket Hub、Store、Config、部署 | `ws/`, `store/`, `config/` |
+
+---
+
+### 🎮 Client 玩法層（5個）
+| Agent | 職責 | 主要檔案 |
+|-------|------|---------|
+| `cannon-agent` | 射擊系統：投射物、AUTO、手感、Hit Stop | `Cannon.gd`, `BulletPool.gd` |
+| `target-system-agent` | 目標物生命週期：生成、移動、受擊、擊破 | `TargetManager.gd`, `TargetPool.gd` |
+| `boss-battle-agent` | BOSS 戰客戶端：進場、Phase 2、死亡動畫 | `TargetManager.gd` BOSS 部分 |
+| `bonus-game-agent` | Bonus 遊戲：拔草場景、計時、結算 | `BonusGame.gd` |
+| `game-state-agent` | 遊戲狀態機、訊號分發、GameManager | `GameManager.gd` |
+
+---
+
+### 🖥️ Client UI 層（4個）
+| Agent | 職責 | 主要檔案 |
+|-------|------|---------|
+| `hud-core-agent` | 核心 HUD：金幣、BET、勞動值、AUTO、LOCK | `HUD.gd` |
+| `lucky-panel-agent` | 150+ LuckyXxxPanel 重構、BaseLuckyPanel | `scripts/ui/Lucky*.gd` |
+| `social-ui-agent` | 排行榜、公會、好友、活動 Panel | 社交相關 Panel |
+| `screen-recorder-agent` | 側錄功能、REC 按鈕 | `ScreenRecorder.gd` |
+
+---
+
+### ✨ Client 特效層（3個）
+| Agent | 職責 | 主要檔案 |
+|-------|------|---------|
+| `hit-effect-agent` | 命中特效、擊破粒子、獎勵跳字 | `HitEffect.gd`, `effects/` |
+| `screen-effect-agent` | 螢幕震動、Hit Stop、水下 Shader、像素化過場 | `ScreenShake.gd`, `UnderwaterOverlay.gd` |
+| `environment-agent` | 背景管理、氣泡層、環境動畫 | `BackgroundManager.gd`, `BubbleLayer.gd` |
+
+---
+
+### 🌐 Client 網路層（2個）
+| Agent | 職責 | 主要檔案 |
+|-------|------|---------|
+| `network-agent` | WebSocket 連線、重連、心跳、訊息收發 | `NetworkManager.gd` |
+| `protocol-sync-agent` | Server↔Client 訊息對應驗證 | `protocol.go` ↔ `GameManager.gd` |
+
+---
+
+### 🎨 美術製作層（7個）
+| Agent | 職責 | 工具 |
+|-------|------|------|
+| `character-pixel-agent` | 角色像素圖：吉伊卡哇/小八/烏薩奇，3狀態 | `generate_pixel_art_v5.py` |
+| `character-animation-agent` | 角色動畫幀：idle/attack/bigwin Spritesheet | `generate_animation_frames.py` |
+| `target-pixel-agent` | 目標物像素圖：T001-T249 程式生成 | `generate_targets_v3.py` |
+| `target-ai-agent` | 目標物 AI 生成：ComfyUI + SD 1.5 | `comfyui_generate_targets.py` |
+| `boss-art-agent` | BOSS 動畫：B001 三狀態 Spritesheet | `generate_boss_sheet.py` |
+| `background-art-agent` | 背景圖：海底/BOSS/Bonus 三種場景 | `generate_backgrounds_v2.py` |
+| `ui-art-agent` | UI 元素：按鈕、圖示、字體、特效 Sprite | `generate_ui_assets.py` |
+
+---
+
+### 🔊 音效層（2個）
+| Agent | 職責 | 工具 |
+|-------|------|------|
+| `sfx-agent` | 音效設計：14個 SFX 的音量、音調、同步 | `AudioManager.gd`, WAV 工具 |
+| `bgm-agent` | BGM 設計：4首 BGM 的循環、切換、淡入淡出 | `AudioManager.gd`, BGM 生成 |
+
+---
+
+### 🔍 整合驗證層（4個）
+| Agent | 職責 |
+|-------|------|
+| `integration-test-agent` | 端對端驗證：Server 發→Client 顯示 |
+| `regression-guard-agent` | 防止新功能破壞舊功能 |
+| `build-export-agent` | HTML5 匯出、build 驗證 |
+| `performance-agent` | FPS、記憶體、Draw Call 監控 |
+
+---
+
+### 👁️ 玩家驗證層（3個）
+| Agent | 職責 |
+|-------|------|
+| `qa-playtest-agent` | 功能測試、回歸測試 |
+| `player-experience-agent` | 玩家視角評估：手感、清晰度、爽感 |
+| `video-analysis-agent` | 分析玩家錄影：停頓點、爽感點、時機問題 |
+
+---
+
+### 📚 知識層（3個）
+| Agent | 職責 |
+|-------|------|
+| `research-agent` | 搜尋最新技術、業界最佳實踐 |
+| `skill-librarian` | 管理知識庫、維護 Skill 索引 |
+| `animation-agent` | 動畫系統：AnimationPlayer、SpriteFrames |
+
+---
+
+## 架構圖
 
 ```
-╔══════════════════════════════════════════════════════════════╗
-║                    決策層（2個）                              ║
-║  ┌─────────────────┐    ┌──────────────────────────────┐    ║
-║  │  Game Director  │    │  Player Experience Director  │    ║
-║  │  （技術決策）    │    │  （玩家體驗決策）             │    ║
-║  └────────┬────────┘    └──────────────┬───────────────┘    ║
-╚═══════════╪═════════════════════════════╪════════════════════╝
-            │                             │
-╔═══════════╪═════════════════════════════╪════════════════════╗
-║           ▼         設計層（3個）        ▼                    ║
-║  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐   ║
-║  │    Spec      │  │   Balance    │  │  Gameplay Design │   ║
-║  │  Architect   │  │    Agent     │  │     Agent        │   ║
-║  └──────────────┘  └──────────────┘  └──────────────────┘   ║
-╚════════════════════════════════════════════════════════════╝
-            │
-╔═══════════╪════════════════════════════════════════════════╗
-║           ▼         實作層（5個）                           ║
-║  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  ║
-║  │  Go Server   │  │   Gameplay   │  │    UI / HUD      │  ║
-║  │    Agent     │  │    Agent     │  │     Agent        │  ║
-║  └──────────────┘  └──────────────┘  └──────────────────┘  ║
-║  ┌──────────────┐  ┌──────────────┐                         ║
-║  │  Art/Sprite  │  │    Audio     │                         ║
-║  │    Agent     │  │    Agent     │                         ║
-║  └──────────────┘  └──────────────┘                         ║
-╚════════════════════════════════════════════════════════════╝
-            │
-╔═══════════╪════════════════════════════════════════════════╗
-║           ▼         整合層（3個）                           ║
-║  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  ║
-║  │ Integration  │  │   Protocol   │  │   Build &        │  ║
-║  │  Test Agent  │  │  Sync Agent  │  │  Export Agent    │  ║
-║  └──────────────┘  └──────────────┘  └──────────────────┘  ║
-╚════════════════════════════════════════════════════════════╝
-            │
-╔═══════════╪════════════════════════════════════════════════╗
-║           ▼         驗證層（4個）                           ║
-║  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  ║
-║  │  QA Playtest │  │   Player     │  │  Video Analysis  │  ║
-║  │    Agent     │  │  Experience  │  │     Agent        │  ║
-║  │              │  │    Agent     │  │                  │  ║
-║  └──────────────┘  └──────────────┘  └──────────────────┘  ║
-║  ┌──────────────┐                                           ║
-║  │  Regression  │                                           ║
-║  │  Guard Agent │                                           ║
-║  └──────────────┘                                           ║
-╚════════════════════════════════════════════════════════════╝
-            │
-╔═══════════╪════════════════════════════════════════════════╗
-║           ▼         知識層（3個）                           ║
-║  ┌──────────────┐  ┌──────────────┐  ┌──────────────────┐  ║
-║  │   Research   │  │    Skill     │  │   Animation      │  ║
-║  │    Agent     │  │  Librarian   │  │     Agent        │  ║
-║  └──────────────┘  └──────────────┘  └──────────────────┘  ║
-╚════════════════════════════════════════════════════════════╝
+決策層          game-director ←→ player-experience-director
+                      │
+設計層    spec-architect  balance-agent  gameplay-design-agent  target-design-agent
+                      │
+Server層  server-core  server-combat  server-event  server-infra
+                      │
+Client層  cannon  target-system  boss-battle  bonus-game  game-state
+                      │
+UI層      hud-core  lucky-panel  social-ui  screen-recorder
+                      │
+特效層    hit-effect  screen-effect  environment
+                      │
+網路層    network  protocol-sync
+                      │
+美術層    character-pixel  character-animation  target-pixel  target-ai
+          boss-art  background-art  ui-art
+                      │
+音效層    sfx  bgm
+                      │
+整合層    integration-test  regression-guard  build-export  performance
+                      │
+驗證層    qa-playtest  player-experience  video-analysis
+                      │
+知識層    research  skill-librarian  animation
 ```
-
----
-
-## 20 個 Agent 完整職責表
-
-### 決策層
-
-| Agent | 職責核心 | 主要輸出 | 觸發條件 |
-|-------|---------|---------|---------|
-| **game-director** | 技術架構決策、任務優先級、風險管理 | 每日任務計畫、決策記錄 | 每日開始、重大決策點 |
-| **player-experience-director** | 玩家體驗決策、爽感設計、體驗循環完整性 | 體驗評估報告、優化指令 | 每個功能完成後、收到玩家錄影後 |
-
-### 設計層
-
-| Agent | 職責核心 | 主要輸出 | 觸發條件 |
-|-------|---------|---------|---------|
-| **spec-architect** | Server↔Client 協定一致性、規格文件 | 協定文件、規格差異報告 | 協定變更前後 |
-| **balance-agent** | RTP 模擬、數值平衡、獎勵結構 | RTP 報告、數值設定 | 新目標物加入、數值調整 |
-| **gameplay-design-agent** | 核心玩法設計、特殊機制設計、手感規格 | 玩法設計文件、手感規格 | 新功能設計階段 |
-
-### 實作層
-
-| Agent | 職責核心 | 主要輸出 | 觸發條件 |
-|-------|---------|---------|---------|
-| **go-server-agent** | Go Server 開發、遊戲邏輯、WebSocket 後端 | Go 原始碼、Server Binary | 後端功能開發 |
-| **gameplay-agent** | Godot 核心玩法：Cannon、TargetManager、碰撞、AUTO | GDScript 玩法腳本 | 玩法功能開發 |
-| **ui-hud-agent** | Godot UI：HUD、Panel、視覺回饋、CanvasLayer | GDScript UI 腳本 | UI 功能開發 |
-| **art-sprite-agent** | 精靈圖生成、美術審核、視覺風格維護 | PNG 資產、美術報告 | 新美術需求 |
-| **audio-agent** | 音效設計、BGM、音效同步 | WAV 資產、音效設定 | 新音效需求 |
-
-### 整合層
-
-| Agent | 職責核心 | 主要輸出 | 觸發條件 |
-|-------|---------|---------|---------|
-| **integration-test-agent** | 端對端驗證：Server 發訊息→Client 正確顯示 | 整合測試報告 | 每個功能完成後（必須） |
-| **protocol-sync-agent** | 確認 Server 協定定義與 Client 處理完全對應 | 協定同步報告 | 協定變更後 |
-| **build-export-agent** | HTML5 匯出、build 驗證、部署 | HTML5 Build、部署報告 | 每日 build |
-
-### 驗證層
-
-| Agent | 職責核心 | 主要輸出 | 觸發條件 |
-|-------|---------|---------|---------|
-| **qa-playtest-agent** | 功能測試、回歸測試、效能測試 | QA 報告、品質分數 | 每次 build 後 |
-| **player-experience-agent** | 玩家視角評估：手感、清晰度、爽感密度 | 體驗評估報告 | 每個功能完成後 |
-| **video-analysis-agent** | 分析玩家錄影：停頓點、困惑點、爽感點 | 影片分析報告、優化建議 | 收到玩家錄影時 |
-| **regression-guard-agent** | 防止新功能破壞既有功能、自動回滾判斷 | 回歸風險報告 | 每次程式碼變更後 |
-
-### 知識層
-
-| Agent | 職責核心 | 主要輸出 | 觸發條件 |
-|-------|---------|---------|---------|
-| **research-agent** | 搜尋最新技術、業界最佳實踐、免費素材 | Skill 文件、研究筆記 | 遇到知識缺口時 |
-| **skill-librarian** | 管理知識庫、維護 Skill 索引、整合失敗記錄 | Skill 索引、知識整合報告 | 定期、新 Skill 加入時 |
-| **animation-agent** | 多幀動畫製作、AnimationPlayer 設定 | 動畫場景、動畫報告 | 新動畫需求 |
 
 ---
 
 ## 體驗循環（每個功能必須走完）
 
 ```
-1. 設計層確認
-   ├── Gameplay Design Agent：玩法設計文件
-   ├── Spec Architect：協定規格
-   └── Balance Agent：數值設計
-
-2. 實作層開發
-   ├── Go Server Agent：後端邏輯
-   ├── Gameplay Agent：玩法 GDScript
-   └── UI/HUD Agent：視覺回饋
-
-3. 整合層驗證（不可跳過）
-   ├── Integration Test Agent：端對端測試
-   └── Protocol Sync Agent：協定對應確認
-
-4. 驗證層評估（不可跳過）
-   ├── QA Playtest Agent：功能測試
-   ├── Player Experience Agent：體驗評估
-   └── Regression Guard Agent：回歸風險
-
-5. 只有通過步驟 3+4，功能才算「完成」
+1. 設計層：target-design-agent 或 gameplay-design-agent 出設計文件
+2. 實作層：對應的 Server + Client Agent 實作
+3. 整合層：integration-test-agent 端對端驗證（不可跳過）
+4. 驗證層：player-experience-agent 體驗評估（不可跳過）
+5. 通過才算完成
 ```
 
 ---
 
-## 品質門檻（硬規則）
+## 品質門檻
 
-| 指標 | 門檻 | 負責 Agent | 違反後果 |
-|------|------|-----------|---------|
-| Spec Completeness | >= 95 | Spec Architect | 停止新功能開發 |
-| Build Stability | >= 95 | Build Export Agent | 禁止產出展示版 |
-| Visual Consistency | >= 90 | Art Sprite Agent | 禁止替換正式素材 |
-| Animation Quality | >= 88 | Animation Agent | 禁止 merge |
-| Audio Sync | >= 90 | Audio Agent | 重新調整觸發時機 |
-| **Gameplay Feel** | **>= 85** | **Player Experience Agent** | **優先修復，停止加新功能** |
-| Balance Health | >= 90 | Balance Agent | 重新模擬數值 |
-| Regression Risk | <= 10 | Regression Guard Agent | 自動 rollback |
-| **Integration Pass** | **100%** | **Integration Test Agent** | **功能不算完成** |
-| **Video Analysis** | **每週至少 1 次** | **Video Analysis Agent** | **觸發強制錄影要求** |
-
----
-
-## 新增 Agent 的核心設計原則
-
-### Player Experience Director（新）
-> 「這個功能讓玩家更爽了嗎？」是唯一的評判標準。
-> 不看程式碼，不看 build 狀態，只看玩家體驗。
-
-### Integration Test Agent（新）
-> 每個功能完成後，必須驗證：
-> 1. Server 發出正確的 WebSocket 訊息
-> 2. Client 收到並正確顯示
-> 3. 玩家操作觸發正確的 Server 邏輯
-> 缺少任何一步，功能不算完成。
-
-### Video Analysis Agent（新）
-> 分析玩家錄影的三個問題：
-> 1. 玩家在哪裡停頓或猶豫？（操作不直覺）
-> 2. 玩家在哪裡有明顯正面反應？（值得強化）
-> 3. 特效和音效是否在正確時機出現？（時機問題）
-
-### Gameplay Agent（從 Godot Client Agent 拆出）
-> 只負責核心玩法：Cannon、TargetManager、AUTO 邏輯、碰撞偵測。
-> 不碰 UI，不碰 WebSocket 協定，不碰美術資產。
-
-### UI/HUD Agent（從 Godot Client Agent 拆出）
-> 只負責 HUD、Panel、視覺回饋、CanvasLayer。
-> 不碰遊戲邏輯，不碰 Server 通訊。
+| 指標 | 門檻 | 負責 Agent |
+|------|------|-----------|
+| Spec Completeness | >= 95 | spec-architect |
+| Build Stability | >= 95 | build-export-agent |
+| Visual Consistency | >= 90 | character-pixel-agent |
+| Animation Quality | >= 88 | character-animation-agent |
+| Audio Sync | >= 90 | sfx-agent |
+| Gameplay Feel | >= 85 | player-experience-agent |
+| Balance Health | >= 90 | balance-agent |
+| Regression Risk | <= 10 | regression-guard-agent |
+| Integration Pass | 100% | integration-test-agent |
+| FPS (HTML5) | >= 30 | performance-agent |
 
 ---
 
-## 禁止行為（全體 Agent）
+## 已廢棄的 Agent（v1.0/v2.0）
 
-1. **禁止宣稱「完成度 100%」** — 改用具體指標
-2. **禁止跳過整合層** — 每個功能必須通過 Integration Test Agent
-3. **禁止跳過驗證層** — 每個功能必須通過 Player Experience Agent
-4. **禁止只用 `go build` 通過作為完成標準** — 這只是第一層
-5. **禁止連續加功能超過 3 個而不做一次完整體驗循環**
+以下 Agent 已被拆分或合併，保留文件供參考：
+- `godot-client-agent.md` → 拆分為 cannon/target-system/boss-battle/bonus-game/game-state
+- `art-director.md` + `sprite-generation-agent.md` → 拆分為 7 個美術 Agent
+- `art-sprite-agent.md` → 進一步拆分為 7 個美術 Agent
+- `gameplay-agent.md` → 拆分為 cannon/target-system/boss-battle/bonus-game
+- `ui-hud-agent.md` → 拆分為 hud-core/lucky-panel/social-ui/screen-recorder
+- `audio-director.md` → 拆分為 sfx-agent/bgm-agent
