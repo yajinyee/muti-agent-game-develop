@@ -261,6 +261,7 @@ type Game struct {
 	LuckyPhoenixRebirth     *luckyPhoenixRebirthManager        // 幸運鳳凰涅槃魚系統管理器（DAY-285）
 	LuckyKraken             *luckyKrakenManager                // 幸運深海克拉肯魚系統管理器（DAY-286）
 	LuckyCosmicPulse        *luckyCosmicPulseManager           // 幸運宇宙脈衝魚系統管理器（DAY-287）
+	LuckyDomino             *luckyDominoManager                // 幸運多米諾魚系統管理器（DAY-288）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -498,6 +499,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyPhoenixRebirth:     newLuckyPhoenixRebirthManager(),
 		LuckyKraken:             newLuckyKrakenManager(),
 		LuckyCosmicPulse:        newLuckyCosmicPulseManager(),
+		LuckyDomino:             newLuckyDominoManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2709,6 +2711,23 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運宇宙脈衝魚：擊破 T245 時觸發宇宙脈衝（DAY-287）
 	if isLuckyCosmicPulseFish(t.DefID) {
 		go g.tryLuckyCosmicPulseFish(p)
+	}
+	// 幸運多米諾魚：全服多米諾完美加成套用（DAY-288）
+	if dominoPerfectMult := g.LuckyDomino.getDominoPerfectMult(); dominoPerfectMult > 1.0 {
+		dominoBonus := int(float64(finalReward) * (dominoPerfectMult - 1.0))
+		finalReward += dominoBonus
+	}
+	// 幸運多米諾魚：骨牌目標被擊破時連鎖推倒（DAY-288）
+	if isDomino, _, _ := g.LuckyDomino.isDominoTarget(t.InstanceID); isDomino {
+		dominoMult := g.notifyDominoKill(p, t.InstanceID)
+		if dominoMult > 1.0 {
+			dominoBonus := int(float64(finalReward) * (dominoMult - 1.0))
+			finalReward += dominoBonus
+		}
+	}
+	// 幸運多米諾魚：擊破 T246 時觸發多米諾（DAY-288）
+	if isLuckyDominoFish(t.DefID) {
+		go g.tryLuckyDominoFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

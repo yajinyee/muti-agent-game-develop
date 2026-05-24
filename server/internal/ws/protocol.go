@@ -628,6 +628,7 @@ const (
 	MsgLuckyPhoenixRebirth         MessageType = "lucky_phoenix_rebirth"                 // 幸運鳳凰涅槃魚廣播（Server→Client，DAY-285）
 	MsgLuckyKraken                 MessageType = "lucky_kraken"                          // 幸運深海克拉肯魚廣播（Server→Client，DAY-286）
 	MsgLuckyCosmicPulse            MessageType = "lucky_cosmic_pulse"                    // 幸運宇宙脈衝魚廣播（Server→Client，DAY-287）
+	MsgLuckyDomino                 MessageType = "lucky_domino"                          // 幸運多米諾魚廣播（Server→Client，DAY-288）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6545,6 +6546,40 @@ type LuckyPhoenixRebirthPayload struct {
 	KillMult        float64                    `json:"kill_mult,omitempty"`         // 涅槃目標擊破倍率
 	FullRebirthMult float64                    `json:"full_rebirth_mult,omitempty"` // 完全涅槃全服倍率
 	Remaining       int                        `json:"remaining,omitempty"`         // 消散時剩餘未擊破數
+}
+
+// LuckyDominoPayload 幸運多米諾魚廣播（Server → Client，DAY-288）
+// 業界依據：Fishing Fortune 2026「multiplier cascade system」+ Royal Fishing「chain reactions」
+// Event 類型：
+//   - domino_start：多米諾觸發（全服，PlayerID/PlayerName/Targets/TotalCount）
+//   - domino_knock：骨牌推倒（全服，PlayerID/PlayerName/KnockedIdx/TotalCount/AccumMult）
+//   - domino_next：下一個骨牌提示（全服，NextIdx/TotalCount/NextTarget）
+//   - domino_perfect：多米諾完美（全服，PlayerName/AccumMult/PerfectMult/Duration）
+//   - domino_perfect_end：完美結束（全服）
+//   - domino_end：超時結算（全服，PlayerID/PlayerName/KnockedIdx/TotalCount/AccumMult/IsPerfect）
+
+// DominoTargetInfo 多米諾骨牌目標資訊
+type DominoTargetInfo struct {
+	InstanceID string  `json:"instance_id"`
+	Name       string  `json:"name"`
+	X          float64 `json:"x"`
+	Y          float64 `json:"y"`
+	Idx        int     `json:"idx"` // 骨牌序號（1-based）
+}
+
+type LuckyDominoPayload struct {
+	Event       string           `json:"event"`
+	PlayerID    string           `json:"player_id,omitempty"`
+	PlayerName  string           `json:"player_name,omitempty"`
+	Targets     []DominoTargetInfo `json:"targets,omitempty"`    // 所有骨牌目標（domino_start）
+	TotalCount  int              `json:"total_count,omitempty"` // 骨牌總數
+	KnockedIdx  int              `json:"knocked_idx,omitempty"` // 已推倒數（1-based）
+	AccumMult   float64          `json:"accum_mult,omitempty"`  // 累積倍率
+	NextIdx     int              `json:"next_idx,omitempty"`    // 下一個骨牌序號
+	NextTarget  DominoTargetInfo `json:"next_target,omitempty"` // 下一個骨牌資訊
+	PerfectMult float64          `json:"perfect_mult,omitempty"` // 完美全服倍率
+	Duration    int              `json:"duration,omitempty"`    // 完美加成持續秒數
+	IsPerfect   bool             `json:"is_perfect,omitempty"`  // 是否多米諾完美
 }
 
 // LuckyCosmicPulsePayload 幸運宇宙脈衝魚廣播（Server → Client，DAY-287）

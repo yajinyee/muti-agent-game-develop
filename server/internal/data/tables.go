@@ -992,6 +992,15 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 24 秒；全服冷卻 40 秒
 	"T245": {ID: "T245", Name: "幸運宇宙脈衝魚", Type: TargetTypeSpecial, MultiplierMin: 82, MultiplierMax: 155, HP: 122, SpawnWeight: 2, Speed: 4, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_cosmic_pulse"},
 
+	// T246 幸運多米諾魚（DAY-288）— 業界依據：Fishing Fortune 2026「multiplier cascade system」
+	//          Royal Fishing Jili「chain reactions that jump between nearby fish」
+	//   - 擊破 T246 後，場上隨機選 5 個目標設為「多米諾骨牌」
+	//   - 第 1 個骨牌立即 HP -80%；若被擊破 → 連鎖推倒第 2 個（HP -80%）→ 依序推倒到第 5 個
+	//   - 每推倒一個骨牌，觸發玩家獲得 ×1.5 累積倍率（最高 ×7.5）
+	//   - 若 5 個骨牌全部在 20 秒內被推倒 → 「多米諾完美」：全服 ×2.5 加成 7 秒
+	//   - 個人冷卻 26 秒；全服冷卻 42 秒
+	"T246": {ID: "T246", Name: "幸運多米諾魚", Type: TargetTypeSpecial, MultiplierMin: 83, MultiplierMax: 157, HP: 123, SpawnWeight: 2, Speed: 5, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_domino"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

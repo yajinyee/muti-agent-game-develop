@@ -1,5 +1,5 @@
 {
-  "enabled": true,
+  "enabled": false,
   "name": "完成後自我評估三問",
   "description": "每次 Agent 執行完畢後，自動執行自我評估三問，確保不會停下來等待，持續推進遊戲完成度。",
   "version": "1",

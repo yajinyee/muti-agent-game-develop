@@ -126,6 +126,7 @@ const (
 	EventLuckyPhoenixRebirth      EventType = "lucky_phoenix_rebirth"      // 幸運鳳凰涅槃魚觸發（DAY-285）
 	EventLuckyKraken              EventType = "lucky_kraken"               // 幸運深海克拉肯魚觸發（DAY-286）
 	EventLuckyCosmicPulse         EventType = "lucky_cosmic_pulse"         // 幸運宇宙脈衝魚觸發（DAY-287）
+	EventLuckyDomino              EventType = "lucky_domino"               // 幸運多米諾魚觸發（DAY-288）
 )
 
 // Priority 公告優先級
@@ -2229,6 +2230,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🌌✨ 宇宙脈衝！"
 		message = msg
 		icon = "🌌"
+		color = c
+		priority = PriorityHigh
+		duration = 7000
+
+	case EventLuckyDomino:
+		msg := "🀱🎯 多米諾觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#8B4513"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🀱🎯 多米諾連鎖！"
+		message = msg
+		icon = "🀱"
 		color = c
 		priority = PriorityHigh
 		duration = 7000
