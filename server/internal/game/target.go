@@ -44,13 +44,15 @@ func NewTarget(def *data.TargetDef, x, y float64) *Target {
 	return t
 }
 
-// rollWeightedMult 依權重抽取倍率（流星/擬態）
+// rollWeightedMult 依權重抽取倍率（流星/擬態/黃金龍魚）
 func rollWeightedMult(def *data.TargetDef) float64 {
 	switch def.ID {
 	case "T103":
 		return rollMeteorMult()
 	case "T101":
 		return rollMimicMult()
+	case "T109":
+		return rollGoldenDragonMult()
 	}
 	return def.Multiplier
 }
@@ -83,6 +85,21 @@ func rollMimicMult() float64 {
 		}
 	}
 	return data.MimicWeights[0].Mult
+}
+
+func rollGoldenDragonMult() float64 {
+	total := 0
+	for _, e := range data.GoldenDragonWeights {
+		total += e.Weight
+	}
+	r := rand.Intn(total)
+	for _, e := range data.GoldenDragonWeights {
+		r -= e.Weight
+		if r < 0 {
+			return e.Mult
+		}
+	}
+	return data.GoldenDragonWeights[0].Mult
 }
 
 func weightedRoll[T interface{ GetMult() float64 }](weights interface{}) float64 {

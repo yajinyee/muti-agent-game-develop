@@ -16,6 +16,12 @@ const TARGET_SPRITES = {
 	"T104": "res://assets/sprites/targets/T104_gold_grass.png",
 	"T105": "res://assets/sprites/targets/T105_coin_fish.png",
 	"B001": "res://assets/sprites/targets/B001_boss.png",
+	# DAY-292 新增特殊目標
+	"T106": "res://assets/sprites/targets/T106_chain_lightning.png",
+	"T107": "res://assets/sprites/targets/T107_crab_torpedo.png",
+	"T108": "res://assets/sprites/targets/T108_vortex_anemone.png",
+	"T109": "res://assets/sprites/targets/T109_golden_dragon.png",
+	"T110": "res://assets/sprites/targets/T110_thunder_lobster.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -32,6 +38,12 @@ const TARGET_COLORS = {
 	"T104": Color(1.0, 0.85, 0.0),  # 金色雜草
 	"T105": Color(1.0, 0.8, 0.2),   # 金色魚
 	"B001": Color(0.8, 0.2, 0.2),   # 紅色 BOSS
+	# DAY-292 新增特殊目標備用顏色
+	"T106": Color(0.0, 0.9, 1.0),   # 青藍連鎖閃電
+	"T107": Color(1.0, 0.4, 0.1),   # 橙紅螃蟹魚雷
+	"T108": Color(0.5, 0.2, 0.8),   # 紫色渦旋海葵
+	"T109": Color(1.0, 0.85, 0.0),  # 金色黃金龍魚
+	"T110": Color(1.0, 0.3, 0.0),   # 火紅雷霆龍蝦
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D

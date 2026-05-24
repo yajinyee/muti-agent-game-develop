@@ -114,6 +114,18 @@ var Targets = []TargetDef{
 	{ID: "T104", Name: "金色雜草", Type: TypeSpecial, Multiplier: 30, HP: 45, SpawnWeight: 12, Speed: 0, Lifetime: 8, LaborGain: 15, Behavior: BehaviorSink, DiffFactor: 0.7},
 	{ID: "T105", Name: "巨大金幣魚", Type: TypeSpecial, Multiplier: 50, HP: 90, SpawnWeight: 8, Speed: 80, Lifetime: 8, LaborGain: 10, Behavior: BehaviorLinear, DiffFactor: 0.8},
 
+	// ── 進階特殊目標（60x-120x）─────────────────────────────
+	// T106 幸運連鎖閃電魚：擊破後觸發連鎖閃電，攻擊附近 3 條魚 HP -50%
+	{ID: "T106", Name: "幸運連鎖閃電魚", Type: TypeSpecial, Multiplier: 60, HP: 80, SpawnWeight: 6, Speed: 90, Lifetime: 12, LaborGain: 12, Behavior: BehaviorLinear, DiffFactor: 0.9},
+	// T107 幸運螃蟹魚雷：擊破後在場上隨機位置觸發 3 次 AOE 爆炸，每次 HP -40%
+	{ID: "T107", Name: "幸運螃蟹魚雷", Type: TypeSpecial, Multiplier: 70, HP: 90, SpawnWeight: 5, Speed: 60, Lifetime: 14, LaborGain: 14, Behavior: BehaviorLinear, DiffFactor: 0.9},
+	// T108 幸運渦旋海葵：擊破後全場所有目標被吸向中心，HP -30%，持續 5 秒
+	{ID: "T108", Name: "幸運渦旋海葵", Type: TypeSpecial, Multiplier: 80, HP: 100, SpawnWeight: 4, Speed: 0, Lifetime: 16, LaborGain: 16, Behavior: BehaviorSink, DiffFactor: 0.9},
+	// T109 幸運黃金龍魚：擊破後觸發雙環輪盤，最高 ×350 倍率
+	{ID: "T109", Name: "幸運黃金龍魚", Type: TypeSpecial, MinMult: 80, MaxMult: 350, HP: 120, SpawnWeight: 3, Speed: 70, Lifetime: 14, LaborGain: 20, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T110 幸運雷霆龍蝦：擊破後 15 秒自動射擊模式，全場 AOE 傷害
+	{ID: "T110", Name: "幸運雷霆龍蝦", Type: TypeSpecial, Multiplier: 100, HP: 140, SpawnWeight: 2, Speed: 50, Lifetime: 16, LaborGain: 25, Behavior: BehaviorLinear, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }
@@ -151,6 +163,20 @@ var MimicWeights = []struct {
 	{15, 60},
 	{20, 30},
 	{30, 10},
+}
+
+// 黃金龍魚輪盤倍率權重（T109）
+var GoldenDragonWeights = []struct {
+	Mult   float64
+	Weight int
+}{
+	{80, 40},
+	{100, 25},
+	{150, 15},
+	{200, 10},
+	{250, 6},
+	{300, 3},
+	{350, 1},
 }
 
 // ── Bonus 目標物 ──────────────────────────────────────────────

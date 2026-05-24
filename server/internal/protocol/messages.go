@@ -28,6 +28,13 @@ const (
 	MsgError        = "error"
 	MsgPong         = "pong"
 	MsgAnnounce     = "announce"
+
+	// 幸運特殊魚事件
+	MsgLuckyChainLightning = "lucky_chain_lightning" // T106 連鎖閃電
+	MsgLuckyCrabTorpedo    = "lucky_crab_torpedo"    // T107 螃蟹魚雷
+	MsgLuckyVortex         = "lucky_vortex"          // T108 渦旋海葵
+	MsgLuckyGoldenDragon   = "lucky_golden_dragon"   // T109 黃金龍魚輪盤
+	MsgLuckyThunderLobster = "lucky_thunder_lobster" // T110 雷霆龍蝦
 )
 
 // ── Envelope ─────────────────────────────────────────────────
@@ -159,4 +166,60 @@ type BonusClickRequest struct {
 	TargetID string  `json:"target_id"`
 	ClickX   float64 `json:"click_x"`
 	ClickY   float64 `json:"click_y"`
+}
+
+// ── Lucky 特殊魚 Payloads ─────────────────────────────────────
+
+// LuckyChainLightningPayload T106 連鎖閃電
+type LuckyChainLightningPayload struct {
+	Event        string   `json:"event"`         // "trigger" | "chain_hit" | "settle"
+	TriggerID    string   `json:"trigger_id"`    // 觸發玩家 ID
+	TriggerName  string   `json:"trigger_name"`  // 觸發玩家名稱
+	HitTargets   []string `json:"hit_targets"`   // 被閃電命中的目標 instance_id 列表
+	ChainCount   int      `json:"chain_count"`   // 連鎖次數
+	TotalReward  int      `json:"total_reward"`  // 總獎勵
+	Multiplier   float64  `json:"multiplier"`    // 最終倍率
+}
+
+// LuckyCrabTorpedoPayload T107 螃蟹魚雷
+type LuckyCrabTorpedoPayload struct {
+	Event       string    `json:"event"`        // "trigger" | "explosion" | "settle"
+	TriggerID   string    `json:"trigger_id"`
+	TriggerName string    `json:"trigger_name"`
+	ExplosionX  float64   `json:"explosion_x"`  // 爆炸中心 X
+	ExplosionY  float64   `json:"explosion_y"`  // 爆炸中心 Y
+	HitTargets  []string  `json:"hit_targets"`  // 被爆炸命中的目標
+	ExplosionNo int       `json:"explosion_no"` // 第幾次爆炸（1-3）
+	TotalReward int       `json:"total_reward"`
+}
+
+// LuckyVortexPayload T108 渦旋海葵
+type LuckyVortexPayload struct {
+	Event       string  `json:"event"`        // "trigger" | "pull" | "damage" | "end"
+	TriggerID   string  `json:"trigger_id"`
+	TriggerName string  `json:"trigger_name"`
+	TimeLeft    float64 `json:"time_left"`    // 渦旋剩餘時間
+	HitCount    int     `json:"hit_count"`    // 本次傷害命中數
+	TotalReward int     `json:"total_reward"`
+}
+
+// LuckyGoldenDragonPayload T109 黃金龍魚輪盤
+type LuckyGoldenDragonPayload struct {
+	Event       string  `json:"event"`        // "trigger" | "spin" | "result"
+	TriggerID   string  `json:"trigger_id"`
+	TriggerName string  `json:"trigger_name"`
+	InnerMult   float64 `json:"inner_mult"`   // 內環倍率
+	OuterMult   float64 `json:"outer_mult"`   // 外環倍率
+	FinalMult   float64 `json:"final_mult"`   // 最終倍率（內×外）
+	Reward      int     `json:"reward"`
+}
+
+// LuckyThunderLobsterPayload T110 雷霆龍蝦
+type LuckyThunderLobsterPayload struct {
+	Event       string  `json:"event"`        // "trigger" | "auto_fire" | "end"
+	TriggerID   string  `json:"trigger_id"`
+	TriggerName string  `json:"trigger_name"`
+	TimeLeft    float64 `json:"time_left"`    // 自動射擊剩餘時間
+	KillCount   int     `json:"kill_count"`   // 已擊破數
+	TotalReward int     `json:"total_reward"`
 }

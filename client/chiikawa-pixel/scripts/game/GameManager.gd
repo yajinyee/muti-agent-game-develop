@@ -13,6 +13,12 @@ signal target_killed(data: Dictionary)
 signal boss_event(event_data: Dictionary)
 signal bonus_event(event_data: Dictionary)
 signal announce(data: Dictionary)
+# DAY-292 幸運特殊魚訊號
+signal lucky_chain_lightning(data: Dictionary)
+signal lucky_crab_torpedo(data: Dictionary)
+signal lucky_vortex(data: Dictionary)
+signal lucky_golden_dragon(data: Dictionary)
+signal lucky_thunder_lobster(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -53,6 +59,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("bonus_event", payload)
 		"announce":
 			emit_signal("announce", payload)
+		# DAY-292 幸運特殊魚事件
+		"lucky_chain_lightning":
+			emit_signal("lucky_chain_lightning", payload)
+		"lucky_crab_torpedo":
+			emit_signal("lucky_crab_torpedo", payload)
+		"lucky_vortex":
+			emit_signal("lucky_vortex", payload)
+		"lucky_golden_dragon":
+			emit_signal("lucky_golden_dragon", payload)
+		"lucky_thunder_lobster":
+			emit_signal("lucky_thunder_lobster", payload)
 		"pong":
 			pass
 		"error":

@@ -46,6 +46,13 @@ type Game struct {
 	bonusScore    map[string]int // playerID -> score
 	bonusWeedHP   map[string]int // weedID -> hp（BG002 需要連點2次）
 
+	// 幸運特殊魚系統
+	luckyChainLightning  *luckyChainLightningManager
+	luckyCrabTorpedo     *luckyCrabTorpedoManager
+	luckyVortex          *luckyVortexManager
+	luckyGoldenDragon    *luckyGoldenDragonManager
+	luckyThunderLobster  *luckyThunderLobsterManager
+
 	lastTick time.Time
 }
 
@@ -58,6 +65,13 @@ func NewGame(hub *ws.Hub) *Game {
 		bonusScore: make(map[string]int),
 		bonusWeedHP: make(map[string]int),
 		lastTick:   time.Now(),
+
+		// 初始化幸運特殊魚系統
+		luckyChainLightning: newLuckyChainLightningManager(),
+		luckyCrabTorpedo:    newLuckyCrabTorpedoManager(),
+		luckyVortex:         newLuckyVortexManager(),
+		luckyGoldenDragon:   newLuckyGoldenDragonManager(),
+		luckyThunderLobster: newLuckyThunderLobsterManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -344,6 +358,21 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				LaborGain:  t.Def.LaborGain,
 				KillerID:   playerID,
 			})
+
+			// 幸運特殊魚觸發
+			killerName := p.ID // 使用 playerID 作為名稱（可擴展為真實名稱）
+			switch {
+			case isLuckyChainLightningFish(t.Def.ID):
+				g.tryLuckyChainLightning(playerID, killerName)
+			case isLuckyCrabTorpedoFish(t.Def.ID):
+				g.tryLuckyCrabTorpedo(playerID, killerName)
+			case isLuckyVortexFish(t.Def.ID):
+				g.tryLuckyVortex(playerID, killerName)
+			case isLuckyGoldenDragonFish(t.Def.ID):
+				g.tryLuckyGoldenDragon(playerID, killerName)
+			case isLuckyThunderLobsterFish(t.Def.ID):
+				g.tryLuckyThunderLobster(playerID, killerName)
+			}
 		}
 
 		// 獎勵通知（單播）

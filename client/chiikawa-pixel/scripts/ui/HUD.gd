@@ -21,6 +21,10 @@ var _boss_timer_panel: Control = null
 var _boss_time_left: float = 0.0
 var _boss_active: bool = false
 var _last_labor: int = 0
+# DAY-292 幸運特殊魚 UI
+var _lucky_banner: Control = null
+var _announce_queue: Array = []
+var _announce_showing: bool = false
 
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
@@ -40,7 +44,16 @@ func _ready() -> void:
 
 	_create_reward_popup()
 	_create_disconnect_overlay()
+	_create_lucky_banner()
 	_update_ui()
+
+	# DAY-292 幸運特殊魚訊號連接
+	GameManager.lucky_chain_lightning.connect(_on_lucky_chain_lightning)
+	GameManager.lucky_crab_torpedo.connect(_on_lucky_crab_torpedo)
+	GameManager.lucky_vortex.connect(_on_lucky_vortex)
+	GameManager.lucky_golden_dragon.connect(_on_lucky_golden_dragon)
+	GameManager.lucky_thunder_lobster.connect(_on_lucky_thunder_lobster)
+	GameManager.announce.connect(_on_announce)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -258,3 +271,163 @@ func _on_disconnected() -> void:
 func _on_reconnected() -> void:
 	if is_instance_valid(_disconnect_overlay):
 		_disconnect_overlay.visible = false
+
+# ── DAY-292 幸運特殊魚 UI ─────────────────────────────────────
+
+func _create_lucky_banner() -> void:
+	_lucky_banner = Control.new()
+	_lucky_banner.name = "LuckyBanner"
+	_lucky_banner.position = Vector2(0, 120)
+	_lucky_banner.size = Vector2(1280, 80)
+	_lucky_banner.visible = false
+	_lucky_banner.z_index = 60
+	add_child(_lucky_banner)
+
+	var bg = ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0, 0, 0, 0.75)
+	_lucky_banner.add_child(bg)
+
+	var lbl = Label.new()
+	lbl.name = "BannerLabel"
+	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+	lbl.add_theme_font_size_override("font_size", 28)
+	lbl.modulate = Color(1.0, 0.9, 0.2)
+	_lucky_banner.add_child(lbl)
+
+func _show_lucky_banner(text: String, color: Color, duration: float = 2.5) -> void:
+	if not is_instance_valid(_lucky_banner):
+		return
+	var lbl = _lucky_banner.get_node_or_null("BannerLabel")
+	if is_instance_valid(lbl):
+		lbl.text = text
+		lbl.modulate = color
+	_lucky_banner.visible = true
+	_lucky_banner.modulate.a = 1.0
+	var tween = create_tween()
+	tween.tween_interval(duration - 0.5)
+	tween.tween_property(_lucky_banner, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(func():
+		if is_instance_valid(_lucky_banner):
+			_lucky_banner.visible = false
+	)
+
+func _on_lucky_chain_lightning(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("⚡ %s 觸發連鎖閃電！" % name, Color(0.0, 0.9, 1.0))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"chain_hit":
+			var chain = data.get("chain_count", 0)
+			var mult = data.get("multiplier", 1.0)
+			_show_lucky_banner("⚡ 連鎖 %d！×%.1f" % [chain, mult], Color(0.0, 0.9, 1.0), 1.0)
+		"settle":
+			var reward = data.get("total_reward", 0)
+			if reward > 0:
+				_show_reward_popup(reward, data.get("multiplier", 1.0))
+
+func _on_lucky_crab_torpedo(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("🦀 %s 發射螃蟹魚雷！" % name, Color(1.0, 0.4, 0.1))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.35)
+		"explosion":
+			var no = data.get("explosion_no", 1)
+			_show_lucky_banner("💥 魚雷爆炸 %d/3！" % no, Color(1.0, 0.6, 0.2), 0.8)
+			ScreenShake.add_trauma(0.5)
+		"settle":
+			var reward = data.get("total_reward", 0)
+			if reward > 0:
+				_show_reward_popup(reward, 3.0)
+
+func _on_lucky_vortex(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("🌀 %s 召喚渦旋海葵！" % name, Color(0.5, 0.2, 0.8))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+		"pull":
+			var tl = data.get("time_left", 0.0)
+			_show_lucky_banner("🌀 渦旋中... %.0fs" % tl, Color(0.7, 0.4, 1.0), 0.9)
+		"end":
+			_show_lucky_banner("🌀 渦旋爆炸！全場 HP -20%！", Color(0.8, 0.5, 1.0))
+			ScreenShake.add_trauma(0.6)
+
+func _on_lucky_golden_dragon(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("🐉 %s 觸發黃金龍魚輪盤！" % name, Color(1.0, 0.85, 0.0))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+		"spin":
+			var inner = data.get("inner_mult", 1.0)
+			var outer = data.get("outer_mult", 1.0)
+			var final_m = data.get("final_mult", 1.0)
+			_show_lucky_banner("🐉 內環 ×%.0f × 外環 ×%.0f = ×%.0f！" % [inner, outer, final_m], Color(1.0, 0.85, 0.0), 3.0)
+		"result":
+			var reward = data.get("reward", 0)
+			var final_m = data.get("final_mult", 1.0)
+			if reward > 0:
+				_show_reward_popup(reward, final_m)
+			if final_m >= 100:
+				ScreenShake.add_trauma(0.8)
+
+func _on_lucky_thunder_lobster(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("🦞⚡ %s 觸發雷霆龍蝦！15 秒免費射擊！" % name, Color(1.0, 0.3, 0.0))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+		"auto_fire":
+			var tl = data.get("time_left", 0.0)
+			var kills = data.get("kill_count", 0)
+			_show_lucky_banner("🦞⚡ 雷霆模式 %.0fs | 擊破 %d 條" % [tl, kills], Color(1.0, 0.5, 0.2), 0.8)
+		"end":
+			var reward = data.get("total_reward", 0)
+			var kills = data.get("kill_count", 0)
+			_show_lucky_banner("🦞 雷霆結束！擊破 %d 條，獎勵 %d！" % [kills, reward], Color(1.0, 0.7, 0.3))
+			if reward > 0:
+				_show_reward_popup(reward, float(kills))
+
+func _on_announce(data: Dictionary) -> void:
+	var msg = data.get("message", "")
+	var priority = data.get("priority", "normal")
+	var color_str = data.get("color", "#FFFFFF")
+	var color = Color.WHITE
+	# 解析 hex 顏色
+	if color_str.begins_with("#") and color_str.length() == 7:
+		var r = color_str.substr(1, 2).hex_to_int() / 255.0
+		var g = color_str.substr(3, 2).hex_to_int() / 255.0
+		var b = color_str.substr(5, 2).hex_to_int() / 255.0
+		color = Color(r, g, b)
+
+	var duration = 2.0
+	match priority:
+		"high": duration = 3.0
+		"critical": duration = 4.0
+
+	_announce_queue.append({"msg": msg, "color": color, "duration": duration})
+	if not _announce_showing:
+		_process_announce_queue()
+
+func _process_announce_queue() -> void:
+	if _announce_queue.is_empty():
+		_announce_showing = false
+		return
+	_announce_showing = true
+	var item = _announce_queue.pop_front()
+	_show_lucky_banner(item["msg"], item["color"], item["duration"])
+	var tween = create_tween()
+	tween.tween_interval(item["duration"] + 0.2)
+	tween.tween_callback(_process_announce_queue)
