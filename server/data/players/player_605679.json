@@ -1,0 +1,215 @@
+{
+  "player_id": "player_605679",
+  "display_name": "player_6",
+  "coins": 10518,
+  "max_coins": 10533,
+  "bet_level": 1,
+  "weapon_level": 1,
+  "kill_count": 1,
+  "total_bet": 54,
+  "total_reward": 572,
+  "attack_count": 54,
+  "session_score": 572,
+  "room_difficulty": "beginner",
+  "last_seen": "2026-05-24T22:13:57.5764995+08:00",
+  "last_login_date": "2026-05-24",
+  "login_streak": 1,
+  "max_login_streak": 1,
+  "equipped_skin": "default",
+  "owned_skins": [
+    "default"
+  ],
+  "vip_total_spend": 54,
+  "vip_level": 0,
+  "vip_last_weekly_at": "0001-01-01T00:00:00Z",
+  "season_points": 30,
+  "season_level": 0,
+  "season_claimed": [],
+  "codex_entries": [
+    {
+      "target_id": "T001",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "T002",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "T003",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "T004",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "T005",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "T006",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "T101",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "T102",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "T103",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "T104",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "T105",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    },
+    {
+      "target_id": "B001",
+      "unlocked": false,
+      "unlocked_at": "0001-01-01T00:00:00Z",
+      "kill_count": 0,
+      "max_multiplier": 0
+    }
+  ],
+  "achievements": [
+    {
+      "id": "big_win",
+      "unlocked_at": "2026-05-24T22:13:48.548997+08:00"
+    },
+    {
+      "id": "first_kill",
+      "unlocked_at": "2026-05-24T22:13:48.5483372+08:00"
+    },
+    {
+      "id": "kill_special",
+      "unlocked_at": "2026-05-24T22:13:48.548997+08:00"
+    }
+  ],
+  "unlocked_titles": [
+    {
+      "id": "novice"
+    },
+    {
+      "id": "special_hunter"
+    }
+  ],
+  "active_title": "special_hunter",
+  "mission_date": "2026-05-24",
+  "mission_progress": [
+    {
+      "mission_id": "daily_kill_10",
+      "current": 1,
+      "target": 10,
+      "completed": false,
+      "reward_claimed": false,
+      "completed_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "mission_id": "daily_kill_boss",
+      "current": 0,
+      "target": 1,
+      "completed": false,
+      "reward_claimed": false,
+      "completed_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "mission_id": "daily_bonus",
+      "current": 0,
+      "target": 2,
+      "completed": false,
+      "reward_claimed": false,
+      "completed_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "mission_id": "daily_earn_5000",
+      "current": 31,
+      "target": 5000,
+      "completed": false,
+      "reward_claimed": false,
+      "completed_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "mission_id": "daily_high_mult",
+      "current": 1,
+      "target": 3,
+      "completed": false,
+      "reward_claimed": false,
+      "completed_at": "0001-01-01T00:00:00Z"
+    },
+    {
+      "mission_id": "daily_combo_5",
+      "current": 0,
+      "target": 5,
+      "completed": false,
+      "reward_claimed": false,
+      "completed_at": "0001-01-01T00:00:00Z"
+    }
+  ],
+  "special_weapon_bomb": 0,
+  "special_weapon_laser": 0,
+  "special_weapon_freeze": 0,
+  "stats_total_sessions": 1,
+  "stats_total_play_time": 49,
+  "stats_total_shots": 54,
+  "stats_total_kills": 1,
+  "stats_total_bet": 54,
+  "stats_total_reward": 46,
+  "stats_total_bonuses": 0,
+  "stats_total_boss_kills": 0,
+  "stats_best_multiplier": 30.787105332595836,
+  "tutorial_completed": false,
+  "stats_best_streak": 0,
+  "stats_best_session": 572,
+  "stats_best_bonus": 0,
+  "stats_max_coins": 10507,
+  "stats_jackpot_wins": 0,
+  "stats_jackpot_mini": 0,
+  "stats_jackpot_minor": 0,
+  "stats_jackpot_major": 0,
+  "stats_jackpot_grand": 0,
+  "stats_jackpot_payout": 0,
+  "stats_hit_count": 1,
+  "stats_miss_count": 53,
+  "stats_first_play_at": "2026-05-24T22:13:07.918+08:00",
+  "stats_last_play_at": "2026-05-24T22:13:08.119+08:00"
+}
