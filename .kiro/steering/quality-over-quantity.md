@@ -84,6 +84,22 @@ inclusion: always
 
 ---
 
+## 原則八：體驗循環（v2.0 架構核心）
+
+每個功能必須走完以下循環才算完成：
+
+```
+設計層確認 → 實作層開發 → 整合層驗證 → 驗證層評估
+```
+
+對應 Agent：
+- 整合層：Integration Test Agent + Protocol Sync Agent（不可跳過）
+- 驗證層：QA Agent + Player Experience Agent + Regression Guard Agent（不可跳過）
+
+**跳過整合層或驗證層 = 功能不算完成。**
+
+---
+
 ## 原則七：UI 腳本數量警戒線
 
 - 超過 **20 個同類型腳本**（如 LuckyXxxPanel.gd）→ 必須建立基礎類別
