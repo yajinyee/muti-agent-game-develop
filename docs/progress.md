@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-282 幸運星爆魚系統）
+## 最後更新：2026-05-24（DAY-283 幸運四象大獎魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-283 更新（自主觸發）：** 幸運四象大獎魚系統（Lucky Four Symbols Jackpot Fish）✅
+  - **業界依據：** Jackpot Fishing by Jili「四層累進大獎（Mini/Minor/Major/Grand）」機制 + 中華文化「四象（青龍/白虎/朱雀/玄武）」主題，2026 年最熱門捕魚機機制
+  - **設計：** Server 維護四象大獎池，每次任何玩家擊破任何目標貢獻 0.5% 到大獎池；擊破 T241 後，依機率抽取四象層級（青龍 60%/白虎 25%/朱雀 12%/玄武 3%）；大獎金額 = 當前大獎池 × 層級比例（青龍 10%/白虎 25%/朱雀 50%/玄武 100%）；玄武大獎觸發後，大獎池重置為基礎值（30000）；全服廣播大獎結果；玄武大獎全服最高優先公告；個人冷卻 30 秒；全服冷卻 50 秒
+  - **設計差異：** 與累積大獎池（T222，全服共同累積到爆發）不同，四象大獎是「個人觸發，依機率抽取層級」；「四象主題（青龍/白虎/朱雀/玄武）」讓大獎有文化感；「玄武 100% 大獎池」讓玩家有「要是觸發玄武就賺大了」的動力；「每次擊破貢獻 0.5%」讓大獎池持續增長；「玄武大獎全服最高優先公告」製造羨慕感
+  - server/internal/game/lucky_four_symbols_handler.go：luckyFourSymbolsManager（個人冷卻/全服冷卻/pool）；fourSymbolTier（id/name/chance/payout/color/emoji）；isLuckyFourSymbolsFish（T241）；contributeToFourSymbolsPool（每次擊破貢獻）；getPoolSize；rollFourSymbolTier（加權隨機抽取）；tryLuckyFourSymbolsFish（觸發/抽取層級/計算獎勵/玄武重置大獎池/全服廣播+公告）；startFourSymbolsPoolBroadcast（goroutine 每30秒廣播大獎池狀態）
+  - server/internal/data/tables.go：新增 T241 幸運四象大獎魚（78-147x/HP118/SpawnWeight2/Speed4/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyFourSymbols；LuckyFourSymbolsPayload（3種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyFourSymbols + case 處理（PriorityCritical）
+  - server/internal/game/game.go：LuckyFourSymbols *luckyFourSymbolsManager；handleKill 加入 contributeToFourSymbolsPool（每次擊破）+ isLuckyFourSymbolsFish 觸發分支；startFourSymbolsPoolBroadcast 啟動
+  - client/chiikawa-pixel/scripts/ui/LuckyFourSymbolsPanel.gd：四象主題面板（symbol_trigger 依層級閃光+頂部橫幅+浮動大字+結算彈窗（白虎以上）；symbol_xuanwu 全螢幕三次強閃光+全螢幕大字；symbol_pool_update 右側大獎池指示器）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_four_symbols 訊號 + _handle_lucky_four_symbols
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyFourSymbolsPanelScript（layer=56）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T241 映射
+  - 四象設計：青龍（60%，10%大獎池）/ 白虎（25%，25%大獎池）/ 朱雀（12%，50%大獎池）/ 玄武（3%，100%大獎池）
+  - 大獎池設計：基礎值 30000；每次擊破貢獻 0.5%；玄武觸發後重置；每 30 秒廣播池狀態
+  - 視覺設計：四象四色分區（青龍綠/白虎銀/朱雀紅/玄武深藍）；金色十字分隔線；金色光環；4方向大獎光芒；四角四象符文；右側大獎池指示器；玄武大獎全螢幕演出
+  - build/vet 全部通過（零錯誤零警告）
+  - T241 精靈圖：四象大獎魚（四色分區圓形魚身+金色十字分隔+金色光環+4方向光芒+四角符文+中心金色大獎核心）
 - **DAY-282 更新（自主觸發）：** 幸運星爆魚系統（Lucky Star Burst Fish）✅
   - **業界依據：** 業界原創「星爆連鎖+全場星雨+倍率爆炸」機制，結合「多點爆炸+累積倍率+共鳴爆發」三個元素，製造「5-8 個星爆點同時炸，全場魚都受傷」的爽感
   - **設計：** 擊破 T240 後，場上隨機生成 5-8 個「星爆點」；每個星爆點依序在 3 秒內爆炸，爆炸時場上所有目標 HP -35%；每個爆炸給觸發玩家 ×1.3 累積倍率（最高 ×6.0）；若有 2 個以上星爆點在 0.5 秒內同時爆炸 → 觸發「星爆共鳴」：全服 ×2.0 加成 5 秒；全服廣播星爆位置和爆炸結果；個人冷卻 24 秒；全服冷卻 40 秒

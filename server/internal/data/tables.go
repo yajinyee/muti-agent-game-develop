@@ -952,6 +952,15 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 24 秒；全服冷卻 40 秒
 	"T240": {ID: "T240", Name: "幸運星爆魚", Type: TargetTypeSpecial, MultiplierMin: 77, MultiplierMax: 145, HP: 117, SpawnWeight: 2, Speed: 5, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_star_burst"},
 
+	// T241 幸運四象大獎魚（DAY-283）— 業界原創「四象大獎+大獎池累積+玄武大獎」機制
+	//   - Server 維護四象大獎池，每次任何玩家擊破任何目標貢獻 0.5% 到大獎池
+	//   - 擊破 T241 後，依機率抽取四象層級：青龍 60% / 白虎 25% / 朱雀 12% / 玄武 3%
+	//   - 大獎金額 = 當前大獎池 × 層級比例（青龍 10% / 白虎 25% / 朱雀 50% / 玄武 100%）
+	//   - 玄武大獎觸發後，大獎池重置為基礎值
+	//   - 全服廣播大獎結果；玄武大獎全服最高優先公告
+	//   - 個人冷卻 30 秒；全服冷卻 50 秒
+	"T241": {ID: "T241", Name: "幸運四象大獎魚", Type: TargetTypeSpecial, MultiplierMin: 78, MultiplierMax: 147, HP: 118, SpawnWeight: 2, Speed: 4, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_four_symbols"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

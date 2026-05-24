@@ -256,6 +256,7 @@ type Game struct {
 	LuckyRareChain          *luckyRareChainManager             // 幸運連鎖稀有魚系統管理器（DAY-280）
 	LuckyGoldMutation       *luckyGoldMutationManager          // 幸運黃金突變魚系統管理器（DAY-281）
 	LuckyStarBurst          *luckyStarBurstManager             // 幸運星爆魚系統管理器（DAY-282）
+	LuckyFourSymbols        *luckyFourSymbolsManager           // 幸運四象大獎魚系統管理器（DAY-283）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -488,6 +489,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyRareChain:          newLuckyRareChainManager(),
 		LuckyGoldMutation:       newLuckyGoldMutationManager(),
 		LuckyStarBurst:          newLuckyStarBurstManager(),
+		LuckyFourSymbols:        newLuckyFourSymbolsManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -526,6 +528,8 @@ func (g *Game) Start() {
 	g.startChallengeTicker()
 	// 啟動巨型章魚轉盤超時計時器（DAY-144）
 	g.startMegaOctopusTicker()
+	// 啟動累進大獎池定期廣播（DAY-283）
+	g.startFourSymbolsPoolBroadcast()
 	go g.gameLoop()
 }
 
@@ -2649,6 +2653,12 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			resonanceReward := int(float64(finalReward) * (resonanceMult - 1.0))
 			finalReward += resonanceReward
 		}
+	}
+	// 幸運累進大獎魚：每次擊破任何目標貢獻到大獎池（DAY-283）
+	go g.LuckyFourSymbols.contributeToFourSymbolsPool(finalReward)
+	// 幸運四象大獎魚：擊破 T241 時觸發四象大獎（DAY-283）
+	if isLuckyFourSymbolsFish(t.DefID) {
+		go g.tryLuckyFourSymbolsFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

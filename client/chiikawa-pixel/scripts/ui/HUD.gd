@@ -366,6 +366,7 @@ func _ready() -> void:
 	_init_lucky_rare_chain_panel()          # 幸運連鎖稀有魚系統面板（DAY-280）
 	_init_lucky_gold_mutation_panel()       # 幸運黃金突變魚系統面板（DAY-281）
 	_init_lucky_star_burst_panel()          # 幸運星爆魚系統面板（DAY-282）
+	_init_lucky_four_symbols_panel()        # 幸運四象大獎魚系統面板（DAY-283）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5311,3 +5312,19 @@ func _init_lucky_star_burst_panel() -> void:
 func _on_lucky_star_burst(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_star_burst_panel):
 		_lucky_star_burst_panel.handle(data)
+
+const LuckyFourSymbolsPanelScript = preload("res://scripts/ui/LuckyFourSymbolsPanel.gd")
+var _lucky_four_symbols_panel = null
+
+func _init_lucky_four_symbols_panel() -> void:
+	var panel = LuckyFourSymbolsPanelScript.new()
+	panel.name = "LuckyFourSymbolsPanel"
+	panel.layer = 56
+	add_child(panel)
+	_lucky_four_symbols_panel = panel
+	if GameManager.has_signal("lucky_four_symbols"):
+		GameManager.lucky_four_symbols.connect(_on_lucky_four_symbols)
+
+func _on_lucky_four_symbols(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_four_symbols_panel):
+		_lucky_four_symbols_panel.handle(data)

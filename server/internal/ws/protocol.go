@@ -623,6 +623,7 @@ const (
 	MsgLuckyRareChain              MessageType = "lucky_rare_chain"                      // 幸運連鎖稀有魚廣播（Server→Client，DAY-280）
 	MsgLuckyGoldMutation           MessageType = "lucky_gold_mutation"                   // 幸運黃金突變魚廣播（Server→Client，DAY-281）
 	MsgLuckyStarBurst              MessageType = "lucky_star_burst"                      // 幸運星爆魚廣播（Server→Client，DAY-282）
+	MsgLuckyFourSymbols            MessageType = "lucky_four_symbols"                    // 幸運四象大獎魚廣播（Server→Client，DAY-283）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6468,4 +6469,20 @@ type LuckyStarBurstPayload struct {
 	TotalHits      int     `json:"total_hits,omitempty"`      // 總命中目標數
 	FinalMult      float64 `json:"final_mult,omitempty"`      // 最終累積倍率
 	TotalReward    int     `json:"total_reward,omitempty"`    // 總獎勵
+}
+
+// LuckyFourSymbolsPayload 幸運四象大獎魚廣播（Server → Client，DAY-283）
+// 四象：青龍（×2.0）/ 白虎（×5.0）/ 朱雀（×12.0）/ 玄武（×30.0）
+// Event 類型：
+//   - symbol_trigger：四象大獎觸發（全服，PlayerID/PlayerName/Symbol/SymbolName/Reward）
+//   - symbol_xuanwu：玄武大獎觸發（全服，PlayerName/Reward，最高優先）
+//   - symbol_pool_update：大獎池更新（全服，PoolSize）
+type LuckyFourSymbolsPayload struct {
+	Event      string  `json:"event"`
+	PlayerID   string  `json:"player_id,omitempty"`
+	PlayerName string  `json:"player_name,omitempty"`
+	Symbol     string  `json:"symbol,omitempty"`      // "qinglong" / "baihu" / "zhuque" / "xuanwu"
+	SymbolName string  `json:"symbol_name,omitempty"` // "青龍" / "白虎" / "朱雀" / "玄武"
+	Reward     int     `json:"reward,omitempty"`      // 大獎金額
+	PoolSize   int     `json:"pool_size,omitempty"`   // 大獎池當前值
 }
