@@ -617,6 +617,7 @@ const (
 	MsgLuckyFortuneProphecy        MessageType = "lucky_fortune_prophecy"                // 幸運命運預言魚廣播（Server→Client，DAY-274）
 	MsgLuckyLuckTotem              MessageType = "lucky_luck_totem"                      // 幸運幸運圖騰魚廣播（Server→Client，DAY-275）
 	MsgLuckyGoldenHurricane        MessageType = "lucky_golden_hurricane"                // 幸運黃金颶風魚廣播（Server→Client，DAY-276）
+	MsgLuckyLightningHammer        MessageType = "lucky_lightning_hammer"                // 幸運閃電錘魚廣播（Server→Client，DAY-277）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6335,4 +6336,26 @@ type LuckyGoldenHurricanePayload struct {
 	SweptCount   int     `json:"swept_count,omitempty"`    // 總掃過目標數
 	FinalMult    float64 `json:"final_mult,omitempty"`     // 最終累積倍率
 	TotalReward  int     `json:"total_reward,omitempty"`   // 颶風期間總獎勵
+}
+
+// LuckyLightningHammerPayload 幸運閃電錘魚廣播（Server → Client，DAY-277）
+// Event 類型：
+//   - hammer_start：閃電錘觸發（全服，PlayerID/PlayerName/HammerCount）
+//   - hammer_hit：錘擊目標（全服，InstanceID/DefID/HPDamage/Killed/AccumMult）
+//   - hammer_end：錘擊結算（全服，PlayerID/PlayerName/HitCount/KillCount/FinalMult/TotalReward）
+//   - hammer_broadcast：全服廣播橫幅（PlayerName/HitCount/KillCount/FinalMult）
+type LuckyLightningHammerPayload struct {
+	Event        string  `json:"event"`
+	PlayerID     string  `json:"player_id,omitempty"`
+	PlayerName   string  `json:"player_name,omitempty"`
+	HammerCount  int     `json:"hammer_count,omitempty"`   // 本次錘擊目標數
+	InstanceID   string  `json:"instance_id,omitempty"`    // 被錘擊的目標 instanceID
+	DefID        string  `json:"def_id,omitempty"`         // 被錘擊的目標 defID
+	HPDamage     int     `json:"hp_damage,omitempty"`      // HP 傷害量
+	Killed       bool    `json:"killed,omitempty"`         // 是否直接擊破
+	AccumMult    float64 `json:"accum_mult,omitempty"`     // 當前累積倍率
+	HitCount     int     `json:"hit_count,omitempty"`      // 總錘擊數
+	KillCount    int     `json:"kill_count,omitempty"`     // 直接擊破數
+	FinalMult    float64 `json:"final_mult,omitempty"`     // 最終累積倍率
+	TotalReward  int     `json:"total_reward,omitempty"`   // 總獎勵
 }

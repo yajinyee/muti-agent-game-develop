@@ -360,6 +360,7 @@ func _ready() -> void:
 	_init_lucky_fortune_prophecy_panel()    # 幸運命運預言魚系統面板（DAY-274）
 	_init_lucky_luck_totem_panel()          # 幸運幸運圖騰魚系統面板（DAY-275）
 	_init_lucky_golden_hurricane_panel()    # 幸運黃金颶風魚系統面板（DAY-276）
+	_init_lucky_lightning_hammer_panel()    # 幸運閃電錘魚系統面板（DAY-277）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5209,3 +5210,19 @@ func _init_lucky_golden_hurricane_panel() -> void:
 func _on_lucky_golden_hurricane(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_golden_hurricane_panel):
 		_lucky_golden_hurricane_panel.handle(data)
+
+const LuckyLightningHammerPanelScript = preload("res://scripts/ui/LuckyLightningHammerPanel.gd")
+var _lucky_lightning_hammer_panel = null
+
+func _init_lucky_lightning_hammer_panel() -> void:
+	var panel = LuckyLightningHammerPanelScript.new()
+	panel.name = "LuckyLightningHammerPanel"
+	panel.layer = 50
+	add_child(panel)
+	_lucky_lightning_hammer_panel = panel
+	if GameManager.has_signal("lucky_lightning_hammer"):
+		GameManager.lucky_lightning_hammer.connect(_on_lucky_lightning_hammer)
+
+func _on_lucky_lightning_hammer(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_lightning_hammer_panel):
+		_lucky_lightning_hammer_panel.handle(data)

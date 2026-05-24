@@ -281,6 +281,7 @@ signal lucky_resonance_wave(data: Dictionary)         # 幸運共鳴波魚系統
 signal lucky_fortune_prophecy(data: Dictionary)       # 幸運命運預言魚系統（DAY-274）
 signal lucky_luck_totem(data: Dictionary)             # 幸運幸運圖騰魚系統（DAY-275）
 signal lucky_golden_hurricane(data: Dictionary)       # 幸運黃金颶風魚系統（DAY-276）
+signal lucky_lightning_hammer(data: Dictionary)       # 幸運閃電錘魚系統（DAY-277）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -810,6 +811,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_luck_totem(payload)
 		"lucky_golden_hurricane":
 			_handle_lucky_golden_hurricane(payload)
+		"lucky_lightning_hammer":
+			_handle_lucky_lightning_hammer(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4099,3 +4102,22 @@ func _handle_lucky_golden_hurricane(payload: Dictionary) -> void:
 			var final_mult: float = payload.get("final_mult", 1.0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] GoldenHurricane ended! swept=%d finalMult=x%.1f reward=%d" % [swept_count, final_mult, total_reward])
+
+## 幸運閃電錘魚系統（DAY-277）
+func _handle_lucky_lightning_hammer(payload: Dictionary) -> void:
+	emit_signal("lucky_lightning_hammer", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"hammer_start":
+			var player_name: String = payload.get("player_name", "???")
+			var hammer_count: int = payload.get("hammer_count", 3)
+			print("[GameManager] LightningHammer started! player=%s count=%d" % [player_name, hammer_count])
+		"hammer_hit":
+			var killed: bool = payload.get("killed", false)
+			var accum_mult: float = payload.get("accum_mult", 1.0)
+			print("[GameManager] LightningHammer hit! killed=%s accum_mult=x%.1f" % [str(killed), accum_mult])
+		"hammer_end":
+			var hit_count: int = payload.get("hit_count", 0)
+			var kill_count: int = payload.get("kill_count", 0)
+			var final_mult: float = payload.get("final_mult", 1.0)
+			print("[GameManager] LightningHammer ended! hits=%d kills=%d finalMult=x%.1f" % [hit_count, kill_count, final_mult])

@@ -250,6 +250,7 @@ type Game struct {
 	LuckyFortuneProphecy    *luckyFortuneProphecyManager       // 幸運命運預言魚系統管理器（DAY-274）
 	LuckyLuckTotem          *luckyLuckTotemManager             // 幸運幸運圖騰魚系統管理器（DAY-275）
 	LuckyGoldenHurricane    *luckyGoldenHurricaneManager       // 幸運黃金颶風魚系統管理器（DAY-276）
+	LuckyLightningHammer    *luckyLightningHammerManager       // 幸運閃電錘魚系統管理器（DAY-277）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -476,6 +477,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyFortuneProphecy:    newLuckyFortuneProphecyManager(),
 		LuckyLuckTotem:          newLuckyLuckTotemManager(),
 		LuckyGoldenHurricane:    newLuckyGoldenHurricaneManager(),
+		LuckyLightningHammer:    newLuckyLightningHammerManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2565,6 +2567,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運黃金颶風魚：擊破 T234 時觸發黃金颶風（DAY-276）
 	if isLuckyGoldenHurricaneFish(t.DefID) {
 		go g.tryLuckyGoldenHurricaneFish(p)
+	}
+	// 幸運閃電錘魚：擊破 T235 時觸發閃電錘（DAY-277）
+	if isLuckyLightningHammerFish(t.DefID) {
+		go g.tryLuckyLightningHammerFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

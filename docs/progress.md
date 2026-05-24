@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-276 幸運黃金颶風魚系統）
+## 最後更新：2026-05-24（DAY-277 幸運閃電錘魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-277 更新（自主觸發）：** 幸運閃電錘魚系統（Lucky Lightning Hammer Fish）✅
+  - **業界依據：** Battle of Luck「Lucky Slammer」機制（2026）進化版，業界原創「瞬間多目標錘擊+累積倍率」機制
+  - **設計：** 擊破 T235 後，觸發「閃電錘」：瞬間選定場上 3-6 個目標；對每個目標造成「閃電錘擊」（HP -60%，30% 機率直接擊破）；每個被錘擊的目標，觸發玩家獲得 ×1.2 倍率加成（累積）；被直接擊破的目標，額外給予 ×2.0 倍率獎勵；全服廣播錘擊結果；個人冷卻 22 秒；全服冷卻 35 秒
+  - **設計差異：** 與黃金颶風（T234，螺旋掃場 HP-30%）不同，閃電錘是「瞬間多目標錘擊」，讓玩家有「一錘打多條魚，有些直接死掉」的爽感；「30% 機率直接擊破」讓每次錘擊都有「這條會不會直接死？」的期待感；「累積倍率 ×1.2/次」讓錘擊數越多倍率越高；「直接擊破額外 ×2.0」讓玩家有「要是全部都直接死就賺大了」的動力；「全服廣播錘擊結果」讓所有玩家看到「有幾條被直接錘死」，製造社交話題感
+  - server/internal/game/lucky_lightning_hammer_handler.go：luckyLightningHammerManager（個人冷卻/全服冷卻）；isLuckyLightningHammerFish（T235）；tryLuckyLightningHammerFish（觸發/選定3-6個目標/全服廣播+全服公告）；runLightningHammerHits（goroutine 每200ms錘擊一個目標/HP-60%/30%直接擊破/累積倍率×1.2）；doLightningHammerSettle（結算/全服廣播+公告）
+  - server/internal/data/tables.go：新增 T235 幸運閃電錘魚（72-135x/HP112/SpawnWeight2/Speed10/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyLightningHammer；LuckyLightningHammerPayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyLightningHammer + case 處理
+  - server/internal/game/game.go：LuckyLightningHammer *luckyLightningHammerManager；handleKill 加入 isLuckyLightningHammerFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyLightningHammerPanel.gd：閃電錘主題面板（hammer_start 電光白三次強閃光+頂部橫幅+錘擊計數器（右上角，錘擊數/擊破數）；hammer_hit 金色/天藍閃光+浮動文字；hammer_end 金色三次強閃光+結算彈窗；hammer_broadcast 全服廣播橫幅）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_lightning_hammer 訊號 + _handle_lucky_lightning_hammer
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyLightningHammerPanelScript（layer=50）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T235 映射
+  - 錘擊設計：3-6 個目標；HP -60%；30% 直接擊破；累積倍率 ×1.2/次；直接擊破額外 ×2.0；每次錘擊間隔 200ms
+  - 結算設計：廣播錘擊數/擊破數/最終倍率/總獎勵；全服廣播+公告（金色/橙色/天藍）
+  - 視覺設計：閃電錘主題（#FFD700 金 + #87CEEB 天藍 + #FFA500 橙 + #FFFFFF 白）；錘擊計數器（右上角，錘擊數/擊破數，顏色隨擊破數變化）；結算彈窗右側滑入（含錘擊數/擊破數/累積倍率/擊破獎勵）
+  - build/vet 全部通過（零錯誤零警告）
+  - T235 精靈圖：電藍閃電錘魚（閃電錘頭+Z字閃電紋路+電藍魚身+金色電光點）
 - **DAY-276 更新（自主觸發）：** 幸運黃金颶風魚系統（Lucky Golden Hurricane Fish）✅
   - **業界依據：** Royal Fishing Jili 2026「AOE 旋風掃場」機制進化版，業界原創「螺旋掃場+累積倍率」機制
   - **設計：** 擊破 T234 後，觸發「黃金颶風」（螺旋掃場，持續 6 秒）；颶風以螺旋路徑掃過整個場地，路徑上所有目標 HP -30%；颶風每掃過一個目標，觸發玩家獲得 ×1.5 倍率加成（累積，最高 ×8.0）；6 秒後颶風結算：廣播掃過目標數/累積倍率/總獎勵；個人冷卻 28 秒；全服冷卻 45 秒

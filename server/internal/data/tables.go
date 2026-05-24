@@ -900,6 +900,15 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 28 秒；全服冷卻 45 秒
 	"T234": {ID: "T234", Name: "幸運黃金颶風魚", Type: TargetTypeSpecial, MultiplierMin: 71, MultiplierMax: 133, HP: 111, SpawnWeight: 2, Speed: 11, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_golden_hurricane"},
 
+	// T235 幸運閃電錘魚（DAY-277）— Battle of Luck「Lucky Slammer」機制（2026）進化版
+	//   - 擊破 T235 後，觸發「閃電錘」：瞬間選定場上 3-6 個目標
+	//   - 對每個目標造成「閃電錘擊」（HP -60%，30% 機率直接擊破）
+	//   - 每個被錘擊的目標，觸發玩家獲得 ×1.2 倍率加成（累積）
+	//   - 被直接擊破的目標，額外給予 ×2.0 倍率獎勵（個人）
+	//   - 全服廣播錘擊結果（錘擊數/擊破數/總倍率）
+	//   - 個人冷卻 22 秒；全服冷卻 35 秒
+	"T235": {ID: "T235", Name: "幸運閃電錘魚", Type: TargetTypeSpecial, MultiplierMin: 72, MultiplierMax: 135, HP: 112, SpawnWeight: 2, Speed: 10, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_lightning_hammer"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
