@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-279 幸運彩虹橋魚系統）
+## 最後更新：2026-05-24（DAY-280 幸運連鎖稀有魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-280 更新（自主觸發）：** 幸運連鎖稀有魚系統（Lucky Rare Chain Fish）✅
+  - **業界依據：** Fishing Fortune 2026「Chain rare catches within 90-second windows to build multipliers from 2x to 500x」機制進化版，業界原創「稀有連鎖+倍率爬升+時間視窗」機制
+  - **設計：** 擊破 T238 後，觸發「稀有連鎖模式」（持續 20 秒）；模式期間，玩家每次擊破「稀有或以上目標」（倍率 ≥ 15x），連鎖計數 +1，倍率爬升（×1.5 → ×2.5 → ×4.0 → ×6.0 → ×10.0，最多 5 層）；每次連鎖必須在 8 秒內完成（否則連鎖中斷，重置到第1層）；達到第 5 層（×10.0）觸發「連鎖爆發」：個人大獎 + 全服廣播；個人冷卻 22 秒；全服冷卻 38 秒
+  - **設計差異：** 與倍率疊加（T225，每次擊破任何目標 +0.3x）不同，連鎖稀有是「只有稀有目標才能連鎖」，讓玩家有「要找稀有魚打，普通魚不算」的策略感；「8 秒連鎖視窗」讓玩家有「要趕快找下一條稀有魚」的緊迫感；「5 層倍率爬升（×1.5→×10.0）」讓玩家有「越打越高，要撐到第 5 層」的動力；「連鎖中斷重置到第1層」讓玩家有「不能讓連鎖斷掉」的壓力感；「第 5 層連鎖爆發全服廣播」讓所有玩家看到「有人達到 5 層連鎖了」，製造羨慕感
+  - server/internal/game/lucky_rare_chain_handler.go：luckyRareChainManager（個人冷卻/全服冷卻/activeSessions）；rareChainSession（playerID/playerName/layer/expiresAt/chainUntil/totalReward/burst/settled）；isLuckyRareChainFish（T238）；isRareTarget（倍率≥15x）；getRareChainMult（供 handleKill 使用，含連鎖視窗判斷）；recordRareChainReward；isRareChainBurst；markRareChainBurst；tryLuckyRareChainFish（觸發/個人訊息+全服廣播+全服公告）；notifyRareChainKill（連鎖通知/第5層觸發爆發）；doRareChainBurst（個人大獎/全服廣播+公告）；runRareChainTimer（goroutine 20秒後結算）
+  - server/internal/data/tables.go：新增 T238 幸運連鎖稀有魚（75-141x/HP115/SpawnWeight2/Speed7/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyRareChain；LuckyRareChainPayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyRareChain + case 處理
+  - server/internal/game/game.go：LuckyRareChain *luckyRareChainManager；handleKill 加入 isLuckyRareChainFish 觸發分支 + getRareChainMult 連鎖倍率套用
+  - client/chiikawa-pixel/scripts/ui/LuckyRareChainPanel.gd：橙紅連鎖主題面板（chain_start 橙紅三次強閃光+頂部橫幅+連鎖指示器（右上角，層數/倍率/8秒視窗進度條）；chain_broadcast 全服廣播橫幅；chain_kill 層數顏色閃光+浮動文字+指示器更新；chain_burst 火橙三次強閃光+「連鎖爆發！×10.0！」大字+結算彈窗；chain_burst_broadcast 全服廣播橫幅；chain_end 模式結束提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_rare_chain 訊號 + _handle_lucky_rare_chain
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyRareChainPanelScript（layer=53）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T238 映射
+  - 連鎖設計：稀有目標（×15+）才計入；8 秒視窗；5 層倍率（×1.5/2.5/4.0/6.0/10.0）；中斷重置到第1層；個人冷卻 22 秒；全服冷卻 38 秒
+  - 爆發設計：第5層觸發；個人大獎；全服廣播+公告（金色）
+  - 視覺設計：橙紅連鎖主題（#FF6B35 橙紅 + #FFD700 金 + #FF4500 火橙 + #00BFFF 天藍）；連鎖指示器（右上角，層數/倍率，顏色隨層數：天藍→草綠→金→橙紅→火橙）；8秒視窗進度條（顏色隨剩餘時間：天藍→橙→火橙）；結算彈窗右側滑入（含層數/倍率/總獎勵）
+  - build/vet 全部通過（零錯誤零警告）
+  - T238 精靈圖：橙紅連鎖稀有魚（橙紅漸層魚身+天藍鎖鏈+金色稀有光環+5層顏色光點+火焰尾跡）
 - **DAY-279 更新（自主觸發）：** 幸運彩虹橋魚系統（Lucky Rainbow Bridge Fish）✅
   - **業界依據：** 業界原創「彩虹橋連接+跨目標連鎖傷害+彩虹爆發」機制，結合「連接特定目標+打一個傷其他+全部打完爆發」三個元素，製造「打這條魚，另外兩條也會受傷」的策略感
   - **設計：** 擊破 T237 後，Server 在場上隨機選 3 個目標，用「彩虹橋」連接；彩虹橋期間（12 秒），任何玩家擊破這 3 個目標中的任何一個 → 其他 2 個目標也獲得 HP -40%（連鎖傷害）；若 3 個目標都在 12 秒內被擊破 → 觸發「彩虹爆發」：全服 ×2.0 加成 6 秒；若 12 秒後未全部擊破 → 「彩虹消散」：剩餘目標 HP -60%（安慰獎）；全服廣播彩虹橋連接的目標和爆發結果；個人冷卻 25 秒；全服冷卻 40 秒

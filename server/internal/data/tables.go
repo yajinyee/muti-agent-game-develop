@@ -927,6 +927,15 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 25 秒；全服冷卻 40 秒
 	"T237": {ID: "T237", Name: "幸運彩虹橋魚", Type: TargetTypeSpecial, MultiplierMin: 74, MultiplierMax: 139, HP: 114, SpawnWeight: 2, Speed: 8, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_rainbow_bridge"},
 
+	// T238 幸運連鎖稀有魚（DAY-280）— Fishing Fortune 2026「Chain rare catches」機制進化版
+	//   - 擊破 T238 後，觸發「稀有連鎖模式」（持續 20 秒）
+	//   - 模式期間，玩家每次擊破「稀有或以上目標」（倍率 ≥ 15x），連鎖計數 +1
+	//   - 倍率爬升：第1層×1.5 → 第2層×2.5 → 第3層×4.0 → 第4層×6.0 → 第5層×10.0
+	//   - 每次連鎖必須在 8 秒內完成（否則連鎖中斷，重置到第1層）
+	//   - 達到第 5 層（×10.0）觸發「連鎖爆發」：個人大獎 + 全服廣播
+	//   - 個人冷卻 22 秒；全服冷卻 38 秒
+	"T238": {ID: "T238", Name: "幸運連鎖稀有魚", Type: TargetTypeSpecial, MultiplierMin: 75, MultiplierMax: 141, HP: 115, SpawnWeight: 2, Speed: 7, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_rare_chain"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

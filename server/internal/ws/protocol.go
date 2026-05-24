@@ -620,6 +620,7 @@ const (
 	MsgLuckyLightningHammer        MessageType = "lucky_lightning_hammer"                // 幸運閃電錘魚廣播（Server→Client，DAY-277）
 	MsgLuckyTimeRift               MessageType = "lucky_time_rift"                       // 幸運時間裂縫魚廣播（Server→Client，DAY-278）
 	MsgLuckyRainbowBridge          MessageType = "lucky_rainbow_bridge"                  // 幸運彩虹橋魚廣播（Server→Client，DAY-279）
+	MsgLuckyRareChain              MessageType = "lucky_rare_chain"                      // 幸運連鎖稀有魚廣播（Server→Client，DAY-280）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6404,4 +6405,25 @@ type LuckyRainbowBridgePayload struct {
 	FadedCount   int      `json:"faded_count,omitempty"`   // 消散目標數
 	BurstMult    float64  `json:"burst_mult,omitempty"`    // 彩虹爆發倍率
 	BurstSeconds int      `json:"burst_seconds,omitempty"` // 彩虹爆發持續秒數
+}
+
+// LuckyRareChainPayload 幸運連鎖稀有魚廣播（Server → Client，DAY-280）
+// Event 類型：
+//   - chain_start：連鎖稀有模式觸發（個人，PlayerID/PlayerName/Duration/WindowSec/MaxLayer）
+//   - chain_broadcast：全服廣播橫幅（PlayerName/Duration）
+//   - chain_kill：連鎖擊破（個人，PlayerID/Layer/Mult/Reward/TotalReward）
+//   - chain_burst：連鎖爆發（個人，PlayerID/PlayerName/Layer/Mult/TotalReward）
+//   - chain_burst_broadcast：連鎖爆發全服廣播（PlayerName/Layer/Mult/TotalReward）
+//   - chain_end：模式結束（個人，PlayerID/Layer/TotalReward）
+type LuckyRareChainPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	Duration    int     `json:"duration,omitempty"`     // 模式持續時間（秒）
+	WindowSec   int     `json:"window_sec,omitempty"`   // 連鎖視窗（秒）
+	MaxLayer    int     `json:"max_layer,omitempty"`    // 最大連鎖層數
+	Layer       int     `json:"layer,omitempty"`        // 當前連鎖層數
+	Mult        float64 `json:"mult,omitempty"`         // 當前層倍率
+	Reward      int     `json:"reward,omitempty"`       // 本次擊破獎勵
+	TotalReward int     `json:"total_reward,omitempty"` // 累積總獎勵
 }

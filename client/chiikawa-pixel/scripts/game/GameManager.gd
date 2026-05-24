@@ -284,6 +284,7 @@ signal lucky_golden_hurricane(data: Dictionary)       # 幸運黃金颶風魚系
 signal lucky_lightning_hammer(data: Dictionary)       # 幸運閃電錘魚系統（DAY-277）
 signal lucky_time_rift(data: Dictionary)              # 幸運時間裂縫魚系統（DAY-278）
 signal lucky_rainbow_bridge(data: Dictionary)          # 幸運彩虹橋魚系統（DAY-279）
+signal lucky_rare_chain(data: Dictionary)              # 幸運連鎖稀有魚系統（DAY-280）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -819,6 +820,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_time_rift(payload)
 		"lucky_rainbow_bridge":
 			_handle_lucky_rainbow_bridge(payload)
+		"lucky_rare_chain":
+			_handle_lucky_rare_chain(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4181,3 +4184,34 @@ func _handle_lucky_rainbow_bridge(payload: Dictionary) -> void:
 			var killed_count: int = payload.get("killed_count", 0)
 			var total_count: int = payload.get("total_count", 3)
 			print("[GameManager] RainbowBridge fade! player=%s killed=%d/%d" % [player_name, killed_count, total_count])
+
+## 幸運連鎖稀有魚系統（DAY-280）
+func _handle_lucky_rare_chain(payload: Dictionary) -> void:
+	emit_signal("lucky_rare_chain", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"chain_start":
+			var player_name: String = payload.get("player_name", "???")
+			var duration: int = payload.get("duration", 20)
+			print("[GameManager] RareChain started! player=%s duration=%d" % [player_name, duration])
+		"chain_broadcast":
+			var player_name: String = payload.get("player_name", "???")
+			print("[GameManager] RareChain broadcast! player=%s" % player_name)
+		"chain_kill":
+			var layer: int = payload.get("layer", 1)
+			var mult: float = payload.get("mult", 1.5)
+			var reward: int = payload.get("reward", 0)
+			print("[GameManager] RareChain kill! layer=%d mult=x%.1f reward=%d" % [layer, mult, reward])
+		"chain_burst":
+			var layer: int = payload.get("layer", 5)
+			var mult: float = payload.get("mult", 10.0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] RareChain BURST! layer=%d mult=x%.1f totalReward=%d" % [layer, mult, total_reward])
+		"chain_burst_broadcast":
+			var player_name: String = payload.get("player_name", "???")
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] RareChain burst broadcast! player=%s totalReward=%d" % [player_name, total_reward])
+		"chain_end":
+			var layer: int = payload.get("layer", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] RareChain ended! layer=%d totalReward=%d" % [layer, total_reward])

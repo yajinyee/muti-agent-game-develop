@@ -253,6 +253,7 @@ type Game struct {
 	LuckyLightningHammer    *luckyLightningHammerManager       // 幸運閃電錘魚系統管理器（DAY-277）
 	LuckyTimeRift           *luckyTimeRiftManager              // 幸運時間裂縫魚系統管理器（DAY-278）
 	LuckyRainbowBridge      *luckyRainbowBridgeManager         // 幸運彩虹橋魚系統管理器（DAY-279）
+	LuckyRareChain          *luckyRareChainManager             // 幸運連鎖稀有魚系統管理器（DAY-280）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -482,6 +483,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyLightningHammer:    newLuckyLightningHammerManager(),
 		LuckyTimeRift:           newLuckyTimeRiftManager(),
 		LuckyRainbowBridge:      newLuckyRainbowBridgeManager(),
+		LuckyRareChain:          newLuckyRareChainManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2600,6 +2602,25 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	rainbowBurstMult := g.LuckyRainbowBridge.getRainbowBridgeBurstMult()
 	if rainbowBurstMult > 1.0 {
 		finalReward = int(float64(finalReward) * rainbowBurstMult)
+	}
+	// 幸運連鎖稀有魚：擊破 T238 時觸發連鎖稀有模式（DAY-280）
+	if isLuckyRareChainFish(t.DefID) {
+		go g.tryLuckyRareChainFish(p)
+	}
+	// 幸運連鎖稀有魚：連鎖稀有模式中擊破稀有目標時，套用連鎖倍率（DAY-280）
+	if !isLuckyRareChainFish(t.DefID) {
+		if chainMult, isChain := g.LuckyRareChain.getRareChainMult(p.ID, int(t.Def.MultiplierMin)); isChain {
+			chainReward := int(float64(finalReward) * (chainMult - 1.0))
+			finalReward += chainReward
+			g.LuckyRareChain.recordRareChainReward(p.ID, chainReward)
+			layer := 0
+			g.LuckyRareChain.mu.Lock()
+			if session, ok := g.LuckyRareChain.activeSessions[p.ID]; ok {
+				layer = session.layer
+			}
+			g.LuckyRareChain.mu.Unlock()
+			go g.notifyRareChainKill(p, layer, chainMult, chainReward)
+		}
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
