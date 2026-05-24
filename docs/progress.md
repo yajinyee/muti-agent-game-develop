@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-272 幸運品質突變魚系統）
+## 最後更新：2026-05-24（DAY-273 幸運共鳴波魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-273 更新（自主觸發）：** 幸運共鳴波魚系統（Lucky Resonance Wave Fish）✅
+  - **業界依據：** Royal Fishing / Jili 2026「連鎖閃電+群體攻擊」趨勢進化版，業界原創「共鳴波擴散+全場同步爆發」機制
+  - **設計：** 擊破 T231 後，發出「共鳴波」（3 層同心圓，每層間隔 400ms）；第 1 層（r=150px）HP -20%，35% 機率引爆（×2.0）；第 2 層（r=250px）HP -15%，25% 機率引爆（×1.8）；第 3 層（r=350px）HP -10%，15% 機率引爆（×1.5）；引爆數 ≥ 5 → 全服 ×1.5 加成 8 秒；個人冷卻 25 秒；全服冷卻 40 秒
+  - **設計差異：** 與連鎖爆炸（T224，從一點向外擴散）不同，共鳴波是「同心圓擴散」，讓玩家看到「波紋從中心向外擴散」的視覺爽感；「3 層同心圓」讓玩家有「波波相連，越來越大」的期待感；「引爆數 ≥ 5 觸發全服爆發」讓玩家有策略感；「全服 ×1.5 加成 8 秒」讓所有玩家都受益，製造「全服一起爽」的社交感
+  - server/internal/game/lucky_resonance_wave_handler.go：luckyResonanceWaveManager（個人冷卻/全服冷卻/activeBurst）；resonanceWaveBurst（mult/expiresAt）；isLuckyResonanceWaveFish（T231）；getResonanceWaveBurstMult（供 handleKill 使用）；tryLuckyResonanceWaveFish（觸發/個人訊息+全服廣播+全服公告）；runResonanceWave（goroutine 三層同心圓/每層 400ms 間隔/引爆判定/爆發觸發）
+  - server/internal/data/tables.go：新增 T231 幸運共鳴波魚（68-127x/HP108/SpawnWeight2/Speed14/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyResonanceWave；LuckyResonanceWavePayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyResonanceWave + case 處理
+  - server/internal/game/game.go：LuckyResonanceWave *luckyResonanceWaveManager；handleKill 加入全服爆發倍率套用 + isLuckyResonanceWaveFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyResonanceWavePanel.gd：天藍波紋主題面板（wave_start 天藍閃光+橫幅+層數計數器；wave_layer 每層波結果+浮動文字；wave_burst 全螢幕三次強閃光+「共鳴爆發！×1.5 全服！」+爆發指示器+結算彈窗；wave_burst_end 爆發結束；wave_result 未達門檻結算）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_resonance_wave 訊號 + _handle_lucky_resonance_wave
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyResonanceWavePanelScript（layer=46）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T231 映射
+  - 三層波設計：第 1 層 r=150px HP-20% 35%引爆×2.0；第 2 層 r=250px HP-15% 25%引爆×1.8；第 3 層 r=350px HP-10% 15%引爆×1.5
+  - 爆發設計：引爆數 ≥ 5；全服 ×1.5 加成 8 秒；全服廣播+公告
+  - 視覺設計：天藍波紋主題（#00BFFF 天藍 + #1E90FF 道奇藍 + #FFD700 金 + #00FF88 翠綠）；層數計數器（右上角，顏色隨層數加深）；爆發指示器（右側脈衝動畫）；結算彈窗右側滑入
+  - build/vet 全部通過（零錯誤零警告）
+  - T231 精靈圖：天藍共鳴波魚（三層同心圓波紋+天藍魚身+波紋中心光點+翠綠光點）
 - **DAY-272 更新（自主觸發）：** 幸運品質突變魚系統（Lucky Quality Mutation Fish）✅
   - **業界依據：** Fishing Frenzy Chapter 3（2026-05-11）Quality Roll 系統 + Fisch Roblox Mutation 機制（150+ 種突變，0.1x 到 17x 倍率），2026 年最熱門「品質突變+稀有度分層」機制
   - **設計：** 擊破 T230 後，觸發「品質突變」：Server 為觸發玩家的下一次擊破「品質突變」（5個品質等級）；Normal（40%）×1.0 / Rare（30%）×1.8 / Epic（18%）×3.5 / Legendary（9%）×6.0 / Mythic（3%）×10.0；品質效果持續到下一次擊破（一次性）；Mythic 品質全服廣播；個人冷卻 18 秒；全服冷卻 30 秒

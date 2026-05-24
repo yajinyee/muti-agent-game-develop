@@ -277,6 +277,7 @@ signal lucky_spin_wheel(data: Dictionary)             # 幸運輪盤魚系統（
 signal lucky_mirror_duel(data: Dictionary)            # 幸運鏡像對決魚系統（DAY-270）
 signal lucky_reroll(data: Dictionary)                 # 幸運倍率重擲魚系統（DAY-271）
 signal lucky_quality_mutation(data: Dictionary)       # 幸運品質突變魚系統（DAY-272）
+signal lucky_resonance_wave(data: Dictionary)         # 幸運共鳴波魚系統（DAY-273）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -798,6 +799,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_reroll(payload)
 		"lucky_quality_mutation":
 			_handle_lucky_quality_mutation(payload)
+		"lucky_resonance_wave":
+			_handle_lucky_resonance_wave(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4031,6 +4034,16 @@ func _handle_lucky_quality_mutation(payload: Dictionary) -> void:
 			var quality: String = payload.get("quality", "normal")
 			var quality_mult: float = payload.get("quality_mult", 1.0)
 			print("[GameManager] QualityMutation start! quality=%s mult=×%.1f" % [quality, quality_mult])
+
+## 幸運共鳴波魚系統（DAY-273）
+func _handle_lucky_resonance_wave(payload: Dictionary) -> void:
+	emit_signal("lucky_resonance_wave", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"wave_burst":
+			var total_explode: int = payload.get("total_explode", 0)
+			var burst_mult: float = payload.get("burst_mult", 1.5)
+			print("[GameManager] ResonanceWave burst! explode=%d mult=×%.1f" % [total_explode, burst_mult])
 		"reroll_used":
 			var best_mult: float = payload.get("best_mult", 1.0)
 			var reward: int = payload.get("reward", 0)

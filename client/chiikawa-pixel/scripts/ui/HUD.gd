@@ -356,6 +356,7 @@ func _ready() -> void:
 	_init_lucky_mirror_duel_panel()         # 幸運鏡像對決魚系統面板（DAY-270）
 	_init_lucky_reroll_panel()              # 幸運倍率重擲魚系統面板（DAY-271）
 	_init_lucky_quality_mutation_panel()    # 幸運品質突變魚系統面板（DAY-272）
+	_init_lucky_resonance_wave_panel()      # 幸運共鳴波魚系統面板（DAY-273）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5141,3 +5142,19 @@ func _init_lucky_quality_mutation_panel() -> void:
 func _on_lucky_quality_mutation(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_quality_mutation_panel):
 		_lucky_quality_mutation_panel.handle(data)
+
+const LuckyResonanceWavePanelScript = preload("res://scripts/ui/LuckyResonanceWavePanel.gd")
+var _lucky_resonance_wave_panel = null
+
+func _init_lucky_resonance_wave_panel() -> void:
+	var panel = LuckyResonanceWavePanelScript.new()
+	panel.name = "LuckyResonanceWavePanel"
+	panel.layer = 46
+	add_child(panel)
+	_lucky_resonance_wave_panel = panel
+	if GameManager.has_signal("lucky_resonance_wave"):
+		GameManager.lucky_resonance_wave.connect(_on_lucky_resonance_wave)
+
+func _on_lucky_resonance_wave(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_resonance_wave_panel):
+		_lucky_resonance_wave_panel.handle(data)

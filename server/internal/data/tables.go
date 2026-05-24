@@ -868,6 +868,14 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 18 秒；全服冷卻 30 秒
 	"T230": {ID: "T230", Name: "幸運品質突變魚", Type: TargetTypeSpecial, MultiplierMin: 67, MultiplierMax: 125, HP: 107, SpawnWeight: 2, Speed: 15, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_quality_mutation"},
 
+	// T231 幸運共鳴波魚（DAY-273）— Royal Fishing / Jili 2026「連鎖閃電+群體攻擊」趨勢進化版
+	//   - 擊破 T231 後，發出「共鳴波」（3 層同心圓，每層間隔 400ms）
+	//   - 第 1 層（r=150px）：HP -20%，35% 機率引爆（×2.0）
+	//   - 第 2 層（r=250px）：HP -15%，25% 機率引爆（×1.8）
+	//   - 第 3 層（r=350px）：HP -10%，15% 機率引爆（×1.5）
+	//   - 引爆數 ≥ 5 → 全服 ×1.5 加成 8 秒；個人冷卻 25 秒；全服冷卻 40 秒
+	"T231": {ID: "T231", Name: "幸運共鳴波魚", Type: TargetTypeSpecial, MultiplierMin: 68, MultiplierMax: 127, HP: 108, SpawnWeight: 2, Speed: 14, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_resonance_wave"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

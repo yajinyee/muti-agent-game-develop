@@ -613,6 +613,7 @@ const (
 	MsgLuckyMirrorDuel             MessageType = "lucky_mirror_duel"                    // 幸運鏡像對決魚廣播（Server→Client，DAY-270）
 	MsgLuckyReroll                 MessageType = "lucky_reroll"                         // 幸運倍率重擲魚廣播（Server→Client，DAY-271）
 	MsgLuckyQualityMutation        MessageType = "lucky_quality_mutation"                // 幸運品質突變魚廣播（Server→Client，DAY-272）
+	MsgLuckyResonanceWave          MessageType = "lucky_resonance_wave"                  // 幸運共鳴波魚廣播（Server→Client，DAY-273）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6246,4 +6247,30 @@ type LuckyQualityMutationPayload struct {
 	QualityEmoji string  `json:"quality_emoji,omitempty"` // 品質 emoji
 	TargetName   string  `json:"target_name,omitempty"`   // 命中目標名稱
 	Reward       int     `json:"reward,omitempty"`        // 最終獎勵
+}
+
+// LuckyResonanceWavePayload 幸運共鳴波魚廣播（Server → Client，DAY-273）
+// Event 類型：
+//   - wave_start：共鳴波開始（個人，PlayerID/PlayerName/X/Y）
+//   - wave_broadcast：全服廣播（PlayerName/X/Y）
+//   - wave_layer：每層波結果（PlayerName/Layer/X/Y/Radius/AffectedCount/ExplodeCount/Mult/Reward）
+//   - wave_burst：共鳴爆發（PlayerName/TotalExplode/TotalReward/BurstMult/BurstDurSec）
+//   - wave_burst_end：共鳴爆發結束
+//   - wave_result：未達爆發門檻的結算（PlayerName/TotalExplode/TotalReward）
+type LuckyResonanceWavePayload struct {
+	Event         string  `json:"event"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	X             float64 `json:"x,omitempty"`             // 觸發點 X
+	Y             float64 `json:"y,omitempty"`             // 觸發點 Y
+	Layer         int     `json:"layer,omitempty"`         // 波層數（1/2/3）
+	Radius        float64 `json:"radius,omitempty"`        // 波半徑（px）
+	AffectedCount int     `json:"affected_count,omitempty"`// 波及目標數
+	ExplodeCount  int     `json:"explode_count,omitempty"` // 引爆目標數
+	Mult          float64 `json:"mult,omitempty"`          // 引爆倍率
+	Reward        int     `json:"reward,omitempty"`        // 本層獎勵
+	TotalExplode  int     `json:"total_explode,omitempty"` // 總引爆數
+	TotalReward   int     `json:"total_reward,omitempty"`  // 總獎勵
+	BurstMult     float64 `json:"burst_mult,omitempty"`    // 全服爆發倍率
+	BurstDurSec   int     `json:"burst_dur_sec,omitempty"` // 全服爆發持續秒數
 }
