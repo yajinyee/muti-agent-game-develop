@@ -3567,3 +3567,20 @@ contribution_per_shot = betCost × 0.005 × level_share
   - T202：「幸運傳染魚」— 擊破後玩家的子彈帶「傳染標記」，命中目標後傳染給周圍目標
 - **設計原則：** 每個新機制要與已有的 T181-T199 有明確差異，不能重複
 - **教訓：** 系統越多，越要確保每個機制的「設計差異」清晰，避免玩家感覺「都一樣」
+
+## 83. 新功能開發前必須先確認現有 handler 是否已存在（重要）
+- **問題：** DAY-285 嘗試建立 lucky_black_hole_handler.go，但 DAY-221 已有同名 handler（T179）
+- **症狀：** `luckyBlackHoleManager redeclared`、`isLuckyBlackHoleFish redeclared` 等編譯錯誤
+- **根本原因：** 沒有先搜尋現有 handler 就直接建立新檔案
+- **解決：** 建立新 handler 前，先用 grep 搜尋 `isLucky[Name]Fish` 確認是否已存在
+- **額外問題：** 刪除「衝突的」新 handler 時，誤刪了舊的 handler（因為同名），導致 game.go 引用失效
+- **教訓：**
+  1. 新功能開發前先 `grep -r "T[編號]" server/` 確認編號未被使用
+  2. 新功能開發前先 `grep -r "isLucky[Name]Fish" server/` 確認函數名稱未被使用
+  3. 刪除檔案前先確認是「新建的」還是「舊有的」
+  4. 每次新功能從 T242 開始，不要跳號
+
+## 84. 龍怒隕石魚（T242）與舊版 dragon_wrath_handler.go 的函數名稱衝突
+- **問題：** `runDragonWrathMeteors` 在 dragon_wrath_handler.go（DAY-154）已定義
+- **解決：** 新 handler 的函數改名為 `runLuckyDragonWrathMeteors`
+- **教訓：** 新 handler 的函數名稱要加 `Lucky` 前綴，避免與舊版特殊武器 handler 衝突
