@@ -977,6 +977,13 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 28 秒；全服冷卻 45 秒
 	"T243": {ID: "T243", Name: "幸運鳳凰涅槃魚", Type: TargetTypeSpecial, MultiplierMin: 80, MultiplierMax: 151, HP: 120, SpawnWeight: 2, Speed: 4, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_phoenix_rebirth"},
 
+	// T244 幸運深海克拉肯魚（DAY-286）— 業界依據：Kraken Unleashed「Kraken Reel + 多段觸手攻擊」機制
+	//   - 擊破 T244 後，召喚「深海克拉肯」：8 條觸手依序攻擊（每 500ms 一條）
+	//   - 每條觸手命中 1-3 個目標（HP -35%），命中 → 累積倍率 ×1.3（最高 ×10.0）
+	//   - 若 8 條觸手全部命中 → 「克拉肯狂怒」：全服 ×2.8 加成 7 秒
+	//   - 個人冷卻 30 秒；全服冷卻 48 秒
+	"T244": {ID: "T244", Name: "幸運深海克拉肯魚", Type: TargetTypeSpecial, MultiplierMin: 81, MultiplierMax: 153, HP: 121, SpawnWeight: 2, Speed: 3, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_kraken"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

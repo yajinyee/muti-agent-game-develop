@@ -259,6 +259,7 @@ type Game struct {
 	LuckyFourSymbols        *luckyFourSymbolsManager           // 幸運四象大獎魚系統管理器（DAY-283）
 	LuckyDragonWrath        *luckyDragonWrathManager           // 幸運龍怒隕石魚系統管理器（DAY-284）
 	LuckyPhoenixRebirth     *luckyPhoenixRebirthManager        // 幸運鳳凰涅槃魚系統管理器（DAY-285）
+	LuckyKraken             *luckyKrakenManager                // 幸運深海克拉肯魚系統管理器（DAY-286）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -494,6 +495,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyFourSymbols:        newLuckyFourSymbolsManager(),
 		LuckyDragonWrath:        newLuckyDragonWrathManager(),
 		LuckyPhoenixRebirth:     newLuckyPhoenixRebirthManager(),
+		LuckyKraken:             newLuckyKrakenManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2687,6 +2689,15 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運鳳凰涅槃魚：擊破 T243 時觸發鳳凰涅槃（DAY-285）
 	if isLuckyPhoenixRebirthFish(t.DefID) {
 		go g.tryLuckyPhoenixRebirthFish(p)
+	}
+	// 幸運深海克拉肯魚：全服克拉肯狂怒加成套用（DAY-286）
+	if krakenFuryMult := g.LuckyKraken.getKrakenFuryMult(); krakenFuryMult > 1.0 {
+		krakenBonus := int(float64(finalReward) * (krakenFuryMult - 1.0))
+		finalReward += krakenBonus
+	}
+	// 幸運深海克拉肯魚：擊破 T244 時觸發克拉肯（DAY-286）
+	if isLuckyKrakenFish(t.DefID) {
+		go g.tryLuckyKrakenFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

@@ -626,6 +626,7 @@ const (
 	MsgLuckyFourSymbols            MessageType = "lucky_four_symbols"                    // 幸運四象大獎魚廣播（Server→Client，DAY-283）
 	MsgLuckyDragonWrath            MessageType = "lucky_dragon_wrath"                    // 幸運龍怒隕石魚廣播（Server→Client，DAY-284）
 	MsgLuckyPhoenixRebirth         MessageType = "lucky_phoenix_rebirth"                 // 幸運鳳凰涅槃魚廣播（Server→Client，DAY-285）
+	MsgLuckyKraken                 MessageType = "lucky_kraken"                          // 幸運深海克拉肯魚廣播（Server→Client，DAY-286）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6543,4 +6544,31 @@ type LuckyPhoenixRebirthPayload struct {
 	KillMult        float64                    `json:"kill_mult,omitempty"`         // 涅槃目標擊破倍率
 	FullRebirthMult float64                    `json:"full_rebirth_mult,omitempty"` // 完全涅槃全服倍率
 	Remaining       int                        `json:"remaining,omitempty"`         // 消散時剩餘未擊破數
+}
+
+// LuckyKrakenPayload 幸運深海克拉肯魚廣播（Server → Client，DAY-286）
+// 業界依據：Kraken Unleashed「Kraken Reel + 多段觸手攻擊」機制
+// Event 類型：
+//   - kraken_start：克拉肯召喚開始（全服，PlayerID/PlayerName/TentacleCount）
+//   - kraken_tentacle：觸手攻擊結果（全服，PlayerID/TentacleX/TentacleY/HitTargets/AccumMult/TentacleIdx/TotalCount）
+//   - kraken_end：克拉肯結算（全服，PlayerID/PlayerName/HitCount/TotalHit/AccumMult/Reward/IsFury）
+//   - kraken_fury：克拉肯狂怒全服加成（全服，PlayerName/FuryMult/Duration）
+//   - kraken_fury_end：克拉肯狂怒結束（全服）
+type LuckyKrakenPayload struct {
+	Event         string  `json:"event"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	TentacleCount int     `json:"tentacle_count,omitempty"` // 觸手總數
+	TentacleX     float64 `json:"tentacle_x,omitempty"`     // 觸手攻擊 X 座標
+	TentacleY     float64 `json:"tentacle_y,omitempty"`     // 觸手攻擊 Y 座標
+	HitTargets    int     `json:"hit_targets,omitempty"`    // 命中目標數
+	AccumMult     float64 `json:"accum_mult,omitempty"`     // 累積倍率
+	TentacleIdx   int     `json:"tentacle_idx,omitempty"`   // 當前觸手序號（1-based）
+	TotalCount    int     `json:"total_count,omitempty"`    // 觸手總數（同 TentacleCount）
+	HitCount      int     `json:"hit_count,omitempty"`      // 命中目標的觸手數
+	TotalHit      int     `json:"total_hit,omitempty"`      // 命中目標總數
+	Reward        int     `json:"reward,omitempty"`         // 個人獎勵
+	IsFury        bool    `json:"is_fury,omitempty"`        // 是否克拉肯狂怒
+	FuryMult      float64 `json:"fury_mult,omitempty"`      // 狂怒全服倍率
+	Duration      int     `json:"duration,omitempty"`       // 狂怒加成持續秒數
 }

@@ -369,6 +369,7 @@ func _ready() -> void:
 	_init_lucky_four_symbols_panel()        # 幸運四象大獎魚系統面板（DAY-283）
 	_init_lucky_dragon_wrath_panel()        # 幸運龍怒隕石魚系統面板（DAY-284）
 	_init_lucky_phoenix_rebirth_panel()     # 幸運鳳凰涅槃魚系統面板（DAY-285）
+	_init_lucky_kraken_panel()              # 幸運深海克拉肯魚系統面板（DAY-286）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5362,3 +5363,19 @@ func _init_lucky_phoenix_rebirth_panel() -> void:
 func _on_lucky_phoenix_rebirth(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_phoenix_rebirth_panel):
 		_lucky_phoenix_rebirth_panel.handle_event(data)
+
+const LuckyKrakenPanelScript = preload("res://scripts/ui/LuckyKrakenPanel.gd")
+var _lucky_kraken_panel = null
+
+func _init_lucky_kraken_panel() -> void:
+	var panel = LuckyKrakenPanelScript.new()
+	panel.name = "LuckyKrakenPanel"
+	panel.layer = 59
+	add_child(panel)
+	_lucky_kraken_panel = panel
+	if GameManager.has_signal("lucky_kraken"):
+		GameManager.lucky_kraken.connect(_on_lucky_kraken)
+
+func _on_lucky_kraken(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_kraken_panel):
+		_lucky_kraken_panel.handle_event(data)

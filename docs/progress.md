@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-285 幸運鳳凰涅槃魚系統）
+## 最後更新：2026-05-24（DAY-286 幸運深海克拉肯魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-286 更新（自主觸發）：** 幸運深海克拉肯魚系統（Lucky Deep Sea Kraken Fish）✅
+  - **業界依據：** Kraken Unleashed「Kraken Reel + 多段觸手攻擊 + Grand Jackpot」機制 + Fishing Fortune 2026「multiplier chains + jackpot triggers」機制
+  - **設計：** 擊破 T244 後，召喚「深海克拉肯」：8 條觸手依序攻擊（每 500ms 一條）；每條觸手命中 1-3 個目標（HP -35%）；每條觸手命中至少 1 個目標 → 觸發玩家獲得 ×1.3 累積倍率（最高 ×10.0）；若 8 條觸手全部命中（無空揮）→「克拉肯狂怒」：全服 ×2.8 加成 7 秒；全服廣播觸手攻擊位置和結果；個人冷卻 30 秒；全服冷卻 48 秒
+  - **設計差異：** 與龍怒隕石（T242，4-7 顆隕石 AOE）不同，克拉肯是「8 條觸手精準攻擊」；「每條觸手命中 1-3 個目標」讓每次攻擊都有「這條觸手打到幾條魚？」的期待感；「8 條觸手全部命中觸發狂怒」比龍怒完美更難，但獎勵更高；「最高 ×10.0 累積倍率」是所有幸運魚中最高的個人倍率；「全服 ×2.8 加成 7 秒」讓所有玩家都受益
+  - server/internal/game/lucky_kraken_handler.go：luckyKrakenManager（個人冷卻/全服冷卻/furyBoost）；krakenFuryBoost（mult/expiresAt）；isLuckyKrakenFish（T244）；getKrakenFuryMult（供 handleKill 使用）；tryLuckyKrakenFish（觸發/全服廣播+公告）；runKrakenTentacles（goroutine 每500ms攻擊一條觸手/HP-35%/最多3個目標/累積倍率×1.3/最高×10.0/狂怒判定/結算）；applyKrakenTentacleDamage（AOE傷害/最多maxHit個/廣播HP更新）；settleKraken（結算/個人獎勵/狂怒觸發）；doKrakenFury（全服×2.8加成7秒/全服廣播+公告）
+  - server/internal/data/tables.go：新增 T244 幸運深海克拉肯魚（81-153x/HP121/SpawnWeight2/Speed3/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyKraken；LuckyKrakenPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyKraken + case 處理（PriorityHigh）
+  - server/internal/game/game.go：LuckyKraken *luckyKrakenManager；handleKill 加入 getKrakenFuryMult 全服倍率套用 + isLuckyKrakenFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyKrakenPanel.gd：深海主題面板（kraken_start 深藍三次強閃光+頂部橫幅+觸手計數器（右上角，命中數/累積倍率）；kraken_tentacle 青藍閃光+浮動文字+計數器更新；kraken_end 結算彈窗；kraken_fury 全螢幕三次強閃光+「克拉肯狂怒！全服×2.8！」大字+狂怒指示器（脈衝動畫+倒數計時）；kraken_fury_end 狂怒結束淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_kraken 訊號 + _handle_lucky_kraken
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyKrakenPanelScript（layer=59）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T244 映射
+  - 觸手設計：8 條；每 500ms 攻擊一條；HP -35%；最多命中 3 個目標；累積倍率 ×1.3/次；最高 ×10.0；個人冷卻 30 秒；全服冷卻 48 秒
+  - 狂怒設計：8 條觸手全部命中觸發；全服 ×2.8 加成 7 秒；全服廣播+公告（深藍/青藍）
+  - 視覺設計：深海主題（#0A1E50 深藍 + #00B4DC 青藍 + #6432B4 紫 + #FFFFFF 白）；觸手計數器（右上角，命中數/累積倍率，顏色隨進度：淡青→青藍→紫）；狂怒指示器（脈衝動畫+倒數計時）
+  - build/vet 全部通過（零錯誤零警告）
+  - T244 精靈圖：深海克拉肯魚（圓形深藍漸層魚身+8條青藍觸手+深海光環+觸手紋路+黃色克拉肯眼睛+青藍嘴巴+中心深海核心）
 - **DAY-285 更新（自主觸發）：** 幸運鳳凰涅槃魚系統（Lucky Phoenix Rebirth Fish）✅
   - **業界依據：** Royal Fishing Jili「Rainbow Phoenix Power Up + Awaken Boss」機制（2026）— 業界原創「鳳凰涅槃+死亡重生+全場火焰洗禮+完全涅槃爆發」機制
   - **設計：** 擊破 T243 後，觸發「鳳凰涅槃」：全場火焰洗禮（所有目標 HP -25%）；隨機選 3 個目標「涅槃重生」（HP 恢復 50%，擊破倍率 ×4.0）；若 3 個涅槃目標全部在 15 秒內被擊破 → 「鳳凰完全涅槃」：全服 ×3.0 加成 8 秒；全服廣播涅槃目標位置和結果；個人冷卻 28 秒；全服冷卻 45 秒
