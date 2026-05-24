@@ -631,6 +631,7 @@ const (
 	MsgLuckyDomino                 MessageType = "lucky_domino"                          // 幸運多米諾魚廣播（Server→Client，DAY-288）
 	MsgLuckyImmortalBoss           MessageType = "lucky_immortal_boss"                   // 幸運永生 BOSS 魚廣播（Server→Client，DAY-289）
 	MsgLuckyWrathCharge            MessageType = "lucky_wrath_charge"                    // 幸運怒氣蓄積魚廣播（Server→Client，DAY-290）
+	MsgLuckyTimeRiftV2             MessageType = "lucky_time_rift_v2"                    // 幸運時空裂縫魚廣播（Server→Client，DAY-291）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6548,6 +6549,25 @@ type LuckyPhoenixRebirthPayload struct {
 	KillMult        float64                    `json:"kill_mult,omitempty"`         // 涅槃目標擊破倍率
 	FullRebirthMult float64                    `json:"full_rebirth_mult,omitempty"` // 完全涅槃全服倍率
 	Remaining       int                        `json:"remaining,omitempty"`         // 消散時剩餘未擊破數
+}
+
+// LuckyTimeRiftV2Payload 幸運時空裂縫魚廣播（Server → Client，DAY-291）
+// 業界依據：Fishing Fortune 2026「Time Freeze mechanic」
+// Event 類型：
+//   - rift_start：時空裂縫開始（TriggerPlayerID/TriggerPlayerName/FreezeDuration/DamageMult）
+//   - rift_end：凍結結束+裂縫爆炸（TriggerPlayerID/TriggerPlayerName/KillCount/ExplosionDmg）
+//   - rift_perfect：時空完美全服加成（TriggerPlayerID/TriggerPlayerName/KillCount/PerfectMult/PerfectDuration）
+//   - rift_perfect_end：時空完美加成結束
+type LuckyTimeRiftV2Payload struct {
+	Event             string  `json:"event"`
+	TriggerPlayerID   string  `json:"trigger_player_id,omitempty"`
+	TriggerPlayerName string  `json:"trigger_player_name,omitempty"`
+	FreezeDuration    int     `json:"freeze_duration,omitempty"`
+	DamageMult        float64 `json:"damage_mult,omitempty"`
+	KillCount         int     `json:"kill_count,omitempty"`
+	ExplosionDmg      float64 `json:"explosion_dmg,omitempty"`
+	PerfectMult       float64 `json:"perfect_mult,omitempty"`
+	PerfectDuration   int     `json:"perfect_duration,omitempty"`
 }
 
 // LuckyWrathChargePayload 幸運怒氣蓄積魚廣播（Server → Client，DAY-290）

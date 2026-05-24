@@ -29,11 +29,13 @@ var _boss_active: bool = false
 var _boss_timer_node: Control = null
 var _last_labor_value: int = 0
 
-# Lucky Panel 系統（DAY-289/290）
+# Lucky Panel 系統（DAY-289/290/291）
 const LuckyImmortalBossPanelScript = preload("res://scripts/ui/LuckyImmortalBossPanel.gd")
 const LuckyWrathChargePanelScript = preload("res://scripts/ui/LuckyWrathChargePanel.gd")
+const LuckyTimeRiftV2PanelScript = preload("res://scripts/ui/LuckyTimeRiftV2Panel.gd")
 var _lucky_immortal_boss_panel = null
 var _lucky_wrath_charge_panel = null
+var _lucky_time_rift_v2_panel = null
 
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
@@ -70,6 +72,12 @@ func _ready() -> void:
 	get_tree().root.add_child(_lucky_wrath_charge_panel)
 	if GameManager.has_signal("lucky_wrath_charge"):
 		GameManager.lucky_wrath_charge.connect(_on_lucky_wrath_charge)
+
+	# 初始化 Lucky Time Rift V2 Panel（DAY-291）
+	_lucky_time_rift_v2_panel = LuckyTimeRiftV2PanelScript.new()
+	get_tree().root.add_child(_lucky_time_rift_v2_panel)
+	if GameManager.has_signal("lucky_time_rift_v2"):
+		GameManager.lucky_time_rift_v2.connect(_on_lucky_time_rift_v2)
 
 	# 初始化側錄系統（DAY-291）
 	# CanvasLayer 必須加到 root，不能作為另一個 CanvasLayer 的子節點
@@ -408,3 +416,8 @@ func _on_lucky_immortal_boss(data: Dictionary) -> void:
 func _on_lucky_wrath_charge(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_wrath_charge_panel):
 		_lucky_wrath_charge_panel.handle_event(data)
+
+# ---- 幸運時空裂縫魚（DAY-291）----
+func _on_lucky_time_rift_v2(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_time_rift_v2_panel):
+		_lucky_time_rift_v2_panel.handle_event(data)

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-290 幸運怒氣蓄積魚系統）
+## 最後更新：2026-05-24（DAY-291 幸運時空裂縫魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-291 更新（自主觸發）：** 幸運時空裂縫魚系統（Lucky Time Rift Fish）✅
+  - **業界依據：** Fishing Fortune 2026「Time Freeze mechanic — all fish freeze in place for 8 seconds, allowing players to target high-value fish without them escaping」— 業界原創「時空裂縫 + 全場凍結 + 凍結期間傷害加倍 + 裂縫爆炸」機制
+  - **設計：** 擊破 T249 後，觸發「時空裂縫」：全場所有目標凍結 8 秒（停止移動）；凍結期間，所有目標受到的傷害 ×2.0（凍結加成）；凍結結束時，場上所有目標 HP -30%（裂縫爆炸）；若凍結期間玩家擊破 ≥ 5 個目標 → 「時空完美」：全服 ×2.5 加成 6 秒；個人冷卻 22 秒；全服冷卻 38 秒
+  - **設計差異：** 與幸運冰凍世界（T237，全場 HP -40% 一次性）不同，時空裂縫是「凍結 + 傷害加倍 + 爆炸」三段；「凍結期間傷害 ×2.0」讓玩家有「要趁凍結期間瘋狂打魚，每一發都值兩發」的動力；「凍結結束 HP -30%」讓玩家有「凍結結束後還有一波爆炸，雙重收益」的驚喜感；「擊破 ≥ 5 個觸發時空完美」讓玩家有「要趁 8 秒內打完 5 條魚」的緊迫感；「全服廣播凍結狀態」讓所有玩家看到「現在全場凍結，快去打魚」的社交感
+  - server/internal/game/lucky_time_rift_v2_handler.go：luckyTimeRiftV2Manager（個人冷卻/全服冷卻/activeSession/perfectBoost/isFrozen）；timeRiftV2PerfectBoost（mult/expiresAt）；timeRiftV2Session（triggerPlayerID/triggerPlayerName/killCount/expiresAt/settled）；isLuckyTimeRiftV2Fish（T249）；getTimeRiftV2PerfectMult（供 handleKill 使用）；getTimeRiftV2DamageMult（凍結期間傷害倍率）；isTimeRiftV2Active（判斷是否凍結中）；notifyTimeRiftV2Kill（凍結期間擊破計數）；tryLuckyTimeRiftV2Fish（觸發/建立會話/全服廣播+公告）；runTimeRiftV2Freeze（goroutine 8秒後凍結結束/裂縫爆炸/時空完美判定）；applyTimeRiftV2Explosion（全場HP-30%/廣播HP更新）；doTimeRiftV2Perfect（全服×2.5加成6秒/全服廣播+公告）
+  - server/internal/data/tables.go：新增 T249 幸運時空裂縫魚（86-163x/HP126/SpawnWeight2/Speed4/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyTimeRiftV2；LuckyTimeRiftV2Payload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyTimeRiftV2 + case 處理（PriorityHigh）
+  - server/internal/game/game.go：LuckyTimeRiftV2 *luckyTimeRiftV2Manager；handleKill 加入 getTimeRiftV2PerfectMult 全服倍率套用 + getTimeRiftV2DamageMult 凍結傷害加倍 + isTimeRiftV2Active 凍結擊破計數 + isLuckyTimeRiftV2Fish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyTimeRiftV2Panel.gd：時空主題面板（rift_start 青藍三次強閃光+頂部橫幅+凍結計時條+傷害加倍指示器；rift_end 全螢幕三次強閃光+「裂縫爆炸！HP-30%！」大字；rift_perfect 全螢幕三次強閃光+「時空完美！全服×2.5！」大字+完美指示器；rift_perfect_end 完美加成結束淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_time_rift_v2 訊號 + _handle_lucky_time_rift_v2
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyTimeRiftV2PanelScript（layer=64）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T249 映射
+  - 凍結設計：8 秒時限；傷害 ×2.0；凍結結束 HP -30%；個人冷卻 22 秒；全服冷卻 38 秒
+  - 時空完美設計：凍結期間擊破 ≥ 5 個觸發；全服 ×2.5 加成 6 秒；全服廣播+公告（青藍/金色）
+  - 視覺設計：時空主題（#00E5FF 青藍 + #0D47A1 深藍 + #7B2FBE 紫 + #FFD700 金 + #FFFFFF 白）；凍結計時條（右上角，剩餘時間+進度條，顏色隨時間：青藍→紫→金）；完美指示器（脈衝動畫+倒數計時）
+  - build/vet 全部通過（零錯誤零警告）
+  - T249 精靈圖：時空裂縫魚（橢圓深藍漸層魚身+Z字形時空裂縫紋路+青藍光環+4方向時空光芒+金色裂縫核心+紫色魚尾+時空粒子散落）非透明像素 89.6%
 - **DAY-290 更新（自主觸發）：** 幸運怒氣蓄積魚系統（Lucky Wrath Charge Fish）✅
   - **業界依據：** Royal Fishing Jili「Dragon Wrath system accumulates with every shot fired. Once the wrath meter fills, players unleash a massive meteorite attack across the centre screen, simultaneously targeting multiple fish」— 業界原創「怒氣蓄積 + 全場隕石雨 + 蓄積越多爆發越強」機制
   - **設計：** 擊破 T248 後，觸發玩家進入「怒氣蓄積模式」（持續 25 秒）；模式期間，玩家每次擊破任何目標 → 怒氣值 +1（最高 20 點）；25 秒後（或怒氣值達到 20）→ 自動爆發「怒氣隕石雨」；隕石數量 = 怒氣值（最少 3 顆，最多 20 顆）；每顆隕石 HP -50%，AOE r=100px；怒氣值 ≥ 15 → 「完美怒氣」：全服 ×2.8 加成 7 秒；個人冷卻 28 秒；全服冷卻 45 秒

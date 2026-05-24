@@ -1013,6 +1013,12 @@ var Targets = map[string]*TargetDef{
 	//       25秒後爆發隕石雨（隕石數=怒氣值），怒氣≥15觸發完美怒氣全服×2.8
 	"T248": {ID: "T248", Name: "幸運怒氣蓄積魚", Type: TargetTypeSpecial, MultiplierMin: 85, MultiplierMax: 161, HP: 125, SpawnWeight: 2, Speed: 5, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_wrath_charge"},
 
+	// T249 幸運時空裂縫魚（DAY-291）
+	// 業界依據：Fishing Fortune 2026「Time Freeze mechanic — all fish freeze in place for 8 seconds」
+	// 設計：擊破後觸發時空裂縫，全場凍結8秒（傷害×2.0），凍結結束爆炸HP-30%，
+	//       凍結期間擊破≥5個觸發時空完美全服×2.5加成6秒
+	"T249": {ID: "T249", Name: "幸運時空裂縫魚", Type: TargetTypeSpecial, MultiplierMin: 86, MultiplierMax: 163, HP: 126, SpawnWeight: 2, Speed: 4, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_time_rift_v2"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

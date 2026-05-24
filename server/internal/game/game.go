@@ -264,6 +264,7 @@ type Game struct {
 	LuckyDomino             *luckyDominoManager                // 幸運多米諾魚系統管理器（DAY-288）
 	LuckyImmortalBoss       *luckyImmortalBossManager          // 幸運永生 BOSS 魚系統管理器（DAY-289）
 	LuckyWrathCharge        *luckyWrathChargeManager           // 幸運怒氣蓄積魚系統管理器（DAY-290）
+	LuckyTimeRiftV2         *luckyTimeRiftV2Manager            // 幸運時空裂縫魚系統管理器（DAY-291）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -504,6 +505,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyDomino:             newLuckyDominoManager(),
 		LuckyImmortalBoss:       newLuckyImmortalBossManager(),
 		LuckyWrathCharge:        newLuckyWrathChargeManager(),
+		LuckyTimeRiftV2:         newLuckyTimeRiftV2Manager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1288,6 +1290,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	finalReward := result.Reward
 	if eventRewardMult > 1.0 {
 		finalReward = int(float64(result.Reward) * eventRewardMult)
+	}
+	// 套用時空裂縫凍結期間傷害加倍（DAY-291）
+	if riftDamageMult := g.LuckyTimeRiftV2.getTimeRiftV2DamageMult(); riftDamageMult > 1.0 {
+		finalReward = int(float64(finalReward) * riftDamageMult)
 	}
 	// 套用天氣獎勵倍率（DAY-087）
 	weatherRewardMult := g.Weather.GetRewardMult()
@@ -2763,6 +2769,20 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運怒氣蓄積魚：擊破 T248 時觸發怒氣蓄積（DAY-290）
 	if isLuckyWrathChargeFish(t.DefID) {
 		go g.tryLuckyWrathChargeFish(p)
+	}
+	// 幸運時空裂縫魚：全服時空完美加成套用（DAY-291）
+	if riftPerfectMult := g.LuckyTimeRiftV2.getTimeRiftV2PerfectMult(); riftPerfectMult > 1.0 {
+		riftBonus := int(float64(finalReward) * (riftPerfectMult - 1.0))
+		finalReward += riftBonus
+	}
+	// 幸運時空裂縫魚：凍結期間傷害加倍（DAY-291）
+	if !isLuckyTimeRiftV2Fish(t.DefID) && g.LuckyTimeRiftV2.isTimeRiftV2Active() {
+		// 凍結期間傷害 ×2.0，已在 finalReward 計算前套用（透過 getTimeRiftV2DamageMult）
+		g.LuckyTimeRiftV2.notifyTimeRiftV2Kill()
+	}
+	// 幸運時空裂縫魚：擊破 T249 時觸發時空裂縫（DAY-291）
+	if isLuckyTimeRiftV2Fish(t.DefID) {
+		go g.tryLuckyTimeRiftV2Fish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
