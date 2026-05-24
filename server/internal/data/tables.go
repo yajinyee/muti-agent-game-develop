@@ -961,6 +961,14 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 30 秒；全服冷卻 50 秒
 	"T241": {ID: "T241", Name: "幸運四象大獎魚", Type: TargetTypeSpecial, MultiplierMin: 78, MultiplierMax: 147, HP: 118, SpawnWeight: 2, Speed: 4, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_four_symbols"},
 
+	// T242 幸運龍怒隕石魚（DAY-284）— 業界依據：Royal Fishing Jili「Dragon Wrath meteors」機制
+	//   - 擊破後召喚 4-7 顆「龍怒隕石」，每顆間隔 600ms 依序墜落
+	//   - 每顆隕石命中範圍（r=120px）內所有目標 HP -45%
+	//   - 每顆命中至少 1 個目標 → 觸發玩家累積倍率 ×1.4（最高 ×8.0）
+	//   - 若所有隕石都命中（龍怒完美）→ 全服 ×2.5 加成 6 秒
+	//   - 個人冷卻 26 秒；全服冷卻 42 秒
+	"T242": {ID: "T242", Name: "幸運龍怒隕石魚", Type: TargetTypeSpecial, MultiplierMin: 79, MultiplierMax: 149, HP: 119, SpawnWeight: 2, Speed: 3, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_dragon_wrath"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-283 幸運四象大獎魚系統）
+## 最後更新：2026-05-24（DAY-284 幸運龍怒隕石魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-284 更新（自主觸發）：** 幸運龍怒隕石魚系統（Lucky Dragon Wrath Meteor Fish）✅
+  - **業界依據：** Royal Fishing Jili「Dragon Wrath meteors」機制（2026 最熱門）— 龍怒召喚隕石雨，全場 AOE 傷害 + 累積倍率 + 完美爆發
+  - **設計：** 擊破 T242 後，召喚 4-7 顆「龍怒隕石」；每顆隕石在 4 秒內依序墜落（每 600ms 一顆）；每顆隕石墜落時，命中範圍內（r=120px）所有目標 HP -45%；每顆隕石命中至少 1 個目標 → 觸發玩家獲得 ×1.4 累積倍率（最高 ×8.0）；若所有隕石都命中目標（無空砸）→「龍怒完美」：全服 ×2.5 加成 6 秒；全服廣播隕石墜落位置和結果；個人冷卻 26 秒；全服冷卻 42 秒
+  - **設計差異：** 與黃金颶風（T234，螺旋掃場 HP-30%）不同，龍怒隕石是「多點 AOE 墜落」；「每顆隕石命中才累積倍率」讓玩家有「要是每顆都命中就賺大了」的期待感；「龍怒完美（全部命中）→ 全服 ×2.5」是最高全服加成，製造「全服一起爽」的社交感；「HP -45%」比黃金颶風（-30%）更強，讓玩家感受到「龍怒的威力」；「全服廣播隕石位置」讓所有玩家看到「隕石在哪裡砸」，製造全服緊張感
+  - server/internal/game/lucky_dragon_wrath_handler.go：luckyDragonWrathManager（個人冷卻/全服冷卻/perfectBoost）；dragonWrathPerfectBoost（mult/expiresAt）；isLuckyDragonWrathFish（T242）；getDragonWrathPerfectMult（供 handleKill 使用）；tryLuckyDragonWrathFish（觸發/決定4-7顆隕石/全服廣播+全服公告）；runLuckyDragonWrathMeteors（goroutine 每600ms墜落一顆/HP-45%/累積倍率×1.4/最高×8.0/龍怒完美判定/結算）；applyDragonWrathMeteorDamage（AOE傷害/廣播HP更新）；settleDragonWrath（結算/個人獎勵/龍怒完美觸發）；doDragonWrathPerfect（全服×2.5加成6秒/全服廣播+公告）
+  - server/internal/data/tables.go：新增 T242 幸運龍怒隕石魚（79-149x/HP119/SpawnWeight2/Speed3/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyDragonWrath；LuckyDragonWrathPayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyDragonWrath + case 處理（PriorityHigh）
+  - server/internal/game/game.go：LuckyDragonWrath *luckyDragonWrathManager；handleKill 加入 getDragonWrathPerfectMult 全服倍率套用 + isLuckyDragonWrathFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyDragonWrathPanel.gd：龍怒主題面板（wrath_start 火橙三次強閃光+頂部橫幅+隕石指示器（右上角，隕石數/累積倍率）；wrath_meteor 閃光+隕石爆炸特效+浮動文字+指示器更新；wrath_end 結算彈窗；wrath_perfect 全螢幕三次強閃光+「龍怒完美！全服×2.5！」大字+完美指示器（脈衝動畫+倒數計時）；wrath_perfect_end 完美結束淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_dragon_wrath 訊號 + _handle_lucky_dragon_wrath
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyDragonWrathPanelScript（layer=57）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T242 映射
+  - 隕石設計：4-7 顆；每 600ms 墜落一顆；HP -45%；r=120px AOE；累積倍率 ×1.4/次；最高 ×8.0；個人冷卻 26 秒；全服冷卻 42 秒
+  - 完美設計：所有隕石都命中觸發；全服 ×2.5 加成 6 秒；全服廣播+公告（火橙/深紅）
+  - 視覺設計：龍怒主題（#FF4500 火橙 + #FFD700 金 + #8B0000 深紅 + #FFFFFF 白）；隕石指示器（右上角，隕石數/累積倍率，顏色隨倍率：金→橙→火橙）；完美指示器（脈衝動畫+倒數計時）；結算彈窗右側滑入（含命中數/累積倍率/獎勵）
+  - build/vet 全部通過（零錯誤零警告）
+  - T242 精靈圖：龍怒隕石魚（火焰龍鱗漸層魚身+隕石衝擊裂縫+火橙光環+4方向火焰光芒+龍爪符文+中心火焰核心）
 - **DAY-283 更新（自主觸發）：** 幸運四象大獎魚系統（Lucky Four Symbols Jackpot Fish）✅
   - **業界依據：** Jackpot Fishing by Jili「四層累進大獎（Mini/Minor/Major/Grand）」機制 + 中華文化「四象（青龍/白虎/朱雀/玄武）」主題，2026 年最熱門捕魚機機制
   - **設計：** Server 維護四象大獎池，每次任何玩家擊破任何目標貢獻 0.5% 到大獎池；擊破 T241 後，依機率抽取四象層級（青龍 60%/白虎 25%/朱雀 12%/玄武 3%）；大獎金額 = 當前大獎池 × 層級比例（青龍 10%/白虎 25%/朱雀 50%/玄武 100%）；玄武大獎觸發後，大獎池重置為基礎值（30000）；全服廣播大獎結果；玄武大獎全服最高優先公告；個人冷卻 30 秒；全服冷卻 50 秒

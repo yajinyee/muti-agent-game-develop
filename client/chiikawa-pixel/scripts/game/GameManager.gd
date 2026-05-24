@@ -288,6 +288,7 @@ signal lucky_rare_chain(data: Dictionary)              # 幸運連鎖稀有魚�
 signal lucky_gold_mutation(data: Dictionary)           # 幸運黃金突變魚系統（DAY-281）
 signal lucky_star_burst(data: Dictionary)              # 幸運星爆魚系統（DAY-282）
 signal lucky_four_symbols(data: Dictionary)            # 幸運四象大獎魚系統（DAY-283）
+signal lucky_dragon_wrath(data: Dictionary)            # 幸運龍怒隕石魚系統（DAY-284）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -831,6 +832,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_star_burst(payload)
 		"lucky_four_symbols":
 			_handle_lucky_four_symbols(payload)
+		"lucky_dragon_wrath":
+			_handle_lucky_dragon_wrath(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4289,3 +4292,32 @@ func _handle_lucky_four_symbols(payload: Dictionary) -> void:
 		"symbol_pool_update":
 			var pool_size: int = payload.get("pool_size", 0)
 			print("[GameManager] FourSymbols pool update: %d" % pool_size)
+
+
+## 幸運龍怒隕石魚系統（DAY-284）
+func _handle_lucky_dragon_wrath(payload: Dictionary) -> void:
+	emit_signal("lucky_dragon_wrath", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"wrath_start":
+			var player_name: String = payload.get("player_name", "???")
+			var meteor_count: int = payload.get("meteor_count", 4)
+			print("[GameManager] DragonWrath start! player=%s meteors=%d" % [player_name, meteor_count])
+		"wrath_meteor":
+			var hit_targets: int = payload.get("hit_targets", 0)
+			var accum_mult: float = payload.get("accum_mult", 1.0)
+			var meteor_idx: int = payload.get("meteor_idx", 1)
+			print("[GameManager] DragonWrath meteor %d hit=%d mult=%.2f" % [meteor_idx, hit_targets, accum_mult])
+		"wrath_end":
+			var player_name: String = payload.get("player_name", "???")
+			var total_hit: int = payload.get("total_hit", 0)
+			var accum_mult: float = payload.get("accum_mult", 1.0)
+			var reward: int = payload.get("reward", 0)
+			var is_perfect: bool = payload.get("is_perfect", false)
+			print("[GameManager] DragonWrath end! player=%s hit=%d mult=%.2f reward=%d perfect=%s" % [player_name, total_hit, accum_mult, reward, str(is_perfect)])
+		"wrath_perfect":
+			var player_name: String = payload.get("player_name", "???")
+			var perfect_mult: float = payload.get("perfect_mult", 2.5)
+			print("[GameManager] DragonWrath PERFECT! player=%s mult=%.1f" % [player_name, perfect_mult])
+		"wrath_perfect_end":
+			print("[GameManager] DragonWrath perfect ended")

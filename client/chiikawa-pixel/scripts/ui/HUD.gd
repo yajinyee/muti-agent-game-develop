@@ -367,6 +367,7 @@ func _ready() -> void:
 	_init_lucky_gold_mutation_panel()       # 幸運黃金突變魚系統面板（DAY-281）
 	_init_lucky_star_burst_panel()          # 幸運星爆魚系統面板（DAY-282）
 	_init_lucky_four_symbols_panel()        # 幸運四象大獎魚系統面板（DAY-283）
+	_init_lucky_dragon_wrath_panel()        # 幸運龍怒隕石魚系統面板（DAY-284）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5328,3 +5329,19 @@ func _init_lucky_four_symbols_panel() -> void:
 func _on_lucky_four_symbols(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_four_symbols_panel):
 		_lucky_four_symbols_panel.handle(data)
+
+const LuckyDragonWrathPanelScript = preload("res://scripts/ui/LuckyDragonWrathPanel.gd")
+var _lucky_dragon_wrath_panel = null
+
+func _init_lucky_dragon_wrath_panel() -> void:
+	var panel = LuckyDragonWrathPanelScript.new()
+	panel.name = "LuckyDragonWrathPanel"
+	panel.layer = 57
+	add_child(panel)
+	_lucky_dragon_wrath_panel = panel
+	if GameManager.has_signal("lucky_dragon_wrath"):
+		GameManager.lucky_dragon_wrath.connect(_on_lucky_dragon_wrath)
+
+func _on_lucky_dragon_wrath(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_dragon_wrath_panel):
+		_lucky_dragon_wrath_panel.handle(data)

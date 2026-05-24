@@ -624,6 +624,7 @@ const (
 	MsgLuckyGoldMutation           MessageType = "lucky_gold_mutation"                   // 幸運黃金突變魚廣播（Server→Client，DAY-281）
 	MsgLuckyStarBurst              MessageType = "lucky_star_burst"                      // 幸運星爆魚廣播（Server→Client，DAY-282）
 	MsgLuckyFourSymbols            MessageType = "lucky_four_symbols"                    // 幸運四象大獎魚廣播（Server→Client，DAY-283）
+	MsgLuckyDragonWrath            MessageType = "lucky_dragon_wrath"                    // 幸運龍怒隕石魚廣播（Server→Client，DAY-284）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6485,4 +6486,30 @@ type LuckyFourSymbolsPayload struct {
 	SymbolName string  `json:"symbol_name,omitempty"` // "青龍" / "白虎" / "朱雀" / "玄武"
 	Reward     int     `json:"reward,omitempty"`      // 大獎金額
 	PoolSize   int     `json:"pool_size,omitempty"`   // 大獎池當前值
+}
+
+// LuckyDragonWrathPayload 幸運龍怒隕石魚廣播（Server → Client，DAY-284）
+// 業界依據：Royal Fishing Jili「Dragon Wrath meteors」機制
+// Event 類型：
+//   - wrath_start：龍怒隕石開始（全服，PlayerID/PlayerName/MeteorCount）
+//   - wrath_meteor：單顆隕石墜落（全服，PlayerID/MeteorX/MeteorY/HitTargets/AccumMult/MeteorIdx/TotalCount）
+//   - wrath_end：龍怒隕石結算（全服，PlayerID/PlayerName/MeteorCount/TotalHit/AccumMult/Reward/IsPerfect）
+//   - wrath_perfect：龍怒完美全服加成（全服，PlayerName/PerfectMult/Duration）
+//   - wrath_perfect_end：龍怒完美結束（全服）
+type LuckyDragonWrathPayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	MeteorCount int     `json:"meteor_count,omitempty"` // 隕石總數
+	MeteorX     float64 `json:"meteor_x,omitempty"`     // 隕石墜落 X 座標
+	MeteorY     float64 `json:"meteor_y,omitempty"`     // 隕石墜落 Y 座標
+	HitTargets  int     `json:"hit_targets,omitempty"`  // 命中目標數
+	AccumMult   float64 `json:"accum_mult,omitempty"`   // 累積倍率
+	MeteorIdx   int     `json:"meteor_idx,omitempty"`   // 當前隕石序號（1-based）
+	TotalCount  int     `json:"total_count,omitempty"`  // 隕石總數（同 MeteorCount）
+	TotalHit    int     `json:"total_hit,omitempty"`    // 命中目標總數
+	Reward      int     `json:"reward,omitempty"`       // 個人獎勵
+	IsPerfect   bool    `json:"is_perfect,omitempty"`   // 是否龍怒完美
+	PerfectMult float64 `json:"perfect_mult,omitempty"` // 完美全服倍率
+	Duration    int     `json:"duration,omitempty"`     // 完美加成持續秒數
 }

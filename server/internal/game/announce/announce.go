@@ -122,6 +122,7 @@ const (
 	EventLuckyGoldMutation        EventType = "lucky_gold_mutation"        // 幸運黃金突變魚觸發（DAY-281）
 	EventLuckyStarBurst           EventType = "lucky_star_burst"           // 幸運星爆魚觸發（DAY-282）
 	EventLuckyFourSymbols         EventType = "lucky_four_symbols"         // 幸運四象大獎魚觸發（DAY-283）
+	EventLuckyDragonWrath         EventType = "lucky_dragon_wrath"         // 幸運龍怒隕石魚觸發（DAY-284）
 )
 
 // Priority 公告優先級
@@ -2148,6 +2149,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityCritical
 		duration = 8000
+
+	case EventLuckyDragonWrath:
+		msg := "🐉🔥 龍怒隕石觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FF4500"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🐉🔥 龍怒隕石！"
+		message = msg
+		icon = "🔥"
+		color = c
+		priority = PriorityHigh
+		duration = 6000
 
 	default:
 		title = "📢 公告"

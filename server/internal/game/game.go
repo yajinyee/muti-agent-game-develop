@@ -257,6 +257,7 @@ type Game struct {
 	LuckyGoldMutation       *luckyGoldMutationManager          // 幸運黃金突變魚系統管理器（DAY-281）
 	LuckyStarBurst          *luckyStarBurstManager             // 幸運星爆魚系統管理器（DAY-282）
 	LuckyFourSymbols        *luckyFourSymbolsManager           // 幸運四象大獎魚系統管理器（DAY-283）
+	LuckyDragonWrath        *luckyDragonWrathManager           // 幸運龍怒隕石魚系統管理器（DAY-284）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -490,6 +491,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyGoldMutation:       newLuckyGoldMutationManager(),
 		LuckyStarBurst:          newLuckyStarBurstManager(),
 		LuckyFourSymbols:        newLuckyFourSymbolsManager(),
+		LuckyDragonWrath:        newLuckyDragonWrathManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2659,6 +2661,15 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運四象大獎魚：擊破 T241 時觸發四象大獎（DAY-283）
 	if isLuckyFourSymbolsFish(t.DefID) {
 		go g.tryLuckyFourSymbolsFish(p)
+	}
+	// 幸運龍怒隕石魚：全服龍怒完美加成套用（DAY-284）
+	if dragonWrathPerfectMult := g.LuckyDragonWrath.getDragonWrathPerfectMult(); dragonWrathPerfectMult > 1.0 {
+		perfectBonus := int(float64(finalReward) * (dragonWrathPerfectMult - 1.0))
+		finalReward += perfectBonus
+	}
+	// 幸運龍怒隕石魚：擊破 T242 時觸發龍怒隕石（DAY-284）
+	if isLuckyDragonWrathFish(t.DefID) {
+		go g.tryLuckyDragonWrathFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
