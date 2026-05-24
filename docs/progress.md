@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-289 幸運永生 BOSS 魚系統）
+## 最後更新：2026-05-24（DAY-290 幸運怒氣蓄積魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-290 更新（自主觸發）：** 幸運怒氣蓄積魚系統（Lucky Wrath Charge Fish）✅
+  - **業界依據：** Royal Fishing Jili「Dragon Wrath system accumulates with every shot fired. Once the wrath meter fills, players unleash a massive meteorite attack across the centre screen, simultaneously targeting multiple fish」— 業界原創「怒氣蓄積 + 全場隕石雨 + 蓄積越多爆發越強」機制
+  - **設計：** 擊破 T248 後，觸發玩家進入「怒氣蓄積模式」（持續 25 秒）；模式期間，玩家每次擊破任何目標 → 怒氣值 +1（最高 20 點）；25 秒後（或怒氣值達到 20）→ 自動爆發「怒氣隕石雨」；隕石數量 = 怒氣值（最少 3 顆，最多 20 顆）；每顆隕石 HP -50%，AOE r=100px；怒氣值 ≥ 15 → 「完美怒氣」：全服 ×2.8 加成 7 秒；個人冷卻 28 秒；全服冷卻 45 秒
+  - **設計差異：** 與龍怒隕石（T242，固定 4-7 顆隕石）不同，怒氣蓄積是「打越多魚，隕石越多」；「怒氣值 = 擊破次數」讓玩家有「要趁 25 秒內瘋狂打魚」的動力；「最多 20 顆隕石」讓玩家有「要把怒氣打滿才能拿到最多隕石」的目標感；「完美怒氣（≥15）→ 全服 ×2.8」讓玩家有「要打到 15 次才能觸發完美」的動力；「全服廣播怒氣進度」讓所有玩家看到「有人在蓄積怒氣，快去打魚幫他」的社交感
+  - server/internal/game/lucky_wrath_charge_handler.go：luckyWrathChargeManager（個人冷卻/全服冷卻/activeSessions/perfectBoost）；wrathPerfectBoost（mult/expiresAt）；wrathChargeSession（playerID/playerName/wrathValue/expiresAt/settled）；isLuckyWrathChargeFish（T248）；getWrathPerfectMult（供 handleKill 使用）；addWrathCharge（玩家擊破目標時增加怒氣值）；isWrathChargeActive（判斷玩家是否在怒氣蓄積模式）；tryLuckyWrathChargeFish（觸發/建立會話/全服廣播+公告）；notifyWrathChargeKill（怒氣值+1/達到最大立即爆發）；doWrathChargeExplosion（隕石雨/AOE傷害/完美怒氣判定/結算）；applyWrathMeteorDamage（AOE傷害/廣播HP更新）；doWrathPerfect（全服×2.8加成7秒/全服廣播+公告）；runWrathChargeTimeout（goroutine 25秒後超時爆發）
+  - server/internal/data/tables.go：新增 T248 幸運怒氣蓄積魚（85-161x/HP125/SpawnWeight2/Speed5/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyWrathCharge；LuckyWrathChargePayload（7種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyWrathCharge + case 處理（PriorityHigh）
+  - server/internal/game/game.go：LuckyWrathCharge *luckyWrathChargeManager；handleKill 加入 getWrathPerfectMult 全服倍率套用 + isWrathChargeActive 怒氣蓄積分支 + isLuckyWrathChargeFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyWrathChargePanel.gd：怒氣主題面板（wrath_start 深紅閃光+頂部橫幅+怒氣條指示器；wrath_charge 橙紅閃光+怒氣條更新；wrath_explode 全螢幕三次強閃光+「怒氣爆發！X顆隕石！」大字；wrath_meteor 閃光+浮動文字；wrath_settle 結算彈窗；wrath_perfect 全螢幕三次強閃光+「完美怒氣！全服×2.8！」大字+完美指示器；wrath_perfect_end 完美加成結束淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_wrath_charge 訊號 + _handle_lucky_wrath_charge
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyWrathChargePanelScript（layer=63）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T248 映射
+  - 怒氣蓄積設計：25 秒時限；每次擊破 +1 怒氣；最高 20 點；最少 3 顆隕石；個人冷卻 28 秒；全服冷卻 45 秒
+  - 完美怒氣設計：怒氣值 ≥ 15 觸發；全服 ×2.8 加成 7 秒；全服廣播+公告（火橙/金色）
+  - 視覺設計：怒氣主題（#8B0000 深紅 + #FF4500 火橙 + #FF6B35 橙紅 + #FFD700 金 + #FFFFFF 白）；怒氣條指示器（右上角，怒氣值/最大值+進度條，顏色隨怒氣：橙紅→火橙→金）；完美指示器（脈衝動畫+倒數計時）
+  - build/vet 全部通過（零錯誤零警告）
+  - T248 精靈圖：怒氣蓄積魚（橢圓火橙漸層魚身+怒氣火焰光環+4方向火焰光芒+怒氣計量條+金色怒氣之眼+深紅魚尾+金色怒氣核心）非透明像素 29.6%
 - **DAY-289 更新（自主觸發）：** 幸運永生 BOSS 魚系統（Lucky Immortal Boss Fish）✅
   - **業界依據：** Royal Fishing Jili「Immortal Boss mechanic — Golden Toad and Ancient Crocodile bosses appear randomly and award consecutive wins ranging from 50X to 150X until they leave the screen」— 業界原創「永生 BOSS 降臨 + 5 條命連續復活 + 倍率遞增 + 最終爆發」機制
   - **設計：** 擊破 T247 後，召喚「永生 BOSS」（在場上隨機位置出現，持續 18 秒）；永生 BOSS 有 5 條命（每次被擊破後立即復活，HP 恢復 100%）；每次擊破永生 BOSS → 觸發玩家獲得 ×2.0 獎勵（第1次）；每次復活時，擊破倍率提升 +0.5x（第1次 ×2.0 → 第2次 ×2.5 → ... → 第5次 ×4.0）；若 5 條命全部在 18 秒內耗盡 → 「永生終結」：全服 ×3.5 加成 8 秒；全服廣播永生 BOSS 位置和每次復活；個人冷卻 32 秒；全服冷卻 50 秒

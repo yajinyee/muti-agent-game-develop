@@ -263,6 +263,7 @@ type Game struct {
 	LuckyCosmicPulse        *luckyCosmicPulseManager           // 幸運宇宙脈衝魚系統管理器（DAY-287）
 	LuckyDomino             *luckyDominoManager                // 幸運多米諾魚系統管理器（DAY-288）
 	LuckyImmortalBoss       *luckyImmortalBossManager          // 幸運永生 BOSS 魚系統管理器（DAY-289）
+	LuckyWrathCharge        *luckyWrathChargeManager           // 幸運怒氣蓄積魚系統管理器（DAY-290）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -502,6 +503,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyCosmicPulse:        newLuckyCosmicPulseManager(),
 		LuckyDomino:             newLuckyDominoManager(),
 		LuckyImmortalBoss:       newLuckyImmortalBossManager(),
+		LuckyWrathCharge:        newLuckyWrathChargeManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2748,6 +2750,19 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運永生 BOSS 魚：擊破 T247 時觸發永生 BOSS（DAY-289）
 	if isLuckyImmortalBossFish(t.DefID) {
 		go g.tryLuckyImmortalBossFish(p)
+	}
+	// 幸運怒氣蓄積魚：全服完美怒氣加成套用（DAY-290）
+	if wrathPerfectMult := g.LuckyWrathCharge.getWrathPerfectMult(); wrathPerfectMult > 1.0 {
+		wrathBonus := int(float64(finalReward) * (wrathPerfectMult - 1.0))
+		finalReward += wrathBonus
+	}
+	// 幸運怒氣蓄積魚：玩家在怒氣蓄積模式中擊破目標時增加怒氣值（DAY-290）
+	if !isLuckyWrathChargeFish(t.DefID) && g.LuckyWrathCharge.isWrathChargeActive(p.ID) {
+		g.notifyWrathChargeKill(p)
+	}
+	// 幸運怒氣蓄積魚：擊破 T248 時觸發怒氣蓄積（DAY-290）
+	if isLuckyWrathChargeFish(t.DefID) {
+		go g.tryLuckyWrathChargeFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

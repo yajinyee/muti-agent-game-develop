@@ -1007,6 +1007,12 @@ var Targets = map[string]*TargetDef{
 	//       5 條命全部耗盡 → 永生終結：全服 ×3.5 加成 8 秒
 	"T247": {ID: "T247", Name: "幸運永生 BOSS 魚", Type: TargetTypeSpecial, MultiplierMin: 84, MultiplierMax: 159, HP: 124, SpawnWeight: 2, Speed: 4, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_immortal_boss"},
 
+	// T248 幸運怒氣蓄積魚（DAY-290）
+	// 業界依據：Royal Fishing Jili「Dragon Wrath system accumulates with every shot fired」
+	// 設計：擊破後觸發怒氣蓄積模式（25秒），每次擊破目標怒氣+1（最高20），
+	//       25秒後爆發隕石雨（隕石數=怒氣值），怒氣≥15觸發完美怒氣全服×2.8
+	"T248": {ID: "T248", Name: "幸運怒氣蓄積魚", Type: TargetTypeSpecial, MultiplierMin: 85, MultiplierMax: 161, HP: 125, SpawnWeight: 2, Speed: 5, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_wrath_charge"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -630,6 +630,7 @@ const (
 	MsgLuckyCosmicPulse            MessageType = "lucky_cosmic_pulse"                    // 幸運宇宙脈衝魚廣播（Server→Client，DAY-287）
 	MsgLuckyDomino                 MessageType = "lucky_domino"                          // 幸運多米諾魚廣播（Server→Client，DAY-288）
 	MsgLuckyImmortalBoss           MessageType = "lucky_immortal_boss"                   // 幸運永生 BOSS 魚廣播（Server→Client，DAY-289）
+	MsgLuckyWrathCharge            MessageType = "lucky_wrath_charge"                    // 幸運怒氣蓄積魚廣播（Server→Client，DAY-290）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6549,8 +6550,36 @@ type LuckyPhoenixRebirthPayload struct {
 	Remaining       int                        `json:"remaining,omitempty"`         // 消散時剩餘未擊破數
 }
 
+// LuckyWrathChargePayload 幸運怒氣蓄積魚廣播（Server → Client，DAY-290）
+// 業界依據：Royal Fishing Jili「Dragon Wrath system accumulates with every shot fired」
+// Event 類型：
+//   - wrath_start：怒氣蓄積開始（PlayerID/PlayerName/WrathValue/MaxWrath/TimeoutSec）
+//   - wrath_charge：怒氣值更新（PlayerID/PlayerName/WrathValue/MaxWrath）
+//   - wrath_explode：怒氣爆發（PlayerID/PlayerName/WrathValue/MeteorCount/IsPerfect）
+//   - wrath_meteor：單顆隕石（PlayerID/MeteorIdx/MeteorTotal/MeteorX/MeteorY/HitCount）
+//   - wrath_settle：爆發結算（PlayerID/PlayerName/WrathValue/MeteorCount/TotalHit/IsPerfect）
+//   - wrath_perfect：完美怒氣全服加成（PlayerID/PlayerName/WrathValue/GlobalMult/GlobalDurationSec）
+//   - wrath_perfect_end：完美怒氣加成結束
+type LuckyWrathChargePayload struct {
+	Event             string  `json:"event"`
+	PlayerID          string  `json:"player_id,omitempty"`
+	PlayerName        string  `json:"player_name,omitempty"`
+	WrathValue        int     `json:"wrath_value,omitempty"`
+	MaxWrath          int     `json:"max_wrath,omitempty"`
+	TimeoutSec        int     `json:"timeout_sec,omitempty"`
+	MeteorCount       int     `json:"meteor_count,omitempty"`
+	MeteorIdx         int     `json:"meteor_idx,omitempty"`
+	MeteorTotal       int     `json:"meteor_total,omitempty"`
+	MeteorX           float64 `json:"meteor_x,omitempty"`
+	MeteorY           float64 `json:"meteor_y,omitempty"`
+	HitCount          int     `json:"hit_count,omitempty"`
+	TotalHit          int     `json:"total_hit,omitempty"`
+	IsPerfect         bool    `json:"is_perfect,omitempty"`
+	GlobalMult        float64 `json:"global_mult,omitempty"`
+	GlobalDurationSec int     `json:"global_duration_sec,omitempty"`
+}
+
 // LuckyImmortalBossPayload 幸運永生 BOSS 魚廣播（Server → Client，DAY-289）
-// 業界依據：Royal Fishing Jili「Immortal Boss mechanic — consecutive wins 50X-150X until they leave」
 // Event 類型：
 //   - immortal_start：永生 BOSS 降臨（全服，TriggerPlayerID/TriggerPlayerName/X/Y/LivesLeft/CurrentMult/TimeoutSec）
 //   - immortal_kill：永生 BOSS 被擊破（全服，TriggerPlayerID/TriggerPlayerName/KillCount/KillMult/NextMult/LivesLeft/X/Y）

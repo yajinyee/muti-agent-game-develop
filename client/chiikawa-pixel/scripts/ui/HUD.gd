@@ -26,9 +26,11 @@ var _boss_active: bool = false
 var _boss_timer_node: Control = null
 var _last_labor_value: int = 0
 
-# Lucky Panel 系統（DAY-289）
+# Lucky Panel 系統（DAY-289/290）
 const LuckyImmortalBossPanelScript = preload("res://scripts/ui/LuckyImmortalBossPanel.gd")
+const LuckyWrathChargePanelScript = preload("res://scripts/ui/LuckyWrathChargePanel.gd")
 var _lucky_immortal_boss_panel = null
+var _lucky_wrath_charge_panel = null
 
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
@@ -59,6 +61,12 @@ func _ready() -> void:
 	get_tree().root.add_child(_lucky_immortal_boss_panel)
 	if GameManager.has_signal("lucky_immortal_boss"):
 		GameManager.lucky_immortal_boss.connect(_on_lucky_immortal_boss)
+
+	# 初始化 Lucky Wrath Charge Panel（DAY-290）
+	_lucky_wrath_charge_panel = LuckyWrathChargePanelScript.new()
+	get_tree().root.add_child(_lucky_wrath_charge_panel)
+	if GameManager.has_signal("lucky_wrath_charge"):
+		GameManager.lucky_wrath_charge.connect(_on_lucky_wrath_charge)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -387,3 +395,8 @@ func _on_daily_bonus_received(bonus_data: Dictionary) -> void:
 func _on_lucky_immortal_boss(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_immortal_boss_panel):
 		_lucky_immortal_boss_panel.handle_event(data)
+
+# ---- 幸運怒氣蓄積魚（DAY-290）----
+func _on_lucky_wrath_charge(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_wrath_charge_panel):
+		_lucky_wrath_charge_panel.handle_event(data)

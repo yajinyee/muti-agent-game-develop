@@ -128,6 +128,7 @@ const (
 	EventLuckyCosmicPulse         EventType = "lucky_cosmic_pulse"         // 幸運宇宙脈衝魚觸發（DAY-287）
 	EventLuckyDomino              EventType = "lucky_domino"               // 幸運多米諾魚觸發（DAY-288）
 	EventLuckyImmortalBoss        EventType = "lucky_immortal_boss"        // 幸運永生 BOSS 魚觸發（DAY-289）
+	EventLuckyWrathCharge         EventType = "lucky_wrath_charge"         // 幸運怒氣蓄積魚觸發（DAY-290）
 )
 
 // Priority 公告優先級
@@ -2274,6 +2275,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		color = c
 		priority = PriorityHigh
 		duration = 8000
+
+	case EventLuckyWrathCharge:
+		msg := "🔥💥 怒氣蓄積！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FF4500"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🔥💥 怒氣蓄積！"
+		message = msg
+		icon = "🔥"
+		color = c
+		priority = PriorityHigh
+		duration = 7000
 
 	default:
 		title = "📢 公告"
