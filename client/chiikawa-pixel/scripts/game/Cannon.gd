@@ -75,8 +75,67 @@ func _ready() -> void:
 	# 用 call_deferred 確保父節點已完全就緒
 	call_deferred("_init_bullet_pool")
 
-func _process(_delta: float) -> void:
-	pass
+## AUTO 自動射擊計時器
+var _auto_fire_timer: float = 0.0
+
+func _process(delta: float) -> void:
+	# AUTO 模式：自動選擇最高價值目標並射擊
+	if not GameManager.is_auto():
+		return
+	var state = GameManager.current_state
+	if state not in ["normal_play", "special_target_event", "boss_battle"]:
+		return
+
+	var fire_rate = GameManager.player_data.get("fire_rate", 2.0)
+	if fire_rate <= 0:
+		fire_rate = 2.0
+	_auto_fire_timer += delta
+	if _auto_fire_timer < 1.0 / fire_rate:
+		return
+	_auto_fire_timer = 0.0
+
+	# 找最高價值目標（評分：倍率 × 2 + HP低加分 + 快離開加分 + BOSS加分）
+	var parent = get_parent()
+	if not is_instance_valid(parent):
+		return
+	var target_manager = parent.get_node_or_null("TargetManager")
+	if not is_instance_valid(target_manager):
+		return
+
+	var best_id = ""
+	var best_score = -1.0
+	for instance_id in target_manager._target_nodes:
+		var node = target_manager._target_nodes[instance_id]
+		if not is_instance_valid(node):
+			continue
+		var hp_bar = node.get_node_or_null("HPBar")
+		var hp_bar_bg = node.get_node_or_null("HPBarBG")
+		var hp_pct = 1.0
+		if is_instance_valid(hp_bar) and is_instance_valid(hp_bar_bg) and hp_bar_bg.size.x > 0:
+			hp_pct = hp_bar.size.x / hp_bar_bg.size.x
+		var mult = node.get_meta("multiplier", 2.0) if node.has_meta("multiplier") else 2.0
+		var score = mult * 2.0
+		score += (1.0 - hp_pct) * 30.0  # HP 低的優先
+		if node.position.x < 400:
+			score += 20.0  # 快離開的優先
+		if node.get_meta("target_type", "") == "boss":
+			score += 500.0  # BOSS 最優先
+		if score > best_score:
+			best_score = score
+			best_id = instance_id
+
+	if best_id == "":
+		return
+
+	var best_node = target_manager._target_nodes.get(best_id, null)
+	if not is_instance_valid(best_node):
+		return
+
+	var target_pos = best_node.position
+	NetworkManager.send_attack(best_id, target_pos.x, target_pos.y)
+	_fire_projectile(target_pos)
+	var char_id = GameManager.player_data.get("character_id", "chiikawa")
+	AudioManager.play_attack_by_character(char_id)
 
 func _init_bullet_pool() -> void:
 	var parent = get_parent()

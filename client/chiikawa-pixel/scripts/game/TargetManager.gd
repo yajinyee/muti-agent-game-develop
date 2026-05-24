@@ -680,6 +680,8 @@ func _create_target_node(data: Dictionary) -> Node2D:
 		sprite.texture = tex
 		# 像素完美縮放（關閉濾波）
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		# 目標物放大 2x，讓玩家在畫面上清楚看見
+		sprite.scale = Vector2(2.0, 2.0)
 
 		# 套用 outline shader（使用快取 shader，避免重複 load）
 		if _cached_outline_shader != null and PerformanceMonitor.is_outline_shader_enabled():
@@ -727,15 +729,15 @@ func _create_target_node(data: Dictionary) -> Node2D:
 
 	# HP 條（規格書 8.1：受擊反饋）
 	var hp_bar_bg = ColorRect.new()
-	hp_bar_bg.size = Vector2(48, 5)
-	hp_bar_bg.position = Vector2(-24, -38)
+	hp_bar_bg.size = Vector2(64, 6)
+	hp_bar_bg.position = Vector2(-32, -52)
 	hp_bar_bg.color = Color(0.2, 0.2, 0.2, 0.8)
 	hp_bar_bg.name = "HPBarBG"
 	container.add_child(hp_bar_bg)
 
 	var hp_bar = ColorRect.new()
-	hp_bar.size = Vector2(48, 5)
-	hp_bar.position = Vector2(-24, -38)
+	hp_bar.size = Vector2(64, 6)
+	hp_bar.position = Vector2(-32, -52)
 	hp_bar.color = Color(0.2, 0.9, 0.2)
 	hp_bar.name = "HPBar"
 	container.add_child(hp_bar)
