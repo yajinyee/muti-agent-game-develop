@@ -627,6 +627,7 @@ const (
 	MsgLuckyDragonWrath            MessageType = "lucky_dragon_wrath"                    // 幸運龍怒隕石魚廣播（Server→Client，DAY-284）
 	MsgLuckyPhoenixRebirth         MessageType = "lucky_phoenix_rebirth"                 // 幸運鳳凰涅槃魚廣播（Server→Client，DAY-285）
 	MsgLuckyKraken                 MessageType = "lucky_kraken"                          // 幸運深海克拉肯魚廣播（Server→Client，DAY-286）
+	MsgLuckyCosmicPulse            MessageType = "lucky_cosmic_pulse"                    // 幸運宇宙脈衝魚廣播（Server→Client，DAY-287）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6544,6 +6545,31 @@ type LuckyPhoenixRebirthPayload struct {
 	KillMult        float64                    `json:"kill_mult,omitempty"`         // 涅槃目標擊破倍率
 	FullRebirthMult float64                    `json:"full_rebirth_mult,omitempty"` // 完全涅槃全服倍率
 	Remaining       int                        `json:"remaining,omitempty"`         // 消散時剩餘未擊破數
+}
+
+// LuckyCosmicPulsePayload 幸運宇宙脈衝魚廣播（Server → Client，DAY-287）
+// 業界依據：TaDa Gaming 2026「Cosmic」主題 + Fishing Fortune 2026「pulse wave mechanics」
+// Event 類型：
+//   - pulse_start：宇宙脈衝開始（全服，PlayerID/PlayerName/WaveCount）
+//   - pulse_wave：脈衝波結果（全服，PlayerID/WaveIdx/TotalWaves/Radius/HitTargets/AccumMult）
+//   - pulse_end：宇宙脈衝結算（全服，PlayerID/PlayerName/TotalHit/AccumMult/Reward/IsResonance）
+//   - pulse_resonance：宇宙共振全服加成（全服，PlayerName/TotalHit/ResMult/Duration）
+//   - pulse_resonance_end：宇宙共振結束（全服）
+type LuckyCosmicPulsePayload struct {
+	Event       string  `json:"event"`
+	PlayerID    string  `json:"player_id,omitempty"`
+	PlayerName  string  `json:"player_name,omitempty"`
+	WaveCount   int     `json:"wave_count,omitempty"`   // 脈衝波總層數
+	WaveIdx     int     `json:"wave_idx,omitempty"`     // 當前層序號（1-based）
+	TotalWaves  int     `json:"total_waves,omitempty"`  // 脈衝波總層數（同 WaveCount）
+	Radius      float64 `json:"radius,omitempty"`       // 本層脈衝波半徑（px）
+	HitTargets  int     `json:"hit_targets,omitempty"`  // 本層命中目標數
+	AccumMult   float64 `json:"accum_mult,omitempty"`   // 累積倍率
+	TotalHit    int     `json:"total_hit,omitempty"`    // 3 層命中目標總數
+	Reward      int     `json:"reward,omitempty"`       // 個人獎勵
+	IsResonance bool    `json:"is_resonance,omitempty"` // 是否觸發宇宙共振
+	ResMult     float64 `json:"res_mult,omitempty"`     // 共振全服倍率
+	Duration    int     `json:"duration,omitempty"`     // 共振加成持續秒數
 }
 
 // LuckyKrakenPayload 幸運深海克拉肯魚廣播（Server → Client，DAY-286）

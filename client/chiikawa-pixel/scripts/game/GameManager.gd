@@ -291,6 +291,7 @@ signal lucky_four_symbols(data: Dictionary)            # 幸運四象大獎魚�
 signal lucky_dragon_wrath(data: Dictionary)            # 幸運龍怒隕石魚系統（DAY-284）
 signal lucky_phoenix_rebirth(data: Dictionary)         # 幸運鳳凰涅槃魚系統（DAY-285）
 signal lucky_kraken(data: Dictionary)                  # 幸運深海克拉肯魚系統（DAY-286）
+signal lucky_cosmic_pulse(data: Dictionary)            # 幸運宇宙脈衝魚系統（DAY-287）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -840,6 +841,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_phoenix_rebirth(payload)
 		"lucky_kraken":
 			_handle_lucky_kraken(payload)
+		"lucky_cosmic_pulse":
+			_handle_lucky_cosmic_pulse(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4379,3 +4382,31 @@ func _handle_lucky_kraken(payload: Dictionary) -> void:
 			print("[GameManager] Kraken FURY! player=%s mult=%.1f" % [player_name, fury_mult])
 		"kraken_fury_end":
 			print("[GameManager] Kraken fury ended")
+
+## 幸運宇宙脈衝魚系統（DAY-287）
+func _handle_lucky_cosmic_pulse(payload: Dictionary) -> void:
+	emit_signal("lucky_cosmic_pulse", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"pulse_start":
+			var player_name: String = payload.get("player_name", "???")
+			var wave_count: int = payload.get("wave_count", 3)
+			print("[GameManager] CosmicPulse start! player=%s waves=%d" % [player_name, wave_count])
+		"pulse_wave":
+			var wave_idx: int = payload.get("wave_idx", 1)
+			var hit_targets: int = payload.get("hit_targets", 0)
+			var accum_mult: float = payload.get("accum_mult", 1.0)
+			print("[GameManager] CosmicPulse wave %d hit=%d mult=%.2f" % [wave_idx, hit_targets, accum_mult])
+		"pulse_end":
+			var player_name: String = payload.get("player_name", "???")
+			var accum_mult: float = payload.get("accum_mult", 1.0)
+			var reward: int = payload.get("reward", 0)
+			var is_resonance: bool = payload.get("is_resonance", false)
+			print("[GameManager] CosmicPulse end! player=%s mult=%.2f reward=%d resonance=%s" % [player_name, accum_mult, reward, str(is_resonance)])
+		"pulse_resonance":
+			var player_name: String = payload.get("player_name", "???")
+			var res_mult: float = payload.get("res_mult", 2.2)
+			var total_hit: int = payload.get("total_hit", 0)
+			print("[GameManager] CosmicPulse RESONANCE! player=%s mult=%.1f totalHit=%d" % [player_name, res_mult, total_hit])
+		"pulse_resonance_end":
+			print("[GameManager] CosmicPulse resonance ended")

@@ -157,6 +157,7 @@ const TARGET_SPRITES = {
 	"T242": "res://assets/sprites/targets/T242_dragon_wrath.png",
 	"T243": "res://assets/sprites/targets/T243_phoenix_rebirth.png",
 	"T244": "res://assets/sprites/targets/T244_kraken.png",
+	"T245": "res://assets/sprites/targets/T245_cosmic_pulse.png",
 	"B001": "res://assets/sprites/targets/B001_boss.png",
 }
 

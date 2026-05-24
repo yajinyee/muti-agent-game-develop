@@ -370,6 +370,7 @@ func _ready() -> void:
 	_init_lucky_dragon_wrath_panel()        # 幸運龍怒隕石魚系統面板（DAY-284）
 	_init_lucky_phoenix_rebirth_panel()     # 幸運鳳凰涅槃魚系統面板（DAY-285）
 	_init_lucky_kraken_panel()              # 幸運深海克拉肯魚系統面板（DAY-286）
+	_init_lucky_cosmic_pulse_panel()        # 幸運宇宙脈衝魚系統面板（DAY-287）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5379,3 +5380,19 @@ func _init_lucky_kraken_panel() -> void:
 func _on_lucky_kraken(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_kraken_panel):
 		_lucky_kraken_panel.handle_event(data)
+
+const LuckyCosmicPulsePanelScript = preload("res://scripts/ui/LuckyCosmicPulsePanel.gd")
+var _lucky_cosmic_pulse_panel = null
+
+func _init_lucky_cosmic_pulse_panel() -> void:
+	var panel = LuckyCosmicPulsePanelScript.new()
+	panel.name = "LuckyCosmicPulsePanel"
+	panel.layer = 60
+	add_child(panel)
+	_lucky_cosmic_pulse_panel = panel
+	if GameManager.has_signal("lucky_cosmic_pulse"):
+		GameManager.lucky_cosmic_pulse.connect(_on_lucky_cosmic_pulse)
+
+func _on_lucky_cosmic_pulse(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_cosmic_pulse_panel):
+		_lucky_cosmic_pulse_panel.handle_event(data)

@@ -984,6 +984,14 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 30 秒；全服冷卻 48 秒
 	"T244": {ID: "T244", Name: "幸運深海克拉肯魚", Type: TargetTypeSpecial, MultiplierMin: 81, MultiplierMax: 153, HP: 121, SpawnWeight: 2, Speed: 3, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_kraken"},
 
+	// T245 幸運宇宙脈衝魚（DAY-287）— 業界依據：TaDa Gaming 2026「Cosmic」主題 + Fishing Fortune 2026「pulse wave mechanics」
+	//   - 擊破 T245 後，發出「宇宙脈衝波」（從場地中心向外擴散）
+	//   - 脈衝波分 3 層（每 800ms 一層），每層命中範圍內所有目標 HP -20%
+	//   - 每層命中目標數 × 0.2 = 累積倍率加成（最高 ×5.0）
+	//   - 若 3 層脈衝波命中目標總數 ≥ 15 → 「宇宙共振」：全服 ×2.2 加成 6 秒
+	//   - 個人冷卻 24 秒；全服冷卻 40 秒
+	"T245": {ID: "T245", Name: "幸運宇宙脈衝魚", Type: TargetTypeSpecial, MultiplierMin: 82, MultiplierMax: 155, HP: 122, SpawnWeight: 2, Speed: 4, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_cosmic_pulse"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

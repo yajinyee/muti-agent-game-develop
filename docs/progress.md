@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-286 幸運深海克拉肯魚系統）
+## 最後更新：2026-05-24（DAY-287 幸運宇宙脈衝魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-287 更新（自主觸發）：** 幸運宇宙脈衝魚系統（Lucky Cosmic Pulse Fish）✅
+  - **業界依據：** TaDa Gaming 2026「Cosmic」主題 + Fishing Fortune 2026「pulse wave mechanics」— 業界原創「宇宙脈衝波+全場共振+脈衝連鎖爆發」機制
+  - **設計：** 擊破 T245 後，發出「宇宙脈衝波」（從場地中心向外擴散）；脈衝波分 3 層（每 800ms 一層），每層命中範圍內所有目標 HP -20%；每層命中目標數 × 0.2 = 累積倍率加成（最高 ×5.0）；若 3 層脈衝波命中目標總數 ≥ 15 → 「宇宙共振」：全服 ×2.2 加成 6 秒；全服廣播脈衝波擴散和命中結果；個人冷卻 24 秒；全服冷卻 40 秒
+  - **設計差異：** 與克拉肯（T244，8 條觸手精準攻擊）不同，宇宙脈衝是「同心圓擴散波」；「每層命中目標數 × 0.2 累積倍率」讓玩家有「場上魚越多，脈衝越值錢」的策略感；「3 層脈衝波命中總數 ≥ 15 觸發宇宙共振」讓玩家有「要趁魚多的時候觸發」的時機感；「全服 ×2.2 加成 6 秒」讓所有玩家都受益；「HP -20% 弱化」比克拉肯（-35%）更溫和，但 3 層疊加讓魚更容易打
+  - server/internal/game/lucky_cosmic_pulse_handler.go：luckyCosmicPulseManager（個人冷卻/全服冷卻/resonanceBoost）；cosmicResonanceBoost（mult/expiresAt）；isLuckyCosmicPulseFish（T245）；getCosmicResonanceMult（供 handleKill 使用）；tryLuckyCosmicPulseFish（觸發/全服廣播+公告）；runCosmicPulseWaves（goroutine 每800ms一層/HP-20%/命中數×0.2累積倍率/最高×5.0/宇宙共振判定/結算）；applyCosmicPulseDamage（同心圓AOE傷害/廣播HP更新）；settleCosmicPulse（結算/個人獎勵/宇宙共振觸發）；doCosmicResonance（全服×2.2加成6秒/全服廣播+公告）
+  - server/internal/data/tables.go：新增 T245 幸運宇宙脈衝魚（82-155x/HP122/SpawnWeight2/Speed4/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyCosmicPulse；LuckyCosmicPulsePayload（5種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyCosmicPulse + case 處理（PriorityHigh）
+  - server/internal/game/game.go：LuckyCosmicPulse *luckyCosmicPulseManager；handleKill 加入 getCosmicResonanceMult 全服倍率套用 + isLuckyCosmicPulseFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyCosmicPulsePanel.gd：宇宙主題面板（pulse_start 紫色三次強閃光+頂部橫幅+脈衝指示器（右上角，層數/累積倍率/命中數）；pulse_wave 顏色隨層數閃光+浮動文字+指示器更新；pulse_end 結算彈窗；pulse_resonance 全螢幕三次強閃光+「宇宙共振！全服×2.2！」大字+共振指示器（脈衝動畫+倒數計時）；pulse_resonance_end 共振結束淡出）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_cosmic_pulse 訊號 + _handle_lucky_cosmic_pulse
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyCosmicPulsePanelScript（layer=60）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T245 映射
+  - 脈衝波設計：3 層；每 800ms 一層；HP -20%；半徑逐層擴大（200/350/500px）；命中數×0.2累積倍率；最高×5.0；個人冷卻 24 秒；全服冷卻 40 秒
+  - 宇宙共振設計：3 層命中總數 ≥ 15 觸發；全服 ×2.2 加成 6 秒；全服廣播+公告（深紫/金色）
+  - 視覺設計：宇宙主題（#0D0025 深紫黑 + #7B2FBE 紫 + #C77DFF 淡紫 + #E0AAFF 淡紫白 + #FFD700 金）；脈衝指示器（右上角，層數/累積倍率/命中數，顏色隨層數：淡紫→紫→金）；共振指示器（脈衝動畫+倒數計時）；結算彈窗右側滑入
+  - build/vet 全部通過（零錯誤零警告）
+  - T245 精靈圖：宇宙脈衝魚（深紫黑漸層橢圓魚身+3層同心圓脈衝波（淡紫/紫/金）+宇宙光環+4方向金色光芒+斜向淡紫光芒+星點散落+金色脈衝核心+金色魚眼+紫色魚尾）非透明像素 86.5%
 - **DAY-286 更新（自主觸發）：** 幸運深海克拉肯魚系統（Lucky Deep Sea Kraken Fish）✅
   - **業界依據：** Kraken Unleashed「Kraken Reel + 多段觸手攻擊 + Grand Jackpot」機制 + Fishing Fortune 2026「multiplier chains + jackpot triggers」機制
   - **設計：** 擊破 T244 後，召喚「深海克拉肯」：8 條觸手依序攻擊（每 500ms 一條）；每條觸手命中 1-3 個目標（HP -35%）；每條觸手命中至少 1 個目標 → 觸發玩家獲得 ×1.3 累積倍率（最高 ×10.0）；若 8 條觸手全部命中（無空揮）→「克拉肯狂怒」：全服 ×2.8 加成 7 秒；全服廣播觸手攻擊位置和結果；個人冷卻 30 秒；全服冷卻 48 秒
