@@ -1890,3 +1890,8 @@
 {"ts":1779634374248,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"da7e89d3-f051-4d89-9216-b867d7907ff3"}}
 {"ts":1779634588249,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"38cd7a71-8c05-423e-a4ce-66b92a2ee96c"}}
 {"ts":1779634857248,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"de81bb14-5da8-4f69-8210-ac4863103f41"}}
+{"ts":1779635076283,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"d4261ddd-be0f-4a0f-b8f9-d72161ea5509"}}
+{"ts":1779635280319,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"534e6868-5ded-49ca-bfa0-dae4d8cf0c85"}}
+{"ts":1779635570472,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"bb4f5630-6a5a-4337-a393-d19a75135100"}}
+{"ts":1779635777511,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"03d636fb-b1f9-4176-b8d8-ca1257d8a92b"}}
+{"ts":1779635969643,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"8dc89d84-58db-4c46-8187-28cdeddb4ab9"}}

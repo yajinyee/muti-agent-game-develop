@@ -1,4 +1,5 @@
-// Package ws WebSocket 連線管理
+// Package ws — WebSocket Hub
+// server-infra-agent 負責維護
 package ws
 
 import (
@@ -6,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"sync"
-	"sync/atomic"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -15,592 +15,164 @@ import (
 const (
 	writeWait      = 10 * time.Second
 	pongWait       = 60 * time.Second
-	pingPeriod     = (pongWait * 9) / 10
-	maxMessageSize = 512 * 1024 // 512KB
-
-	// Rate limiting：每個客戶端每秒最多 30 條訊息（token bucket）
-	// 捕魚機正常操作：攻擊 ~10/s，投注切換 ~2/s，ping ~1/s → 30/s 足夠
-	rateLimitPerSecond = 30
-	rateLimitBurst     = 60 // 允許短暫爆發（最多 2 秒的量）
+	pingPeriod     = 50 * time.Second
+	maxMessageSize = 65536
 )
 
 var upgrader = websocket.Upgrader{
 	ReadBufferSize:  4096,
 	WriteBufferSize: 4096,
-	EnableCompression: true, // permessage-deflate，減少頻寬（skill-go-websocket-scalability）
-	CheckOrigin: func(r *http.Request) bool {
-		return true // Prototype 允許所有來源
-	},
+	CheckOrigin:     func(r *http.Request) bool { return true },
 }
 
-// ClientRole 客戶端角色
-type ClientRole string
-
-const (
-	RolePlayer    ClientRole = "player"    // 一般玩家（可攻擊、投注）
-	RoleSpectator ClientRole = "spectator" // 觀戰者（只讀，收廣播但不能發遊戲指令）
-)
-
-// rateLimiter Token bucket 速率限制器（per-client）
-type rateLimiter struct {
-	tokens    float64
-	maxTokens float64
-	refillRate float64 // tokens per second
-	lastRefill time.Time
-	mu         sync.Mutex
-}
-
-// newRateLimiter 建立速率限制器
-func newRateLimiter(perSecond, burst int) *rateLimiter {
-	return &rateLimiter{
-		tokens:     float64(burst),
-		maxTokens:  float64(burst),
-		refillRate: float64(perSecond),
-		lastRefill: time.Now(),
-	}
-}
-
-// Allow 嘗試消耗一個 token，回傳是否允許
-func (r *rateLimiter) Allow() bool {
-	r.mu.Lock()
-	defer r.mu.Unlock()
-
-	now := time.Now()
-	elapsed := now.Sub(r.lastRefill).Seconds()
-	r.lastRefill = now
-
-	// 補充 token
-	r.tokens += elapsed * r.refillRate
-	if r.tokens > r.maxTokens {
-		r.tokens = r.maxTokens
-	}
-
-	if r.tokens >= 1.0 {
-		r.tokens -= 1.0
-		return true
-	}
-	return false
-}
-
-// Client WebSocket 客戶端
+// Client 代表一個 WebSocket 連線
 type Client struct {
-	ID       string
-	Hub      *Hub
-	conn     *websocket.Conn
-	send     chan []byte
-	PlayerID string
-	Role     ClientRole   // 客戶端角色（DAY-023）
-	limiter  *rateLimiter // per-client 速率限制（DAY-036）
-
-	// Ping latency 追蹤（DAY-044）
-	lastPingSentAt time.Time  // 最後一次發送 ping 的時間
-	lastPingLatMs  int64      // 最後一次 ping/pong 延遲（毫秒）
-	pingMu         sync.Mutex // 保護 ping 欄位
-
-	// Client 端效能數據（DAY-045）
-	lastPerfFPS       float64   // 最後上報的 FPS
-	lastPerfMemoryMB  float64   // 最後上報的記憶體（MB）
-	lastPerfDrawCalls int       // 最後上報的 Draw Calls
-	lastPerfQuality   string    // 最後上報的效能等級
-	lastPerfAt        time.Time // 最後上報時間
-	perfMu            sync.Mutex
+	ID   string
+	hub  *Hub
+	conn *websocket.Conn
+	send chan []byte
 }
 
-// Hub 管理所有 WebSocket 連線
+// Hub 管理所有連線
 type Hub struct {
-	mu      sync.RWMutex
-	clients map[string]*Client
-
-	// 訊息處理回調
-	OnMessage              func(clientID string, msg *Message)
-	OnConnect              func(clientID string)
-	OnDisconnect           func(clientID string)
-	OnSpectatorDisconnect  func(spectatorID string) // 觀戰者斷線回調（DAY-055）
-
-	// 訊息吞吐量計數器（原子操作，供 /metrics 使用）
-	MsgReceived  atomic.Int64 // 收到的訊息總數
-	MsgSent      atomic.Int64 // 發送的訊息總數
-	MsgDropped   atomic.Int64 // 丟棄的訊息總數（buffer full + rate limit）
-	BytesSentRaw atomic.Int64 // 發送的原始位元組數（壓縮前，用於估算壓縮率）
-
-	// 訊息類型計數器（DAY-043，供 /metrics 顯示各類型訊息頻率）
-	msgTypeCounts sync.Map // MessageType -> *atomic.Int64
-
-	// Ping latency 統計（DAY-044，供 /metrics 顯示連線品質）
-	pingLatencySum atomic.Int64 // 所有 ping/pong 延遲總和（毫秒）
-	pingLatencyCount atomic.Int64 // ping/pong 樣本數
-	pingLatencyMax   atomic.Int64 // 最大延遲（毫秒）
-
-	// 效能歷史 ring buffer（DAY-051，儲存最近 100 筆 Client 端效能快照）
-	perfHistoryMu  sync.Mutex
-	perfHistory    []PerfHistoryEntry // ring buffer
-	perfHistoryIdx int                // 下一個寫入位置
+	mu         sync.RWMutex
+	clients    map[string]*Client
+	OnConnect    func(clientID string)
+	OnDisconnect func(clientID string)
+	OnMessage    func(clientID string, msgType string, payload json.RawMessage)
 }
 
-// PerfHistoryEntry 效能歷史記錄（DAY-051）
-type PerfHistoryEntry struct {
-	ClientID  string
-	FPS       float64
-	MemoryMB  float64
-	DrawCalls int
-	Quality   string
-	RecordedAt time.Time
-}
-
-// NewHub 建立新 Hub
 func NewHub() *Hub {
 	return &Hub{
-		clients:     make(map[string]*Client),
-		perfHistory: make([]PerfHistoryEntry, 100), // ring buffer 容量 100
+		clients: make(map[string]*Client),
 	}
 }
 
-// Register 註冊客戶端
-func (h *Hub) Register(client *Client) {
+// ServeWS 升級 HTTP 連線為 WebSocket
+func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, clientID string) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Printf("[Hub] upgrade error: %v", err)
+		return
+	}
+	c := &Client{ID: clientID, hub: h, conn: conn, send: make(chan []byte, 256)}
 	h.mu.Lock()
-	h.clients[client.ID] = client
+	h.clients[clientID] = c
 	h.mu.Unlock()
 
-	log.Printf("[WS] Client connected: %s (role=%s)", client.ID, client.Role)
-	if h.OnConnect != nil && client.Role == RolePlayer {
-		h.OnConnect(client.ID)
+	if h.OnConnect != nil {
+		h.OnConnect(clientID)
 	}
+	go c.writePump()
+	c.readPump()
 }
 
-// Unregister 移除客戶端
-func (h *Hub) Unregister(client *Client) {
-	h.mu.Lock()
-	if _, ok := h.clients[client.ID]; ok {
-		delete(h.clients, client.ID)
-		close(client.send)
-	}
-	h.mu.Unlock()
-
-	log.Printf("[WS] Client disconnected: %s (role=%s)", client.ID, client.Role)
-	if h.OnDisconnect != nil && client.Role == RolePlayer {
-		h.OnDisconnect(client.ID)
-	}
-	if h.OnSpectatorDisconnect != nil && client.Role == RoleSpectator {
-		h.OnSpectatorDisconnect(client.ID)
-	}
-}
-
-// SpectatorCount 目前觀戰者數量
-func (h *Hub) SpectatorCount() int {
+// Send 傳送訊息給指定玩家
+func (h *Hub) Send(clientID string, msgType string, payload interface{}) {
 	h.mu.RLock()
-	defer h.mu.RUnlock()
-	count := 0
-	for _, c := range h.clients {
-		if c.Role == RoleSpectator {
-			count++
-		}
-	}
-	return count
-}
-
-// PlayerCount 目前玩家數量（不含觀戰者）
-func (h *Hub) PlayerCount() int {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	count := 0
-	for _, c := range h.clients {
-		if c.Role == RolePlayer {
-			count++
-		}
-	}
-	return count
-}
-
-// Send 傳送訊息給指定客戶端
-func (h *Hub) Send(clientID string, msg *Message) error {
-	h.mu.RLock()
-	client, ok := h.clients[clientID]
+	c, ok := h.clients[clientID]
 	h.mu.RUnlock()
-
 	if !ok {
-		return nil
+		return
 	}
-
-	data, err := json.Marshal(msg)
+	data, err := json.Marshal(map[string]interface{}{"type": msgType, "payload": payload})
 	if err != nil {
-		return err
+		return
 	}
-
 	select {
-	case client.send <- data:
-		h.MsgSent.Add(1)
-		h.BytesSentRaw.Add(int64(len(data)))
-		h.IncrMsgType(msg.Type)
+	case c.send <- data:
 	default:
-		h.MsgDropped.Add(1)
-		log.Printf("[WS] Send buffer full for client %s, dropping message", clientID)
+		log.Printf("[Hub] send buffer full for %s", clientID)
 	}
-	return nil
 }
 
-// Broadcast 廣播訊息給所有客戶端
-func (h *Hub) Broadcast(msg *Message) {
-	data, err := json.Marshal(msg)
+// Broadcast 廣播給所有玩家
+func (h *Hub) Broadcast(msgType string, payload interface{}) {
+	data, err := json.Marshal(map[string]interface{}{"type": msgType, "payload": payload})
 	if err != nil {
-		log.Printf("[WS] Broadcast marshal error: %v", err)
 		return
 	}
-
 	h.mu.RLock()
 	defer h.mu.RUnlock()
-
-	for _, client := range h.clients {
+	for _, c := range h.clients {
 		select {
-		case client.send <- data:
-			h.MsgSent.Add(1)
-			h.BytesSentRaw.Add(int64(len(data)))
+		case c.send <- data:
 		default:
-			h.MsgDropped.Add(1)
-			log.Printf("[WS] Broadcast buffer full for client %s", client.ID)
 		}
 	}
-	// 廣播訊息類型計數（每次廣播算一次，不管有幾個 client）
-	h.IncrMsgType(msg.Type)
 }
 
-// BroadcastToPlayers 廣播訊息給所有玩家（排除觀戰者，DAY-054d）
-// 用於觀戰者加入通知等只需要玩家知道的事件
-func (h *Hub) BroadcastToPlayers(msg *Message) {
-	data, err := json.Marshal(msg)
-	if err != nil {
-		log.Printf("[WS] BroadcastToPlayers marshal error: %v", err)
-		return
-	}
-
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-
-	for _, client := range h.clients {
-		if client.Role != RolePlayer {
-			continue
-		}
-		select {
-		case client.send <- data:
-			h.MsgSent.Add(1)
-			h.BytesSentRaw.Add(int64(len(data)))
-		default:
-			h.MsgDropped.Add(1)
-			log.Printf("[WS] BroadcastToPlayers buffer full for client %s", client.ID)
-		}
-	}
-	h.IncrMsgType(msg.Type)
-}
-
-// ClientCount 目前總連線數（玩家 + 觀戰者）
-func (h *Hub) ClientCount() int {
+// PlayerCount 回傳目前連線數
+func (h *Hub) PlayerCount() int {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
 	return len(h.clients)
 }
 
-// IncrMsgType 增加指定訊息類型的計數（DAY-043）
-func (h *Hub) IncrMsgType(msgType MessageType) {
-	val, _ := h.msgTypeCounts.LoadOrStore(msgType, &atomic.Int64{})
-	val.(*atomic.Int64).Add(1)
-}
-
-// GetMsgTypeCounts 取得所有訊息類型的計數（DAY-043）
-// 回傳 map[string]int64，供 /metrics 端點使用
-func (h *Hub) GetMsgTypeCounts() map[string]int64 {
-	result := make(map[string]int64)
-	h.msgTypeCounts.Range(func(key, value interface{}) bool {
-		result[string(key.(MessageType))] = value.(*atomic.Int64).Load()
-		return true
-	})
-	return result
-}
-
-// RecordPingLatency 記錄一次 ping/pong 延遲（DAY-044）
-// 由 writePump 在收到 pong 時呼叫
-func (h *Hub) RecordPingLatency(latencyMs int64) {
-	h.pingLatencySum.Add(latencyMs)
-	h.pingLatencyCount.Add(1)
-	// 更新最大值（CAS loop）
-	for {
-		cur := h.pingLatencyMax.Load()
-		if latencyMs <= cur {
-			break
-		}
-		if h.pingLatencyMax.CompareAndSwap(cur, latencyMs) {
-			break
-		}
-	}
-}
-
-// GetPingStats 取得 ping latency 統計（DAY-044）
-// 回傳 (avgMs, maxMs, sampleCount)
-func (h *Hub) GetPingStats() (avgMs float64, maxMs int64, count int64) {
-	count = h.pingLatencyCount.Load()
-	maxMs = h.pingLatencyMax.Load()
-	if count > 0 {
-		avgMs = float64(h.pingLatencySum.Load()) / float64(count)
-	}
-	return
-}
-
-// GetClientPingLatencies 取得所有客戶端的最新 ping 延遲（DAY-044）
-// 回傳 map[clientID]latencyMs，供 /metrics 顯示 per-client 延遲
-func (h *Hub) GetClientPingLatencies() map[string]int64 {
+// PlayerIDs 回傳所有玩家 ID
+func (h *Hub) PlayerIDs() []string {
 	h.mu.RLock()
 	defer h.mu.RUnlock()
-	result := make(map[string]int64, len(h.clients))
-	for id, c := range h.clients {
-		c.pingMu.Lock()
-		result[id] = c.lastPingLatMs
-		c.pingMu.Unlock()
+	ids := make([]string, 0, len(h.clients))
+	for id := range h.clients {
+		ids = append(ids, id)
 	}
-	return result
+	return ids
 }
 
-// UpdateClientPerf 更新指定客戶端的效能數據（DAY-045）
-// 由 game.go 在收到 client_perf 訊息時呼叫
-func (h *Hub) UpdateClientPerf(clientID string, fps, memMB float64, drawCalls int, quality string) {
-	h.mu.RLock()
-	client, ok := h.clients[clientID]
-	h.mu.RUnlock()
-	if !ok {
-		return
-	}
-	client.perfMu.Lock()
-	client.lastPerfFPS = fps
-	client.lastPerfMemoryMB = memMB
-	client.lastPerfDrawCalls = drawCalls
-	client.lastPerfQuality = quality
-	client.lastPerfAt = time.Now()
-	client.perfMu.Unlock()
-
-	// 追加到效能歷史 ring buffer（DAY-051）
-	h.perfHistoryMu.Lock()
-	h.perfHistory[h.perfHistoryIdx] = PerfHistoryEntry{
-		ClientID:   clientID,
-		FPS:        fps,
-		MemoryMB:   memMB,
-		DrawCalls:  drawCalls,
-		Quality:    quality,
-		RecordedAt: time.Now(),
-	}
-	h.perfHistoryIdx = (h.perfHistoryIdx + 1) % len(h.perfHistory)
-	h.perfHistoryMu.Unlock()
-}
-
-// ClientPerfSnapshot 單一客戶端效能快照
-type ClientPerfSnapshot struct {
-	ClientID  string
-	FPS       float64
-	MemoryMB  float64
-	DrawCalls int
-	Quality   string
-	Age       time.Duration // 距離上次上報的時間
-}
-
-// GetClientPerfSnapshots 取得所有客戶端的效能快照（DAY-045）
-// 回傳最近 60 秒內有上報的客戶端，供 /metrics 使用
-func (h *Hub) GetClientPerfSnapshots() []ClientPerfSnapshot {
-	h.mu.RLock()
-	defer h.mu.RUnlock()
-	now := time.Now()
-	result := make([]ClientPerfSnapshot, 0, len(h.clients))
-	for id, c := range h.clients {
-		if c.Role != RolePlayer {
-			continue
-		}
-		c.perfMu.Lock()
-		if !c.lastPerfAt.IsZero() && now.Sub(c.lastPerfAt) < 60*time.Second {
-			result = append(result, ClientPerfSnapshot{
-				ClientID:  id,
-				FPS:       c.lastPerfFPS,
-				MemoryMB:  c.lastPerfMemoryMB,
-				DrawCalls: c.lastPerfDrawCalls,
-				Quality:   c.lastPerfQuality,
-				Age:       now.Sub(c.lastPerfAt),
-			})
-		}
-		c.perfMu.Unlock()
-	}
-	return result
-}
-
-// GetPerfHistory 取得效能歷史記錄（DAY-051）
-// 回傳最近 N 筆（最多 100 筆），按時間排序（最新在前）
-// sinceSeconds: 只回傳最近 N 秒內的記錄（0 = 全部）
-func (h *Hub) GetPerfHistory(sinceSeconds int) []PerfHistoryEntry {
-	h.perfHistoryMu.Lock()
-	defer h.perfHistoryMu.Unlock()
-
-	cutoff := time.Time{}
-	if sinceSeconds > 0 {
-		cutoff = time.Now().Add(-time.Duration(sinceSeconds) * time.Second)
-	}
-
-	// 從 ring buffer 收集有效記錄（非零時間）
-	result := make([]PerfHistoryEntry, 0, len(h.perfHistory))
-	for _, entry := range h.perfHistory {
-		if entry.RecordedAt.IsZero() {
-			continue
-		}
-		if !cutoff.IsZero() && entry.RecordedAt.Before(cutoff) {
-			continue
-		}
-		result = append(result, entry)
-	}
-
-	// 按時間排序（最新在前）
-	for i := 0; i < len(result)-1; i++ {
-		for j := i + 1; j < len(result); j++ {
-			if result[j].RecordedAt.After(result[i].RecordedAt) {
-				result[i], result[j] = result[j], result[i]
-			}
-		}
-	}
-	return result
-}
-
-// ServeWS 處理 WebSocket 升級請求（一般玩家）
-func (h *Hub) ServeWS(w http.ResponseWriter, r *http.Request, clientID string) {
-	h.serveWSWithRole(w, r, clientID, RolePlayer)
-}
-
-// ServeSpectatorWS 處理觀戰者 WebSocket 升級請求（DAY-023）
-func (h *Hub) ServeSpectatorWS(w http.ResponseWriter, r *http.Request, clientID string) {
-	h.serveWSWithRole(w, r, clientID, RoleSpectator)
-}
-
-// serveWSWithRole 內部：依角色建立 WebSocket 連線
-func (h *Hub) serveWSWithRole(w http.ResponseWriter, r *http.Request, clientID string, role ClientRole) {
-	conn, err := upgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.Printf("[WS] Upgrade error: %v", err)
-		return
-	}
-
-	client := &Client{
-		ID:       clientID,
-		Hub:      h,
-		conn:     conn,
-		send:     make(chan []byte, 256),
-		PlayerID: clientID,
-		Role:     role,
-		limiter:  newRateLimiter(rateLimitPerSecond, rateLimitBurst),
-	}
-
-	h.Register(client)
-
-	go client.writePump()
-	go client.readPump(h)
-}
-
-// readPump 讀取客戶端訊息
-func (c *Client) readPump(h *Hub) {
+func (c *Client) readPump() {
 	defer func() {
-		h.Unregister(c)
+		c.hub.mu.Lock()
+		delete(c.hub.clients, c.ID)
+		c.hub.mu.Unlock()
 		c.conn.Close()
+		if c.hub.OnDisconnect != nil {
+			c.hub.OnDisconnect(c.ID)
+		}
 	}()
-
 	c.conn.SetReadLimit(maxMessageSize)
 	c.conn.SetReadDeadline(time.Now().Add(pongWait))
 	c.conn.SetPongHandler(func(string) error {
 		c.conn.SetReadDeadline(time.Now().Add(pongWait))
-		// 計算 ping/pong 延遲（DAY-044）
-		c.pingMu.Lock()
-		if !c.lastPingSentAt.IsZero() {
-			latencyMs := time.Since(c.lastPingSentAt).Milliseconds()
-			c.lastPingLatMs = latencyMs
-			c.pingMu.Unlock()
-			c.Hub.RecordPingLatency(latencyMs)
-		} else {
-			c.pingMu.Unlock()
-		}
 		return nil
 	})
-
 	for {
-		_, rawMsg, err := c.conn.ReadMessage()
+		_, msg, err := c.conn.ReadMessage()
 		if err != nil {
-			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
-				log.Printf("[WS] Read error for %s: %v", c.ID, err)
-			}
 			break
 		}
-
-		var msg Message
-		if err := json.Unmarshal(rawMsg, &msg); err != nil {
-			log.Printf("[WS] Parse error for %s: %v", c.ID, err)
+		var env struct {
+			Type    string          `json:"type"`
+			Payload json.RawMessage `json:"payload"`
+		}
+		if err := json.Unmarshal(msg, &env); err != nil {
 			continue
 		}
-
-		// 觀戰者只允許 ping，其他遊戲指令一律忽略（DAY-023）
-		if c.Role == RoleSpectator && msg.Type != MsgPing {
-			log.Printf("[WS] Spectator %s tried to send %s, ignored", c.ID, msg.Type)
-			continue
-		}
-
-		// Rate limiting：超過速率限制時丟棄訊息（DAY-036）
-		// ping 訊息豁免（避免影響心跳機制）
-		if msg.Type != MsgPing && !c.limiter.Allow() {
-			log.Printf("[WS] Rate limit exceeded for client %s, dropping %s", c.ID, msg.Type)
-			h.MsgDropped.Add(1)
-			continue
-		}
-
-		h.MsgReceived.Add(1)
-		if h.OnMessage != nil {
-			h.OnMessage(c.ID, &msg)
+		if c.hub.OnMessage != nil {
+			c.hub.OnMessage(c.ID, env.Type, env.Payload)
 		}
 	}
 }
 
-// writePump 傳送訊息給客戶端
 func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
 		c.conn.Close()
 	}()
-
 	for {
 		select {
-		case message, ok := <-c.send:
+		case msg, ok := <-c.send:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
-
-			// 每個訊息獨立傳送，避免 JSON 合併造成解析問題
-			w, err := c.conn.NextWriter(websocket.TextMessage)
-			if err != nil {
+			if err := c.conn.WriteMessage(websocket.TextMessage, msg); err != nil {
 				return
 			}
-			w.Write(message)
-			if err := w.Close(); err != nil {
-				return
-			}
-
-			// 批次傳送佇列中的訊息（各自獨立 frame）
-			n := len(c.send)
-			for i := 0; i < n; i++ {
-				c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-				w, err := c.conn.NextWriter(websocket.TextMessage)
-				if err != nil {
-					return
-				}
-				w.Write(<-c.send)
-				if err := w.Close(); err != nil {
-					return
-				}
-			}
-
 		case <-ticker.C:
 			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			// 記錄 ping 發送時間（DAY-044，用於計算 pong 延遲）
-			c.pingMu.Lock()
-			c.lastPingSentAt = time.Now()
-			c.pingMu.Unlock()
 			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}

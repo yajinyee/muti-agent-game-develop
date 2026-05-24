@@ -1,350 +1,261 @@
-# -*- coding: utf-8 -*-
 """
-目標物 v4 - 修復密度問題
-主要改善：
-1. T001/T104 草葉：改為連續繪製（不跳行），密度從 11% 提升到 50%+
-2. T101 擬態怪物：基於 T001 v4，密度同步提升
-3. T103 流星：加大核心，增加光暈密度
-4. 所有目標物：加強陰影和細節
-"""
-from PIL import Image
-import os
-import math
+generate_targets_v4.py — 目標物像素圖生成（重建版）
+target-pixel-agent 負責維護
 
-OUTPUT_DIR = r"D:\Kiro\client\chiikawa-pixel\assets\sprites\targets"
+每個目標物 64x64 px，透明背景，清楚可辨識的剪影
+"""
+from PIL import Image, ImageDraw
+import os
+
+OUT = r"d:\Kiro\client\chiikawa-pixel\assets\sprites\targets"
+os.makedirs(OUT, exist_ok=True)
+
 SIZE = 64
 
 def new_img():
     return Image.new("RGBA", (SIZE, SIZE), (0, 0, 0, 0))
 
-def px(img, x, y, c):
-    if 0 <= x < SIZE and 0 <= y < SIZE:
-        img.putpixel((x, y), c)
+def circle(draw, cx, cy, r, color, outline=None):
+    draw.ellipse([cx-r, cy-r, cx+r, cy+r], fill=color, outline=outline)
 
-def fill_circle(img, cx, cy, r, color):
-    for y in range(cy-r, cy+r+1):
-        for x in range(cx-r, cx+r+1):
-            if (x-cx)**2 + (y-cy)**2 <= r**2:
-                px(img, x, y, color)
+def rect(draw, x, y, w, h, color, outline=None):
+    draw.rectangle([x, y, x+w, y+h], fill=color, outline=outline)
 
-def fill_circle_shaded(img, cx, cy, r, base_rgb):
-    r_v, g_v, b_v = base_rgb
-    light = (min(255,r_v+35), min(255,g_v+35), min(255,b_v+35), 255)
-    mid   = (r_v, g_v, b_v, 255)
-    dark  = (max(0,r_v-40), max(0,g_v-40), max(0,b_v-40), 255)
-    for y in range(cy-r, cy+r+1):
-        for x in range(cx-r, cx+r+1):
-            if (x-cx)**2 + (y-cy)**2 > r**2:
-                continue
-            nx_ = (x-cx)/max(r,1)
-            ny_ = (y-cy)/max(r,1)
-            dot = -(nx_*(-0.7) + ny_*(-0.7))
-            if dot > 0.25:
-                c = light
-            elif dot < -0.1:
-                c = dark
-            else:
-                c = mid
-            px(img, x, y, c)
+def save(img, name):
+    path = os.path.join(OUT, name)
+    img.save(path)
+    pixels = sum(1 for p in img.getdata() if p[3] > 0)
+    pct = pixels / (SIZE*SIZE) * 100
+    print(f"  {name}: {pct:.1f}% non-transparent")
 
-def outline_circle(img, cx, cy, r, color):
-    for y in range(cy-r-1, cy+r+2):
-        for x in range(cx-r-1, cx+r+2):
-            d = math.sqrt((x-cx)**2 + (y-cy)**2)
-            if r+0.1 <= d <= r+1.5:
-                px(img, x, y, color)
-
-def fill_rect_shaded(img, x1, y1, x2, y2, base_rgb):
-    r_v, g_v, b_v = base_rgb
-    w = x2 - x1
-    h = y2 - y1
-    for y in range(y1, y2):
-        for x in range(x1, x2):
-            nx_ = (x - x1) / max(w, 1)
-            ny_ = (y - y1) / max(h, 1)
-            brightness = 1.0 - (nx_ + ny_) * 0.15
-            r_c = int(min(255, r_v * brightness))
-            g_c = int(min(255, g_v * brightness))
-            b_c = int(min(255, b_v * brightness))
-            px(img, x, y, (r_c, g_c, b_c, 255))
-
-def draw_leaf(img, cx, cy, angle_deg, length, width, color_mid, color_edge, outline_color):
-    """繪製一片葉子（連續填充，不跳行）"""
-    angle = math.radians(angle_deg)
-    dx_step = math.cos(angle)
-    dy_step = math.sin(angle)
-    
-    for i in range(length):
-        # 葉子中心點
-        lx = cx + dx_step * i
-        ly = cy + dy_step * i
-        
-        # 葉子寬度隨長度遞減（尖端變細）
-        w = max(1, int(width * (1.0 - i / length * 0.7)))
-        
-        # 垂直於葉子方向的向量
-        perp_x = -dy_step
-        perp_y = dx_step
-        
-        for j in range(-w, w+1):
-            x = int(lx + perp_x * j)
-            y = int(ly + perp_y * j)
-            if abs(j) == w:
-                px(img, x, y, outline_color)
-            elif abs(j) <= w // 2:
-                px(img, x, y, color_mid)
-            else:
-                px(img, x, y, color_edge)
-
-def gen_T001_grass_v4():
-    """像素雜草 2x v4 - 連續葉子，密度提升"""
-    img = new_img()
-    OUTLINE = (30, 80, 20, 255)
-    STEM    = (60, 120, 40, 255)
-    LEAF1   = (80, 180, 50, 255)
-    LEAF2   = (100, 200, 60, 255)
-    LEAF_L  = (50, 140, 35, 255)
-    DARK    = (40, 100, 25, 255)
-
-    cx = 32
-    
-    # 草莖（加粗）
-    for y in range(40, 62):
-        for x in range(cx-4, cx+5):
-            shade = 1.0 - abs(x - cx) / 5 * 0.3
-            r = int(60 * shade)
-            g = int(120 * shade)
-            b = int(40 * shade)
-            px(img, x, y, (r, g, b, 255))
-    for y in range(40, 62):
-        px(img, cx-4, y, OUTLINE)
-        px(img, cx+4, y, OUTLINE)
-    
-    # 左葉（填充三角形區域）
-    for y in range(6, 42):
-        progress = (42 - y) / 36.0  # 0=底部, 1=頂部
-        # 葉子從莖向左延伸
-        leaf_x_center = cx - 2 - int(progress * 20)
-        leaf_width = max(1, int(5 * (1.0 - progress * 0.6)))
-        for dx in range(-leaf_width, leaf_width+1):
-            x = leaf_x_center + dx
-            if abs(dx) == leaf_width:
-                px(img, x, y, OUTLINE)
-            elif abs(dx) <= leaf_width // 2:
-                px(img, x, y, LEAF1)
-            else:
-                px(img, x, y, LEAF_L)
-    
-    # 右葉（填充三角形區域）
-    for y in range(6, 42):
-        progress = (42 - y) / 36.0
-        leaf_x_center = cx + 2 + int(progress * 20)
-        leaf_width = max(1, int(5 * (1.0 - progress * 0.6)))
-        for dx in range(-leaf_width, leaf_width+1):
-            x = leaf_x_center + dx
-            if abs(dx) == leaf_width:
-                px(img, x, y, OUTLINE)
-            elif abs(dx) <= leaf_width // 2:
-                px(img, x, y, LEAF1)
-            else:
-                px(img, x, y, LEAF_L)
-    
-    # 中間葉（直向上，最寬）
-    for y in range(2, 42):
-        progress = (42 - y) / 40.0
-        leaf_width = max(1, int(6 * (1.0 - progress * 0.7)))
-        for dx in range(-leaf_width, leaf_width+1):
-            x = cx + dx
-            if abs(dx) == leaf_width:
-                px(img, x, y, OUTLINE)
-            elif abs(dx) <= leaf_width // 2:
-                px(img, x, y, LEAF2)
-            else:
-                px(img, x, y, LEAF1)
-    
-    # 地面根部
-    for x in range(cx-6, cx+7):
-        px(img, x, 62, OUTLINE)
-    
-    return img
-
-
-def gen_T101_mimic_v4():
-    """擬態型怪物 v4 - 基於 T001 v4，加上詭異眼睛"""
-    img = gen_T001_grass_v4()
-    
-    EYE_W = (255, 255, 200, 255)
-    EYE_P = (150, 0, 200, 255)
-    OUTLINE = (50, 0, 80, 255)
-    
-    # 詭異眼睛（在葉子上）
-    for (ex, ey) in [(18, 26), (46, 26)]:
-        fill_circle(img, ex, ey, 5, EYE_W)
-        fill_circle(img, ex, ey, 3, EYE_P)
-        px(img, ex-1, ey-1, (255, 255, 255, 255))
-        outline_circle(img, ex, ey, 5, OUTLINE)
-    
-    # 詭異的嘴（在莖上）
-    for x in range(28, 37):
-        px(img, x, 52, OUTLINE)
+# ── T001 像素雜草（綠色，靜止）────────────────────────────────
+def gen_T001():
+    img = new_img(); d = ImageDraw.Draw(img)
+    # 草莖
     for i in range(3):
-        px(img, 29+i*3, 53, OUTLINE)
-    
-    return img
+        x = 16 + i * 12
+        d.line([(x, 48), (x-4, 20)], fill=(30, 140, 30, 255), width=3)
+        d.line([(x, 48), (x+4, 22)], fill=(50, 170, 50, 255), width=2)
+        # 草葉
+        d.ellipse([x-8, 14, x+4, 26], fill=(60, 200, 60, 255))
+    # 地面
+    rect(d, 8, 48, 48, 8, (80, 60, 30, 255))
+    save(img, "T001_grass.png")
 
+# ── T002 綠色小蟲 ─────────────────────────────────────────────
+def gen_T002():
+    img = new_img(); d = ImageDraw.Draw(img)
+    # 身體
+    circle(d, 32, 36, 16, (50, 200, 50, 255), (20, 120, 20, 255))
+    # 頭
+    circle(d, 32, 20, 10, (70, 220, 70, 255), (20, 120, 20, 255))
+    # 眼睛
+    circle(d, 28, 18, 3, (0, 0, 0, 255))
+    circle(d, 36, 18, 3, (0, 0, 0, 255))
+    circle(d, 27, 17, 1, (255, 255, 255, 255))
+    circle(d, 35, 17, 1, (255, 255, 255, 255))
+    # 觸角
+    d.line([(28, 12), (22, 4)], fill=(20, 120, 20, 255), width=2)
+    d.line([(36, 12), (42, 4)], fill=(20, 120, 20, 255), width=2)
+    # 腳
+    for i in range(3):
+        y = 32 + i * 5
+        d.line([(16, y), (8, y+4)], fill=(20, 120, 20, 255), width=2)
+        d.line([(48, y), (56, y+4)], fill=(20, 120, 20, 255), width=2)
+    save(img, "T002_bug_g.png")
 
-def gen_T103_meteor_v4():
-    """流星 v4 - 更大的核心，更密的光暈"""
-    img = new_img()
-    CORE  = (255, 240, 100)
-    GLOW1 = (255, 200, 50)
-    GLOW2 = (255, 150, 20)
-    TRAIL = (255, 100, 0)
-    OUTLINE=(180, 80, 0, 255)
-    WHITE = (255, 255, 255, 255)
+# ── T003 紅色小蟲 ─────────────────────────────────────────────
+def gen_T003():
+    img = new_img(); d = ImageDraw.Draw(img)
+    circle(d, 32, 36, 16, (220, 50, 50, 255), (140, 20, 20, 255))
+    circle(d, 32, 20, 10, (240, 70, 70, 255), (140, 20, 20, 255))
+    circle(d, 28, 18, 3, (0, 0, 0, 255))
+    circle(d, 36, 18, 3, (0, 0, 0, 255))
+    circle(d, 27, 17, 1, (255, 255, 255, 255))
+    circle(d, 35, 17, 1, (255, 255, 255, 255))
+    d.line([(28, 12), (22, 4)], fill=(140, 20, 20, 255), width=2)
+    d.line([(36, 12), (42, 4)], fill=(140, 20, 20, 255), width=2)
+    for i in range(3):
+        y = 32 + i * 5
+        d.line([(16, y), (8, y+4)], fill=(140, 20, 20, 255), width=2)
+        d.line([(48, y), (56, y+4)], fill=(140, 20, 20, 255), width=2)
+    save(img, "T003_bug_r.png")
 
-    # 流星尾巴（更寬更密）
-    for i in range(24):
-        x = 56 - i*2
-        y = 8 + i*2
-        alpha = max(0, 220 - i*9)
-        for dx in range(-3, 4):
-            a = max(0, alpha - abs(dx)*30)
-            px(img, x+dx, y, (*TRAIL, a))
-        # 尾巴中心線（更亮）
-        px(img, x, y, (*CORE, min(255, alpha+50)))
+# ── T004 藍色小蟲 ─────────────────────────────────────────────
+def gen_T004():
+    img = new_img(); d = ImageDraw.Draw(img)
+    circle(d, 32, 36, 16, (50, 100, 220, 255), (20, 50, 140, 255))
+    circle(d, 32, 20, 10, (70, 130, 240, 255), (20, 50, 140, 255))
+    circle(d, 28, 18, 3, (0, 0, 0, 255))
+    circle(d, 36, 18, 3, (0, 0, 0, 255))
+    circle(d, 27, 17, 1, (255, 255, 255, 255))
+    circle(d, 35, 17, 1, (255, 255, 255, 255))
+    d.line([(28, 12), (22, 4)], fill=(20, 50, 140, 255), width=2)
+    d.line([(36, 12), (42, 4)], fill=(20, 50, 140, 255), width=2)
+    for i in range(3):
+        y = 32 + i * 5
+        d.line([(16, y), (8, y+4)], fill=(20, 50, 140, 255), width=2)
+        d.line([(48, y), (56, y+4)], fill=(20, 50, 140, 255), width=2)
+    save(img, "T004_bug_b.png")
 
-    # 星形核心（更大）
-    fill_circle_shaded(img, 18, 46, 14, CORE)
-    outline_circle(img, 18, 46, 14, OUTLINE)
-    
-    # 核心高光
-    fill_circle(img, 14, 42, 4, WHITE)
-    
-    # 光暈（更密）
-    for r in range(15, 20):
-        for angle in range(0, 360, 3):
-            rad = math.radians(angle)
-            x = int(18 + r * math.cos(rad))
-            y = int(46 + r * math.sin(rad))
-            alpha = max(0, 150 - (r-15)*30)
-            px(img, x, y, (*GLOW1, alpha))
+# ── T005 會走路的布丁 ─────────────────────────────────────────
+def gen_T005():
+    img = new_img(); d = ImageDraw.Draw(img)
+    # 布丁身體（圓形）
+    circle(d, 32, 34, 20, (255, 220, 80, 255), (180, 140, 20, 255))
+    # 布丁頂部（焦糖）
+    circle(d, 32, 18, 10, (200, 120, 30, 255), (140, 80, 10, 255))
+    # 眼睛
+    circle(d, 26, 30, 4, (0, 0, 0, 255))
+    circle(d, 38, 30, 4, (0, 0, 0, 255))
+    circle(d, 25, 29, 2, (255, 255, 255, 255))
+    circle(d, 37, 29, 2, (255, 255, 255, 255))
+    # 嘴巴
+    d.arc([26, 36, 38, 44], 0, 180, fill=(180, 100, 20, 255), width=2)
+    # 腳
+    d.ellipse([14, 50, 26, 58], fill=(255, 200, 60, 255))
+    d.ellipse([38, 50, 50, 58], fill=(255, 200, 60, 255))
+    save(img, "T005_pudding.png")
 
-    # 星芒（8方向）
-    for angle in range(0, 360, 45):
-        rad = math.radians(angle)
-        for i in range(6):
-            x = int(18 + (15+i) * math.cos(rad))
-            y = int(46 + (15+i) * math.sin(rad))
-            alpha = max(0, 200 - i*35)
-            px(img, x, y, (*GLOW2, alpha))
+# ── T006 巨大蘑菇 ─────────────────────────────────────────────
+def gen_T006():
+    img = new_img(); d = ImageDraw.Draw(img)
+    # 蘑菇柄
+    rect(d, 22, 38, 20, 20, (220, 200, 180, 255), (160, 140, 120, 255))
+    # 蘑菇帽
+    d.ellipse([8, 16, 56, 44], fill=(180, 60, 30, 255), outline=(120, 30, 10, 255))
+    # 白色斑點
+    circle(d, 22, 26, 5, (255, 255, 255, 200))
+    circle(d, 38, 22, 4, (255, 255, 255, 200))
+    circle(d, 46, 32, 3, (255, 255, 255, 200))
+    # 眼睛
+    circle(d, 28, 34, 3, (0, 0, 0, 255))
+    circle(d, 36, 34, 3, (0, 0, 0, 255))
+    save(img, "T006_mushroom.png")
 
-    return img
+# ── T101 擬態型怪物 ───────────────────────────────────────────
+def gen_T101():
+    img = new_img(); d = ImageDraw.Draw(img)
+    # 不規則形狀（擬態感）
+    d.polygon([(32,8),(52,20),(56,40),(44,56),(20,56),(8,40),(12,20)],
+              fill=(120, 120, 140, 255), outline=(60, 60, 80, 255))
+    # 問號（擬態標誌）
+    d.text((26, 22), "?", fill=(200, 200, 220, 255))
+    # 眼睛（詭異）
+    circle(d, 24, 32, 5, (200, 50, 50, 255))
+    circle(d, 40, 32, 5, (200, 50, 50, 255))
+    circle(d, 24, 32, 2, (0, 0, 0, 255))
+    circle(d, 40, 32, 2, (0, 0, 0, 255))
+    save(img, "T101_mimic.png")
 
+# ── T102 寶箱怪 ───────────────────────────────────────────────
+def gen_T102():
+    img = new_img(); d = ImageDraw.Draw(img)
+    # 箱子主體
+    rect(d, 10, 28, 44, 28, (180, 130, 40, 255), (100, 70, 10, 255))
+    # 箱蓋
+    rect(d, 10, 18, 44, 14, (200, 150, 50, 255), (100, 70, 10, 255))
+    # 金屬扣
+    rect(d, 26, 22, 12, 10, (220, 180, 60, 255), (140, 100, 20, 255))
+    # 眼睛（在箱蓋上）
+    circle(d, 24, 24, 4, (255, 255, 255, 255))
+    circle(d, 40, 24, 4, (255, 255, 255, 255))
+    circle(d, 24, 24, 2, (0, 0, 0, 255))
+    circle(d, 40, 24, 2, (0, 0, 0, 255))
+    # 牙齒
+    for i in range(5):
+        x = 14 + i * 8
+        rect(d, x, 28, 5, 6, (255, 255, 255, 255))
+    save(img, "T102_chest.png")
 
-def gen_T104_gold_grass_v4():
-    """金色雜草 v4 - 連續葉子，密度提升"""
-    img = new_img()
-    GOLD   = (220, 180, 30)
-    GOLD_L = (255, 230, 80)
-    GOLD_D = (160, 120, 10)
-    OUTLINE= (100, 60, 5, 255)
-    SHINE  = (255, 255, 200, 255)
+# ── T103 流星 ─────────────────────────────────────────────────
+def gen_T103():
+    img = new_img(); d = ImageDraw.Draw(img)
+    # 流星主體（橢圓）
+    d.ellipse([20, 24, 56, 44], fill=(255, 255, 220, 255), outline=(200, 200, 150, 255))
+    # 尾跡
+    for i in range(4):
+        alpha = 200 - i * 40
+        d.ellipse([4-i*2, 28+i, 24-i*2, 40+i],
+                  fill=(255, 240, 180, alpha))
+    # 光芒
+    d.line([(38, 20), (38, 8)], fill=(255, 255, 200, 200), width=2)
+    d.line([(50, 28), (60, 22)], fill=(255, 255, 200, 200), width=2)
+    save(img, "T103_meteor.png")
 
-    cx = 32
-    
-    # 草莖（金色，加粗）
-    for y in range(40, 62):
-        for x in range(cx-4, cx+5):
-            shade = 1.0 - abs(x - cx) / 5 * 0.3
-            r = int(220 * shade)
-            g = int(180 * shade)
-            b = int(30 * shade)
-            px(img, x, y, (r, g, b, 255))
-    for y in range(40, 62):
-        px(img, cx-4, y, OUTLINE)
-        px(img, cx+4, y, OUTLINE)
-    
-    # 左葉（填充三角形，金色）
-    for y in range(6, 42):
-        progress = (42 - y) / 36.0
-        leaf_x_center = cx - 2 - int(progress * 20)
-        leaf_width = max(1, int(5 * (1.0 - progress * 0.6)))
-        for dx in range(-leaf_width, leaf_width+1):
-            x = leaf_x_center + dx
-            if abs(dx) == leaf_width:
-                px(img, x, y, OUTLINE)
-            elif abs(dx) <= leaf_width // 2:
-                px(img, x, y, (*GOLD_L, 255))
-            else:
-                px(img, x, y, (*GOLD, 255))
-    
-    # 右葉（填充三角形，金色）
-    for y in range(6, 42):
-        progress = (42 - y) / 36.0
-        leaf_x_center = cx + 2 + int(progress * 20)
-        leaf_width = max(1, int(5 * (1.0 - progress * 0.6)))
-        for dx in range(-leaf_width, leaf_width+1):
-            x = leaf_x_center + dx
-            if abs(dx) == leaf_width:
-                px(img, x, y, OUTLINE)
-            elif abs(dx) <= leaf_width // 2:
-                px(img, x, y, (*GOLD_L, 255))
-            else:
-                px(img, x, y, (*GOLD, 255))
-    
-    # 中間葉（直向上，最亮）
-    for y in range(2, 42):
-        progress = (42 - y) / 40.0
-        leaf_width = max(1, int(6 * (1.0 - progress * 0.7)))
-        for dx in range(-leaf_width, leaf_width+1):
-            x = cx + dx
-            if abs(dx) == leaf_width:
-                px(img, x, y, OUTLINE)
-            elif abs(dx) <= leaf_width // 2:
-                px(img, x, y, (*GOLD_L, 255))
-            else:
-                px(img, x, y, (*GOLD, 255))
-    
-    # 閃光點（更多）
-    shine_points = [(20, 18), (44, 14), (32, 6), (14, 30), (50, 26), (26, 10), (38, 22)]
-    for (sx, sy) in shine_points:
-        px(img, sx, sy, SHINE)
-        for ddx, ddy in [(1,0),(-1,0),(0,1),(0,-1),(1,1),(-1,-1)]:
-            px(img, sx+ddx, sy+ddy, (*GOLD_L, 200))
-    
-    # 地面根部
-    for x in range(cx-6, cx+7):
-        px(img, x, 62, OUTLINE)
-    
-    return img
+# ── T104 金色雜草 ─────────────────────────────────────────────
+def gen_T104():
+    img = new_img(); d = ImageDraw.Draw(img)
+    # 金色草莖（更粗更亮）
+    for i in range(3):
+        x = 14 + i * 14
+        d.line([(x, 52), (x-6, 16)], fill=(200, 160, 0, 255), width=4)
+        d.line([(x, 52), (x+6, 18)], fill=(220, 180, 20, 255), width=3)
+        # 金色草葉
+        d.ellipse([x-10, 10, x+6, 24], fill=(255, 200, 0, 255), outline=(180, 140, 0, 255))
+    # 地面
+    rect(d, 6, 52, 52, 8, (120, 90, 20, 255))
+    # 金色光暈
+    for r in [28, 32, 36]:
+        d.ellipse([32-r, 32-r, 32+r, 32+r], outline=(255, 220, 0, 60))
+    save(img, "T104_gold_grass.png")
 
+# ── T105 巨大金幣魚 ───────────────────────────────────────────
+def gen_T105():
+    img = new_img(); d = ImageDraw.Draw(img)
+    # 魚身（橢圓）
+    d.ellipse([8, 20, 52, 48], fill=(255, 200, 30, 255), outline=(180, 130, 0, 255))
+    # 魚鱗
+    for row in range(2):
+        for col in range(3):
+            x = 16 + col * 12
+            y = 26 + row * 10
+            d.ellipse([x, y, x+8, y+6], outline=(200, 150, 0, 180))
+    # 魚尾
+    d.polygon([(52, 34), (62, 22), (62, 46)], fill=(220, 170, 0, 255))
+    # 眼睛
+    circle(d, 18, 30, 5, (255, 255, 255, 255))
+    circle(d, 18, 30, 3, (0, 0, 0, 255))
+    circle(d, 17, 29, 1, (255, 255, 255, 255))
+    # ¥ 符號
+    d.text((26, 26), "¥", fill=(180, 120, 0, 255))
+    save(img, "T105_coin_fish.png")
 
-def main():
-    print("=== 目標物 v4 生成（修復密度問題）===\n")
-    
-    # 只重新生成密度低的目標物
-    targets_to_fix = [
-        ("T001_grass",    gen_T001_grass_v4),
-        ("T101_mimic",    gen_T101_mimic_v4),
-        ("T103_meteor",   gen_T103_meteor_v4),
-        ("T104_gold_grass", gen_T104_gold_grass_v4),
-    ]
-    
-    for name, fn in targets_to_fix:
-        img = fn()
-        path = os.path.join(OUTPUT_DIR, f"{name}.png")
-        img.save(path)
-        
-        # 計算密度
-        pixels = list(img.getdata())
-        non_t = sum(1 for p in pixels if p[3] > 10)
-        total = img.width * img.height
-        pct = non_t / total * 100
-        
-        print(f"  ✅ {name}.png: {img.width}x{img.height}, {non_t}/{total} ({pct:.0f}%)")
-    
-    print(f"\n✅ 完成！輸出目錄: {OUTPUT_DIR}")
+# ── B001 BOSS（那個孩子）─────────────────────────────────────
+def gen_B001():
+    img = new_img(); d = ImageDraw.Draw(img)
+    # 大圓形身體
+    circle(d, 32, 32, 28, (60, 20, 80, 255), (30, 0, 50, 255))
+    # 眼睛（大而詭異）
+    circle(d, 22, 26, 8, (255, 50, 50, 255))
+    circle(d, 42, 26, 8, (255, 50, 50, 255))
+    circle(d, 22, 26, 4, (0, 0, 0, 255))
+    circle(d, 42, 26, 4, (0, 0, 0, 255))
+    circle(d, 20, 24, 2, (255, 255, 255, 255))
+    circle(d, 40, 24, 2, (255, 255, 255, 255))
+    # 嘴巴（邪惡微笑）
+    d.arc([18, 36, 46, 52], 0, 180, fill=(200, 0, 0, 255), width=3)
+    # 牙齒
+    for i in range(4):
+        x = 22 + i * 6
+        d.polygon([(x, 44), (x+3, 44), (x+1, 50)], fill=(255, 255, 255, 255))
+    # 光環
+    for r in [30, 34]:
+        d.ellipse([32-r, 32-r, 32+r, 32+r], outline=(150, 0, 200, 100))
+    save(img, "B001_boss.png")
 
-if __name__ == '__main__':
-    main()
+# ── 生成所有目標物 ────────────────────────────────────────────
+print("生成目標物像素圖...")
+gen_T001()
+gen_T002()
+gen_T003()
+gen_T004()
+gen_T005()
+gen_T006()
+gen_T101()
+gen_T102()
+gen_T103()
+gen_T104()
+gen_T105()
+gen_B001()
+print(f"\n✅ 完成！輸出到 {OUT}")

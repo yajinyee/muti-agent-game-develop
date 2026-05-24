@@ -1,0 +1,32 @@
+; Engine configuration file.
+; It's best edited using the editor UI and not directly,
+; but the file format allows this.
+
+config_version=5
+
+[application]
+
+config/name="吉伊卡哇：像素大討伐"
+config/description="捕魚機遊戲"
+run/main_scene="res://scenes/Main.tscn"
+config/features=PackedStringArray("4.2", "GL Compatibility")
+config/icon="res://icon.svg"
+
+[display]
+
+window/size/viewport_width=1280
+window/size/viewport_height=720
+window/stretch/mode="canvas_items"
+window/stretch/aspect="keep"
+
+[rendering]
+
+textures/canvas_textures/default_texture_filter=0
+
+[autoload]
+
+GameManager="*res://scripts/game/GameManager.gd"
+NetworkManager="*res://scripts/network/NetworkManager.gd"
+AudioManager="*res://scripts/game/AudioManager.gd"
+ScreenShake="*res://scripts/game/ScreenShake.gd"
+HitEffect="*res://scripts/game/HitEffect.gd"
