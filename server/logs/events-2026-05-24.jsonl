@@ -1690,3 +1690,10 @@
 {"ts":1779628544310,"event":"attack","player_id":"player_806584","room_id":"room-001","data":{"bet_cost":1,"bet_level":1,"is_auto":true,"is_hit":false,"target_id":"9cd3b2ff-c6c8-411f-ab8e-9df4edf753e0"}}
 {"ts":1779628590592,"event":"room_summary","player_id":"system","room_id":"room-001","data":{"stats":{"room_id":"room-001","start_time":"2026-05-24T21:12:36.7334787+08:00","last_update":"2026-05-24T21:15:44.3105152+08:00","total_players":2,"peak_players":1,"current_players":1,"total_attacks":65,"total_hits":0,"total_kills":5,"total_bet":65,"total_reward":18,"overall_rtp":0.27692307692307694,"boss_spawn_count":1,"boss_kill_count":0,"bonus_count":0}}}
 {"ts":1779629326248,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"afb692b2-7c34-4bc1-8a00-3f16b761ecc9"}}
+{"ts":1779629561347,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"1411f133-860c-4776-9ef5-c2bdd3bc394a"}}
+{"ts":1779629750349,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"cd1a9105-1728-48e5-acfc-491d28dc9c78"}}
+{"ts":1779630048449,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"c79a14b8-25de-40c9-9577-988fb459e14e"}}
+{"ts":1779630253450,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"b60d5d97-d8ac-45a8-b53d-fb38ba0cd14a"}}
+{"ts":1779630537449,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"18d5e9ef-9d60-4a9d-8797-0a99a1eada05"}}
+{"ts":1779630832549,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"7c1540f1-3c34-413f-8f26-1790b20022e3"}}
+{"ts":1779631120650,"event":"boss_spawn","player_id":"system","room_id":"room-001","data":{"avg_bet_lv":5,"boss_def":"B001","hp":690,"instance_id":"209bfcf0-5c4e-4982-90a0-e070c2aa7102"}}
