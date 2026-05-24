@@ -119,6 +119,7 @@ const (
 	EventLuckyTimeRift            EventType = "lucky_time_rift"            // 幸運時間裂縫魚觸發（DAY-278）
 	EventLuckyRainbowBridge       EventType = "lucky_rainbow_bridge"       // 幸運彩虹橋魚觸發（DAY-279）
 	EventLuckyRareChain           EventType = "lucky_rare_chain"           // 幸運連鎖稀有魚觸發（DAY-280）
+	EventLuckyGoldMutation        EventType = "lucky_gold_mutation"        // 幸運黃金突變魚觸發（DAY-281）
 )
 
 // Priority 公告優先級
@@ -2082,6 +2083,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🔗 連鎖稀有！"
 		message = msg
 		icon = "🔗"
+		color = c
+		priority = PriorityHigh
+		duration = 5000
+
+	case EventLuckyGoldMutation:
+		msg := "✨ 黃金突變觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#FFD700"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "✨ 黃金突變！"
+		message = msg
+		icon = "✨"
 		color = c
 		priority = PriorityHigh
 		duration = 5000

@@ -254,6 +254,7 @@ type Game struct {
 	LuckyTimeRift           *luckyTimeRiftManager              // 幸運時間裂縫魚系統管理器（DAY-278）
 	LuckyRainbowBridge      *luckyRainbowBridgeManager         // 幸運彩虹橋魚系統管理器（DAY-279）
 	LuckyRareChain          *luckyRareChainManager             // 幸運連鎖稀有魚系統管理器（DAY-280）
+	LuckyGoldMutation       *luckyGoldMutationManager          // 幸運黃金突變魚系統管理器（DAY-281）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -484,6 +485,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyTimeRift:           newLuckyTimeRiftManager(),
 		LuckyRainbowBridge:      newLuckyRainbowBridgeManager(),
 		LuckyRareChain:          newLuckyRareChainManager(),
+		LuckyGoldMutation:       newLuckyGoldMutationManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2620,6 +2622,19 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			}
 			g.LuckyRareChain.mu.Unlock()
 			go g.notifyRareChainKill(p, layer, chainMult, chainReward)
+		}
+	}
+	// 幸運黃金突變魚：擊破 T239 時觸發黃金突變（DAY-281）
+	if isLuckyGoldMutationFish(t.DefID) {
+		go g.tryLuckyGoldMutationFish(p)
+	}
+	// 幸運黃金突變魚：擊破黃金突變目標時，套用突變倍率並觸發感染（DAY-281）
+	if !isLuckyGoldMutationFish(t.DefID) {
+		if goldMult := g.LuckyGoldMutation.getGoldMutationMult(t.InstanceID); goldMult > 1.0 {
+			goldReward := int(float64(finalReward) * (goldMult - 1.0))
+			finalReward += goldReward
+			g.LuckyGoldMutation.removeGoldMutation(t.InstanceID)
+			go g.notifyGoldMutationKill(p, t.InstanceID, goldMult)
 		}
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）

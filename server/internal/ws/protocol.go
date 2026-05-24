@@ -621,6 +621,7 @@ const (
 	MsgLuckyTimeRift               MessageType = "lucky_time_rift"                       // 幸運時間裂縫魚廣播（Server→Client，DAY-278）
 	MsgLuckyRainbowBridge          MessageType = "lucky_rainbow_bridge"                  // 幸運彩虹橋魚廣播（Server→Client，DAY-279）
 	MsgLuckyRareChain              MessageType = "lucky_rare_chain"                      // 幸運連鎖稀有魚廣播（Server→Client，DAY-280）
+	MsgLuckyGoldMutation           MessageType = "lucky_gold_mutation"                   // 幸運黃金突變魚廣播（Server→Client，DAY-281）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6426,4 +6427,21 @@ type LuckyRareChainPayload struct {
 	Mult        float64 `json:"mult,omitempty"`         // 當前層倍率
 	Reward      int     `json:"reward,omitempty"`       // 本次擊破獎勵
 	TotalReward int     `json:"total_reward,omitempty"` // 累積總獎勵
+}
+
+// LuckyGoldMutationPayload 幸運黃金突變魚廣播（Server → Client，DAY-281）
+// Event 類型：
+//   - mutation_start：黃金突變觸發（全服，PlayerID/PlayerName/TargetIIDs/TargetNames/KillMult/Duration）
+//   - mutation_kill：突變目標被擊破（全服，PlayerName/KilledIID/KillMult）
+//   - mutation_infect：感染突變（全服，PlayerName/TargetIIDs/TargetNames/KillMult）
+//   - mutation_expire：突變消失（全服）
+type LuckyGoldMutationPayload struct {
+	Event       string   `json:"event"`
+	PlayerID    string   `json:"player_id,omitempty"`
+	PlayerName  string   `json:"player_name,omitempty"`
+	TargetIIDs  []string `json:"target_iids,omitempty"`   // 突變目標 instanceID 列表
+	TargetNames []string `json:"target_names,omitempty"`  // 突變目標名稱列表
+	KillMult    float64  `json:"kill_mult,omitempty"`     // 擊破倍率
+	Duration    int      `json:"duration,omitempty"`      // 持續時間（秒）
+	KilledIID   string   `json:"killed_iid,omitempty"`    // 被擊破的目標 instanceID
 }

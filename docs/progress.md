@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-280 幸運連鎖稀有魚系統）
+## 最後更新：2026-05-24（DAY-281 幸運黃金突變魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,23 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-281 更新（自主觸發）：** 幸運黃金突變魚系統（Lucky Gold Mutation Fish）✅
+  - **業界依據：** Fisch Roblox「Lucky Gold Mutation（6.14×）」+ Fishing Legend 2025「高倍率目標」機制，業界原創「黃金突變+全場感染+突變連鎖」機制
+  - **設計：** 擊破 T239 後，觸發「黃金突變」：Server 隨機選場上 2-4 個目標，讓它們「突變為黃金版本」（HP 降低 50%，擊破倍率 ×3.0）；突變目標有 30% 機率在被擊破時「感染」相鄰目標（也突變，HP 降低 50%，擊破倍率 ×2.0）；突變持續 15 秒；全服廣播突變目標位置；個人冷卻 20 秒；全服冷卻 35 秒
+  - **設計差異：** 與品質突變（T230，個人下一次擊破品質抽取）不同，黃金突變是「場上特定目標突變」，讓玩家有「快去打那幾條黃金魚！」的緊迫感；「感染相鄰目標（30%）」讓玩家有「打一條黃金魚，旁邊的也可能突變」的驚喜感；「突變目標 HP -50%」讓黃金魚更容易打；「突變持續 15 秒」製造緊迫感；「全服廣播突變目標位置」讓所有玩家搶打
+  - server/internal/game/lucky_gold_mutation_handler.go：luckyGoldMutationManager（個人冷卻/全服冷卻/mutatedTargets）；goldMutatedTarget（instanceID/defID/name/mult/isInfected/expiresAt）；isLuckyGoldMutationFish（T239）；isGoldMutated；getGoldMutationMult（供 handleKill 使用）；removeGoldMutation；tryLuckyGoldMutationFish（觸發/選2-4個目標/HP-50%/全服廣播+公告）；notifyGoldMutationKill（擊破通知/30%感染）；tryGoldMutationInfect（感染相鄰目標/HP-50%/全服廣播）；runGoldMutationTimer（goroutine 15秒後突變消失）
+  - server/internal/data/tables.go：新增 T239 幸運黃金突變魚（76-143x/HP116/SpawnWeight2/Speed6/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyGoldMutation；LuckyGoldMutationPayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyGoldMutation + case 處理
+  - server/internal/game/game.go：LuckyGoldMutation *luckyGoldMutationManager；handleKill 加入 isLuckyGoldMutationFish 觸發分支 + getGoldMutationMult 突變倍率套用
+  - client/chiikawa-pixel/scripts/ui/LuckyGoldMutationPanel.gd：黃金突變主題面板（mutation_start 金色三次強閃光+頂部橫幅+突變指示器（右上角，突變數/倍率/計時）；mutation_kill 金色閃光+浮動文字；mutation_infect 橙金閃光+全服廣播橫幅；mutation_expire 突變消失提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_gold_mutation 訊號 + _handle_lucky_gold_mutation
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyGoldMutationPanelScript（layer=54）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T239 映射
+  - 突變設計：2-4 個目標；HP -50%；擊破 ×3.0；感染 30% 機率；感染目標 ×2.0；持續 15 秒；個人冷卻 20 秒；全服冷卻 35 秒
+  - 視覺設計：黃金突變主題（#FFD700 金 + #FFA500 橙金 + #FF8C00 深橙 + #FFFACD 淡金）；突變指示器（右上角，突變數/倍率/計時，金色脈衝動畫）；結算彈窗右側滑入
+  - build/vet 全部通過（零錯誤零警告）
+  - T239 精靈圖：黃金突變魚（金色漸層魚身+黃金光環+突變星芒+金色條紋+橙金魚尾）
 - **DAY-280 更新（自主觸發）：** 幸運連鎖稀有魚系統（Lucky Rare Chain Fish）✅
   - **業界依據：** Fishing Fortune 2026「Chain rare catches within 90-second windows to build multipliers from 2x to 500x」機制進化版，業界原創「稀有連鎖+倍率爬升+時間視窗」機制
   - **設計：** 擊破 T238 後，觸發「稀有連鎖模式」（持續 20 秒）；模式期間，玩家每次擊破「稀有或以上目標」（倍率 ≥ 15x），連鎖計數 +1，倍率爬升（×1.5 → ×2.5 → ×4.0 → ×6.0 → ×10.0，最多 5 層）；每次連鎖必須在 8 秒內完成（否則連鎖中斷，重置到第1層）；達到第 5 層（×10.0）觸發「連鎖爆發」：個人大獎 + 全服廣播；個人冷卻 22 秒；全服冷卻 38 秒

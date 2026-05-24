@@ -364,6 +364,7 @@ func _ready() -> void:
 	_init_lucky_time_rift_panel()           # 幸運時間裂縫魚系統面板（DAY-278）
 	_init_lucky_rainbow_bridge_panel()      # 幸運彩虹橋魚系統面板（DAY-279）
 	_init_lucky_rare_chain_panel()          # 幸運連鎖稀有魚系統面板（DAY-280）
+	_init_lucky_gold_mutation_panel()       # 幸運黃金突變魚系統面板（DAY-281）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5277,3 +5278,19 @@ func _init_lucky_rare_chain_panel() -> void:
 func _on_lucky_rare_chain(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_rare_chain_panel):
 		_lucky_rare_chain_panel.handle(data)
+
+const LuckyGoldMutationPanelScript = preload("res://scripts/ui/LuckyGoldMutationPanel.gd")
+var _lucky_gold_mutation_panel = null
+
+func _init_lucky_gold_mutation_panel() -> void:
+	var panel = LuckyGoldMutationPanelScript.new()
+	panel.name = "LuckyGoldMutationPanel"
+	panel.layer = 54
+	add_child(panel)
+	_lucky_gold_mutation_panel = panel
+	if GameManager.has_signal("lucky_gold_mutation"):
+		GameManager.lucky_gold_mutation.connect(_on_lucky_gold_mutation)
+
+func _on_lucky_gold_mutation(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_gold_mutation_panel):
+		_lucky_gold_mutation_panel.handle(data)

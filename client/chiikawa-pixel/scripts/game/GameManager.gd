@@ -285,6 +285,7 @@ signal lucky_lightning_hammer(data: Dictionary)       # 幸運閃電錘魚系統
 signal lucky_time_rift(data: Dictionary)              # 幸運時間裂縫魚系統（DAY-278）
 signal lucky_rainbow_bridge(data: Dictionary)          # 幸運彩虹橋魚系統（DAY-279）
 signal lucky_rare_chain(data: Dictionary)              # 幸運連鎖稀有魚系統（DAY-280）
+signal lucky_gold_mutation(data: Dictionary)           # 幸運黃金突變魚系統（DAY-281）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -822,6 +823,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_rainbow_bridge(payload)
 		"lucky_rare_chain":
 			_handle_lucky_rare_chain(payload)
+		"lucky_gold_mutation":
+			_handle_lucky_gold_mutation(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4215,3 +4218,24 @@ func _handle_lucky_rare_chain(payload: Dictionary) -> void:
 			var layer: int = payload.get("layer", 0)
 			var total_reward: int = payload.get("total_reward", 0)
 			print("[GameManager] RareChain ended! layer=%d totalReward=%d" % [layer, total_reward])
+
+## 幸運黃金突變魚系統（DAY-281）
+func _handle_lucky_gold_mutation(payload: Dictionary) -> void:
+	emit_signal("lucky_gold_mutation", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"mutation_start":
+			var player_name: String = payload.get("player_name", "???")
+			var count: int = payload.get("target_iids", []).size()
+			var kill_mult: float = payload.get("kill_mult", 3.0)
+			print("[GameManager] GoldMutation started! player=%s count=%d mult=x%.1f" % [player_name, count, kill_mult])
+		"mutation_kill":
+			var player_name: String = payload.get("player_name", "???")
+			var kill_mult: float = payload.get("kill_mult", 3.0)
+			print("[GameManager] GoldMutation kill! player=%s mult=x%.1f" % [player_name, kill_mult])
+		"mutation_infect":
+			var player_name: String = payload.get("player_name", "???")
+			var kill_mult: float = payload.get("kill_mult", 2.0)
+			print("[GameManager] GoldMutation infect! player=%s mult=x%.1f" % [player_name, kill_mult])
+		"mutation_expire":
+			print("[GameManager] GoldMutation expired!")

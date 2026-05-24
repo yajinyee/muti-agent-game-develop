@@ -936,6 +936,13 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 22 秒；全服冷卻 38 秒
 	"T238": {ID: "T238", Name: "幸運連鎖稀有魚", Type: TargetTypeSpecial, MultiplierMin: 75, MultiplierMax: 141, HP: 115, SpawnWeight: 2, Speed: 7, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_rare_chain"},
 
+	// T239 幸運黃金突變魚（DAY-281）— Fisch Roblox「Lucky Gold Mutation（6.14×）」機制進化版
+	//   - 擊破 T239 後，隨機選場上 2-4 個目標「突變為黃金版本」（HP -50%，擊破 ×3.0）
+	//   - 突變目標被擊破時，30% 機率感染相鄰目標（HP -50%，擊破 ×2.0）
+	//   - 突變持續 15 秒；全服廣播突變目標位置
+	//   - 個人冷卻 20 秒；全服冷卻 35 秒
+	"T239": {ID: "T239", Name: "幸運黃金突變魚", Type: TargetTypeSpecial, MultiplierMin: 76, MultiplierMax: 143, HP: 116, SpawnWeight: 2, Speed: 6, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_gold_mutation"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 
