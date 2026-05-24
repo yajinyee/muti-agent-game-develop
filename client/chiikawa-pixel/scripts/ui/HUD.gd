@@ -368,6 +368,7 @@ func _ready() -> void:
 	_init_lucky_star_burst_panel()          # 幸運星爆魚系統面板（DAY-282）
 	_init_lucky_four_symbols_panel()        # 幸運四象大獎魚系統面板（DAY-283）
 	_init_lucky_dragon_wrath_panel()        # 幸運龍怒隕石魚系統面板（DAY-284）
+	_init_lucky_phoenix_rebirth_panel()     # 幸運鳳凰涅槃魚系統面板（DAY-285）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5345,3 +5346,19 @@ func _init_lucky_dragon_wrath_panel() -> void:
 func _on_lucky_dragon_wrath(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_dragon_wrath_panel):
 		_lucky_dragon_wrath_panel.handle(data)
+
+const LuckyPhoenixRebirthPanelScript = preload("res://scripts/ui/LuckyPhoenixRebirthPanel.gd")
+var _lucky_phoenix_rebirth_panel = null
+
+func _init_lucky_phoenix_rebirth_panel() -> void:
+	var panel = LuckyPhoenixRebirthPanelScript.new()
+	panel.name = "LuckyPhoenixRebirthPanel"
+	panel.layer = 58
+	add_child(panel)
+	_lucky_phoenix_rebirth_panel = panel
+	if GameManager.has_signal("lucky_phoenix_rebirth"):
+		GameManager.lucky_phoenix_rebirth.connect(_on_lucky_phoenix_rebirth)
+
+func _on_lucky_phoenix_rebirth(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_phoenix_rebirth_panel):
+		_lucky_phoenix_rebirth_panel.handle_event(data)

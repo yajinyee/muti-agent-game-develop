@@ -969,6 +969,14 @@ var Targets = map[string]*TargetDef{
 	//   - 個人冷卻 26 秒；全服冷卻 42 秒
 	"T242": {ID: "T242", Name: "幸運龍怒隕石魚", Type: TargetTypeSpecial, MultiplierMin: 79, MultiplierMax: 149, HP: 119, SpawnWeight: 2, Speed: 3, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_dragon_wrath"},
 
+	// T243 幸運鳳凰涅槃魚（DAY-285）— 業界依據：Royal Fishing Jili「Rainbow Phoenix Power Up」機制
+	//   - 擊破 T243 後，觸發「鳳凰涅槃」：
+	//   - 全場火焰洗禮：場上所有目標 HP -25%
+	//   - 涅槃重生：隨機選 3 個目標 HP 恢復 50%，擊破倍率 ×4.0
+	//   - 若 3 個涅槃目標全部在 15 秒內被擊破 → 「鳳凰完全涅槃」：全服 ×3.0 加成 8 秒
+	//   - 個人冷卻 28 秒；全服冷卻 45 秒
+	"T243": {ID: "T243", Name: "幸運鳳凰涅槃魚", Type: TargetTypeSpecial, MultiplierMin: 80, MultiplierMax: 151, HP: 120, SpawnWeight: 2, Speed: 4, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_phoenix_rebirth"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -625,6 +625,7 @@ const (
 	MsgLuckyStarBurst              MessageType = "lucky_star_burst"                      // 幸運星爆魚廣播（Server→Client，DAY-282）
 	MsgLuckyFourSymbols            MessageType = "lucky_four_symbols"                    // 幸運四象大獎魚廣播（Server→Client，DAY-283）
 	MsgLuckyDragonWrath            MessageType = "lucky_dragon_wrath"                    // 幸運龍怒隕石魚廣播（Server→Client，DAY-284）
+	MsgLuckyPhoenixRebirth         MessageType = "lucky_phoenix_rebirth"                 // 幸運鳳凰涅槃魚廣播（Server→Client，DAY-285）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -698,6 +699,7 @@ type TargetUpdatePayload struct {
 	Y          float64 `json:"y"`
 	Phase      int     `json:"phase"`      // BOSS 用
 	IsFleeing  bool    `json:"is_fleeing"` // 寶箱怪用
+	IsRebirth  bool    `json:"is_rebirth,omitempty"` // 鳳凰涅槃重生用（DAY-285）
 }
 
 // TargetKillPayload 目標擊破
@@ -6512,4 +6514,33 @@ type LuckyDragonWrathPayload struct {
 	IsPerfect   bool    `json:"is_perfect,omitempty"`   // 是否龍怒完美
 	PerfectMult float64 `json:"perfect_mult,omitempty"` // 完美全服倍率
 	Duration    int     `json:"duration,omitempty"`     // 完美加成持續秒數
+}
+
+// PhoenixRebirthTargetInfo 涅槃重生目標資訊
+type PhoenixRebirthTargetInfo struct {
+	InstanceID string  `json:"instance_id"`
+	Name       string  `json:"name"`
+	X          float64 `json:"x"`
+	Y          float64 `json:"y"`
+}
+
+// LuckyPhoenixRebirthPayload 幸運鳳凰涅槃魚廣播（Server → Client，DAY-285）
+// 業界依據：Royal Fishing Jili「Rainbow Phoenix Power Up」機制
+// Event 類型：
+//   - rebirth_start：鳳凰涅槃開始（全服，PlayerID/PlayerName/FireBathCount/RebirthTargets/Duration）
+//   - rebirth_kill：涅槃目標被擊破（全服，PlayerID/PlayerName/InstanceID/KillMult）
+//   - rebirth_full：鳳凰完全涅槃（全服，PlayerName/FullRebirthMult/Duration）
+//   - rebirth_full_end：完全涅槃結束（全服）
+//   - rebirth_fade：涅槃消散（全服，PlayerID/Remaining）
+type LuckyPhoenixRebirthPayload struct {
+	Event           string                     `json:"event"`
+	PlayerID        string                     `json:"player_id,omitempty"`
+	PlayerName      string                     `json:"player_name,omitempty"`
+	FireBathCount   int                        `json:"fire_bath_count,omitempty"`   // 火焰洗禮命中目標數
+	RebirthTargets  []PhoenixRebirthTargetInfo `json:"rebirth_targets,omitempty"`   // 涅槃重生目標列表
+	Duration        int                        `json:"duration,omitempty"`          // 涅槃持續秒數
+	InstanceID      string                     `json:"instance_id,omitempty"`       // 被擊破的涅槃目標 ID
+	KillMult        float64                    `json:"kill_mult,omitempty"`         // 涅槃目標擊破倍率
+	FullRebirthMult float64                    `json:"full_rebirth_mult,omitempty"` // 完全涅槃全服倍率
+	Remaining       int                        `json:"remaining,omitempty"`         // 消散時剩餘未擊破數
 }

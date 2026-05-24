@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-284 幸運龍怒隕石魚系統）
+## 最後更新：2026-05-24（DAY-285 幸運鳳凰涅槃魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-285 更新（自主觸發）：** 幸運鳳凰涅槃魚系統（Lucky Phoenix Rebirth Fish）✅
+  - **業界依據：** Royal Fishing Jili「Rainbow Phoenix Power Up + Awaken Boss」機制（2026）— 業界原創「鳳凰涅槃+死亡重生+全場火焰洗禮+完全涅槃爆發」機制
+  - **設計：** 擊破 T243 後，觸發「鳳凰涅槃」：全場火焰洗禮（所有目標 HP -25%）；隨機選 3 個目標「涅槃重生」（HP 恢復 50%，擊破倍率 ×4.0）；若 3 個涅槃目標全部在 15 秒內被擊破 → 「鳳凰完全涅槃」：全服 ×3.0 加成 8 秒；全服廣播涅槃目標位置和結果；個人冷卻 28 秒；全服冷卻 45 秒
+  - **設計差異：** 與龍怒隕石（T242，多點 AOE 墜落）不同，鳳凰涅槃是「先傷全場，再讓特定目標重生」；「涅槃目標 HP 恢復 50%」讓玩家有「這條魚又活了，但打死有 ×4.0！」的策略感；「3 個涅槃目標全部擊破觸發完全涅槃」讓玩家有「要趁 15 秒內打完 3 條涅槃魚」的緊迫感；「全服 ×3.0 加成 8 秒」是最高全服加成之一，製造「全服一起爽」的社交感；「全場火焰洗禮 HP -25%」讓所有魚都更容易打，製造「鳳凰降臨，全場魚都受傷」的爽感
+  - server/internal/game/lucky_phoenix_rebirth_handler.go：luckyPhoenixRebirthManager（個人冷卻/全服冷卻/activeSession/fullRebirthBoost）；phoenixRebirthTarget（instanceID/defID/name/x/y/killed）；phoenixFullRebirthBoost（mult/expiresAt）；phoenixRebirthSession（triggerPlayerID/triggerPlayerName/targets/expiresAt/settled）；isLuckyPhoenixRebirthFish（T243）；getPhoenixFullRebirthMult（供 handleKill 使用）；isPhoenixRebirthTarget（判斷是否為涅槃目標/回傳倍率）；markPhoenixRebirthTargetKilled（標記擊破/判斷是否全部完成）；tryLuckyPhoenixRebirthFish（觸發/全場火焰洗禮/選取涅槃目標/全服廣播+公告）；applyPhoenixFireBath（全場 HP -25%/廣播 HP 更新）；selectPhoenixRebirthTargets（選取3個目標/HP 恢復 50%/廣播 HP 更新）；notifyPhoenixRebirthKill（涅槃目標擊破通知/全部完成觸發完全涅槃）；doPhoenixFullRebirth（全服×3.0加成8秒/全服廣播+公告）；runPhoenixRebirthTimer（goroutine 15秒後消散/廣播+公告）
+  - server/internal/data/tables.go：新增 T243 幸運鳳凰涅槃魚（80-151x/HP120/SpawnWeight2/Speed4/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyPhoenixRebirth；PhoenixRebirthTargetInfo；LuckyPhoenixRebirthPayload（5種事件）；TargetUpdatePayload 新增 IsRebirth 欄位
+  - server/internal/game/announce/announce.go：新增 EventLuckyPhoenixRebirth + case 處理（PriorityHigh）
+  - server/internal/game/game.go：LuckyPhoenixRebirth *luckyPhoenixRebirthManager；handleKill 加入 getPhoenixFullRebirthMult 全服倍率套用 + isPhoenixRebirthTarget 涅槃倍率套用 + notifyPhoenixRebirthKill + isLuckyPhoenixRebirthFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyPhoenixRebirthPanel.gd：鳳凰主題面板（rebirth_start 火橙三次強閃光+頂部橫幅+涅槃指示器（右上角，擊破數/總數）+右側豎向計時條；rebirth_kill 金色閃光+浮動文字+指示器更新；rebirth_full 全螢幕三次強閃光+「完全涅槃！全服×3.0！」大字+完全涅槃指示器（脈衝動畫+倒數計時）；rebirth_full_end 完全涅槃結束淡出；rebirth_fade 灰色閃光+消散文字）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_phoenix_rebirth 訊號 + _handle_lucky_phoenix_rebirth
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyPhoenixRebirthPanelScript（layer=58）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T243 映射
+  - 涅槃設計：全場 HP -25%；3 個涅槃目標；HP 恢復 50%；擊破 ×4.0；15 秒時限；個人冷卻 28 秒；全服冷卻 45 秒
+  - 完全涅槃設計：3 個涅槃目標全部擊破觸發；全服 ×3.0 加成 8 秒；全服廣播+公告（深橙/金色）
+  - 消散設計：15 秒後未全部擊破；廣播消散+公告（灰色）
+  - 視覺設計：鳳凰主題（#FF6B35 火橙 + #FFD700 金 + #FF4500 深橙 + #FFF0E0 淡橙白）；涅槃指示器（右上角，擊破數/總數，顏色隨進度：金→火橙→深橙）；右側豎向計時條（x=-28 與其他計時條錯開）；完全涅槃指示器（脈衝動畫+倒數計時）；結算彈窗右側滑入
+  - build/vet 全部通過（零錯誤零警告）
+  - T243 精靈圖：鳳凰涅槃魚（橢圓火橙漸層魚身+鳳凰羽毛金色弧線+涅槃火焰光環+4方向火焰光芒+鳳凰尾羽橙紅漸層+中心涅槃核心白色+金色光點散落）
 - **DAY-284 更新（自主觸發）：** 幸運龍怒隕石魚系統（Lucky Dragon Wrath Meteor Fish）✅
   - **業界依據：** Royal Fishing Jili「Dragon Wrath meteors」機制（2026 最熱門）— 龍怒召喚隕石雨，全場 AOE 傷害 + 累積倍率 + 完美爆發
   - **設計：** 擊破 T242 後，召喚 4-7 顆「龍怒隕石」；每顆隕石在 4 秒內依序墜落（每 600ms 一顆）；每顆隕石墜落時，命中範圍內（r=120px）所有目標 HP -45%；每顆隕石命中至少 1 個目標 → 觸發玩家獲得 ×1.4 累積倍率（最高 ×8.0）；若所有隕石都命中目標（無空砸）→「龍怒完美」：全服 ×2.5 加成 6 秒；全服廣播隕石墜落位置和結果；個人冷卻 26 秒；全服冷卻 42 秒

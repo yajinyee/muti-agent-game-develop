@@ -258,6 +258,7 @@ type Game struct {
 	LuckyStarBurst          *luckyStarBurstManager             // 幸運星爆魚系統管理器（DAY-282）
 	LuckyFourSymbols        *luckyFourSymbolsManager           // 幸運四象大獎魚系統管理器（DAY-283）
 	LuckyDragonWrath        *luckyDragonWrathManager           // 幸運龍怒隕石魚系統管理器（DAY-284）
+	LuckyPhoenixRebirth     *luckyPhoenixRebirthManager        // 幸運鳳凰涅槃魚系統管理器（DAY-285）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -492,6 +493,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyStarBurst:          newLuckyStarBurstManager(),
 		LuckyFourSymbols:        newLuckyFourSymbolsManager(),
 		LuckyDragonWrath:        newLuckyDragonWrathManager(),
+		LuckyPhoenixRebirth:     newLuckyPhoenixRebirthManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -2670,6 +2672,21 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運龍怒隕石魚：擊破 T242 時觸發龍怒隕石（DAY-284）
 	if isLuckyDragonWrathFish(t.DefID) {
 		go g.tryLuckyDragonWrathFish(p)
+	}
+	// 幸運鳳凰涅槃魚：全服完全涅槃加成套用（DAY-285）
+	if phoenixFullMult := g.LuckyPhoenixRebirth.getPhoenixFullRebirthMult(); phoenixFullMult > 1.0 {
+		phoenixBonus := int(float64(finalReward) * (phoenixFullMult - 1.0))
+		finalReward += phoenixBonus
+	}
+	// 幸運鳳凰涅槃魚：擊破涅槃重生目標時，觸發涅槃擊破通知（DAY-285）
+	if isRebirth, rebirthMult := g.LuckyPhoenixRebirth.isPhoenixRebirthTarget(t.InstanceID); isRebirth {
+		rebirthBonus := int(float64(finalReward) * (rebirthMult - 1.0))
+		finalReward += rebirthBonus
+		go g.notifyPhoenixRebirthKill(p, t.InstanceID)
+	}
+	// 幸運鳳凰涅槃魚：擊破 T243 時觸發鳳凰涅槃（DAY-285）
+	if isLuckyPhoenixRebirthFish(t.DefID) {
+		go g.tryLuckyPhoenixRebirthFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {
