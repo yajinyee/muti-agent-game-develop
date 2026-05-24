@@ -113,6 +113,7 @@ const (
 	EventLuckyQualityMutation     EventType = "lucky_quality_mutation"     // 幸運品質突變魚觸發（DAY-272）
 	EventLuckyResonanceWave       EventType = "lucky_resonance_wave"       // 幸運共鳴波魚觸發（DAY-273）
 	EventLuckyFortuneProphecy     EventType = "lucky_fortune_prophecy"     // 幸運命運預言魚觸發（DAY-274）
+	EventLuckyLuckTotem           EventType = "lucky_luck_totem"           // 幸運幸運圖騰魚觸發（DAY-275）
 )
 
 // Priority 公告優先級
@@ -1956,6 +1957,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🔮 命運預言！"
 		message = msg
 		icon = "🔮"
+		color = c
+		priority = PriorityHigh
+		duration = 4500
+
+	case EventLuckyLuckTotem:
+		msg := "🍀 幸運圖騰觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#00FF88"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🍀 幸運圖騰！"
+		message = msg
+		icon = "🍀"
 		color = c
 		priority = PriorityHigh
 		duration = 4500

@@ -279,6 +279,7 @@ signal lucky_reroll(data: Dictionary)                 # 幸運倍率重擲魚系
 signal lucky_quality_mutation(data: Dictionary)       # 幸運品質突變魚系統（DAY-272）
 signal lucky_resonance_wave(data: Dictionary)         # 幸運共鳴波魚系統（DAY-273）
 signal lucky_fortune_prophecy(data: Dictionary)       # 幸運命運預言魚系統（DAY-274）
+signal lucky_luck_totem(data: Dictionary)             # 幸運幸運圖騰魚系統（DAY-275）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -804,6 +805,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_resonance_wave(payload)
 		"lucky_fortune_prophecy":
 			_handle_lucky_fortune_prophecy(payload)
+		"lucky_luck_totem":
+			_handle_lucky_luck_totem(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4062,3 +4065,16 @@ func _handle_lucky_fortune_prophecy(payload: Dictionary) -> void:
 			print("[GameManager] FortuneProphecy failed! actual=x%.1f" % actual_mult)
 		"prophecy_expire":
 			print("[GameManager] FortuneProphecy expired!")
+
+## 幸運幸運圖騰魚系統（DAY-275）
+func _handle_lucky_luck_totem(payload: Dictionary) -> void:
+	emit_signal("lucky_luck_totem", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"totem_start":
+			var global_mult: float = payload.get("global_mult", 1.3)
+			print("[GameManager] LuckTotem started! global=x%.1f" % global_mult)
+		"totem_end":
+			var total_kills: int = payload.get("total_kills", 0)
+			var total_reward: int = payload.get("total_reward", 0)
+			print("[GameManager] LuckTotem ended! kills=%d reward=%d" % [total_kills, total_reward])

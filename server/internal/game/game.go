@@ -248,6 +248,7 @@ type Game struct {
 	LuckyQualityMutation    *luckyQualityMutationManager       // 幸運品質突變魚系統管理器（DAY-272）
 	LuckyResonanceWave      *luckyResonanceWaveManager         // 幸運共鳴波魚系統管理器（DAY-273）
 	LuckyFortuneProphecy    *luckyFortuneProphecyManager       // 幸運命運預言魚系統管理器（DAY-274）
+	LuckyLuckTotem          *luckyLuckTotemManager             // 幸運幸運圖騰魚系統管理器（DAY-275）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -472,6 +473,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyQualityMutation:    newLuckyQualityMutationManager(),
 		LuckyResonanceWave:      newLuckyResonanceWaveManager(),
 		LuckyFortuneProphecy:    newLuckyFortuneProphecyManager(),
+		LuckyLuckTotem:          newLuckyLuckTotemManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1653,6 +1655,19 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 			finalReward = int(float64(finalReward) * prophecyMult)
 		}
 	}
+	// 套用幸運幸運圖騰魚倍率（DAY-275，×1.3 全服 + ×1.5 觸發者個人，圖騰期間）
+	if !isLuckyLuckTotemFish(t.DefID) && g.LuckyLuckTotem.isLuckTotemActive() {
+		globalMult, personalMult := g.LuckyLuckTotem.getLuckTotemMult(p.ID)
+		totemBonus := int(float64(finalReward) * (globalMult - 1.0))
+		if personalMult > 1.0 {
+			totemBonus += int(float64(finalReward) * (personalMult - 1.0))
+		}
+		if totemBonus > 0 {
+			finalReward += totemBonus
+			g.LuckyLuckTotem.recordLuckTotemKill(totemBonus)
+			go g.notifyLuckTotemKill(p, totemBonus)
+		}
+	}
 	// 套用幸運星座命運魚星座祝福/庇護倍率加成（DAY-259，×3.0/1.5 乘法，個人，祝福/庇護期間）
 	zodiacMult := g.LuckyZodiacFate.getLuckyZodiacFateMult(p.ID)
 	if zodiacMult > 1.0 {
@@ -2529,6 +2544,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運命運預言魚：擊破 T232 時觸發命運預言（DAY-274）
 	if isLuckyFortuneProphecyFish(t.DefID) {
 		go g.tryLuckyFortuneProphecyFish(p)
+	}
+	// 幸運幸運圖騰魚：擊破 T233 時觸發幸運圖騰（DAY-275）
+	if isLuckyLuckTotemFish(t.DefID) {
+		go g.tryLuckyLuckTotemFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

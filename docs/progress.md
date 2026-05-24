@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-274 幸運命運預言魚系統）
+## 最後更新：2026-05-24（DAY-275 幸運幸運圖騰魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,24 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-275 更新（自主觸發）：** 幸運幸運圖騰魚系統（Lucky Luck Totem Fish）✅
+  - **業界依據：** Fish It Luck Totem（2026）「全場幸運加成 100% 30分鐘」機制進化版，縮短為 15 秒高強度爆發，加入「觸發者個人雙倍加成」製造社交動力
+  - **設計：** 擊破 T233 後，場上出現「幸運圖騰」（持續 15 秒）；圖騰期間：全服所有玩家每次擊破任何目標 → ×1.3 全服加成；觸發玩家額外獲得 ×1.5 個人加成（疊加在全服加成上）；15 秒後圖騰消失，廣播結算（總擊破數/總獎勵）；個人冷卻 30 秒；全服冷卻 50 秒
+  - **設計差異：** 與命運預言（T232，個人倍率門檻）不同，幸運圖騰是「全服共享加成」，讓所有玩家有「快快快，趁圖騰期間多打幾條」的緊迫感；「全服 ×1.3 + 觸發者 ×1.5」讓觸發者有「我觸發了圖騰，全服都在受益」的成就感；「15 秒高強度爆發」比 Fish It 的 30 分鐘更緊湊，製造「要趁 15 秒內打最多魚」的緊迫感；「全服廣播結算（總擊破數/總獎勵）」讓所有玩家看到「這次圖騰全服共打了多少魚」，製造社交話題感
+  - server/internal/game/lucky_luck_totem_handler.go：luckyLuckTotemManager（個人冷卻/全服冷卻/activeSession）；luckTotemSession（triggerPlayerID/triggerPlayerName/expiresAt/totalKills/totalReward/settled）；isLuckyLuckTotemFish（T233）；isLuckTotemActive（供 handleKill 使用）；getLuckTotemMult（全服×1.3/觸發者×1.5）；recordLuckTotemKill（記錄擊破數和獎勵）；tryLuckyLuckTotemFish（觸發/個人訊息+全服廣播+全服公告）；notifyLuckTotemKill（圖騰期間擊破通知）；runLuckTotemTimeout（goroutine 15秒後結算/全服廣播+公告）
+  - server/internal/data/tables.go：新增 T233 幸運幸運圖騰魚（70-131x/HP110/SpawnWeight2/Speed12/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyLuckTotem；LuckyLuckTotemPayload（4種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyLuckTotem + case 處理
+  - server/internal/game/game.go：LuckyLuckTotem *luckyLuckTotemManager；handleKill 加入 isLuckTotemActive 分支 + getLuckTotemMult/recordLuckTotemKill/notifyLuckTotemKill + isLuckyLuckTotemFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyLuckTotemPanel.gd：翠綠幸運主題面板（totem_start 翠綠三次強閃光+頂部橫幅+圖騰指示器（右上角，全服×1.3/個人×1.5）+右側豎向計時條；totem_broadcast 全服廣播橫幅；totem_kill 輕微翠綠閃光+金色浮動文字；totem_end 翠綠閃光+全服廣播橫幅+結算彈窗）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_luck_totem 訊號 + _handle_lucky_luck_totem
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyLuckTotemPanelScript（layer=48）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T233 映射
+  - 圖騰設計：全服 ×1.3 加成；觸發者額外 ×1.5；持續 15 秒；個人冷卻 30 秒；全服冷卻 50 秒
+  - 結算設計：15 秒後廣播總擊破數/總獎勵；全服廣播+公告（翠綠色）
+  - 視覺設計：翠綠幸運主題（#00FF88 翠綠 + #FFD700 金 + #00BFFF 天藍 + #7FFF00 草綠）；圖騰指示器（右上角，全服×1.3/個人×1.5 雙行顯示）；右側豎向計時條（x=-338 與其他計時條錯開）；結算彈窗右側滑入（含觸發者/總擊破數/總獎勵）
+  - build/vet 全部通過（零錯誤零警告）
+  - T233 精靈圖：翠綠幸運圖騰魚（四葉草+圖騰符文+翠綠魚身+金色幸運光點+翠綠光暈）
 - **DAY-274 更新（自主觸發）：** 幸運命運預言魚系統（Lucky Fortune Prophecy Fish）✅
   - **業界依據：** Lucky Fish by AbraCadabra（2026-05-16）crash mechanic + 倍率上升機制進化版，2026 年最新「預言門檻+成真爆發」機制
   - **設計：** 擊破 T232 後，Server 預言「下一條被擊破的魚倍率門檻」（預言值 = 隨機 ×2.0 到 ×8.0，6 個等級）；玩家在 20 秒內擊破任何目標：若實際倍率 ≥ 預言值 → 「預言成真」×3.0 加成（個人）；若實際倍率 < 預言值 → 「預言落空」×1.2 安慰獎（個人）；預言值越高，成真機率越低但更有挑戰感；個人冷卻 22 秒；全服冷卻 38 秒

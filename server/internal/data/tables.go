@@ -884,6 +884,14 @@ var Targets = map[string]*TargetDef{
 	//   - 預言值越高，成真機率越低但更有挑戰感；個人冷卻 22 秒；全服冷卻 38 秒
 	"T232": {ID: "T232", Name: "幸運命運預言魚", Type: TargetTypeSpecial, MultiplierMin: 69, MultiplierMax: 129, HP: 109, SpawnWeight: 2, Speed: 13, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_fortune_prophecy"},
 
+	// T233 幸運幸運圖騰魚（DAY-275）— Fish It Luck Totem（2026）「全場幸運加成」機制進化版
+	//   - 擊破 T233 後，場上出現「幸運圖騰」（持續 15 秒）
+	//   - 圖騰期間：全服所有玩家每次擊破任何目標 → ×1.3 全服加成
+	//   - 觸發玩家額外獲得 ×1.5 個人加成（疊加在全服加成上）
+	//   - 15 秒後圖騰消失，廣播結算（總擊破數/總獎勵）
+	//   - 個人冷卻 30 秒；全服冷卻 50 秒
+	"T233": {ID: "T233", Name: "幸運幸運圖騰魚", Type: TargetTypeSpecial, MultiplierMin: 70, MultiplierMax: 131, HP: 110, SpawnWeight: 2, Speed: 12, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_luck_totem"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

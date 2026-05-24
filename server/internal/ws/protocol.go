@@ -615,6 +615,7 @@ const (
 	MsgLuckyQualityMutation        MessageType = "lucky_quality_mutation"                // 幸運品質突變魚廣播（Server→Client，DAY-272）
 	MsgLuckyResonanceWave          MessageType = "lucky_resonance_wave"                  // 幸運共鳴波魚廣播（Server→Client，DAY-273）
 	MsgLuckyFortuneProphecy        MessageType = "lucky_fortune_prophecy"                // 幸運命運預言魚廣播（Server→Client，DAY-274）
+	MsgLuckyLuckTotem              MessageType = "lucky_luck_totem"                      // 幸運幸運圖騰魚廣播（Server→Client，DAY-275）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6294,4 +6295,22 @@ type LuckyFortuneProphecyPayload struct {
 	BonusReward   int     `json:"bonus_reward,omitempty"`   // 額外獎勵
 	TargetName    string  `json:"target_name,omitempty"`    // 擊破目標名稱
 	ExpiresIn     int     `json:"expires_in,omitempty"`     // 剩餘秒數
+}
+
+// LuckyLuckTotemPayload 幸運幸運圖騰魚廣播（Server → Client，DAY-275）
+// Event 類型：
+//   - totem_start：圖騰開始（個人，PlayerID/PlayerName/GlobalMult/PersonalMult/DurationSec）
+//   - totem_broadcast：全服廣播（PlayerName/GlobalMult/DurationSec）
+//   - totem_kill：圖騰期間擊破通知（個人，PlayerID/PlayerName/BonusReward）
+//   - totem_end：圖騰結束（全服，PlayerName/TotalKills/TotalReward）
+type LuckyLuckTotemPayload struct {
+	Event         string  `json:"event"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	GlobalMult    float64 `json:"global_mult,omitempty"`    // 全服加成倍率
+	PersonalMult  float64 `json:"personal_mult,omitempty"`  // 觸發者個人額外加成
+	DurationSec   int     `json:"duration_sec,omitempty"`   // 圖騰持續秒數
+	BonusReward   int     `json:"bonus_reward,omitempty"`   // 圖騰期間額外獎勵
+	TotalKills    int     `json:"total_kills,omitempty"`    // 圖騰期間總擊破數
+	TotalReward   int     `json:"total_reward,omitempty"`   // 圖騰期間總獎勵
 }

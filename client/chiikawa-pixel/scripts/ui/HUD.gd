@@ -358,6 +358,7 @@ func _ready() -> void:
 	_init_lucky_quality_mutation_panel()    # 幸運品質突變魚系統面板（DAY-272）
 	_init_lucky_resonance_wave_panel()      # 幸運共鳴波魚系統面板（DAY-273）
 	_init_lucky_fortune_prophecy_panel()    # 幸運命運預言魚系統面板（DAY-274）
+	_init_lucky_luck_totem_panel()          # 幸運幸運圖騰魚系統面板（DAY-275）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5175,3 +5176,19 @@ func _init_lucky_fortune_prophecy_panel() -> void:
 func _on_lucky_fortune_prophecy(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_fortune_prophecy_panel):
 		_lucky_fortune_prophecy_panel.handle(data)
+
+const LuckyLuckTotemPanelScript = preload("res://scripts/ui/LuckyLuckTotemPanel.gd")
+var _lucky_luck_totem_panel = null
+
+func _init_lucky_luck_totem_panel() -> void:
+	var panel = LuckyLuckTotemPanelScript.new()
+	panel.name = "LuckyLuckTotemPanel"
+	panel.layer = 48
+	add_child(panel)
+	_lucky_luck_totem_panel = panel
+	if GameManager.has_signal("lucky_luck_totem"):
+		GameManager.lucky_luck_totem.connect(_on_lucky_luck_totem)
+
+func _on_lucky_luck_totem(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_luck_totem_panel):
+		_lucky_luck_totem_panel.handle(data)
