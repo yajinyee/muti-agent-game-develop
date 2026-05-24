@@ -30,11 +30,13 @@ const (
 	MsgAnnounce     = "announce"
 
 	// 幸運特殊魚事件
-	MsgLuckyChainLightning = "lucky_chain_lightning" // T106 連鎖閃電
-	MsgLuckyCrabTorpedo    = "lucky_crab_torpedo"    // T107 螃蟹魚雷
-	MsgLuckyVortex         = "lucky_vortex"          // T108 渦旋海葵
-	MsgLuckyGoldenDragon   = "lucky_golden_dragon"   // T109 黃金龍魚輪盤
-	MsgLuckyThunderLobster = "lucky_thunder_lobster" // T110 雷霆龍蝦
+	MsgLuckyChainLightning  = "lucky_chain_lightning"  // T106 連鎖閃電
+	MsgLuckyCrabTorpedo     = "lucky_crab_torpedo"     // T107 螃蟹魚雷
+	MsgLuckyVortex          = "lucky_vortex"           // T108 渦旋海葵
+	MsgLuckyGoldenDragon    = "lucky_golden_dragon"    // T109 黃金龍魚輪盤
+	MsgLuckyThunderLobster  = "lucky_thunder_lobster"  // T110 雷霆龍蝦
+	MsgLuckyAwakenedPhoenix = "lucky_awakened_phoenix" // T111 覺醒鳳凰
+	MsgLuckyShockwaveBomb   = "lucky_shockwave_bomb"   // T112 全場震盪
 )
 
 // ── Envelope ─────────────────────────────────────────────────
@@ -222,4 +224,24 @@ type LuckyThunderLobsterPayload struct {
 	TimeLeft    float64 `json:"time_left"`    // 自動射擊剩餘時間
 	KillCount   int     `json:"kill_count"`   // 已擊破數
 	TotalReward int     `json:"total_reward"`
+}
+
+// LuckyAwakenedPhoenixPayload T111 覺醒鳳凰
+type LuckyAwakenedPhoenixPayload struct {
+	Event       string  `json:"event"`        // "awaken_start" | "power_up" | "perfect_awaken" | "perfect_end" | "awaken_end"
+	TriggerID   string  `json:"trigger_id"`
+	TriggerName string  `json:"trigger_name"`
+	PowerUpMult float64 `json:"power_up_mult,omitempty"` // 本次 Power Up 倍率（6-10x）
+	ShotsLeft   int     `json:"shots_left,omitempty"`    // 剩餘 Power Up 次數
+	HitCount    int     `json:"hit_count,omitempty"`     // 命中次數
+	TotalReward int     `json:"total_reward,omitempty"`
+}
+
+// LuckyShockwaveBombPayload T112 全場震盪
+type LuckyShockwaveBombPayload struct {
+	Event       string `json:"event"`        // "shockwave_start" | "shockwave_hit" | "super_shockwave" | "super_end" | "power_end"
+	TriggerID   string `json:"trigger_id"`
+	TriggerName string `json:"trigger_name"`
+	HitCount    int    `json:"hit_count,omitempty"`    // 震盪命中目標數
+	TotalReward int    `json:"total_reward,omitempty"`
 }

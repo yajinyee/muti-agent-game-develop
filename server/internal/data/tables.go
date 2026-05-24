@@ -125,6 +125,10 @@ var Targets = []TargetDef{
 	{ID: "T109", Name: "幸運黃金龍魚", Type: TypeSpecial, MinMult: 80, MaxMult: 350, HP: 120, SpawnWeight: 3, Speed: 70, Lifetime: 14, LaborGain: 20, Behavior: BehaviorLinear, DiffFactor: 1.0},
 	// T110 幸運雷霆龍蝦：擊破後 15 秒自動射擊模式，全場 AOE 傷害
 	{ID: "T110", Name: "幸運雷霆龍蝦", Type: TypeSpecial, Multiplier: 100, HP: 140, SpawnWeight: 2, Speed: 50, Lifetime: 16, LaborGain: 25, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T111 幸運覺醒鳳凰魚：擊破後觸發覺醒模式，下 5 次攻擊每次 Power Up 6x-10x
+	{ID: "T111", Name: "幸運覺醒鳳凰魚", Type: TypeSpecial, Multiplier: 90, HP: 110, SpawnWeight: 4, Speed: 75, Lifetime: 14, LaborGain: 18, Behavior: BehaviorLinear, DiffFactor: 0.95},
+	// T112 幸運全場震盪魚：擊破後全場 HP -35%，觸發玩家 10 秒攻擊力 ×2.0
+	{ID: "T112", Name: "幸運全場震盪魚", Type: TypeSpecial, Multiplier: 75, HP: 95, SpawnWeight: 5, Speed: 65, Lifetime: 13, LaborGain: 15, Behavior: BehaviorLinear, DiffFactor: 0.9},
 
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},

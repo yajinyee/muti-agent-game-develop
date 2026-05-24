@@ -54,6 +54,9 @@ func _ready() -> void:
 	GameManager.lucky_golden_dragon.connect(_on_lucky_golden_dragon)
 	GameManager.lucky_thunder_lobster.connect(_on_lucky_thunder_lobster)
 	GameManager.announce.connect(_on_announce)
+	# DAY-293 新增幸運特殊魚訊號連接
+	GameManager.lucky_awakened_phoenix.connect(_on_lucky_awakened_phoenix)
+	GameManager.lucky_shockwave_bomb.connect(_on_lucky_shockwave_bomb)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -431,3 +434,51 @@ func _process_announce_queue() -> void:
 	var tween = create_tween()
 	tween.tween_interval(item["duration"] + 0.2)
 	tween.tween_callback(_process_announce_queue)
+
+# ── DAY-293 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_awakened_phoenix(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"awaken_start":
+			_show_lucky_banner("🔥 %s 觸發覺醒鳳凰！下 5 次攻擊 Power Up！" % name, Color(1.0, 0.42, 0.21))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.35)
+		"power_up":
+			var mult = data.get("power_up_mult", 6.0)
+			var shots = data.get("shots_left", 0)
+			_show_lucky_banner("🔥 Power Up ×%.0f！剩餘 %d 次" % [mult, shots], Color(1.0, 0.6, 0.2), 1.0)
+		"perfect_awaken":
+			_show_lucky_banner("🔥✨ 完美覺醒！%s 全服 ×2.0 加成 8 秒！" % name, Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.6)
+		"perfect_end":
+			_show_lucky_banner("🔥 完美覺醒加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"awaken_end":
+			var reward = data.get("total_reward", 0)
+			var hits = data.get("hit_count", 0)
+			_show_lucky_banner("🔥 覺醒結束！命中 %d 次，獎勵 %d！" % [hits, reward], Color(1.0, 0.7, 0.3))
+			if reward > 0:
+				_show_reward_popup(reward, float(hits))
+
+func _on_lucky_shockwave_bomb(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"shockwave_start":
+			_show_lucky_banner("💥 %s 觸發全場震盪！全場 HP -35%！" % name, Color(1.0, 0.27, 0.0))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.7)
+		"shockwave_hit":
+			var hits = data.get("hit_count", 0)
+			var reward = data.get("total_reward", 0)
+			_show_lucky_banner("💥 震盪命中 %d 個目標！獎勵 %d！" % [hits, reward], Color(1.0, 0.5, 0.2))
+			if reward > 0:
+				_show_reward_popup(reward, float(hits) * 0.5)
+		"super_shockwave":
+			_show_lucky_banner("💥🌊 超級震盪！%s 全服 ×1.8 加成 6 秒！" % name, Color(1.0, 0.42, 0.21), 3.5)
+			ScreenShake.add_trauma(0.8)
+		"super_end":
+			_show_lucky_banner("💥 超級震盪加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"power_end":
+			_show_lucky_banner("💥 %s 的震盪強化結束" % name, Color(0.6, 0.6, 0.6), 1.5)

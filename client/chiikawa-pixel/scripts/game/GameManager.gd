@@ -19,6 +19,9 @@ signal lucky_crab_torpedo(data: Dictionary)
 signal lucky_vortex(data: Dictionary)
 signal lucky_golden_dragon(data: Dictionary)
 signal lucky_thunder_lobster(data: Dictionary)
+# DAY-293 新增幸運特殊魚訊號
+signal lucky_awakened_phoenix(data: Dictionary)
+signal lucky_shockwave_bomb(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -70,6 +73,11 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_golden_dragon", payload)
 		"lucky_thunder_lobster":
 			emit_signal("lucky_thunder_lobster", payload)
+		# DAY-293 新增幸運特殊魚事件
+		"lucky_awakened_phoenix":
+			emit_signal("lucky_awakened_phoenix", payload)
+		"lucky_shockwave_bomb":
+			emit_signal("lucky_shockwave_bomb", payload)
 		"pong":
 			pass
 		"error":

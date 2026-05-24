@@ -52,6 +52,8 @@ type Game struct {
 	luckyVortex          *luckyVortexManager
 	luckyGoldenDragon    *luckyGoldenDragonManager
 	luckyThunderLobster  *luckyThunderLobsterManager
+	luckyAwakenedPhoenix *luckyAwakenedPhoenixManager
+	luckyShockwaveBomb   *luckyShockwaveBombManager
 
 	lastTick time.Time
 }
@@ -67,11 +69,13 @@ func NewGame(hub *ws.Hub) *Game {
 		lastTick:   time.Now(),
 
 		// 初始化幸運特殊魚系統
-		luckyChainLightning: newLuckyChainLightningManager(),
-		luckyCrabTorpedo:    newLuckyCrabTorpedoManager(),
-		luckyVortex:         newLuckyVortexManager(),
-		luckyGoldenDragon:   newLuckyGoldenDragonManager(),
-		luckyThunderLobster: newLuckyThunderLobsterManager(),
+		luckyChainLightning:  newLuckyChainLightningManager(),
+		luckyCrabTorpedo:     newLuckyCrabTorpedoManager(),
+		luckyVortex:          newLuckyVortexManager(),
+		luckyGoldenDragon:    newLuckyGoldenDragonManager(),
+		luckyThunderLobster:  newLuckyThunderLobsterManager(),
+		luckyAwakenedPhoenix: newLuckyAwakenedPhoenixManager(),
+		luckyShockwaveBomb:   newLuckyShockwaveBombManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -372,6 +376,21 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.tryLuckyGoldenDragon(playerID, killerName)
 			case isLuckyThunderLobsterFish(t.Def.ID):
 				g.tryLuckyThunderLobster(playerID, killerName)
+			case isLuckyAwakenedPhoenixFish(t.Def.ID):
+				g.tryLuckyAwakenedPhoenix(playerID, killerName)
+			case isLuckyShockwaveBombFish(t.Def.ID):
+				g.tryLuckyShockwaveBomb(playerID, killerName)
+			}
+
+			// 覺醒鳳凰 Power Up 消耗（命中任何目標時）
+			if g.luckyAwakenedPhoenix.isAwakenedPhoenixActive(playerID) {
+				powerUpMult, powerReward, isDone := g.luckyAwakenedPhoenix.consumeAwakenedPhoenixShot(playerID, true, bet.BetCost)
+				if powerReward > 0 {
+					p.AddCoins(powerReward)
+					reward += powerReward
+					result.Reward = reward
+					g.notifyAwakenedPhoenixShot(playerID, killerName, powerUpMult, powerReward, isDone)
+				}
 			}
 		}
 
