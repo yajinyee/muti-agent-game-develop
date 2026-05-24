@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://o6hsisgmrxlbw"
-path="res://.godot/imported/T115_rainbow_phoenix.png-dc448e3feb2b0e4752c7c7372c72c5fd.ctex"
+uid="uid://dk86qmou3cx1m"
+path="res://.godot/imported/T115_rainbow_phoenix.png-630cec4da5ed50156eb105975edb1300.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T115_rainbow_phoenix.png"
-dest_files=["res://.godot/imported/T115_rainbow_phoenix.png-dc448e3feb2b0e4752c7c7372c72c5fd.ctex"]
+dest_files=["res://.godot/imported/T115_rainbow_phoenix.png-630cec4da5ed50156eb105975edb1300.ctex"]
 
 [params]
 

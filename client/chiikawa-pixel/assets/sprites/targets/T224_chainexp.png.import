@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2k54lob7q2uoa"
-path="res://.godot/imported/T224_chainexp.png-7ae2304f780eb121d473ce2147a9dba2.ctex"
+uid="uid://jb1havgsnqdw"
+path="res://.godot/imported/T224_chainexp.png-489f5614290f1dc7be3cd4d840198551.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T224_chainexp.png"
-dest_files=["res://.godot/imported/T224_chainexp.png-7ae2304f780eb121d473ce2147a9dba2.ctex"]
+dest_files=["res://.godot/imported/T224_chainexp.png-489f5614290f1dc7be3cd4d840198551.ctex"]
 
 [params]
 

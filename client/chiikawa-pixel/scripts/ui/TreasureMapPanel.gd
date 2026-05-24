@@ -1,29 +1,29 @@
-# TreasureMapPanel.gd — 寶藏地圖面板（DAY-122）
-# 業界依據：bsu.edu（2026）確認「Hidden Treasure Unlocks」是 2026 年捕魚機最新趨勢
-# 3×3 賓果式地圖，擊破特定目標物填滿格子，集滿一行/列/對角線觸發寶藏獎勵
+﻿# TreasureMapPanel.gd ??撖嗉??啣??Ｘ嚗AY-122嚗?
+# 璆剔?靘?嚗su.edu嚗?026嚗Ⅱ隤idden Treasure Unlocks? 2026 撟湔?擳???啗隅??
+# 3?3 鞈?撘????孵??格??拙‵皛踵摮??遛銝銵???撠?蝺孛?澆窄????
 extends Control
 
-# 格子大小和間距
+# ?澆?憭批???頝?
 const CELL_SIZE = 72
 const CELL_GAP = 6
 const GRID_OFFSET_X = 20
 const GRID_OFFSET_Y = 60
 
-# 格子顏色
-const COLOR_EMPTY   = Color(0.12, 0.15, 0.25, 0.9)   # 未填滿：深藍灰
-const COLOR_FILLED  = Color(0.15, 0.55, 0.25, 0.95)  # 已填滿：深綠
-const COLOR_LINE    = Color(0.8, 0.65, 0.0, 1.0)     # 完成行：金色
+# ?澆?憿
+const COLOR_EMPTY   = Color(0.12, 0.15, 0.25, 0.9)   # ?芸‵皛選?瘛梯???
+const COLOR_FILLED  = Color(0.15, 0.55, 0.25, 0.95)  # 撌脣‵皛選?瘛梁?
+const COLOR_LINE    = Color(0.8, 0.65, 0.0, 1.0)     # 摰?銵??
 
 var _panel_bg: Control = null
-var _cell_nodes: Array = []  # 9 個格子節點
+var _cell_nodes: Array = []  # 9 ?摮?暺?
 var _is_open: bool = false
 var _current_data: Dictionary = {}
 
 func _ready():
-	# 預設隱藏
+	# ?身?梯?
 	visible = false
 
-	# 連接 GameManager 訊號
+	# ?? GameManager 閮?
 	if GameManager.has_signal("treasure_map_updated"):
 		GameManager.treasure_map_updated.connect(_on_treasure_map_updated)
 	if GameManager.has_signal("treasure_map_line"):
@@ -34,35 +34,35 @@ func _ready():
 	_build_panel()
 
 func _build_panel() -> void:
-	# 主面板背景
+	# 銝駁?輯???
 	_panel_bg = Control.new()
 	_panel_bg.z_index = 80
 	add_child(_panel_bg)
 
 	var bg = ColorRect.new()
 	bg.size = Vector2(280, 340)
-	bg.position = Vector2(490, 190)  # 畫面中央偏左
+	bg.position = Vector2(490, 190)  # ?恍銝剖亢?椰
 	bg.color = Color(0.06, 0.08, 0.16, 0.96)
 	_panel_bg.add_child(bg)
 
-	# 標題
+	# 璅?
 	var title = Label.new()
-	title.text = "🗺️ 寶藏地圖"
+	title.text = "?儭?撖嗉??啣?"
 	title.position = Vector2(500, 198)
 	title.add_theme_font_size_override("font_size", 20)
 	title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	_panel_bg.add_child(title)
 
-	# 副標題（今日進度）
+	# ?舀?憿?隞?脣漲嚗?
 	var subtitle = Label.new()
 	subtitle.name = "Subtitle"
-	subtitle.text = "擊破目標物填滿格子"
+	subtitle.text = "??格??拙‵皛踵摮?"
 	subtitle.position = Vector2(500, 222)
 	subtitle.add_theme_font_size_override("font_size", 13)
 	subtitle.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
 	_panel_bg.add_child(subtitle)
 
-	# 建立 3×3 格子
+	# 撱箇? 3?3 ?澆?
 	_cell_nodes.clear()
 	for r in range(3):
 		for c in range(3):
@@ -70,17 +70,17 @@ func _build_panel() -> void:
 			_panel_bg.add_child(cell)
 			_cell_nodes.append(cell)
 
-	# 獎勵說明
+	# ?隤芣?
 	var reward_lbl = Label.new()
-	reward_lbl.text = "一行/列/對角線 → 50×投注\n集滿全圖 → 500×投注 🏆"
+	reward_lbl.text = "銝銵???撠?蝺???50??釣\n?遛?典? ??500??釣 ??"
 	reward_lbl.position = Vector2(500, 318)
 	reward_lbl.add_theme_font_size_override("font_size", 12)
 	reward_lbl.add_theme_color_override("font_color", Color(0.7, 0.7, 0.5))
 	_panel_bg.add_child(reward_lbl)
 
-	# 關閉按鈕
+	# ????
 	var close_btn = Button.new()
-	close_btn.text = "✕"
+	close_btn.text = "??"
 	close_btn.position = Vector2(748, 196)
 	close_btn.size = Vector2(24, 24)
 	close_btn.add_theme_font_size_override("font_size", 14)
@@ -94,7 +94,7 @@ func _create_cell(row: int, col: int) -> Control:
 	var x = 500 + GRID_OFFSET_X + col * (CELL_SIZE + CELL_GAP)
 	var y = 240 + GRID_OFFSET_Y + row * (CELL_SIZE + CELL_GAP)
 
-	# 格子背景
+	# ?澆??
 	var bg = ColorRect.new()
 	bg.name = "BG"
 	bg.size = Vector2(CELL_SIZE, CELL_SIZE)
@@ -102,7 +102,7 @@ func _create_cell(row: int, col: int) -> Control:
 	bg.color = COLOR_EMPTY
 	cell.add_child(bg)
 
-	# 格子圖示
+	# ?澆??內
 	var icon_lbl = Label.new()
 	icon_lbl.name = "Icon"
 	icon_lbl.text = "?"
@@ -111,7 +111,7 @@ func _create_cell(row: int, col: int) -> Control:
 	icon_lbl.add_theme_color_override("font_color", Color(0.5, 0.5, 0.6))
 	cell.add_child(icon_lbl)
 
-	# 格子名稱
+	# ?澆??迂
 	var name_lbl = Label.new()
 	name_lbl.name = "Name"
 	name_lbl.text = ""
@@ -120,10 +120,10 @@ func _create_cell(row: int, col: int) -> Control:
 	name_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.7))
 	cell.add_child(name_lbl)
 
-	# 填滿勾選標記（預設隱藏）
+	# 憛急遛?暸璅?嚗?閮剝??
 	var check = Label.new()
 	check.name = "Check"
-	check.text = "✓"
+	check.text = "??"
 	check.position = Vector2(x + 48, y + 4)
 	check.add_theme_font_size_override("font_size", 18)
 	check.add_theme_color_override("font_color", Color(0.3, 1.0, 0.4))
@@ -140,12 +140,12 @@ func _update_grid(data: Dictionary) -> void:
 	var cells = data.get("cells", [])
 	var filled_count = data.get("filled_count", 0)
 
-	# 更新副標題
+	# ?湔?舀?憿?
 	var subtitle = _panel_bg.get_node_or_null("Subtitle")
 	if subtitle:
-		subtitle.text = "今日進度：%d/9 格" % filled_count
+		subtitle.text = "隞?脣漲嚗?d/9 ?? % filled_count"
 
-	# 更新每個格子
+	# ?湔瘥摮?
 	for cell_data in cells:
 		var r = cell_data.get("row", 0)
 		var c = cell_data.get("col", 0)
@@ -158,24 +158,24 @@ func _update_grid(data: Dictionary) -> void:
 		var icon = cell_data.get("icon", "?")
 		var name_text = cell_data.get("name", "")
 
-		# 更新圖示
+		# ?湔?內
 		var icon_lbl = cell.get_node_or_null("Icon")
 		if icon_lbl:
 			icon_lbl.text = icon
 			icon_lbl.add_theme_color_override("font_color",
 				Color(1.0, 1.0, 1.0) if filled else Color(0.5, 0.5, 0.6))
 
-		# 更新名稱
+		# ?湔?迂
 		var name_lbl = cell.get_node_or_null("Name")
 		if name_lbl:
 			name_lbl.text = name_text
 
-		# 更新背景顏色
+		# ?湔?憿
 		var bg = cell.get_node_or_null("BG")
 		if bg:
 			bg.color = COLOR_FILLED if filled else COLOR_EMPTY
 
-		# 更新勾選標記
+		# ?湔?暸璅?
 		var check = cell.get_node_or_null("Check")
 		if check:
 			check.visible = filled
@@ -183,24 +183,24 @@ func _update_grid(data: Dictionary) -> void:
 func _on_treasure_map_line(data: Dictionary) -> void:
 	var line_type = data.get("line_type", "")
 	var reward = data.get("reward", 0)
-	var message = data.get("message", "完成一條線！")
+	var message = data.get("message", "")"
 
-	# 顯示完成通知
+	# 憿舐內摰??
 	_show_reward_popup(message, reward, Color(1.0, 0.85, 0.2))
 
-	# 高亮完成的行/列/對角線
+	# 擃漁摰???/??撠?蝺?
 	_highlight_line(line_type)
 
 func _on_treasure_map_full(data: Dictionary) -> void:
 	var reward = data.get("reward", 0)
-	var message = data.get("message", "傳說寶藏！")
+	var message = data.get("message", "?唾牧撖嗉?嚗?)"
 
-	# 顯示大獎通知（金色閃光）
+	# 憿舐內憭抒??嚗??脤???
 	_show_reward_popup(message, reward, Color(1.0, 0.7, 0.0))
 	_show_full_map_effect()
 
 func _highlight_line(line_type: String) -> void:
-	# 依行/列/對角線類型高亮對應格子
+	# 靘?/??撠?蝺???鈭桀??摮?
 	var indices: Array = []
 	match line_type:
 		"row0": indices = [0, 1, 2]
@@ -224,7 +224,7 @@ func _highlight_line(line_type: String) -> void:
 
 func _show_reward_popup(message: String, reward: int, color: Color) -> void:
 	var popup = Label.new()
-	popup.text = "%s\n+%d 金幣" % [message, reward]
+	popup.text = "%s\n+%d ?馳" % [message, reward]
 	popup.position = Vector2(490, 160)
 	popup.add_theme_font_size_override("font_size", 18)
 	popup.add_theme_color_override("font_color", color)
@@ -237,7 +237,7 @@ func _show_reward_popup(message: String, reward: int, color: Color) -> void:
 	tween.tween_callback(popup.queue_free)
 
 func _show_full_map_effect() -> void:
-	# 整張地圖金色閃光
+	# ?游撐?啣????
 	for cell in _cell_nodes:
 		var bg = cell.get_node_or_null("BG")
 		if bg:
@@ -248,7 +248,7 @@ func _show_full_map_effect() -> void:
 func show_panel() -> void:
 	visible = true
 	_is_open = true
-	# 請求最新地圖狀態
+	# 隢???啣????
 	if NetworkManager.has_method("send_get_treasure_map"):
 		NetworkManager.send_get_treasure_map()
 

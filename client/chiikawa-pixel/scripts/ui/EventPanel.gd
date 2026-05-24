@@ -1,21 +1,21 @@
-## EventPanel.gd — 限時活動面板（DAY-079）
-## 顯示當前限時活動、倒數計時、效果說明
-## 位置：TopBar 上（常駐顯示，有活動時高亮）
+﻿## EventPanel.gd ????瘣餃??Ｘ嚗AY-079嚗?
+## 憿舐內?嗅???瘣餃??閮????牧??
+## 雿蔭嚗opBar 銝?撣賊?憿舐內嚗?瘣餃???鈭殷?
 extends Node2D
 
-# ---- 常數 ----
+# ---- 撣豢 ----
 const PANEL_WIDTH  := 260
 const PANEL_HEIGHT := 80
 
-# 活動類型顏色
+# 瘣餃?憿?憿
 const EVENT_COLORS := {
-	"golden_hour":  Color(1.00, 0.85, 0.10),  # 黃金
-	"fish_frenzy":  Color(0.00, 0.75, 1.00),  # 藍色
-	"lucky_moment": Color(0.00, 1.00, 0.50),  # 綠色
-	"none":         Color(0.40, 0.40, 0.40),  # 灰色
+	"golden_hour":  Color(1.00, 0.85, 0.10),  # 暺?
+	"fish_frenzy":  Color(0.00, 0.75, 1.00),  # ?
+	"lucky_moment": Color(0.00, 1.00, 0.50),  # 蝬
+	"none":         Color(0.40, 0.40, 0.40),  # ?啗
 }
 
-# ---- 節點引用 ----
+# ---- 蝭暺???----
 var _pixel_font: Font = null
 var _is_open: bool = false
 var _toggle_btn: Button = null
@@ -27,12 +27,12 @@ var _timer_label: Label = null
 var _effect_label: Label = null
 var _glow_rect: ColorRect = null
 
-# ---- 活動資料 ----
+# ---- 瘣餃?鞈? ----
 var _event_data: Dictionary = {
 	"type": "none",
 	"name": "",
 	"description": "",
-	"icon": "⏰",
+	"icon": "??,"
 	"color": "#666666",
 	"is_active": false,
 	"end_at": 0,
@@ -42,7 +42,7 @@ var _event_data: Dictionary = {
 	"kill_chance_add": 0.0
 }
 
-# ---- 初始化 ----
+# ---- ????----
 func _ready() -> void:
 	if ResourceLoader.exists("res://assets/fonts/pixel8.fnt"):
 		_pixel_font = load("res://assets/fonts/pixel8.fnt")
@@ -55,7 +55,7 @@ func setup(font: Font) -> void:
 		_pixel_font = font
 
 func _process(_delta: float) -> void:
-	# 每秒更新倒數計時
+	# 瘥??湔?閮?
 	if _event_data.get("is_active", false) and _timer_label:
 		var end_at_ms: int = _event_data.get("end_at", 0)
 		if end_at_ms > 0:
@@ -65,24 +65,24 @@ func _process(_delta: float) -> void:
 				var secs := remaining_ms / 1000
 				var mins := secs / 60
 				var s := secs % 60
-				_timer_label.text = "⏱ %02d:%02d" % [mins, s]
+				_timer_label.text = "??%02d:%02d" % [mins, s]
 			else:
-				_timer_label.text = "⏱ 結束中..."
+				_timer_label.text = "??蝯?銝?.."
 
-## 建立折疊按鈕（TopBar 上）
+## 撱箇?????嚗opBar 銝?
 func _build_toggle_btn() -> void:
 	_toggle_btn = Button.new()
-	_toggle_btn.text = "⏰"
+	_toggle_btn.text = "??"
 	_toggle_btn.size = Vector2(32, 24)
 	_toggle_btn.position = Vector2(0, 0)
 	_toggle_btn.flat = true
-	_toggle_btn.tooltip_text = "限時活動"
+	_toggle_btn.tooltip_text = "??瘣餃?"
 	if _pixel_font:
 		_toggle_btn.add_theme_font_override("font", _pixel_font)
 		_toggle_btn.add_theme_font_size_override("font_size", 14)
 	add_child(_toggle_btn)
 
-## 建立主面板（預設隱藏）
+## 撱箇?銝駁?選??身?梯?嚗?
 func _build_panel() -> void:
 	_panel_bg = ColorRect.new()
 	_panel_bg.position = Vector2(-PANEL_WIDTH + 32, 28)
@@ -91,7 +91,7 @@ func _build_panel() -> void:
 	_panel_bg.visible = false
 	add_child(_panel_bg)
 
-	# 光暈邊框（活動時顯示）
+	# ????嚗暑??憿舐內嚗?
 	_glow_rect = ColorRect.new()
 	_glow_rect.position = Vector2(-1, -1)
 	_glow_rect.size = Vector2(PANEL_WIDTH + 2, PANEL_HEIGHT + 2)
@@ -99,10 +99,10 @@ func _build_panel() -> void:
 	_glow_rect.z_index = -1
 	_panel_bg.add_child(_glow_rect)
 
-	# 活動圖示 + 名稱
+	# 瘣餃??內 + ?迂
 	_event_icon_label = Label.new()
 	_event_icon_label.position = Vector2(8, 4)
-	_event_icon_label.text = "⏰"
+	_event_icon_label.text = "??"
 	_event_icon_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	if _pixel_font:
 		_event_icon_label.add_theme_font_override("font", _pixel_font)
@@ -111,14 +111,14 @@ func _build_panel() -> void:
 
 	_event_name_label = Label.new()
 	_event_name_label.position = Vector2(32, 6)
-	_event_name_label.text = "目前無活動"
+	_event_name_label.text = "?桀??⊥暑??"
 	_event_name_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	if _pixel_font:
 		_event_name_label.add_theme_font_override("font", _pixel_font)
 		_event_name_label.add_theme_font_size_override("font_size", 12)
 	_panel_bg.add_child(_event_name_label)
 
-	# 倒數計時
+	# ?閮?
 	_timer_label = Label.new()
 	_timer_label.position = Vector2(PANEL_WIDTH - 80, 6)
 	_timer_label.text = ""
@@ -128,17 +128,17 @@ func _build_panel() -> void:
 		_timer_label.add_theme_font_size_override("font_size", 11)
 	_panel_bg.add_child(_timer_label)
 
-	# 活動描述
+	# 瘣餃??膩
 	_event_desc_label = Label.new()
 	_event_desc_label.position = Vector2(8, 26)
-	_event_desc_label.text = "等待下一個活動..."
+	_event_desc_label.text = "蝑?銝??暑??.."
 	_event_desc_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	if _pixel_font:
 		_event_desc_label.add_theme_font_override("font", _pixel_font)
 		_event_desc_label.add_theme_font_size_override("font_size", 10)
 	_panel_bg.add_child(_event_desc_label)
 
-	# 效果說明
+	# ??隤芣?
 	_effect_label = Label.new()
 	_effect_label.position = Vector2(8, 44)
 	_effect_label.text = ""
@@ -148,7 +148,7 @@ func _build_panel() -> void:
 		_effect_label.add_theme_font_size_override("font_size", 10)
 	_panel_bg.add_child(_effect_label)
 
-## 連接訊號
+## ??閮?
 func _connect_signals() -> void:
 	if _toggle_btn:
 		_toggle_btn.pressed.connect(_on_toggle_pressed)
@@ -156,30 +156,30 @@ func _connect_signals() -> void:
 		if GameManager.has_signal("event_updated"):
 			GameManager.event_updated.connect(_on_event_updated)
 
-## 折疊/展開面板
+## ??/撅??Ｘ
 func _on_toggle_pressed() -> void:
 	_is_open = !_is_open
 	if _panel_bg:
 		_panel_bg.visible = _is_open
 
-## 更新活動資料
+## ?湔瘣餃?鞈?
 func _on_event_updated(data: Dictionary) -> void:
 	var was_active: bool = _event_data.get("is_active", false)
 	_event_data = data
 	_refresh_ui()
-	# 若活動剛開始，顯示通知
+	# ?交暑????嚗＊蝷粹
 	var is_active: bool = data.get("is_active", false)
 	if is_active and not was_active:
 		_show_event_start_popup(data)
 
-## 刷新 UI
+## ?瑟 UI
 func _refresh_ui() -> void:
 	if not _panel_bg:
 		return
 
 	var event_type: String = _event_data.get("type", "none")
 	var event_name: String = _event_data.get("name", "")
-	var event_icon: String = _event_data.get("icon", "⏰")
+	var event_icon: String = _event_data.get("icon", "??)"
 	var event_desc: String = _event_data.get("description", "")
 	var is_active: bool = _event_data.get("is_active", false)
 	var reward_mult: float = _event_data.get("reward_mult", 1.0)
@@ -188,68 +188,68 @@ func _refresh_ui() -> void:
 
 	var event_color: Color = EVENT_COLORS.get(event_type, Color(0.4, 0.4, 0.4))
 
-	# 更新按鈕
+	# ?湔??
 	if _toggle_btn:
 		if is_active:
 			_toggle_btn.text = event_icon
 			_toggle_btn.modulate = event_color
 		else:
-			_toggle_btn.text = "⏰"
+			_toggle_btn.text = "??"
 			_toggle_btn.modulate = Color(0.5, 0.5, 0.5)
 
-	# 更新圖示
+	# ?湔?內
 	if _event_icon_label:
 		_event_icon_label.text = event_icon
 		_event_icon_label.add_theme_color_override("font_color", event_color)
 
-	# 更新名稱
+	# ?湔?迂
 	if _event_name_label:
 		if is_active:
 			_event_name_label.text = event_name
 			_event_name_label.add_theme_color_override("font_color", event_color)
 		else:
-			_event_name_label.text = "目前無活動"
+			_event_name_label.text = "?桀??⊥暑??"
 			_event_name_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 
-	# 更新描述
+	# ?湔?膩
 	if _event_desc_label:
 		if is_active:
 			_event_desc_label.text = event_desc
 			_event_desc_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 		else:
-			_event_desc_label.text = "等待下一個活動..."
+			_event_desc_label.text = "蝑?銝??暑??.."
 			_event_desc_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 
-	# 更新效果說明
+	# ?湔??隤芣?
 	if _effect_label:
 		var effects := []
 		if reward_mult > 1.0:
-			effects.append("獎勵 ×%.1f" % reward_mult)
+			effects.append("? ?%.1f" % reward_mult)
 		if spawn_mult > 1.0:
-			effects.append("目標 ×%.1f" % spawn_mult)
+			effects.append("?格? ?%.1f" % spawn_mult)
 		if kill_add > 0:
-			effects.append("擊破率 +%.0f%%" % (kill_add * 100))
+			effects.append("???+%.0f%%" % (kill_add * 100))
 		if effects.size() > 0:
-			_effect_label.text = "效果：" + "  ".join(effects)
+			_effect_label.text = "??嚗? + "  ".join(effects)"
 			_effect_label.add_theme_color_override("font_color", event_color)
 		else:
 			_effect_label.text = ""
 
-	# 光暈效果
+	# ????
 	if _glow_rect:
 		if is_active:
 			_glow_rect.color = Color(event_color.r, event_color.g, event_color.b, 0.15)
 		else:
 			_glow_rect.color = Color(0, 0, 0, 0)
 
-	# 計時器（無活動時清空）
+	# 閮??剁??⊥暑??皜征嚗?
 	if _timer_label and not is_active:
 		_timer_label.text = ""
 
-## 顯示活動開始彈窗
+## 憿舐內瘣餃???敶?
 func _show_event_start_popup(data: Dictionary) -> void:
 	var event_name: String = data.get("name", "")
-	var event_icon: String = data.get("icon", "⏰")
+	var event_icon: String = data.get("icon", "??)"
 	var event_desc: String = data.get("description", "")
 	var event_type: String = data.get("type", "none")
 	var event_color: Color = EVENT_COLORS.get(event_type, Color(1.0, 1.0, 1.0))
@@ -270,7 +270,7 @@ func _show_event_start_popup(data: Dictionary) -> void:
 
 	var lbl := Label.new()
 	lbl.position = Vector2(8, 6)
-	lbl.text = "%s 限時活動開始！" % event_icon
+	lbl.text = "%s ??瘣餃???嚗? % event_icon"
 	lbl.add_theme_color_override("font_color", event_color)
 	if _pixel_font:
 		lbl.add_theme_font_override("font", _pixel_font)
@@ -295,7 +295,7 @@ func _show_event_start_popup(data: Dictionary) -> void:
 		lbl3.add_theme_font_size_override("font_size", 10)
 	popup.add_child(lbl3)
 
-	# 動畫：彈入 → 停留 → 淡出
+	# ?嚗??????? ??瘛∪
 	var tween := popup.create_tween()
 	popup.modulate.a = 0.0
 	tween.tween_property(popup, "modulate:a", 1.0, 0.4)

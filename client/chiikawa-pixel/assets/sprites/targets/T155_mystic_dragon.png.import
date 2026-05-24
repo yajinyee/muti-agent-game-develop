@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://i8m1w4ifeksoy"
-path="res://.godot/imported/T155_mystic_dragon.png-c9295df5c3e3049902b530b47ecfbca1.ctex"
+uid="uid://bitbq0nv8516g"
+path="res://.godot/imported/T155_mystic_dragon.png-fc17965f89f1d022e43659ee15fd8fc4.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T155_mystic_dragon.png"
-dest_files=["res://.godot/imported/T155_mystic_dragon.png-c9295df5c3e3049902b530b47ecfbca1.ctex"]
+dest_files=["res://.godot/imported/T155_mystic_dragon.png-fc17965f89f1d022e43659ee15fd8fc4.ctex"]
 
 [params]
 

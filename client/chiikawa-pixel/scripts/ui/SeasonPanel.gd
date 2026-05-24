@@ -1,14 +1,14 @@
-## SeasonPanel.gd — 賽季通行證面板（DAY-072）
-## 顯示賽季積分進度條和 10 個等級獎勵
-## 位置：TopBar 下方（可折疊）
+﻿## SeasonPanel.gd ??鞈賢迤??霅?選?DAY-072嚗?
+## 憿舐內鞈賢迤蝛??脣漲璇? 10 ??蝝???
+## 雿蔭嚗opBar 銝嚗??嚗?
 extends Node2D
 
-# ---- 常數 ----
+# ---- 撣豢 ----
 const PANEL_WIDTH  := 320
 const PANEL_HEIGHT := 200
 const BTN_SIZE     := 26
 
-# ---- 節點引用 ----
+# ---- 蝭暺???----
 var _pixel_font: Font = null
 var _is_open: bool = false
 var _toggle_btn: Button = null
@@ -19,7 +19,7 @@ var _points_label: Label = null
 var _level_label: Label = null
 var _level_buttons: Array = []
 
-# ---- 賽季資料 ----
+# ---- 鞈賢迤鞈? ----
 var _season_data: Dictionary = {
 	"season_points": 0,
 	"current_level": 0,
@@ -29,10 +29,10 @@ var _season_data: Dictionary = {
 	"levels": []
 }
 
-# ---- 訊號 ----
+# ---- 閮? ----
 signal season_level_claimed(level: int)
 
-# ---- 初始化 ----
+# ---- ????----
 func _ready() -> void:
 	if ResourceLoader.exists("res://assets/fonts/pixel8.fnt"):
 		_pixel_font = load("res://assets/fonts/pixel8.fnt")
@@ -44,20 +44,20 @@ func setup(font: Font) -> void:
 	if font:
 		_pixel_font = font
 
-## 建立折疊按鈕（TopBar 上）
+## 撱箇?????嚗opBar 銝?
 func _build_toggle_btn() -> void:
 	_toggle_btn = Button.new()
-	_toggle_btn.text = "🏆"
+	_toggle_btn.text = "??"
 	_toggle_btn.size = Vector2(32, 24)
 	_toggle_btn.position = Vector2(0, 0)
 	_toggle_btn.flat = true
-	_toggle_btn.tooltip_text = "賽季通行證"
+	_toggle_btn.tooltip_text = "鞈賢迤??霅?"
 	if _pixel_font:
 		_toggle_btn.add_theme_font_override("font", _pixel_font)
 		_toggle_btn.add_theme_font_size_override("font_size", 14)
 	add_child(_toggle_btn)
 
-## 建立主面板（預設隱藏）
+## 撱箇?銝駁?選??身?梯?嚗?
 func _build_panel() -> void:
 	_panel_bg = ColorRect.new()
 	_panel_bg.position = Vector2(-PANEL_WIDTH + 32, 28)
@@ -66,54 +66,54 @@ func _build_panel() -> void:
 	_panel_bg.visible = false
 	add_child(_panel_bg)
 
-	# 標題
+	# 璅?
 	var title := Label.new()
 	title.position = Vector2(8, 4)
-	title.text = "🏆 賽季通行證"
+	title.text = "?? 鞈賢迤??霅?"
 	title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	if _pixel_font:
 		title.add_theme_font_override("font", _pixel_font)
 		title.add_theme_font_size_override("font_size", 12)
 	_panel_bg.add_child(title)
 
-	# 積分標籤
+	# 蝛?璅惜
 	_points_label = Label.new()
 	_points_label.position = Vector2(8, 20)
-	_points_label.text = "積分：0"
+	_points_label.text = "蝛?嚗?"
 	_points_label.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
 	if _pixel_font:
 		_points_label.add_theme_font_override("font", _pixel_font)
 		_points_label.add_theme_font_size_override("font_size", 10)
 	_panel_bg.add_child(_points_label)
 
-	# 等級標籤
+	# 蝑?璅惜
 	_level_label = Label.new()
 	_level_label.position = Vector2(200, 20)
-	_level_label.text = "等級：0/10"
+	_level_label.text = "蝑?嚗?/10"
 	_level_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	if _pixel_font:
 		_level_label.add_theme_font_override("font", _pixel_font)
 		_level_label.add_theme_font_size_override("font_size", 10)
 	_panel_bg.add_child(_level_label)
 
-	# 進度條背景
+	# ?脣漲璇???
 	_progress_bar = ColorRect.new()
 	_progress_bar.position = Vector2(8, 34)
 	_progress_bar.size = Vector2(PANEL_WIDTH - 16, 10)
 	_progress_bar.color = Color(0.15, 0.1, 0.3, 0.9)
 	_panel_bg.add_child(_progress_bar)
 
-	# 進度條填充
+	# ?脣漲璇‵??
 	_progress_fill = ColorRect.new()
 	_progress_fill.position = Vector2(8, 34)
 	_progress_fill.size = Vector2(0, 10)
 	_progress_fill.color = Color(1.0, 0.85, 0.2)
 	_panel_bg.add_child(_progress_fill)
 
-	# 10 個等級按鈕（兩行，每行 5 個）
+	# 10 ??蝝????抵?嚗?銵?5 ??
 	_build_level_buttons()
 
-## 建立等級按鈕
+## 撱箇?蝑???
 func _build_level_buttons() -> void:
 	for i in range(10):
 		var row = i / 5
@@ -121,7 +121,7 @@ func _build_level_buttons() -> void:
 		var btn_x = 8 + col * (BTN_SIZE + 4)
 		var btn_y = 50 + row * (BTN_SIZE + 24)
 
-		# 按鈕背景
+		# ???
 		var btn_bg := ColorRect.new()
 		btn_bg.position = Vector2(btn_x, btn_y)
 		btn_bg.size = Vector2(BTN_SIZE, BTN_SIZE)
@@ -129,16 +129,16 @@ func _build_level_buttons() -> void:
 		btn_bg.name = "LvlBG_%d" % (i + 1)
 		_panel_bg.add_child(btn_bg)
 
-		# 等級圖示
+		# 蝑??內
 		var icon_label := Label.new()
 		icon_label.position = Vector2(btn_x + 2, btn_y + 2)
-		icon_label.text = "⭐"
+		icon_label.text = "潃?"
 		if _pixel_font:
 			icon_label.add_theme_font_override("font", _pixel_font)
 			icon_label.add_theme_font_size_override("font_size", 14)
 		_panel_bg.add_child(icon_label)
 
-		# 等級數字
+		# 蝑??詨?
 		var num_label := Label.new()
 		num_label.position = Vector2(btn_x, btn_y + BTN_SIZE + 2)
 		num_label.text = "Lv%d" % (i + 1)
@@ -148,7 +148,7 @@ func _build_level_buttons() -> void:
 			num_label.add_theme_font_size_override("font_size", 8)
 		_panel_bg.add_child(num_label)
 
-		# 點擊按鈕
+		# 暺???
 		var btn := Button.new()
 		btn.position = Vector2(btn_x, btn_y)
 		btn.size = Vector2(BTN_SIZE, BTN_SIZE)
@@ -165,13 +165,13 @@ func _build_level_buttons() -> void:
 			"level": i + 1
 		})
 
-## 連接訊號
+## ??閮?
 func _connect_signals() -> void:
 	_toggle_btn.pressed.connect(_on_toggle_pressed)
 	for item in _level_buttons:
 		item["btn"].pressed.connect(_on_level_btn_pressed.bind(item["level"]))
 
-	# 連接 GameManager 訊號
+	# ?? GameManager 閮?
 	if GameManager.has_signal("season_updated"):
 		GameManager.season_updated.connect(_on_season_updated)
 	if GameManager.has_signal("season_level_up"):
@@ -182,12 +182,12 @@ func _on_toggle_pressed() -> void:
 	_panel_bg.visible = _is_open
 
 func _on_level_btn_pressed(level: int) -> void:
-	# 找到等級資料
+	# ?曉蝑?鞈?
 	var levels = _season_data.get("levels", [])
 	for lvl in levels:
 		if lvl.get("level") == level:
 			if lvl.get("unlocked", false) and not lvl.get("claimed", false):
-				# 發送領取請求
+				# ?潮???瘙?
 				NetworkManager.send_message({
 					"type": "claim_season_level",
 					"payload": {"level": level}
@@ -200,10 +200,10 @@ func _on_season_updated(data: Dictionary) -> void:
 	_refresh_ui()
 
 func _on_season_level_up(data: Dictionary) -> void:
-	# 顯示升級通知
+	# 憿舐內???
 	_show_level_up_notification(data)
 
-## 更新 UI
+## ?湔 UI
 func _refresh_ui() -> void:
 	var points = _season_data.get("season_points", 0)
 	var current_level = _season_data.get("current_level", 0)
@@ -211,17 +211,17 @@ func _refresh_ui() -> void:
 	var points_to_next = _season_data.get("points_to_next", 100)
 
 	if is_instance_valid(_points_label):
-		_points_label.text = "積分：%d（距下級：%d）" % [points, points_to_next]
+		_points_label.text = "蝛?嚗?d嚗?銝?嚗?d嚗? % [points, points_to_next]"
 
 	if is_instance_valid(_level_label):
-		_level_label.text = "等級：%d/10" % current_level
+		_level_label.text = "蝑?嚗?d/10" % current_level
 
-	# 更新進度條
+	# ?湔?脣漲璇?
 	if is_instance_valid(_progress_fill):
 		var max_width = PANEL_WIDTH - 16
 		_progress_fill.size.x = max_width * progress
 
-	# 更新等級按鈕狀態
+	# ?湔蝑??????
 	var levels = _season_data.get("levels", [])
 	for item in _level_buttons:
 		var level = item["level"]
@@ -230,7 +230,7 @@ func _refresh_ui() -> void:
 		if not is_instance_valid(bg):
 			continue
 
-		# 找到對應等級資料
+		# ?曉撠?蝑?鞈?
 		var lvl_data = {}
 		for l in levels:
 			if l.get("level") == level:
@@ -242,40 +242,40 @@ func _refresh_ui() -> void:
 		var special_type = lvl_data.get("special_type", "")
 
 		if claimed:
-			# 已領取：綠色
+			# 撌脤???蝬
 			bg.color = Color(0.05, 0.25, 0.05, 0.9)
 			if is_instance_valid(icon):
-				icon.text = "✅"
+				icon.text = "??"
 		elif unlocked:
-			# 可領取：金色閃爍
+			# ?舫??????
 			bg.color = Color(0.3, 0.25, 0.05, 0.95)
 			if is_instance_valid(icon):
 				if special_type == "skin":
-					icon.text = "🎨"
+					icon.text = "?"
 				elif special_type == "title":
-					icon.text = "👑"
+					icon.text = "??"
 				else:
-					icon.text = "💰"
+					icon.text = "?"
 		else:
-			# 未解鎖：灰色
+			# ?芾圾???啗
 			bg.color = Color(0.1, 0.08, 0.25, 0.9)
 			if is_instance_valid(icon):
-				icon.text = "🔒"
+				icon.text = "??"
 
-## 顯示升級通知
+## 憿舐內???
 func _show_level_up_notification(data: Dictionary) -> void:
 	var level = data.get("level", 0)
 	var coin_reward = data.get("coin_reward", 0)
 	var special_type = data.get("special_type", "")
 	var special_name = data.get("special_name", "")
 
-	var text = "🏆 賽季等級 %d！\n+%d 金幣" % [level, coin_reward]
+	var text = "?? 鞈賢迤蝑? %d嚗n+%d ?馳" % [level, coin_reward]
 	if special_type == "skin":
-		text += "\n🎨 解鎖：%s" % special_name
+		text += "\n? 閫??嚗?s" % special_name
 	elif special_type == "title":
-		text += "\n👑 解鎖：%s" % special_name
+		text += "\n?? 閫??嚗?s" % special_name
 
-	# 建立通知標籤
+	# 撱箇??璅惜
 	var notify := Label.new()
 	notify.text = text
 	notify.position = Vector2(-100, -60)
@@ -285,7 +285,7 @@ func _show_level_up_notification(data: Dictionary) -> void:
 		notify.add_theme_font_size_override("font_size", 11)
 	add_child(notify)
 
-	# 動畫：彈入 → 停留 → 淡出
+	# ?嚗??????? ??瘛∪
 	var tween = create_tween()
 	tween.tween_property(notify, "scale", Vector2(1.1, 1.1), 0.15)
 	tween.tween_property(notify, "scale", Vector2(1.0, 1.0), 0.1)

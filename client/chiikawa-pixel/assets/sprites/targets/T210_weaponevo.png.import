@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://9woanc77xvie6"
-path="res://.godot/imported/T210_weaponevo.png-eb2f84bac13317ee86553b579a10615c.ctex"
+uid="uid://d0fbwvu7gaic2"
+path="res://.godot/imported/T210_weaponevo.png-be1cbb07ede5f9acdd753054cb634eb1.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T210_weaponevo.png"
-dest_files=["res://.godot/imported/T210_weaponevo.png-eb2f84bac13317ee86553b579a10615c.ctex"]
+dest_files=["res://.godot/imported/T210_weaponevo.png-be1cbb07ede5f9acdd753054cb634eb1.ctex"]
 
 [params]
 

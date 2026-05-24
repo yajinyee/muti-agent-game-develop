@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jduxpw2j5fkvb"
-path="res://.godot/imported/T199_chainreact.png-83a20f1827240eaf7542779562f9b6e5.ctex"
+uid="uid://bm17js7100tdr"
+path="res://.godot/imported/T199_chainreact.png-5c825cc826fb23381ce3a164e9745f4d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T199_chainreact.png"
-dest_files=["res://.godot/imported/T199_chainreact.png-83a20f1827240eaf7542779562f9b6e5.ctex"]
+dest_files=["res://.godot/imported/T199_chainreact.png-5c825cc826fb23381ce3a164e9745f4d.ctex"]
 
 [params]
 

@@ -1,5 +1,5 @@
-## WheelPanel.gd - DAY-084
-## 幸運轉盤 UI：擊殺特殊目標後觸發，顯示旋轉動畫和獎勵結果
+﻿## WheelPanel.gd - DAY-084
+## 撟賊?頧 UI嚗?畾箇畾璅?閫貊嚗＊蝷箸?頧??怠??蝯?
 extends Node2D
 
 const PANEL_W := 320
@@ -26,7 +26,7 @@ var _final_reward: int = 0
 var _is_spinning: bool = false
 var _spin_tween: Tween = null
 
-# 轉盤旋轉狀態
+# 頧?????
 var _current_angle: float = 0.0
 var _target_angle: float = 0.0
 
@@ -37,7 +37,7 @@ func setup(font: FontFile) -> void:
 	hide()
 
 func _build_ui() -> void:
-	# 全螢幕半透明遮罩
+	# ?刻撟????桃蔗
 	_overlay = ColorRect.new()
 	_overlay.color = Color(0.0, 0.0, 0.0, 0.75)
 	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -45,14 +45,14 @@ func _build_ui() -> void:
 	_overlay.position = Vector2(-640, -180)
 	add_child(_overlay)
 
-	# 主面板背景
+	# 銝駁?輯???
 	_bg = ColorRect.new()
 	_bg.color = Color(0.05, 0.05, 0.15, 0.97)
 	_bg.size = Vector2(PANEL_W, PANEL_H)
 	_bg.position = Vector2(-PANEL_W / 2, -PANEL_H / 2)
 	add_child(_bg)
 
-	# 金色邊框
+	# ???
 	var border = ColorRect.new()
 	border.color = Color(1.0, 0.85, 0.1, 1.0)
 	border.size = Vector2(PANEL_W, 3)
@@ -64,9 +64,9 @@ func _build_ui() -> void:
 	border_b.position = Vector2(-PANEL_W / 2, PANEL_H / 2 - 3)
 	add_child(border_b)
 
-	# 標題
+	# 璅?
 	_title_label = Label.new()
-	_title_label.text = "🎰 幸運轉盤"
+	_title_label.text = "? 撟賊?頧"
 	_title_label.position = Vector2(-PANEL_W / 2 + 10, -PANEL_H / 2 + 8)
 	_title_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1))
 	if _font:
@@ -74,7 +74,7 @@ func _build_ui() -> void:
 		_title_label.add_theme_font_size_override("font_size", 18)
 	add_child(_title_label)
 
-	# 目標物名稱
+	# ?格??拙?蝔?
 	_target_label = Label.new()
 	_target_label.text = ""
 	_target_label.position = Vector2(-PANEL_W / 2 + 10, -PANEL_H / 2 + 32)
@@ -84,13 +84,13 @@ func _build_ui() -> void:
 		_target_label.add_theme_font_size_override("font_size", 12)
 	add_child(_target_label)
 
-	# 轉盤容器（8個格子排成圓形）
+	# 頧摰孵嚗??摮???敶ｇ?
 	_wheel_container = Control.new()
 	_wheel_container.size = Vector2(200, 200)
 	_wheel_container.position = Vector2(-100, -80)
 	add_child(_wheel_container)
 
-	# 建立 8 個格子
+	# 撱箇? 8 ?摮?
 	var radius := 80.0
 	for i in range(SLOT_COUNT):
 		var angle := (i * TAU / SLOT_COUNT) - PI / 2
@@ -114,14 +114,14 @@ func _build_ui() -> void:
 		_wheel_container.add_child(slot_lbl)
 		_slot_labels.append(slot_lbl)
 
-	# 中心指針（三角形用 ColorRect 模擬）
+	# 銝剖???嚗?閫耦??ColorRect 璅⊥嚗?
 	_pointer = ColorRect.new()
 	_pointer.color = Color(1.0, 0.3, 0.3, 1.0)
 	_pointer.size = Vector2(12, 20)
 	_pointer.position = Vector2(94, 72)
 	_wheel_container.add_child(_pointer)
 
-	# 結果標籤
+	# 蝯?璅惜
 	_result_label = Label.new()
 	_result_label.text = ""
 	_result_label.position = Vector2(-PANEL_W / 2 + 10, 100)
@@ -131,7 +131,7 @@ func _build_ui() -> void:
 		_result_label.add_theme_font_size_override("font_size", 22)
 	add_child(_result_label)
 
-	# 獎勵標籤
+	# ?璅惜
 	_reward_label = Label.new()
 	_reward_label.text = ""
 	_reward_label.position = Vector2(-PANEL_W / 2 + 10, 130)
@@ -141,9 +141,9 @@ func _build_ui() -> void:
 		_reward_label.add_theme_font_size_override("font_size", 16)
 	add_child(_reward_label)
 
-	# 關閉按鈕
+	# ????
 	_close_btn = Button.new()
-	_close_btn.text = "繼續"
+	_close_btn.text = "蝜潛?"
 	_close_btn.size = Vector2(120, 36)
 	_close_btn.position = Vector2(-60, 150)
 	_close_btn.pressed.connect(_on_close)
@@ -168,7 +168,7 @@ func _on_wheel_triggered(data: Dictionary) -> void:
 	var target_name: String = data.get("target_name", "")
 	var multiplier: float = data.get("multiplier", 1.0)
 
-	# 更新格子顯示
+	# ?湔?澆?憿舐內
 	for i in range(min(_slots_data.size(), SLOT_COUNT)):
 		var slot = _slots_data[i]
 		if i < _slot_labels.size():
@@ -177,19 +177,19 @@ func _on_wheel_triggered(data: Dictionary) -> void:
 			var color_hex: String = slot.get("color", "#4CAF50")
 			_slot_rects[i].color = Color(color_hex)
 
-	_target_label.text = "擊殺：%s" % target_name
+	_target_label.text = "?捏嚗?s" % target_name
 	_result_label.text = ""
 	_reward_label.text = ""
 	_close_btn.hide()
 	_is_spinning = true
 
-	# 顯示面板
+	# 憿舐內?Ｘ
 	show()
 	_play_spin_animation(multiplier)
 
 func _play_spin_animation(multiplier: float) -> void:
-	# 高亮格子依序閃爍，模擬轉盤旋轉
-	var spin_steps := 24 + _win_index  # 至少轉 3 圈
+	# 擃漁?澆?靘???嚗芋?祈??斗?頧?
+	var spin_steps := 24 + _win_index  # ?喳?頧?3 ??
 	var step_duration := 0.05
 	var current_step := 0
 
@@ -198,7 +198,7 @@ func _play_spin_animation(multiplier: float) -> void:
 	for step in range(spin_steps):
 		var highlight_idx := step % SLOT_COUNT
 		var duration := step_duration
-		# 後半段減速
+		# 敺?畾菜???
 		if step > spin_steps - 8:
 			duration = step_duration + (spin_steps - step) * 0.04
 
@@ -207,7 +207,7 @@ func _play_spin_animation(multiplier: float) -> void:
 		)
 		_spin_tween.tween_interval(duration)
 
-	# 最後停在中獎格子
+	# ?敺??其葉?摮?
 	_spin_tween.tween_callback(func():
 		_highlight_slot(_win_index)
 		_show_result(multiplier)
@@ -232,20 +232,20 @@ func _highlight_slot(idx: int) -> void:
 func _show_result(multiplier: float) -> void:
 	_is_spinning = false
 
-	# 中獎格子保持高亮
+	# 銝剔??澆?靽?擃漁
 	if _win_index < _slot_rects.size() and _slots_data.size() > _win_index:
 		var color_hex: String = _slots_data[_win_index].get("color", "#FFD700")
 		_slot_rects[_win_index].color = Color(color_hex)
 
-	_result_label.text = "🎉 %.0fx 大獎！" % multiplier
-	_reward_label.text = "+%d 金幣（基礎 %d）" % [_final_reward, _base_reward]
+	_result_label.text = "?? %.0fx 憭抒?嚗? % multiplier"
+	_reward_label.text = "+%d ?馳嚗蝷?%d嚗? % [_final_reward, _base_reward]"
 
-	# 放大動畫
+	# ?曉之?
 	var tween = create_tween()
 	tween.tween_property(self, "scale", Vector2(1.15, 1.15), 0.12)
 	tween.tween_property(self, "scale", Vector2(1.0, 1.0), 0.1)
 
-	# 顯示關閉按鈕
+	# 憿舐內????
 	_close_btn.show()
 
 func _on_close() -> void:

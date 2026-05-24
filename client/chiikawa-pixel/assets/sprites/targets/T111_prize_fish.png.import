@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://g2uf5qsfrq3qj"
-path="res://.godot/imported/T111_prize_fish.png-6dfee1dfa8dfb56d80488ae2c350c751.ctex"
+uid="uid://c7gkkou57j7yr"
+path="res://.godot/imported/T111_prize_fish.png-a175fd7587c3179e3494305729ae88fa.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T111_prize_fish.png"
-dest_files=["res://.godot/imported/T111_prize_fish.png-6dfee1dfa8dfb56d80488ae2c350c751.ctex"]
+dest_files=["res://.godot/imported/T111_prize_fish.png-a175fd7587c3179e3494305729ae88fa.ctex"]
 
 [params]
 

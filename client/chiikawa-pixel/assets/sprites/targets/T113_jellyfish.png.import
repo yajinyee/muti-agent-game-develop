@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://pfcjrfoza2eeo"
-path="res://.godot/imported/T113_jellyfish.png-04eb55f5ac6b5466767a4c78e213260f.ctex"
+uid="uid://ds3wy8w8lgq4e"
+path="res://.godot/imported/T113_jellyfish.png-19cef9a255fad5cd89a39a57625ee4c9.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T113_jellyfish.png"
-dest_files=["res://.godot/imported/T113_jellyfish.png-04eb55f5ac6b5466767a4c78e213260f.ctex"]
+dest_files=["res://.godot/imported/T113_jellyfish.png-19cef9a255fad5cd89a39a57625ee4c9.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://hgcq008sb2mxr"
-path="res://.godot/imported/T161_humpback_whale.png-4f542ec1460c1eac35527acad3bbb498.ctex"
+uid="uid://dkwvfycjquq60"
+path="res://.godot/imported/T161_humpback_whale.png-22ea4052f01534dffa1f53514f5d10b5.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T161_humpback_whale.png"
-dest_files=["res://.godot/imported/T161_humpback_whale.png-4f542ec1460c1eac35527acad3bbb498.ctex"]
+dest_files=["res://.godot/imported/T161_humpback_whale.png-22ea4052f01534dffa1f53514f5d10b5.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://u2tdrp3de4eva"
-path="res://.godot/imported/T130_lucky_egg_fish.png-57b1ab812b78ffde6bd26f212d259a4b.ctex"
+uid="uid://bqr0tgh3k303g"
+path="res://.godot/imported/T130_lucky_egg_fish.png-2072ae78a9a17f51867717a832c0f3aa.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T130_lucky_egg_fish.png"
-dest_files=["res://.godot/imported/T130_lucky_egg_fish.png-57b1ab812b78ffde6bd26f212d259a4b.ctex"]
+dest_files=["res://.godot/imported/T130_lucky_egg_fish.png-2072ae78a9a17f51867717a832c0f3aa.ctex"]
 
 [params]
 

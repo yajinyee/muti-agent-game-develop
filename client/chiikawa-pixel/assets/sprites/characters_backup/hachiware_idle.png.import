@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bs0mb47ng2333"
-path="res://.godot/imported/hachiware_idle.png-02c5239673c9bd2fcdd53b8184311cbf.ctex"
+path="res://.godot/imported/hachiware_idle.png-66088ed94d526c3cbf7e6c2bd3ea7636.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/characters/hachiware_idle.png"
-dest_files=["res://.godot/imported/hachiware_idle.png-02c5239673c9bd2fcdd53b8184311cbf.ctex"]
+source_file="res://assets/sprites/characters_backup/hachiware_idle.png"
+dest_files=["res://.godot/imported/hachiware_idle.png-66088ed94d526c3cbf7e6c2bd3ea7636.ctex"]
 
 [params]
 

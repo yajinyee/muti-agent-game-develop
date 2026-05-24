@@ -1,7 +1,7 @@
-## RoulettePanel.gd - DAY-113
-## 雙層倍率輪盤 UI：擊殺 BOSS/特殊目標後觸發
-## 內圈(8格,1-10x) × 外圈(12格,1-100x) = 最終倍率（最高 1000x）
-## 廣播給所有玩家觀看，觸發玩家有互動感
+﻿## RoulettePanel.gd - DAY-113
+## ?惜??頛芰 UI嚗?畾?BOSS/?寞??格?敺孛??
+## ?批?(8??1-10x) ? 憭?(12??1-100x) = ?蝯?嚗?擃?1000x嚗?
+## 撱?蝯行??摰嗉???閫貊?拙振????
 extends Node2D
 
 const PANEL_W := 480
@@ -18,27 +18,27 @@ var _title_label: Label
 var _player_label: Label
 var _target_label: Label
 
-# 輪盤格子節點
+# 頛芰?澆?蝭暺?
 var _inner_rects: Array = []
 var _inner_labels: Array = []
 var _outer_rects: Array = []
 var _outer_labels: Array = []
 
-# 結果顯示
+# 蝯?憿舐內
 var _inner_result_label: Label
 var _outer_result_label: Label
 var _mult_label: Label
 var _reward_label: Label
 var _close_btn: Button
 
-# 狀態
+# ???
 var _inner_data: Array = []
 var _outer_data: Array = []
 var _is_spinning: bool = false
 var _is_self: bool = false
 var _session_id: String = ""
 
-# 旋轉動畫狀態
+# ??????
 var _inner_spin_tween: Tween = null
 var _outer_spin_tween: Tween = null
 var _inner_win_idx: int = 0
@@ -51,7 +51,7 @@ func setup(font: FontFile) -> void:
 	hide()
 
 func _build_ui() -> void:
-	# 全螢幕半透明遮罩
+	# ?刻撟????桃蔗
 	_overlay = ColorRect.new()
 	_overlay.color = Color(0.0, 0.0, 0.0, 0.82)
 	_overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -59,23 +59,23 @@ func _build_ui() -> void:
 	_overlay.position = Vector2(-640, -180)
 	add_child(_overlay)
 
-	# 主面板背景（深藍色）
+	# 銝駁?輯??荔?瘛梯??莎?
 	_bg = ColorRect.new()
 	_bg.color = Color(0.04, 0.04, 0.18, 0.98)
 	_bg.size = Vector2(PANEL_W, PANEL_H)
 	_bg.position = Vector2(-PANEL_W / 2, -PANEL_H / 2)
 	add_child(_bg)
 
-	# 金色頂部邊框
+	# ????
 	var border_top = ColorRect.new()
 	border_top.color = Color(1.0, 0.85, 0.1, 1.0)
 	border_top.size = Vector2(PANEL_W, 4)
 	border_top.position = Vector2(-PANEL_W / 2, -PANEL_H / 2)
 	add_child(border_top)
 
-	# 標題
+	# 璅?
 	_title_label = Label.new()
-	_title_label.text = "🎡 雙層倍率輪盤"
+	_title_label.text = "? ?惜??頛芰"
 	_title_label.position = Vector2(-PANEL_W / 2 + 12, -PANEL_H / 2 + 10)
 	_title_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1))
 	if _font:
@@ -83,7 +83,7 @@ func _build_ui() -> void:
 		_title_label.add_theme_font_size_override("font_size", 20)
 	add_child(_title_label)
 
-	# 玩家名稱
+	# ?拙振?迂
 	_player_label = Label.new()
 	_player_label.text = ""
 	_player_label.position = Vector2(-PANEL_W / 2 + 12, -PANEL_H / 2 + 36)
@@ -93,7 +93,7 @@ func _build_ui() -> void:
 		_player_label.add_theme_font_size_override("font_size", 13)
 	add_child(_player_label)
 
-	# 目標名稱
+	# ?格??迂
 	_target_label = Label.new()
 	_target_label.text = ""
 	_target_label.position = Vector2(-PANEL_W / 2 + 12, -PANEL_H / 2 + 54)
@@ -103,7 +103,7 @@ func _build_ui() -> void:
 		_target_label.add_theme_font_size_override("font_size", 12)
 	add_child(_target_label)
 
-	# 外圈格子（12格）
+	# 憭??澆?嚗?2?潘?
 	for i in range(OUTER_COUNT):
 		var angle := (i * TAU / OUTER_COUNT) - PI / 2
 		var cx := OUTER_RADIUS * cos(angle)
@@ -126,9 +126,9 @@ func _build_ui() -> void:
 		add_child(lbl)
 		_outer_labels.append(lbl)
 
-	# 外圈標籤
+	# 憭?璅惜
 	var outer_ring_label = Label.new()
-	outer_ring_label.text = "外圈"
+	outer_ring_label.text = "憭?"
 	outer_ring_label.position = Vector2(-16, -OUTER_RADIUS - 20)
 	outer_ring_label.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0))
 	if _font:
@@ -136,7 +136,7 @@ func _build_ui() -> void:
 		outer_ring_label.add_theme_font_size_override("font_size", 11)
 	add_child(outer_ring_label)
 
-	# 內圈格子（8格）
+	# ?批??澆?嚗??潘?
 	for i in range(INNER_COUNT):
 		var angle := (i * TAU / INNER_COUNT) - PI / 2
 		var cx := INNER_RADIUS * cos(angle)
@@ -159,9 +159,9 @@ func _build_ui() -> void:
 		add_child(lbl)
 		_inner_labels.append(lbl)
 
-	# 內圈標籤
+	# ?批?璅惜
 	var inner_ring_label = Label.new()
-	inner_ring_label.text = "內圈"
+	inner_ring_label.text = "?批?"
 	inner_ring_label.position = Vector2(-16, -INNER_RADIUS - 16)
 	inner_ring_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.5))
 	if _font:
@@ -169,7 +169,7 @@ func _build_ui() -> void:
 		inner_ring_label.add_theme_font_size_override("font_size", 11)
 	add_child(inner_ring_label)
 
-	# 中心圓（裝飾）
+	# 銝剖???鋆ˇ嚗?
 	var center_bg = ColorRect.new()
 	center_bg.size = Vector2(50, 50)
 	center_bg.position = Vector2(-25, -25)
@@ -177,7 +177,7 @@ func _build_ui() -> void:
 	add_child(center_bg)
 
 	var center_label = Label.new()
-	center_label.text = "×"
+	center_label.text = "?"
 	center_label.position = Vector2(-10, -14)
 	center_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1))
 	if _font:
@@ -185,7 +185,7 @@ func _build_ui() -> void:
 		center_label.add_theme_font_size_override("font_size", 24)
 	add_child(center_label)
 
-	# 結果區域（底部）
+	# 蝯????摨嚗?
 	var result_bg = ColorRect.new()
 	result_bg.color = Color(0.06, 0.06, 0.2, 0.95)
 	result_bg.size = Vector2(PANEL_W - 20, 100)
@@ -193,7 +193,7 @@ func _build_ui() -> void:
 	add_child(result_bg)
 
 	_inner_result_label = Label.new()
-	_inner_result_label.text = "內圈：旋轉中..."
+	_inner_result_label.text = "?批?嚗?頧葉..."
 	_inner_result_label.position = Vector2(-PANEL_W / 2 + 20, PANEL_H / 2 - 110)
 	_inner_result_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.5))
 	if _font:
@@ -202,7 +202,7 @@ func _build_ui() -> void:
 	add_child(_inner_result_label)
 
 	_outer_result_label = Label.new()
-	_outer_result_label.text = "外圈：旋轉中..."
+	_outer_result_label.text = "憭?嚗?頧葉..."
 	_outer_result_label.position = Vector2(-PANEL_W / 2 + 20, PANEL_H / 2 - 90)
 	_outer_result_label.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0))
 	if _font:
@@ -228,9 +228,9 @@ func _build_ui() -> void:
 		_reward_label.add_theme_font_size_override("font_size", 16)
 	add_child(_reward_label)
 
-	# 關閉按鈕
+	# ????
 	_close_btn = Button.new()
-	_close_btn.text = "太棒了！繼續"
+	_close_btn.text = "憭芣?鈭?蝜潛?"
 	_close_btn.size = Vector2(160, 36)
 	_close_btn.position = Vector2(-80, PANEL_H / 2 - 44)
 	_close_btn.pressed.connect(_on_close)
@@ -257,20 +257,20 @@ func _on_roulette_started(data: Dictionary) -> void:
 	_inner_data = data.get("inner_segments", [])
 	_outer_data = data.get("outer_segments", [])
 
-	# 更新格子顯示
+	# ?湔?澆?憿舐內
 	_update_segments()
 
-	# 更新標籤
+	# ?湔璅惜
 	if _is_self:
-		_player_label.text = "🎯 你觸發了雙層輪盤！"
+		_player_label.text = "? 雿孛?潔??惜頛芰嚗?"
 		_player_label.add_theme_color_override("font_color", Color(1.0, 1.0, 0.3))
 	else:
-		_player_label.text = "👀 %s 觸發了雙層輪盤" % player_name
+		_player_label.text = "?? %s 閫貊鈭?撅方憚?? % player_name"
 		_player_label.add_theme_color_override("font_color", Color(0.7, 0.9, 1.0))
 
-	_target_label.text = "擊殺：%s" % target_name
-	_inner_result_label.text = "內圈：旋轉中..."
-	_outer_result_label.text = "外圈：旋轉中..."
+	_target_label.text = "?捏嚗?s" % target_name
+	_inner_result_label.text = "?批?嚗?頧葉..."
+	_outer_result_label.text = "憭?嚗?頧葉..."
 	_mult_label.text = ""
 	_reward_label.text = ""
 	_close_btn.hide()
@@ -292,7 +292,7 @@ func _on_roulette_result(data: Dictionary) -> void:
 	var is_jackpot: bool = data.get("is_jackpot", false)
 	var is_mega_win: bool = data.get("is_mega_win", false)
 
-	# 播放旋轉動畫，3秒後顯示結果
+	# ?剜???嚗?蝘?憿舐內蝯?
 	_play_dual_spin_animation(inner_mult, outer_mult, final_mult, base_reward, final_reward, is_jackpot, is_mega_win)
 
 func _update_segments() -> void:
@@ -314,13 +314,13 @@ func _update_segments() -> void:
 
 func _play_dual_spin_animation(inner_mult: float, outer_mult: float, final_mult: float,
 		base_reward: int, final_reward: int, is_jackpot: bool, is_mega_win: bool) -> void:
-	# 內圈旋轉（快速）
+	# ?批???嚗翰??
 	var inner_steps := 24 + _inner_win_idx
-	var outer_steps := 32 + _outer_win_idx  # 外圈轉更多圈
+	var outer_steps := 32 + _outer_win_idx  # 憭?頧憭?
 
 	var tween = create_tween()
 
-	# 同時旋轉內外圈
+	# ?????批???
 	for step in range(max(inner_steps, outer_steps)):
 		var inner_idx := step % INNER_COUNT
 		var outer_idx := step % OUTER_COUNT
@@ -334,7 +334,7 @@ func _play_dual_spin_animation(inner_mult: float, outer_mult: float, final_mult:
 		)
 		tween.tween_interval(duration)
 
-	# 最終停止
+	# ?蝯?甇?
 	tween.tween_callback(func():
 		_highlight_inner(_inner_win_idx)
 		_highlight_outer(_outer_win_idx)
@@ -371,7 +371,7 @@ func _show_result(inner_mult: float, outer_mult: float, final_mult: float,
 		base_reward: int, final_reward: int, is_jackpot: bool, is_mega_win: bool) -> void:
 	_is_spinning = false
 
-	# 保持中獎格子高亮
+	# 靽?銝剔??澆?擃漁
 	if _inner_win_idx < _inner_rects.size() and _inner_data.size() > _inner_win_idx:
 		var color_hex: String = _inner_data[_inner_win_idx].get("color", "#FFD700")
 		_inner_rects[_inner_win_idx].color = Color(color_hex)
@@ -379,28 +379,28 @@ func _show_result(inner_mult: float, outer_mult: float, final_mult: float,
 		var color_hex: String = _outer_data[_outer_win_idx].get("color", "#FFD700")
 		_outer_rects[_outer_win_idx].color = Color(color_hex)
 
-	_inner_result_label.text = "內圈：%.0fx" % inner_mult
-	_outer_result_label.text = "外圈：%.0fx" % outer_mult
+	_inner_result_label.text = "?批?嚗?.0fx" % inner_mult
+	_outer_result_label.text = "憭?嚗?.0fx" % outer_mult
 
-	# 最終倍率顯示（依等級變色）
+	# ?蝯?憿舐內嚗?蝑?霈嚗?
 	if is_jackpot:
-		_mult_label.text = "🌟 最終倍率：%.0fx（傳說！）" % final_mult
+		_mult_label.text = "?? ?蝯?嚗?.0fx嚗隤迎?嚗? % final_mult"
 		_mult_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1))
 		_play_jackpot_effect()
 	elif is_mega_win:
-		_mult_label.text = "💥 最終倍率：%.0fx（超大獎！）" % final_mult
+		_mult_label.text = "? ?蝯?嚗?.0fx嚗?憭抒?嚗?" % final_mult
 		_mult_label.add_theme_color_override("font_color", Color(1.0, 0.5, 0.1))
 		_play_megawin_effect()
 	else:
-		_mult_label.text = "✨ 最終倍率：%.0fx" % final_mult
+		_mult_label.text = "???蝯?嚗?.0fx" % final_mult
 		_mult_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1))
 
 	if _is_self:
-		_reward_label.text = "🪙 獎勵：+%d 金幣（基礎 %d）" % [final_reward, base_reward]
+		_reward_label.text = "?? ?嚗?%d ?馳嚗蝷?%d嚗? % [final_reward, base_reward]"
 	else:
-		_reward_label.text = "🪙 獎勵：%d 金幣" % final_reward
+		_reward_label.text = "?? ?嚗?d ?馳" % final_reward
 
-	# 縮放彈入動畫
+	# 蝮格敶?
 	scale = Vector2(0.8, 0.8)
 	var tween = create_tween()
 	tween.tween_property(self, "scale", Vector2(1.1, 1.1), 0.15)
@@ -409,7 +409,7 @@ func _show_result(inner_mult: float, outer_mult: float, final_mult: float,
 	_close_btn.show()
 
 func _play_jackpot_effect() -> void:
-	# 全畫面金色閃光（傳說等級）
+	# ?函?ａ??脤????唾牧蝑?嚗?
 	var flash = ColorRect.new()
 	flash.color = Color(1.0, 0.85, 0.1, 0.0)
 	flash.size = Vector2(1280, 720)
@@ -426,7 +426,7 @@ func _play_jackpot_effect() -> void:
 	)
 
 func _play_megawin_effect() -> void:
-	# 橙色閃光（超大獎）
+	# 璈??嚗?憭抒?嚗?
 	var flash = ColorRect.new()
 	flash.color = Color(1.0, 0.5, 0.1, 0.0)
 	flash.size = Vector2(1280, 720)

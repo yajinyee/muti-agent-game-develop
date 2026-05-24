@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://qgv7n3b7mjj5n"
-path="res://.godot/imported/T197_synergy.png-17d14109db6bfff1bf32898dc39a7ba1.ctex"
+uid="uid://0aqbum7dp14l"
+path="res://.godot/imported/T197_synergy.png-b44b86cb6cd6c70045aadb1bd5a49d6e.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T197_synergy.png"
-dest_files=["res://.godot/imported/T197_synergy.png-17d14109db6bfff1bf32898dc39a7ba1.ctex"]
+dest_files=["res://.godot/imported/T197_synergy.png-b44b86cb6cd6c70045aadb1bd5a49d6e.ctex"]
 
 [params]
 

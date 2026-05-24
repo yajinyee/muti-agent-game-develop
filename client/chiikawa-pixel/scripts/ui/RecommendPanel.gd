@@ -1,5 +1,5 @@
-## RecommendPanel.gd — 智慧推薦面板（DAY-110）
-## 根據玩家行為模式，顯示個人化遊戲建議
+﻿## RecommendPanel.gd ???箸?刻?Ｘ嚗AY-110嚗?
+## ?寞??拙振銵璅∪?嚗＊蝷箏犖???脣遣霅?
 extends CanvasLayer
 
 var _panel: PanelContainer
@@ -12,14 +12,14 @@ func _ready():
 	hide()
 
 func _build_ui():
-	# 半透明背景
+	# ???
 	var bg = ColorRect.new()
 	bg.color = Color(0, 0, 0, 0.5)
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	add_child(bg)
 	bg.gui_input.connect(func(e): if e is InputEventMouseButton and e.pressed: hide())
 
-	# 主面板（右側滑入）
+	# 銝駁?選??喳皛嚗?
 	_panel = PanelContainer.new()
 	_panel.set_anchors_preset(Control.PRESET_CENTER_RIGHT)
 	_panel.custom_minimum_size = Vector2(320, 400)
@@ -33,25 +33,25 @@ func _build_ui():
 	vbox.add_theme_constant_override("separation", 10)
 	_panel.add_child(vbox)
 
-	# 標題列
+	# 璅???
 	var title_row = HBoxContainer.new()
 	vbox.add_child(title_row)
 
 	var title_lbl = Label.new()
-	title_lbl.text = "💡 智慧建議"
+	title_lbl.text = "? ?箸撱箄降"
 	title_lbl.add_theme_font_size_override("font_size", 18)
 	title_lbl.add_theme_color_override("font_color", Color(0.3, 0.9, 1.0))
 	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_row.add_child(title_lbl)
 
 	var close_btn = Button.new()
-	close_btn.text = "✕"
+	close_btn.text = "??"
 	close_btn.custom_minimum_size = Vector2(28, 28)
 	close_btn.pressed.connect(hide)
 	title_row.add_child(close_btn)
 
 	var subtitle = Label.new()
-	subtitle.text = "根據你的遊戲習慣，為你量身打造建議"
+	subtitle.text = "?寞?雿??蝧嚗雿?頨急??遣霅?"
 	subtitle.add_theme_font_size_override("font_size", 11)
 	subtitle.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	subtitle.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
@@ -60,23 +60,23 @@ func _build_ui():
 	var sep = HSeparator.new()
 	vbox.add_child(sep)
 
-	# 載入中提示
+	# 頛銝剜?蝷?
 	_loading_label = Label.new()
-	_loading_label.text = "⏳ 分析中..."
+	_loading_label.text = "????銝?.."
 	_loading_label.add_theme_font_size_override("font_size", 14)
 	_loading_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	_loading_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	vbox.add_child(_loading_label)
 
-	# 推薦列表
+	# ?刻?”
 	_recs_container = VBoxContainer.new()
 	_recs_container.add_theme_constant_override("separation", 8)
 	_recs_container.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	vbox.add_child(_recs_container)
 
-	# 底部按鈕
+	# 摨??
 	var refresh_btn = Button.new()
-	refresh_btn.text = "🔄 重新分析"
+	refresh_btn.text = "?? ???"
 	refresh_btn.pressed.connect(_on_refresh_pressed)
 	vbox.add_child(refresh_btn)
 
@@ -93,7 +93,7 @@ func update_recommendations(data: Dictionary):
 	var recs = data.get("recommendations", [])
 	if recs.is_empty():
 		var empty_lbl = Label.new()
-		empty_lbl.text = "✅ 目前沒有特別建議\n繼續保持！"
+		empty_lbl.text = "???桀?瘝??孵撱箄降\n蝜潛?靽?嚗?"
 		empty_lbl.add_theme_font_size_override("font_size", 13)
 		empty_lbl.add_theme_color_override("font_color", Color(0.5, 1.0, 0.5))
 		empty_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -122,12 +122,12 @@ func _create_rec_card(rec: Dictionary) -> PanelContainer:
 	vbox.add_theme_constant_override("separation", 4)
 	panel.add_child(vbox)
 
-	# 標題行
+	# 璅?銵?
 	var title_row = HBoxContainer.new()
 	vbox.add_child(title_row)
 
 	var icon_lbl = Label.new()
-	icon_lbl.text = rec.get("icon", "💡")
+	icon_lbl.text = rec.get("icon", "?")
 	icon_lbl.add_theme_font_size_override("font_size", 18)
 	title_row.add_child(icon_lbl)
 
@@ -138,7 +138,7 @@ func _create_rec_card(rec: Dictionary) -> PanelContainer:
 	title_lbl.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_row.add_child(title_lbl)
 
-	# 信心度
+	# 靽∪?摨?
 	var confidence = rec.get("confidence", 0.5)
 	var conf_lbl = Label.new()
 	conf_lbl.text = "%.0f%%" % (confidence * 100)
@@ -146,7 +146,7 @@ func _create_rec_card(rec: Dictionary) -> PanelContainer:
 	conf_lbl.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	title_row.add_child(conf_lbl)
 
-	# 描述
+	# ?膩
 	var desc_lbl = Label.new()
 	desc_lbl.text = rec.get("description", "")
 	desc_lbl.add_theme_font_size_override("font_size", 11)
@@ -154,11 +154,11 @@ func _create_rec_card(rec: Dictionary) -> PanelContainer:
 	desc_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	vbox.add_child(desc_lbl)
 
-	# 如果有建議投注等級，顯示快速切換按鈕
+	# 憒??遣霅唳?瘜函?蝝?憿舐內敹恍?????
 	var target_bet = rec.get("target_bet_lv", 0)
 	if target_bet > 0:
 		var btn = Button.new()
-		btn.text = "切換到 LV%d" % target_bet
+		btn.text = "????LV%d" % target_bet
 		btn.custom_minimum_size = Vector2(0, 28)
 		btn.pressed.connect(func(): _on_switch_bet_pressed(target_bet))
 		vbox.add_child(btn)
@@ -167,9 +167,9 @@ func _create_rec_card(rec: Dictionary) -> PanelContainer:
 
 func _get_priority_color(priority: int) -> Color:
 	match priority:
-		1: return Color(1.0, 0.3, 0.3)  # 紅色 = 高優先
-		2: return Color(1.0, 0.7, 0.2)  # 橙色 = 中優先
-		_: return Color(0.3, 0.7, 1.0)  # 藍色 = 低優先
+		1: return Color(1.0, 0.3, 0.3)  # 蝝 = 擃??
+		2: return Color(1.0, 0.7, 0.2)  # 璈 = 銝剖??
+		_: return Color(0.3, 0.7, 1.0)  # ? = 雿??
 
 func _clear_recs():
 	for child in _recs_container.get_children():

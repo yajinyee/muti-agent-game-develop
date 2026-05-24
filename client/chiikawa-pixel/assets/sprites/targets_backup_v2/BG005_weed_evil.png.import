@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://t5y1ai9ony2yn"
-path="res://.godot/imported/BG005_weed_evil.png-2d9fc46091846662f033064822e87682.ctex"
+uid="uid://txob8oftyo6t"
+path="res://.godot/imported/BG005_weed_evil.png-7cbec96dadf3eb42657ed99c52105d42.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets_backup_v2/BG005_weed_evil.png"
-dest_files=["res://.godot/imported/BG005_weed_evil.png-2d9fc46091846662f033064822e87682.ctex"]
+dest_files=["res://.godot/imported/BG005_weed_evil.png-7cbec96dadf3eb42657ed99c52105d42.ctex"]
 
 [params]
 

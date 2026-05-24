@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://s3u7toxk22uqg"
-path="res://.godot/imported/T215_guildwar.png-32c9fd68db5e26733b05235cf5a0123c.ctex"
+uid="uid://dm8qhhaktadpe"
+path="res://.godot/imported/T215_guildwar.png-bbc817145ce03b6e92eb451b2ca06039.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T215_guildwar.png"
-dest_files=["res://.godot/imported/T215_guildwar.png-32c9fd68db5e26733b05235cf5a0123c.ctex"]
+dest_files=["res://.godot/imported/T215_guildwar.png-bbc817145ce03b6e92eb451b2ca06039.ctex"]
 
 [params]
 

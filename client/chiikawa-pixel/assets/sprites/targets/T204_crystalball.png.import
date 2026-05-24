@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://hoew4211eq9oe"
-path="res://.godot/imported/T204_crystalball.png-cf700cd548ee5630f769f9b4c19ef0ee.ctex"
+uid="uid://dsy2j04rtkewm"
+path="res://.godot/imported/T204_crystalball.png-652ec04e72c86ffc695667b1b9651bc9.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T204_crystalball.png"
-dest_files=["res://.godot/imported/T204_crystalball.png-cf700cd548ee5630f769f9b4c19ef0ee.ctex"]
+dest_files=["res://.godot/imported/T204_crystalball.png-652ec04e72c86ffc695667b1b9651bc9.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://l14u35mw592rr"
-path="res://.godot/imported/T194_mirrorworld.png-a51f93313c996ee2cf51b0e8c21bace4.ctex"
+uid="uid://gwacyu6hogih"
+path="res://.godot/imported/T194_mirrorworld.png-3c75b7311f4c5e397b38fdb8910375e8.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T194_mirrorworld.png"
-dest_files=["res://.godot/imported/T194_mirrorworld.png-a51f93313c996ee2cf51b0e8c21bace4.ctex"]
+dest_files=["res://.godot/imported/T194_mirrorworld.png-3c75b7311f4c5e397b38fdb8910375e8.ctex"]
 
 [params]
 

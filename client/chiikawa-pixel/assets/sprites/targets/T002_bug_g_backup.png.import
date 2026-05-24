@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://x8y34shxmrl1z"
-path="res://.godot/imported/T002_bug_g_backup.png-f964133cd4729d74469f3a8c6c2b6ba3.ctex"
+uid="uid://2jvlgyf8kdif"
+path="res://.godot/imported/T002_bug_g_backup.png-1f3c5d18e1147ca82323254f06da45f1.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T002_bug_g_backup.png"
-dest_files=["res://.godot/imported/T002_bug_g_backup.png-f964133cd4729d74469f3a8c6c2b6ba3.ctex"]
+dest_files=["res://.godot/imported/T002_bug_g_backup.png-1f3c5d18e1147ca82323254f06da45f1.ctex"]
 
 [params]
 

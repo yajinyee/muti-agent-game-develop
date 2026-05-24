@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1axj7pw930e05"
-path="res://.godot/imported/T227_spinwheel.png-d4551f9e672a22cf240d6bee4b24adeb.ctex"
+uid="uid://c3icoefrpr5hk"
+path="res://.godot/imported/T227_spinwheel.png-1483a13ae84aad0fed5ab5931c5334a6.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T227_spinwheel.png"
-dest_files=["res://.godot/imported/T227_spinwheel.png-d4551f9e672a22cf240d6bee4b24adeb.ctex"]
+dest_files=["res://.godot/imported/T227_spinwheel.png-1483a13ae84aad0fed5ab5931c5334a6.ctex"]
 
 [params]
 

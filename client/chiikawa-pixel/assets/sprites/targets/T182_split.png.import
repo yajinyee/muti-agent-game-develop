@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://9sxndd4xxtqhl"
-path="res://.godot/imported/T182_split.png-c5fcf7b7f51d219f16fc8b6da300afbe.ctex"
+uid="uid://dvoomwrxf7qfh"
+path="res://.godot/imported/T182_split.png-ecb4b93696525a88e97d040df7ef01bf.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T182_split.png"
-dest_files=["res://.godot/imported/T182_split.png-c5fcf7b7f51d219f16fc8b6da300afbe.ctex"]
+dest_files=["res://.godot/imported/T182_split.png-ecb4b93696525a88e97d040df7ef01bf.ctex"]
 
 [params]
 

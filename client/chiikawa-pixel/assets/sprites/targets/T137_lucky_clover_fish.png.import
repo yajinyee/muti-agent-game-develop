@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://prfdobdnrkx5v"
-path="res://.godot/imported/T137_lucky_clover_fish.png-2bc42eeba8f0f7abd9f49a4ad196dfbb.ctex"
+uid="uid://brvb2onirg4t"
+path="res://.godot/imported/T137_lucky_clover_fish.png-393fbe4f398207aab623daf6eeed6e2c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T137_lucky_clover_fish.png"
-dest_files=["res://.godot/imported/T137_lucky_clover_fish.png-2bc42eeba8f0f7abd9f49a4ad196dfbb.ctex"]
+dest_files=["res://.godot/imported/T137_lucky_clover_fish.png-393fbe4f398207aab623daf6eeed6e2c.ctex"]
 
 [params]
 

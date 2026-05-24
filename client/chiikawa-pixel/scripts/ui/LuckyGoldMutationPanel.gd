@@ -1,4 +1,4 @@
-## LuckyGoldMutationPanel.gd — 幸運黃金突變魚 UI 面板（DAY-281）
+﻿## LuckyGoldMutationPanel.gd — 幸運黃金突變魚 UI 面板（DAY-281）
 ## 黃金突變主題：#FFD700 金 + #FFA500 橙金 + #FF8C00 深橙 + #FFFACD 淡金 + #FF6B35 橙紅
 ## 業界原創「黃金突變+全場感染+突變連鎖」機制
 ##
@@ -111,7 +111,7 @@ func _on_mutation_infect(payload: Dictionary) -> void:
 
 	# 浮動文字
 	var vp_size := get_viewport().get_visible_rect().size
-	var name_str := target_names[0] if target_names.size() > 0 else "???"
+	var name_str: String = target_names[0] if target_names.size() > 0 else "???"
 	_show_mini_banner(
 		"✨ 感染！%s 讓 %s 也突變了！擊破得 ×%.1f！" % [player_name, name_str, kill_mult],
 		COLOR_ORANGE_GOLD

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://uhanhfa3rmy17"
-path="res://.godot/imported/T239_gold_mutation.png-6ca55c7a74ce8e59776d484b4b1e6b2a.ctex"
+uid="uid://48bi4otxmmae"
+path="res://.godot/imported/T239_gold_mutation.png-c370abeb4a6ef1fddcfd994d181df02a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T239_gold_mutation.png"
-dest_files=["res://.godot/imported/T239_gold_mutation.png-6ca55c7a74ce8e59776d484b4b1e6b2a.ctex"]
+dest_files=["res://.godot/imported/T239_gold_mutation.png-c370abeb4a6ef1fddcfd994d181df02a.ctex"]
 
 [params]
 

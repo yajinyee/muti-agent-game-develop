@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bgkakz7mgfv86"
-path="res://.godot/imported/T186_quantum.png-83232bd050c00b336ee71c28c06f43ca.ctex"
+uid="uid://bgkak07mgfv86"
+path="res://.godot/imported/T186_quantum.png-6e213dac24be233317052a09e847c49d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T186_quantum.png"
-dest_files=["res://.godot/imported/T186_quantum.png-83232bd050c00b336ee71c28c06f43ca.ctex"]
+dest_files=["res://.godot/imported/T186_quantum.png-6e213dac24be233317052a09e847c49d.ctex"]
 
 [params]
 

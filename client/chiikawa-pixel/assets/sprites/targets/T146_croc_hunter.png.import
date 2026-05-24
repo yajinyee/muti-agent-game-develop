@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://5ne33al3rm9tx"
-path="res://.godot/imported/T146_croc_hunter.png-e881ae6d66c243fa5db5d1e4a2706fd1.ctex"
+uid="uid://dlj0xu6cs75jl"
+path="res://.godot/imported/T146_croc_hunter.png-921fe35d799c9433c5aa18f81368db0a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T146_croc_hunter.png"
-dest_files=["res://.godot/imported/T146_croc_hunter.png-e881ae6d66c243fa5db5d1e4a2706fd1.ctex"]
+dest_files=["res://.godot/imported/T146_croc_hunter.png-921fe35d799c9433c5aa18f81368db0a.ctex"]
 
 [params]
 

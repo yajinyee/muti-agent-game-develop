@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bezg2ip4tki8l"
-path="res://.godot/imported/T188_storm.png-cb9d00a78869c53f634830500d15abb6.ctex"
+uid="uid://be0g2ip4tki8l"
+path="res://.godot/imported/T188_storm.png-31d20197e3b95e5fdd654c55b735b506.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T188_storm.png"
-dest_files=["res://.godot/imported/T188_storm.png-cb9d00a78869c53f634830500d15abb6.ctex"]
+dest_files=["res://.godot/imported/T188_storm.png-31d20197e3b95e5fdd654c55b735b506.ctex"]
 
 [params]
 

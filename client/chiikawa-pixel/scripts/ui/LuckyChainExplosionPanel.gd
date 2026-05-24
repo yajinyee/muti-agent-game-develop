@@ -1,4 +1,4 @@
-## LuckyChainExplosionPanel.gd — 幸運連鎖爆炸魚 UI（DAY-266）
+﻿## LuckyChainExplosionPanel.gd — 幸運連鎖爆炸魚 UI（DAY-266）
 ## 火焰爆炸主題面板
 ## 主色：#FF4500 火橙 + #FF6B35 橙紅 + #FFD700 金 + #FF0000 紅
 extends CanvasLayer
@@ -141,7 +141,7 @@ func _on_explosion_layer(payload: Dictionary) -> void:
 	pulse.tween_property(_layer_counter, "scale", Vector2(1.3, 1.3), 0.08)
 	pulse.tween_property(_layer_counter, "scale", Vector2(1.0, 1.0), 0.12)
 
-	_ = affected_count
+	# (unused variable suppressed)
 
 ## 最終結算廣播
 func _on_explosion_result(payload: Dictionary) -> void:

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://9jmvypd5m5l17"
-path="res://.godot/imported/T220_progjakpot.png-1b66bc43a82f5109a6eb323307d47fe4.ctex"
+uid="uid://dmdw88044jly3"
+path="res://.godot/imported/T220_progjakpot.png-59380e0f7a88e77fb63f4e0457a6ccfb.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T220_progjakpot.png"
-dest_files=["res://.godot/imported/T220_progjakpot.png-1b66bc43a82f5109a6eb323307d47fe4.ctex"]
+dest_files=["res://.godot/imported/T220_progjakpot.png-59380e0f7a88e77fb63f4e0457a6ccfb.ctex"]
 
 [params]
 

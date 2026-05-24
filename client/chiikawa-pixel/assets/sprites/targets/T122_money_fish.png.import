@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://apfdg3gpzqdfr"
-path="res://.godot/imported/T122_money_fish.png-208fab7d2e55aa39d0d8c6cb91ceb856.ctex"
+uid="uid://pfdg3gp0qdfr"
+path="res://.godot/imported/T122_money_fish.png-cdca818b1eb755dd073db17e36f4bda3.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T122_money_fish.png"
-dest_files=["res://.godot/imported/T122_money_fish.png-208fab7d2e55aa39d0d8c6cb91ceb856.ctex"]
+dest_files=["res://.godot/imported/T122_money_fish.png-cdca818b1eb755dd073db17e36f4bda3.ctex"]
 
 [params]
 

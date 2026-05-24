@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6ecdae5ec4b9cc3b"
-path="res://.godot/imported/T102_chest_swim.png-6ecdae5ec4b9cc3b512e26cca4de11f7.ctex"
+uid="uid://4lh32s6030in"
+path="res://.godot/imported/T102_chest_swim.png-311c113d6bbe80031079df19ec3b094d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T102_chest_swim.png"
-dest_files=["res://.godot/imported/T102_chest_swim.png-6ecdae5ec4b9cc3b512e26cca4de11f7.ctex"]
+dest_files=["res://.godot/imported/T102_chest_swim.png-311c113d6bbe80031079df19ec3b094d.ctex"]
 
 [params]
 

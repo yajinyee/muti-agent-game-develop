@@ -1,23 +1,23 @@
-## DailyBossPanel.gd — 每日特殊 BOSS 挑戰面板（DAY-077）
-## 顯示每日 BOSS 的 HP、貢獻排名、倒數計時、獎勵池
-## 位置：TopBar 右側（可折疊）
+﻿## DailyBossPanel.gd ??瘥?寞? BOSS ??Ｘ嚗AY-077嚗?
+## 憿舐內瘥 BOSS ??HP?甜?餅??閮????菜?
+## 雿蔭嚗opBar ?喳嚗??嚗?
 extends Node2D
 
-# ---- 常數 ----
+# ---- 撣豢 ----
 const PANEL_WIDTH  := 280
 const PANEL_HEIGHT := 320
 
-# ---- 節點引用 ----
+# ---- 蝭暺???----
 var _pixel_font: Font = null
 var _is_open: bool = false
 var _toggle_btn: Button = null
 var _panel_bg: ColorRect = null
 var _content_node: Node2D = null
 
-# ---- 每日 BOSS 資料 ----
+# ---- 瘥 BOSS 鞈? ----
 var _date_id: String = ""
 var _boss_name: String = ""
-var _boss_icon: String = "👹"
+var _boss_icon: String = "?"
 var _boss_color: String = "#FF4444"
 var _description: String = ""
 var _max_hp: int = 0
@@ -31,11 +31,11 @@ var _my_damage: int = 0
 var _my_reward: int = 0
 var _difficulty_mod: float = 1.0
 
-# ---- 結算資料 ----
+# ---- 蝯?鞈? ----
 var _defeated_data: Dictionary = {}
 var _show_defeated: bool = false
 
-# ---- 初始化 ----
+# ---- ????----
 func _ready() -> void:
 	if ResourceLoader.exists("res://assets/fonts/pixel8.fnt"):
 		_pixel_font = load("res://assets/fonts/pixel8.fnt")
@@ -47,20 +47,20 @@ func setup(font: Font) -> void:
 	if font:
 		_pixel_font = font
 
-## 建立折疊按鈕
+## 撱箇?????
 func _build_toggle_btn() -> void:
 	_toggle_btn = Button.new()
-	_toggle_btn.text = "👹"
+	_toggle_btn.text = "?"
 	_toggle_btn.size = Vector2(32, 24)
 	_toggle_btn.position = Vector2(0, 0)
 	_toggle_btn.flat = true
-	_toggle_btn.tooltip_text = "每日 BOSS"
+	_toggle_btn.tooltip_text = "瘥 BOSS"
 	if _pixel_font:
 		_toggle_btn.add_theme_font_override("font", _pixel_font)
 	add_child(_toggle_btn)
 	_toggle_btn.pressed.connect(_on_toggle_pressed)
 
-## 建立面板
+## 撱箇??Ｘ
 func _build_panel() -> void:
 	_panel_bg = ColorRect.new()
 	_panel_bg.color = Color(0.08, 0.03, 0.03, 0.93)
@@ -74,14 +74,14 @@ func _build_panel() -> void:
 	_content_node.visible = false
 	add_child(_content_node)
 
-## 連接訊號
+## ??閮?
 func _connect_signals() -> void:
 	if GameManager.has_signal("daily_boss_updated"):
 		GameManager.daily_boss_updated.connect(_on_daily_boss_updated)
 	if GameManager.has_signal("daily_boss_defeated"):
 		GameManager.daily_boss_defeated.connect(_on_daily_boss_defeated)
 
-# ---- 事件處理 ----
+# ---- 鈭辣?? ----
 func _on_toggle_pressed() -> void:
 	_is_open = !_is_open
 	_panel_bg.visible = _is_open
@@ -93,7 +93,7 @@ func _on_toggle_pressed() -> void:
 func _on_daily_boss_updated(data: Dictionary) -> void:
 	_date_id = data.get("date_id", "")
 	_boss_name = data.get("boss_name", "???")
-	_boss_icon = data.get("boss_icon", "👹")
+	_boss_icon = data.get("boss_icon", "?")
 	_boss_color = data.get("boss_color", "#FF4444")
 	_description = data.get("description", "")
 	_max_hp = data.get("max_hp", 0)
@@ -118,7 +118,7 @@ func _on_daily_boss_defeated(data: Dictionary) -> void:
 		_redraw_panel()
 	_show_defeat_notification(data)
 
-# ---- 繪製 ----
+# ---- 蝜芾ˊ ----
 func _redraw_panel() -> void:
 	for child in _content_node.get_children():
 		child.queue_free()
@@ -131,9 +131,9 @@ func _redraw_panel() -> void:
 func _draw_active_view() -> void:
 	var y := 8.0
 
-	# 標題
+	# 璅?
 	var title_lbl := Label.new()
-	title_lbl.text = "每日 BOSS：%s%s" % [_boss_icon, _boss_name]
+	title_lbl.text = "瘥 BOSS嚗?s%s" % [_boss_icon, _boss_name]
 	title_lbl.position = Vector2(8, y)
 	title_lbl.size = Vector2(PANEL_WIDTH - 16, 20)
 	if _pixel_font:
@@ -143,7 +143,7 @@ func _draw_active_view() -> void:
 	_content_node.add_child(title_lbl)
 	y += 22
 
-	# 描述
+	# ?膩
 	if _description != "":
 		var desc_lbl := Label.new()
 		desc_lbl.text = _description
@@ -157,7 +157,7 @@ func _draw_active_view() -> void:
 		_content_node.add_child(desc_lbl)
 		y += 30
 
-	# HP 條
+	# HP 璇?
 	var hp_bg := ColorRect.new()
 	hp_bg.color = Color(0.3, 0.1, 0.1, 0.8)
 	hp_bg.size = Vector2(PANEL_WIDTH - 16, 16)
@@ -184,9 +184,9 @@ func _draw_active_view() -> void:
 	_content_node.add_child(hp_lbl)
 	y += 20
 
-	# 獎勵池 + 倒數
+	# ?瘙?+ ?
 	var info_lbl := Label.new()
-	info_lbl.text = "🪙 獎勵池：%d  |  %s" % [_reward_pool, _get_countdown_text()]
+	info_lbl.text = "?? ?瘙?%d  |  %s" % [_reward_pool, _get_countdown_text()]
 	info_lbl.position = Vector2(8, y)
 	info_lbl.size = Vector2(PANEL_WIDTH - 16, 16)
 	if _pixel_font:
@@ -196,10 +196,10 @@ func _draw_active_view() -> void:
 	_content_node.add_child(info_lbl)
 	y += 18
 
-	# 我的貢獻
+	# ??鞎Ｙ
 	if _my_damage > 0:
 		var my_lbl := Label.new()
-		my_lbl.text = "我的傷害：%d" % _my_damage
+		my_lbl.text = "???瑕拿嚗?d" % _my_damage
 		my_lbl.position = Vector2(8, y)
 		my_lbl.size = Vector2(PANEL_WIDTH - 16, 14)
 		if _pixel_font:
@@ -209,7 +209,7 @@ func _draw_active_view() -> void:
 		_content_node.add_child(my_lbl)
 		y += 16
 
-	# 分隔線
+	# ??蝺?
 	var sep := ColorRect.new()
 	sep.color = Color(0.4, 0.2, 0.2, 0.8)
 	sep.size = Vector2(PANEL_WIDTH - 16, 1)
@@ -217,9 +217,9 @@ func _draw_active_view() -> void:
 	_content_node.add_child(sep)
 	y += 6
 
-	# 貢獻排名標題
+	# 鞎Ｙ??璅?
 	var rank_title := Label.new()
-	rank_title.text = "貢獻排名"
+	rank_title.text = "鞎Ｙ??"
 	rank_title.position = Vector2(8, y)
 	rank_title.size = Vector2(PANEL_WIDTH - 16, 14)
 	if _pixel_font:
@@ -229,7 +229,7 @@ func _draw_active_view() -> void:
 	_content_node.add_child(rank_title)
 	y += 16
 
-	# 貢獻者列表
+	# 鞎Ｙ??銵?
 	for i in range(min(_top_contribs.size(), 5)):
 		var entry = _top_contribs[i]
 		var rank: int = entry.get("rank", i + 1)
@@ -244,9 +244,9 @@ func _draw_active_view() -> void:
 			row_bg.position = Vector2(8, y - 2)
 			_content_node.add_child(row_bg)
 
-		var rank_icon := "🥇" if rank == 1 else ("🥈" if rank == 2 else ("🥉" if rank == 3 else str(rank) + "."))
+		var rank_icon := "??" if rank == 1 else ("??" if rank == 2 else ("??" if rank == 3 else str(rank) + "."))
 		var row_lbl := Label.new()
-		row_lbl.text = "%s %s  %d傷" % [rank_icon, name, damage]
+		row_lbl.text = "%s %s  %d?? % [rank_icon, name, damage]"
 		row_lbl.position = Vector2(12, y)
 		row_lbl.size = Vector2(PANEL_WIDTH - 24, 16)
 		if _pixel_font:
@@ -257,10 +257,10 @@ func _draw_active_view() -> void:
 		_content_node.add_child(row_lbl)
 		y += 18
 
-	# 難度修正提示
+	# ??漲靽格迤?內
 	if _difficulty_mod < 1.0:
 		var diff_lbl := Label.new()
-		diff_lbl.text = "⬇ 難度已降低 %d%%" % [int((1.0 - _difficulty_mod) * 100)]
+		diff_lbl.text = "漎???漲撌脤?雿?%d%%" % [int((1.0 - _difficulty_mod) * 100)]
 		diff_lbl.position = Vector2(8, y + 4)
 		diff_lbl.size = Vector2(PANEL_WIDTH - 16, 14)
 		if _pixel_font:
@@ -272,14 +272,14 @@ func _draw_active_view() -> void:
 func _draw_defeated_view() -> void:
 	var y := 8.0
 	var boss_name: String = _defeated_data.get("boss_name", "???")
-	var boss_icon: String = _defeated_data.get("boss_icon", "👹")
+	var boss_icon: String = _defeated_data.get("boss_icon", "?")
 	var killer_name: String = _defeated_data.get("killer_name", "???")
 	var my_reward: int = _defeated_data.get("my_reward", 0)
 	var rankings = _defeated_data.get("rankings", [])
 
-	# 標題
+	# 璅?
 	var title_lbl := Label.new()
-	title_lbl.text = "%s%s 已被擊敗！" % [boss_icon, boss_name]
+	title_lbl.text = "%s%s 撌脰◤??嚗? % [boss_icon, boss_name]"
 	title_lbl.position = Vector2(8, y)
 	title_lbl.size = Vector2(PANEL_WIDTH - 16, 20)
 	if _pixel_font:
@@ -289,9 +289,9 @@ func _draw_defeated_view() -> void:
 	_content_node.add_child(title_lbl)
 	y += 24
 
-	# 擊殺者
+	# ?捏??
 	var killer_lbl := Label.new()
-	killer_lbl.text = "最後一擊：%s" % killer_name
+	killer_lbl.text = "?敺???%s" % killer_name
 	killer_lbl.position = Vector2(8, y)
 	killer_lbl.size = Vector2(PANEL_WIDTH - 16, 16)
 	if _pixel_font:
@@ -301,10 +301,10 @@ func _draw_defeated_view() -> void:
 	_content_node.add_child(killer_lbl)
 	y += 20
 
-	# 我的獎勵
+	# ???
 	if my_reward > 0:
 		var reward_lbl := Label.new()
-		reward_lbl.text = "你獲得：🪙 %d 金幣！" % my_reward
+		reward_lbl.text = "雿敺??? %d ?馳嚗? % my_reward"
 		reward_lbl.position = Vector2(8, y)
 		reward_lbl.size = Vector2(PANEL_WIDTH - 16, 18)
 		if _pixel_font:
@@ -314,7 +314,7 @@ func _draw_defeated_view() -> void:
 		_content_node.add_child(reward_lbl)
 		y += 22
 
-	# 前三名
+	# ????
 	var sep := ColorRect.new()
 	sep.color = Color(0.4, 0.2, 0.1, 0.8)
 	sep.size = Vector2(PANEL_WIDTH - 16, 1)
@@ -330,9 +330,9 @@ func _draw_defeated_view() -> void:
 		var reward: int = entry.get("reward", 0)
 		var is_me: bool = entry.get("is_me", false)
 
-		var rank_icon := "🥇" if rank == 1 else ("🥈" if rank == 2 else ("🥉" if rank == 3 else str(rank) + "."))
+		var rank_icon := "??" if rank == 1 else ("??" if rank == 2 else ("??" if rank == 3 else str(rank) + "."))
 		var row_lbl := Label.new()
-		row_lbl.text = "%s %s  %d傷  +%d🪙" % [rank_icon, name, damage, reward]
+		row_lbl.text = "%s %s  %d?? +%d??" % [rank_icon, name, damage, reward]
 		row_lbl.position = Vector2(12, y)
 		row_lbl.size = Vector2(PANEL_WIDTH - 24, 16)
 		if _pixel_font:
@@ -343,9 +343,9 @@ func _draw_defeated_view() -> void:
 		_content_node.add_child(row_lbl)
 		y += 18
 
-	# 關閉按鈕
+	# ????
 	var close_btn := Button.new()
-	close_btn.text = "關閉"
+	close_btn.text = "??"
 	close_btn.size = Vector2(80, 24)
 	close_btn.position = Vector2((PANEL_WIDTH - 80) / 2, y + 8)
 	if _pixel_font:
@@ -357,44 +357,44 @@ func _draw_defeated_view() -> void:
 		_redraw_panel()
 	)
 
-# ---- 工具函數 ----
+# ---- 撌亙?賣 ----
 func _get_countdown_text() -> String:
 	if _end_at_ms <= 0:
-		return "等待重置..."
+		return "蝑??蔭..."
 	var now_unix_ms := int(Time.get_unix_time_from_system() * 1000)
 	var remaining_ms := _end_at_ms - now_unix_ms
 	if remaining_ms <= 0:
-		return "重置中..."
+		return "?蔭銝?.."
 	var remaining_sec := remaining_ms / 1000
 	var hours := remaining_sec / 3600
 	var minutes := (remaining_sec % 3600) / 60
 	if hours > 0:
-		return "%d時%d分" % [hours, minutes]
+		return "%d??d?? % [hours, minutes]"
 	else:
-		return "%d分鐘" % minutes
+		return "%d??" % minutes
 
 func _update_toggle_badge() -> void:
 	if _status == "defeated":
-		_toggle_btn.text = "👹✓"
+		_toggle_btn.text = "???"
 	elif _my_damage > 0:
-		_toggle_btn.text = "👹⚔"
+		_toggle_btn.text = "???"
 	else:
-		_toggle_btn.text = "👹"
+		_toggle_btn.text = "?"
 
 func _show_defeat_notification(data: Dictionary) -> void:
 	var boss_name: String = data.get("boss_name", "???")
-	var boss_icon: String = data.get("boss_icon", "👹")
+	var boss_icon: String = data.get("boss_icon", "?")
 	var my_reward: int = data.get("my_reward", 0)
 	if my_reward > 0:
 		if get_parent() and get_parent().has_method("show_achievement_notify"):
-			var msg := "%s%s 已擊敗！你獲得 %d 金幣！" % [boss_icon, boss_name, my_reward]
+			var msg := "%s%s 撌脫???雿敺?%d ?馳嚗? % [boss_icon, boss_name, my_reward]"
 			get_parent().show_achievement_notify(msg, "gold")
 	else:
 		if get_parent() and get_parent().has_method("show_achievement_notify"):
-			var msg := "%s%s 已被擊敗！" % [boss_icon, boss_name]
+			var msg := "%s%s 撌脰◤??嚗? % [boss_icon, boss_name]"
 			get_parent().show_achievement_notify(msg, "normal")
 
-# ---- 每幀更新 ----
+# ---- 瘥??湔 ----
 func _process(_delta: float) -> void:
 	if _is_open and not _show_defeated:
 		var hp_lbl = _content_node.find_child("HPLabel", false, false)

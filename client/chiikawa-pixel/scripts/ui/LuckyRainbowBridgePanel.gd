@@ -226,7 +226,7 @@ func _flash_rainbow(times: int) -> void:
 
 	var tween := create_tween()
 	for i in range(times):
-		var c := RAINBOW_COLORS[i % RAINBOW_COLORS.size()]
+		var c: Variant = RAINBOW_COLORS[i % RAINBOW_COLORS.size()]
 		tween.tween_property(flash, "color", Color(c.r, c.g, c.b, 0.45), 0.07)
 		tween.tween_property(flash, "color:a", 0.0, 0.10)
 	tween.tween_callback(func():

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://pu9ydjbnb7avy"
-path="res://.godot/imported/T002_bug_g_swim_backup.png-9a355e4c68de09911cf0c7ac804b6605.ctex"
+uid="uid://fnh0bmm2eruw"
+path="res://.godot/imported/T002_bug_g_swim_backup.png-01ed0a84cf7e3ef88c4d7925676515cd.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T002_bug_g_swim_backup.png"
-dest_files=["res://.godot/imported/T002_bug_g_swim_backup.png-9a355e4c68de09911cf0c7ac804b6605.ctex"]
+dest_files=["res://.godot/imported/T002_bug_g_swim_backup.png-01ed0a84cf7e3ef88c4d7925676515cd.ctex"]
 
 [params]
 

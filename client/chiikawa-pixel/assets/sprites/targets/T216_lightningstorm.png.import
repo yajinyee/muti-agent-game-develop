@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2glgm9yl7jpz9"
-path="res://.godot/imported/T216_lightningstorm.png-9a55b3097ff247ed8dea14aafe55df71.ctex"
+uid="uid://eqdivjt84lpw"
+path="res://.godot/imported/T216_lightningstorm.png-acf350ca3282186a862f41cfb4238317.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T216_lightningstorm.png"
-dest_files=["res://.godot/imported/T216_lightningstorm.png-9a55b3097ff247ed8dea14aafe55df71.ctex"]
+dest_files=["res://.godot/imported/T216_lightningstorm.png-acf350ca3282186a862f41cfb4238317.ctex"]
 
 [params]
 

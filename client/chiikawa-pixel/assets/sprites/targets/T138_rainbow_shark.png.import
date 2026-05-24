@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://sqy9pv7mvckh9"
-path="res://.godot/imported/T138_rainbow_shark.png-d2e24f19e22776f13dda2dbb0b9ddf9e.ctex"
+uid="uid://dbdsdojmmi2g7"
+path="res://.godot/imported/T138_rainbow_shark.png-c6160e29b30265ee2ef1afd78694299d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T138_rainbow_shark.png"
-dest_files=["res://.godot/imported/T138_rainbow_shark.png-d2e24f19e22776f13dda2dbb0b9ddf9e.ctex"]
+dest_files=["res://.godot/imported/T138_rainbow_shark.png-c6160e29b30265ee2ef1afd78694299d.ctex"]
 
 [params]
 

@@ -1,4 +1,4 @@
-## LuckySpinWheelPanel.gd — 幸運輪盤魚 UI（DAY-269）
+﻿## LuckySpinWheelPanel.gd — 幸運輪盤魚 UI（DAY-269）
 ## 粉金輪盤主題面板（個人幸運輪盤）
 ## 主色：#FF69B4 粉紅 + #FFD700 金 + #FF4500 火橙 + #1A1A2E 深藍黑
 extends CanvasLayer
@@ -193,7 +193,7 @@ func _on_spin_result(payload: Dictionary) -> void:
 	banner_tween.tween_interval(4.0)
 	banner_tween.tween_property(_banner, "modulate:a", 0.0, 0.5)
 
-	_ = sector_index
+	# (unused variable suppressed)
 
 ## 加成期間擊破（個人）
 func _on_spin_boost_kill(payload: Dictionary) -> void:

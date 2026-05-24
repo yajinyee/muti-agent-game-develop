@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://vylmjtf1w7qhh"
-path="res://.godot/imported/T174_poison.png-d2d8fcd5dbf5956da70556bc487ffa2d.ctex"
+uid="uid://cnkaljtr37don"
+path="res://.godot/imported/T174_poison.png-f1a8d23edd1d9a491d9fc6fcfe88f09e.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T174_poison.png"
-dest_files=["res://.godot/imported/T174_poison.png-d2d8fcd5dbf5956da70556bc487ffa2d.ctex"]
+dest_files=["res://.godot/imported/T174_poison.png-f1a8d23edd1d9a491d9fc6fcfe88f09e.ctex"]
 
 [params]
 

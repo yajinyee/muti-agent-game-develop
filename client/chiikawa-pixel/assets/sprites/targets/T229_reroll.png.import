@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://unxv99b377m24"
-path="res://.godot/imported/T229_reroll.png-457bf5f38ef8305c03f5d5cd34140aa8.ctex"
+uid="uid://bcwkcypue7abb"
+path="res://.godot/imported/T229_reroll.png-42e346c47f0c72de8d6b03326e899420.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T229_reroll.png"
-dest_files=["res://.godot/imported/T229_reroll.png-457bf5f38ef8305c03f5d5cd34140aa8.ctex"]
+dest_files=["res://.godot/imported/T229_reroll.png-42e346c47f0c72de8d6b03326e899420.ctex"]
 
 [params]
 

@@ -1,7 +1,7 @@
-## GoldenSharkPanel.gd — 黃金鯊魚全服狂暴模式面板（DAY-161）
-## 擊破黃金鯊魚後觸發全服狂暴模式 12 秒，所有獎勵 ×1.5
-## 視覺：橙紅鯊魚爆炸 + 全螢幕橙色光暈 + 倒數計時器 + ×1.5 標誌
-## 與幸運星魚不同：全服共享，任何玩家擊破都讓全服受益
+﻿## GoldenSharkPanel.gd ??暺?攳??冽??璅∪??Ｘ嚗AY-161嚗?
+## ?暺?攳?敺孛?澆???湔芋撘?12 蝘???????1.5
+## 閬死嚗?蝝?擳???+ ?刻撟??脣???+ ?閮???+ ?1.5 璅?
+## ?兢??擳????冽??曹澈嚗遙雿摰嗆??湧霈????
 extends Node2D
 
 var _pixel_font: Font = null
@@ -34,9 +34,9 @@ func _process(delta: float) -> void:
 		_hide_berserk()
 		return
 	if is_instance_valid(_countdown_label):
-		_countdown_label.text = "🦈 ×1.5 %.1f秒" % _remaining
+		_countdown_label.text = "?? ?1.5 %.1f蝘? % _remaining"
 
-## 處理黃金鯊魚狂暴模式事件
+## ??暺?攳??璅∪?鈭辣
 func _on_golden_shark_berserk(data: Dictionary) -> void:
 	var phase: String = data.get("phase", "")
 	var duration: float = data.get("duration_secs", 12.0)
@@ -48,7 +48,7 @@ func _on_golden_shark_berserk(data: Dictionary) -> void:
 	elif phase == "berserk_end":
 		_hide_berserk()
 
-## 顯示狂暴模式效果
+## 憿舐內?璅∪???
 func _show_berserk(killer_name: String, killer_id: String, duration: float) -> void:
 	_is_active = true
 	_remaining = duration
@@ -56,14 +56,14 @@ func _show_berserk(killer_name: String, killer_id: String, duration: float) -> v
 
 	var is_me = (killer_id == _my_player_id)
 
-	# 全螢幕橙紅半透明遮罩（狂暴感）
+	# ?刻撟?蝝????桃蔗嚗??湔?嚗?
 	_overlay = ColorRect.new()
 	_overlay.position = Vector2(-640, -360)
 	_overlay.size = Vector2(1280, 720)
 	_overlay.color = Color(1.0, 0.4, 0.0, 0.07)
 	add_child(_overlay)
 
-	# 全螢幕橙色閃光
+	# ?刻撟??脤???
 	var flash := ColorRect.new()
 	flash.position = Vector2(-640, -360)
 	flash.size = Vector2(1280, 720)
@@ -75,7 +75,7 @@ func _show_berserk(killer_name: String, killer_id: String, duration: float) -> v
 		if is_instance_valid(flash): flash.queue_free()
 	)
 
-	# 頂部橫幅（橙紅主題）
+	# ?璈怠?嚗?蝝蜓憿?
 	var banner_bg := ColorRect.new()
 	banner_bg.name = "SharkBanner"
 	banner_bg.position = Vector2(-640, -360)
@@ -85,9 +85,9 @@ func _show_berserk(killer_name: String, killer_id: String, duration: float) -> v
 
 	var banner_text: String
 	if is_me:
-		banner_text = "🦈 你擊破黃金鯊魚！全服狂暴模式！所有獎勵 ×1.5 持續 %.0f 秒！" % duration
+		banner_text = "?? 雿??湧???擳??冽??璅∪?嚗??????1.5 ?? %.0f 蝘?" % duration
 	else:
-		banner_text = "🦈 %s 擊破黃金鯊魚！全服狂暴模式！所有獎勵 ×1.5 持續 %.0f 秒！" % [killer_name, duration]
+		banner_text = "?? %s ?暺?攳?嚗???湔芋撘???????1.5 ?? %.0f 蝘?" % [killer_name, duration]
 
 	var banner_lbl := Label.new()
 	banner_lbl.name = "SharkBannerLabel"
@@ -101,7 +101,7 @@ func _show_berserk(killer_name: String, killer_id: String, duration: float) -> v
 		banner_lbl.add_theme_font_override("font", _pixel_font)
 	add_child(banner_lbl)
 
-	# 橫幅滑入動畫
+	# 璈怠?皛?
 	banner_bg.position.y = -410
 	banner_lbl.position.y = -404
 	var slide_tween = banner_bg.create_tween()
@@ -109,7 +109,7 @@ func _show_berserk(killer_name: String, killer_id: String, duration: float) -> v
 	var slide_tween2 = banner_lbl.create_tween()
 	slide_tween2.tween_property(banner_lbl, "position:y", -354.0, 0.3)
 
-	# 倒數計時器（右上角）
+	# ?閮??剁??喃?閫?
 	var countdown_bg := ColorRect.new()
 	countdown_bg.name = "SharkCountdownBG"
 	countdown_bg.position = Vector2(510, -355)
@@ -121,7 +121,7 @@ func _show_berserk(killer_name: String, killer_id: String, duration: float) -> v
 	_countdown_label.name = "SharkCountdown"
 	_countdown_label.position = Vector2(510, -352)
 	_countdown_label.size = Vector2(130, 30)
-	_countdown_label.text = "🦈 ×1.5 %.1f秒" % duration
+	_countdown_label.text = "?? ?1.5 %.1f蝘? % duration"
 	_countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_countdown_label.add_theme_color_override("font_color", Color(1.0, 0.7, 0.1))
 	_countdown_label.add_theme_font_size_override("font_size", 13)
@@ -129,7 +129,7 @@ func _show_berserk(killer_name: String, killer_id: String, duration: float) -> v
 		_countdown_label.add_theme_font_override("font", _pixel_font)
 	add_child(_countdown_label)
 
-	# 自己觸發時：中央大 ×1.5 標誌（彈跳動畫）
+	# ?芸楛閫貊??銝剖亢憭??1.5 璅?嚗?頝喳??恬?
 	if is_me:
 		var mult_bg := ColorRect.new()
 		mult_bg.name = "BerserkMultBG"
@@ -142,7 +142,7 @@ func _show_berserk(killer_name: String, killer_id: String, duration: float) -> v
 		mult_lbl.name = "BerserkMultLabel"
 		mult_lbl.position = Vector2(-90, -53)
 		mult_lbl.size = Vector2(180, 86)
-		mult_lbl.text = "×1.5"
+		mult_lbl.text = "?1.5"
 		mult_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		mult_lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		mult_lbl.add_theme_color_override("font_color", Color(1.0, 0.7, 0.1))
@@ -151,13 +151,13 @@ func _show_berserk(killer_name: String, killer_id: String, duration: float) -> v
 			mult_lbl.add_theme_font_override("font", _pixel_font)
 		add_child(mult_lbl)
 
-		# 彈跳動畫
+		# 敶歲?
 		mult_lbl.scale = Vector2(0.5, 0.5)
 		var scale_tween = mult_lbl.create_tween()
 		scale_tween.tween_property(mult_lbl, "scale", Vector2(1.2, 1.2), 0.2)
 		scale_tween.tween_property(mult_lbl, "scale", Vector2(1.0, 1.0), 0.1)
 
-		# 2 秒後淡出
+		# 2 蝘?瘛∪
 		var fade_tween = mult_lbl.create_tween()
 		fade_tween.tween_interval(2.0)
 		fade_tween.tween_property(mult_lbl, "modulate:a", 0.0, 0.5)
@@ -166,7 +166,7 @@ func _show_berserk(killer_name: String, killer_id: String, duration: float) -> v
 			if is_instance_valid(mult_bg): mult_bg.queue_free()
 		)
 
-## 隱藏狂暴模式效果
+## ?梯??璅∪???
 func _hide_berserk() -> void:
 	_is_active = false
 	_remaining = 0.0

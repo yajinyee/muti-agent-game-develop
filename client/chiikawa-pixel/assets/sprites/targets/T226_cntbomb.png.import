@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://kt2umxi5we5oj"
-path="res://.godot/imported/T226_cntbomb.png-b59c2baf6ea700e296aa49816bcea72a.ctex"
+uid="uid://c384gtonr0e50"
+path="res://.godot/imported/T226_cntbomb.png-05fe3416f8dd64cbddba6728231e8d95.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T226_cntbomb.png"
-dest_files=["res://.godot/imported/T226_cntbomb.png-b59c2baf6ea700e296aa49816bcea72a.ctex"]
+dest_files=["res://.godot/imported/T226_cntbomb.png-05fe3416f8dd64cbddba6728231e8d95.ctex"]
 
 [params]
 

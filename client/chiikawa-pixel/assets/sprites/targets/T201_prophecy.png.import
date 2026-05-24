@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://myeh43af8hges"
-path="res://.godot/imported/T201_prophecy.png-da2481dd28c46bd17470fa9ec2dcf649.ctex"
+uid="uid://bd5vdwiojus4i"
+path="res://.godot/imported/T201_prophecy.png-4acc4338a79b86b41aa650b84554aa58.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T201_prophecy.png"
-dest_files=["res://.godot/imported/T201_prophecy.png-da2481dd28c46bd17470fa9ec2dcf649.ctex"]
+dest_files=["res://.godot/imported/T201_prophecy.png-4acc4338a79b86b41aa650b84554aa58.ctex"]
 
 [params]
 

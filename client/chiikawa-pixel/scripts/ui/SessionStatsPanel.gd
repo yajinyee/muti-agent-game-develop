@@ -1,27 +1,27 @@
-## SessionStatsPanel.gd
-## Session 統計面板（DAY-046，從 HUD.gd 拆分 DAY-053）
-## 顯示本局統計：擊殺數、最高連擊、總獎勵、BOSS 擊殺、Bonus 次數、淨收益
-## 每 60 秒自動彈出一次（variable reinforcement，讓玩家感受到進度）
+﻿## SessionStatsPanel.gd
+## Session 蝯梯??Ｘ嚗AY-046嚗? HUD.gd ?? DAY-053嚗?
+## 憿舐內?砍?蝯梯?嚗?畾箸??擃???蜇??OSS ?捏?onus 甈⊥?楊?嗥?
+## 瘥?60 蝘???箔?甈∴?variable reinforcement嚗??拙振???圈脣漲嚗?
 
 extends Control
 
-# 由 HUD.gd 在建立後設定
+# ??HUD.gd ?典遣蝡?閮剖?
 var pixel_font: Font = null
 
-const SESSION_AUTO_POPUP_INTERVAL = 60.0  # 每 60 秒自動彈出一次
+const SESSION_AUTO_POPUP_INTERVAL = 60.0  # 瘥?60 蝘???箔?甈?
 
 var _visible_flag: bool = false
 var _auto_popup_timer: float = 0.0
 var _start_coins: int = 0
 
-# 本局統計數據（由 GameManager 訊號更新）
+# ?砍?蝯梯??豢?嚗 GameManager 閮??湔嚗?
 var _kills: int = 0
 var _max_combo: int = 0
 var _total_reward: int = 0
 var _boss_kills: int = 0
 var _bonus_count: int = 0
 
-## 初始化（由 HUD.gd 呼叫）
+## ??????HUD.gd ?澆嚗?
 func setup(font: Font) -> void:
 	pixel_font = font
 	GameManager.reward_received.connect(_on_session_reward)
@@ -30,13 +30,13 @@ func setup(font: Font) -> void:
 	GameManager.bonus_event.connect(_on_session_bonus_event)
 	_start_coins = GameManager.get_coins()
 
-## 建立「📊 本局」按鈕（TopBar）
+## 撱箇?????砍?????TopBar嚗?
 func create_button(top_bar: Control) -> void:
 	if not is_instance_valid(top_bar):
 		return
 	var btn = Button.new()
 	btn.name = "SessionStatsButton"
-	btn.text = "📊 本局"
+	btn.text = "?? ?砍?"
 	btn.position = Vector2(840, 4)
 	btn.size = Vector2(80, 32)
 	btn.add_theme_font_size_override("font_size", 12)
@@ -45,7 +45,7 @@ func create_button(top_bar: Control) -> void:
 	btn.pressed.connect(toggle)
 	top_bar.add_child(btn)
 
-## 每幀更新（自動彈出計時）
+## 瘥??湔嚗???箄???
 func _process(delta: float) -> void:
 	_auto_popup_timer += delta
 	if _auto_popup_timer >= SESSION_AUTO_POPUP_INTERVAL:
@@ -54,14 +54,14 @@ func _process(delta: float) -> void:
 		if state == "normal_play" or state == "special_target_event":
 			show_popup()
 
-## 切換顯示
+## ??憿舐內
 func toggle() -> void:
 	_visible_flag = not _visible_flag
 	visible = _visible_flag
 	if _visible_flag:
 		_refresh()
 
-## 彈出顯示（3 秒後自動收起）
+## 敶憿舐內嚗? 蝘??芸??嗉絲嚗?
 func show_popup() -> void:
 	_visible_flag = true
 	visible = true
@@ -73,7 +73,7 @@ func show_popup() -> void:
 			_visible_flag = false
 	)
 
-## 訊號處理
+## 閮???
 func _on_session_reward(reward: Dictionary) -> void:
 	_total_reward += reward.get("amount", 0)
 
@@ -92,7 +92,7 @@ func _on_session_bonus_event(bonus_data: Dictionary) -> void:
 	if event == "end":
 		_bonus_count += 1
 
-## 刷新統計數據顯示
+## ?瑟蝯梯??豢?憿舐內
 func _refresh() -> void:
 	var player_data = GameManager.player_data
 	var kills = player_data.get("kill_count", _kills)
@@ -102,8 +102,8 @@ func _refresh() -> void:
 
 	var rows = {
 		"KillsRow":  str(kills),
-		"ComboRow":  ("×%d" % _max_combo) if _max_combo > 0 else "—",
-		"RewardRow": ("🪙%d" % reward) if reward > 0 else "0",
+		"ComboRow":  ("?%d" % _max_combo) if _max_combo > 0 else "??,"
+		"RewardRow": ("??%d" % reward) if reward > 0 else "0",
 		"BossRow":   str(_boss_kills),
 		"BonusRow":  str(_bonus_count),
 		"ProfitRow": ("%+d" % net_profit),
@@ -114,7 +114,7 @@ func _refresh() -> void:
 			var val_lbl = row.get_node_or_null("Value")
 			if is_instance_valid(val_lbl):
 				val_lbl.text = rows[row_name]
-				# 顏色高亮
+				# 憿擃漁
 				if row_name == "ComboRow" and _max_combo >= 5:
 					val_lbl.add_theme_color_override("font_color", Color(1.0, 0.7, 0.1))
 				elif row_name == "BossRow" and _boss_kills > 0:
@@ -129,7 +129,7 @@ func _refresh() -> void:
 					else:
 						val_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 
-## 建立面板 UI
+## 撱箇??Ｘ UI
 func _ready() -> void:
 	name = "SessionStatsPanel"
 	position = Vector2(1050, 50)
@@ -139,13 +139,13 @@ func _ready() -> void:
 	_build_panel_ui()
 
 func _build_panel_ui() -> void:
-	# 背景
+	# ?
 	var bg = ColorRect.new()
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	bg.color = Color(0.02, 0.05, 0.15, 0.92)
 	add_child(bg)
 
-	# 邊框（金色）
+	# ??嚗??莎?
 	for border_data in [
 		[Vector2(0, 0), Vector2(220, 2)],
 		[Vector2(0, 198), Vector2(220, 2)],
@@ -158,10 +158,10 @@ func _build_panel_ui() -> void:
 		border.color = Color(0.90, 0.75, 0.20, 0.80)
 		add_child(border)
 
-	# 標題
+	# 璅?
 	var title = Label.new()
 	title.name = "Title"
-	title.text = "📊 本局統計"
+	title.text = "?? ?砍?蝯梯?"
 	title.position = Vector2(10, 8)
 	title.size = Vector2(200, 24)
 	title.add_theme_font_size_override("font_size", 14)
@@ -170,21 +170,21 @@ func _build_panel_ui() -> void:
 		title.add_theme_font_override("font", pixel_font)
 	add_child(title)
 
-	# 分隔線
+	# ??蝺?
 	var sep = ColorRect.new()
 	sep.position = Vector2(8, 34)
 	sep.size = Vector2(204, 1)
 	sep.color = Color(0.90, 0.75, 0.20, 0.40)
 	add_child(sep)
 
-	# 統計行（6行）
+	# 蝯梯?銵?6銵?
 	var stats_data = [
-		["KillsRow",   "⚔️ 擊殺",     "0"],
-		["ComboRow",   "🔥 最高連擊",  "0"],
-		["RewardRow",  "🪙 總獎勵",    "0"],
-		["BossRow",    "👹 BOSS 擊殺", "0"],
-		["BonusRow",   "🌿 Bonus 次數","0"],
-		["ProfitRow",  "📈 淨收益",    "0"],
+		["KillsRow",   "?? ?捏",     "0"],
+		["ComboRow",   "? ?擃??",  "0"],
+		["RewardRow",  "?? 蝮賜???,    "0"],"
+		["BossRow",    "? BOSS ?捏", "0"],
+		["BonusRow",   "? Bonus 甈⊥","0"],
+		["ProfitRow",  "?? 瘛冽??,    "0"],"
 	]
 	for i in range(stats_data.size()):
 		var row = Control.new()
@@ -216,10 +216,10 @@ func _build_panel_ui() -> void:
 			val_lbl.add_theme_font_override("font", pixel_font)
 		row.add_child(val_lbl)
 
-	# ESC 提示（底部）
+	# ESC ?內嚗??剁?
 	var esc_hint = Label.new()
 	esc_hint.name = "EscHint"
-	esc_hint.text = "[ESC] 關閉"
+	esc_hint.text = "[ESC] ??"
 	esc_hint.position = Vector2(8, 182)
 	esc_hint.size = Vector2(204, 14)
 	esc_hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

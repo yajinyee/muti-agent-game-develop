@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xkjw37opufgvt"
-path="res://.godot/imported/T228_mirrorduel.png-119ba121b4014b1b22b978abc50234a5.ctex"
+uid="uid://d3pku57g67c8"
+path="res://.godot/imported/T228_mirrorduel.png-6d0047e084138f1345646b11c66bf170.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T228_mirrorduel.png"
-dest_files=["res://.godot/imported/T228_mirrorduel.png-119ba121b4014b1b22b978abc50234a5.ctex"]
+dest_files=["res://.godot/imported/T228_mirrorduel.png-6d0047e084138f1345646b11c66bf170.ctex"]
 
 [params]
 

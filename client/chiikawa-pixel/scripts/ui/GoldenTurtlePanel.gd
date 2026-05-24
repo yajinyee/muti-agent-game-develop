@@ -1,7 +1,7 @@
-## GoldenTurtlePanel.gd — 黃金海龜時間停止面板（DAY-159）
-## 業界依據：Ocean King 系列「Time Stop」機制
-## 擊破黃金海龜後觸發全場時間停止 8 秒，所有目標物暫停移動
-## 視覺：金色時鐘停止動畫 + 全螢幕金色光暈 + 倒數計時器
+﻿## GoldenTurtlePanel.gd ??暺?瘚琿????迫?Ｘ嚗AY-159嚗?
+## 璆剔?靘?嚗cean King 蝟餃??ime Stop????
+## ?暺?瘚琿?敺孛?澆?湔???甇?8 蝘???璅?怠?蝘餃?
+## 閬死嚗??脫???甇Ｗ???+ ?刻撟??脣???+ ?閮???
 extends Node2D
 
 var _pixel_font: Font = null
@@ -33,9 +33,9 @@ func _process(delta: float) -> void:
 		_hide_countdown()
 		return
 	if is_instance_valid(_countdown_label):
-		_countdown_label.text = "⏱ %.1f" % _remaining
+		_countdown_label.text = "??%.1f" % _remaining
 
-## 處理黃金海龜時間停止事件
+## ??暺?瘚琿????迫鈭辣
 func _on_golden_turtle_time_stop(data: Dictionary) -> void:
 	var phase: String = data.get("phase", "")
 	var duration: float = data.get("duration_secs", 8.0)
@@ -46,19 +46,19 @@ func _on_golden_turtle_time_stop(data: Dictionary) -> void:
 	elif phase == "time_stop_end":
 		_hide_time_stop()
 
-## 顯示時間停止效果
+## 憿舐內???迫??
 func _show_time_stop(killer_name: String, duration: float) -> void:
 	_is_active = true
 	_remaining = duration
 
-	# 全螢幕金色半透明遮罩
+	# ?刻撟??脣????桃蔗
 	_overlay = ColorRect.new()
-	_overlay.position = Vector2(-640, -360)  # 相對於面板位置
+	_overlay.position = Vector2(-640, -360)  # ?詨??潮?蹂?蝵?
 	_overlay.size = Vector2(1280, 720)
 	_overlay.color = Color(1.0, 0.9, 0.0, 0.08)
 	add_child(_overlay)
 
-	# 全螢幕金色閃光（短暫）
+	# ?刻撟??脤????剜嚗?
 	var flash := ColorRect.new()
 	flash.position = Vector2(-640, -360)
 	flash.size = Vector2(1280, 720)
@@ -70,7 +70,7 @@ func _show_time_stop(killer_name: String, duration: float) -> void:
 		if is_instance_valid(flash): flash.queue_free()
 	)
 
-	# 頂部橫幅
+	# ?璈怠?
 	var banner_bg := ColorRect.new()
 	banner_bg.name = "TimeBanner"
 	banner_bg.position = Vector2(-640, -360)
@@ -82,7 +82,7 @@ func _show_time_stop(killer_name: String, duration: float) -> void:
 	banner_lbl.name = "TimeBannerLabel"
 	banner_lbl.position = Vector2(-640, -356)
 	banner_lbl.size = Vector2(1280, 40)
-	banner_lbl.text = "🐢 %s 觸發黃金海龜！時間停止 %.0f 秒！" % [killer_name, duration]
+	banner_lbl.text = "? %s 閫貊暺?瘚琿?嚗???甇?%.0f 蝘?" % [killer_name, duration]
 	banner_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	banner_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.0))
 	banner_lbl.add_theme_font_size_override("font_size", 16)
@@ -90,7 +90,7 @@ func _show_time_stop(killer_name: String, duration: float) -> void:
 		banner_lbl.add_theme_font_override("font", _pixel_font)
 	add_child(banner_lbl)
 
-	# 橫幅滑入動畫
+	# 璈怠?皛?
 	banner_bg.position.y = -400
 	banner_lbl.position.y = -396
 	var slide_tween = banner_bg.create_tween()
@@ -98,7 +98,7 @@ func _show_time_stop(killer_name: String, duration: float) -> void:
 	var slide_tween2 = banner_lbl.create_tween()
 	slide_tween2.tween_property(banner_lbl, "position:y", -356.0, 0.3)
 
-	# 倒數計時器（右上角）
+	# ?閮??剁??喃?閫?
 	var countdown_bg := ColorRect.new()
 	countdown_bg.name = "CountdownBG"
 	countdown_bg.position = Vector2(540, -355)
@@ -110,7 +110,7 @@ func _show_time_stop(killer_name: String, duration: float) -> void:
 	_countdown_label.name = "CountdownLabel"
 	_countdown_label.position = Vector2(540, -352)
 	_countdown_label.size = Vector2(90, 30)
-	_countdown_label.text = "⏱ %.1f" % duration
+	_countdown_label.text = "??%.1f" % duration
 	_countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_countdown_label.add_theme_color_override("font_color", Color(1.0, 0.9, 0.0))
 	_countdown_label.add_theme_font_size_override("font_size", 14)
@@ -118,14 +118,14 @@ func _show_time_stop(killer_name: String, duration: float) -> void:
 		_countdown_label.add_theme_font_override("font", _pixel_font)
 	add_child(_countdown_label)
 
-## 隱藏時間停止效果
+## ?梯????迫??
 func _hide_time_stop() -> void:
 	_is_active = false
 	_remaining = 0.0
 	_hide_countdown()
 
 func _hide_countdown() -> void:
-	# 清除所有時間停止 UI
+	# 皜?????甇?UI
 	for child_name in ["TimeBanner", "TimeBannerLabel", "CountdownBG", "CountdownLabel"]:
 		var node = get_node_or_null(child_name)
 		if is_instance_valid(node):

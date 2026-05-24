@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://87o3fhdiqemly"
-path="res://.godot/imported/T180_resonance.png-68d9859a5be254ceddacabdae40aea7d.ctex"
+uid="uid://dbf4o00h7rmju"
+path="res://.godot/imported/T180_resonance.png-d472cac171a6269eb1aac515ad62ff76.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T180_resonance.png"
-dest_files=["res://.godot/imported/T180_resonance.png-68d9859a5be254ceddacabdae40aea7d.ctex"]
+dest_files=["res://.godot/imported/T180_resonance.png-d472cac171a6269eb1aac515ad62ff76.ctex"]
 
 [params]
 

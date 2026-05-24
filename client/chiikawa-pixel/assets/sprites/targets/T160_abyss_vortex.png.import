@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://kh5lu1hzbxaej"
-path="res://.godot/imported/T160_abyss_vortex.png-db3c920c92d0919d2e574c3633fe46bc.ctex"
+uid="uid://crcuownh6jiu0"
+path="res://.godot/imported/T160_abyss_vortex.png-50daa8150957d4aa6f863878cd8df003.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T160_abyss_vortex.png"
-dest_files=["res://.godot/imported/T160_abyss_vortex.png-db3c920c92d0919d2e574c3633fe46bc.ctex"]
+dest_files=["res://.godot/imported/T160_abyss_vortex.png-50daa8150957d4aa6f863878cd8df003.ctex"]
 
 [params]
 

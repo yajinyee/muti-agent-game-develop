@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://9yah807y5oiax"
-path="res://.godot/imported/T208_mirrorsplit.png-5b05aba747058835d9e7973382f9b5c0.ctex"
+uid="uid://d10jjkuym2h7t"
+path="res://.godot/imported/T208_mirrorsplit.png-6912f4d10fd576a1840774374667e3b9.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T208_mirrorsplit.png"
-dest_files=["res://.godot/imported/T208_mirrorsplit.png-5b05aba747058835d9e7973382f9b5c0.ctex"]
+dest_files=["res://.godot/imported/T208_mirrorsplit.png-6912f4d10fd576a1840774374667e3b9.ctex"]
 
 [params]
 

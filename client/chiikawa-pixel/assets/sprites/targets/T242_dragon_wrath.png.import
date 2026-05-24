@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://w3m0858fazz5b"
-path="res://.godot/imported/T242_dragon_wrath.png-6db4ee95c2607ad013d12e14a8b8b53c.ctex"
+uid="uid://drlobvm5g0ndh"
+path="res://.godot/imported/T242_dragon_wrath.png-7a43fc19f2c2627db08a1ab8c9535d6f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T242_dragon_wrath.png"
-dest_files=["res://.godot/imported/T242_dragon_wrath.png-6db4ee95c2607ad013d12e14a8b8b53c.ctex"]
+dest_files=["res://.godot/imported/T242_dragon_wrath.png-7a43fc19f2c2627db08a1ab8c9535d6f.ctex"]
 
 [params]
 

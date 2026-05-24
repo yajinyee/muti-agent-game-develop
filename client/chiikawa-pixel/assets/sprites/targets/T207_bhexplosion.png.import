@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://0j3a8c6oslb7w"
-path="res://.godot/imported/T207_bhexplosion.png-14485dfb3fbc7d760a27a9ca78084f53.ctex"
+uid="uid://cdm2o0n6fd2oc"
+path="res://.godot/imported/T207_bhexplosion.png-6111ef178a225d83587d4456d1fe8031.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T207_bhexplosion.png"
-dest_files=["res://.godot/imported/T207_bhexplosion.png-14485dfb3fbc7d760a27a9ca78084f53.ctex"]
+dest_files=["res://.godot/imported/T207_bhexplosion.png-6111ef178a225d83587d4456d1fe8031.ctex"]
 
 [params]
 

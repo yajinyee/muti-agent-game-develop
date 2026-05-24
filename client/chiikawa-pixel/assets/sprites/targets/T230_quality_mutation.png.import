@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7jjv47ukh9nt1"
-path="res://.godot/imported/T230_quality_mutation.png-78db295d3b1444a3e1d1752059c19bb7.ctex"
+uid="uid://bmaxfrijynnrw"
+path="res://.godot/imported/T230_quality_mutation.png-b518f922fce8ddd38b01fc6cd0ad8ac6.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T230_quality_mutation.png"
-dest_files=["res://.godot/imported/T230_quality_mutation.png-78db295d3b1444a3e1d1752059c19bb7.ctex"]
+dest_files=["res://.godot/imported/T230_quality_mutation.png-b518f922fce8ddd38b01fc6cd0ad8ac6.ctex"]
 
 [params]
 

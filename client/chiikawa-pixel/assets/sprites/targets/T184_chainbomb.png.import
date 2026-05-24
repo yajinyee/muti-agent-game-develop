@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://f4845vre7uv3v"
-path="res://.godot/imported/T184_chainbomb.png-d2cf895eb639b8bb44248e85eee6b9d8.ctex"
+uid="uid://cauaktt5nn1c4"
+path="res://.godot/imported/T184_chainbomb.png-33ac2fc95aeb845f3939b115d569376d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T184_chainbomb.png"
-dest_files=["res://.godot/imported/T184_chainbomb.png-d2cf895eb639b8bb44248e85eee6b9d8.ctex"]
+dest_files=["res://.godot/imported/T184_chainbomb.png-33ac2fc95aeb845f3939b115d569376d.ctex"]
 
 [params]
 

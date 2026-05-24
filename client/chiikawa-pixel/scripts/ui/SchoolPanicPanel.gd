@@ -1,11 +1,11 @@
-## SchoolPanicPanel.gd — 魚群驚嚇連帶面板（DAY-191）
-## 業界靈感：Ocean King 3 Plus「School of Fish — when one fish is caught, others scatter in panic」
-## 視覺主題：橙色驚嚇 + 魚群散開動畫 + 倒數計時
+﻿## SchoolPanicPanel.gd ??擳黎撽???葆?Ｘ嚗AY-191嚗?
+## 璆剔???嚗cean King 3 Plus?chool of Fish ??when one fish is caught, others scatter in panic??
+## 閬死銝駁?嚗??脤???+ 擳黎???? + ?閮?
 
 extends Control
 
-const PANIC_COLOR  := Color(1.0, 0.55, 0.0)   # 橙色（驚嚇）
-const WARN_COLOR   := Color(1.0, 0.8, 0.0)    # 黃色（警告）
+const PANIC_COLOR  := Color(1.0, 0.55, 0.0)   # 璈嚗???
+const WARN_COLOR   := Color(1.0, 0.8, 0.0)    # 暺嚗郎??
 
 var _banner: Control = null
 var _timer_label: Label = null
@@ -28,10 +28,10 @@ func _process(delta: float) -> void:
 		set_process(false)
 		_hide_all()
 		return
-	# 更新倒數計時
+	# ?湔?閮?
 	if _timer_label and is_instance_valid(_timer_label):
-		_timer_label.text = "🐟 驚嚇中 %.1f 秒" % _panic_timer
-		# 最後 3 秒變紅色閃爍
+		_timer_label.text = "?? 撽?銝?%.1f 蝘? % _panic_timer"
+		# ?敺?3 蝘?蝝??
 		if _panic_timer <= 3.0:
 			_timer_label.add_theme_color_override("font_color", Color.RED)
 		else:
@@ -53,21 +53,21 @@ func _show_panic_start(data: Dictionary) -> void:
 	_panic_timer = duration
 	_is_active = true
 
-	# 橙色閃光（兩次）
+	# 璈??嚗甈∴?
 	_flash_screen(PANIC_COLOR, 0.55)
 	var t1 = get_tree().create_timer(0.2)
 	t1.timeout.connect(func(): _flash_screen(PANIC_COLOR, 0.4))
 
-	# 頂部橫幅
-	_show_banner("🐟 魚群驚嚇！%d 條魚 HP 減半！" % target_count, PANIC_COLOR)
+	# ?璈怠?
+	_show_banner("?? 擳黎撽?嚗?d 璇? HP 皜?嚗? % target_count, PANIC_COLOR)"
 
-	# 中央大字提示（自己觸發時）
+	# 銝剖亢憭批??內嚗撌梯孛?潭?嚗?
 	var my_id: String = GameManager.my_player_id if GameManager.has_method("get_my_player_id") else ""
 	var killer_id: String = data.get("killer_id", "")
 	if killer_id != "" and killer_id == my_id:
-		_show_center_popup("🐟 魚群驚嚇觸發！\n快速擊破基礎魚！", PANIC_COLOR)
+		_show_center_popup("?? 擳黎撽?閫貊嚗n敹恍??游蝷?嚗?, PANIC_COLOR)"
 
-	# 底部倒數計時標籤
+	# 摨?閮?璅惜
 	_show_timer_label(duration)
 
 	set_process(true)
@@ -103,7 +103,7 @@ func _show_banner(text: String, color: Color) -> void:
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_banner.add_child(label)
 
-	# 滑入動畫
+	# 皛?
 	_banner.position.y = -52
 	var tween = create_tween()
 	tween.tween_property(_banner, "position:y", 0.0, 0.25).set_trans(Tween.TRANS_BACK)
@@ -118,13 +118,13 @@ func _show_center_popup(text: String, color: Color) -> void:
 	popup.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 	add_child(popup)
 
-	# 彈跳動畫
+	# 敶歲?
 	popup.scale = Vector2(0.5, 0.5)
 	popup.pivot_offset = popup.size / 2.0
 	var tween = create_tween()
 	tween.tween_property(popup, "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_BACK)
 
-	# 2 秒後淡出
+	# 2 蝘?瘛∪
 	var timer = get_tree().create_timer(2.0)
 	timer.timeout.connect(func():
 		if is_instance_valid(popup):
@@ -138,7 +138,7 @@ func _show_timer_label(duration: float) -> void:
 		_timer_label.queue_free()
 
 	_timer_label = Label.new()
-	_timer_label.text = "🐟 驚嚇中 %.1f 秒" % duration
+	_timer_label.text = "?? 撽?銝?%.1f 蝘? % duration"
 	_timer_label.add_theme_color_override("font_color", PANIC_COLOR)
 	_timer_label.add_theme_font_size_override("font_size", 16)
 	_timer_label.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)

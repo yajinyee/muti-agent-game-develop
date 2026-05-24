@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://foaviseey751o"
-path="res://.godot/imported/T222_karmacycle.png-4b0d72c58276147682b3feecca80dd82.ctex"
+uid="uid://bsu0wqg5f1baw"
+path="res://.godot/imported/T222_karmacycle.png-744abd7d710f5429db66ec2bf716041d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T222_karmacycle.png"
-dest_files=["res://.godot/imported/T222_karmacycle.png-4b0d72c58276147682b3feecca80dd82.ctex"]
+dest_files=["res://.godot/imported/T222_karmacycle.png-744abd7d710f5429db66ec2bf716041d.ctex"]
 
 [params]
 

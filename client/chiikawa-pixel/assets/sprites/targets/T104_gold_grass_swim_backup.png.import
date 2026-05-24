@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://q431h17mvob0o"
-path="res://.godot/imported/T104_gold_grass_swim_backup.png-c151d07d43c51da709fc049ec1ba83bd.ctex"
+uid="uid://bohj4tjmmusym"
+path="res://.godot/imported/T104_gold_grass_swim_backup.png-eb42139e45671a8c4958c8e369588f82.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T104_gold_grass_swim_backup.png"
-dest_files=["res://.godot/imported/T104_gold_grass_swim_backup.png-c151d07d43c51da709fc049ec1ba83bd.ctex"]
+dest_files=["res://.godot/imported/T104_gold_grass_swim_backup.png-eb42139e45671a8c4958c8e369588f82.ctex"]
 
 [params]
 

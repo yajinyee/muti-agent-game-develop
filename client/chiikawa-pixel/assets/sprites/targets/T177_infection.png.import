@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1d2o4xp0rzubi"
-path="res://.godot/imported/T177_infection.png-fe34110bc7983954f3e1978a02865923.ctex"
+uid="uid://c6mhll7ieslqw"
+path="res://.godot/imported/T177_infection.png-4a23a72bf7343d5ee445fa0300f4d29b.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T177_infection.png"
-dest_files=["res://.godot/imported/T177_infection.png-fe34110bc7983954f3e1978a02865923.ctex"]
+dest_files=["res://.godot/imported/T177_infection.png-4a23a72bf7343d5ee445fa0300f4d29b.ctex"]
 
 [params]
 

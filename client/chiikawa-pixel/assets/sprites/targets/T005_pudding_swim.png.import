@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://f571b5256b79dbc1"
-path="res://.godot/imported/T005_pudding_swim.png-f571b5256b79dbc19d4134bbd2c2a9d2.ctex"
+uid="uid://i4mqbmp0q1d3"
+path="res://.godot/imported/T005_pudding_swim.png-7a8753cef3700769f5d03f09fedbc7ce.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T005_pudding_swim.png"
-dest_files=["res://.godot/imported/T005_pudding_swim.png-f571b5256b79dbc19d4134bbd2c2a9d2.ctex"]
+dest_files=["res://.godot/imported/T005_pudding_swim.png-7a8753cef3700769f5d03f09fedbc7ce.ctex"]
 
 [params]
 

@@ -1,21 +1,21 @@
-## WeatherSurgePanel.gd
+﻿## WeatherSurgePanel.gd
 ##
-## 天氣湧現事件面板（DAY-127）
-## 天氣切換時觸發稀有目標群湧，全服廣播橫幅
-## 位置：頂部中央滑入（z_index=77，在黃金時間面板 76 之上）
-## 設計：
-##   - 橫幅從頂部滑入，顯示湧現名稱、圖示、倒數計時
-##   - 湧現期間右下角顯示小型狀態指示器（稀有/金幣魚加成百分比）
-##   - 湧現結束時淡出
+## 憭拇除皝抒鈭辣?Ｘ嚗AY-127嚗?
+## 憭拇除???孛?潛??璅黎皝改??冽?撱?璈怠?
+## 雿蔭嚗??其葉憭格??伐?z_index=77嚗暺????Ｘ 76 銋?嚗?
+## 閮剛?嚗?
+##   - 璈怠?敺??冽??伐?憿舐內皝抒?迂??蝷箝閮?
+##   - 皝抒???喃?閫＊蝷箏?????蝷箏嚗????馳擳????嚗?
+##   - 皝抒蝯??楚??
 
 extends Control
 
-# ---- 常數 ----
+# ---- 撣豢 ----
 const BANNER_HEIGHT := 64.0
 const SLIDE_DURATION := 0.4
 const INDICATOR_SIZE := Vector2(140, 48)
 
-# ---- 節點引用 ----
+# ---- 蝭暺???----
 var _banner: Panel = null
 var _banner_icon: Label = null
 var _banner_title: Label = null
@@ -26,7 +26,7 @@ var _indicator_rare: Label = null
 var _indicator_gold: Label = null
 var _pixel_font: FontFile = null
 
-# ---- 狀態 ----
+# ---- ???----
 var _is_active: bool = false
 var _end_time: float = 0.0
 var _surge_name: String = ""
@@ -40,12 +40,12 @@ func setup(font: FontFile) -> void:
 	_connect_signals()
 
 func _build_ui() -> void:
-	# 頂部橫幅
+	# ?璈怠?
 	_banner = Panel.new()
 	_banner.name = "WeatherSurgeBanner"
 	_banner.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	_banner.size = Vector2(1280, BANNER_HEIGHT)
-	_banner.position = Vector2(0, -BANNER_HEIGHT)  # 初始在畫面外
+	_banner.position = Vector2(0, -BANNER_HEIGHT)  # ???函?Ｗ?
 	_banner.visible = false
 	var banner_style = StyleBoxFlat.new()
 	banner_style.bg_color = Color(0.1, 0.2, 0.4, 0.92)
@@ -56,7 +56,7 @@ func _build_ui() -> void:
 	_banner.add_theme_stylebox_override("panel", banner_style)
 	add_child(_banner)
 
-	# 橫幅圖示
+	# 璈怠??內
 	_banner_icon = Label.new()
 	_banner_icon.position = Vector2(20, 10)
 	_banner_icon.size = Vector2(44, 44)
@@ -64,7 +64,7 @@ func _build_ui() -> void:
 	_banner_icon.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_banner.add_child(_banner_icon)
 
-	# 橫幅標題
+	# 璈怠?璅?
 	_banner_title = Label.new()
 	_banner_title.position = Vector2(72, 6)
 	_banner_title.size = Vector2(600, 28)
@@ -74,7 +74,7 @@ func _build_ui() -> void:
 		_banner_title.add_theme_font_override("font", _pixel_font)
 	_banner.add_child(_banner_title)
 
-	# 橫幅描述
+	# 璈怠??膩
 	_banner_desc = Label.new()
 	_banner_desc.position = Vector2(72, 34)
 	_banner_desc.size = Vector2(700, 22)
@@ -84,7 +84,7 @@ func _build_ui() -> void:
 		_banner_desc.add_theme_font_override("font", _pixel_font)
 	_banner.add_child(_banner_desc)
 
-	# 倒數計時（右側）
+	# ?閮?嚗?湛?
 	_banner_timer = Label.new()
 	_banner_timer.position = Vector2(1100, 18)
 	_banner_timer.size = Vector2(160, 28)
@@ -95,7 +95,7 @@ func _build_ui() -> void:
 		_banner_timer.add_theme_font_override("font", _pixel_font)
 	_banner.add_child(_banner_timer)
 
-	# 右下角狀態指示器
+	# ?喃?閫???蝷箏
 	_indicator = Panel.new()
 	_indicator.name = "WeatherSurgeIndicator"
 	_indicator.position = Vector2(1280 - INDICATOR_SIZE.x - 8, 720 - INDICATOR_SIZE.y - 8)
@@ -112,18 +112,18 @@ func _build_ui() -> void:
 	_indicator.add_theme_stylebox_override("panel", ind_style)
 	add_child(_indicator)
 
-	# 指示器標題
+	# ?內?冽?憿?
 	var ind_title = Label.new()
 	ind_title.position = Vector2(4, 2)
 	ind_title.size = Vector2(132, 16)
 	ind_title.add_theme_color_override("font_color", Color(0.4, 0.85, 1.0))
 	ind_title.add_theme_font_size_override("font_size", 10)
-	ind_title.text = "🌊 湧現中"
+	ind_title.text = "?? 皝抒銝?"
 	if is_instance_valid(_pixel_font):
 		ind_title.add_theme_font_override("font", _pixel_font)
 	_indicator.add_child(ind_title)
 
-	# 稀有加成
+	# 蝔????
 	_indicator_rare = Label.new()
 	_indicator_rare.position = Vector2(4, 18)
 	_indicator_rare.size = Vector2(132, 14)
@@ -133,7 +133,7 @@ func _build_ui() -> void:
 		_indicator_rare.add_theme_font_override("font", _pixel_font)
 	_indicator.add_child(_indicator_rare)
 
-	# 金幣魚加成
+	# ?馳擳???
 	_indicator_gold = Label.new()
 	_indicator_gold.position = Vector2(4, 32)
 	_indicator_gold.size = Vector2(132, 14)
@@ -149,12 +149,12 @@ func _connect_signals() -> void:
 	if GameManager.has_signal("weather_surge_ended"):
 		GameManager.weather_surge_ended.connect(_on_weather_surge_ended)
 
-# ---- 事件處理 ----
+# ---- 鈭辣?? ----
 
 func _on_weather_surge_started(data: Dictionary) -> void:
-	_surge_name = data.get("surge_name", "天氣湧現")
-	var icon = data.get("surge_icon", "🌊")
-	var message = data.get("surge_message", "稀有目標大量湧現！")
+	_surge_name = data.get("surge_name", "憭拇除皝抒")
+	var icon = data.get("surge_icon", "??")
+	var message = data.get("surge_message", "蝔?璅之?鳩?橘?")
 	var duration = data.get("duration", 30)
 	_rare_bonus = data.get("rare_bonus", 0.0)
 	_gold_bonus = data.get("gold_bonus", 0.0)
@@ -163,7 +163,7 @@ func _on_weather_surge_started(data: Dictionary) -> void:
 	_is_active = true
 	_end_time = Time.get_ticks_msec() / 1000.0 + duration
 
-	# 更新橫幅樣式顏色
+	# ?湔璈怠?璅??憿
 	var banner_style = StyleBoxFlat.new()
 	banner_style.bg_color = Color(0.1, 0.2, 0.4, 0.92)
 	banner_style.border_color = _banner_color
@@ -172,37 +172,37 @@ func _on_weather_surge_started(data: Dictionary) -> void:
 	banner_style.corner_radius_bottom_right = 6
 	_banner.add_theme_stylebox_override("panel", banner_style)
 
-	# 更新內容
+	# ?湔?批捆
 	_banner_icon.text = icon
-	_banner_title.text = _surge_name + "！"
+	_banner_title.text = _surge_name + "嚗?"
 	_banner_desc.text = message
 
-	# 更新指示器
-	_indicator_rare.text = "👾 稀有 +" + str(int(_rare_bonus * 100)) + "%"
-	_indicator_gold.text = "🪙 金幣魚 +" + str(int(_gold_bonus * 100)) + "%"
+	# ?湔?內??
+	_indicator_rare.text = "? 蝔??+" + str(int(_rare_bonus * 100)) + "%"
+	_indicator_gold.text = "?? ?馳擳?+" + str(int(_gold_bonus * 100)) + "%"
 
-	# 顯示並滑入
+	# 憿舐內銝行???
 	_banner.visible = true
 	_indicator.visible = true
 	_banner.position = Vector2(0, -BANNER_HEIGHT)
 	var tween = create_tween()
 	tween.tween_property(_banner, "position", Vector2(0, 0), SLIDE_DURATION).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 
-	# 閃光效果
+	# ????
 	_do_flash_effect()
 
 func _on_weather_surge_ended(data: Dictionary) -> void:
 	_is_active = false
-	_banner_timer.text = "結束"
+	_banner_timer.text = "蝯?"
 	_banner_timer.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 
-	# 滑出並隱藏
+	# 皛銝阡??
 	var tween = create_tween()
 	tween.tween_property(_banner, "position", Vector2(0, -BANNER_HEIGHT), SLIDE_DURATION).set_ease(Tween.EASE_IN)
 	tween.tween_callback(func():
 		_banner.visible = false
 	)
-	# 指示器淡出
+	# ?內?冽楚??
 	var tween2 = create_tween()
 	tween2.tween_property(_indicator, "modulate:a", 0.0, 0.5)
 	tween2.tween_callback(func():
@@ -211,7 +211,7 @@ func _on_weather_surge_ended(data: Dictionary) -> void:
 	)
 
 func _do_flash_effect() -> void:
-	# 全螢幕短暫閃光（天藍色）
+	# ?刻撟?恍???憭抵??莎?
 	var flash = ColorRect.new()
 	flash.color = Color(_banner_color.r, _banner_color.g, _banner_color.b, 0.25)
 	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -224,7 +224,7 @@ func _do_flash_effect() -> void:
 			flash.queue_free()
 	)
 
-# ---- 每幀更新倒數計時 ----
+# ---- 瘥??湔?閮? ----
 
 func _process(delta: float) -> void:
 	if not _is_active or not is_instance_valid(_banner_timer):
@@ -236,7 +236,7 @@ func _process(delta: float) -> void:
 		return
 	var secs = int(remaining)
 	_banner_timer.text = "%02d:%02d" % [secs / 60, secs % 60]
-	# 最後 10 秒紅色閃爍
+	# ?敺?10 蝘??脤???
 	if remaining <= 10:
 		var blink = fmod(now * 2.0, 1.0) > 0.5
 		_banner_timer.add_theme_color_override("font_color",

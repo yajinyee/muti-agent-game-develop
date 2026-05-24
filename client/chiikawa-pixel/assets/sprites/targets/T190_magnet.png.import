@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://x7va5sytalezu"
-path="res://.godot/imported/T190_magnet.png-3ef435b7db77818f35ea553498620e63.ctex"
+uid="uid://1f2mhhbvd5ha"
+path="res://.godot/imported/T190_magnet.png-6607d3f787fb3175390a42a0995299c4.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T190_magnet.png"
-dest_files=["res://.godot/imported/T190_magnet.png-3ef435b7db77818f35ea553498620e63.ctex"]
+dest_files=["res://.godot/imported/T190_magnet.png-6607d3f787fb3175390a42a0995299c4.ctex"]
 
 [params]
 

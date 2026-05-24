@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://o1qv6wmot1qqa"
-path="res://.godot/imported/T181_teleport.png-aca03c91bf7365918fc9ff63872e68af.ctex"
+uid="uid://dgjbfquw5f4gy"
+path="res://.godot/imported/T181_teleport.png-70c3d87f54b1b7fd561ae671c1c51b51.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T181_teleport.png"
-dest_files=["res://.godot/imported/T181_teleport.png-aca03c91bf7365918fc9ff63872e68af.ctex"]
+dest_files=["res://.godot/imported/T181_teleport.png-70c3d87f54b1b7fd561ae671c1c51b51.ctex"]
 
 [params]
 

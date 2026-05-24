@@ -1,33 +1,33 @@
-## LuckyGravityFlipPanel.gd — 幸運重力反轉魚系統面板（DAY-238）
-## 業界原創「重力反轉+上下顛倒移動+重力崩潰」機制
+﻿## LuckyGravityFlipPanel.gd ??撟賊?????擳頂蝯梢?選?DAY-238嚗?
+## 璆剔??????頧?銝?憿宏????撏拇蔑????
 ##
-## 視覺設計：
-##   - 橙棕重力主題（#E67E22 + #D35400 + #FAD7A0 + #FFF3E0）
-##   - gravity_start：橙色三次強閃光 + 頂部橫幅 + 「🔄 重力反轉！」大字 + 計時條 + 上下翻轉箭頭
-##   - gravity_collapse：全螢幕橙色強閃光 + 「🔄 重力崩潰！」大字 + HP -45% 提示
-##   - gravity_end：橙色淡出 + 重力恢復提示
+## 閬死閮剛?嚗?
+##   - 璈???銝駁?嚗?E67E22 + #D35400 + #FAD7A0 + #FFF3E0嚗?
+##   - gravity_start嚗??脖?甈∪撥?? + ?璈怠? + ???????嚗之摮?+ 閮?璇?+ 銝?蝧餉?蝞剝
+##   - gravity_collapse嚗?Ｗ?璈撘琿???+ ?????撏拇蔑嚗之摮?+ HP -45% ?內
+##   - gravity_end嚗??脫楚??+ ???Ｗ儔?內
 extends CanvasLayer
 
-# 重力反轉狀態
+# ???????
 var _active: bool = false
 var _duration_sec: int = 10
 
-# 計時條節點
+# 閮?璇?暺?
 var _timer_bar: ColorRect = null
 var _timer_bar_bg: ColorRect = null
 
-# 主題顏色
-const COLOR_PRIMARY  = Color("#E67E22")  # 橙色
-const COLOR_DARK     = Color("#D35400")  # 深橙
-const COLOR_PALE     = Color("#FAD7A0")  # 淡橙
-const COLOR_LIGHT_BG = Color("#FFF3E0")  # 極淡橙
-const COLOR_GOLD     = Color("#FFD700")  # 金黃
-const COLOR_WHITE    = Color("#FFFFFF")  # 白色
+# 銝駁?憿
+const COLOR_PRIMARY  = Color("#E67E22")  # 璈
+const COLOR_DARK     = Color("#D35400")  # 瘛望?
+const COLOR_PALE     = Color("#FAD7A0")  # 瘛⊥?
+const COLOR_LIGHT_BG = Color("#FFF3E0")  # 璆菜楚璈?
+const COLOR_GOLD     = Color("#FFD700")  # ??
+const COLOR_WHITE    = Color("#FFFFFF")  # ?質
 
 func _ready() -> void:
-	layer = 7  # 幸運重力反轉魚面板層級
+	layer = 7  # 撟賊?????擳?踹惜蝝?
 
-## 處理幸運重力反轉魚訊息
+## ??撟賊?????擳???
 func handle_lucky_gravity_flip(payload: Dictionary) -> void:
 	var event: String = payload.get("event", "")
 	match event:
@@ -38,7 +38,7 @@ func handle_lucky_gravity_flip(payload: Dictionary) -> void:
 		"gravity_end":
 			_on_gravity_end(payload)
 
-## gravity_start — 重力反轉開始
+## gravity_start ????????
 func _on_gravity_start(payload: Dictionary) -> void:
 	var player_name: String = payload.get("player_name", "")
 	_duration_sec = payload.get("duration_sec", 10)
@@ -48,16 +48,16 @@ func _on_gravity_start(payload: Dictionary) -> void:
 
 	var vp_size = get_viewport().size
 
-	# 橙色三次強閃光
+	# 璈銝活撘琿???
 	_flash_screen(COLOR_PRIMARY, 0.12)
 	await get_tree().create_timer(0.08).timeout
 	_flash_screen(COLOR_WHITE, 0.10)
 	await get_tree().create_timer(0.07).timeout
 	_flash_screen(COLOR_PALE, 0.09)
 
-	# 頂部橫幅
+	# ?璈怠?
 	var banner = Label.new()
-	banner.text = "🔄 %s 觸發重力反轉！目標上下翻轉！" % player_name
+	banner.text = "?? %s 閫貊????嚗璅?銝蕃頧?" % player_name
 	banner.add_theme_font_size_override("font_size", 14)
 	banner.add_theme_color_override("font_color", COLOR_PALE)
 	banner.position = Vector2(vp_size.x / 2 - 150, 6)
@@ -68,9 +68,9 @@ func _on_gravity_start(payload: Dictionary) -> void:
 	tween_banner.tween_property(banner, "modulate:a", 0.0, 0.5)
 	tween_banner.tween_callback(banner.queue_free)
 
-	# 「🔄 重力反轉！」大字
+	# ???????嚗之摮?
 	var big_label = Label.new()
-	big_label.text = "🔄 重力反轉！"
+	big_label.text = "?? ????嚗?"
 	big_label.add_theme_font_size_override("font_size", 48)
 	big_label.add_theme_color_override("font_color", COLOR_PRIMARY)
 	big_label.position = vp_size / 2 - Vector2(90, 28)
@@ -83,9 +83,9 @@ func _on_gravity_start(payload: Dictionary) -> void:
 	tween_big.tween_property(big_label, "modulate:a", 0.0, 0.4)
 	tween_big.tween_callback(big_label.queue_free)
 
-	# 倍率提示
+	# ???內
 	var mult_label = Label.new()
-	mult_label.text = "重力反轉期間 ×%.1f 倍率加成！" % kill_boost
+	mult_label.text = "?????? ?%.1f ????嚗? % kill_boost"
 	mult_label.add_theme_font_size_override("font_size", 13)
 	mult_label.add_theme_color_override("font_color", COLOR_GOLD)
 	mult_label.position = Vector2(vp_size.x / 2 - 80, vp_size.y / 2 + 28)
@@ -96,23 +96,23 @@ func _on_gravity_start(payload: Dictionary) -> void:
 	tween_mult.tween_property(mult_label, "modulate:a", 0.0, 0.5)
 	tween_mult.tween_callback(mult_label.queue_free)
 
-	# 上下翻轉箭頭（場景中央水平線）
+	# 銝?蝧餉?蝞剝嚗?臭葉憭格偌撟喟?嚗?
 	_spawn_flip_arrows(vp_size)
 
-	# 底部計時條（橙→深橙漸變）
+	# 摨閮?璇?璈?瘛望?瞍貉?嚗?
 	_spawn_timer_bar(float(_duration_sec))
 
-	# 同步目標位置（Y 座標翻轉）
+	# ?郊?格?雿蔭嚗 摨扳?蝧餉?嚗?
 	if positions.size() > 0:
 		_sync_gravity_positions(positions)
 
-## gravity_collapse — 重力崩潰
+## gravity_collapse ????撏拇蔑
 func _on_gravity_collapse(payload: Dictionary) -> void:
 	var collapsed_count: int = payload.get("collapsed_count", 0)
 
 	var vp_size = get_viewport().size
 
-	# 清除計時條
+	# 皜閮?璇?
 	if is_instance_valid(_timer_bar):
 		_timer_bar.queue_free()
 		_timer_bar = null
@@ -120,16 +120,16 @@ func _on_gravity_collapse(payload: Dictionary) -> void:
 		_timer_bar_bg.queue_free()
 		_timer_bar_bg = null
 
-	# 全螢幕橙色強閃光（重力崩潰感）
+	# ?刻撟??脣撥??嚗??援瞏唳?嚗?
 	_flash_screen(COLOR_PRIMARY, 0.18)
 	await get_tree().create_timer(0.12).timeout
 	_flash_screen(COLOR_WHITE, 0.12)
 	await get_tree().create_timer(0.08).timeout
 	_flash_screen(COLOR_DARK, 0.10)
 
-	# 「🔄 重力崩潰！」大字
+	# ?????撏拇蔑嚗之摮?
 	var collapse_label = Label.new()
-	collapse_label.text = "🔄 重力崩潰！"
+	collapse_label.text = "?? ??撏拇蔑嚗?"
 	collapse_label.add_theme_font_size_override("font_size", 48)
 	collapse_label.add_theme_color_override("font_color", COLOR_DARK)
 	collapse_label.position = vp_size / 2 - Vector2(90, 28)
@@ -142,10 +142,10 @@ func _on_gravity_collapse(payload: Dictionary) -> void:
 	tween_collapse.tween_property(collapse_label, "modulate:a", 0.0, 0.5)
 	tween_collapse.tween_callback(collapse_label.queue_free)
 
-	# HP -45% 提示
+	# HP -45% ?內
 	if collapsed_count > 0:
 		var hp_label = Label.new()
-		hp_label.text = "💥 %d 個目標 HP -45%%！" % collapsed_count
+		hp_label.text = "? %d ?璅?HP -45%%嚗? % collapsed_count"
 		hp_label.add_theme_font_size_override("font_size", 16)
 		hp_label.add_theme_color_override("font_color", COLOR_GOLD)
 		hp_label.position = Vector2(vp_size.x / 2 - 80, vp_size.y / 2 + 30)
@@ -156,11 +156,11 @@ func _on_gravity_collapse(payload: Dictionary) -> void:
 		tween_hp.parallel().tween_property(hp_label, "modulate:a", 0.0, 0.5)
 		tween_hp.tween_callback(hp_label.queue_free)
 
-## gravity_end — 重力反轉結束
+## gravity_end ??????蝯?
 func _on_gravity_end(_payload: Dictionary) -> void:
 	_active = false
 
-	# 清除計時條（若崩潰前已清除則跳過）
+	# 皜閮?璇??亙援瞏啣?撌脫??文?頝喲?嚗?
 	if is_instance_valid(_timer_bar):
 		_timer_bar.queue_free()
 		_timer_bar = null
@@ -170,9 +170,9 @@ func _on_gravity_end(_payload: Dictionary) -> void:
 
 	var vp_size = get_viewport().size
 
-	# 重力恢復提示
+	# ???Ｗ儔?內
 	var end_label = Label.new()
-	end_label.text = "🔄 重力恢復正常"
+	end_label.text = "?? ???Ｗ儔甇?虜"
 	end_label.add_theme_font_size_override("font_size", 14)
 	end_label.add_theme_color_override("font_color", COLOR_PRIMARY)
 	end_label.position = Vector2(vp_size.x / 2 - 55, vp_size.y - 40)
@@ -183,12 +183,12 @@ func _on_gravity_end(_payload: Dictionary) -> void:
 	tween_end.tween_property(end_label, "modulate:a", 0.0, 0.5)
 	tween_end.tween_callback(end_label.queue_free)
 
-## 建立上下翻轉箭頭（場景中央水平線）
+## 撱箇?銝?蝧餉?蝞剝嚗?臭葉憭格偌撟喟?嚗?
 func _spawn_flip_arrows(vp_size: Vector2) -> void:
-	# 場景中央水平線（Y=300 對應畫面中央）
+	# ?湔銝剖亢瘞游像蝺?Y=300 撠??恍銝剖亢嚗?
 	var center_y = vp_size.y * 0.5
 
-	# 水平中線
+	# 瘞游像銝剔?
 	var line = ColorRect.new()
 	line.color = Color(COLOR_PRIMARY.r, COLOR_PRIMARY.g, COLOR_PRIMARY.b, 0.4)
 	line.size = Vector2(vp_size.x, 2)
@@ -204,14 +204,14 @@ func _spawn_flip_arrows(vp_size: Vector2) -> void:
 	tween_line.tween_property(line, "modulate:a", 0.0, 0.5)
 	tween_line.tween_callback(line.queue_free)
 
-	# 左右兩側翻轉箭頭
+	# 撌血?拙蝧餉?蝞剝
 	var arrow_positions = [
 		Vector2(30, center_y - 16),
 		Vector2(vp_size.x - 50, center_y - 16),
 	]
 	for pos in arrow_positions:
 		var arrow = Label.new()
-		arrow.text = "⇅"
+		arrow.text = "??"
 		arrow.add_theme_font_size_override("font_size", 22)
 		arrow.add_theme_color_override("font_color", COLOR_PRIMARY)
 		arrow.position = pos
@@ -226,9 +226,9 @@ func _spawn_flip_arrows(vp_size: Vector2) -> void:
 		tween_a.tween_property(arrow, "modulate:a", 0.0, 0.4)
 		tween_a.tween_callback(arrow.queue_free)
 
-## 同步目標位置（Y 座標翻轉後的新位置）
+## ?郊?格?雿蔭嚗 摨扳?蝧餉?敺??唬?蝵殷?
 func _sync_gravity_positions(positions: Array) -> void:
-	# 透過 GameManager 的 target_teleported 訊號平滑移動目標到翻轉後位置
+	# ?? GameManager ??target_teleported 閮?撟單?蝘餃??格??啁蕃頧?雿蔭
 	for pos_data in positions:
 		var target_id: String = pos_data.get("id", "")
 		var new_x: float = pos_data.get("x", 0.0)
@@ -236,7 +236,7 @@ func _sync_gravity_positions(positions: Array) -> void:
 		if target_id != "":
 			GameManager.emit_signal("target_teleported", target_id, new_x, new_y)
 
-## 建立底部計時條（橙→深橙漸變）
+## 撱箇?摨閮?璇?璈?瘛望?瞍貉?嚗?
 func _spawn_timer_bar(duration: float) -> void:
 	var vp_size = get_viewport().size
 
@@ -263,9 +263,9 @@ func _spawn_timer_bar(duration: float) -> void:
 			bg.queue_free()
 	)
 
-# ---- 輔助函數 ----
+# ---- 頛?賣 ----
 
-## 全螢幕閃光效果
+## ?刻撟?????
 func _flash_screen(color: Color, duration: float) -> void:
 	var flash = ColorRect.new()
 	flash.color = Color(color.r, color.g, color.b, 0.26)

@@ -1,25 +1,25 @@
-## RoyalChainLightningPanel.gd — 皇家閃電鰻持續連鎖電擊面板（DAY-156）
-## 業界依據：royal-fishing.co.uk 2026「Creates chain lightning that shocks nearby fish
-##   consecutively until targeting turns off. Devastating against clustered schools.」
-## 視覺設計：
-##   - chain_start：頂部橫幅滑入（電藍色）+ 全螢幕電藍閃光
-##   - jump_N：每跳顯示電擊線條動畫 + 跳數計數器 + 浮動獎勵文字
-##   - result：右側滑入彈窗（含跳數/擊破數/總獎勵）
-##   - ≥8 跳：雙閃光（傳說連鎖）
+﻿## RoyalChainLightningPanel.gd ???振?敿餅?蝥???餅??Ｘ嚗AY-156嚗?
+## 璆剔?靘?嚗oyal-fishing.co.uk 2026?reates chain lightning that shocks nearby fish
+##   consecutively until targeting turns off. Devastating against clustered schools.??
+## 閬死閮剛?嚗?
+##   - chain_start嚗??冽帖撟??伐??餉??莎?+ ?刻撟????
+##   - jump_N嚗?頝喲＊蝷粹??璇???+ 頝單閮??+ 瘚桀????
+##   - result嚗?湔??亙?蝒??怨歲?????蝮賜??蛛?
+##   - ?? 頝喉??????唾牧???嚗?
 extends Control
 
-# ---- 常數 ----
+# ---- 撣豢 ----
 const PANEL_WIDTH := 1280.0
 const PANEL_HEIGHT := 720.0
 
-# ---- 節點引用 ----
+# ---- 蝭暺???----
 var _banner: Control = null
 var _banner_label: Label = null
 var _jump_counter: Label = null
 var _result_panel: Control = null
 var _pixel_font: FontFile = null
 
-# ---- 狀態 ----
+# ---- ???----
 var _is_active: bool = false
 var _jump_count: int = 0
 var _killed_count: int = 0
@@ -35,7 +35,7 @@ func _build_ui() -> void:
 	size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 
-	# 頂部橫幅（chain_start 時滑入）
+	# ?璈怠?嚗hain_start ???伐?
 	_banner = Control.new()
 	_banner.position = Vector2(0, -60)
 	_banner.size = Vector2(PANEL_WIDTH, 52)
@@ -50,7 +50,7 @@ func _build_ui() -> void:
 	_banner_label.position = Vector2(0, 8)
 	_banner_label.size = Vector2(PANEL_WIDTH, 36)
 	_banner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_banner_label.text = "⚡ 皇家閃電鰻 — 持續連鎖電擊！"
+	_banner_label.text = "???振?敿?????????餅?嚗?"
 	_banner_label.add_theme_color_override("font_color", Color(0.0, 0.75, 1.0))
 	if _pixel_font:
 		_banner_label.add_theme_font_override("font", _pixel_font)
@@ -58,7 +58,7 @@ func _build_ui() -> void:
 	_banner.add_child(_banner_label)
 	add_child(_banner)
 
-	# 跳數計數器（左上角）
+	# 頝單閮?剁?撌虫?閫?
 	_jump_counter = Label.new()
 	_jump_counter.position = Vector2(12, 60)
 	_jump_counter.size = Vector2(120, 28)
@@ -73,7 +73,7 @@ func _connect_signals() -> void:
 	if GameManager.has_signal("royal_chain_lightning"):
 		GameManager.royal_chain_lightning.connect(_on_royal_chain_lightning)
 
-# ---- 事件處理 ----
+# ---- 鈭辣?? ----
 
 func _on_royal_chain_lightning(data: Dictionary) -> void:
 	var phase: String = data.get("phase", "")
@@ -111,7 +111,7 @@ func _on_royal_chain_lightning(data: Dictionary) -> void:
 			_jump_counter.text = ""
 			if total_reward > 0:
 				_show_result_panel(total_jumps, _killed_count, total_reward)
-				# 傳說連鎖（≥8 跳）雙閃光
+				# ?唾牧???嚗8 頝喉?????
 				if total_jumps >= 8:
 					_flash_screen(Color(0.0, 0.75, 1.0, 0.5))
 					await get_tree().create_timer(0.15).timeout
@@ -127,10 +127,10 @@ func _hide_banner() -> void:
 	tween.tween_property(_banner, "position:y", -60.0, 0.25).set_ease(Tween.EASE_IN)
 
 func _update_jump_counter() -> void:
-	_jump_counter.text = "⚡ 第 %d 跳" % _jump_count
+	_jump_counter.text = "??蝚?%d 頝? % _jump_count"
 
 func _show_jump_effect(x: float, y: float, killed: bool, reward: int) -> void:
-	# 電擊閃光（在目標位置）
+	# ?餅???嚗?格?雿蔭嚗?
 	var flash = ColorRect.new()
 	flash.size = Vector2(40, 40)
 	flash.position = Vector2(x - 20, y - 20)
@@ -142,7 +142,7 @@ func _show_jump_effect(x: float, y: float, killed: bool, reward: int) -> void:
 	tween.tween_property(flash, "modulate:a", 0.0, 0.25)
 	tween.tween_callback(func(): if is_instance_valid(flash): flash.queue_free())
 
-	# 浮動獎勵文字（擊破時）
+	# 瘚桀????嚗??湔?嚗?
 	if killed and reward > 0:
 		var lbl = Label.new()
 		lbl.text = "+%d" % reward
@@ -183,7 +183,7 @@ func _show_result_panel(jumps: int, killed: int, reward: int) -> void:
 	var title = Label.new()
 	title.position = Vector2(0, 8)
 	title.size = Vector2(220, 24)
-	title.text = "⚡ 皇家閃電鰻連鎖"
+	title.text = "???振?敿駁??"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	title.add_theme_color_override("font_color", Color(0.0, 0.9, 1.0))
 	if _pixel_font:
@@ -192,9 +192,9 @@ func _show_result_panel(jumps: int, killed: int, reward: int) -> void:
 	_result_panel.add_child(title)
 
 	var lines = [
-		"連鎖跳數：%d 跳" % jumps,
-		"擊破目標：%d 個" % killed,
-		"獲得獎勵：%d 金幣" % reward,
+		"???頝單嚗?d 頝? % jumps,"
+		"??格?嚗?d ?? % killed,"
+		"?脣??嚗?d ?馳" % reward,
 	]
 	for i in range(lines.size()):
 		var lbl = Label.new()
@@ -209,10 +209,10 @@ func _show_result_panel(jumps: int, killed: int, reward: int) -> void:
 
 	add_child(_result_panel)
 
-	# 從右側滑入
+	# 敺?湔???
 	var tween = _result_panel.create_tween()
 	tween.tween_property(_result_panel, "position:x", PANEL_WIDTH - 230.0, 0.35).set_ease(Tween.EASE_OUT)
-	# 3 秒後淡出
+	# 3 蝘?瘛∪
 	tween.tween_interval(3.0)
 	tween.tween_property(_result_panel, "modulate:a", 0.0, 0.4)
 	tween.tween_callback(func():

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://lxfonq9lmn2y0"
-path="res://.godot/imported/T173_mirror.png-f0e9cac673cc4a2975fe7134603be3cc.ctex"
+uid="uid://c62vlitw2gpp"
+path="res://.godot/imported/T173_mirror.png-589e22622c706e7c6acb2637438280fe.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T173_mirror.png"
-dest_files=["res://.godot/imported/T173_mirror.png-f0e9cac673cc4a2975fe7134603be3cc.ctex"]
+dest_files=["res://.godot/imported/T173_mirror.png-589e22622c706e7c6acb2637438280fe.ctex"]
 
 [params]
 

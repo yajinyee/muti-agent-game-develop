@@ -1,5 +1,5 @@
-## ReferralPanel.gd — 推薦碼面板（DAY-082）
-## 顯示玩家的推薦碼，讓玩家輸入他人推薦碼
+﻿## ReferralPanel.gd ???刻蝣潮?選?DAY-082嚗?
+## 憿舐內?拙振??衣Ⅳ嚗??拙振頛詨隞犖?刻蝣?
 extends Node2D
 
 const PANEL_WIDTH  := 360
@@ -34,9 +34,9 @@ func _build_ui() -> void:
 	_bg.position = Vector2(px, py)
 	add_child(_bg)
 
-	# 標題
+	# 璅?
 	var title = Label.new()
-	title.text = "🎁 推薦好友"
+	title.text = "?? ?刻憟賢?"
 	title.position = _bg.position + Vector2(16, 12)
 	title.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	if _font:
@@ -44,9 +44,9 @@ func _build_ui() -> void:
 		title.add_theme_font_size_override("font_size", 18)
 	add_child(title)
 
-	# 關閉按鈕
+	# ????
 	_close_btn = Button.new()
-	_close_btn.text = "✕"
+	_close_btn.text = "??"
 	_close_btn.size = Vector2(28, 28)
 	_close_btn.position = _bg.position + Vector2(PANEL_WIDTH - 36, 8)
 	_close_btn.add_theme_color_override("font_color", Color(1, 0.4, 0.4))
@@ -55,16 +55,16 @@ func _build_ui() -> void:
 	add_child(_close_btn)
 	_close_btn.pressed.connect(_on_close_pressed)
 
-	# 分隔線
+	# ??蝺?
 	var sep = ColorRect.new()
 	sep.color = Color(0.3, 0.5, 0.8, 0.5)
 	sep.size = Vector2(PANEL_WIDTH - 16, 2)
 	sep.position = _bg.position + Vector2(8, 40)
 	add_child(sep)
 
-	# 我的推薦碼
+	# ???刻蝣?
 	var my_code_title = Label.new()
-	my_code_title.text = "我的推薦碼："
+	my_code_title.text = "???刻蝣潘?"
 	my_code_title.position = _bg.position + Vector2(16, 52)
 	my_code_title.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	if _font:
@@ -81,9 +81,9 @@ func _build_ui() -> void:
 		_my_code_label.add_theme_font_size_override("font_size", 28)
 	add_child(_my_code_label)
 
-	# 推薦說明
+	# ?刻隤芣?
 	var desc = Label.new()
-	desc.text = "推薦人：+1000 金幣  被推薦人：+500 金幣"
+	desc.text = "?刻鈭綽?+1000 ?馳  鋡急?虫犖嚗?500 ?馳"
 	desc.position = _bg.position + Vector2(16, 108)
 	desc.add_theme_color_override("font_color", Color(0.7, 0.9, 0.7))
 	if _font:
@@ -91,9 +91,9 @@ func _build_ui() -> void:
 		desc.add_theme_font_size_override("font_size", 12)
 	add_child(desc)
 
-	# 統計
+	# 蝯梯?
 	_referral_count_label = Label.new()
-	_referral_count_label.text = "已推薦：0 人"
+	_referral_count_label.text = "撌脫?佗?0 鈭?"
 	_referral_count_label.position = _bg.position + Vector2(16, 128)
 	_referral_count_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	if _font:
@@ -102,7 +102,7 @@ func _build_ui() -> void:
 	add_child(_referral_count_label)
 
 	_total_reward_label = Label.new()
-	_total_reward_label.text = "累計獎勵：0 金幣"
+	_total_reward_label.text = "蝝航??嚗? ?馳"
 	_total_reward_label.position = _bg.position + Vector2(16, 148)
 	_total_reward_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	if _font:
@@ -110,16 +110,16 @@ func _build_ui() -> void:
 		_total_reward_label.add_theme_font_size_override("font_size", 13)
 	add_child(_total_reward_label)
 
-	# 分隔線
+	# ??蝺?
 	var sep2 = ColorRect.new()
 	sep2.color = Color(0.3, 0.5, 0.8, 0.3)
 	sep2.size = Vector2(PANEL_WIDTH - 16, 1)
 	sep2.position = _bg.position + Vector2(8, 170)
 	add_child(sep2)
 
-	# 輸入推薦碼
+	# 頛詨?刻蝣?
 	var input_title = Label.new()
-	input_title.text = "輸入好友推薦碼："
+	input_title.text = "頛詨憟賢??刻蝣潘?"
 	input_title.position = _bg.position + Vector2(16, 178)
 	input_title.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	if _font:
@@ -128,7 +128,7 @@ func _build_ui() -> void:
 	add_child(input_title)
 
 	_input_field = LineEdit.new()
-	_input_field.placeholder_text = "輸入6位推薦碼"
+	_input_field.placeholder_text = "頛詨6雿?衣Ⅳ"
 	_input_field.max_length = 6
 	_input_field.size = Vector2(180, 32)
 	_input_field.position = _bg.position + Vector2(16, 198)
@@ -138,7 +138,7 @@ func _build_ui() -> void:
 	add_child(_input_field)
 
 	_use_btn = Button.new()
-	_use_btn.text = "使用"
+	_use_btn.text = "雿輻"
 	_use_btn.size = Vector2(80, 32)
 	_use_btn.position = _bg.position + Vector2(204, 198)
 	if _font:
@@ -147,7 +147,7 @@ func _build_ui() -> void:
 	add_child(_use_btn)
 	_use_btn.pressed.connect(_on_use_btn_pressed)
 
-	# 狀態訊息
+	# ?????
 	_status_label = Label.new()
 	_status_label.text = ""
 	_status_label.position = _bg.position + Vector2(16, 238)
@@ -172,21 +172,21 @@ func _on_referral_info(data: Dictionary) -> void:
 	var used_code: String = data.get("used_code", "")
 
 	_my_code_label.text = my_code
-	_referral_count_label.text = "已推薦：%d 人（最多 20 人）" % count
-	_total_reward_label.text = "累計獎勵：%d 金幣" % total_reward
+	_referral_count_label.text = "撌脫?佗?%d 鈭綽??憭?20 鈭綽?" % count
+	_total_reward_label.text = "蝝航??嚗?d ?馳" % total_reward
 
-	# 已使用推薦碼則禁用輸入
+	# 撌脖蝙?冽?衣Ⅳ???刻撓??
 	if used_code != "":
 		_input_field.editable = false
 		_use_btn.disabled = true
 		_input_field.text = used_code
-		_status_label.text = "✅ 已使用推薦碼：%s" % used_code
+		_status_label.text = "??撌脖蝙?冽?衣Ⅳ嚗?s" % used_code
 		_status_label.add_theme_color_override("font_color", Color(0.5, 1.0, 0.5))
 
 func _on_use_btn_pressed() -> void:
 	var code = _input_field.text.strip_edges().to_upper()
 	if code.length() != 6:
-		_show_status("請輸入6位推薦碼", Color(1.0, 0.4, 0.4))
+		_show_status("隢撓??雿?衣Ⅳ", Color(1.0, 0.4, 0.4))
 		return
 	if GameManager.has_method("use_referral_code"):
 		GameManager.use_referral_code(code)
@@ -195,16 +195,16 @@ func _on_use_btn_pressed() -> void:
 func _on_referral_success(data: Dictionary) -> void:
 	var reward: int = data.get("reward", 0)
 	var msg: String = data.get("message", "")
-	_show_status("✅ %s +%d 金幣" % [msg, reward], Color(0.5, 1.0, 0.5))
+	_show_status("??%s +%d ?馳" % [msg, reward], Color(0.5, 1.0, 0.5))
 	_input_field.editable = false
 	_use_btn.disabled = true
-	# 刷新資訊
+	# ?瑟鞈?
 	if GameManager.has_method("request_referral_info"):
 		GameManager.request_referral_info()
 
 func _on_referral_error(data: Dictionary) -> void:
-	var reason: String = data.get("reason", "未知錯誤")
-	_show_status("❌ %s" % reason, Color(1.0, 0.4, 0.4))
+	var reason: String = data.get("reason", "?芰?航炊")
+	_show_status("??%s" % reason, Color(1.0, 0.4, 0.4))
 	_use_btn.disabled = false
 
 func _show_status(text: String, color: Color) -> void:

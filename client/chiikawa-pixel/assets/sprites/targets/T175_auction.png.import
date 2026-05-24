@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://sm1qb6rb9za23"
-path="res://.godot/imported/T175_auction.png-3c272522fe1139e77458df03690d82f6.ctex"
+uid="uid://c6e8xx3b06r11"
+path="res://.godot/imported/T175_auction.png-40748a3e70efd9e36da77298d6f2ae08.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T175_auction.png"
-dest_files=["res://.godot/imported/T175_auction.png-3c272522fe1139e77458df03690d82f6.ctex"]
+dest_files=["res://.godot/imported/T175_auction.png-40748a3e70efd9e36da77298d6f2ae08.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://t246dominofish288"
-path="res://.godot/imported/T246_domino.png-t246dominofish288.ctex"
+uid="uid://vfbg2r78yh72"
+path="res://.godot/imported/T246_domino.png-0657f88960c46aaa34a8bf0d858e145f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T246_domino.png"
-dest_files=["res://.godot/imported/T246_domino.png-t246dominofish288.ctex"]
+dest_files=["res://.godot/imported/T246_domino.png-0657f88960c46aaa34a8bf0d858e145f.ctex"]
 
 [params]
 

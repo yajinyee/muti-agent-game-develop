@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://pk0sdipqtvigb"
-path="res://.godot/imported/T179_blackhole.png-7cf6cd03dfa813e74752fe8dc9c04b64.ctex"
+uid="uid://dyr6lcxy5au50"
+path="res://.godot/imported/T179_blackhole.png-95d2b351cbb50b340d10104240d59e52.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T179_blackhole.png"
-dest_files=["res://.godot/imported/T179_blackhole.png-7cf6cd03dfa813e74752fe8dc9c04b64.ctex"]
+dest_files=["res://.godot/imported/T179_blackhole.png-95d2b351cbb50b340d10104240d59e52.ctex"]
 
 [params]
 

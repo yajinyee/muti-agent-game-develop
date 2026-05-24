@@ -1,6 +1,6 @@
-## LuckyStarFishPanel.gd — 幸運星魚全場倍率翻倍面板（DAY-160）
-## 擊破幸運星魚後觸發全場倍率翻倍 10 秒，所有獎勵 ×2
-## 視覺：金色星星爆炸 + 全螢幕金色光暈 + 倒數計時器 + ×2 標誌
+﻿## LuckyStarFishPanel.gd ??撟賊????典??蝧餃?選?DAY-160嚗?
+## ?撟賊???敺孛?澆?游?蝧餃?10 蝘???????2
+## 閬死嚗??脫?????+ ?刻撟??脣???+ ?閮???+ ?2 璅?
 extends Node2D
 
 var _pixel_font: Font = null
@@ -34,9 +34,9 @@ func _process(delta: float) -> void:
 		_hide_lucky()
 		return
 	if is_instance_valid(_countdown_label):
-		_countdown_label.text = "⭐ ×2 %.1f秒" % _remaining
+		_countdown_label.text = "潃??2 %.1f蝘? % _remaining"
 
-## 處理幸運星魚事件
+## ??撟賊???鈭辣
 func _on_lucky_star_fish(data: Dictionary) -> void:
 	var phase: String = data.get("phase", "")
 	var duration: float = data.get("duration_secs", 10.0)
@@ -48,7 +48,7 @@ func _on_lucky_star_fish(data: Dictionary) -> void:
 	elif phase == "lucky_end":
 		_hide_lucky()
 
-## 顯示倍率翻倍效果
+## 憿舐內??蝧餃???
 func _show_lucky(killer_name: String, killer_id: String, duration: float) -> void:
 	_is_active = true
 	_remaining = duration
@@ -56,14 +56,14 @@ func _show_lucky(killer_name: String, killer_id: String, duration: float) -> voi
 
 	var is_me = (killer_id == _my_player_id)
 
-	# 全螢幕金色半透明遮罩（自己觸發時更強烈）
+	# ?刻撟??脣????桃蔗嚗撌梯孛?潭??游撥??
 	_overlay = ColorRect.new()
 	_overlay.position = Vector2(-640, -360)
 	_overlay.size = Vector2(1280, 720)
 	_overlay.color = Color(1.0, 0.9, 0.0, 0.06 if not is_me else 0.12)
 	add_child(_overlay)
 
-	# 全螢幕金色閃光
+	# ?刻撟??脤???
 	var flash := ColorRect.new()
 	flash.position = Vector2(-640, -360)
 	flash.size = Vector2(1280, 720)
@@ -75,7 +75,7 @@ func _show_lucky(killer_name: String, killer_id: String, duration: float) -> voi
 		if is_instance_valid(flash): flash.queue_free()
 	)
 
-	# 頂部橫幅
+	# ?璈怠?
 	var banner_bg := ColorRect.new()
 	banner_bg.name = "LuckyBanner"
 	banner_bg.position = Vector2(-640, -360)
@@ -83,9 +83,9 @@ func _show_lucky(killer_name: String, killer_id: String, duration: float) -> voi
 	banner_bg.color = Color(0.15, 0.12, 0.0, 0.92)
 	add_child(banner_bg)
 
-	var banner_text = "⭐ %s 擊破幸運星魚！全場獎勵 ×2 持續 %.0f 秒！" % [killer_name, duration]
+	var banner_text = "潃?%s ?撟賊???嚗?渡????2 ?? %.0f 蝘?" % [killer_name, duration]
 	if is_me:
-		banner_text = "⭐ 你擊破幸運星魚！你的獎勵 ×2 持續 %.0f 秒！" % duration
+		banner_text = "潃?雿??游兢??擳?雿?? ?2 ?? %.0f 蝘?" % duration
 
 	var banner_lbl := Label.new()
 	banner_lbl.name = "LuckyBannerLabel"
@@ -99,7 +99,7 @@ func _show_lucky(killer_name: String, killer_id: String, duration: float) -> voi
 		banner_lbl.add_theme_font_override("font", _pixel_font)
 	add_child(banner_lbl)
 
-	# 橫幅滑入動畫
+	# 璈怠?皛?
 	banner_bg.position.y = -410
 	banner_lbl.position.y = -404
 	var slide_tween = banner_bg.create_tween()
@@ -107,7 +107,7 @@ func _show_lucky(killer_name: String, killer_id: String, duration: float) -> voi
 	var slide_tween2 = banner_lbl.create_tween()
 	slide_tween2.tween_property(banner_lbl, "position:y", -354.0, 0.3)
 
-	# 倒數計時器（右上角）
+	# ?閮??剁??喃?閫?
 	var countdown_bg := ColorRect.new()
 	countdown_bg.name = "LuckyCountdownBG"
 	countdown_bg.position = Vector2(510, -355)
@@ -119,7 +119,7 @@ func _show_lucky(killer_name: String, killer_id: String, duration: float) -> voi
 	_countdown_label.name = "LuckyCountdown"
 	_countdown_label.position = Vector2(510, -352)
 	_countdown_label.size = Vector2(120, 30)
-	_countdown_label.text = "⭐ ×2 %.1f秒" % duration
+	_countdown_label.text = "潃??2 %.1f蝘? % duration"
 	_countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_countdown_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.2))
 	_countdown_label.add_theme_font_size_override("font_size", 13)
@@ -127,7 +127,7 @@ func _show_lucky(killer_name: String, killer_id: String, duration: float) -> voi
 		_countdown_label.add_theme_font_override("font", _pixel_font)
 	add_child(_countdown_label)
 
-	# 自己觸發時：中央大 ×2 標誌
+	# ?芸楛閫貊??銝剖亢憭??2 璅?
 	if is_me:
 		var mult_bg := ColorRect.new()
 		mult_bg.name = "MultBG"
@@ -140,7 +140,7 @@ func _show_lucky(killer_name: String, killer_id: String, duration: float) -> voi
 		_mult_label.name = "MultLabel"
 		_mult_label.position = Vector2(-80, -48)
 		_mult_label.size = Vector2(160, 76)
-		_mult_label.text = "×2"
+		_mult_label.text = "?2"
 		_mult_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		_mult_label.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
 		_mult_label.add_theme_color_override("font_color", Color(1.0, 0.95, 0.2))
@@ -149,13 +149,13 @@ func _show_lucky(killer_name: String, killer_id: String, duration: float) -> voi
 			_mult_label.add_theme_font_override("font", _pixel_font)
 		add_child(_mult_label)
 
-		# ×2 標誌縮放彈跳動畫
+		# ?2 璅?蝮格敶歲?
 		_mult_label.scale = Vector2(0.5, 0.5)
 		var scale_tween = _mult_label.create_tween()
 		scale_tween.tween_property(_mult_label, "scale", Vector2(1.2, 1.2), 0.2)
 		scale_tween.tween_property(_mult_label, "scale", Vector2(1.0, 1.0), 0.1)
 
-		# 2 秒後淡出 ×2 標誌
+		# 2 蝘?瘛∪ ?2 璅?
 		var fade_tween = _mult_label.create_tween()
 		fade_tween.tween_interval(2.0)
 		fade_tween.tween_property(_mult_label, "modulate:a", 0.0, 0.5)
@@ -165,7 +165,7 @@ func _show_lucky(killer_name: String, killer_id: String, duration: float) -> voi
 			_mult_label = null
 		)
 
-## 隱藏倍率翻倍效果
+## ?梯???蝧餃???
 func _hide_lucky() -> void:
 	_is_active = false
 	_remaining = 0.0

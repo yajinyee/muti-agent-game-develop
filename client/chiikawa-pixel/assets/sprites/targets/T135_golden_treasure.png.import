@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://yxxoc4kj2crpm"
-path="res://.godot/imported/T135_golden_treasure.png-ed3ecd49017df1f86e0375ff1ca9f8c5.ctex"
+uid="uid://brigsr11n4i51"
+path="res://.godot/imported/T135_golden_treasure.png-d7919ce6c9a7375bf8bc78c73893762e.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T135_golden_treasure.png"
-dest_files=["res://.godot/imported/T135_golden_treasure.png-ed3ecd49017df1f86e0375ff1ca9f8c5.ctex"]
+dest_files=["res://.godot/imported/T135_golden_treasure.png-d7919ce6c9a7375bf8bc78c73893762e.ctex"]
 
 [params]
 

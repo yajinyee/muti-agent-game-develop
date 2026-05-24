@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://wo9fgwtgdux61"
-path="res://.godot/imported/T159_serial_bomb_crab.png-a0cba08077b692e3288c6d0c5b489f8d.ctex"
+uid="uid://dd72im76jule7"
+path="res://.godot/imported/T159_serial_bomb_crab.png-90703feb70b1bc1e68e898f5a73d11aa.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T159_serial_bomb_crab.png"
-dest_files=["res://.godot/imported/T159_serial_bomb_crab.png-a0cba08077b692e3288c6d0c5b489f8d.ctex"]
+dest_files=["res://.godot/imported/T159_serial_bomb_crab.png-90703feb70b1bc1e68e898f5a73d11aa.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://p9fr7izcfbbi7"
-path="res://.godot/imported/T128_freeze_bomb.png-16f2c42b7dea4092d6e263777de662ca.ctex"
+uid="uid://ssbubcb5hsh5"
+path="res://.godot/imported/T128_freeze_bomb.png-f53d5a0f8b99424dfb99cc534482adf4.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T128_freeze_bomb.png"
-dest_files=["res://.godot/imported/T128_freeze_bomb.png-16f2c42b7dea4092d6e263777de662ca.ctex"]
+dest_files=["res://.godot/imported/T128_freeze_bomb.png-f53d5a0f8b99424dfb99cc534482adf4.ctex"]
 
 [params]
 

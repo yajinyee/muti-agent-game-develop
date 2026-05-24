@@ -1,4 +1,4 @@
-## LuckyMirrorDuelPanel.gd — 幸運鏡像對決魚 UI 面板（DAY-270）
+﻿## LuckyMirrorDuelPanel.gd — 幸運鏡像對決魚 UI 面板（DAY-270）
 ## 紫金對決主題：#9B59B6 紫 + #FFD700 金 + #DC143C 紅 + #1E90FF 藍
 ##
 ## 事件類型：
@@ -28,7 +28,7 @@ var _timer_bar: ColorRect = null
 var _timer_tween: Tween = null
 var _my_score_label: Label = null
 var _opp_score_label: Label = null
-var _duel_duration: float64 = 15.0
+var _duel_duration: float = 15.0
 var _is_challenger: bool = false
 var _opponent_name: String = ""
 

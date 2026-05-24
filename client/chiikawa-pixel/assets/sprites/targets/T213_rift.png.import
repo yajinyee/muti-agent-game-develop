@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://239w4xdu4zd12"
-path="res://.godot/imported/T213_rift.png-35c865d3fc7b9baab92b39b5efbad9d6.ctex"
+uid="uid://2ft0jw36k8qp"
+path="res://.godot/imported/T213_rift.png-6b35b2e6c8d5809004a403c95a102268.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T213_rift.png"
-dest_files=["res://.godot/imported/T213_rift.png-35c865d3fc7b9baab92b39b5efbad9d6.ctex"]
+dest_files=["res://.godot/imported/T213_rift.png-6b35b2e6c8d5809004a403c95a102268.ctex"]
 
 [params]
 

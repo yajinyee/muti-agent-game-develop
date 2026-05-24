@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://yi7pxhvqigd6r"
-path="res://.godot/imported/T156_ghost_fish.png-27e6252ac9b6a816bac2fa9a1125a66e.ctex"
+uid="uid://bcrie5d7374m6"
+path="res://.godot/imported/T156_ghost_fish.png-db38a85aa6f5946c35f2777fc0eb0872.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T156_ghost_fish.png"
-dest_files=["res://.godot/imported/T156_ghost_fish.png-27e6252ac9b6a816bac2fa9a1125a66e.ctex"]
+dest_files=["res://.godot/imported/T156_ghost_fish.png-db38a85aa6f5946c35f2777fc0eb0872.ctex"]
 
 [params]
 

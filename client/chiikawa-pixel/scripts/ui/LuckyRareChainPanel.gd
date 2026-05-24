@@ -1,4 +1,4 @@
-## LuckyRareChainPanel.gd — 幸運連鎖稀有魚 UI 面板（DAY-280）
+﻿## LuckyRareChainPanel.gd — 幸運連鎖稀有魚 UI 面板（DAY-280）
 ## 連鎖稀有主題：#FF6B35 橙紅 + #FFD700 金 + #FF4500 火橙 + #00BFFF 天藍 + #FFFFFF 白
 ## 業界原創「稀有連鎖+倍率爬升+時間視窗」機制
 ##
@@ -144,7 +144,7 @@ func _on_chain_kill(payload: Dictionary) -> void:
 	_update_chain_layer(layer, mult)
 
 	# 閃光（顏色依層數）
-	var flash_color := LAYER_COLORS[min(layer-1, LAYER_COLORS.size()-1)]
+	var flash_color: Color = LAYER_COLORS[min(layer-1, LAYER_COLORS.size()-1)]
 	_flash_screen(flash_color, 1, 0.3)
 
 	# 浮動文字
@@ -370,11 +370,11 @@ func _show_chain_indicator(layer: int, max_layer: int, window_sec: int) -> void:
 func _update_chain_layer(layer: int, mult: float) -> void:
 	if is_instance_valid(_layer_label):
 		_layer_label.text = "第 %d/5 層" % layer
-		var c := LAYER_COLORS[min(layer-1, LAYER_COLORS.size()-1)]
+		var c: Color = LAYER_COLORS[min(layer-1, LAYER_COLORS.size()-1)]
 		_layer_label.add_theme_color_override("font_color", c)
 	if is_instance_valid(_mult_label):
 		_mult_label.text = "×%.1f" % mult
-		var c := LAYER_COLORS[min(layer-1, LAYER_COLORS.size()-1)]
+		var c: Color = LAYER_COLORS[min(layer-1, LAYER_COLORS.size()-1)]
 		_mult_label.add_theme_color_override("font_color", c)
 
 func _clear_chain_indicator() -> void:

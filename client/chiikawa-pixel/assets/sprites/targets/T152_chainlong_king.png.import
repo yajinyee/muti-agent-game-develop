@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://1rfm2whb86pkr"
-path="res://.godot/imported/T152_chainlong_king.png-5d9bec8c31cab6b6de90dc4975e64c47.ctex"
+uid="uid://dkyfjkxsuyg06"
+path="res://.godot/imported/T152_chainlong_king.png-27086e50d9f6c21e26b0e545a57797f1.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T152_chainlong_king.png"
-dest_files=["res://.godot/imported/T152_chainlong_king.png-5d9bec8c31cab6b6de90dc4975e64c47.ctex"]
+dest_files=["res://.godot/imported/T152_chainlong_king.png-27086e50d9f6c21e26b0e545a57797f1.ctex"]
 
 [params]
 

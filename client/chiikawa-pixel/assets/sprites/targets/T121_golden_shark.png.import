@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ws8uaphn5pr8l"
-path="res://.godot/imported/T121_golden_shark.png-43c6d6c898d9ad859591f1922af532b9.ctex"
+uid="uid://dh7icfvfcpfgr"
+path="res://.godot/imported/T121_golden_shark.png-777c2b6f991cf3da5989fa204ea24d6c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T121_golden_shark.png"
-dest_files=["res://.godot/imported/T121_golden_shark.png-43c6d6c898d9ad859591f1922af532b9.ctex"]
+dest_files=["res://.godot/imported/T121_golden_shark.png-777c2b6f991cf3da5989fa204ea24d6c.ctex"]
 
 [params]
 

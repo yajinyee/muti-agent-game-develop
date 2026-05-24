@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://g7wnmrc7fxddr"
-path="res://.godot/imported/T221_elemfusion.png-8ffa6e062774fa86ae17917183b87eeb.ctex"
+uid="uid://ddir1pfxuqhl0"
+path="res://.godot/imported/T221_elemfusion.png-4770776dd8e8d0fe453f5f9f340d90c8.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T221_elemfusion.png"
-dest_files=["res://.godot/imported/T221_elemfusion.png-8ffa6e062774fa86ae17917183b87eeb.ctex"]
+dest_files=["res://.godot/imported/T221_elemfusion.png-4770776dd8e8d0fe453f5f9f340d90c8.ctex"]
 
 [params]
 

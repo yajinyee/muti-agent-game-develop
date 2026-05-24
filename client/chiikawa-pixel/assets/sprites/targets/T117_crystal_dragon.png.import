@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://6wi8d7jwirtfq"
-path="res://.godot/imported/T117_crystal_dragon.png-89cf06e25c3d56ed80fd7650975d0b82.ctex"
+uid="uid://0aanq6vy5tdm"
+path="res://.godot/imported/T117_crystal_dragon.png-490479d2adb09bb7453ef2cee4f944a6.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T117_crystal_dragon.png"
-dest_files=["res://.godot/imported/T117_crystal_dragon.png-89cf06e25c3d56ed80fd7650975d0b82.ctex"]
+dest_files=["res://.godot/imported/T117_crystal_dragon.png-490479d2adb09bb7453ef2cee4f944a6.ctex"]
 
 [params]
 

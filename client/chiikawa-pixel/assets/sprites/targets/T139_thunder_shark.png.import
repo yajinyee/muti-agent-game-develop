@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://q020ot2ybu9c2"
-path="res://.godot/imported/T139_thunder_shark.png-4ebc7a8244dcd1f4e510f1eaffe83169.ctex"
+uid="uid://bkgjcmex12rb0"
+path="res://.godot/imported/T139_thunder_shark.png-f8b1fe0111c75a41d6ebc3c9c8ff6f75.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T139_thunder_shark.png"
-dest_files=["res://.godot/imported/T139_thunder_shark.png-4ebc7a8244dcd1f4e510f1eaffe83169.ctex"]
+dest_files=["res://.godot/imported/T139_thunder_shark.png-f8b1fe0111c75a41d6ebc3c9c8ff6f75.ctex"]
 
 [params]
 

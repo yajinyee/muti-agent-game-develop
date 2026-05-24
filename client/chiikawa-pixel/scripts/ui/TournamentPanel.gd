@@ -1,15 +1,15 @@
-## TournamentPanel.gd — 週賽 + 每日賽 + 多格式賽面板（DAY-111 升級）
-## 顯示本週排名、今日排名、多格式賽排名、積分、獎勵資訊
-## 每 30 秒由 Server 推送更新
+﻿## TournamentPanel.gd ???梯魚 + 瘥鞈?+ 憭撘魚?Ｘ嚗AY-111 ??嚗?
+## 憿舐內?祇望????交????澆?鞈賣??????菔?閮?
+## 瘥?30 蝘 Server ?券??
 extends Node2D
 
-# ---- 常數 ----
+# ---- 撣豢 ----
 const PANEL_WIDTH  := 260
 const PANEL_HEIGHT := 340
 const PANEL_X      := 10
 const PANEL_Y      := 50
 
-# ---- 節點引用 ----
+# ---- 蝭暺???----
 var _panel_bg: ColorRect
 var _title_label: Label
 var _toggle_btn: Button
@@ -22,43 +22,43 @@ var _my_rank_label: Label
 var _time_label: Label
 var _format_desc_label: Label
 
-# ---- 狀態 ----
+# ---- ???----
 var _is_expanded: bool = false
-var _active_tab: String = "daily"  # "weekly" / "daily" / "multi"（預設顯示每日賽）
+var _active_tab: String = "daily"  # "weekly" / "daily" / "multi"嚗?閮剝＊蝷箸??亥魚嚗?
 var _pixel_font: Font = null
 
-# 週賽資料
+# ?梯魚鞈?
 var _weekly_rankings: Array = []
 var _weekly_my_rank: int = 0
 var _weekly_my_points: int = 0
 var _weekly_seconds_left: int = 0
 var _weekly_total_players: int = 0
 
-# 每日賽資料（DAY-093）
+# 瘥鞈質???DAY-093嚗?
 var _daily_rankings: Array = []
 var _daily_my_rank: int = 0
 var _daily_my_points: int = 0
 var _daily_seconds_left: int = 0
 var _daily_total_players: int = 0
 
-# 多格式賽資料（DAY-111）
+# 憭撘魚鞈?嚗AY-111嚗?
 var _multi_rankings: Array = []
 var _multi_my_rank: int = 0
 var _multi_my_score: float = 0.0
 var _multi_seconds_left: int = 0
 var _multi_total_players: int = 0
 var _multi_format: String = "score"
-var _multi_format_name: String = "積分賽"
-var _multi_format_icon: String = "⭐"
-var _multi_format_unit: String = "分"
+var _multi_format_name: String = "蝛?鞈?"
+var _multi_format_icon: String = "潃?"
+var _multi_format_unit: String = "??"
 var _multi_format_desc: String = ""
 var _multi_next_format: String = ""
 var _multi_next_format_name: String = ""
 var _multi_next_format_icon: String = ""
 
-# ---- 初始化 ----
+# ---- ????----
 func _ready() -> void:
-	# 載入像素字體
+	# 頛??摮?
 	if ResourceLoader.exists("res://assets/fonts/pixel8.fnt"):
 		_pixel_font = load("res://assets/fonts/pixel8.fnt")
 
@@ -70,47 +70,47 @@ func setup(font: Font) -> void:
 		_pixel_font = font
 
 func _build_ui() -> void:
-	# 背景面板
+	# ??Ｘ
 	_panel_bg = ColorRect.new()
 	_panel_bg.position = Vector2(PANEL_X, PANEL_Y)
-	_panel_bg.size = Vector2(PANEL_WIDTH, 36)  # 折疊時只顯示標題列
+	_panel_bg.size = Vector2(PANEL_WIDTH, 36)  # ???憿舐內璅???
 	_panel_bg.color = Color(0.05, 0.08, 0.18, 0.88)
 	add_child(_panel_bg)
 
-	# 標題列
+	# 璅???
 	var title_bar := ColorRect.new()
 	title_bar.position = Vector2(0, 0)
 	title_bar.size = Vector2(PANEL_WIDTH, 36)
 	title_bar.color = Color(0.1, 0.2, 0.5, 0.95)
 	_panel_bg.add_child(title_bar)
 
-	# 標題文字
+	# 璅???
 	_title_label = Label.new()
 	_title_label.position = Vector2(8, 6)
-	_title_label.text = "🏆 錦標賽"
+	_title_label.text = "?? ?行?鞈?"
 	_title_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0))
 	if _pixel_font:
 		_title_label.add_theme_font_override("font", _pixel_font)
 		_title_label.add_theme_font_size_override("font_size", 14)
 	title_bar.add_child(_title_label)
 
-	# 展開/折疊按鈕
+	# 撅?/????
 	_toggle_btn = Button.new()
 	_toggle_btn.position = Vector2(PANEL_WIDTH - 32, 4)
 	_toggle_btn.size = Vector2(28, 28)
-	_toggle_btn.text = "▼"
+	_toggle_btn.text = "??"
 	_toggle_btn.flat = true
 	_toggle_btn.add_theme_color_override("font_color", Color(0.8, 0.9, 1.0))
 	title_bar.add_child(_toggle_btn)
 
-	# Tab 切換列（今日賽 / 多格式賽 / 週賽）
+	# Tab ????隞鞈?/ 憭撘魚 / ?梯魚嚗?
 	var tab_bar := HBoxContainer.new()
 	tab_bar.position = Vector2(0, 36)
 	tab_bar.size = Vector2(PANEL_WIDTH, 24)
 	_panel_bg.add_child(tab_bar)
 
 	_tab_daily_btn = Button.new()
-	_tab_daily_btn.text = "📅 今日"
+	_tab_daily_btn.text = "?? 隞"
 	_tab_daily_btn.custom_minimum_size = Vector2(PANEL_WIDTH / 3, 24)
 	_tab_daily_btn.flat = false
 	_tab_daily_btn.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
@@ -120,7 +120,7 @@ func _build_ui() -> void:
 	tab_bar.add_child(_tab_daily_btn)
 
 	_tab_multi_btn = Button.new()
-	_tab_multi_btn.text = "⚡ 特殊"
+	_tab_multi_btn.text = "???寞?"
 	_tab_multi_btn.custom_minimum_size = Vector2(PANEL_WIDTH / 3, 24)
 	_tab_multi_btn.flat = false
 	_tab_multi_btn.add_theme_color_override("font_color", Color(0.7, 0.8, 1.0))
@@ -130,7 +130,7 @@ func _build_ui() -> void:
 	tab_bar.add_child(_tab_multi_btn)
 
 	_tab_weekly_btn = Button.new()
-	_tab_weekly_btn.text = "📆 週賽"
+	_tab_weekly_btn.text = "?? ?梯魚"
 	_tab_weekly_btn.custom_minimum_size = Vector2(PANEL_WIDTH / 3, 24)
 	_tab_weekly_btn.flat = false
 	_tab_weekly_btn.add_theme_color_override("font_color", Color(0.7, 0.8, 1.0))
@@ -139,7 +139,7 @@ func _build_ui() -> void:
 		_tab_weekly_btn.add_theme_font_size_override("font_size", 10)
 	tab_bar.add_child(_tab_weekly_btn)
 
-	# 格式說明（多格式賽 Tab 專用）
+	# ?澆?隤芣?嚗??澆?鞈?Tab 撠嚗?
 	_format_desc_label = Label.new()
 	_format_desc_label.position = Vector2(8, 62)
 	_format_desc_label.size = Vector2(PANEL_WIDTH - 16, 18)
@@ -151,17 +151,17 @@ func _build_ui() -> void:
 		_format_desc_label.add_theme_font_size_override("font_size", 9)
 	_panel_bg.add_child(_format_desc_label)
 
-	# 我的排名（Tab 下方）
+	# ????嚗ab 銝嚗?
 	_my_rank_label = Label.new()
 	_my_rank_label.position = Vector2(8, 62)
-	_my_rank_label.text = "我的排名：未上榜"
+	_my_rank_label.text = "????嚗銝?"
 	_my_rank_label.add_theme_color_override("font_color", Color(0.7, 0.9, 1.0))
 	if _pixel_font:
 		_my_rank_label.add_theme_font_override("font", _pixel_font)
 		_my_rank_label.add_theme_font_size_override("font_size", 11)
 	_panel_bg.add_child(_my_rank_label)
 
-	# 倒數計時
+	# ?閮?
 	_time_label = Label.new()
 	_time_label.position = Vector2(PANEL_WIDTH - 90, 62)
 	_time_label.text = ""
@@ -171,17 +171,17 @@ func _build_ui() -> void:
 		_time_label.add_theme_font_size_override("font_size", 10)
 	_panel_bg.add_child(_time_label)
 
-	# 排名列表容器（展開時顯示）
+	# ???”摰孵嚗???憿舐內嚗?
 	_entries_container = VBoxContainer.new()
 	_entries_container.position = Vector2(0, 82)
 	_entries_container.size = Vector2(PANEL_WIDTH, PANEL_HEIGHT - 100)
 	_entries_container.visible = false
 	_panel_bg.add_child(_entries_container)
 
-	# 底部說明
+	# 摨隤芣?
 	_footer_label = Label.new()
 	_footer_label.position = Vector2(8, PANEL_HEIGHT - 20)
-	_footer_label.text = "🥇50000  🥈25000  🥉10000"
+	_footer_label.text = "??50000  ??25000  ??10000"
 	_footer_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	if _pixel_font:
 		_footer_label.add_theme_font_override("font", _pixel_font)
@@ -194,20 +194,20 @@ func _connect_signals() -> void:
 	_tab_daily_btn.pressed.connect(_on_tab_daily_pressed)
 	_tab_weekly_btn.pressed.connect(_on_tab_weekly_pressed)
 	_tab_multi_btn.pressed.connect(_on_tab_multi_pressed)
-	# 連接 GameManager 的週賽更新訊號
+	# ?? GameManager ?梯魚?湔閮?
 	if GameManager.has_signal("tournament_updated"):
 		GameManager.tournament_updated.connect(_on_tournament_updated)
-	# 連接 GameManager 的每日賽更新訊號（DAY-093）
+	# ?? GameManager ???亥魚?湔閮?嚗AY-093嚗?
 	if GameManager.has_signal("daily_tournament_updated"):
 		GameManager.daily_tournament_updated.connect(_on_daily_tournament_updated)
-	# 連接 GameManager 的多格式賽更新訊號（DAY-111）
+	# ?? GameManager ???澆?鞈賣?啗???DAY-111嚗?
 	if GameManager.has_signal("multi_format_updated"):
 		GameManager.multi_format_updated.connect(_on_multi_format_updated)
 
-# ---- 訊號處理 ----
+# ---- 閮??? ----
 func _on_toggle_pressed() -> void:
 	_is_expanded = !_is_expanded
-	_toggle_btn.text = "▲" if _is_expanded else "▼"
+	_toggle_btn.text = "?? if _is_expanded else "??
 	_entries_container.visible = _is_expanded
 	_footer_label.visible = _is_expanded
 
@@ -246,8 +246,8 @@ func _on_tab_multi_pressed() -> void:
 	_tab_multi_btn.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
 	_tab_daily_btn.add_theme_color_override("font_color", Color(0.7, 0.8, 1.0))
 	_tab_weekly_btn.add_theme_color_override("font_color", Color(0.7, 0.8, 1.0))
-	# 顯示格式說明，隱藏我的排名（格式說明佔同一位置）
-	_format_desc_label.text = _multi_format_icon + " " + _multi_format_name + "：" + _multi_format_desc
+	# 憿舐內?澆?隤芣?嚗???????澆?隤芣?雿?銝雿蔭嚗?
+	_format_desc_label.text = _multi_format_icon + " " + _multi_format_name + "嚗? + _multi_format_desc"
 	_format_desc_label.visible = true
 	_my_rank_label.visible = false
 	_update_time_label()
@@ -280,7 +280,7 @@ func _on_daily_tournament_updated(data: Dictionary) -> void:
 		if _is_expanded:
 			_rebuild_entries()
 
-# 多格式賽更新（DAY-111）
+# 憭撘魚?湔嚗AY-111嚗?
 func _on_multi_format_updated(data: Dictionary) -> void:
 	_multi_rankings = data.get("rankings", [])
 	_multi_my_rank = data.get("player_rank", 0)
@@ -288,36 +288,36 @@ func _on_multi_format_updated(data: Dictionary) -> void:
 	_multi_seconds_left = data.get("seconds_left", 0)
 	_multi_total_players = data.get("total_players", 0)
 	_multi_format = data.get("today_format", "score")
-	_multi_format_name = data.get("format_name", "積分賽")
-	_multi_format_icon = data.get("format_icon", "⭐")
-	_multi_format_unit = data.get("format_unit", "分")
+	_multi_format_name = data.get("format_name", "蝛?鞈?)"
+	_multi_format_icon = data.get("format_icon", "潃?)"
+	_multi_format_unit = data.get("format_unit", "??)"
 	_multi_format_desc = data.get("format_desc", "")
 	_multi_next_format = data.get("next_format", "")
 	_multi_next_format_name = data.get("next_format_name", "")
 	_multi_next_format_icon = data.get("next_format_icon", "")
 
-	# 更新 Tab 按鈕文字顯示今日格式圖示
-	_tab_multi_btn.text = _multi_format_icon + " 特殊"
+	# ?湔 Tab ????憿舐內隞?澆??內
+	_tab_multi_btn.text = _multi_format_icon + " ?寞?"
 
 	if _active_tab == "multi":
-		_format_desc_label.text = _multi_format_icon + " " + _multi_format_name + "：" + _multi_format_desc
+		_format_desc_label.text = _multi_format_icon + " " + _multi_format_name + "嚗? + _multi_format_desc"
 		_update_time_label()
 		if _is_expanded:
 			_rebuild_entries()
 
-# ---- UI 更新 ----
+# ---- UI ?湔 ----
 func _update_my_rank_label() -> void:
 	var my_rank := 0
 	var my_score_str := ""
 
 	if _active_tab == "daily":
 		my_rank = _daily_my_rank
-		my_score_str = "%d分" % _daily_my_points
+		my_score_str = "%d?? % _daily_my_points"
 	elif _active_tab == "weekly":
 		my_rank = _weekly_my_rank
-		my_score_str = "%d分" % _weekly_my_points
+		my_score_str = "%d?? % _weekly_my_points"
 	else:
-		# multi tab 用 format_desc_label，不用 my_rank_label
+		# multi tab ??format_desc_label嚗???my_rank_label
 		return
 
 	if my_rank > 0:
@@ -329,7 +329,7 @@ func _update_my_rank_label() -> void:
 			_my_rank_label.add_theme_color_override("font_color", Color(0.7, 0.9, 1.0))
 	else:
 		var pts := _daily_my_points if _active_tab == "daily" else _weekly_my_points
-		_my_rank_label.text = "我的積分：%s" % my_score_str if pts > 0 else "我的排名：未上榜"
+		_my_rank_label.text = "??蝛?嚗?s" % my_score_str if pts > 0 else "????嚗銝?"
 		_my_rank_label.add_theme_color_override("font_color", Color(0.6, 0.7, 0.8))
 
 func _update_time_label() -> void:
@@ -342,7 +342,7 @@ func _update_time_label() -> void:
 		seconds_left = _multi_seconds_left
 
 	if seconds_left <= 0:
-		_time_label.text = "結算中..."
+		_time_label.text = "蝯?銝?.."
 		return
 	var days := seconds_left / 86400
 	var hours := (seconds_left % 86400) / 3600
@@ -368,14 +368,14 @@ func _rebuild_entries() -> void:
 
 	if rankings.is_empty():
 		var empty_label := Label.new()
-		empty_label.text = "  尚無參賽者"
+		empty_label.text = "  撠?魚??"
 		empty_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 		if _pixel_font:
 			empty_label.add_theme_font_override("font", _pixel_font)
 			empty_label.add_theme_font_size_override("font_size", 11)
 		_entries_container.add_child(empty_label)
 
-		# 更新底部獎勵說明
+		# ?湔摨?隤芣?
 		_update_footer_label()
 		return
 
@@ -386,15 +386,15 @@ func _rebuild_entries() -> void:
 
 func _update_footer_label() -> void:
 	if _active_tab == "daily":
-		_footer_label.text = "🥇5000  🥈2000  🥉1000"
+		_footer_label.text = "??5000  ??2000  ??1000"
 	elif _active_tab == "multi":
-		# 多格式賽顯示明日格式預告
+		# 憭撘魚憿舐內??澆???
 		if _multi_next_format_name != "":
-			_footer_label.text = "明日：%s %s" % [_multi_next_format_icon, _multi_next_format_name]
+			_footer_label.text = "?嚗?s %s" % [_multi_next_format_icon, _multi_next_format_name]
 		else:
-			_footer_label.text = "🥇5000  🥈2000  🥉1000"
+			_footer_label.text = "??5000  ??2000  ??1000"
 	else:
-		_footer_label.text = "🥇50000  🥈25000  🥉10000"
+		_footer_label.text = "??50000  ??25000  ??10000"
 
 func _add_entry_row(entry: Dictionary) -> void:
 	var rank: int = entry.get("rank", 0)
@@ -402,7 +402,7 @@ func _add_entry_row(entry: Dictionary) -> void:
 	var prize: int = entry.get("prize", 0)
 	var is_self: bool = entry.get("is_self", false)
 
-	# 多格式賽用 score_label，其他用 points
+	# 憭撘魚??score_label嚗隞 points
 	var score_str: String
 	if _active_tab == "multi":
 		score_str = entry.get("score_label", "0")
@@ -412,13 +412,13 @@ func _add_entry_row(entry: Dictionary) -> void:
 	var row := HBoxContainer.new()
 	row.custom_minimum_size = Vector2(PANEL_WIDTH - 8, 22)
 
-	# 背景（自己高亮）
+	# ?嚗撌梢?鈭殷?
 	var row_bg := ColorRect.new()
 	row_bg.color = Color(0.2, 0.4, 0.8, 0.3) if is_self else Color(0.0, 0.0, 0.0, 0.0)
 	row_bg.size = Vector2(PANEL_WIDTH - 8, 22)
 	row.add_child(row_bg)
 
-	# 排名圖示
+	# ???內
 	var rank_label := Label.new()
 	rank_label.text = _get_rank_icon(rank)
 	rank_label.custom_minimum_size = Vector2(28, 22)
@@ -428,9 +428,9 @@ func _add_entry_row(entry: Dictionary) -> void:
 		rank_label.add_theme_font_size_override("font_size", 12)
 	row.add_child(rank_label)
 
-	# 玩家名稱
+	# ?拙振?迂
 	var name_label := Label.new()
-	var short_name := display_name if display_name.length() <= 8 else display_name.substr(0, 7) + "…"
+	var short_name := display_name if display_name.length() <= 8 else display_name.substr(0, 7) + "??"
 	name_label.text = short_name
 	name_label.custom_minimum_size = Vector2(100, 22)
 	name_label.add_theme_color_override("font_color", Color(1.0, 1.0, 0.8) if is_self else Color(0.9, 0.9, 0.9))
@@ -439,7 +439,7 @@ func _add_entry_row(entry: Dictionary) -> void:
 		name_label.add_theme_font_size_override("font_size", 11)
 	row.add_child(name_label)
 
-	# 分數
+	# ?
 	var pts_label := Label.new()
 	pts_label.text = score_str
 	pts_label.custom_minimum_size = Vector2(50, 22)
@@ -450,10 +450,10 @@ func _add_entry_row(entry: Dictionary) -> void:
 		pts_label.add_theme_font_size_override("font_size", 11)
 	row.add_child(pts_label)
 
-	# 獎勵（前三名顯示）
+	# ?嚗?銝?憿舐內嚗?
 	if prize > 0:
 		var prize_label := Label.new()
-		prize_label.text = " 💰"
+		prize_label.text = " ?"
 		prize_label.custom_minimum_size = Vector2(24, 22)
 		prize_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.0))
 		if _pixel_font:
@@ -463,22 +463,22 @@ func _add_entry_row(entry: Dictionary) -> void:
 
 	_entries_container.add_child(row)
 
-# ---- 工具函數 ----
+# ---- 撌亙?賣 ----
 func _get_rank_icon(rank: int) -> String:
 	match rank:
-		1: return "🥇"
-		2: return "🥈"
-		3: return "🥉"
+		1: return "??"
+		2: return "??"
+		3: return "??"
 		_: return "#%d" % rank
 
 func _get_rank_color(rank: int) -> Color:
 	match rank:
-		1: return Color(1.0, 0.85, 0.0)   # 金色
-		2: return Color(0.8, 0.8, 0.85)   # 銀色
-		3: return Color(0.8, 0.5, 0.2)    # 銅色
-		_: return Color(0.7, 0.7, 0.7)    # 灰色
+		1: return Color(1.0, 0.85, 0.0)   # ?
+		2: return Color(0.8, 0.8, 0.85)   # ???
+		3: return Color(0.8, 0.5, 0.2)    # ?
+		_: return Color(0.7, 0.7, 0.7)    # ?啗
 
-# ---- 每幀更新倒數 ----
+# ---- 瘥??湔? ----
 func _process(delta: float) -> void:
 	if _active_tab == "daily" and _daily_seconds_left > 0:
 		_daily_seconds_left -= int(delta)

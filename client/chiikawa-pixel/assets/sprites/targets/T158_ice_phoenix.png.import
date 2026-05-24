@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://cfdbggnd11sog"
-path="res://.godot/imported/T158_ice_phoenix.png-e61b5c6b8c93fa0d9c7bf2c43cb6bf3b.ctex"
+path="res://.godot/imported/T158_ice_phoenix.png-bcd73e1b3962c51b40c24dbb993ddf87.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T158_ice_phoenix.png"
-dest_files=["res://.godot/imported/T158_ice_phoenix.png-e61b5c6b8c93fa0d9c7bf2c43cb6bf3b.ctex"]
+dest_files=["res://.godot/imported/T158_ice_phoenix.png-bcd73e1b3962c51b40c24dbb993ddf87.ctex"]
 
 [params]
 

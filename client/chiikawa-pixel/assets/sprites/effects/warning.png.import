@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://warning_effect_001"
-path="res://.godot/imported/warning.png-warning_effect_001.ctex"
+uid="uid://bjsr1s8dknhxl"
+path="res://.godot/imported/warning.png-168dd44229726ae7273730dba0dc3456.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/effects/warning.png"
-dest_files=["res://.godot/imported/warning.png-warning_effect_001.ctex"]
+dest_files=["res://.godot/imported/warning.png-168dd44229726ae7273730dba0dc3456.ctex"]
 
 [params]
 

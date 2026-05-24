@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ygfw3k4irv8of"
-path="res://.godot/imported/T165_golden_wave_fish.png-ed3ecd49017df1f86e0375ff1ca9f8c5.ctex"
+uid="uid://8ypj8l0eoy4t"
+path="res://.godot/imported/T165_golden_wave_fish.png-e1073c5294c3f97559dfcea0d53576c2.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T165_golden_wave_fish.png"
-dest_files=["res://.godot/imported/T165_golden_wave_fish.png-ed3ecd49017df1f86e0375ff1ca9f8c5.ctex"]
+dest_files=["res://.godot/imported/T165_golden_wave_fish.png-e1073c5294c3f97559dfcea0d53576c2.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://323a10d0b49d5d64"
-path="res://.godot/imported/T101_mimic_swim.png-323a10d0b49d5d644d004922d82c5c46.ctex"
+uid="uid://cdmeuxfycwakd"
+path="res://.godot/imported/T101_mimic_swim.png-50536d301263c00aaf3f36aad6f6d624.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T101_mimic_swim.png"
-dest_files=["res://.godot/imported/T101_mimic_swim.png-323a10d0b49d5d644d004922d82c5c46.ctex"]
+dest_files=["res://.godot/imported/T101_mimic_swim.png-50536d301263c00aaf3f36aad6f6d624.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://awt2rl17qji4a"
-path="res://.godot/imported/T198_bet.png-4a8548a6ee04036b876e890b12c7b42d.ctex"
+uid="uid://wt2rl17qji4a"
+path="res://.godot/imported/T198_bet.png-ebfc928ea1f7be5cf597ebdb748b31c3.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T198_bet.png"
-dest_files=["res://.godot/imported/T198_bet.png-4a8548a6ee04036b876e890b12c7b42d.ctex"]
+dest_files=["res://.godot/imported/T198_bet.png-ebfc928ea1f7be5cf597ebdb748b31c3.ctex"]
 
 [params]
 

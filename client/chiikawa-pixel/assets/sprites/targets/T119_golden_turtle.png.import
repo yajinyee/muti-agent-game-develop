@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ypx2cwkrddpva"
-path="res://.godot/imported/T119_golden_turtle.png-855ad838a7b3deb3d4a74e3f69b1d39e.ctex"
+uid="uid://bjitsk18x5hco"
+path="res://.godot/imported/T119_golden_turtle.png-a78a38390f4ba6fb9f4547977d8fe338.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T119_golden_turtle.png"
-dest_files=["res://.godot/imported/T119_golden_turtle.png-855ad838a7b3deb3d4a74e3f69b1d39e.ctex"]
+dest_files=["res://.godot/imported/T119_golden_turtle.png-a78a38390f4ba6fb9f4547977d8fe338.ctex"]
 
 [params]
 

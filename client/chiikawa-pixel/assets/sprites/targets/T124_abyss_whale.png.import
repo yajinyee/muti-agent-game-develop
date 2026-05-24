@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://52r4svge7d8ji"
-path="res://.godot/imported/T124_abyss_whale.png-b2641710720fa3ac79ac7bf55386deac.ctex"
+uid="uid://d0w1oh0m8x375"
+path="res://.godot/imported/T124_abyss_whale.png-80a661cfd4d38991de5c90b6b61e4870.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T124_abyss_whale.png"
-dest_files=["res://.godot/imported/T124_abyss_whale.png-b2641710720fa3ac79ac7bf55386deac.ctex"]
+dest_files=["res://.godot/imported/T124_abyss_whale.png-80a661cfd4d38991de5c90b6b61e4870.ctex"]
 
 [params]
 

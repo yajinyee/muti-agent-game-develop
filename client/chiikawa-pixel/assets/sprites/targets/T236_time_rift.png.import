@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bugv50ttzxg8v"
-path="res://.godot/imported/T236_time_rift.png-da5c677e2ef44cef6df8388fcd82eb06.ctex"
+uid="uid://bugv50tt0xg8v"
+path="res://.godot/imported/T236_time_rift.png-71f6ac9b2b2950811155fc9cc3a1c30c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T236_time_rift.png"
-dest_files=["res://.godot/imported/T236_time_rift.png-da5c677e2ef44cef6df8388fcd82eb06.ctex"]
+dest_files=["res://.godot/imported/T236_time_rift.png-71f6ac9b2b2950811155fc9cc3a1c30c.ctex"]
 
 [params]
 

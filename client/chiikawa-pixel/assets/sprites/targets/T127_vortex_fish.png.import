@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jfrw4elp8xeyb"
-path="res://.godot/imported/T127_vortex_fish.png-66e463b9452b52a814b180082739723b.ctex"
+uid="uid://box6xaq74jngr"
+path="res://.godot/imported/T127_vortex_fish.png-1e7d08c9b61c16037173d30414818c90.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T127_vortex_fish.png"
-dest_files=["res://.godot/imported/T127_vortex_fish.png-66e463b9452b52a814b180082739723b.ctex"]
+dest_files=["res://.godot/imported/T127_vortex_fish.png-1e7d08c9b61c16037173d30414818c90.ctex"]
 
 [params]
 

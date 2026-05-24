@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://bonus_trigger_001"
-path="res://.godot/imported/bonus_trigger.wav-bonus_trigger_001.sample"
+uid="uid://dowxoiy5m2kb6"
+path="res://.godot/imported/bonus_trigger.wav-fd96b98d931044b4be5d78e55950864f.sample"
 
 [deps]
 
 source_file="res://assets/audio/sfx/bonus_trigger.wav"
-dest_files=["res://.godot/imported/bonus_trigger.wav-bonus_trigger_001.sample"]
+dest_files=["res://.godot/imported/bonus_trigger.wav-fd96b98d931044b4be5d78e55950864f.sample"]
 
 [params]
 

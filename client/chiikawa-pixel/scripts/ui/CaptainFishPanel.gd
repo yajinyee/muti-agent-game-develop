@@ -1,7 +1,7 @@
-## CaptainFishPanel.gd — 船長魚全服競速模式面板（DAY-163）
-## 擊破船長魚後觸發全服競速 30 秒，擊破最多目標獲得大獎
-## 視覺：藍色海軍主題 + 倒數計時 + 即時排行榜 + 結果彈窗
-## 業界依據：King of Ocean 2026「Captain Fish trigger bonus rounds」
+﻿## CaptainFishPanel.gd ???寥擳?奎?芋撘?選?DAY-163嚗?
+## ??寥擳?閫貊?冽?蝡園?30 蝘???憭璅敺之??
+## 閬死嚗??脫絲頠蜓憿?+ ?閮? + ?單???璁?+ 蝯?敶?
+## 璆剔?靘?嚗ing of Ocean 2026?aptain Fish trigger bonus rounds??
 extends Node2D
 
 var _pixel_font: Font = null
@@ -33,9 +33,9 @@ func _process(delta: float) -> void:
 		_remaining = 0.0
 		return
 	if is_instance_valid(_countdown_label):
-		_countdown_label.text = "⚓ 競速 %.0f秒" % _remaining
+		_countdown_label.text = "??蝡園?%.0f蝘? % _remaining"
 
-## 處理船長魚競速事件
+## ???寥擳奎??隞?
 func _on_captain_fish_race(data: Dictionary) -> void:
 	var phase: String = data.get("phase", "")
 	var duration: float = data.get("duration_secs", 30.0)
@@ -56,13 +56,13 @@ func _on_captain_fish_race(data: Dictionary) -> void:
 		"race_reward":
 			_show_my_reward(data)
 
-## 顯示競速開始
+## 憿舐內蝡園?憪?
 func _show_race_start(killer_name: String, killer_id: String, duration: float) -> void:
 	_is_active = true
 	_remaining = duration
 	var is_me = (killer_id == _my_player_id)
 
-	# 全螢幕藍色閃光
+	# ?刻撟??脤???
 	var flash := ColorRect.new()
 	flash.position = Vector2(-640, -360)
 	flash.size = Vector2(1280, 720)
@@ -74,7 +74,7 @@ func _show_race_start(killer_name: String, killer_id: String, duration: float) -
 		if is_instance_valid(flash): flash.queue_free()
 	)
 
-	# 頂部橫幅（藍色海軍主題）
+	# ?璈怠?嚗??脫絲頠蜓憿?
 	var banner_bg := ColorRect.new()
 	banner_bg.name = "CaptainBanner"
 	banner_bg.position = Vector2(-640, -360)
@@ -84,9 +84,9 @@ func _show_race_start(killer_name: String, killer_id: String, duration: float) -
 
 	var banner_text: String
 	if is_me:
-		banner_text = "⚓ 你擊破船長魚！全服競速開始！30 秒內擊破最多目標獲得大獎！"
+		banner_text = "??雿??渲?琿?嚗?奎??憪?30 蝘??憭璅敺之??"
 	else:
-		banner_text = "⚓ %s 擊破船長魚！全服競速開始！30 秒內擊破最多目標獲得大獎！" % killer_name
+		banner_text = "??%s ??寥擳??冽?蝡園?憪?30 蝘??憭璅敺之??" % killer_name
 
 	var banner_lbl := Label.new()
 	banner_lbl.name = "CaptainBannerLabel"
@@ -100,7 +100,7 @@ func _show_race_start(killer_name: String, killer_id: String, duration: float) -
 		banner_lbl.add_theme_font_override("font", _pixel_font)
 	add_child(banner_lbl)
 
-	# 橫幅滑入
+	# 璈怠?皛
 	banner_bg.position.y = -410
 	banner_lbl.position.y = -404
 	var slide = banner_bg.create_tween()
@@ -108,7 +108,7 @@ func _show_race_start(killer_name: String, killer_id: String, duration: float) -
 	var slide2 = banner_lbl.create_tween()
 	slide2.tween_property(banner_lbl, "position:y", -354.0, 0.3)
 
-	# 倒數計時器（右上角）
+	# ?閮??剁??喃?閫?
 	var countdown_bg := ColorRect.new()
 	countdown_bg.name = "CaptainCountdownBG"
 	countdown_bg.position = Vector2(510, -355)
@@ -120,7 +120,7 @@ func _show_race_start(killer_name: String, killer_id: String, duration: float) -
 	_countdown_label.name = "CaptainCountdown"
 	_countdown_label.position = Vector2(510, -352)
 	_countdown_label.size = Vector2(120, 30)
-	_countdown_label.text = "⚓ 競速 %.0f秒" % duration
+	_countdown_label.text = "??蝡園?%.0f蝘? % duration"
 	_countdown_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_countdown_label.add_theme_color_override("font_color", Color(0.5, 0.85, 1.0))
 	_countdown_label.add_theme_font_size_override("font_size", 13)
@@ -128,7 +128,7 @@ func _show_race_start(killer_name: String, killer_id: String, duration: float) -
 		_countdown_label.add_theme_font_override("font", _pixel_font)
 	add_child(_countdown_label)
 
-	# 左側排行榜面板
+	# 撌血??璁??
 	_leaderboard_bg = ColorRect.new()
 	_leaderboard_bg.name = "CaptainLeaderboard"
 	_leaderboard_bg.position = Vector2(-630, -200)
@@ -140,7 +140,7 @@ func _show_race_start(killer_name: String, killer_id: String, duration: float) -
 	lb_title.name = "CaptainLBTitle"
 	lb_title.position = Vector2(-630, -198)
 	lb_title.size = Vector2(180, 22)
-	lb_title.text = "🏆 競速排行"
+	lb_title.text = "?? 蝡園?銵?"
 	lb_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	lb_title.add_theme_color_override("font_color", Color(0.5, 0.85, 1.0))
 	lb_title.add_theme_font_size_override("font_size", 13)
@@ -148,18 +148,18 @@ func _show_race_start(killer_name: String, killer_id: String, duration: float) -
 		lb_title.add_theme_font_override("font", _pixel_font)
 	add_child(lb_title)
 
-## 更新排行榜
+## ?湔??璁?
 func _update_leaderboard(entries: Array, remaining: float) -> void:
 	_remaining = remaining
-	# 清除舊排行榜條目
+	# 皜??銵?璇
 	for lbl in _leaderboard_labels:
 		if is_instance_valid(lbl): lbl.queue_free()
 	_leaderboard_labels.clear()
 
-	# 顯示前 5 名
+	# 憿舐內??5 ??
 	for i in range(min(entries.size(), 5)):
 		var entry = entries[i]
-		var rank_icon = ["🥇", "🥈", "🥉", "4.", "5."][i]
+		var rank_icon = ["??", "??", "??", "4.", "5."][i]
 		var name_str: String = entry.get("player_name", "?")
 		var kills: int = entry.get("kill_count", 0)
 		var is_me = (entry.get("player_id", "") == _my_player_id)
@@ -175,28 +175,28 @@ func _update_leaderboard(entries: Array, remaining: float) -> void:
 		add_child(lbl)
 		_leaderboard_labels.append(lbl)
 
-## 顯示競速結束
+## 憿舐內蝡園???
 func _show_race_end(entries: Array) -> void:
 	_is_active = false
 	_remaining = 0.0
 
-	# 隱藏倒數計時器
+	# ?梯??閮???
 	for node_name in ["CaptainCountdownBG", "CaptainCountdown"]:
 		var node = get_node_or_null(node_name)
 		if is_instance_valid(node):
 			node.queue_free()
 	_countdown_label = null
 
-	# 更新排行榜顯示最終結果
+	# ?湔??璁＊蝷箸?蝯???
 	_update_leaderboard(entries, 0.0)
 
-	# 3 秒後淡出所有 UI
+	# 3 蝘?瘛∪???UI
 	var timer = get_tree().create_timer(3.0)
 	timer.timeout.connect(func():
 		_hide_all()
 	)
 
-## 顯示個人獎勵
+## 憿舐內?犖?
 func _show_my_reward(data: Dictionary) -> void:
 	var my_rank: int = data.get("my_rank", 0)
 	var my_bonus: int = data.get("my_bonus", 0)
@@ -205,9 +205,9 @@ func _show_my_reward(data: Dictionary) -> void:
 	if my_bonus <= 0:
 		return
 
-	var rank_text = ["🥇 第一名", "🥈 第二名", "🥉 第三名"].get(my_rank - 1, "第%d名" % my_rank)
+	var rank_text = ["?? 蝚砌???, "?? 蝚砌???, "?? 蝚砌???].get(my_rank - 1, "蝚?d?? % my_rank)
 
-	# 中央獎勵彈窗
+	# 銝剖亢?敶?
 	var popup_bg := ColorRect.new()
 	popup_bg.name = "CaptainRewardPopup"
 	popup_bg.position = Vector2(-120, -70)
@@ -216,7 +216,7 @@ func _show_my_reward(data: Dictionary) -> void:
 	add_child(popup_bg)
 
 	var title_lbl := Label.new()
-	title_lbl.text = "⚓ 競速結束！%s" % rank_text
+	title_lbl.text = "??蝡園???%s" % rank_text
 	title_lbl.position = Vector2(-120, -68)
 	title_lbl.size = Vector2(240, 26)
 	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -227,7 +227,7 @@ func _show_my_reward(data: Dictionary) -> void:
 	add_child(title_lbl)
 
 	var kills_lbl := Label.new()
-	kills_lbl.text = "擊破 %d 個目標" % my_kills
+	kills_lbl.text = "? %d ?璅? % my_kills"
 	kills_lbl.position = Vector2(-120, -40)
 	kills_lbl.size = Vector2(240, 22)
 	kills_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -238,7 +238,7 @@ func _show_my_reward(data: Dictionary) -> void:
 	add_child(kills_lbl)
 
 	var bonus_lbl := Label.new()
-	bonus_lbl.text = "+%d 金幣獎勵！" % my_bonus
+	bonus_lbl.text = "+%d ?馳?嚗? % my_bonus"
 	bonus_lbl.position = Vector2(-120, -16)
 	bonus_lbl.size = Vector2(240, 30)
 	bonus_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -248,13 +248,13 @@ func _show_my_reward(data: Dictionary) -> void:
 		bonus_lbl.add_theme_font_override("font", _pixel_font)
 	add_child(bonus_lbl)
 
-	# 彈跳動畫
+	# 敶歲?
 	popup_bg.scale = Vector2(0.8, 0.8)
 	var scale_tween = popup_bg.create_tween()
 	scale_tween.tween_property(popup_bg, "scale", Vector2(1.05, 1.05), 0.15)
 	scale_tween.tween_property(popup_bg, "scale", Vector2(1.0, 1.0), 0.08)
 
-	# 4 秒後淡出
+	# 4 蝘?瘛∪
 	for node in [popup_bg, title_lbl, kills_lbl, bonus_lbl]:
 		var fade = node.create_tween()
 		fade.tween_interval(4.0)
@@ -263,7 +263,7 @@ func _show_my_reward(data: Dictionary) -> void:
 			if is_instance_valid(node): node.queue_free()
 		)
 
-## 隱藏所有 UI
+## ?梯????UI
 func _hide_all() -> void:
 	_is_active = false
 	for child_name in ["CaptainBanner", "CaptainBannerLabel", "CaptainCountdownBG",

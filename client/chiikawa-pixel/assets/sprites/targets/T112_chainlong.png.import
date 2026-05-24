@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xfpnmfp8zuy0h"
-path="res://.godot/imported/T112_chainlong.png-0be566416d06b6bf006e3fc28adcd7c7.ctex"
+uid="uid://d3obn44y6ul7n"
+path="res://.godot/imported/T112_chainlong.png-f9db2d0d4792b13a4024d6d978d5d74a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T112_chainlong.png"
-dest_files=["res://.godot/imported/T112_chainlong.png-0be566416d06b6bf006e3fc28adcd7c7.ctex"]
+dest_files=["res://.godot/imported/T112_chainlong.png-f9db2d0d4792b13a4024d6d978d5d74a.ctex"]
 
 [params]
 

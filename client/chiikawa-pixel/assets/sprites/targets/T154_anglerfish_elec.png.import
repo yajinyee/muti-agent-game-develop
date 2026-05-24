@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://iqmba42u65ikk"
-path="res://.godot/imported/T154_anglerfish_elec.png-c44e5c1ae02d8c9e6a188e85fdf8e53b.ctex"
+uid="uid://0sj308d2qq11"
+path="res://.godot/imported/T154_anglerfish_elec.png-b85be844fa6d1f0af6e418aa8f0fcc75.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T154_anglerfish_elec.png"
-dest_files=["res://.godot/imported/T154_anglerfish_elec.png-c44e5c1ae02d8c9e6a188e85fdf8e53b.ctex"]
+dest_files=["res://.godot/imported/T154_anglerfish_elec.png-b85be844fa6d1f0af6e418aa8f0fcc75.ctex"]
 
 [params]
 

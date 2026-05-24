@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://xz0aojgo0o1hh"
-path="res://.godot/imported/T225_multstk.png-d336e65986636eda4c87b5fdf580cf58.ctex"
+uid="uid://tj146w6mhrwv"
+path="res://.godot/imported/T225_multstk.png-4f12d58072647d449da8274a0c74ec0b.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T225_multstk.png"
-dest_files=["res://.godot/imported/T225_multstk.png-d336e65986636eda4c87b5fdf580cf58.ctex"]
+dest_files=["res://.godot/imported/T225_multstk.png-4f12d58072647d449da8274a0c74ec0b.ctex"]
 
 [params]
 

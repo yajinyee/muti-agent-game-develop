@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ouvtx8hovyxhn"
-path="res://.godot/imported/bonus_bg_backup.png-f346046acbe6fe2b3a0c65f9f2981d0d.ctex"
+uid="uid://dan762pw7eb7d"
+path="res://.godot/imported/bonus_bg_backup.png-5bba4608c8037e6c72ab4696073d9b8d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/backgrounds/bonus_bg_backup.png"
-dest_files=["res://.godot/imported/bonus_bg_backup.png-f346046acbe6fe2b3a0c65f9f2981d0d.ctex"]
+dest_files=["res://.godot/imported/bonus_bg_backup.png-5bba4608c8037e6c72ab4696073d9b8d.ctex"]
 
 [params]
 

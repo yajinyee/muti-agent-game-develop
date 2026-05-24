@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://b001bosssheet01"
-path="res://.godot/imported/B001_boss_sheet.png-b001bosssheet01.ctex"
+uid="uid://cw4r3577u8c6k"
+path="res://.godot/imported/B001_boss_sheet.png-ecdf3286f94145f571503d1841c85bd0.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/B001_boss_sheet.png"
-dest_files=["res://.godot/imported/B001_boss_sheet.png-b001bosssheet01.ctex"]
+dest_files=["res://.godot/imported/B001_boss_sheet.png-ecdf3286f94145f571503d1841c85bd0.ctex"]
 
 [params]
 

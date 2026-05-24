@@ -1,6 +1,6 @@
-## ChallengePanel.gd - DAY-085
-## 隱藏挑戰系統 UI：挑戰解鎖時顯示驚喜通知
-## 設計原則：隱藏挑戰解鎖時要有「驚喜感」，比普通成就更誇張
+﻿## ChallengePanel.gd - DAY-085
+## ?梯??蝟餌絞 UI嚗??啗圾??憿舐內撽??
+## 閮剛???嚗???啗圾??閬???????瘥??撠望隤撐
 extends Node2D
 
 const PANEL_W := 280
@@ -36,42 +36,42 @@ func _show_challenge_popup(data: Dictionary) -> void:
 	var was_hidden: bool = data.get("was_hidden", false)
 	var name_str: String = data.get("name", "")
 	var desc_str: String = data.get("description", "")
-	var icon_str: String = data.get("icon", "🏆")
+	var icon_str: String = data.get("icon", "??")
 	var reward: int = data.get("reward", 0)
 
-	# 建立彈窗容器
+	# 撱箇?敶?摰孵
 	var popup = Node2D.new()
 	popup.position = Vector2(640, 200)
 	popup.scale = Vector2(0.0, 0.0)
 	add_child(popup)
 
-	# 背景（隱藏挑戰用金色，普通挑戰用藍色）
+	# ?嚗???啁?嚗???啁?嚗?
 	var bg = ColorRect.new()
 	bg.size = Vector2(PANEL_W, PANEL_H)
 	bg.position = Vector2(-PANEL_W / 2, -PANEL_H / 2)
 	if was_hidden:
-		bg.color = Color(0.15, 0.10, 0.02, 0.97)  # 深金色
+		bg.color = Color(0.15, 0.10, 0.02, 0.97)  # 瘛梢???
 	else:
-		bg.color = Color(0.02, 0.08, 0.18, 0.97)  # 深藍色
+		bg.color = Color(0.02, 0.08, 0.18, 0.97)  # 瘛梯???
 	popup.add_child(bg)
 
-	# 頂部邊框
+	# ???
 	var border = ColorRect.new()
 	border.size = Vector2(PANEL_W, 3)
 	border.position = Vector2(-PANEL_W / 2, -PANEL_H / 2)
 	if was_hidden:
-		border.color = Color(1.0, 0.85, 0.1, 1.0)  # 金色
+		border.color = Color(1.0, 0.85, 0.1, 1.0)  # ?
 	else:
-		border.color = Color(0.3, 0.7, 1.0, 1.0)   # 藍色
+		border.color = Color(0.3, 0.7, 1.0, 1.0)   # ?
 	popup.add_child(border)
 
-	# 標題（隱藏挑戰有特殊標記）
+	# 璅?嚗???唳??寞?璅?嚗?
 	var title_lbl = Label.new()
 	if was_hidden:
-		title_lbl.text = "🎉 隱藏挑戰解鎖！"
+		title_lbl.text = "?? ?梯??閫??嚗?"
 		title_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1))
 	else:
-		title_lbl.text = "✅ 挑戰完成！"
+		title_lbl.text = "???摰?嚗?"
 		title_lbl.add_theme_color_override("font_color", Color(0.5, 1.0, 0.5))
 	title_lbl.position = Vector2(-PANEL_W / 2 + 8, -PANEL_H / 2 + 6)
 	if _font:
@@ -79,7 +79,7 @@ func _show_challenge_popup(data: Dictionary) -> void:
 		title_lbl.add_theme_font_size_override("font_size", 13)
 	popup.add_child(title_lbl)
 
-	# 挑戰名稱
+	# ??迂
 	var name_lbl = Label.new()
 	name_lbl.text = "%s %s" % [icon_str, name_str]
 	name_lbl.position = Vector2(-PANEL_W / 2 + 8, -PANEL_H / 2 + 24)
@@ -89,7 +89,7 @@ func _show_challenge_popup(data: Dictionary) -> void:
 		name_lbl.add_theme_font_size_override("font_size", 16)
 	popup.add_child(name_lbl)
 
-	# 描述
+	# ?膩
 	var desc_lbl = Label.new()
 	desc_lbl.text = desc_str
 	desc_lbl.position = Vector2(-PANEL_W / 2 + 8, -PANEL_H / 2 + 44)
@@ -99,10 +99,10 @@ func _show_challenge_popup(data: Dictionary) -> void:
 		desc_lbl.add_theme_font_size_override("font_size", 11)
 	popup.add_child(desc_lbl)
 
-	# 獎勵
+	# ?
 	if reward > 0:
 		var reward_lbl = Label.new()
-		reward_lbl.text = "+%d 🪙" % reward
+		reward_lbl.text = "+%d ??" % reward
 		reward_lbl.position = Vector2(PANEL_W / 2 - 80, -PANEL_H / 2 + 28)
 		reward_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.1))
 		if _font:
@@ -110,15 +110,15 @@ func _show_challenge_popup(data: Dictionary) -> void:
 			reward_lbl.add_theme_font_size_override("font_size", 16)
 		popup.add_child(reward_lbl)
 
-	# 動畫：彈出 → 停留 → 淡出
+	# ?嚗??????? ??瘛∪
 	var tween = create_tween()
-	# 彈出
+	# 敶
 	tween.tween_property(popup, "scale", Vector2(1.1, 1.1), 0.15)
 	tween.tween_property(popup, "scale", Vector2(1.0, 1.0), 0.1)
-	# 停留（隱藏挑戰停留更久）
+	# ??嚗???啣??銋?
 	var stay_time := 3.5 if was_hidden else 2.5
 	tween.tween_interval(stay_time)
-	# 淡出（向上移動）
+	# 瘛∪嚗?銝宏??
 	tween.tween_property(popup, "position:y", popup.position.y - 30, 0.4)
 	tween.tween_property(popup, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(func():
@@ -126,12 +126,12 @@ func _show_challenge_popup(data: Dictionary) -> void:
 		_show_next()
 	)
 
-	# 隱藏挑戰額外特效：金色粒子
+	# ?梯??憿??寞?嚗??脩?摮?
 	if was_hidden:
 		_spawn_gold_particles(popup)
 
 func _spawn_gold_particles(parent: Node2D) -> void:
-	# 生成 8 個金色粒子從中心散開
+	# ?? 8 ???脩?摮?銝剖????
 	for i in range(8):
 		var particle = ColorRect.new()
 		particle.size = Vector2(4, 4)

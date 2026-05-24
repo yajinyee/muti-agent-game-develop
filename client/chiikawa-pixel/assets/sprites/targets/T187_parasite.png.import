@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://t2vfar161gt5a"
-path="res://.godot/imported/T187_parasite.png-868bac72cd0803507c813cd403db8d07.ctex"
+uid="uid://qt2cigw7ghdg"
+path="res://.godot/imported/T187_parasite.png-8a8c4194d4d1552ff1ea836b971a4d0d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T187_parasite.png"
-dest_files=["res://.godot/imported/T187_parasite.png-868bac72cd0803507c813cd403db8d07.ctex"]
+dest_files=["res://.godot/imported/T187_parasite.png-8a8c4194d4d1552ff1ea836b971a4d0d.ctex"]
 
 [params]
 

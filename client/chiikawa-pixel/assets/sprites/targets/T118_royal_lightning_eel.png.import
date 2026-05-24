@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2q5ztkmludcyq"
-path="res://.godot/imported/T118_royal_lightning_eel.png-334ba1b97df6dfb454b4955b48d535de.ctex"
+uid="uid://pbwo56tvw7oe"
+path="res://.godot/imported/T118_royal_lightning_eel.png-b75ab832c38b153721ea2c1fea388f99.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T118_royal_lightning_eel.png"
-dest_files=["res://.godot/imported/T118_royal_lightning_eel.png-334ba1b97df6dfb454b4955b48d535de.ctex"]
+dest_files=["res://.godot/imported/T118_royal_lightning_eel.png-b75ab832c38b153721ea2c1fea388f99.ctex"]
 
 [params]
 

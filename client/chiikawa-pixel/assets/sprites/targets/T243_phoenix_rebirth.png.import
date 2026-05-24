@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://t243phoenixrebirth285"
-path="res://.godot/imported/T243_phoenix_rebirth.png-t243phoenixrebirth285.ctex"
+uid="uid://bxi6pg2ivwp8w"
+path="res://.godot/imported/T243_phoenix_rebirth.png-0613c8ae4c5d425251c63ad97dcb5c97.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T243_phoenix_rebirth.png"
-dest_files=["res://.godot/imported/T243_phoenix_rebirth.png-t243phoenixrebirth285.ctex"]
+dest_files=["res://.godot/imported/T243_phoenix_rebirth.png-0613c8ae4c5d425251c63ad97dcb5c97.ctex"]
 
 [params]
 

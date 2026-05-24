@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://fyh1lb6ghfgqc"
-path="res://.godot/imported/T006_mushroom.png-86b409554ed5da8227d84cb181b940ec.ctex"
+uid="uid://b325y886v7kyk"
+path="res://.godot/imported/T006_mushroom.png-5b23e23bf90bfd22a05a292f7786c635.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets_backup_v2/T006_mushroom.png"
-dest_files=["res://.godot/imported/T006_mushroom.png-86b409554ed5da8227d84cb181b940ec.ctex"]
+dest_files=["res://.godot/imported/T006_mushroom.png-5b23e23bf90bfd22a05a292f7786c635.ctex"]
 
 [params]
 

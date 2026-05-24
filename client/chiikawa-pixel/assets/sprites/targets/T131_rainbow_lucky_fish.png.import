@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://7gv7cx9vtjidf"
-path="res://.godot/imported/T131_rainbow_lucky_fish.png-9bf316579fc7ff04b798f7b4874c8dd7.ctex"
+uid="uid://bjm8miwvbwibb"
+path="res://.godot/imported/T131_rainbow_lucky_fish.png-9b218d79243c14dacd80bfb792b2e816.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T131_rainbow_lucky_fish.png"
-dest_files=["res://.godot/imported/T131_rainbow_lucky_fish.png-9bf316579fc7ff04b798f7b4874c8dd7.ctex"]
+dest_files=["res://.godot/imported/T131_rainbow_lucky_fish.png-9b218d79243c14dacd80bfb792b2e816.ctex"]
 
 [params]
 

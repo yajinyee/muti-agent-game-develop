@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://3m45kxp7mg4la"
-path="res://.godot/imported/T166_dragon_king.png-fc520c23f6000e271a191bba6dd80975.ctex"
+uid="uid://bla2gkbgn10aw"
+path="res://.godot/imported/T166_dragon_king.png-51f2fe9078f66c474cdf2af00a2b398d.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T166_dragon_king.png"
-dest_files=["res://.godot/imported/T166_dragon_king.png-fc520c23f6000e271a191bba6dd80975.ctex"]
+dest_files=["res://.godot/imported/T166_dragon_king.png-51f2fe9078f66c474cdf2af00a2b398d.ctex"]
 
 [params]
 

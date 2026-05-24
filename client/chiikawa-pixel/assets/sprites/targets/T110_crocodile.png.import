@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://mg0wjl34bh4i0"
-path="res://.godot/imported/T110_crocodile.png-70dce3fce834a42c114879e4f608e185.ctex"
+uid="uid://usbrgddlvh8p"
+path="res://.godot/imported/T110_crocodile.png-8e025db81fb1d933cf8dbfd15bbe2871.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T110_crocodile.png"
-dest_files=["res://.godot/imported/T110_crocodile.png-70dce3fce834a42c114879e4f608e185.ctex"]
+dest_files=["res://.godot/imported/T110_crocodile.png-8e025db81fb1d933cf8dbfd15bbe2871.ctex"]
 
 [params]
 

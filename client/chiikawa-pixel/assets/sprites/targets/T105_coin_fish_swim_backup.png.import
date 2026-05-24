@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://stjpszww27djg"
-path="res://.godot/imported/T105_coin_fish_swim_backup.png-6a532555e0746ffee53bbb3c2b1fc31f.ctex"
+uid="uid://ddv8gr8wteuie"
+path="res://.godot/imported/T105_coin_fish_swim_backup.png-5efc5f1ffdc422113ff5fab2b8096e09.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T105_coin_fish_swim_backup.png"
-dest_files=["res://.godot/imported/T105_coin_fish_swim_backup.png-6a532555e0746ffee53bbb3c2b1fc31f.ctex"]
+dest_files=["res://.godot/imported/T105_coin_fish_swim_backup.png-5efc5f1ffdc422113ff5fab2b8096e09.ctex"]
 
 [params]
 

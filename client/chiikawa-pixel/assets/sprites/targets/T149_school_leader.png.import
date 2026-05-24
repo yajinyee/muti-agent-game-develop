@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://zkp0sedbuv0wd"
-path="res://.godot/imported/T149_school_leader.png-be136b14dec4d63544a0c29ffd63f98a.ctex"
+uid="uid://cear81tshordr"
+path="res://.godot/imported/T149_school_leader.png-857749656bc220e0043ab0a8bcfcf908.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T149_school_leader.png"
-dest_files=["res://.godot/imported/T149_school_leader.png-be136b14dec4d63544a0c29ffd63f98a.ctex"]
+dest_files=["res://.godot/imported/T149_school_leader.png-857749656bc220e0043ab0a8bcfcf908.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://8vb206t1tzb5q"
-path="res://.godot/imported/T162_free_spin_fish.png-ad19c3442acbd121e0e2d8f3e98525c3.ctex"
+uid="uid://cx14bqh1ceb3m"
+path="res://.godot/imported/T162_free_spin_fish.png-a10e1c8874a1f49be7f81935b5b7df50.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T162_free_spin_fish.png"
-dest_files=["res://.godot/imported/T162_free_spin_fish.png-ad19c3442acbd121e0e2d8f3e98525c3.ctex"]
+dest_files=["res://.godot/imported/T162_free_spin_fish.png-a10e1c8874a1f49be7f81935b5b7df50.ctex"]
 
 [params]
 

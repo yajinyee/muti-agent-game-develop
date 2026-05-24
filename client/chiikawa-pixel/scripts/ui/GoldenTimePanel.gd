@@ -126,8 +126,8 @@ func show_golden_time_start(data: Dictionary) -> void:
 	_seconds_left = data.get("seconds_left", data.get("duration", 45))
 	_mult_boost = data.get("mult_boost", 2.0)
 
-	var color := TIER_COLORS.get(_current_tier, TIER_COLORS[1])
-	var bg_color := TIER_BG_COLORS.get(_current_tier, TIER_BG_COLORS[1])
+	var color: Variant = TIER_COLORS.get(_current_tier, TIER_COLORS[1])
+	var bg_color: Variant = TIER_BG_COLORS.get(_current_tier, TIER_BG_COLORS[1])
 
 	# 更新 UI
 	_bg.color = bg_color

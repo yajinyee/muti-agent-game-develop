@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://lvxwdww2rongq"
-path="res://.godot/imported/T214_servercharge.png-ecec03a12ce7581adfea7754af0c4b3e.ctex"
+uid="uid://bqblq6b2206g"
+path="res://.godot/imported/T214_servercharge.png-7ddd39234e2bdbc4c3438c56d1791426.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T214_servercharge.png"
-dest_files=["res://.godot/imported/T214_servercharge.png-ecec03a12ce7581adfea7754af0c4b3e.ctex"]
+dest_files=["res://.godot/imported/T214_servercharge.png-7ddd39234e2bdbc4c3438c56d1791426.ctex"]
 
 [params]
 

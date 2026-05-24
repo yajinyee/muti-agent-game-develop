@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://l73tcu9l20emb"
-path="res://.godot/imported/T150_rock_skeleton.png-ea6e6cebe6174fb0ffaee0e12e3274cc.ctex"
+uid="uid://mu7kpiueerc0"
+path="res://.godot/imported/T150_rock_skeleton.png-dc83018d8fcbadbd52fbdc55057ba294.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T150_rock_skeleton.png"
-dest_files=["res://.godot/imported/T150_rock_skeleton.png-ea6e6cebe6174fb0ffaee0e12e3274cc.ctex"]
+dest_files=["res://.godot/imported/T150_rock_skeleton.png-dc83018d8fcbadbd52fbdc55057ba294.ctex"]
 
 [params]
 

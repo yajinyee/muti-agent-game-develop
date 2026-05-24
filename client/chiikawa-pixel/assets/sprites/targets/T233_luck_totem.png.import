@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://km2u5g57yf2n6"
-path="res://.godot/imported/T233_luck_totem.png-f4e9ca869187899da46c1f1112590ceb.ctex"
+uid="uid://cv84ydcpt1b5n"
+path="res://.godot/imported/T233_luck_totem.png-32469014212d3bee152e34c0d0483ae0.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T233_luck_totem.png"
-dest_files=["res://.godot/imported/T233_luck_totem.png-f4e9ca869187899da46c1f1112590ceb.ctex"]
+dest_files=["res://.godot/imported/T233_luck_totem.png-32469014212d3bee152e34c0d0483ae0.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ub5vqkfc23pe4"
-path="res://.godot/imported/T185_mirrortime.png-db711a8ff1d4898f16a7ffc2d7917a13.ctex"
+uid="uid://y4jsas283cmb"
+path="res://.godot/imported/T185_mirrortime.png-31241e14cf83782b3d81d2b50252e215.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T185_mirrortime.png"
-dest_files=["res://.godot/imported/T185_mirrortime.png-db711a8ff1d4898f16a7ffc2d7917a13.ctex"]
+dest_files=["res://.godot/imported/T185_mirrortime.png-31241e14cf83782b3d81d2b50252e215.ctex"]
 
 [params]
 

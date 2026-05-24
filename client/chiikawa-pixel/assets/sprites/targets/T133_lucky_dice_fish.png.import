@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://q00y7cwimm8y9"
-path="res://.godot/imported/T133_lucky_dice_fish.png-a2468fd7634c382a4adfca6db1b7fa13.ctex"
+uid="uid://bkeit38idtqx7"
+path="res://.godot/imported/T133_lucky_dice_fish.png-5684c9ceccf8e6b1f115d5c63cbf8f00.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T133_lucky_dice_fish.png"
-dest_files=["res://.godot/imported/T133_lucky_dice_fish.png-a2468fd7634c382a4adfca6db1b7fa13.ctex"]
+dest_files=["res://.godot/imported/T133_lucky_dice_fish.png-5684c9ceccf8e6b1f115d5c63cbf8f00.ctex"]
 
 [params]
 

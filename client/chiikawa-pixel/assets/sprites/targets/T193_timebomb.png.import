@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rwfmisssqrsuk"
-path="res://.godot/imported/T193_timebomb.png-170e5afcc5bc27cc767e6b7d4c792141.ctex"
+uid="uid://cgr45k4shybti"
+path="res://.godot/imported/T193_timebomb.png-0a9788c457f4ed7017acbc17672cf6ae.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T193_timebomb.png"
-dest_files=["res://.godot/imported/T193_timebomb.png-170e5afcc5bc27cc767e6b7d4c792141.ctex"]
+dest_files=["res://.godot/imported/T193_timebomb.png-0a9788c457f4ed7017acbc17672cf6ae.ctex"]
 
 [params]
 

@@ -1,4 +1,4 @@
-## ThunderboltLobsterPanel.gd — 雷霆龍蝦免費射擊面板（DAY-199）
+﻿## ThunderboltLobsterPanel.gd — 雷霆龍蝦免費射擊面板（DAY-199）
 ## 業界依據：Royal Fishing JILI「Thunderbolt Lobster — 15 seconds of free play
 ## followed by automatic shooting from the Thunderbolt Turret.
 ## Players can earn extra seconds to extend gameplay.」
@@ -18,10 +18,10 @@ var _time_bar_bg: ColorRect  # 進度條背景
 var _result_popup: Control
 
 var _is_active: bool = false
-var _duration: float64 = 15.0
-var _max_duration: float64 = 30.0
-var _elapsed: float64 = 0.0
-var _remaining: float64 = 15.0
+var _duration: float = 15.0
+var _max_duration: float = 30.0
+var _elapsed: float = 0.0
+var _remaining: float = 15.0
 var _kill_count: int = 0
 
 func _ready() -> void:

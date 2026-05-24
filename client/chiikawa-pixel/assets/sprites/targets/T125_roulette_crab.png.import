@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://9aq1qsilhb4vr"
-path="res://.godot/imported/T125_roulette_crab.png-0b261766b4ea632af10960c50a598450.ctex"
+uid="uid://ddh21c5kxo4tn"
+path="res://.godot/imported/T125_roulette_crab.png-5a6971314424d6c718671e7a6e330961.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T125_roulette_crab.png"
-dest_files=["res://.godot/imported/T125_roulette_crab.png-0b261766b4ea632af10960c50a598450.ctex"]
+dest_files=["res://.godot/imported/T125_roulette_crab.png-5a6971314424d6c718671e7a6e330961.ctex"]
 
 [params]
 

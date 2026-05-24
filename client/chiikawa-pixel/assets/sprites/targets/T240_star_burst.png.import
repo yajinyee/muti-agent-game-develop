@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://z73lx57dvbfpr"
-path="res://.godot/imported/T240_star_burst.png-754f4ac194f77663254a3765f81cfa96.ctex"
+uid="uid://c1neftouh2556"
+path="res://.godot/imported/T240_star_burst.png-fbd070f6a815839a21b9e8706d590b60.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T240_star_burst.png"
-dest_files=["res://.godot/imported/T240_star_burst.png-754f4ac194f77663254a3765f81cfa96.ctex"]
+dest_files=["res://.godot/imported/T240_star_burst.png-fbd070f6a815839a21b9e8706d590b60.ctex"]
 
 [params]
 

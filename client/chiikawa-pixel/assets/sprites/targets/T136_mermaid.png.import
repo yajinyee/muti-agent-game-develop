@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://wf2kuldjkkuqr"
-path="res://.godot/imported/T136_mermaid.png-8e61a99f869de670d6d67fa96a35c476.ctex"
+uid="uid://c307wbraqkhxx"
+path="res://.godot/imported/T136_mermaid.png-00a319d013c8d422cf63b35218cb2140.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T136_mermaid.png"
-dest_files=["res://.godot/imported/T136_mermaid.png-8e61a99f869de670d6d67fa96a35c476.ctex"]
+dest_files=["res://.godot/imported/T136_mermaid.png-00a319d013c8d422cf63b35218cb2140.ctex"]
 
 [params]
 

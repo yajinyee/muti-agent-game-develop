@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://klup99osz7hrc"
-path="res://.godot/imported/T157_thunder_lobster_v2.png-3b06920e29642d751190ee432f0c1338.ctex"
+uid="uid://cu1y35ubvsp8s"
+path="res://.godot/imported/T157_thunder_lobster_v2.png-da8d5155cc5229ad75acaac1b9417c10.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T157_thunder_lobster_v2.png"
-dest_files=["res://.godot/imported/T157_thunder_lobster_v2.png-3b06920e29642d751190ee432f0c1338.ctex"]
+dest_files=["res://.godot/imported/T157_thunder_lobster_v2.png-da8d5155cc5229ad75acaac1b9417c10.ctex"]
 
 [params]
 

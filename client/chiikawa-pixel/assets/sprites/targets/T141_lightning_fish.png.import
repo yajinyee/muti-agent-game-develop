@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://50ssygoiste65"
-path="res://.godot/imported/T141_lightning_fish.png-5c7f88653402d443067ffce3cb57542d.ctex"
+uid="uid://dxxpt18qufavs"
+path="res://.godot/imported/T141_lightning_fish.png-222b6db4c557bef6e32dfc7828b2a96b.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T141_lightning_fish.png"
-dest_files=["res://.godot/imported/T141_lightning_fish.png-5c7f88653402d443067ffce3cb57542d.ctex"]
+dest_files=["res://.godot/imported/T141_lightning_fish.png-222b6db4c557bef6e32dfc7828b2a96b.ctex"]
 
 [params]
 

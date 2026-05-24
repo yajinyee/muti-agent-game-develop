@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://ddhuremu2ohne"
-path="res://.godot/imported/chiikawa_bigwin.png-34679ea2c9150eee7f54a80ecfad844b.ctex"
+path="res://.godot/imported/chiikawa_bigwin.png-82fe6cb82e202e8eac3893085b0e1068.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/characters/chiikawa_bigwin.png"
-dest_files=["res://.godot/imported/chiikawa_bigwin.png-34679ea2c9150eee7f54a80ecfad844b.ctex"]
+source_file="res://assets/sprites/characters_backup/chiikawa_bigwin.png"
+dest_files=["res://.godot/imported/chiikawa_bigwin.png-82fe6cb82e202e8eac3893085b0e1068.ctex"]
 
 [params]
 

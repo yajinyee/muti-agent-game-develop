@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://epelckpci0vpi"
-path="res://.godot/imported/T195_freezeworld.png-0b341f2043253551d9f112eff18d859f.ctex"
+uid="uid://typqir2xs0xq"
+path="res://.godot/imported/T195_freezeworld.png-b6503de1c0705db0dec04089be20f49f.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T195_freezeworld.png"
-dest_files=["res://.godot/imported/T195_freezeworld.png-0b341f2043253551d9f112eff18d859f.ctex"]
+dest_files=["res://.godot/imported/T195_freezeworld.png-b6503de1c0705db0dec04089be20f49f.ctex"]
 
 [params]
 

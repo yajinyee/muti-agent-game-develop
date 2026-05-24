@@ -1,4 +1,4 @@
-## LuckyMultiplierStackPanel.gd — 幸運倍率疊加魚 UI（DAY-267）
+﻿## LuckyMultiplierStackPanel.gd — 幸運倍率疊加魚 UI（DAY-267）
 ## 翠綠疊加主題面板（Fishing Fortune Multiplier Cascade 風格）
 ## 主色：#00FF88 翠綠 + #FFD700 金 + #00BFFF 天藍 + #1A1A2E 深藍黑
 extends CanvasLayer
@@ -217,7 +217,7 @@ func _on_stack_update(payload: Dictionary) -> void:
 	if target_name != "":
 		_show_float_text("📈 %s ×%.1f +%d" % [target_name, current_stack, reward], counter_color)
 
-	_ = kill_count
+	# (unused variable suppressed)
 
 ## 倍率爆發（達到 10.0x，個人）
 func _on_stack_burst(payload: Dictionary) -> void:

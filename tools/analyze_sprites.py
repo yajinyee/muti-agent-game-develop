@@ -1,70 +1,66 @@
-# -*- coding: utf-8 -*-
-"""
-分析 sprite 的顏色分布，找出品質問題
-"""
+#!/usr/bin/env python3
+"""分析精靈圖的實際品質"""
 from PIL import Image
 import os
-from collections import Counter
+import numpy as np
 
-def analyze_sprite(path, name):
-    img = Image.open(path).convert('RGBA')
-    w, h = img.size
-    pixels = [(x, y, img.getpixel((x, y))) for y in range(h) for x in range(w)]
-    non_transparent = [(x, y, p) for x, y, p in pixels if p[3] > 10]
-    
-    total = w * h
-    non_t = len(non_transparent)
-    pct = non_t / total * 100
-    
-    print(f"\n[{name}] {w}x{h}, {non_t}/{total} ({pct:.0f}%)")
-    
-    # 顏色分布（不量化，直接看原始顏色）
-    colors = Counter()
-    for _, _, p in non_transparent:
-        # 分類：白色、黑色、紅色、藍色、其他
-        r, g, b, a = p
-        if r > 200 and g > 200 and b > 200:
-            colors['white/light'] += 1
-        elif r < 50 and g < 50 and b < 50:
-            colors['black/dark'] += 1
-        elif r > 150 and g < 100 and b < 100:
-            colors['red'] += 1
-        elif r < 100 and g < 100 and b > 150:
-            colors['blue'] += 1
-        elif r > 150 and g > 150 and b < 100:
-            colors['yellow/gold'] += 1
-        elif r > 150 and g < 100 and b > 100:
-            colors['pink/magenta'] += 1
-        else:
-            colors['other'] += 1
-    
-    for color, count in sorted(colors.items(), key=lambda x: -x[1]):
-        pct_c = count / non_t * 100
-        print(f"  {color}: {count} ({pct_c:.1f}%)")
-    
-    # 檢查是否有洋紅色殘留（去背不完整）
-    magenta_count = sum(1 for _, _, p in non_transparent 
-                       if p[0] > 200 and p[1] < 50 and p[2] > 200)
-    if magenta_count > 0:
-        print(f"  ⚠️  洋紅色殘留: {magenta_count} pixels")
-    
-    return non_t, total, pct
+PY = "C:/Users/yajinyee0306/AppData/Local/Programs/Python/Python312/python.exe"
+base = r"d:\Kiro\client\chiikawa-pixel\assets\sprites"
 
-def main():
-    char_dir = r'd:\Kiro\client\chiikawa-pixel\assets\sprites\characters'
-    target_dir = r'd:\Kiro\client\chiikawa-pixel\assets\sprites\targets'
+def analyze_sprite(path):
+    img = Image.open(path).convert("RGBA")
+    arr = np.array(img)
     
-    print("=== 角色 Sprite 顏色分析 ===")
-    for f in sorted(os.listdir(char_dir)):
-        if not f.endswith('.png') or 'ref' in f:
-            continue
-        analyze_sprite(os.path.join(char_dir, f), f)
+    # 計算非透明像素比例
+    alpha = arr[:, :, 3]
+    total = arr.shape[0] * arr.shape[1]
+    non_transparent = np.sum(alpha > 10)
+    ratio = non_transparent / total * 100
     
-    print("\n=== 目標物 Sprite 顏色分析 ===")
-    for f in sorted(os.listdir(target_dir)):
-        if not f.endswith('.png'):
-            continue
-        analyze_sprite(os.path.join(target_dir, f), f)
+    # 計算顏色多樣性
+    rgb = arr[alpha > 10, :3]
+    if len(rgb) > 0:
+        unique_colors = len(np.unique(rgb.reshape(-1, 3), axis=0))
+    else:
+        unique_colors = 0
+    
+    # 計算主要顏色
+    if len(rgb) > 0:
+        # 找最常見的顏色
+        from collections import Counter
+        color_counts = Counter(map(tuple, rgb.tolist()))
+        top_colors = color_counts.most_common(3)
+    else:
+        top_colors = []
+    
+    return {
+        "size": img.size,
+        "non_transparent_pct": round(ratio, 1),
+        "unique_colors": unique_colors,
+        "top_colors": top_colors
+    }
 
-if __name__ == '__main__':
-    main()
+sprites = [
+    ("T001 雜草", "targets/T001_grass.png"),
+    ("T002 綠蟲", "targets/T002_bug_g.png"),
+    ("T005 布丁", "targets/T005_pudding.png"),
+    ("T101 擬態", "targets/T101_mimic.png"),
+    ("T105 金幣魚", "targets/T105_coin_fish.png"),
+    ("B001 BOSS", "targets/B001_boss.png"),
+    ("吉伊卡哇", "characters/chiikawa_idle.png"),
+    ("小八", "characters/hachiware_idle.png"),
+    ("烏薩奇", "characters/usagi_idle.png"),
+]
+
+for name, rel_path in sprites:
+    path = os.path.join(base, rel_path)
+    if os.path.exists(path):
+        info = analyze_sprite(path)
+        print(f"\n{name} ({rel_path}):")
+        print(f"  Size: {info['size']}")
+        print(f"  Non-transparent: {info['non_transparent_pct']}%")
+        print(f"  Unique colors: {info['unique_colors']}")
+        if info['top_colors']:
+            print(f"  Top colors: {info['top_colors'][:2]}")
+    else:
+        print(f"\n{name}: NOT FOUND")

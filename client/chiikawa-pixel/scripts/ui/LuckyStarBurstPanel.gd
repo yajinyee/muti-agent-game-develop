@@ -1,4 +1,4 @@
-## LuckyStarBurstPanel.gd — 幸運星爆魚 UI 面板（DAY-282）
+﻿## LuckyStarBurstPanel.gd — 幸運星爆魚 UI 面板（DAY-282）
 ## 星爆主題：#FFD700 金 + #00BFFF 天藍 + #FF69B4 粉紅 + #7FFF00 草綠 + #FFFFFF 白
 ## 業界原創「星爆連鎖+全場星雨+倍率爆炸」機制
 ##
@@ -365,7 +365,7 @@ func _show_resonance_indicator(global_mult: float, global_dur: int) -> void:
 		await get_tree().create_timer(1.0).timeout
 		elapsed += 1.0
 		if is_instance_valid(_resonance_timer_label):
-			var remaining := max(0, global_dur - int(elapsed))
+			var remaining: int = max(0, global_dur - int(elapsed))
 			_resonance_timer_label.text = "%d 秒" % remaining
 
 	if is_instance_valid(_resonance_indicator):

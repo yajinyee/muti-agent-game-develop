@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rngppa0ewj0yp"
-path="res://.godot/imported/T148_triple_lucky.png-e9ba4c3cf17885d12ce1681bd4ef4883.ctex"
+uid="uid://b6s8c2cenqixn"
+path="res://.godot/imported/T148_triple_lucky.png-8c05758bd2bb89c817e9cfbe36c37805.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T148_triple_lucky.png"
-dest_files=["res://.godot/imported/T148_triple_lucky.png-e9ba4c3cf17885d12ce1681bd4ef4883.ctex"]
+dest_files=["res://.godot/imported/T148_triple_lucky.png-8c05758bd2bb89c817e9cfbe36c37805.ctex"]
 
 [params]
 

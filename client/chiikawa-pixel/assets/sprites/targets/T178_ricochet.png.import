@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://p43fn4ozhtrih"
-path="res://.godot/imported/T178_ricochet.png-99f7efe15a1446df0105cdf2b49f099d.ctex"
+uid="uid://ogxbv0y71ahf"
+path="res://.godot/imported/T178_ricochet.png-209ee78bf2227e5bf1b7a64fd29cad3c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T178_ricochet.png"
-dest_files=["res://.godot/imported/T178_ricochet.png-99f7efe15a1446df0105cdf2b49f099d.ctex"]
+dest_files=["res://.godot/imported/T178_ricochet.png-209ee78bf2227e5bf1b7a64fd29cad3c.ctex"]
 
 [params]
 

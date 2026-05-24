@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://bubble_pop_001"
-path="res://.godot/imported/bubble_pop.wav-bubble_pop_001.sample"
+uid="uid://ble1214hfxxg6"
+path="res://.godot/imported/bubble_pop.wav-cf2e57ec7ffba9b956c4ecfa57682db2.sample"
 
 [deps]
 
 source_file="res://assets/audio/sfx/bubble_pop.wav"
-dest_files=["res://.godot/imported/bubble_pop.wav-bubble_pop_001.sample"]
+dest_files=["res://.godot/imported/bubble_pop.wav-cf2e57ec7ffba9b956c4ecfa57682db2.sample"]
 
 [params]
 

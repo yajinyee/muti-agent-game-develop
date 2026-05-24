@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://e5o7hvc06jqt8"
-path="res://.godot/imported/T203_phantom.png-2437c964c2d5272e493d76ef3d00f857.ctex"
+uid="uid://bbbcvtfrmcu3h"
+path="res://.godot/imported/T203_phantom.png-6c3cb56e7353764835a8a7db8c92c9af.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T203_phantom.png"
-dest_files=["res://.godot/imported/T203_phantom.png-2437c964c2d5272e493d76ef3d00f857.ctex"]
+dest_files=["res://.godot/imported/T203_phantom.png-6c3cb56e7353764835a8a7db8c92c9af.ctex"]
 
 [params]
 

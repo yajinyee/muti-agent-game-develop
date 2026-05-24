@@ -1,24 +1,24 @@
-## DragonWrathPanel.gd
+﻿## DragonWrathPanel.gd
 ##
-## 龍怒蓄力大招面板（DAY-128）
-## 業界依據：JILI Royal Fishing 2026 Dragon Wrath — 累積怒氣值釋放全螢幕大招
-## 位置：左下角怒氣條 + 大招按鈕
-## 設計：
-##   - 怒氣條（0-100）：漸層顏色（藍→紫→紅）
-##   - 滿怒氣時按鈕閃爍，提示玩家釋放
-##   - 大招開始：全螢幕龍形閃光 + 橫幅
-##   - 大招結果：顯示擊破數和獎勵
+## 樴??之??選?DAY-128嚗?
+## 璆剔?靘?嚗ILI Royal Fishing 2026 Dragon Wrath ??蝝舐??除?潮??曉?Ｗ?憭扳?
+## 雿蔭嚗椰銝??除璇?+ 憭扳???
+## 閮剛?嚗?
+##   - ?除璇?0-100嚗?瞍詨惜憿嚗??換??嚗?
+##   - 皛踵除???????內?拙振?
+##   - 憭扳???嚗?Ｗ?樴耦?? + 璈怠?
+##   - 憭扳?蝯?嚗＊蝷箸??湔????
 
 extends Control
 
-# ---- 常數 ----
+# ---- 撣豢 ----
 const MAX_CHARGE := 100
 const BAR_WIDTH := 160.0
 const BAR_HEIGHT := 16.0
 const PANEL_WIDTH := 180.0
 const PANEL_HEIGHT := 80.0
 
-# ---- 節點引用 ----
+# ---- 蝭暺???----
 var _bar_bg: ColorRect = null
 var _bar_fill: ColorRect = null
 var _bar_label: Label = null
@@ -26,7 +26,7 @@ var _wrath_btn: Button = null
 var _charge_label: Label = null
 var _pixel_font: FontFile = null
 
-# ---- 狀態 ----
+# ---- ???----
 var _charge: int = 0
 var _is_ready: bool = false
 var _cooldown: int = 0
@@ -38,7 +38,7 @@ func setup(font: FontFile) -> void:
 	_connect_signals()
 
 func _build_ui() -> void:
-	# 面板背景
+	# ?Ｘ?
 	var bg = Panel.new()
 	bg.position = Vector2(0, 0)
 	bg.size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
@@ -51,32 +51,32 @@ func _build_ui() -> void:
 	bg.add_theme_stylebox_override("panel", bg_style)
 	add_child(bg)
 
-	# 標題
+	# 璅?
 	var title = Label.new()
 	title.position = Vector2(8, 4)
 	title.size = Vector2(164, 16)
-	title.text = "🐉 龍怒"
+	title.text = "?? 樴?"
 	title.add_theme_color_override("font_color", Color(0.8, 0.5, 1.0))
 	title.add_theme_font_size_override("font_size", 11)
 	if is_instance_valid(_pixel_font):
 		title.add_theme_font_override("font", _pixel_font)
 	add_child(title)
 
-	# 怒氣條背景
+	# ?除璇???
 	_bar_bg = ColorRect.new()
 	_bar_bg.position = Vector2(8, 22)
 	_bar_bg.size = Vector2(BAR_WIDTH, BAR_HEIGHT)
 	_bar_bg.color = Color(0.1, 0.1, 0.2)
 	add_child(_bar_bg)
 
-	# 怒氣條填充
+	# ?除璇‵??
 	_bar_fill = ColorRect.new()
 	_bar_fill.position = Vector2(8, 22)
 	_bar_fill.size = Vector2(0, BAR_HEIGHT)
 	_bar_fill.color = Color(0.3, 0.2, 0.9)
 	add_child(_bar_fill)
 
-	# 怒氣值標籤（疊在條上）
+	# ?除?潭?蝐歹??璇?嚗?
 	_bar_label = Label.new()
 	_bar_label.position = Vector2(8, 22)
 	_bar_label.size = Vector2(BAR_WIDTH, BAR_HEIGHT)
@@ -89,11 +89,11 @@ func _build_ui() -> void:
 		_bar_label.add_theme_font_override("font", _pixel_font)
 	add_child(_bar_label)
 
-	# 大招按鈕
+	# 憭扳???
 	_wrath_btn = Button.new()
 	_wrath_btn.position = Vector2(8, 44)
 	_wrath_btn.size = Vector2(BAR_WIDTH, 28)
-	_wrath_btn.text = "🐉 大討伐"
+	_wrath_btn.text = "?? 憭扯?隡?"
 	_wrath_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 	_wrath_btn.add_theme_font_size_override("font_size", 12)
 	_wrath_btn.disabled = true
@@ -110,7 +110,7 @@ func _connect_signals() -> void:
 	if GameManager.has_signal("wrath_result"):
 		GameManager.wrath_result.connect(_on_wrath_result)
 
-# ---- 事件處理 ----
+# ---- 鈭辣?? ----
 
 func _on_wrath_updated(data: Dictionary) -> void:
 	_charge = data.get("charge", 0)
@@ -125,8 +125,8 @@ func _on_wrath_btn_pressed() -> void:
 		NetworkManager.send_use_wrath()
 
 func _on_wrath_started(data: Dictionary) -> void:
-	var player_name = data.get("player_name", "玩家")
-	var msg = data.get("message", player_name + " 釋放了大討伐！")
+	var player_name = data.get("player_name", "?拙振")
+	var msg = data.get("message", player_name + " ?鈭之閮?嚗?)"
 	_show_wrath_effect(msg)
 
 func _on_wrath_result(data: Dictionary) -> void:
@@ -136,18 +136,18 @@ func _on_wrath_result(data: Dictionary) -> void:
 	if is_me:
 		_show_result_popup(killed, reward)
 
-# ---- 視覺更新 ----
+# ---- 閬死?湔 ----
 
 func _update_display() -> void:
 	if not is_instance_valid(_bar_fill):
 		return
 
-	# 更新怒氣條寬度
+	# ?湔?除璇祝摨?
 	var ratio = float(_charge) / float(MAX_CHARGE)
 	var tween = create_tween()
 	tween.tween_property(_bar_fill, "size:x", BAR_WIDTH * ratio, 0.15)
 
-	# 更新怒氣條顏色（藍→紫→紅）
+	# ?湔?除璇??莎???蝝徉?蝝?
 	var bar_color: Color
 	if ratio < 0.5:
 		bar_color = Color(0.3, 0.2, 0.9).lerp(Color(0.7, 0.2, 0.9), ratio * 2.0)
@@ -155,27 +155,27 @@ func _update_display() -> void:
 		bar_color = Color(0.7, 0.2, 0.9).lerp(Color(1.0, 0.2, 0.2), (ratio - 0.5) * 2.0)
 	_bar_fill.color = bar_color
 
-	# 更新標籤
+	# ?湔璅惜
 	if is_instance_valid(_bar_label):
 		_bar_label.text = str(_charge) + " / " + str(MAX_CHARGE)
 
-	# 更新按鈕狀態
+	# ?湔?????
 	if is_instance_valid(_wrath_btn):
 		if _is_ready:
 			_wrath_btn.disabled = false
-			_wrath_btn.text = "🐉 大討伐！"
+			_wrath_btn.text = "?? 憭扯?隡?"
 			_wrath_btn.add_theme_color_override("font_color", Color(1.0, 0.8, 0.2))
 		elif _cooldown > 0:
 			_wrath_btn.disabled = true
-			_wrath_btn.text = "冷卻 %ds" % _cooldown
+			_wrath_btn.text = "?瑕 %ds" % _cooldown
 			_wrath_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 		else:
 			_wrath_btn.disabled = true
-			_wrath_btn.text = "🐉 大討伐"
+			_wrath_btn.text = "?? 憭扯?隡?"
 			_wrath_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 
 func _show_wrath_effect(msg: String) -> void:
-	# 全螢幕龍形閃光（紫紅色）
+	# ?刻撟?敶ａ???蝝怎??莎?
 	var flash = ColorRect.new()
 	flash.color = Color(0.6, 0.1, 0.9, 0.35)
 	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
@@ -188,9 +188,9 @@ func _show_wrath_effect(msg: String) -> void:
 			flash.queue_free()
 	)
 
-	# 頂部橫幅
+	# ?璈怠?
 	var banner = Label.new()
-	banner.text = "🐉 " + msg
+	banner.text = "?? " + msg
 	banner.set_anchors_and_offsets_preset(Control.PRESET_TOP_WIDE)
 	banner.size.y = 40
 	banner.add_theme_color_override("font_color", Color(1.0, 0.7, 0.2))
@@ -211,7 +211,7 @@ func _show_wrath_effect(msg: String) -> void:
 
 func _show_result_popup(killed: int, reward: int) -> void:
 	var popup = Label.new()
-	popup.text = "🐉 大討伐！擊破 %d 個目標，獲得 %d 金幣！" % [killed, reward]
+	popup.text = "?? 憭扯?隡?? %d ?璅??脣? %d ?馳嚗? % [killed, reward]"
 	popup.position = Vector2(640 - 200, 360)
 	popup.size = Vector2(400, 40)
 	popup.add_theme_color_override("font_color", Color(1.0, 0.9, 0.3))
@@ -230,7 +230,7 @@ func _show_result_popup(killed: int, reward: int) -> void:
 			popup.queue_free()
 	)
 
-# ---- 每幀更新（按鈕閃爍）----
+# ---- 瘥??湔嚗?????----
 
 func _process(delta: float) -> void:
 	if not _is_ready or not is_instance_valid(_wrath_btn):

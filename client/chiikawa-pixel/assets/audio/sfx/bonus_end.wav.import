@@ -2,13 +2,13 @@
 
 importer="wav"
 type="AudioStreamWAV"
-uid="uid://bonus_end_001"
-path="res://.godot/imported/bonus_end.wav-bonus_end_001.sample"
+uid="uid://dvij1q332mj40"
+path="res://.godot/imported/bonus_end.wav-9a63da706fc50581777bc144eb8ed940.sample"
 
 [deps]
 
 source_file="res://assets/audio/sfx/bonus_end.wav"
-dest_files=["res://.godot/imported/bonus_end.wav-bonus_end_001.sample"]
+dest_files=["res://.godot/imported/bonus_end.wav-9a63da706fc50581777bc144eb8ed940.sample"]
 
 [params]
 

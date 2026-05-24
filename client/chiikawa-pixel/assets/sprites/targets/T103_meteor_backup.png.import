@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://33k08aiu2tm6l"
-path="res://.godot/imported/T103_meteor_backup.png-e9fa80d01404c1b17a53074adf98f09d.ctex"
+uid="uid://b1pw3u234fiu8"
+path="res://.godot/imported/T103_meteor_backup.png-a78ce00a3263b02adc28d8f3ae6205d4.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T103_meteor_backup.png"
-dest_files=["res://.godot/imported/T103_meteor_backup.png-e9fa80d01404c1b17a53074adf98f09d.ctex"]
+dest_files=["res://.godot/imported/T103_meteor_backup.png-a78ce00a3263b02adc28d8f3ae6205d4.ctex"]
 
 [params]
 

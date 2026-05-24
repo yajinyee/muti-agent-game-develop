@@ -1,8 +1,8 @@
-## CodexPanel.gd — 魚類圖鑑面板（DAY-081）
-## 顯示所有目標物的收集進度，解鎖時顯示通知動畫
+﻿## CodexPanel.gd ??擳????Ｘ嚗AY-081嚗?
+## 憿舐內??璅??脣漲嚗圾??憿舐內??
 extends Node2D
 
-# ---- 常數 ----
+# ---- 撣豢 ----
 const PANEL_WIDTH  := 420
 const PANEL_HEIGHT := 520
 const RARITY_COLORS := {
@@ -12,13 +12,13 @@ const RARITY_COLORS := {
 	"legendary": Color(1.0, 0.7, 0.0),
 }
 const RARITY_ICONS := {
-	"common":    "⬜",
-	"rare":      "🔵",
-	"epic":      "🟣",
-	"legendary": "⭐",
+	"common":    "漎?,"
+	"rare":      "?",
+	"epic":      "?",
+	"legendary": "潃?,"
 }
 
-# ---- 節點引用 ----
+# ---- 蝭暺???----
 var _font: FontFile
 var _bg: ColorRect
 var _title_label: Label
@@ -28,12 +28,12 @@ var _entry_container: VBoxContainer
 var _close_btn: Button
 var _is_visible := false
 
-# ---- 圖鑑資料 ----
+# ---- ??鞈? ----
 var _entries: Array = []
 var _unlocked_count: int = 0
 var _total_count: int = 0
 
-# ---- 解鎖通知 ----
+# ---- 閫??? ----
 var _unlock_queue: Array = []
 var _showing_unlock := false
 
@@ -46,7 +46,7 @@ func setup(font: FontFile) -> void:
 	hide()
 
 func _build_ui() -> void:
-	# 背景面板
+	# ??Ｘ
 	_bg = ColorRect.new()
 	_bg.color = Color(0.05, 0.08, 0.15, 0.95)
 	_bg.size = Vector2(PANEL_WIDTH, PANEL_HEIGHT)
@@ -56,9 +56,9 @@ func _build_ui() -> void:
 	)
 	add_child(_bg)
 
-	# 標題
+	# 璅?
 	_title_label = Label.new()
-	_title_label.text = "📖 圖鑑"
+	_title_label.text = "?? ??"
 	_title_label.position = _bg.position + Vector2(16, 12)
 	_title_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	if _font:
@@ -66,7 +66,7 @@ func _build_ui() -> void:
 		_title_label.add_theme_font_size_override("font_size", 20)
 	add_child(_title_label)
 
-	# 進度標籤
+	# ?脣漲璅惜
 	_progress_label = Label.new()
 	_progress_label.text = "0 / 12"
 	_progress_label.position = _bg.position + Vector2(PANEL_WIDTH - 80, 14)
@@ -76,16 +76,16 @@ func _build_ui() -> void:
 		_progress_label.add_theme_font_size_override("font_size", 16)
 	add_child(_progress_label)
 
-	# 分隔線
+	# ??蝺?
 	var sep = ColorRect.new()
 	sep.color = Color(0.3, 0.5, 0.8, 0.5)
 	sep.size = Vector2(PANEL_WIDTH - 16, 2)
 	sep.position = _bg.position + Vector2(8, 40)
 	add_child(sep)
 
-	# 關閉按鈕
+	# ????
 	_close_btn = Button.new()
-	_close_btn.text = "✕"
+	_close_btn.text = "??"
 	_close_btn.size = Vector2(28, 28)
 	_close_btn.position = _bg.position + Vector2(PANEL_WIDTH - 36, 8)
 	_close_btn.add_theme_color_override("font_color", Color(1, 0.4, 0.4))
@@ -94,7 +94,7 @@ func _build_ui() -> void:
 	add_child(_close_btn)
 	_close_btn.pressed.connect(_on_close_pressed)
 
-	# 捲動容器
+	# ?脣?摰孵
 	_scroll_container = ScrollContainer.new()
 	_scroll_container.position = _bg.position + Vector2(8, 48)
 	_scroll_container.size = Vector2(PANEL_WIDTH - 16, PANEL_HEIGHT - 60)
@@ -119,14 +119,14 @@ func _on_codex_updated(data: Dictionary) -> void:
 	_refresh_entries()
 
 func _refresh_entries() -> void:
-	# 清除舊條目
+	# 皜????
 	for child in _entry_container.get_children():
 		child.queue_free()
 
-	# 更新進度
+	# ?湔?脣漲
 	_progress_label.text = "%d / %d" % [_unlocked_count, _total_count]
 
-	# 依稀有度分組顯示
+	# 靘??漲??憿舐內
 	var groups := {
 		"legendary": [],
 		"epic":      [],
@@ -140,10 +140,10 @@ func _refresh_entries() -> void:
 
 	var group_order := ["legendary", "epic", "rare", "common"]
 	var group_names := {
-		"legendary": "⭐ 傳說",
-		"epic":      "🟣 史詩",
-		"rare":      "🔵 稀有",
-		"common":    "⬜ 普通",
+		"legendary": "潃??唾牧",
+		"epic":      "? ?脰帘",
+		"rare":      "? 蝔??,"
+		"common":    "漎??桅?,"
 	}
 
 	for rarity in group_order:
@@ -151,7 +151,7 @@ func _refresh_entries() -> void:
 		if group_entries.is_empty():
 			continue
 
-		# 分組標題
+		# ??璅?
 		var group_label = Label.new()
 		group_label.text = group_names[rarity]
 		group_label.add_theme_color_override("font_color", RARITY_COLORS[rarity])
@@ -161,11 +161,11 @@ func _refresh_entries() -> void:
 		group_label.custom_minimum_size = Vector2(0, 24)
 		_entry_container.add_child(group_label)
 
-		# 條目列表
+		# 璇?”
 		for entry in group_entries:
 			_add_entry_row(entry)
 
-		# 間距
+		# ??
 		var spacer = Control.new()
 		spacer.custom_minimum_size = Vector2(0, 8)
 		_entry_container.add_child(spacer)
@@ -180,16 +180,16 @@ func _add_entry_row(entry: Dictionary) -> void:
 	var row = HBoxContainer.new()
 	row.custom_minimum_size = Vector2(0, 36)
 
-	# 圖示（解鎖=稀有度圖示，未解鎖=❓）
+	# ?內嚗圾??蝔?漲?內嚗閫??=??
 	var icon_label = Label.new()
-	icon_label.text = RARITY_ICONS[rarity] if unlocked else "❓"
+	icon_label.text = RARITY_ICONS[rarity] if unlocked else "??"
 	icon_label.custom_minimum_size = Vector2(28, 0)
 	if _font:
 		icon_label.add_theme_font_override("font", _font)
 		icon_label.add_theme_font_size_override("font_size", 16)
 	row.add_child(icon_label)
 
-	# 名稱
+	# ?迂
 	var name_label = Label.new()
 	name_label.text = name_text if unlocked else "???"
 	name_label.custom_minimum_size = Vector2(120, 0)
@@ -202,9 +202,9 @@ func _add_entry_row(entry: Dictionary) -> void:
 	row.add_child(name_label)
 
 	if unlocked:
-		# 擊破次數
+		# ?甈⊥
 		var kill_label = Label.new()
-		kill_label.text = "×%d" % kill_count
+		kill_label.text = "?%d" % kill_count
 		kill_label.custom_minimum_size = Vector2(50, 0)
 		kill_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 		if _font:
@@ -212,9 +212,9 @@ func _add_entry_row(entry: Dictionary) -> void:
 			kill_label.add_theme_font_size_override("font_size", 12)
 		row.add_child(kill_label)
 
-		# 最高倍率
+		# ?擃?
 		var mult_label = Label.new()
-		mult_label.text = "最高 %.0fx" % max_mult
+		mult_label.text = "?擃?%.0fx" % max_mult
 		mult_label.custom_minimum_size = Vector2(80, 0)
 		mult_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 		if _font:
@@ -222,9 +222,9 @@ func _add_entry_row(entry: Dictionary) -> void:
 			mult_label.add_theme_font_size_override("font_size", 12)
 		row.add_child(mult_label)
 	else:
-		# 未解鎖提示
+		# ?芾圾??蝷?
 		var hint_label = Label.new()
-		hint_label.text = "擊破解鎖"
+		hint_label.text = "?閫??"
 		hint_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 		if _font:
 			hint_label.add_theme_font_override("font", _font)
@@ -233,13 +233,13 @@ func _add_entry_row(entry: Dictionary) -> void:
 
 	_entry_container.add_child(row)
 
-	# 分隔線
+	# ??蝺?
 	var sep = ColorRect.new()
 	sep.color = Color(0.2, 0.3, 0.5, 0.3)
 	sep.custom_minimum_size = Vector2(0, 1)
 	_entry_container.add_child(sep)
 
-# ---- 解鎖通知 ----
+# ---- 閫??? ----
 
 func _on_codex_unlocked(data: Dictionary) -> void:
 	_unlock_queue.append(data)
@@ -265,23 +265,23 @@ func _spawn_unlock_popup(data: Dictionary) -> void:
 	popup.position = Vector2(800, 400)
 	add_child(popup)
 
-	# 背景
+	# ?
 	var bg = ColorRect.new()
 	bg.color = Color(0.05, 0.08, 0.15, 0.92)
 	bg.size = Vector2(280, 80)
 	bg.position = Vector2(-140, -40)
 	popup.add_child(bg)
 
-	# 邊框
+	# ??
 	var border = ColorRect.new()
 	border.color = RARITY_COLORS.get(rarity, Color.WHITE)
 	border.size = Vector2(280, 3)
 	border.position = Vector2(-140, -40)
 	popup.add_child(border)
 
-	# 標題
+	# 璅?
 	var title_lbl = Label.new()
-	title_lbl.text = "📖 圖鑑解鎖！"
+	title_lbl.text = "?? ??閫??嚗?"
 	title_lbl.position = Vector2(-130, -34)
 	title_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	if _font:
@@ -289,7 +289,7 @@ func _spawn_unlock_popup(data: Dictionary) -> void:
 		title_lbl.add_theme_font_size_override("font_size", 14)
 	popup.add_child(title_lbl)
 
-	# 目標名稱
+	# ?格??迂
 	var name_lbl = Label.new()
 	name_lbl.text = "%s %s" % [RARITY_ICONS.get(rarity, ""), target_name]
 	name_lbl.position = Vector2(-130, -14)
@@ -299,9 +299,9 @@ func _spawn_unlock_popup(data: Dictionary) -> void:
 		name_lbl.add_theme_font_size_override("font_size", 16)
 	popup.add_child(name_lbl)
 
-	# 獎勵 + 進度
+	# ? + ?脣漲
 	var reward_lbl = Label.new()
-	reward_lbl.text = "+%d 金幣  (%d/%d)" % [reward, unlocked, total]
+	reward_lbl.text = "+%d ?馳  (%d/%d)" % [reward, unlocked, total]
 	reward_lbl.position = Vector2(-130, 10)
 	reward_lbl.add_theme_color_override("font_color", Color(0.7, 1.0, 0.7))
 	if _font:
@@ -309,7 +309,7 @@ func _spawn_unlock_popup(data: Dictionary) -> void:
 		reward_lbl.add_theme_font_size_override("font_size", 13)
 	popup.add_child(reward_lbl)
 
-	# 動畫：淡入 → 停留 → 淡出
+	# ?嚗楚?????? ??瘛∪
 	popup.modulate.a = 0.0
 	var tween = create_tween()
 	tween.tween_property(popup, "modulate:a", 1.0, 0.3)
@@ -322,9 +322,9 @@ func _spawn_unlock_popup(data: Dictionary) -> void:
 
 func _on_codex_complete(data: Dictionary) -> void:
 	var reward: int = data.get("reward", 5000)
-	var title_name: String = data.get("title_name", "圖鑑完成者")
+	var title_name: String = data.get("title_name", "??摰???)"
 
-	# 全圖鑑完成大彈窗
+	# ?典????之敶?
 	var popup = Node2D.new()
 	popup.position = Vector2(800, 450)
 	add_child(popup)
@@ -342,7 +342,7 @@ func _on_codex_complete(data: Dictionary) -> void:
 	popup.add_child(border)
 
 	var title_lbl = Label.new()
-	title_lbl.text = "🏆 圖鑑全收集完成！"
+	title_lbl.text = "?? ???冽????"
 	title_lbl.position = Vector2(-170, -52)
 	title_lbl.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	if _font:
@@ -351,7 +351,7 @@ func _on_codex_complete(data: Dictionary) -> void:
 	popup.add_child(title_lbl)
 
 	var reward_lbl = Label.new()
-	reward_lbl.text = "+%d 金幣" % reward
+	reward_lbl.text = "+%d ?馳" % reward
 	reward_lbl.position = Vector2(-170, -20)
 	reward_lbl.add_theme_color_override("font_color", Color(0.7, 1.0, 0.7))
 	if _font:
@@ -360,7 +360,7 @@ func _on_codex_complete(data: Dictionary) -> void:
 	popup.add_child(reward_lbl)
 
 	var title_unlock_lbl = Label.new()
-	title_unlock_lbl.text = "稱號解鎖：「%s」" % title_name
+	title_unlock_lbl.text = "蝔梯?閫??嚗?s?? % title_name"
 	title_unlock_lbl.position = Vector2(-170, 14)
 	title_unlock_lbl.add_theme_color_override("font_color", Color(1.0, 0.7, 0.0))
 	if _font:
@@ -375,7 +375,7 @@ func _on_codex_complete(data: Dictionary) -> void:
 	tween.tween_property(popup, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(popup.queue_free)
 
-# ---- 顯示/隱藏 ----
+# ---- 憿舐內/?梯? ----
 
 func toggle() -> void:
 	if _is_visible:
@@ -386,7 +386,7 @@ func toggle() -> void:
 func _show_panel() -> void:
 	_is_visible = true
 	show()
-	# 請求最新圖鑑資料
+	# 隢???啣?????
 	if GameManager.has_method("request_codex"):
 		GameManager.request_codex()
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://zk8143i859r3n"
-path="res://.godot/imported/T005_pudding_backup.png-02b65f498a7b46886787c3086327ba06.ctex"
+uid="uid://cestlq0qr2jj2"
+path="res://.godot/imported/T005_pudding_backup.png-cfef09fae03c5a69d06cfe8d14c7e4b0.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T005_pudding_backup.png"
-dest_files=["res://.godot/imported/T005_pudding_backup.png-02b65f498a7b46886787c3086327ba06.ctex"]
+dest_files=["res://.godot/imported/T005_pudding_backup.png-cfef09fae03c5a69d06cfe8d14c7e4b0.ctex"]
 
 [params]
 

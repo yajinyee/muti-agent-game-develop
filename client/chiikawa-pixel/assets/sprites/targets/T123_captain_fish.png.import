@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://9qs61poxd2leb"
-path="res://.godot/imported/T123_captain_fish.png-e1b268f93814f70a20da5c133710008f.ctex"
+uid="uid://dtj8cacwuglb6"
+path="res://.godot/imported/T123_captain_fish.png-8ad9af850074f0635f119b48f0fe893a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T123_captain_fish.png"
-dest_files=["res://.godot/imported/T123_captain_fish.png-e1b268f93814f70a20da5c133710008f.ctex"]
+dest_files=["res://.godot/imported/T123_captain_fish.png-8ad9af850074f0635f119b48f0fe893a.ctex"]
 
 [params]
 

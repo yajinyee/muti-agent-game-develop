@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://mbq9hpkjgqbqs"
-path="res://.godot/imported/T153_drill_bit_lobster.png-e8899562ee9e0c9f9417a04f20833982.ctex"
+uid="uid://pjnpjsrq4ohi"
+path="res://.godot/imported/T153_drill_bit_lobster.png-7cb287205693133127256433c4f1d075.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T153_drill_bit_lobster.png"
-dest_files=["res://.godot/imported/T153_drill_bit_lobster.png-e8899562ee9e0c9f9417a04f20833982.ctex"]
+dest_files=["res://.godot/imported/T153_drill_bit_lobster.png-7cb287205693133127256433c4f1d075.ctex"]
 
 [params]
 

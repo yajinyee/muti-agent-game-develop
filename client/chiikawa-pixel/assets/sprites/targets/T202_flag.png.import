@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://qu5ew2qxpahnw"
-path="res://.godot/imported/T202_flag.png-b9e27fa15d278d31fbcf8cc170c16046.ctex"
+uid="uid://bfiwkt2xggymu"
+path="res://.godot/imported/T202_flag.png-a4fc5dbfc927318b0a35b9edc178b141.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T202_flag.png"
-dest_files=["res://.godot/imported/T202_flag.png-b9e27fa15d278d31fbcf8cc170c16046.ctex"]
+dest_files=["res://.godot/imported/T202_flag.png-a4fc5dbfc927318b0a35b9edc178b141.ctex"]
 
 [params]
 

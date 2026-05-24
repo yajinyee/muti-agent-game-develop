@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://p52ye541j17fi"
-path="res://.godot/imported/T169_lucky_trident.png-0eb8548b956ab7b1c03c24e029c9413c.ctex"
+uid="uid://pgh1xg1a8peg"
+path="res://.godot/imported/T169_lucky_trident.png-9ac032494a72292ac06068c6da90ae50.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T169_lucky_trident.png"
-dest_files=["res://.godot/imported/T169_lucky_trident.png-0eb8548b956ab7b1c03c24e029c9413c.ctex"]
+dest_files=["res://.godot/imported/T169_lucky_trident.png-9ac032494a72292ac06068c6da90ae50.ctex"]
 
 [params]
 

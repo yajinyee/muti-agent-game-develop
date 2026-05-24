@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dawzx5fwtgx9o"
-path="res://.godot/imported/T006_mushroom_swim_backup.png-40d3e4832d0185426ae1256881cbe67f.ctex"
+uid="uid://daw0x5fwtgyao"
+path="res://.godot/imported/T006_mushroom_swim_backup.png-596bc71adde448f53eaafcf59a7351a0.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T006_mushroom_swim_backup.png"
-dest_files=["res://.godot/imported/T006_mushroom_swim_backup.png-40d3e4832d0185426ae1256881cbe67f.ctex"]
+dest_files=["res://.godot/imported/T006_mushroom_swim_backup.png-596bc71adde448f53eaafcf59a7351a0.ctex"]
 
 [params]
 

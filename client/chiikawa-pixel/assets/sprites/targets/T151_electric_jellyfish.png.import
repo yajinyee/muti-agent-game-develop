@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://z9v3otl1urvnj"
-path="res://.godot/imported/T151_electric_jellyfish.png-058c93ca8b622c2cfe8048a6aeb0ae09.ctex"
+uid="uid://c3gu5h3jhkm3x"
+path="res://.godot/imported/T151_electric_jellyfish.png-306a6cad6e127422a2d6209d1fec323e.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T151_electric_jellyfish.png"
-dest_files=["res://.godot/imported/T151_electric_jellyfish.png-058c93ca8b622c2cfe8048a6aeb0ae09.ctex"]
+dest_files=["res://.godot/imported/T151_electric_jellyfish.png-306a6cad6e127422a2d6209d1fec323e.ctex"]
 
 [params]
 

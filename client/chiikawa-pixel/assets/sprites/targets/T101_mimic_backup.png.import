@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://jzke8mztz2jnp"
-path="res://.godot/imported/T101_mimic_backup.png-ac85494523d84dcfe455b293f47412e1.ctex"
+uid="uid://caqn2i6cvnr46"
+path="res://.godot/imported/T101_mimic_backup.png-7e18d8940c0e937bc68d30662ed8b635.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T101_mimic_backup.png"
-dest_files=["res://.godot/imported/T101_mimic_backup.png-ac85494523d84dcfe455b293f47412e1.ctex"]
+dest_files=["res://.godot/imported/T101_mimic_backup.png-7e18d8940c0e937bc68d30662ed8b635.ctex"]
 
 [params]
 

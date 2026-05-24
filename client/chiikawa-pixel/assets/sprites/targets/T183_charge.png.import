@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://dmseprd6qgyib"
-path="res://.godot/imported/T183_charge.png-dcd6b467d8568a69947dc79c17006aa1.ctex"
+path="res://.godot/imported/T183_charge.png-88c933597fed623edfec988102566941.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T183_charge.png"
-dest_files=["res://.godot/imported/T183_charge.png-dcd6b467d8568a69947dc79c17006aa1.ctex"]
+dest_files=["res://.godot/imported/T183_charge.png-88c933597fed623edfec988102566941.ctex"]
 
 [params]
 

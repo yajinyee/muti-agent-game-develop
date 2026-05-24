@@ -1,6 +1,6 @@
-## LeaderboardPanel.gd
-## 排行榜面板獨立腳本（DAY-058）
-## 從 HUD.gd 拆分：_create_leaderboard_panel, _create_leaderboard_row,
+﻿## LeaderboardPanel.gd
+## ??璁?輻蝡?穿?DAY-058嚗?
+## 敺?HUD.gd ??嚗create_leaderboard_panel, _create_leaderboard_row,
 ##                  _show_leaderboard_placeholder, _on_leaderboard_updated, _toggle_leaderboard
 extends RefCounted
 
@@ -11,18 +11,18 @@ var _visible: bool = true
 var _toggle_btn: Button = null
 var _pixel_font: Font = null
 
-## 初始化排行榜面板
-## parent: 要加入的父節點（HUD CanvasLayer）
-## font: 像素字體（可為 null）
+## ????銵??Ｘ
+## parent: 閬??亦??嗥?暺?HUD CanvasLayer嚗?
+## font: ??摮?嚗??null嚗?
 func setup(parent: Node, font: Font) -> void:
 	_pixel_font = font
 	_create_panel(parent)
 
-## 取得面板節點（供 HUD 存取）
+## ???Ｘ蝭暺?靘?HUD 摮?嚗?
 func get_panel() -> Control:
 	return _panel
 
-## 更新排行榜資料
+## ?湔??璁???
 func update(entries: Array, my_player_id: String) -> void:
 	if not is_instance_valid(_panel):
 		return
@@ -45,35 +45,35 @@ func update(entries: Array, my_player_id: String) -> void:
 		var entry = entries[i]
 		var is_self = entry.get("player_id", "") == my_player_id
 
-		# 名次
+		# ?活
 		var rank_lbl = row.get_node_or_null("RankLabel")
 		if rank_lbl:
 			match i:
-				0: rank_lbl.text = "🥇"
-				1: rank_lbl.text = "🥈"
-				2: rank_lbl.text = "🥉"
+				0: rank_lbl.text = "??"
+				1: rank_lbl.text = "??"
+				2: rank_lbl.text = "??"
 				_: rank_lbl.text = "#%d" % (i + 1)
 
-		# 玩家名稱（自己高亮）
+		# ?拙振?迂嚗撌梢?鈭殷?
 		var name_lbl = row.get_node_or_null("NameLabel")
 		if name_lbl:
 			var display = entry.get("display_name", "???")
-			name_lbl.text = ("▶" if is_self else "") + display
+			name_lbl.text = ("?? if is_self else "") + display"
 			name_lbl.modulate = Color(1.0, 1.0, 0.4) if is_self else Color.WHITE
 
-		# 分數
+		# ?
 		var score_lbl = row.get_node_or_null("ScoreLabel")
 		if score_lbl:
 			var score = entry.get("score", 0)
-			score_lbl.text = "💰%d" % score
+			score_lbl.text = "?%d" % score
 			score_lbl.modulate = Color(1.0, 0.9, 0.3) if is_self else Color(0.9, 0.9, 0.9)
 
-		# 擊殺數
+		# ?捏??
 		var kill_lbl = row.get_node_or_null("KillLabel")
 		if kill_lbl:
-			kill_lbl.text = "⚔%d" % entry.get("kill_count", 0)
+			kill_lbl.text = "??d" % entry.get("kill_count", 0)
 
-		# 稱號（DAY-068）
+		# 蝔梯?嚗AY-068嚗?
 		var title_lbl = row.get_node_or_null("TitleLabel")
 		if title_lbl:
 			var title_icon: String = entry.get("title_icon", "")
@@ -85,13 +85,13 @@ func update(entries: Array, my_player_id: String) -> void:
 			else:
 				title_lbl.text = ""
 
-		# 加好友按鈕（DAY-073）：非自己的玩家才顯示
+		# ?末????DAY-073嚗??撌梁??拙振?＊蝷?
 		var add_friend_btn = row.get_node_or_null("AddFriendBtn")
 		if add_friend_btn:
 			var entry_player_id: String = entry.get("player_id", "")
 			if not is_self and entry_player_id != "":
 				add_friend_btn.visible = true
-				# 清除舊的連接，重新連接
+				# 皜????嚗??圈?
 				if add_friend_btn.pressed.get_connections().size() > 0:
 					for conn in add_friend_btn.pressed.get_connections():
 						add_friend_btn.pressed.disconnect(conn["callable"])
@@ -100,13 +100,13 @@ func update(entries: Array, my_player_id: String) -> void:
 						"type": "send_friend_request",
 						"payload": {"target_id": entry_player_id}
 					})
-					add_friend_btn.text = "✓"
+					add_friend_btn.text = "??"
 					add_friend_btn.disabled = true
 				)
 			else:
 				add_friend_btn.visible = false
 
-		# 自己的行背景高亮
+		# ?芸楛???擃漁
 		var row_bg = row.get_node_or_null("RowBG")
 		if row_bg:
 			if is_self:
@@ -116,7 +116,7 @@ func update(entries: Array, my_player_id: String) -> void:
 			else:
 				row_bg.color = Color(0.03, 0.07, 0.18, 0.6)
 
-	# 動態調整高度
+	# ??隤踵擃漲
 	var new_height = 30 + count * 40
 	if is_instance_valid(_panel):
 		var bg = _panel.get_node_or_null("LeaderboardBG")
@@ -124,7 +124,7 @@ func update(entries: Array, my_player_id: String) -> void:
 			bg.size.y = new_height
 		_panel.size.y = new_height
 
-## 顯示等待佔位符
+## 憿舐內蝑?雿?蝚?
 func show_placeholder() -> void:
 	if not is_instance_valid(_panel):
 		return
@@ -137,7 +137,7 @@ func show_placeholder() -> void:
 		row.visible = true
 		var name_lbl = row.get_node_or_null("NameLabel")
 		if name_lbl:
-			name_lbl.text = "等待玩家..."
+			name_lbl.text = "蝑??拙振..."
 			name_lbl.modulate = Color(0.6, 0.6, 0.6)
 		var rank_lbl = row.get_node_or_null("RankLabel")
 		if rank_lbl:
@@ -149,7 +149,7 @@ func show_placeholder() -> void:
 		if kill_lbl:
 			kill_lbl.text = ""
 
-## 切換顯示/隱藏
+## ??憿舐內/?梯?
 func toggle() -> void:
 	if not is_instance_valid(_panel):
 		return
@@ -164,12 +164,12 @@ func toggle() -> void:
 		bg.size.y = 230 if _visible else 28
 
 	if is_instance_valid(_toggle_btn):
-		_toggle_btn.text = "▲" if _visible else "▼"
+		_toggle_btn.text = "?? if _visible else "??
 
-# ---- 私有方法 ----
+# ---- 蝘??寞? ----
 
 func _create_panel(parent: Node) -> void:
-	# 位置：BOSS 計時器 x=900, y=50，高度 80px，所以排行榜從 y=140 開始
+	# 雿蔭嚗OSS 閮???x=900, y=50嚗?摨?80px嚗?隞交?銵?敺?y=140 ??
 	var panel = Control.new()
 	panel.name = "LeaderboardPanel"
 	panel.position = Vector2(900, 140)
@@ -178,14 +178,14 @@ func _create_panel(parent: Node) -> void:
 	parent.add_child(panel)
 	_panel = panel
 
-	# 背景
+	# ?
 	var bg = ColorRect.new()
 	bg.name = "LeaderboardBG"
 	bg.size = Vector2(360, 200)
 	bg.color = Color(0.0, 0.05, 0.15, 0.82)
 	panel.add_child(bg)
 
-	# 標題列
+	# 璅???
 	var title_bar = ColorRect.new()
 	title_bar.size = Vector2(360, 28)
 	title_bar.color = Color(0.05, 0.15, 0.4, 0.95)
@@ -193,7 +193,7 @@ func _create_panel(parent: Node) -> void:
 
 	var title_lbl = Label.new()
 	title_lbl.name = "LeaderboardTitle"
-	title_lbl.text = "🏆 排行榜"
+	title_lbl.text = "?? ??璁?"
 	title_lbl.position = Vector2(10, 4)
 	title_lbl.add_theme_font_size_override("font_size", 14)
 	title_lbl.modulate = Color(1.0, 0.9, 0.3)
@@ -201,10 +201,10 @@ func _create_panel(parent: Node) -> void:
 		title_lbl.add_theme_font_override("font", _pixel_font)
 	panel.add_child(title_lbl)
 
-	# 折疊按鈕
+	# ????
 	var toggle_btn = Button.new()
 	toggle_btn.name = "LeaderboardToggle"
-	toggle_btn.text = "▲"
+	toggle_btn.text = "??"
 	toggle_btn.position = Vector2(325, 2)
 	toggle_btn.size = Vector2(30, 24)
 	toggle_btn.add_theme_font_size_override("font_size", 12)
@@ -212,18 +212,18 @@ func _create_panel(parent: Node) -> void:
 	panel.add_child(toggle_btn)
 	_toggle_btn = toggle_btn
 
-	# 排行榜條目容器
+	# ??璁??桀捆??
 	var entries_container = Control.new()
 	entries_container.name = "EntriesContainer"
 	entries_container.position = Vector2(0, 30)
 	entries_container.size = Vector2(360, 170)
 	panel.add_child(entries_container)
 
-	# 預建立 5 個排行榜行（避免動態建立）
+	# ?遣蝡?5 ??銵?銵??踹???撱箇?嚗?
 	for i in range(MAX_LEADERBOARD_ENTRIES):
 		_create_row(entries_container, i)
 
-	# 顯示等待佔位符
+	# 憿舐內蝑?雿?蝚?
 	show_placeholder()
 
 func _create_row(container: Control, index: int) -> void:
@@ -233,7 +233,7 @@ func _create_row(container: Control, index: int) -> void:
 	row.size = Vector2(360, 38)
 	container.add_child(row)
 
-	# 行背景
+	# 銵???
 	var row_bg = ColorRect.new()
 	row_bg.name = "RowBG"
 	row_bg.size = Vector2(360, 38)
@@ -243,7 +243,7 @@ func _create_row(container: Control, index: int) -> void:
 		row_bg.color = Color(0.03, 0.07, 0.18, 0.6)
 	row.add_child(row_bg)
 
-	# 名次標籤
+	# ?活璅惜
 	var rank_lbl = Label.new()
 	rank_lbl.name = "RankLabel"
 	rank_lbl.position = Vector2(6, 6)
@@ -253,7 +253,7 @@ func _create_row(container: Control, index: int) -> void:
 		rank_lbl.add_theme_font_override("font", _pixel_font)
 	row.add_child(rank_lbl)
 
-	# 玩家名稱
+	# ?拙振?迂
 	var name_lbl = Label.new()
 	name_lbl.name = "NameLabel"
 	name_lbl.position = Vector2(42, 6)
@@ -264,7 +264,7 @@ func _create_row(container: Control, index: int) -> void:
 		name_lbl.add_theme_font_override("font", _pixel_font)
 	row.add_child(name_lbl)
 
-	# 分數
+	# ?
 	var score_lbl = Label.new()
 	score_lbl.name = "ScoreLabel"
 	score_lbl.position = Vector2(188, 6)
@@ -275,7 +275,7 @@ func _create_row(container: Control, index: int) -> void:
 		score_lbl.add_theme_font_override("font", _pixel_font)
 	row.add_child(score_lbl)
 
-	# 擊殺數
+	# ?捏??
 	var kill_lbl = Label.new()
 	kill_lbl.name = "KillLabel"
 	kill_lbl.position = Vector2(295, 6)
@@ -286,7 +286,7 @@ func _create_row(container: Control, index: int) -> void:
 		kill_lbl.add_theme_font_override("font", _pixel_font)
 	row.add_child(kill_lbl)
 
-	# 稱號標籤（DAY-068）— 顯示在名稱下方
+	# 蝔梯?璅惜嚗AY-068嚗?憿舐內?典?蝔曹???
 	var title_lbl = Label.new()
 	title_lbl.name = "TitleLabel"
 	title_lbl.position = Vector2(42, 18)
@@ -297,15 +297,15 @@ func _create_row(container: Control, index: int) -> void:
 		title_lbl.add_theme_font_override("font", _pixel_font)
 	row.add_child(title_lbl)
 
-	# 加好友按鈕（DAY-073）
+	# ?末????DAY-073嚗?
 	var add_friend_btn = Button.new()
 	add_friend_btn.name = "AddFriendBtn"
-	add_friend_btn.text = "➕"
+	add_friend_btn.text = "??"
 	add_friend_btn.position = Vector2(330, 8)
 	add_friend_btn.size = Vector2(24, 22)
 	add_friend_btn.flat = true
-	add_friend_btn.tooltip_text = "加好友"
-	add_friend_btn.visible = false  # 預設隱藏，update() 時依條件顯示
+	add_friend_btn.tooltip_text = "?末??"
+	add_friend_btn.visible = false  # ?身?梯?嚗pdate() ??璇辣憿舐內
 	if is_instance_valid(_pixel_font):
 		add_friend_btn.add_theme_font_override("font", _pixel_font)
 		add_friend_btn.add_theme_font_size_override("font_size", 11)

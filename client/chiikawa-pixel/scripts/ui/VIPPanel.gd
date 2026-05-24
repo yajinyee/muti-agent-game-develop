@@ -1,24 +1,24 @@
-## VIPPanel.gd — VIP 等級系統面板（DAY-078）
-## 顯示 VIP 等級、消費進度、週獎勵領取按鈕
-## 位置：TopBar 上（可折疊）
+﻿## VIPPanel.gd ??VIP 蝑?蝟餌絞?Ｘ嚗AY-078嚗?
+## 憿舐內 VIP 蝑???鞎駁脣漲?梁??菟?????
+## 雿蔭嚗opBar 銝??舀???
 extends Node2D
 
-# ---- 常數 ----
+# ---- 撣豢 ----
 const PANEL_WIDTH  := 300
 const PANEL_HEIGHT := 220
 const BTN_SIZE     := 26
 
-# VIP 等級顏色
+# VIP 蝑?憿
 const TIER_COLORS := {
-	0: Color(0.6, 0.6, 0.6),       # 無 VIP（灰）
-	1: Color(0.80, 0.50, 0.20),    # 青銅
-	2: Color(0.75, 0.75, 0.75),    # 白銀
-	3: Color(1.00, 0.85, 0.10),    # 黃金
-	4: Color(0.90, 0.90, 0.88),    # 白金
-	5: Color(0.73, 0.95, 1.00),    # 鑽石
+	0: Color(0.6, 0.6, 0.6),       # ??VIP嚗嚗?
+	1: Color(0.80, 0.50, 0.20),    # ??
+	2: Color(0.75, 0.75, 0.75),    # ?賡?
+	3: Color(1.00, 0.85, 0.10),    # 暺?
+	4: Color(0.90, 0.90, 0.88),    # ?賡?
+	5: Color(0.73, 0.95, 1.00),    # ?賜
 }
 
-# ---- 節點引用 ----
+# ---- 蝭暺???----
 var _pixel_font: Font = null
 var _is_open: bool = false
 var _toggle_btn: Button = null
@@ -34,11 +34,11 @@ var _weekly_btn: Button = null
 var _weekly_label: Label = null
 var _tier_rows: Array = []
 
-# ---- VIP 資料 ----
+# ---- VIP 鞈? ----
 var _vip_data: Dictionary = {
 	"vip_level": 0,
-	"tier_name": "一般玩家",
-	"tier_icon": "👤",
+	"tier_name": "銝?祉摰?,"
+	"tier_icon": "?",
 	"tier_color": "#999999",
 	"total_spend": 0,
 	"cashback_rate": 0.0,
@@ -50,7 +50,7 @@ var _vip_data: Dictionary = {
 	"can_claim_weekly": false
 }
 
-# ---- 初始化 ----
+# ---- ????----
 func _ready() -> void:
 	if ResourceLoader.exists("res://assets/fonts/pixel8.fnt"):
 		_pixel_font = load("res://assets/fonts/pixel8.fnt")
@@ -62,20 +62,20 @@ func setup(font: Font) -> void:
 	if font:
 		_pixel_font = font
 
-## 建立折疊按鈕（TopBar 上）
+## 撱箇?????嚗opBar 銝?
 func _build_toggle_btn() -> void:
 	_toggle_btn = Button.new()
-	_toggle_btn.text = "💎"
+	_toggle_btn.text = "??"
 	_toggle_btn.size = Vector2(32, 24)
 	_toggle_btn.position = Vector2(0, 0)
 	_toggle_btn.flat = true
-	_toggle_btn.tooltip_text = "VIP 等級"
+	_toggle_btn.tooltip_text = "VIP 蝑?"
 	if _pixel_font:
 		_toggle_btn.add_theme_font_override("font", _pixel_font)
 		_toggle_btn.add_theme_font_size_override("font_size", 14)
 	add_child(_toggle_btn)
 
-## 建立主面板（預設隱藏）
+## 撱箇?銝駁?選??身?梯?嚗?
 func _build_panel() -> void:
 	_panel_bg = ColorRect.new()
 	_panel_bg.position = Vector2(-PANEL_WIDTH + 32, 28)
@@ -84,108 +84,108 @@ func _build_panel() -> void:
 	_panel_bg.visible = false
 	add_child(_panel_bg)
 
-	# 標題
+	# 璅?
 	var title := Label.new()
 	title.position = Vector2(8, 4)
-	title.text = "💎 VIP 會員系統"
+	title.text = "?? VIP ?蝟餌絞"
 	title.add_theme_color_override("font_color", Color(0.73, 0.95, 1.0))
 	if _pixel_font:
 		title.add_theme_font_override("font", _pixel_font)
 		title.add_theme_font_size_override("font_size", 12)
 	_panel_bg.add_child(title)
 
-	# 等級標籤
+	# 蝑?璅惜
 	_tier_label = Label.new()
 	_tier_label.position = Vector2(8, 22)
-	_tier_label.text = "👤 一般玩家"
+	_tier_label.text = "? 銝?祉摰?"
 	_tier_label.add_theme_color_override("font_color", Color(0.6, 0.6, 0.6))
 	if _pixel_font:
 		_tier_label.add_theme_font_override("font", _pixel_font)
 		_tier_label.add_theme_font_size_override("font_size", 11)
 	_panel_bg.add_child(_tier_label)
 
-	# 消費標籤
+	# 瘨祥璅惜
 	_spend_label = Label.new()
 	_spend_label.position = Vector2(8, 38)
-	_spend_label.text = "累積消費：0 金幣"
+	_spend_label.text = "蝝舐?瘨祥嚗? ?馳"
 	_spend_label.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	if _pixel_font:
 		_spend_label.add_theme_font_override("font", _pixel_font)
 		_spend_label.add_theme_font_size_override("font_size", 10)
 	_panel_bg.add_child(_spend_label)
 
-	# 進度條背景
+	# ?脣漲璇???
 	_progress_bar = ColorRect.new()
 	_progress_bar.position = Vector2(8, 54)
 	_progress_bar.size = Vector2(PANEL_WIDTH - 16, 10)
 	_progress_bar.color = Color(0.15, 0.15, 0.25)
 	_panel_bg.add_child(_progress_bar)
 
-	# 進度條填充
+	# ?脣漲璇‵??
 	_progress_fill = ColorRect.new()
 	_progress_fill.position = Vector2(0, 0)
 	_progress_fill.size = Vector2(0, 10)
 	_progress_fill.color = Color(0.73, 0.95, 1.0)
 	_progress_bar.add_child(_progress_fill)
 
-	# 進度標籤
+	# ?脣漲璅惜
 	_progress_label = Label.new()
 	_progress_label.position = Vector2(8, 66)
-	_progress_label.text = "距下一等級：10,000 金幣"
+	_progress_label.text = "頝?銝蝑?嚗?0,000 ?馳"
 	_progress_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.9))
 	if _pixel_font:
 		_progress_label.add_theme_font_override("font", _pixel_font)
 		_progress_label.add_theme_font_size_override("font_size", 9)
 	_panel_bg.add_child(_progress_label)
 
-	# 返還率標籤
+	# 餈???蝐?
 	_cashback_label = Label.new()
 	_cashback_label.position = Vector2(8, 82)
-	_cashback_label.text = "💰 金幣返還：0%"
+	_cashback_label.text = "? ?馳餈?嚗?%"
 	_cashback_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	if _pixel_font:
 		_cashback_label.add_theme_font_override("font", _pixel_font)
 		_cashback_label.add_theme_font_size_override("font_size", 10)
 	_panel_bg.add_child(_cashback_label)
 
-	# 每日獎勵倍率標籤
+	# 瘥???璅惜
 	_daily_mult_label = Label.new()
 	_daily_mult_label.position = Vector2(8, 96)
-	_daily_mult_label.text = "📅 每日獎勵倍率：×1.0"
+	_daily_mult_label.text = "?? 瘥???嚗?.0"
 	_daily_mult_label.add_theme_color_override("font_color", Color(0.6, 1.0, 0.6))
 	if _pixel_font:
 		_daily_mult_label.add_theme_font_override("font", _pixel_font)
 		_daily_mult_label.add_theme_font_size_override("font_size", 10)
 	_panel_bg.add_child(_daily_mult_label)
 
-	# 週獎勵標籤
+	# ?梁??菜?蝐?
 	_weekly_label = Label.new()
 	_weekly_label.position = Vector2(8, 112)
-	_weekly_label.text = "🎁 週獎勵：--"
+	_weekly_label.text = "?? ?梁??蛛?--"
 	_weekly_label.add_theme_color_override("font_color", Color(0.9, 0.7, 1.0))
 	if _pixel_font:
 		_weekly_label.add_theme_font_override("font", _pixel_font)
 		_weekly_label.add_theme_font_size_override("font_size", 10)
 	_panel_bg.add_child(_weekly_label)
 
-	# 週獎勵領取按鈕
+	# ?梁??菟?????
 	_weekly_btn = Button.new()
 	_weekly_btn.position = Vector2(8, 128)
 	_weekly_btn.size = Vector2(PANEL_WIDTH - 16, 24)
-	_weekly_btn.text = "領取週獎勵"
+	_weekly_btn.text = "???梁???"
 	_weekly_btn.disabled = true
 	if _pixel_font:
 		_weekly_btn.add_theme_font_override("font", _pixel_font)
 		_weekly_btn.add_theme_font_size_override("font_size", 10)
 	_panel_bg.add_child(_weekly_btn)
 
-	# VIP 等級列表（5 個等級）
+	# VIP 蝑??”嚗? ??蝝?
 	var tier_defs := [
-		{"level": 1, "name": "青銅", "icon": "🥉", "spend": "10,000"},
-		{"level": 2, "name": "白銀", "icon": "🥈", "spend": "50,000"},
-		{"level": 3, "name": "黃金", "icon": "🥇", "spend": "200,000"},
-		{"level": 4, "name": "白金", "icon": "💎", "spend": "500,000"},
-		{"level": 5, "name": "鑽石", "icon": "👑", "spend": "2,000,000"},
+		{"level": 1, "name": "??", "icon": "??", "spend": "10,000"},
+		{"level": 2, "name": "?賡?", "icon": "??", "spend": "50,000"},
+		{"level": 3, "name": "暺?", "icon": "??", "spend": "200,000"},
+		{"level": 4, "name": "?賡?", "icon": "??", "spend": "500,000"},
+		{"level": 5, "name": "?賜", "icon": "??", "spend": "2,000,000"},
 	]
 	for i in range(tier_defs.size()):
 		var td = tier_defs[i]
@@ -199,13 +199,13 @@ func _build_panel() -> void:
 		_panel_bg.add_child(row)
 		_tier_rows.append(row)
 
-## 連接訊號
+## ??閮?
 func _connect_signals() -> void:
 	if _toggle_btn:
 		_toggle_btn.pressed.connect(_on_toggle_pressed)
 	if _weekly_btn:
 		_weekly_btn.pressed.connect(_on_weekly_btn_pressed)
-	# 連接 GameManager 訊號
+	# ?? GameManager 閮?
 	if GameManager:
 		if GameManager.has_signal("vip_updated"):
 			GameManager.vip_updated.connect(_on_vip_updated)
@@ -214,38 +214,38 @@ func _connect_signals() -> void:
 		if GameManager.has_signal("vip_weekly_claimed"):
 			GameManager.vip_weekly_claimed.connect(_on_vip_weekly_claimed)
 
-## 折疊/展開面板
+## ??/撅??Ｘ
 func _on_toggle_pressed() -> void:
 	_is_open = !_is_open
 	if _panel_bg:
 		_panel_bg.visible = _is_open
 
-## 更新 VIP 資料
+## ?湔 VIP 鞈?
 func _on_vip_updated(data: Dictionary) -> void:
 	_vip_data = data
 	_refresh_ui()
 
-## VIP 升級通知
+## VIP ???
 func _on_vip_level_up(data: Dictionary) -> void:
 	_show_level_up_popup(data)
 
-## 週獎勵領取通知
+## ?梁??菟??
 func _on_vip_weekly_claimed(data: Dictionary) -> void:
 	_show_weekly_claimed_popup(data)
 
-## 領取週獎勵按鈕
+## ???梁??菜???
 func _on_weekly_btn_pressed() -> void:
 	if GameManager:
 		GameManager.claim_vip_weekly()
 
-## 刷新 UI
+## ?瑟 UI
 func _refresh_ui() -> void:
 	if not _panel_bg:
 		return
 
 	var level: int = _vip_data.get("vip_level", 0)
-	var tier_name: String = _vip_data.get("tier_name", "一般玩家")
-	var tier_icon: String = _vip_data.get("tier_icon", "👤")
+	var tier_name: String = _vip_data.get("tier_name", "銝?祉摰?)"
+	var tier_icon: String = _vip_data.get("tier_icon", "?")
 	var total_spend: int = _vip_data.get("total_spend", 0)
 	var cashback_rate: float = _vip_data.get("cashback_rate", 0.0)
 	var daily_mult: float = _vip_data.get("daily_bonus_mult", 1.0)
@@ -254,73 +254,73 @@ func _refresh_ui() -> void:
 	var progress: float = _vip_data.get("progress", 0.0)
 	var can_claim: bool = _vip_data.get("can_claim_weekly", false)
 
-	# 等級顏色
+	# 蝑?憿
 	var tier_color: Color = TIER_COLORS.get(level, Color(0.6, 0.6, 0.6))
 
-	# 更新按鈕圖示顏色
+	# ?湔???內憿
 	if _toggle_btn:
 		_toggle_btn.modulate = tier_color
 
-	# 等級標籤
+	# 蝑?璅惜
 	if _tier_label:
 		_tier_label.text = "%s %s" % [tier_icon, tier_name]
 		_tier_label.add_theme_color_override("font_color", tier_color)
 
-	# 消費標籤
+	# 瘨祥璅惜
 	if _spend_label:
-		_spend_label.text = "累積消費：%s 金幣" % _format_number(total_spend)
+		_spend_label.text = "蝝舐?瘨祥嚗?s ?馳" % _format_number(total_spend)
 
-	# 進度條
+	# ?脣漲璇?
 	if _progress_fill and _progress_bar:
 		var bar_width := _progress_bar.size.x
 		_progress_fill.size.x = bar_width * clamp(progress, 0.0, 1.0)
 		_progress_fill.color = tier_color
 
-	# 進度標籤
+	# ?脣漲璅惜
 	if _progress_label:
 		if level >= 5:
-			_progress_label.text = "✨ 已達最高等級"
+			_progress_label.text = "??撌脤??擃?蝝?"
 			_progress_label.add_theme_color_override("font_color", TIER_COLORS[5])
 		else:
-			_progress_label.text = "距下一等級：%s 金幣" % _format_number(spend_to_next)
+			_progress_label.text = "頝?銝蝑?嚗?s ?馳" % _format_number(spend_to_next)
 
-	# 返還率
+	# 餈???
 	if _cashback_label:
 		if cashback_rate > 0:
-			_cashback_label.text = "💰 金幣返還：%.0f%%" % (cashback_rate * 100)
+			_cashback_label.text = "? ?馳餈?嚗?.0f%%" % (cashback_rate * 100)
 			_cashback_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 		else:
-			_cashback_label.text = "💰 金幣返還：無"
+			_cashback_label.text = "? ?馳餈?嚗"
 			_cashback_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 
-	# 每日獎勵倍率
+	# 瘥???
 	if _daily_mult_label:
-		_daily_mult_label.text = "📅 每日獎勵倍率：×%.1f" % daily_mult
+		_daily_mult_label.text = "?? 瘥???嚗?.1f" % daily_mult
 		if daily_mult > 1.0:
 			_daily_mult_label.add_theme_color_override("font_color", Color(0.6, 1.0, 0.6))
 		else:
 			_daily_mult_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 
-	# 週獎勵
+	# ?梁???
 	if _weekly_label:
 		if weekly_bonus > 0:
-			_weekly_label.text = "🎁 週獎勵：%s 金幣" % _format_number(weekly_bonus)
+			_weekly_label.text = "?? ?梁??蛛?%s ?馳" % _format_number(weekly_bonus)
 			_weekly_label.add_theme_color_override("font_color", Color(0.9, 0.7, 1.0))
 		else:
-			_weekly_label.text = "🎁 週獎勵：升級 VIP 解鎖"
+			_weekly_label.text = "?? ?梁??蛛??? VIP 閫??"
 			_weekly_label.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 
-	# 週獎勵按鈕
+	# ?梁??菜???
 	if _weekly_btn:
 		_weekly_btn.disabled = not can_claim
 		if can_claim:
-			_weekly_btn.text = "🎁 領取週獎勵 (%s 金幣)" % _format_number(weekly_bonus)
+			_weekly_btn.text = "?? ???梁???(%s ?馳)" % _format_number(weekly_bonus)
 			_weekly_btn.modulate = Color(1.0, 1.0, 1.0)
 		else:
-			_weekly_btn.text = "週獎勵（7天後可領）"
+			_weekly_btn.text = "?梁??蛛?7憭拙??舫?嚗?"
 			_weekly_btn.modulate = Color(0.6, 0.6, 0.6)
 
-	# 更新等級列表顏色
+	# ?湔蝑??”憿
 	for i in range(_tier_rows.size()):
 		var row: Label = _tier_rows[i]
 		var row_level := i + 1
@@ -331,17 +331,17 @@ func _refresh_ui() -> void:
 		else:
 			row.add_theme_color_override("font_color", Color(0.4, 0.4, 0.4))
 
-## 顯示 VIP 升級彈窗
+## 憿舐內 VIP ??敶?
 func _show_level_up_popup(data: Dictionary) -> void:
 	var new_level: int = data.get("new_level", 1)
 	var tier_name: String = data.get("tier_name", "")
-	var tier_icon: String = data.get("tier_icon", "💎")
+	var tier_icon: String = data.get("tier_icon", "??")
 	var tier_color_hex: String = data.get("tier_color", "#FFFFFF")
 	var weekly_bonus: int = data.get("weekly_bonus", 0)
 
 	var tier_color := Color(TIER_COLORS.get(new_level, Color(1.0, 1.0, 1.0)))
 
-	# 建立彈窗
+	# 撱箇?敶?
 	var canvas := get_viewport().get_canvas_layer_node(1) if get_viewport() else null
 	var popup_parent := canvas if canvas else get_parent()
 	if not is_instance_valid(popup_parent):
@@ -358,7 +358,7 @@ func _show_level_up_popup(data: Dictionary) -> void:
 
 	var lbl := Label.new()
 	lbl.position = Vector2(8, 8)
-	lbl.text = "%s VIP 升級！" % tier_icon
+	lbl.text = "%s VIP ??嚗? % tier_icon"
 	lbl.add_theme_color_override("font_color", tier_color)
 	if _pixel_font:
 		lbl.add_theme_font_override("font", _pixel_font)
@@ -367,7 +367,7 @@ func _show_level_up_popup(data: Dictionary) -> void:
 
 	var lbl2 := Label.new()
 	lbl2.position = Vector2(8, 28)
-	lbl2.text = "恭喜成為 %s！" % tier_name
+	lbl2.text = "?剖?? %s嚗? % tier_name"
 	lbl2.add_theme_color_override("font_color", Color(1.0, 1.0, 1.0))
 	if _pixel_font:
 		lbl2.add_theme_font_override("font", _pixel_font)
@@ -376,14 +376,14 @@ func _show_level_up_popup(data: Dictionary) -> void:
 
 	var lbl3 := Label.new()
 	lbl3.position = Vector2(8, 46)
-	lbl3.text = "週獎勵：%s 金幣 | 立即可領取！" % _format_number(weekly_bonus)
+	lbl3.text = "?梁??蛛?%s ?馳 | 蝡?舫???" % _format_number(weekly_bonus)
 	lbl3.add_theme_color_override("font_color", Color(0.9, 0.7, 1.0))
 	if _pixel_font:
 		lbl3.add_theme_font_override("font", _pixel_font)
 		lbl3.add_theme_font_size_override("font_size", 10)
 	popup.add_child(lbl3)
 
-	# 動畫：彈入 → 停留 → 淡出
+	# ?嚗??????? ??瘛∪
 	var tween := popup.create_tween()
 	popup.modulate.a = 0.0
 	tween.tween_property(popup, "modulate:a", 1.0, 0.3)
@@ -391,7 +391,7 @@ func _show_level_up_popup(data: Dictionary) -> void:
 	tween.tween_property(popup, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(popup.queue_free)
 
-## 顯示週獎勵領取彈窗
+## 憿舐內?梁??菟???蝒?
 func _show_weekly_claimed_popup(data: Dictionary) -> void:
 	var coins: int = data.get("coins", 0)
 	var tier_name: String = data.get("tier_name", "")
@@ -412,7 +412,7 @@ func _show_weekly_claimed_popup(data: Dictionary) -> void:
 
 	var lbl := Label.new()
 	lbl.position = Vector2(8, 8)
-	lbl.text = "🎁 VIP 週獎勵領取成功！"
+	lbl.text = "?? VIP ?梁??菟?????"
 	lbl.add_theme_color_override("font_color", Color(0.9, 0.7, 1.0))
 	if _pixel_font:
 		lbl.add_theme_font_override("font", _pixel_font)
@@ -421,7 +421,7 @@ func _show_weekly_claimed_popup(data: Dictionary) -> void:
 
 	var lbl2 := Label.new()
 	lbl2.position = Vector2(8, 28)
-	lbl2.text = "+%s 金幣（%s 福利）" % [_format_number(coins), tier_name]
+	lbl2.text = "+%s ?馳嚗?s 蝳嚗? % [_format_number(coins), tier_name]"
 	lbl2.add_theme_color_override("font_color", Color(1.0, 0.85, 0.2))
 	if _pixel_font:
 		lbl2.add_theme_font_override("font", _pixel_font)
@@ -435,7 +435,7 @@ func _show_weekly_claimed_popup(data: Dictionary) -> void:
 	tween.tween_property(popup, "modulate:a", 0.0, 0.4)
 	tween.tween_callback(popup.queue_free)
 
-## 格式化數字（加千分位）
+## ?澆??摮?????嚗?
 func _format_number(n: int) -> String:
 	var s := str(n)
 	var result := ""

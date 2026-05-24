@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://t245cosmicpulse287"
-path="res://.godot/imported/T245_cosmic_pulse.png-t245cosmicpulse287.ctex"
+uid="uid://cn00g63ee28ow"
+path="res://.godot/imported/T245_cosmic_pulse.png-b2164401d611cedd031a3e17f4a66eec.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T245_cosmic_pulse.png"
-dest_files=["res://.godot/imported/T245_cosmic_pulse.png-t245cosmicpulse287.ctex"]
+dest_files=["res://.godot/imported/T245_cosmic_pulse.png-b2164401d611cedd031a3e17f4a66eec.ctex"]
 
 [params]
 

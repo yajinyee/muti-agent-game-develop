@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://iyccti0ma1f2p"
-path="res://.godot/imported/T168_lucky_hot_zone.png-0ccd749871367f6b6367fe87370ac65e.ctex"
+uid="uid://8ilne535moj6"
+path="res://.godot/imported/T168_lucky_hot_zone.png-979c20318634b371a176777ea1a2af70.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T168_lucky_hot_zone.png"
-dest_files=["res://.godot/imported/T168_lucky_hot_zone.png-0ccd749871367f6b6367fe87370ac65e.ctex"]
+dest_files=["res://.godot/imported/T168_lucky_hot_zone.png-979c20318634b371a176777ea1a2af70.ctex"]
 
 [params]
 

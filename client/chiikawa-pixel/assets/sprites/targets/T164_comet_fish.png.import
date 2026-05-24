@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://3nmfn5fdct0w4"
-path="res://.godot/imported/T164_comet_fish.png-341c18b49cade4cdf612507b8733d636.ctex"
+uid="uid://blrcjqylefvmr"
+path="res://.godot/imported/T164_comet_fish.png-572cb66307fe6c5b0ef8b9980d527375.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T164_comet_fish.png"
-dest_files=["res://.godot/imported/T164_comet_fish.png-341c18b49cade4cdf612507b8733d636.ctex"]
+dest_files=["res://.godot/imported/T164_comet_fish.png-572cb66307fe6c5b0ef8b9980d527375.ctex"]
 
 [params]
 

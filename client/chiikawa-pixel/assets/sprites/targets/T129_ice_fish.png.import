@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://62c4e07g4xtbh"
-path="res://.godot/imported/T129_ice_fish.png-ae494058846e49dc482424a042c16ee8.ctex"
+uid="uid://425okugmcs8d"
+path="res://.godot/imported/T129_ice_fish.png-a0048b90e6c8567ee476686f4bdfb252.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T129_ice_fish.png"
-dest_files=["res://.godot/imported/T129_ice_fish.png-ae494058846e49dc482424a042c16ee8.ctex"]
+dest_files=["res://.godot/imported/T129_ice_fish.png-a0048b90e6c8567ee476686f4bdfb252.ctex"]
 
 [params]
 

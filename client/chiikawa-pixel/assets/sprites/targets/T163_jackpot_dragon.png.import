@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://f1spx25qi5kre"
-path="res://.godot/imported/T163_jackpot_dragon.png-d442ee940f405e186de6ee66fb29bf76.ctex"
+uid="uid://b6eud08hxxo0m"
+path="res://.godot/imported/T163_jackpot_dragon.png-d8766c7686d90f7d386c9c39e8539814.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T163_jackpot_dragon.png"
-dest_files=["res://.godot/imported/T163_jackpot_dragon.png-d442ee940f405e186de6ee66fb29bf76.ctex"]
+dest_files=["res://.godot/imported/T163_jackpot_dragon.png-d8766c7686d90f7d386c9c39e8539814.ctex"]
 
 [params]
 

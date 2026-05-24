@@ -1,0 +1,4620 @@
+﻿## HUD.gd
+## 銝駁???UI嚗??潭 11蝡?
+## DAY-053嚗???JackpotPanel / MissionPanel / SessionStatsPanel ?箇蝡??
+
+extends CanvasLayer
+
+const PixelTheme = preload("res://scripts/ui/PixelTheme.gd")
+# DISABLED: const JackpotPanelScript = preload("res://scripts/ui/JackpotPanel.gd")
+# DISABLED: const MissionPanelScript = preload("res://scripts/ui/MissionPanel.gd")
+# DISABLED: const SessionStatsPanelScript = preload("res://scripts/ui/SessionStatsPanel.gd")
+# DISABLED: const LeaderboardPanelScript = preload("res://scripts/ui/LeaderboardPanel.gd")
+# DISABLED: const TournamentPanelScript = preload("res://scripts/ui/TournamentPanel.gd")
+# DISABLED: const WeaponPanelScript = preload("res://scripts/ui/WeaponPanel.gd")
+# DISABLED: const TitlePanelScript = preload("res://scripts/ui/TitlePanel.gd")
+# DISABLED: const SkinPanelScript = preload("res://scripts/ui/SkinPanel.gd")
+# DISABLED: const SeasonPanelScript = preload("res://scripts/ui/SeasonPanel.gd")
+# DISABLED: const FriendPanelScript = preload("res://scripts/ui/FriendPanel.gd")
+# DISABLED: const GuildPanelScript = preload("res://scripts/ui/GuildPanel.gd")
+# DISABLED: const GuildWarPanelScript = preload("res://scripts/ui/GuildWarPanel.gd")
+# DISABLED: const DailyBossPanelScript = preload("res://scripts/ui/DailyBossPanel.gd")
+# DISABLED: const VIPPanelScript = preload("res://scripts/ui/VIPPanel.gd")
+# DISABLED: const EventPanelScript = preload("res://scripts/ui/EventPanel.gd")
+# DISABLED: const CodexPanelScript = preload("res://scripts/ui/CodexPanel.gd")
+# DISABLED: const StreakPanelScript = preload("res://scripts/ui/StreakPanel.gd")
+# DISABLED: const ReferralPanelScript = preload("res://scripts/ui/ReferralPanel.gd")
+# DISABLED: const WheelPanelScript = preload("res://scripts/ui/WheelPanel.gd")
+# DISABLED: const ChallengePanelScript = preload("res://scripts/ui/ChallengePanel.gd")
+# DISABLED: const MissionStreakPanelScript = preload("res://scripts/ui/MissionStreakPanel.gd")
+# DISABLED: const RoulettePanelScript = preload("res://scripts/ui/RoulettePanel.gd")
+# DISABLED: const BuyBonusPanelScript = preload("res://scripts/ui/BuyBonusPanel.gd")
+const RaidPanelScript = preload("res://scripts/ui/RaidPanel.gd")
+const FragmentPanelScript = preload("res://scripts/ui/FragmentPanel.gd")
+# DISABLED: const LuckyCatchPanelScript = preload("res://scripts/ui/LuckyCatchPanel.gd")
+# DISABLED: const RapidRespinPanelScript = preload("res://scripts/ui/RapidRespinPanel.gd")
+# DISABLED: const TreasureMapPanelScript = preload("res://scripts/ui/TreasureMapPanel.gd")
+const FlashChallengePanelScript = preload("res://scripts/ui/FlashChallengePanel.gd")
+
+@onready var coins_label: Label = $TopBar/CoinsLabel
+@onready var bet_label: Label = $TopBar/BetLabel
+@onready var character_label: Label = $TopBar/CharacterLabel
+@onready var labor_bar: ProgressBar = $TopBar/LaborBar
+@onready var labor_label: Label = $TopBar/LaborLabel
+@onready var auto_button: Button = $BottomBar/AutoButton
+@onready var lock_button: Button = $BottomBar/LockButton
+@onready var bet_minus_button: Button = $BottomBar/BetMinusButton
+@onready var bet_plus_button: Button = $BottomBar/BetPlusButton
+@onready var boss_button: Button = $BottomBar/BossButton
+@onready var bonus_button: Button = $BottomBar/BonusButton
+@onready var reward_popup: Label = $RewardPopup
+@onready var state_label: Label = $StateLabel
+@onready var warning_overlay: Control = $WarningOverlay
+@onready var bonus_overlay: Control = $BonusOverlay
+
+var _reward_popup_base_y: float = 0.0
+var _lock_active: bool = false
+
+# BOSS 閮??剁?閬??28.3嚗＊蝷箏擗???撠???嚗?
+var _boss_time_left: float = 0.0
+var _boss_active: bool = false
+var _boss_timer_node: Control = null
+
+# ??摮?嚗??潭蝢?閬?嚗?
+var _pixel_font: Font = null
+const PIXEL_FONT_PATH = "res://assets/fonts/pixel8.fnt"
+
+func _ready() -> void:
+	# 憟??憸冽 Theme嚗?????? UI ?????渡???憸冽嚗?
+	var pixel_theme = PixelTheme.create()
+	# 憟??TopBar ??BottomBar ????蝭暺?
+	var top_bar = get_node_or_null("TopBar")
+	var bottom_bar = get_node_or_null("BottomBar")
+	if is_instance_valid(top_bar):
+		top_bar.theme = pixel_theme
+		# TopBar ?嚗楛瘚瑁???嚗?
+		var top_bg = ColorRect.new()
+		top_bg.name = "PixelBG"
+		top_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		top_bg.color = Color(0.03, 0.06, 0.18, 0.88)
+		top_bg.z_index = -1
+		top_bar.add_child(top_bg)
+		top_bar.move_child(top_bg, 0)
+		# TopBar 摨??蝺??嚗?
+		var top_line = ColorRect.new()
+		top_line.name = "BottomLine"
+		top_line.size = Vector2(1280, 2)
+		top_line.position = Vector2(0, 38)
+		top_line.color = Color(0.90, 0.75, 0.20, 0.60)
+		top_bar.add_child(top_line)
+		# 觀戰者計數標籤（DAY-055）
+		var spectator_lbl = Label.new()
+		spectator_lbl.name = "SpectatorCountLabel"
+		spectator_lbl.text = ""
+		spectator_lbl.position = Vector2(1180, 8)
+		spectator_lbl.size = Vector2(90, 24)
+		spectator_lbl.add_theme_font_size_override("font_size", 12)
+		spectator_lbl.modulate = Color(0.7, 0.85, 1.0, 0.8)
+		spectator_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+		top_bar.add_child(spectator_lbl)
+	if is_instance_valid(bottom_bar):
+		bottom_bar.theme = pixel_theme
+		# BottomBar ?嚗楛瘚瑁???嚗?
+		var bot_bg = ColorRect.new()
+		bot_bg.name = "PixelBG"
+		bot_bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		bot_bg.color = Color(0.03, 0.06, 0.18, 0.88)
+		bot_bg.z_index = -1
+		bottom_bar.add_child(bot_bg)
+		bottom_bar.move_child(bot_bg, 0)
+		# BottomBar ???蝺??嚗?
+		var bot_line = ColorRect.new()
+		bot_line.name = "TopLine"
+		bot_line.size = Vector2(1280, 2)
+		bot_line.position = Vector2(0, 0)
+		bot_line.color = Color(0.90, 0.75, 0.20, 0.60)
+		bottom_bar.add_child(bot_line)
+
+	# 頛??摮?
+	if ResourceLoader.exists(PIXEL_FONT_PATH):
+		_pixel_font = load(PIXEL_FONT_PATH)
+		_apply_pixel_font()
+
+	GameManager.player_updated.connect(_on_player_updated)
+	GameManager.game_state_changed.connect(_on_game_state_changed)
+	GameManager.reward_received.connect(_on_reward_received)
+	GameManager.boss_event.connect(_on_boss_event)
+	GameManager.bonus_event.connect(_on_bonus_event)
+	GameManager.leaderboard_updated.connect(_on_leaderboard_updated)
+	GameManager.achievement_unlocked.connect(_on_achievement_unlocked)
+	GameManager.combo_event.connect(_on_combo_event)  # ???鈭辣嚗AY-022嚗?
+	# jackpot_updated / jackpot_won 撌脩宏??JackpotPanel.gd嚗AY-053嚗?
+	GameManager.spectator_joined.connect(_on_spectator_joined)  # 觀戰者加入（DAY-054d）
+	GameManager.spectator_left.connect(_on_spectator_left)      # 觀戰者離開（DAY-055）
+	GameManager.daily_bonus_received.connect(_on_daily_bonus_received)  # 每日登入獎勵（DAY-065）
+
+	# ?瑞?/???蝷?NetworkManager.disconnected.connect(_on_disconnected)
+	NetworkManager.connected.connect(_on_reconnected)
+
+	auto_button.pressed.connect(_on_auto_pressed)
+	lock_button.pressed.connect(_on_lock_pressed)
+	bet_minus_button.pressed.connect(_on_bet_minus)
+	bet_plus_button.pressed.connect(_on_bet_plus)
+	boss_button.pressed.connect(NetworkManager.send_trigger_boss)
+	bonus_button.pressed.connect(NetworkManager.send_trigger_bonus)
+
+	# UI ??暺??單?嚗??潭 audio-map.json嚗i.click = weed_pull.wav嚗?
+	for btn in [auto_button, lock_button, bet_minus_button, bet_plus_button, boss_button, bonus_button]:
+		if is_instance_valid(btn):
+			btn.pressed.connect(func(): AudioManager.play_sfx(AudioManager.SFX.WEED_PULL))
+
+	reward_popup.visible = false
+	_reward_popup_base_y = reward_popup.position.y
+
+	# WarningLabel ??憸冽嚗之摮??脯敶梧?
+	var warning_label = get_node_or_null("WarningOverlay/WarningLabel")
+	if is_instance_valid(warning_label):
+		warning_label.add_theme_font_size_override("font_size", 72)
+		warning_label.add_theme_color_override("font_color", Color(1.0, 0.15, 0.15))
+		warning_label.add_theme_color_override("font_shadow_color", Color(0.5, 0.0, 0.0, 0.8))
+		warning_label.add_theme_constant_override("shadow_offset_x", 3)
+		warning_label.add_theme_constant_override("shadow_offset_y", 3)
+		if is_instance_valid(_pixel_font):
+			warning_label.add_theme_font_override("font", _pixel_font)
+
+	# StateLabel ??憸冽嚗銝???＊蝷綽?
+	var state_lbl = get_node_or_null("StateLabel")
+	if is_instance_valid(state_lbl):
+		state_lbl.add_theme_font_size_override("font_size", 11)
+		state_lbl.add_theme_color_override("font_color", Color(0.6, 0.8, 1.0, 0.7))
+
+	_update_ui()
+	_create_disconnect_overlay()
+	_create_leaderboard_panel()
+	_create_achievement_queue()
+	_create_lobby_overlay()  # 憭批輒 UI嚗AY-020嚗?
+	_init_mission_panel()     # 瘥隞餃?蝟餌絞嚗AY-037嚗AY-053 ??嚗?
+	_init_session_stats()     # Session Stats ?Ｘ嚗AY-046嚗AY-053 ??嚗?
+	_init_jackpot_panel()     # Progressive Jackpot ?Ｘ嚗AY-048嚗AY-053 ??嚗?
+	_init_tournament_panel()  # 週賽排名面板（DAY-066）
+	_init_weapon_panel()      # 武器升級面板（DAY-067）
+	_init_title_panel()       # 稱號面板（DAY-068）
+	_init_skin_panel()        # 砲台外觀面板（DAY-071）
+	_init_season_panel()      # 賽季通行證面板（DAY-072）
+	_init_friend_panel()      # 好友系統面板（DAY-073）+ 挑戰面板（DAY-102）+ 私訊面板（DAY-103）
+	_init_dm_panel()          # 私訊面板（DAY-103）
+	_init_guild_panel()       # 公會系統面板（DAY-074）
+	_init_guild_war_panel()   # 公會戰面板（DAY-076）
+	_init_daily_boss_panel()  # 每日 BOSS 挑戰面板（DAY-077）
+	_init_vip_panel()         # VIP 等級面板（DAY-078）
+	_init_event_panel()       # 限時活動面板（DAY-079）
+	_init_codex_panel()       # 魚類圖鑑面板（DAY-081）
+	_init_streak_panel()      # 連擊系統面板（DAY-083）
+	_init_referral_panel()    # 推薦碼面板（DAY-082）
+	_init_wheel_panel()       # 幸運轉盤面板（DAY-084）
+	_init_challenge_panel()   # 隱藏挑戰面板（DAY-085）
+	_init_mission_streak_panel() # 任務連續完成面板（DAY-086）
+	_init_weather_panel()     # 天氣系統面板（DAY-087）
+	_init_chain_panel()       # 連鎖爆炸面板（DAY-088）
+	_init_special_weapon_panel() # 特殊武器面板（DAY-089）
+	_init_mystery_box_panel()    # 神秘寶箱面板（DAY-090）
+	_init_room_select_panel()    # 房間難度選擇面板（DAY-091）
+	_init_daily_spin_panel()     # 每日簽到轉盤面板（DAY-092）
+	_init_shop_panel()           # 商店面板（DAY-094）
+	_init_player_stats_panel()   # 玩家統計面板（DAY-096）
+	_init_announcement_panel()   # 全服公告面板（DAY-097）
+	_init_activity_feed_panel()  # 成就動態牆面板（DAY-112）
+	_init_player_card_panel()    # 玩家名片面板（DAY-106）
+	_init_login_milestone_panel() # 登入里程碑面板（DAY-107）
+	_init_player_journey_panel()  # 玩家旅程儀表板（DAY-108）
+	_init_roulette_panel()        # 雙層倍率輪盤面板（DAY-113）
+	_init_buy_bonus_panel()       # Buy Bonus 面板（DAY-114）
+	_init_raid_panel()            # Co-op Boss Raid 面板（DAY-115）
+	_init_fragment_panel()        # 碎片收集大獎面板（DAY-116）
+	_init_lucky_catch_panel()     # 幸運捕獲通知面板（DAY-119）
+	_init_rapid_respin_panel()    # Rapid Respin 通知面板（DAY-121）
+	_init_treasure_map_panel()    # 寶藏地圖面板（DAY-122）
+	_init_flash_challenge_panel() # 閃電挑戰面板（DAY-123）
+	_init_rare_target_alert()     # 傳說目標警報（DAY-124）
+	_init_golden_time_panel()     # 黃金時間面板（DAY-125）
+	_init_rare_catch_panel()      # 稀有連擊面板（DAY-126）
+	_init_weather_surge_panel()   # 天氣湧現事件面板（DAY-127）
+	_init_dragon_wrath_panel()    # 龍怒蓄力大招面板（DAY-128）
+	_init_immortal_boss_panel()   # 不死 BOSS 連勝面板（DAY-129）
+	_init_awaken_boss_panel()     # 覺醒 BOSS 面板（DAY-130）
+	_init_win_streak_panel()      # 連勝獎勵面板（DAY-131）
+	_init_lightning_eel_panel()   # 閃電鰻連鎖攻擊面板（DAY-132）
+	_init_fever_mode_panel()      # 狂熱模式面板（DAY-133）
+	_init_unlucky_bonus_panel()   # 失敗補償面板（DAY-135）
+	_init_speed_race_panel()      # 競速獵殺面板（DAY-136）
+	_init_bounty_panel()          # 全服目標懸賞面板（DAY-137）
+	_init_mult_storm_panel()      # 全服倍率風暴面板（DAY-138）
+	_init_dual_roulette_panel()   # 雙環輪盤面板（DAY-139）
+	_init_mega_catch_panel()      # Mega Catch 事件面板（DAY-140）
+	_init_drill_lobster_panel()   # 鑽頭龍蝦連帶效果面板（DAY-142）
+	_init_bomb_crab_panel()       # 炸彈蟹連環爆炸面板（DAY-143）
+	_init_mega_octopus_panel()    # 巨型章魚轉盤面板（DAY-144）
+	_init_anglerfish_panel()      # 巨型鮟鱇魚電擊寶箱面板（DAY-145）
+	_init_crocodile_panel()       # 巨型鹹水鱷魚獵魚面板（DAY-146）
+	_init_giant_prize_fish_panel() # 夢幻巨型獎勵魚面板（DAY-147）
+	_init_chainlong_wheel_panel()  # 千龍王強化輪盤面板（DAY-148）
+	_init_golden_jellyfish_panel() # 黃金水母全場電擊面板（DAY-149）
+	_init_thunderbolt_lobster_panel() # 雷霆龍蝦免費射擊面板（DAY-150）
+	_init_rainbow_phoenix_panel()     # 彩虹鳳凰 Power Up 面板（DAY-151）
+	_init_vampire_panel()             # 吸血鬼成長倍率面板（DAY-152）
+	_init_crystal_dragon_panel()      # 水晶龍收集大獎面板（DAY-153）
+	_init_royal_chain_lightning_panel() # 皇家閃電鰻持續連鎖電擊面板（DAY-156）
+	_init_golden_turtle_panel()       # 黃金海龜時間停止面板（DAY-159）
+	_init_lucky_star_fish_panel()     # 幸運星魚全場倍率翻倍面板（DAY-160）
+	_init_golden_shark_panel()        # 黃金鯊魚全服狂暴模式面板（DAY-161）
+	_init_money_fish_panel()          # 金幣魚王即時獎勵面板（DAY-162）
+	_init_captain_fish_panel()        # 船長魚全服競速模式面板（DAY-163）
+	_init_abyss_whale_panel()         # 深淵巨鯨全服 Boss 挑戰面板（DAY-164）
+	_init_black_hole_panel()          # 黑洞漩渦武器視覺效果面板（DAY-166）
+	_init_roulette_crab_panel()       # 黃金輪盤螃蟹面板（DAY-167）
+	_init_lion_dance_panel()          # 獅子舞大獎爆發面板（DAY-168）
+	_init_vortex_fish_panel()         # 漩渦魚群吸引面板（DAY-169）
+	_init_freeze_bomb_panel()         # 冰凍炸彈魚面板（DAY-170）
+	_init_ice_fishing_panel()         # 冰釣幸運輪盤面板（DAY-171）
+	_init_lucky_egg_panel()           # 幸運彩蛋魚面板（DAY-172）
+	_init_rainbow_lucky_panel()       # 彩虹幸運魚面板（DAY-173）
+	_init_sea_anemone_panel()         # 海葵觸手攻擊面板（DAY-174）
+	_init_lucky_dice_panel()          # 幸運骰子魚面板（DAY-175）
+	_init_fire_storm_panel()          # 火焰風暴魚面板（DAY-176）
+	_init_golden_treasure_panel()     # 黃金寶藏魚面板（DAY-177）
+	_init_mermaid_healing_panel()     # 美人魚治癒面板（DAY-178）
+	_init_lucky_clover_panel()        # 幸運草魚面板（DAY-179）
+	_init_rainbow_shark_panel()       # 彩虹鯊魚爆發面板（DAY-180）
+	_init_thunder_shark_panel()       # 雷霆鯊魚連鎖閃電面板（DAY-181）
+	_init_vampire_fish_panel()        # 吸血鬼魚累積倍率面板（DAY-182）
+	_init_lightning_auto_chain_panel() # 閃電魚自動連鎖面板（DAY-183）
+	_init_meteor_fish_panel()          # 隕石魚隕石雨面板（DAY-184）
+	_init_phoenix_fish_panel()         # 鳳凰魚涅槃重生面板（DAY-185）
+	_init_dragon_turtle_panel()        # 龍龜不死 Boss 面板（DAY-186）
+	_init_chain_bomb_panel()           # 連鎖爆炸魚面板（DAY-187）
+	_init_crocodile_hunter_panel()     # 巨型鱷魚獵食面板（DAY-188）
+	_init_time_bomb_fish_panel()       # 時間炸彈魚面板（DAY-189）
+	_init_triple_lucky_fish_panel()    # 三重幸運魚面板（DAY-190）
+	_init_school_panic_panel()         # 魚群驚嚇連帶面板（DAY-191）
+	_init_rock_skeleton_concert_panel() # 搖滾骷髏演唱會面板（DAY-192）
+	_init_electric_jellyfish_panel()    # 電流水母電流網路面板（DAY-193）
+	_init_chainlong_king_panel()        # 長龍王雙環輪盤面板（DAY-194）
+	_init_drill_lobster_panel()         # 鑽頭龍蝦穿透爆炸面板（DAY-195）
+	_init_anglerfish_electric_panel()   # 巨型鮟鱇魚電擊寶箱面板（DAY-196）
+	_init_mystic_dragon_panel()         # 神秘龍魚八波攻擊面板（DAY-197）
+	_init_ghost_fish_panel()            # 幽靈魚分身面板（DAY-198）
+	_init_thunderbolt_lobster_panel()   # 雷霆龍蝦免費射擊面板（DAY-199）
+	_init_ice_phoenix_panel()           # 冰鳳凰覺醒 BOSS 面板（DAY-200）
+	_init_serial_bomb_crab_panel()      # 連環炸彈蟹面板（DAY-201）
+	_init_abyss_vortex_panel()          # 深淵漩渦魚面板（DAY-202）
+	_init_humpback_whale_panel()        # 座頭鯨覺醒面板（DAY-203）
+	_init_free_spin_fish_panel()        # 自由旋轉魚免費射擊面板（DAY-204）
+	_init_jackpot_dragon_panel()        # 獎池龍 Jackpot 抽獎面板（DAY-205）
+	_init_comet_fish_panel()            # 彗星魚連鎖爆炸面板（DAY-206）
+	_init_golden_wave_fish_panel()      # 黃金波浪魚全場倍率衝擊面板（DAY-207）
+	_init_dragon_king_panel()           # 深海龍王全服合力蓄力面板（DAY-208）
+	_init_fortune_coin_fish_panel()     # 幸運金幣魚即時獎勵面板（DAY-209）
+	_init_lucky_hot_zone_panel()        # 幸運熱區魚空間策略面板（DAY-210）
+	_init_lucky_trident_panel()         # 幸運三叉魚互動三轉盤面板（DAY-211）
+	_init_time_freeze_panel()           # 時間凍結魚系統面板（DAY-212）
+	_init_rainbow_prism_panel()         # 彩虹稜鏡魚系統面板（DAY-213）
+	_init_golden_accumulator_panel()    # 黃金累積魚系統面板（DAY-214）
+	_init_lucky_mirror_fish_panel()     # 幸運鏡像魚系統面板（DAY-215）
+	_init_cursed_poison_fish_panel()    # 詛咒毒魚系統面板（DAY-216）
+	_init_lucky_auction_fish_panel()    # 幸運拍賣魚系統面板（DAY-217）
+	_init_lucky_evolution_fish_panel()  # 幸運進化魚系統面板（DAY-218）
+	_init_lucky_infection_fish_panel()  # 幸運連鎖感染魚系統面板（DAY-219）
+	_init_lucky_ricochet_fish_panel()   # 幸運反彈魚系統面板（DAY-220）
+	_init_lucky_black_hole_panel()      # 幸運黑洞魚系統面板（DAY-221）
+	_init_lucky_resonance_fish_panel()  # 幸運共鳴魚系統面板（DAY-222）
+	_init_lucky_teleport_fish_panel()   # 幸運傳送魚系統面板（DAY-223）
+	_init_lucky_split_fish_panel()      # 幸運分裂魚系統面板（DAY-224）
+	_init_lucky_charge_fish_panel()     # 幸運充能魚系統面板（DAY-225）
+	_init_lucky_chain_bomb_panel()      # 幸運鏈鎖爆炸魚系統面板（DAY-226）
+	_init_lucky_mirror_time_panel()     # 幸運鏡像時空魚系統面板（DAY-227）
+	_init_lucky_quantum_fish_panel()    # 幸運量子魚系統面板（DAY-228）
+	_init_lucky_parasite_fish_panel()   # 幸運寄生魚系統面板（DAY-229）
+	_init_lucky_storm_fish_panel()      # 幸運風暴魚系統面板（DAY-230）
+	_init_lucky_boomerang_fish_panel()  # 幸運迴旋鏢魚系統面板（DAY-231）
+	_init_lucky_magnet_fish_panel()     # 幸運磁力魚系統面板（DAY-232）
+	_init_lucky_echo_fish_panel()       # 幸運回聲魚系統面板（DAY-233）
+	_init_lucky_vortex_fish_panel()     # 幸運漩渦魚系統面板（DAY-234）
+	_init_lucky_time_bomb_fish_panel()  # 幸運時間炸彈魚系統面板（DAY-235）
+	_init_lucky_mirror_world_panel()    # 幸運鏡面世界魚系統面板（DAY-236）
+	_init_lucky_freeze_world_panel()    # 幸運冰凍世界魚系統面板（DAY-237）
+	_init_lucky_gravity_flip_panel()    # 幸運重力反轉魚系統面板（DAY-238）
+	_init_lucky_synergy_burst_panel()   # 幸運共鳴爆發魚系統面板（DAY-239）
+	_init_lucky_bet_fish_panel()        # 幸運賭注魚系統面板（DAY-240）
+	_init_lucky_chain_reaction_panel()  # 幸運連鎖反應魚系統面板（DAY-241）
+	_init_lucky_clone_fish_panel()      # 幸運分身魚系統面板（DAY-242）
+	# _init_lucky_prophecy_fish_panel()  # disabled: parse error
+	# _init_lucky_flag_fish_panel()  # disabled: parse error
+	_init_lucky_phantom_fish_panel()    # 幸運幽靈魚系統面板（DAY-245）
+	_init_lucky_crystal_ball_fish_panel() # 幸運水晶球魚系統面板（DAY-246）
+	_init_lucky_time_rewind_panel()       # 幸運時光倒流魚系統面板（DAY-247）
+	_init_lucky_tornado_panel()           # 幸運龍捲風魚系統面板（DAY-248）
+	_init_lucky_black_hole_explosion_panel() # 幸運黑洞爆炸魚系統面板（DAY-249）
+	_init_lucky_mirror_split_panel()         # 幸運鏡像分裂魚系統面板（DAY-250）
+	_init_lucky_quantum_entangle_panel()     # 幸運量子糾纏魚系統面板（DAY-251）
+	_init_lucky_weapon_evo_panel()           # 幸運武器進化魚系統面板（DAY-252）
+	_init_lucky_meteor_shower_panel()        # 幸運星際隕石魚系統面板（DAY-253）
+	_init_lucky_dragon_king_panel()          # 幸運龍王降臨魚系統面板（DAY-254）
+	_init_lucky_rift_panel()                 # 幸運時空裂縫魚系統面板（DAY-255）
+	_init_lucky_server_charge_panel()        # 幸運全服充能魚系統面板（DAY-256）
+	_init_lucky_guild_war_panel()            # 幸運公會戰魚系統面板（DAY-257）
+	_init_lucky_lightning_storm_panel()      # 幸運閃電風暴魚系統面板（DAY-258）
+	_init_lucky_zodiac_fate_panel()          # 幸運星座命運魚系統面板（DAY-259）
+	_init_lucky_treasure_hunter_panel()     # 幸運寶藏獵人魚系統面板（DAY-260）
+	_init_lucky_time_capsule_panel()        # 幸運時間膠囊魚系統面板（DAY-261）
+	_init_lucky_progressive_jackpot_panel() # 幸運累積大獎池魚系統面板（DAY-262）
+	_init_lucky_element_fusion_panel()      # 幸運元素融合魚系統面板（DAY-263）
+	_init_lucky_karma_cycle_panel()         # 幸運命運輪迴魚系統面板（DAY-264）
+	_init_lucky_speed_race_fish_panel()     # 幸運競速賽魚系統面板（DAY-265）
+	_init_lucky_chain_explosion_panel()     # 幸運連鎖爆炸魚系統面板（DAY-266）
+	_init_lucky_multiplier_stack_panel()    # 幸運倍率疊加魚系統面板（DAY-267）
+	_init_lucky_countdown_bomb_panel()      # 幸運倒數炸彈魚系統面板（DAY-268）
+	_init_lucky_spin_wheel_panel()          # 幸運輪盤魚系統面板（DAY-269）
+	_init_lucky_mirror_duel_panel()         # 幸運鏡像對決魚系統面板（DAY-270）
+	_init_lucky_reroll_panel()              # 幸運倍率重擲魚系統面板（DAY-271）
+	_init_lucky_quality_mutation_panel()    # 幸運品質突變魚系統面板（DAY-272）
+	_init_lucky_resonance_wave_panel()      # 幸運共鳴波魚系統面板（DAY-273）
+	_init_lucky_fortune_prophecy_panel()    # 幸運命運預言魚系統面板（DAY-274）
+	_init_lucky_luck_totem_panel()          # 幸運幸運圖騰魚系統面板（DAY-275）
+	_init_lucky_golden_hurricane_panel()    # 幸運黃金颶風魚系統面板（DAY-276）
+	_init_lucky_lightning_hammer_panel()    # 幸運閃電錘魚系統面板（DAY-277）
+	_init_lucky_time_rift_panel()           # 幸運時間裂縫魚系統面板（DAY-278）
+	_init_lucky_rainbow_bridge_panel()      # 幸運彩虹橋魚系統面板（DAY-279）
+	_init_lucky_rare_chain_panel()          # 幸運連鎖稀有魚系統面板（DAY-280）
+	_init_lucky_gold_mutation_panel()       # 幸運黃金突變魚系統面板（DAY-281）
+	_init_lucky_star_burst_panel()          # 幸運星爆魚系統面板（DAY-282）
+	_init_lucky_four_symbols_panel()        # 幸運四象大獎魚系統面板（DAY-283）
+	_init_lucky_dragon_wrath_panel()        # 幸運龍怒隕石魚系統面板（DAY-284）
+	_init_lucky_phoenix_rebirth_panel()     # 幸運鳳凰涅槃魚系統面板（DAY-285）
+	_init_lucky_kraken_panel()              # 幸運深海克拉肯魚系統面板（DAY-286）
+	_init_lucky_cosmic_pulse_panel()        # 幸運宇宙脈衝魚系統面板（DAY-287）
+	_init_lucky_domino_panel()              # 幸運多米諾魚系統面板（DAY-288）
+
+## 憟??摮??唳???Label
+func _apply_pixel_font() -> void:
+	if not is_instance_valid(_pixel_font):
+		return
+	var labels = [coins_label, bet_label, character_label, labor_label, reward_popup, state_label]
+	for label in labels:
+		if is_instance_valid(label):
+			label.add_theme_font_override("font", _pixel_font)
+	# ??摮?
+	var buttons = [auto_button, lock_button, bet_minus_button, bet_plus_button, boss_button, bonus_button]
+	for btn in buttons:
+		if is_instance_valid(btn):
+			btn.add_theme_font_override("font", _pixel_font)
+
+var _last_labor_value: int = 0  # 餈質馱銝活???潘??菜葫?遛閫貊
+
+func _on_player_updated(_data: Dictionary) -> void:
+	_update_ui()
+
+func _update_ui() -> void:
+	coins_label.text = "?? %d" % GameManager.get_coins()
+
+	var lv = GameManager.get_bet_level()
+	var cost = GameManager.get_bet_cost()
+	bet_label.text = "BET LV%d  (%d/shot)" % [lv, cost]
+
+	character_label.text = "??%s" % GameManager.get_character_name()
+	character_label.modulate = GameManager.get_character_color()
+
+	var labor = GameManager.get_labor_value()
+	labor_bar.value = labor
+	# ???潭餈遛????
+	if labor >= 80:
+		labor_label.text = "??%d/100" % labor
+		labor_label.modulate = Color(1.0, 0.9, 0.2)
+	else:
+		labor_label.text = "? %d/100" % labor
+		labor_label.modulate = Color.WHITE
+
+	# ?菜葫???澆?? 100嚗孛?澆?蝝??
+	if labor >= 100 and _last_labor_value < 100:
+		var char_id = GameManager.player_data.get("character_id", "chiikawa")
+		HitEffect.spawn_level_up(Vector2(640, 630), char_id)
+		ScreenShake.add_trauma(0.3)
+	_last_labor_value = labor
+
+	# Auto ??
+	if GameManager.is_auto():
+		auto_button.modulate = Color(0.3, 1.0, 0.3)
+		auto_button.text = "AUTO ON"
+	else:
+		auto_button.modulate = Color.WHITE
+		auto_button.text = "AUTO"
+
+	# Lock ??
+	var lock_id = GameManager.get_lock_target_id()
+	if lock_id != "":
+		lock_button.modulate = Color(1.0, 0.8, 0.2)
+		lock_button.text = "?? LOCK"
+		_lock_active = true
+	else:
+		lock_button.modulate = Color(0.7, 0.7, 0.7)
+		lock_button.text = "?? LOCK"
+		_lock_active = false
+
+func _on_game_state_changed(new_state: String) -> void:
+	state_label.text = new_state.to_upper().replace("_", " ")
+
+	match new_state:
+		"boss_warning":
+			_show_boss_warning()
+		"boss_battle":
+			warning_overlay.visible = false
+		"bonus_game":
+			bonus_overlay.visible = true
+		"bonus_result", "normal_play", "boss_result":
+			bonus_overlay.visible = false
+			warning_overlay.visible = false
+
+func _show_boss_warning() -> void:
+	warning_overlay.visible = true
+	var tween = create_tween().set_loops(8)
+	tween.tween_property(warning_overlay, "modulate:a", 0.1, 0.18)
+	tween.tween_property(warning_overlay, "modulate:a", 1.0, 0.18)
+
+func _on_reward_received(reward: Dictionary) -> void:
+	var amount = reward.get("amount", 0)
+	var multiplier = reward.get("multiplier", 1.0)
+	if amount <= 0:
+		return
+	_show_reward_popup(amount, multiplier)
+
+func _show_reward_popup(amount: int, multiplier: float) -> void:
+	# 靘?瘙箏?憿舐內?批捆
+	var icon = "??"
+	if multiplier >= 100:
+		icon = "?"
+		reward_popup.modulate = Color(1.0, 0.3, 0.1, 1.0)
+	elif multiplier >= 20:
+		icon = "?"
+		reward_popup.modulate = Color(1.0, 0.85, 0.0, 1.0)
+	elif multiplier >= 10:
+		icon = "??"
+		reward_popup.modulate = Color(1.0, 1.0, 0.4, 1.0)
+	else:
+		icon = "??"
+		reward_popup.modulate = Color(1.0, 1.0, 1.0, 1.0)
+
+	reward_popup.text = "%s +%d  ?%.0f" % [icon, amount, multiplier]
+	reward_popup.position.y = _reward_popup_base_y
+
+	reward_popup.visible = true
+
+	var tween = create_tween()
+	tween.tween_property(reward_popup, "position:y", _reward_popup_base_y - 70, 0.7)
+	tween.parallel().tween_property(reward_popup, "modulate:a", 0.0, 0.7)
+	tween.tween_callback(func():
+		reward_popup.visible = false
+		reward_popup.position.y = _reward_popup_base_y
+	)
+
+func _on_boss_event(event_data: Dictionary) -> void:
+	match event_data.get("event", ""):
+		"warning":
+			AudioManager.stop_bgm_briefly()
+			AudioManager.play_sfx(AudioManager.SFX.BOSS_WARNING)
+			_show_boss_incoming_preview()  # BOSS 銵璇?閬賢???
+		"spawn":
+			AudioManager.play_bgm(AudioManager.BGM.BOSS_ENTER)
+			_hide_boss_incoming_preview()  # ?梯??汗嚗＊蝷箸迤撘??
+			_start_boss_timer()
+		"phase_change":
+			AudioManager.play_bgm(AudioManager.BGM.BOSS_RAGE)
+		"kill", "timeout":
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			AudioManager.play_bgm(AudioManager.BGM.MAIN_GAME)
+			_stop_boss_timer()
+			# BOSS ?捏?嗥??寞?
+			if event_data.get("event", "") == "kill":
+				HitEffect.spawn_big_win(Vector2(640, 360), 100.0)
+				ScreenShake.add_trauma(0.7)
+
+# ?? BOSS 閮???UI嚗??潭 28.3嚗??????????????????????????????
+
+func _start_boss_timer() -> void:
+	_boss_time_left = 60.0
+	_boss_active = true
+
+	# 撱箇? BOSS 閮??券??
+	if is_instance_valid(_boss_timer_node):
+		_boss_timer_node.queue_free()
+
+	var panel = Control.new()
+	panel.name = "BossTimerPanel"
+	panel.set_anchors_and_offsets_preset(Control.PRESET_TOP_RIGHT)
+	panel.position = Vector2(900, 50)
+	panel.size = Vector2(360, 80)
+	add_child(panel)
+	_boss_timer_node = panel
+
+	# ?
+	var bg = ColorRect.new()
+	bg.size = Vector2(360, 80)
+	bg.color = Color(0.1, 0.0, 0.0, 0.85)
+	panel.add_child(bg)
+
+	# BOSS 璅?
+	var title = Label.new()
+	title.name = "BossTitle"
+	title.text = "??BOSS BATTLE"
+	title.position = Vector2(10, 5)
+	title.add_theme_font_size_override("font_size", 16)
+	title.modulate = Color(1.0, 0.3, 0.3)
+	if is_instance_valid(_pixel_font):
+		title.add_theme_font_override("font", _pixel_font)
+	panel.add_child(title)
+
+	# ?拚???
+	var timer_lbl = Label.new()
+	timer_lbl.name = "BossTimeLabel"
+	timer_lbl.text = "60.0s"
+	timer_lbl.position = Vector2(10, 28)
+	timer_lbl.add_theme_font_size_override("font_size", 28)
+	timer_lbl.modulate = Color(1.0, 0.9, 0.2)
+	if is_instance_valid(_pixel_font):
+		timer_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(timer_lbl)
+
+	# ???內
+	var mult_lbl = Label.new()
+	mult_lbl.name = "BossMultLabel"
+	mult_lbl.text = "500x"
+	mult_lbl.position = Vector2(200, 28)
+	mult_lbl.add_theme_font_size_override("font_size", 28)
+	mult_lbl.modulate = Color(1.0, 0.5, 0.0)
+	if is_instance_valid(_pixel_font):
+		mult_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(mult_lbl)
+
+	# ??隤芣?
+	var hint_lbl = Label.new()
+	hint_lbl.name = "BossHintLabel"
+	hint_lbl.text = "Kill faster = higher reward!"
+	hint_lbl.position = Vector2(10, 60)
+	hint_lbl.add_theme_font_size_override("font_size", 12)
+	hint_lbl.modulate = Color(0.8, 0.8, 0.8)
+	if is_instance_valid(_pixel_font):
+		hint_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(hint_lbl)
+
+func _stop_boss_timer() -> void:
+	_boss_active = false
+	if is_instance_valid(_boss_timer_node):
+		var tween = create_tween()
+		tween.tween_property(_boss_timer_node, "modulate:a", 0.0, 0.5)
+		tween.tween_callback(func():
+			if is_instance_valid(_boss_timer_node):
+				_boss_timer_node.queue_free()
+				_boss_timer_node = null
+		)
+
+# ?? BOSS ?脣?汗 UI嚗郎??畾菟＊蝷?BOSS 銵璇? 0 憛急遛嚗??????????
+
+var _boss_preview_node: Control = null
+
+## 憿舐內 BOSS ?脣?汗嚗郎??畾?3 蝘?
+## 銵璇? 0 蝺拇憛急遛??100%嚗???敺?
+func _show_boss_incoming_preview() -> void:
+	if is_instance_valid(_boss_preview_node):
+		_boss_preview_node.queue_free()
+
+	var panel = Control.new()
+	panel.name = "BossIncomingPreview"
+	panel.position = Vector2(320, 280)  # ?恍銝剖亢??
+	panel.size = Vector2(640, 120)
+	panel.z_index = 90
+	panel.modulate.a = 0.0
+	add_child(panel)
+	_boss_preview_node = panel
+
+	# ?
+	var bg = ColorRect.new()
+	bg.size = Vector2(640, 120)
+	bg.color = Color(0.05, 0.0, 0.0, 0.88)
+	panel.add_child(bg)
+
+	# ?蝝??嚗???
+	var top_bar = ColorRect.new()
+	top_bar.name = "TopBar"
+	top_bar.size = Vector2(640, 4)
+	top_bar.color = Color(1.0, 0.1, 0.1, 1.0)
+	panel.add_child(top_bar)
+
+	# BOSS ?迂
+	var name_lbl = Label.new()
+	name_lbl.name = "BossNameLabel"
+	name_lbl.text = "!! BOSS INCOMING !!"
+	name_lbl.position = Vector2(20, 12)
+	name_lbl.add_theme_font_size_override("font_size", 22)
+	name_lbl.modulate = Color(1.0, 0.3, 0.3)
+	if is_instance_valid(_pixel_font):
+		name_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(name_lbl)
+
+	# BOSS ?舀?憿?
+	var sub_lbl = Label.new()
+	sub_lbl.text = "BOSS  HP: 3000"
+	sub_lbl.position = Vector2(20, 40)
+	sub_lbl.add_theme_font_size_override("font_size", 13)
+	sub_lbl.modulate = Color(0.8, 0.8, 0.8)
+	if is_instance_valid(_pixel_font):
+		sub_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(sub_lbl)
+
+	# HP 璇???
+	var hp_bg = ColorRect.new()
+	hp_bg.size = Vector2(600, 20)
+	hp_bg.position = Vector2(20, 65)
+	hp_bg.color = Color(0.15, 0.0, 0.0, 1.0)
+	panel.add_child(hp_bg)
+
+	# HP 璇?敺?0 憛急遛嚗?
+	var hp_bar = ColorRect.new()
+	hp_bar.name = "BossHPBar"
+	hp_bar.size = Vector2(0, 20)  # ??撖砍漲 0
+	hp_bar.position = Vector2(20, 65)
+	hp_bar.color = Color(0.9, 0.1, 0.1, 1.0)
+	panel.add_child(hp_bar)
+
+	# HP 璇????鈭桃?嚗?
+	var hp_shine = ColorRect.new()
+	hp_shine.name = "BossHPShine"
+	hp_shine.size = Vector2(0, 4)
+	hp_shine.position = Vector2(20, 65)
+	hp_shine.color = Color(1.0, 0.5, 0.5, 0.6)
+	panel.add_child(hp_shine)
+
+	# ???內
+	var mult_lbl = Label.new()
+	mult_lbl.text = "MAX 500x"
+	mult_lbl.position = Vector2(490, 12)
+	mult_lbl.add_theme_font_size_override("font_size", 18)
+	mult_lbl.modulate = Color(1.0, 0.6, 0.0)
+	if is_instance_valid(_pixel_font):
+		mult_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(mult_lbl)
+
+	# ???
+	var countdown_lbl = Label.new()
+	countdown_lbl.name = "CountdownLabel"
+	countdown_lbl.text = "3"
+	countdown_lbl.position = Vector2(295, 88)
+	countdown_lbl.add_theme_font_size_override("font_size", 20)
+	countdown_lbl.modulate = Color(1.0, 0.9, 0.2)
+	countdown_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	countdown_lbl.size = Vector2(50, 28)
+	if is_instance_valid(_pixel_font):
+		countdown_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(countdown_lbl)
+
+	# ?摨?
+	var tween = panel.create_tween()
+
+	# 1. 瘛∪嚗?.2 蝘?
+	tween.tween_property(panel, "modulate:a", 1.0, 0.2)
+
+	# 2. HP 璇? 0 憛急遛嚗?.5 蝘?璅⊥ BOSS ?嚗?
+	tween.parallel().tween_property(hp_bar, "size:x", 600.0, 2.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	tween.parallel().tween_property(hp_shine, "size:x", 600.0, 2.5).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+
+	# 3. ? 3????
+	tween.tween_callback(func():
+		if is_instance_valid(countdown_lbl):
+			countdown_lbl.text = "2"
+			var t2 = countdown_lbl.create_tween()
+			t2.tween_property(countdown_lbl, "scale", Vector2(1.5, 1.5), 0.1)
+			t2.tween_property(countdown_lbl, "scale", Vector2(1.0, 1.0), 0.1)
+	)
+	tween.tween_interval(0.8)
+	tween.tween_callback(func():
+		if is_instance_valid(countdown_lbl):
+			countdown_lbl.text = "1"
+			countdown_lbl.modulate = Color(1.0, 0.4, 0.4)
+			var t3 = countdown_lbl.create_tween()
+			t3.tween_property(countdown_lbl, "scale", Vector2(1.8, 1.8), 0.1)
+			t3.tween_property(countdown_lbl, "scale", Vector2(1.0, 1.0), 0.1)
+	)
+	tween.tween_interval(0.5)
+
+	# 4. HP 璇????遛敺???3 甈∴?
+	for _i in 3:
+		tween.tween_property(hp_bar, "modulate", Color(2.0, 0.5, 0.5, 1.0), 0.06)
+		tween.tween_property(hp_bar, "modulate", Color.WHITE, 0.06)
+
+	# ??????嚗蝡?tween嚗?蝥?郎????
+	var bar_tween = top_bar.create_tween().set_loops()
+	bar_tween.tween_property(top_bar, "modulate:a", 0.3, 0.2)
+	bar_tween.tween_property(top_bar, "modulate:a", 1.0, 0.2)
+
+## ?梯? BOSS ?脣?汗嚗OSS 甇???箇??
+func _hide_boss_incoming_preview() -> void:
+	if not is_instance_valid(_boss_preview_node):
+		return
+	var tween = create_tween()
+	tween.tween_property(_boss_preview_node, "modulate:a", 0.0, 0.3)
+	tween.tween_callback(func():
+		if is_instance_valid(_boss_preview_node):
+			_boss_preview_node.queue_free()
+			_boss_preview_node = null
+	)
+
+func _get_boss_multiplier_text(time_left: float) -> String:
+	if time_left <= 10:
+		return "100x"
+	elif time_left <= 20:
+		return "150x"
+	elif time_left <= 30:
+		return "200x"
+	elif time_left <= 40:
+		return "300x"
+	elif time_left <= 50:
+		return "400x"
+	else:
+		return "500x"
+
+func _get_boss_multiplier_color(time_left: float) -> Color:
+	if time_left <= 10:
+		return Color(0.6, 0.6, 0.6)  # ?堆??雿?嚗?
+	elif time_left <= 20:
+		return Color(0.4, 0.8, 1.0)  # ??
+	elif time_left <= 30:
+		return Color(0.4, 1.0, 0.4)  # 蝬?
+	elif time_left <= 40:
+		return Color(1.0, 0.9, 0.2)  # 暺?
+	elif time_left <= 50:
+		return Color(1.0, 0.5, 0.0)  # 璈?
+	else:
+		return Color(1.0, 0.2, 0.2)  # 蝝??擃?嚗?
+
+func _process(delta: float) -> void:
+	# Session Stats 自動彈出由 SessionStatsPanel._process 處理（DAY-053）
+
+	if not _boss_active or not is_instance_valid(_boss_timer_node):
+		return
+
+	_boss_time_left = max(0.0, _boss_time_left - delta)
+
+	var timer_lbl = _boss_timer_node.get_node_or_null("BossTimeLabel")
+	var mult_lbl = _boss_timer_node.get_node_or_null("BossMultLabel")
+
+	if timer_lbl:
+		timer_lbl.text = "%.1fs" % _boss_time_left
+		# ?敺?10 蝘??郎??
+		if _boss_time_left <= 10.0:
+			var flash = int(_boss_time_left * 4) % 2 == 0
+			timer_lbl.modulate = Color.RED if flash else Color.WHITE
+		else:
+			timer_lbl.modulate = Color(1.0, 0.9, 0.2)
+
+	if mult_lbl:
+		var mult_text = _get_boss_multiplier_text(_boss_time_left)
+		var mult_color = _get_boss_multiplier_color(_boss_time_left)
+		mult_lbl.text = mult_text
+		mult_lbl.modulate = mult_color
+
+		# ??霈??憭扳?蝷?
+		if mult_text != mult_lbl.get_meta("last_mult", ""):
+			mult_lbl.set_meta("last_mult", mult_text)
+			var tween = create_tween()
+			tween.tween_property(mult_lbl, "scale", Vector2(1.4, 1.4), 0.1)
+			tween.tween_property(mult_lbl, "scale", Vector2(1.0, 1.0), 0.1)
+
+	# FPS 憿舐內嚗EBUG 璅∪?嚗?
+	if OS.is_debug_build():
+		_update_fps_display()
+
+func _on_bonus_event(event_data: Dictionary) -> void:
+	match event_data.get("event", ""):
+		"ready":
+			AudioManager.play_sfx(AudioManager.SFX.BONUS_READY)
+		"start":
+			AudioManager.play_bgm(AudioManager.BGM.BONUS_GAME)
+		"tick":
+			var tl = event_data.get("time_left", 0.0)
+			var timer_lbl = bonus_overlay.get_node_or_null("TimerLabel")
+			if timer_lbl:
+				timer_lbl.text = "%.1f" % tl
+		"end":
+			_show_reward_popup(event_data.get("reward", 0), event_data.get("multiplier", 50.0))
+			AudioManager.play_bgm(AudioManager.BGM.MAIN_GAME)
+
+func _on_auto_pressed() -> void:
+	NetworkManager.send_auto_toggle()
+
+func _on_lock_pressed() -> void:
+	# 閫???
+	NetworkManager.send_lock("")
+
+func _on_bet_minus() -> void:
+	NetworkManager.send_bet_change(max(1, GameManager.get_bet_level() - 1))
+
+func _on_bet_plus() -> void:
+	NetworkManager.send_bet_change(min(10, GameManager.get_bet_level() + 1))
+
+# ?? ?瑞?/??UI ??????????????????????????????????????????????
+
+var _disconnect_overlay: Control = null
+var _reconnect_dots_timer: float = 0.0
+var _reconnect_dots: int = 0
+var _is_disconnected: bool = false
+
+func _create_disconnect_overlay() -> void:
+	var overlay = Control.new()
+	overlay.name = "DisconnectOverlay"
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.visible = false
+	overlay.z_index = 100
+	add_child(overlay)
+	_disconnect_overlay = overlay
+
+	# ??暺?
+	var bg = ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.0, 0.0, 0.0, 0.75)
+	overlay.add_child(bg)
+
+	# ?瑞??內
+	var icon_label = Label.new()
+	icon_label.name = "DisconnectIcon"
+	icon_label.text = "?"
+	icon_label.position = Vector2(580, 290)
+	icon_label.add_theme_font_size_override("font_size", 48)
+	overlay.add_child(icon_label)
+
+	# ?瑞???
+	var msg_label = Label.new()
+	msg_label.name = "DisconnectMsg"
+	msg_label.text = "???銝剜"
+	msg_label.position = Vector2(540, 355)
+	msg_label.add_theme_font_size_override("font_size", 24)
+	msg_label.modulate = Color(1.0, 0.4, 0.4)
+	if is_instance_valid(_pixel_font):
+		msg_label.add_theme_font_override("font", _pixel_font)
+	overlay.add_child(msg_label)
+
+	# ??葉??嚗葆??暺?嚗?
+	var reconnect_label = Label.new()
+	reconnect_label.name = "ReconnectLabel"
+	reconnect_label.text = "????銝?.."
+	reconnect_label.position = Vector2(520, 390)
+	reconnect_label.add_theme_font_size_override("font_size", 18)
+	reconnect_label.modulate = Color(0.8, 0.8, 0.8)
+	if is_instance_valid(_pixel_font):
+		reconnect_label.add_theme_font_override("font", _pixel_font)
+	overlay.add_child(reconnect_label)
+
+func _on_disconnected() -> void:
+	_is_disconnected = true
+	if is_instance_valid(_disconnect_overlay):
+		_disconnect_overlay.visible = true
+		# ???
+		var tween = create_tween().set_loops()
+		tween.tween_property(_disconnect_overlay, "modulate:a", 0.7, 0.5)
+		tween.tween_property(_disconnect_overlay, "modulate:a", 1.0, 0.5)
+
+func _on_reconnected() -> void:
+	_is_disconnected = false
+	if is_instance_valid(_disconnect_overlay):
+		# 憿舐內?歇?????敺楚??
+		var msg = _disconnect_overlay.get_node_or_null("DisconnectMsg")
+		if msg:
+			msg.text = "RECONNECTING..."
+			msg.modulate = Color(0.3, 1.0, 0.3)
+		var reconnect = _disconnect_overlay.get_node_or_null("ReconnectLabel")
+		if reconnect:
+			reconnect.visible = false
+
+		var tween = create_tween()
+		tween.tween_interval(1.0)
+		tween.tween_property(_disconnect_overlay, "modulate:a", 0.0, 0.5)
+		tween.tween_callback(func():
+			if is_instance_valid(_disconnect_overlay):
+				_disconnect_overlay.visible = false
+				_disconnect_overlay.modulate.a = 1.0
+				# ?蔭??
+				var m = _disconnect_overlay.get_node_or_null("DisconnectMsg")
+				if m:
+					m.text = "???銝剜"
+					m.modulate = Color(1.0, 0.4, 0.4)
+				var r = _disconnect_overlay.get_node_or_null("ReconnectLabel")
+				if r:
+					r.visible = true
+		)
+
+# ?? ??璁?UI ??????????????????????????????????????????????????
+var _fps_label: Label = null
+var _fps_update_timer: float = 0.0
+var _perf_panel: Control = null  # 摰????Ｘ
+
+func _update_fps_display() -> void:
+	_fps_update_timer += get_process_delta_time()
+	if _fps_update_timer < 0.5:
+		return
+	_fps_update_timer = 0.0
+
+	# 擐活撱箇?摰??Ｘ
+	if _perf_panel == null:
+		_create_perf_panel()
+
+	if not is_instance_valid(_perf_panel):
+		return
+
+	var fps = Engine.get_frames_per_second()
+	var mem_mb = PerformanceMonitor.snapshot_memory_mb
+	var draw_calls = PerformanceMonitor.snapshot_draw_calls
+	var nodes = PerformanceMonitor.snapshot_nodes
+	var quality = PerformanceMonitor.current_quality
+	var quality_str = ["HIGH", "MED", "LOW"][quality]
+
+	# FPS 銵?
+	var fps_lbl = _perf_panel.get_node_or_null("FPSLine")
+	if fps_lbl:
+		fps_lbl.text = "FPS: %d  [%s]" % [fps, quality_str]
+		if fps < 30:
+			fps_lbl.modulate = Color(1.0, 0.3, 0.3, 0.95)
+		elif fps < 50:
+			fps_lbl.modulate = Color(1.0, 0.8, 0.2, 0.9)
+		else:
+			fps_lbl.modulate = Color(0.4, 1.0, 0.5, 0.85)
+
+	# 閮擃?
+	var mem_lbl = _perf_panel.get_node_or_null("MemLine")
+	if mem_lbl:
+		mem_lbl.text = "MEM: %.1f MB" % mem_mb
+		if mem_mb > 200.0:
+			mem_lbl.modulate = Color(1.0, 0.5, 0.2, 0.9)
+		else:
+			mem_lbl.modulate = Color(0.7, 0.9, 1.0, 0.8)
+
+	# Draw Calls 銵?
+	var dc_lbl = _perf_panel.get_node_or_null("DCLine")
+	if dc_lbl:
+		dc_lbl.text = "DC: %d  Nodes: %d" % [draw_calls, nodes]
+		if draw_calls > 500:
+			dc_lbl.modulate = Color(1.0, 0.6, 0.2, 0.9)
+		else:
+			dc_lbl.modulate = Color(0.7, 0.9, 1.0, 0.8)
+
+	# Ping 銵?DAY-036嚗?
+	var ping_lbl = _perf_panel.get_node_or_null("PingLine")
+	if ping_lbl:
+		var ping_ms = NetworkManager.get_ping_ms()
+		if ping_ms < 0:
+			ping_lbl.text = "PING: --"
+			ping_lbl.modulate = Color(0.6, 0.6, 0.6, 0.7)
+		else:
+			ping_lbl.text = "PING: %d ms" % ping_ms
+			if ping_ms > 200:
+				ping_lbl.modulate = Color(1.0, 0.3, 0.3, 0.9)  # 蝝?擃辣??
+			elif ping_ms > 100:
+				ping_lbl.modulate = Color(1.0, 0.8, 0.2, 0.9)  # 暺?銝剖辣??
+			else:
+				ping_lbl.modulate = Color(0.4, 1.0, 0.5, 0.85) # 蝬?雿辣??
+
+	# Pool 蝯梯?銵?DAY-041嚗ulletPool + TargetPool嚗?
+	var pool_lbl = _perf_panel.get_node_or_null("PoolLine")
+	if pool_lbl:
+		var b_stats = PerformanceMonitor.get_bullet_pool_stats()
+		var t_stats = TargetPool.get_stats()
+		pool_lbl.text = "POOL B:%d/%d T:%d/%d" % [
+			b_stats.get("active", 0), b_stats.get("total", 0),
+			t_stats.get("active", 0), t_stats.get("total", 0)
+		]
+
+func _create_perf_panel() -> void:
+	var panel = Control.new()
+	panel.name = "PerfPanel"
+	panel.position = Vector2(8, 670)
+	panel.size = Vector2(220, 74)  # 擃漲敺?56 憓???74嚗???ping 銵?
+	panel.z_index = 200
+	add_child(panel)
+	_perf_panel = panel
+
+	# ???
+	var bg = ColorRect.new()
+	bg.size = Vector2(220, 74)
+	bg.color = Color(0.0, 0.0, 0.0, 0.55)
+	panel.add_child(bg)
+
+	# 撌血蝬??嚗EBUG 璅?嚗?
+	var side = ColorRect.new()
+	side.size = Vector2(3, 74)
+	side.color = Color(0.2, 1.0, 0.4, 0.8)
+	panel.add_child(side)
+
+	# FPS 銵?
+	var fps_lbl = Label.new()
+	fps_lbl.name = "FPSLine"
+	fps_lbl.position = Vector2(8, 4)
+	fps_lbl.size = Vector2(210, 16)
+	fps_lbl.add_theme_font_size_override("font_size", 12)
+	fps_lbl.text = "FPS: --  [HIGH]"
+	fps_lbl.modulate = Color(0.4, 1.0, 0.5, 0.85)
+	if is_instance_valid(_pixel_font):
+		fps_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(fps_lbl)
+
+	# 閮擃?
+	var mem_lbl = Label.new()
+	mem_lbl.name = "MemLine"
+	mem_lbl.position = Vector2(8, 22)
+	mem_lbl.size = Vector2(210, 16)
+	mem_lbl.add_theme_font_size_override("font_size", 12)
+	mem_lbl.text = "MEM: -- MB"
+	mem_lbl.modulate = Color(0.7, 0.9, 1.0, 0.8)
+	if is_instance_valid(_pixel_font):
+		mem_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(mem_lbl)
+
+	# Draw Calls 銵?
+	var dc_lbl = Label.new()
+	dc_lbl.name = "DCLine"
+	dc_lbl.position = Vector2(8, 40)
+	dc_lbl.size = Vector2(210, 16)
+	dc_lbl.add_theme_font_size_override("font_size", 12)
+	dc_lbl.text = "DC: --  Nodes: --"
+	dc_lbl.modulate = Color(0.7, 0.9, 1.0, 0.8)
+	if is_instance_valid(_pixel_font):
+		dc_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(dc_lbl)
+
+	# Ping 銵?DAY-036嚗?
+	var ping_lbl = Label.new()
+	ping_lbl.name = "PingLine"
+	ping_lbl.position = Vector2(8, 58)
+	ping_lbl.size = Vector2(210, 16)
+	ping_lbl.add_theme_font_size_override("font_size", 12)
+	ping_lbl.text = "PING: --"
+	ping_lbl.modulate = Color(0.6, 0.6, 0.6, 0.7)
+	if is_instance_valid(_pixel_font):
+		ping_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(ping_lbl)
+
+	# Pool 蝯梯?銵?DAY-041嚗ulletPool + TargetPool嚗?
+	var pool_lbl = Label.new()
+	pool_lbl.name = "PoolLine"
+	pool_lbl.position = Vector2(8, 76)
+	pool_lbl.size = Vector2(210, 16)
+	pool_lbl.add_theme_font_size_override("font_size", 11)
+	pool_lbl.text = "POOL: B?/? T?/?"
+	pool_lbl.modulate = Color(0.6, 0.8, 0.6, 0.75)
+	if is_instance_valid(_pixel_font):
+		pool_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(pool_lbl)
+
+	# ?Ｘ擃漲隤踵嚗???pool 銵?敺?74 憓???96嚗?
+	bg.size.y = 96
+	panel.size.y = 96
+	var side_bar = panel.get_node_or_null("ColorRect")  # 撌血??
+	if is_instance_valid(side_bar):
+		side_bar.size.y = 96
+
+# ?? ?停?蝟餌絞 ??????????????????????????????????????????????
+
+var _achievement_queue: Array = []   # 敺＊蝷箇??停雿?
+var _achievement_showing: bool = false
+var _achievement_panel: Control = null
+
+func _create_achievement_queue() -> void:
+	# ?停??Ｘ嚗銝?嚗?憪??
+	var panel = Control.new()
+	panel.name = "AchievementPanel"
+	panel.position = Vector2(900, 650)  # ?喃?閫?
+	panel.size = Vector2(360, 80)
+	panel.z_index = 50
+	panel.visible = false
+	add_child(panel)
+	_achievement_panel = panel
+
+	# ?嚗楛?脣???嚗??脤?獢?嚗?
+	var bg = ColorRect.new()
+	bg.name = "AchBG"
+	bg.size = Vector2(360, 80)
+	bg.color = Color(0.08, 0.06, 0.02, 0.92)
+	panel.add_child(bg)
+
+	# ????
+	var top_bar = ColorRect.new()
+	top_bar.size = Vector2(360, 4)
+	top_bar.color = Color(1.0, 0.85, 0.1, 1.0)
+	panel.add_child(top_bar)
+
+	# ?停?內嚗之 emoji嚗?
+	var icon_lbl = Label.new()
+	icon_lbl.name = "AchIcon"
+	icon_lbl.text = "??"
+	icon_lbl.position = Vector2(8, 18)
+	icon_lbl.add_theme_font_size_override("font_size", 36)
+	panel.add_child(icon_lbl)
+
+	# ??撠梯圾????憿?
+	var title_lbl = Label.new()
+	title_lbl.name = "AchTitle"
+	title_lbl.text = ""  # will be set dynamically
+	title_lbl.position = Vector2(58, 8)
+	title_lbl.add_theme_font_size_override("font_size", 11)
+	title_lbl.modulate = Color(1.0, 0.85, 0.1)
+	if is_instance_valid(_pixel_font):
+		title_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(title_lbl)
+
+	# ?停?迂
+	var name_lbl = Label.new()
+	name_lbl.name = "AchName"
+	name_lbl.text = ""
+	name_lbl.position = Vector2(58, 26)
+	name_lbl.add_theme_font_size_override("font_size", 16)
+	name_lbl.modulate = Color.WHITE
+	if is_instance_valid(_pixel_font):
+		name_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(name_lbl)
+
+	# ?停?膩
+	var desc_lbl = Label.new()
+	desc_lbl.name = "AchDesc"
+	desc_lbl.text = ""
+	desc_lbl.position = Vector2(58, 50)
+	desc_lbl.add_theme_font_size_override("font_size", 11)
+	desc_lbl.modulate = Color(0.8, 0.8, 0.8)
+	if is_instance_valid(_pixel_font):
+		desc_lbl.add_theme_font_override("font", _pixel_font)
+	panel.add_child(desc_lbl)
+
+func _on_achievement_unlocked(achievement_data: Dictionary) -> void:
+	_achievement_queue.append(achievement_data)
+	if not _achievement_showing:
+		_show_next_achievement()
+
+func _show_next_achievement() -> void:
+	if _achievement_queue.is_empty() or not is_instance_valid(_achievement_panel):
+		_achievement_showing = false
+		return
+
+	_achievement_showing = true
+	var data = _achievement_queue.pop_front()
+
+	# ?湔?Ｘ?批捆
+	var icon_lbl = _achievement_panel.get_node_or_null("AchIcon")
+	var name_lbl = _achievement_panel.get_node_or_null("AchName")
+	var desc_lbl = _achievement_panel.get_node_or_null("AchDesc")
+
+	if icon_lbl:
+		icon_lbl.text = data.get("icon", "??")
+	if name_lbl:
+		name_lbl.text = data.get("name", "")
+	if desc_lbl:
+		desc_lbl.text = data.get("description", "")
+
+	# 靘?撠梢??身摰椰?游蔗?脤?璇???
+	var side_bar = _achievement_panel.get_node_or_null("AchSideBar")
+	if not is_instance_valid(side_bar):
+		side_bar = ColorRect.new()
+		side_bar.name = "AchSideBar"
+		side_bar.size = Vector2(4, 80)
+		side_bar.position = Vector2(0, 0)
+		_achievement_panel.add_child(side_bar)
+	var ach_type = data.get("type", "normal")
+	match ach_type:
+		"boss":    side_bar.color = Color(1.0, 0.2, 0.2, 1.0)   # 蝝 ??BOSS ?賊?
+		"bonus":   side_bar.color = Color(0.2, 0.8, 0.2, 1.0)   # 蝬 ??Bonus ?賊?
+		"special": side_bar.color = Color(0.6, 0.2, 1.0, 1.0)   # 蝝怨 ???寞??停
+		_:         side_bar.color = Color(1.0, 0.85, 0.1, 1.0)  # ? ??銝?祆?撠?
+
+	# ?剜?單?嚗 bonus_ready ?單?嚗?
+	AudioManager.play_sfx(AudioManager.SFX.BONUS_READY)
+
+	# ?嚗??喳皛 ??敶歲蝮格 ???? 3 蝘???瘛∪皛粥
+	_achievement_panel.modulate.a = 1.0
+	_achievement_panel.scale = Vector2(1.0, 1.0)
+	_achievement_panel.position.x = 1300.0  # ?恍憭??
+	_achievement_panel.visible = true
+
+	var tween = create_tween().set_parallel(false)
+	# 皛嚗?.35 蝘?BACK 敶改?
+	tween.tween_property(_achievement_panel, "position:x", 900.0, 0.35).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+	# 敶歲蝮格嚗?.15 蝘??曉之 ???迤嚗?
+	var scale_tween = create_tween().set_parallel(true)
+	scale_tween.tween_property(_achievement_panel, "scale", Vector2(1.05, 1.05), 0.08).set_ease(Tween.EASE_OUT)
+	scale_tween.chain().tween_property(_achievement_panel, "scale", Vector2(1.0, 1.0), 0.1).set_ease(Tween.EASE_IN_OUT)
+	# ?? 3 蝘?
+	tween.tween_interval(3.0)
+	# 瘛∪ + 皛嚗?.3 蝘?
+	tween.tween_property(_achievement_panel, "modulate:a", 0.0, 0.3).set_ease(Tween.EASE_IN)
+	tween.tween_callback(func():
+		if is_instance_valid(_achievement_panel):
+			_achievement_panel.visible = false
+			_achievement_panel.modulate.a = 1.0
+			_achievement_panel.scale = Vector2(1.0, 1.0)
+		# 憿舐內銝???撠梧??乩???蝛綽?
+		_show_next_achievement()
+	)
+
+# ?? 憭批輒 UI嚗AY-020嚗??????????????????????????????????????????
+
+var _lobby_overlay: Control = null
+var _lobby_manager: Control = null
+
+## 撱箇?憭批輒 overlay嚗?憪???舐???????恬?
+func _create_lobby_overlay() -> void:
+	# 撱箇??刻撟?overlay 摰孵
+	var overlay = Control.new()
+	overlay.name = "LobbyOverlay"
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.visible = false
+	overlay.z_index = 150
+	add_child(overlay)
+	_lobby_overlay = overlay
+
+	# 撱箇? LobbyManager UI
+	var lobby_script = load("res://scripts/ui/LobbyManager.gd")
+	if lobby_script:
+		_lobby_manager = lobby_script.new()
+		_lobby_manager.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		overlay.add_child(_lobby_manager)
+		# ???輸??豢?閮?
+		_lobby_manager.room_selected.connect(_on_lobby_room_selected)
+
+	# ??TopBar ????????
+	var top_bar = get_node_or_null("TopBar")
+	if is_instance_valid(top_bar):
+		var switch_btn = Button.new()
+		switch_btn.name = "SwitchRoomBtn"
+		switch_btn.text = "??"
+		switch_btn.position = Vector2(1240, 6)
+		switch_btn.size = Vector2(32, 28)
+		switch_btn.add_theme_font_size_override("font_size", 16)
+		switch_btn.pressed.connect(_show_lobby)
+		switch_btn.tooltip_text = "???輸?"
+		if is_instance_valid(_pixel_font):
+			switch_btn.add_theme_font_override("font", _pixel_font)
+		top_bar.add_child(switch_btn)
+
+		# ?迂閮剖???嚗AY-021嚗?
+		var name_btn = Button.new()
+		name_btn.name = "SetNameBtn"
+		name_btn.text = "P"
+		name_btn.position = Vector2(1204, 6)
+		name_btn.size = Vector2(32, 28)
+		name_btn.add_theme_font_size_override("font_size", 16)
+		name_btn.pressed.connect(show_name_dialog)
+		name_btn.tooltip_text = "閮剖??迂"
+		if is_instance_valid(_pixel_font):
+			name_btn.add_theme_font_override("font", _pixel_font)
+		top_bar.add_child(name_btn)
+
+## 憿舐內憭批輒
+func _show_lobby() -> void:
+	if not is_instance_valid(_lobby_overlay):
+		return
+	_lobby_overlay.visible = true
+	_lobby_overlay.modulate.a = 0.0
+	var tween = create_tween()
+	tween.tween_property(_lobby_overlay, "modulate:a", 1.0, 0.3)
+	# 閫貊?輸??”?瑟
+	if is_instance_valid(_lobby_manager) and _lobby_manager.has_method("show_lobby"):
+		_lobby_manager.show_lobby()
+
+## 憭批輒?豢??輸?敺??矽
+func _on_lobby_room_selected(room_id: String) -> void:
+	print("[HUD] Room selected: ", room_id)
+	# 瘛∪憭批輒
+	var tween = create_tween()
+	tween.tween_property(_lobby_overlay, "modulate:a", 0.0, 0.4)
+	tween.tween_callback(func():
+		if is_instance_valid(_lobby_overlay):
+			_lobby_overlay.visible = false
+	)
+
+	# 閫?唳芋撘?憿舐內???唬葉??蝐歹?DAY-024嚗?
+	if NetworkManager.is_spectator():
+		_show_spectator_badge()
+		var notify_lbl = Label.new()
+		notify_lbl.text = "?? 閫??%s 銝?.." % room_id
+		notify_lbl.position = Vector2(440, 360)
+		notify_lbl.size = Vector2(400, 40)
+		notify_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		notify_lbl.add_theme_font_size_override("font_size", 18)
+		notify_lbl.modulate = Color(0.5, 0.8, 1.0)
+		if is_instance_valid(_pixel_font):
+			notify_lbl.add_theme_font_override("font", _pixel_font)
+		add_child(notify_lbl)
+		var t2 = create_tween()
+		t2.tween_interval(2.0)
+		t2.tween_property(notify_lbl, "modulate:a", 0.0, 0.5)
+		t2.tween_callback(func():
+			if is_instance_valid(notify_lbl):
+				notify_lbl.queue_free()
+		)
+		return
+
+	# 銝?砍??交??憿舐內???輸??內
+	var notify_lbl = Label.new()
+	notify_lbl.text = "????%s..." % room_id
+	notify_lbl.position = Vector2(440, 360)
+	notify_lbl.size = Vector2(400, 40)
+	notify_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	notify_lbl.add_theme_font_size_override("font_size", 18)
+	notify_lbl.modulate = Color(0.4, 1.0, 0.5)
+	if is_instance_valid(_pixel_font):
+		notify_lbl.add_theme_font_override("font", _pixel_font)
+	add_child(notify_lbl)
+	var t2 = create_tween()
+	t2.tween_interval(1.5)
+	t2.tween_property(notify_lbl, "modulate:a", 0.0, 0.5)
+	t2.tween_callback(func():
+		if is_instance_valid(notify_lbl):
+			notify_lbl.queue_free()
+	)
+
+## 憿舐內閫?唳?蝐歹?DAY-024嚗??喃?閫??脯??閫?唬葉??蝐?
+func _show_spectator_badge() -> void:
+	# ?踹???撱箇?
+	if get_node_or_null("SpectatorBadge") != null:
+		return
+	var badge = Label.new()
+	badge.name = "SpectatorBadge"
+	badge.text = "?? 閫?唬葉"
+	badge.position = Vector2(1050, 8)
+	badge.size = Vector2(180, 24)
+	badge.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	badge.add_theme_font_size_override("font_size", 14)
+	badge.modulate = Color(0.5, 0.8, 1.0)
+	if is_instance_valid(_pixel_font):
+		badge.add_theme_font_override("font", _pixel_font)
+	# ? TopBar
+	var top_bar = get_node_or_null("TopBar")
+	if is_instance_valid(top_bar):
+		top_bar.add_child(badge)
+	else:
+		add_child(badge)
+
+# ?? ?拙振?迂閮剖?嚗AY-021嚗??????????????????????????????????????
+
+var _name_dialog: Control = null
+
+## 憿舐內?迂閮剖?撠店獢?
+func show_name_dialog() -> void:
+	if is_instance_valid(_name_dialog):
+		_name_dialog.queue_free()
+
+	var dialog = Control.new()
+	dialog.name = "NameDialog"
+	dialog.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	dialog.z_index = 200
+	add_child(dialog)
+	_name_dialog = dialog
+
+	# ???嚗?????
+	var bg = ColorRect.new()
+	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	bg.color = Color(0.0, 0.0, 0.0, 0.6)
+	bg.gui_input.connect(func(event):
+		if event is InputEventMouseButton and event.pressed:
+			if is_instance_valid(_name_dialog):
+				_name_dialog.queue_free()
+				_name_dialog = null
+	)
+	dialog.add_child(bg)
+
+	# 撠店獢?選??恍銝剖亢嚗?
+	var panel = Control.new()
+	panel.name = "Panel"
+	panel.position = Vector2(390, 300)
+	panel.size = Vector2(500, 160)
+	dialog.add_child(panel)
+
+	# ?Ｘ?
+	var panel_bg = ColorRect.new()
+	panel_bg.size = Vector2(500, 160)
+	panel_bg.color = Color(0.05, 0.08, 0.2, 0.97)
+	panel.add_child(panel_bg)
+
+	# ????
+	var top_line = ColorRect.new()
+	top_line.size = Vector2(500, 3)
+	top_line.color = Color(0.9, 0.75, 0.2, 0.9)
+	panel.add_child(top_line)
+
+	# 璅?
+	var title = Label.new()
+	title.text = "??閮剖?憿舐內?迂"
+	title.position = Vector2(16, 12)
+	title.add_theme_font_size_override("font_size", 18)
+	title.modulate = Color(1.0, 0.9, 0.3)
+	if is_instance_valid(_pixel_font):
+		title.add_theme_font_override("font", _pixel_font)
+	panel.add_child(title)
+
+	# 隤芣???
+	var hint = Label.new()
+	hint.text = "1-16 摮?嚗＊蝷箏??璁?"
+	hint.position = Vector2(16, 40)
+	hint.add_theme_font_size_override("font_size", 12)
+	hint.modulate = Color(0.7, 0.7, 0.7)
+	if is_instance_valid(_pixel_font):
+		hint.add_theme_font_override("font", _pixel_font)
+	panel.add_child(hint)
+
+	# 頛詨獢?
+	var line_edit = LineEdit.new()
+	line_edit.name = "NameInput"
+	line_edit.position = Vector2(16, 65)
+	line_edit.size = Vector2(360, 36)
+	line_edit.placeholder_text = "頛詨?迂..."
+	line_edit.max_length = 16
+	line_edit.text = GameManager.player_data.get("display_name", "")
+	line_edit.add_theme_font_size_override("font_size", 16)
+	if is_instance_valid(_pixel_font):
+		line_edit.add_theme_font_override("font", _pixel_font)
+	panel.add_child(line_edit)
+
+	# 蝣箄???
+	var confirm_btn = Button.new()
+	confirm_btn.name = "ConfirmBtn"
+	confirm_btn.text = "蝣箄?"
+	confirm_btn.position = Vector2(390, 65)
+	confirm_btn.size = Vector2(96, 36)
+	confirm_btn.add_theme_font_size_override("font_size", 14)
+	if is_instance_valid(_pixel_font):
+		confirm_btn.add_theme_font_override("font", _pixel_font)
+	confirm_btn.pressed.connect(func():
+		var name_input = panel.get_node_or_null("NameInput")
+		if not name_input:
+			return
+		var new_name = name_input.text.strip_edges()
+		if new_name.length() == 0 or new_name.length() > 16:
+			var err_tween = create_tween().set_loops(3)
+			err_tween.tween_property(name_input, "modulate", Color(1.0, 0.3, 0.3), 0.1)
+			err_tween.tween_property(name_input, "modulate", Color.WHITE, 0.1)
+			return
+		NetworkManager.send_set_display_name(new_name)
+		AudioManager.play_sfx(AudioManager.SFX.WEED_PULL)
+		if is_instance_valid(_name_dialog):
+			_name_dialog.queue_free()
+			_name_dialog = null
+	)
+	panel.add_child(confirm_btn)
+
+	# ????
+	var cancel_btn = Button.new()
+	cancel_btn.text = "??"
+	cancel_btn.position = Vector2(16, 115)
+	cancel_btn.size = Vector2(96, 32)
+	cancel_btn.add_theme_font_size_override("font_size", 13)
+	cancel_btn.modulate = Color(0.7, 0.7, 0.7)
+	if is_instance_valid(_pixel_font):
+		cancel_btn.add_theme_font_override("font", _pixel_font)
+	cancel_btn.pressed.connect(func():
+		if is_instance_valid(_name_dialog):
+			_name_dialog.queue_free()
+			_name_dialog = null
+	)
+	panel.add_child(cancel_btn)
+
+	# 瘛∪?
+	dialog.modulate.a = 0.0
+	var tween = create_tween()
+	tween.tween_property(dialog, "modulate:a", 1.0, 0.15)
+	line_edit.grab_focus()
+	line_edit.select_all()
+
+
+# ?? ???鈭辣嚗AY-022嚗??????????????????????????????????????????
+
+func _on_combo_event(combo_data: Dictionary) -> void:
+	var combo_count = combo_data.get("combo_count", 1)
+	if combo_count < 2:
+		return
+	# ?函?唬?蝵桅＊蝷粹???寞?
+	HitEffect.spawn_combo(combo_count, Vector2(640, 580))
+	# ????單?嚗 kill.wav嚗靽???
+	AudioManager.play_sfx(AudioManager.SFX.KILL)
+
+# ?? 瘥隞餃??Ｘ嚗AY-037嚗??????????????????????????????????????
+
+# ?? 瘥隞餃??Ｘ嚗AY-037嚗AY-053 ????MissionPanel.gd嚗??????????????????
+
+var _mission_panel_node: MissionPanelScript = null  # ?函??Ｘ蝭暺?
+
+## ???遙??選?DAY-053嚗?
+func _init_mission_panel() -> void:
+	pass  # disabled: broken panel
+## 隞餃?摰??嚗? MissionPanel 頧?唳?撠梢蝟餌絞嚗?
+func _on_mission_completed_notify(mission_data: Dictionary) -> void:
+	var name_str = mission_data.get("name", "隞餃?摰?")
+	var icon = mission_data.get("icon", "??")
+	var reward = mission_data.get("reward", 0)
+	_achievement_queue.append({
+		"name": "%s %s" % [icon, name_str],
+		"description": "摰?嚗?????%d" % reward,
+		"icon": icon,
+		"type": "special"
+	})
+	if not _achievement_showing:
+		_show_next_achievement()
+
+## 閮剖?隞餃??蔭??嚗 GameManager ?澆嚗AY-038嚗?
+func set_mission_reset_at(reset_at_ms: int) -> void:
+	if is_instance_valid(_mission_panel_node):
+		_mission_panel_node.set_mission_reset_at(reset_at_ms)
+
+
+
+# ── Session Stats 面板（DAY-046，DAY-053 拆分為 SessionStatsPanel.gd）──────
+
+var _session_stats_node: SessionStatsPanelScript = null  # 獨立面板節點
+
+## 初始化 Session Stats 面板（DAY-053）
+func _init_session_stats() -> void:
+	pass  # disabled: broken panel
+# ── Progressive Jackpot 面板（DAY-048，DAY-053 拆分為 JackpotPanel.gd）──────
+
+var _jackpot_panel_node: JackpotPanelScript = null  # 獨立面板節點
+
+## 初始化 Jackpot 面板（DAY-053）
+func _init_jackpot_panel() -> void:
+	pass  # disabled: broken panel
+# ── 排行榜面板（DAY-058 拆分到 LeaderboardPanel.gd）──────────────────────────
+
+var _leaderboard_node = null  # LeaderboardPanelScript 實例
+
+## 初始化排行榜面板（委派給 LeaderboardPanel.gd）
+func _create_leaderboard_panel() -> void:
+	pass  # disabled: broken panel
+## 排行榜更新事件（委派給 LeaderboardPanel.gd）
+func _on_leaderboard_updated(entries: Array) -> void:
+	if _leaderboard_node:
+		_leaderboard_node.update(entries, GameManager.get_player_id())
+
+# ── ESC 快捷鍵（DAY-049，DAY-053 更新）──────────────────────────
+
+## 覆寫 _input 處理 ESC 快捷鍵
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.pressed and not event.echo:
+		if event.keycode == KEY_ESCAPE:
+			if is_instance_valid(_session_stats_node):
+				_session_stats_node.toggle()
+			get_viewport().set_input_as_handled()
+
+# ── 觀戰者加入通知（DAY-054d）──────────────────────────────────────────────
+
+func _on_spectator_joined(spectator_data: Dictionary) -> void:
+	var count = spectator_data.get("spectator_count", 1)
+	# 更新 TopBar 觀戰者計數
+	_update_spectator_count_label(count)
+	# 用成就通知系統顯示觀戰者加入（複用現有 UI）
+	_achievement_queue.append({
+		"icon": "👁️",
+		"name": "有人在觀戰！",
+		"description": "目前 %d 位觀戰者" % count,
+		"type": "special"
+	})
+	if not _achievement_showing:
+		_show_next_achievement()
+
+# ── 觀戰者離開通知（DAY-055）──────────────────────────────────────────────
+
+func _on_spectator_left(spectator_data: Dictionary) -> void:
+	var count = spectator_data.get("spectator_count", 0)
+	# 更新 TopBar 觀戰者計數
+	_update_spectator_count_label(count)
+	if count > 0:
+		# 還有觀戰者，靜默更新（不打擾玩家）
+		return
+	# 最後一位觀戰者離開，顯示通知
+	_achievement_queue.append({
+		"icon": "👋",
+		"name": "觀戰者離開了",
+		"description": "目前無觀戰者",
+		"type": "normal"
+	})
+	if not _achievement_showing:
+		_show_next_achievement()
+
+## 更新 TopBar 觀戰者計數標籤（DAY-055）
+func _update_spectator_count_label(count: int) -> void:
+	var top_bar = get_node_or_null("TopBar")
+	if not is_instance_valid(top_bar):
+		return
+	var lbl = top_bar.get_node_or_null("SpectatorCountLabel")
+	if not is_instance_valid(lbl):
+		return
+	if count > 0:
+		lbl.text = "👁️ %d" % count
+		lbl.modulate = Color(0.7, 0.85, 1.0, 0.9)
+	else:
+		lbl.text = ""
+
+# ── 每日登入獎勵彈窗（DAY-065）──────────────────────────────────────────────
+
+func _on_daily_bonus_received(bonus_data: Dictionary) -> void:
+	var streak = bonus_data.get("streak", 1)
+	var reward = bonus_data.get("reward", 0)
+	var max_streak = bonus_data.get("max_streak", streak)
+	_show_daily_bonus_popup(streak, reward, max_streak)
+
+## 顯示每日登入獎勵彈窗
+func _show_daily_bonus_popup(streak: int, reward: int, max_streak: int) -> void:
+	# 建立彈窗容器（CanvasLayer 確保在最上層）
+	var canvas = CanvasLayer.new()
+	canvas.layer = 200
+	add_child(canvas)
+
+	# 半透明背景遮罩
+	var overlay = ColorRect.new()
+	overlay.color = Color(0, 0, 0, 0.6)
+	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	overlay.mouse_filter = Control.MOUSE_FILTER_STOP
+	canvas.add_child(overlay)
+
+	# 彈窗主體
+	var panel = PanelContainer.new()
+	panel.set_anchors_preset(Control.PRESET_CENTER)
+	panel.custom_minimum_size = Vector2(380, 280)
+	panel.position = Vector2(-190, -140)
+	canvas.add_child(panel)
+
+	var vbox = VBoxContainer.new()
+	vbox.add_theme_constant_override("separation", 12)
+	panel.add_child(vbox)
+
+	# 標題
+	var title_lbl = Label.new()
+	title_lbl.text = "🌟 每日登入獎勵"
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.add_theme_font_size_override("font_size", 22)
+	title_lbl.add_theme_color_override("font_color", Color(1.0, 0.9, 0.2))
+	vbox.add_child(title_lbl)
+
+	# 連續天數
+	var streak_lbl = Label.new()
+	var streak_text = "連續登入 %d 天" % streak
+	if streak >= 7:
+		streak_text += " 🔥"
+	streak_lbl.text = streak_text
+	streak_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	streak_lbl.add_theme_font_size_override("font_size", 16)
+	streak_lbl.add_theme_color_override("font_color", Color(1.0, 0.7, 0.3))
+	vbox.add_child(streak_lbl)
+
+	# 獎勵金額（大字）
+	var reward_lbl = Label.new()
+	reward_lbl.text = "🪙 +%d 金幣" % reward
+	reward_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	reward_lbl.add_theme_font_size_override("font_size", 32)
+	reward_lbl.add_theme_color_override("font_color", Color(1.0, 0.95, 0.4))
+	vbox.add_child(reward_lbl)
+
+	# 7天獎勵預覽條
+	var preview_lbl = Label.new()
+	preview_lbl.text = "7天獎勵：500 → 800 → 1200 → 1800 → 2500 → 3500 → 5000"
+	preview_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	preview_lbl.add_theme_font_size_override("font_size", 11)
+	preview_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
+	preview_lbl.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	vbox.add_child(preview_lbl)
+
+	# 最高連續天數
+	if max_streak > 1:
+		var max_lbl = Label.new()
+		max_lbl.text = "最高連續：%d 天" % max_streak
+		max_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		max_lbl.add_theme_font_size_override("font_size", 12)
+		max_lbl.add_theme_color_override("font_color", Color(0.6, 0.9, 0.6))
+		vbox.add_child(max_lbl)
+
+	# 確認按鈕
+	var btn = Button.new()
+	btn.text = "太棒了！"
+	btn.custom_minimum_size = Vector2(160, 40)
+	btn.add_theme_font_size_override("font_size", 16)
+	var btn_container = CenterContainer.new()
+	btn_container.add_child(btn)
+	vbox.add_child(btn_container)
+
+	# 彈入動畫
+	panel.scale = Vector2(0.5, 0.5)
+	panel.modulate.a = 0.0
+	var tween = panel.create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(panel, "scale", Vector2(1.0, 1.0), 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tween.tween_property(panel, "modulate:a", 1.0, 0.2)
+
+	# 按鈕關閉
+	btn.pressed.connect(func():
+		var close_tween = panel.create_tween()
+		close_tween.set_parallel(true)
+		close_tween.tween_property(panel, "scale", Vector2(0.8, 0.8), 0.15)
+		close_tween.tween_property(panel, "modulate:a", 0.0, 0.15)
+		close_tween.tween_callback(canvas.queue_free).set_delay(0.15)
+	)
+
+	# 5 秒後自動關閉
+	get_tree().create_timer(5.0).timeout.connect(func():
+		if is_instance_valid(canvas):
+			canvas.queue_free()
+	)
+
+
+# ── 週賽排名面板（DAY-066）──────────────────────────────────────────────
+
+var _tournament_panel_node = null
+
+## 初始化週賽排名面板（DAY-066）
+func _init_tournament_panel() -> void:
+	pass  # disabled: broken panel
+# ── 武器升級面板（DAY-067）──────────────────────────────────────────────
+
+var _weapon_panel_node = null
+
+## 初始化武器升級面板（DAY-067）
+## 位置：BottomBar 左側（x=10, y=畫面高度-90）
+func _init_weapon_panel() -> void:
+	pass  # disabled: broken panel
+## ── 稱號面板（DAY-068）──────────────────────────────────────────────────────
+var _title_panel_node = null
+
+## 初始化稱號面板（DAY-068）
+## 位置：TopBar 下方左側，顯示玩家當前稱號
+func _init_title_panel() -> void:
+	pass  # disabled: broken panel
+## ── 砲台外觀面板（DAY-071）──────────────────────────────────────────────────────
+var _skin_panel_node = null
+
+## 初始化砲台外觀面板（DAY-071）
+## 位置：BottomBar 右側（WeaponPanel 右邊）
+func _init_skin_panel() -> void:
+	pass  # disabled: broken panel
+## ── 賽季通行證面板（DAY-072）──────────────────────────────────────────────────────
+var _season_panel_node = null
+
+## 初始化賽季通行證面板（DAY-072）
+## 位置：TopBar 右側（從右往左排列，x=1248）
+func _init_season_panel() -> void:
+	pass  # disabled: broken panel
+## ── 好友系統面板（DAY-073）──────────────────────────────────────────────────────
+var _friend_panel_node = null
+
+## 初始化好友系統面板（DAY-073）
+## 位置：TopBar 右側（從右往左排列，x=1216）
+func _init_friend_panel() -> void:
+	pass  # disabled: broken panel
+## ── 好友挑戰面板（DAY-102）──────────────────────────────────────────────────────
+var _challenge_pvp_panel_node = null
+
+## 初始化好友挑戰面板（DAY-102）
+## 位置：左下角，顯示進行中的挑戰分數
+func _init_challenge_pvp_panel() -> void:
+	pass  # disabled: broken panel
+## ── 私訊面板（DAY-103）──────────────────────────────────────────────────────────
+var _dm_panel_node = null
+
+## 初始化私訊面板（DAY-103）
+## 位置：TopBar 右側（x=1248）
+func _init_dm_panel() -> void:
+	pass  # disabled: broken panel
+var _guild_panel_node = null
+
+## 初始化公會系統面板（DAY-074）
+## 位置：TopBar 右側（從右往左排列，x=1184）
+func _init_guild_panel() -> void:
+	pass  # disabled: broken panel
+## ── 公會戰面板（DAY-076）──────────────────────────────────────────────────────
+var _guild_war_panel_node = null
+
+## 初始化公會戰面板（DAY-076）
+## 位置：TopBar 右側（從右往左排列，x=1152）
+func _init_guild_war_panel() -> void:
+	pass  # disabled: broken panel
+## ── 每日 BOSS 挑戰面板（DAY-077）──────────────────────────────────────────────
+var _daily_boss_panel_node = null
+
+## 初始化每日 BOSS 挑戰面板（DAY-077）
+## 位置：TopBar 右側（從右往左排列，x=1120）
+func _init_daily_boss_panel() -> void:
+	pass  # disabled: broken panel
+## ── VIP 等級面板（DAY-078）──────────────────────────────────────────────────
+var _vip_panel_node = null
+
+## 初始化 VIP 等級面板（DAY-078）
+## 位置：TopBar 右側（從右往左排列，x=1088）
+func _init_vip_panel() -> void:
+	pass  # disabled: broken panel
+## ── 限時活動面板（DAY-079）──────────────────────────────────────────────────
+var _event_panel_node = null
+
+## 初始化限時活動面板（DAY-079）
+## 位置：TopBar 右側（從右往左排列，x=1056）
+func _init_event_panel() -> void:
+	pass  # disabled: broken panel
+## ── 魚類圖鑑面板（DAY-081）──────────────────────────────────────────────────
+var _codex_panel_node = null
+
+## 初始化魚類圖鑑面板（DAY-081）
+## 位置：TopBar 右側（從右往左排列，x=1024）
+func _init_codex_panel() -> void:
+	pass  # disabled: broken panel
+## ── 連擊系統面板（DAY-083）──────────────────────────────────────────────────
+var _streak_panel_node = null
+
+## 初始化連擊系統面板（DAY-083）
+## 位置：遊戲畫面中央上方（顯示當前連擊數）
+func _init_streak_panel() -> void:
+	pass  # disabled: broken panel
+## ── 推薦碼面板（DAY-082）──────────────────────────────────────────────────
+var _referral_panel_node = null
+
+## 初始化推薦碼面板（DAY-082）
+## 位置：TopBar 右側（從右往左排列，x=992）
+func _init_referral_panel() -> void:
+	pass  # disabled: broken panel
+## ── 幸運轉盤面板（DAY-084）──────────────────────────────────────────────────
+var _wheel_panel_node = null
+
+## 初始化幸運轉盤面板（DAY-084）
+## 位置：畫面中央（全螢幕覆蓋式彈窗）
+func _init_wheel_panel() -> void:
+	pass  # disabled: broken panel
+## ── 隱藏挑戰面板（DAY-085）──────────────────────────────────────────────────
+var _challenge_panel_node = null
+
+## 初始化隱藏挑戰面板（DAY-085）
+## 位置：畫面上方中央（挑戰解鎖通知彈窗）
+func _init_challenge_panel() -> void:
+	pass  # disabled: broken panel
+## ── 任務連續完成面板（DAY-086）──────────────────────────────────────────────
+var _mission_streak_panel_node = null
+
+## 初始化任務連續完成面板（DAY-086）
+func _init_mission_streak_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 天氣系統面板（DAY-087）----
+
+# DISABLED: const WeatherPanelScript = preload("res://scripts/ui/WeatherPanel.gd")
+var _weather_panel: Control = null
+
+func _init_weather_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 連鎖爆炸面板（DAY-088）----
+
+# DISABLED: const ChainExplosionPanelScript = preload("res://scripts/ui/ChainExplosionPanel.gd")
+var _chain_panel: Control = null
+
+func _init_chain_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 特殊武器面板（DAY-089）----
+
+# DISABLED: const SpecialWeaponPanelScript = preload("res://scripts/ui/SpecialWeaponPanel.gd")
+var _special_weapon_panel: Control = null
+
+func _init_special_weapon_panel() -> void:
+	pass  # disabled: broken panel
+func _on_special_weapon_selected(weapon_type: String) -> void:
+	# 通知 GameManager 當前選中的特殊武器
+	GameManager.set_meta("selected_special_weapon", weapon_type)
+
+# ---- 神秘寶箱面板（DAY-090）----
+
+# DISABLED: const MysteryBoxPanelScript = preload("res://scripts/ui/MysteryBoxPanel.gd")
+var _mystery_box_panel: Control = null
+
+func _init_mystery_box_panel() -> void:
+	pass  # disabled: broken panel
+# DISABLED: const RoomSelectPanelScript = preload("res://scripts/ui/RoomSelectPanel.gd")
+var _room_select_panel: Control = null
+var _room_btn: Button = null
+
+func _init_room_select_panel() -> void:
+	pass  # disabled: broken panel
+func _on_room_btn_pressed() -> void:
+	if is_instance_valid(_room_select_panel):
+		_room_select_panel.show_panel()
+
+func _on_room_switched_hud(data: Dictionary) -> void:
+	var icon = data.get("room_icon", "🏠")
+	var name_str = data.get("room_name", "房間")
+	if is_instance_valid(_room_btn):
+		_room_btn.text = icon + " " + name_str
+
+# DISABLED: const DailySpinPanelScript = preload("res://scripts/ui/DailySpinPanel.gd")
+var _daily_spin_panel: Control = null
+var _daily_spin_btn: Button = null
+
+func _init_daily_spin_panel() -> void:
+	pass  # disabled: broken panel
+func _on_daily_spin_btn_pressed() -> void:
+	if is_instance_valid(_daily_spin_panel):
+		_daily_spin_panel.show_panel()
+
+func _on_daily_spin_state_hud(data: Dictionary) -> void:
+	var can_spin = data.get("can_spin", false)
+	if is_instance_valid(_daily_spin_btn):
+		if can_spin:
+			_daily_spin_btn.text = "🎡 轉盤 ✓"
+			_daily_spin_btn.add_theme_color_override("font_color", Color(0.3, 1.0, 0.3))
+		else:
+			_daily_spin_btn.text = "🎡 轉盤"
+			_daily_spin_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
+
+# ---- 商店系統（DAY-094）----
+# DISABLED: const ShopPanelScript = preload("res://scripts/ui/ShopPanel.gd")
+var _shop_panel_node = null
+
+func _init_shop_panel() -> void:
+	pass  # disabled: broken panel
+func _on_shop_btn_pressed() -> void:
+	if is_instance_valid(_shop_panel_node):
+		_shop_panel_node._on_toggle_pressed()
+
+# ---- 玩家統計面板（DAY-096）----
+# DISABLED: const PlayerStatsPanelScript = preload("res://scripts/ui/PlayerStatsPanel.gd")
+var _player_stats_panel_node = null
+
+func _init_player_stats_panel() -> void:
+	pass  # disabled: broken panel
+func _on_stats_btn_pressed() -> void:
+	if is_instance_valid(_player_stats_panel_node):
+		if _player_stats_panel_node.visible:
+			_player_stats_panel_node.visible = false
+		else:
+			_player_stats_panel_node.show_panel()
+
+# ---- 全服公告系統（DAY-097）----
+# DISABLED: const AnnouncementPanelScript = preload("res://scripts/ui/AnnouncementPanel.gd")
+
+func _init_announcement_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 成就動態牆系統（DAY-112）----
+# DISABLED: const ActivityFeedPanelScript = preload("res://scripts/ui/ActivityFeedPanel.gd")
+
+func _init_activity_feed_panel() -> void:
+	pass  # disabled: broken panel
+## 玩家名片面板（DAY-106）
+var _player_card_panel_node = null
+# DISABLED: const PlayerCardPanelScript = preload("res://scripts/ui/PlayerCardPanel.gd")
+
+func _init_player_card_panel() -> void:
+	pass  # disabled: broken panel
+## 顯示玩家名片（供排行榜/公會/好友面板呼叫）
+func show_player_card(player_id: String) -> void:
+	if is_instance_valid(_player_card_panel_node):
+		_player_card_panel_node.show_card(player_id)
+
+## 登入里程碑面板（DAY-107）
+var _login_milestone_panel_node = null
+const LoginMilestonePanelScript = preload("res://scripts/ui/LoginMilestonePanel.gd")
+
+func _init_login_milestone_panel() -> void:
+	var panel = LoginMilestonePanelScript.new()
+	panel.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 95
+	add_child(panel)
+	_login_milestone_panel_node = panel
+	# 連接里程碑訊號
+	GameManager.login_milestone_reached.connect(_on_login_milestone_reached)
+	GameManager.login_progress_received.connect(_on_login_progress_received)
+
+## 里程碑達成通知（DAY-107）
+func _on_login_milestone_reached(data: Dictionary) -> void:
+	if is_instance_valid(_login_milestone_panel_node):
+		_login_milestone_panel_node.show_milestone(data)
+
+## 登入進度回應（DAY-107）
+func _on_login_progress_received(data: Dictionary) -> void:
+	if is_instance_valid(_login_milestone_panel_node):
+		_login_milestone_panel_node.show_progress(data)
+
+## 玩家旅程儀表板（DAY-108）
+var _player_journey_panel_node = null
+# DISABLED: const PlayerJourneyPanelScript = preload("res://scripts/ui/PlayerJourneyPanel.gd")
+
+func _init_player_journey_panel() -> void:
+	pass  # disabled: broken panel
+## 賽季節日活動面板（DAY-109）
+var _festival_panel_node = null
+# DISABLED: const FestivalPanelScript = preload("res://scripts/ui/FestivalPanel.gd")
+
+func _init_festival_panel() -> void:
+	pass  # disabled: broken panel
+## 節日狀態更新（DAY-109）
+func _on_festival_updated(data: Dictionary) -> void:
+	if is_instance_valid(_festival_panel_node):
+		_festival_panel_node.update_from_data(data)
+
+## 節日任務可領取通知（DAY-109）
+func _on_festival_task_ready(task_id: String) -> void:
+	# 顯示提示（可以加 toast 通知）
+	print("[HUD] Festival task ready: %s" % task_id)
+
+## 節日稱號獲得通知（DAY-109）
+func _on_festival_title_earned(data: Dictionary) -> void:
+	var title_name: String = data.get("title_name", "")
+	print("[HUD] Festival title earned: %s" % title_name)
+
+## 顯示節日面板（供 TopBar 按鈕呼叫）
+func show_festival_panel() -> void:
+	if is_instance_valid(_festival_panel_node):
+		GameManager.request_festival()
+		_festival_panel_node.show()
+
+# ---- 名人堂面板（DAY-110）----
+var _hall_of_fame_panel = null
+
+func _init_hall_of_fame_panel() -> void:
+	pass  # disabled: broken panel
+## 公開方法：顯示名人堂面板
+func show_hall_of_fame():
+	if is_instance_valid(_hall_of_fame_panel):
+		_hall_of_fame_panel.show_panel()
+
+# ---- 智慧推薦面板（DAY-110）----
+var _recommend_panel = null
+
+func _init_recommend_panel() -> void:
+	pass  # disabled: broken panel
+## ── 雙層倍率輪盤面板（DAY-113）──────────────────────────────────────────────
+var _roulette_panel_node = null
+
+## 初始化雙層倍率輪盤面板（DAY-113）
+## 位置：畫面中央（全螢幕覆蓋式彈窗，z_index=72 在 WheelPanel 之上）
+func _init_roulette_panel() -> void:
+	pass  # disabled: broken panel
+## ── Buy Bonus 面板（DAY-114）──────────────────────────────────────────────────
+var _buy_bonus_panel_node = null
+var _buy_bonus_btn: Button = null
+
+## 初始化 Buy Bonus 面板（DAY-114）
+## 位置：畫面中央（全螢幕覆蓋式彈窗，z_index=65）
+## 同時在 BottomBar 加入 Buy Bonus 按鈕
+func _init_buy_bonus_panel() -> void:
+	pass  # disabled: broken panel
+func _on_buy_bonus_btn_pressed() -> void:
+	if is_instance_valid(_buy_bonus_panel_node):
+		_buy_bonus_panel_node.show_panel()
+
+## Co-op Boss Raid 面板（DAY-115）
+## 位置：全螢幕覆蓋，z_index=68（在 BuyBonus 之上）
+func _init_raid_panel() -> void:
+	var panel = RaidPanelScript.new()
+	panel.z_index = 68
+	add_child(panel)
+
+	# 連接 GameManager 訊號
+	if GameManager.has_signal("raid_warning"):
+		GameManager.raid_warning.connect(func(data): panel.show_warning(data))
+	if GameManager.has_signal("raid_started"):
+		GameManager.raid_started.connect(func(data): panel.show_raid_start(data))
+	if GameManager.has_signal("raid_updated"):
+		GameManager.raid_updated.connect(func(data): panel.update_raid(data))
+	if GameManager.has_signal("raid_result"):
+		GameManager.raid_result.connect(func(data):
+			var my_id = GameManager.get_player_id() if GameManager.has_method("get_player_id") else ""
+			panel.show_result(data, my_id)
+		)
+
+func _init_fragment_panel() -> void:
+	var panel = FragmentPanelScript.new()
+	panel.z_index = 62
+	add_child(panel)
+
+	# 連接 GameManager 訊號
+	if GameManager.has_signal("fragment_dropped"):
+		GameManager.fragment_dropped.connect(func(data): panel.on_fragment_drop(data))
+	if GameManager.has_signal("fragment_completed"):
+		GameManager.fragment_completed.connect(func(data): panel.on_fragment_complete(data))
+	if GameManager.has_signal("fragment_status_received"):
+		GameManager.fragment_status_received.connect(func(data): panel.update_status(data))
+
+# ---- 幸運捕獲系統（DAY-119）----
+var _lucky_catch_panel_node = null
+
+func _init_lucky_catch_panel() -> void:
+	pass  # disabled: broken panel
+# ---- Rapid Respin 系統（DAY-121）----
+var _rapid_respin_panel_node = null
+
+func _init_rapid_respin_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 寶藏地圖系統（DAY-122）----
+var _treasure_map_panel_node = null
+
+func _init_treasure_map_panel() -> void:
+	pass  # disabled: broken panel
+func show_treasure_map_panel() -> void:
+	if is_instance_valid(_treasure_map_panel_node):
+		_treasure_map_panel_node.show_panel()
+
+# ---- 閃電挑戰系統（DAY-123）----
+var _flash_challenge_panel_node = null
+
+func _init_flash_challenge_panel() -> void:
+	pass  # disabled: broken panel
+func _on_flash_challenge_started(data: Dictionary) -> void:
+	if is_instance_valid(_flash_challenge_panel_node):
+		_flash_challenge_panel_node.on_flash_challenge_start(data)
+
+func _on_flash_challenge_updated(data: Dictionary) -> void:
+	if is_instance_valid(_flash_challenge_panel_node):
+		_flash_challenge_panel_node.on_flash_challenge_update(data)
+
+func _on_flash_challenge_ended(data: Dictionary) -> void:
+	if is_instance_valid(_flash_challenge_panel_node):
+		_flash_challenge_panel_node.on_flash_challenge_end(data)
+
+func _on_flash_challenge_reward(data: Dictionary) -> void:
+	if is_instance_valid(_flash_challenge_panel_node):
+		_flash_challenge_panel_node.on_flash_challenge_reward(data)
+
+# ---- 傳說目標警報系統（DAY-124）----
+
+func _init_rare_target_alert() -> void:
+	var gm = get_node_or_null("/root/GameManager")
+	if gm and gm.has_signal("rare_target_alerted"):
+		gm.rare_target_alerted.connect(_on_rare_target_alerted)
+
+func _on_rare_target_alerted(data: Dictionary) -> void:
+	var quality: String = data.get("quality", "epic")
+	var message: String = data.get("message", "")
+	var color_str: String = data.get("color", "#FFD700")
+	var icon: String = data.get("icon", "⭐")
+	
+	# 顯示頂部橫幅警報
+	_show_rare_target_banner(icon, message, Color(color_str), quality == "legendary")
+
+func _show_rare_target_banner(icon: String, message: String, color: Color, is_legendary: bool) -> void:
+	# 建立橫幅
+	var banner := PanelContainer.new()
+	banner.z_index = 95
+	
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.05, 0.05, 0.1, 0.9)
+	style.border_color = color
+	style.border_width_top = 2
+	style.border_width_bottom = 2
+	style.corner_radius_top_left = 4
+	style.corner_radius_top_right = 4
+	style.corner_radius_bottom_left = 4
+	style.corner_radius_bottom_right = 4
+	banner.add_theme_stylebox_override("panel", style)
+	
+	var label := Label.new()
+	label.text = icon + " " + message
+	label.add_theme_font_size_override("font_size", 14)
+	label.add_theme_color_override("font_color", color)
+	label.add_theme_constant_override("outline_size", 2)
+	label.add_theme_color_override("font_outline_color", Color.BLACK)
+	banner.add_child(label)
+	
+	# 置中頂部
+	banner.position = Vector2(640 - 200, -50)
+	banner.size = Vector2(400, 36)
+	add_child(banner)
+	
+	# 滑入動畫
+	var tween := create_tween()
+	tween.tween_property(banner, "position:y", 10, 0.3).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	
+	# 傳說品質：金色閃爍
+	if is_legendary:
+		tween.parallel().tween_property(banner, "modulate", Color(2.0, 1.8, 0.5, 1.0), 0.15)
+		tween.tween_property(banner, "modulate", Color.WHITE, 0.15)
+		tween.tween_property(banner, "modulate", Color(2.0, 1.8, 0.5, 1.0), 0.15)
+		tween.tween_property(banner, "modulate", Color.WHITE, 0.15)
+	
+	# 3 秒後滑出
+	tween.tween_interval(3.0)
+	tween.tween_property(banner, "position:y", -50, 0.3).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_IN)
+	tween.tween_callback(banner.queue_free)
+
+# ---- 黃金時間系統（DAY-125）----
+
+const GoldenTimePanelScript = preload("res://scripts/ui/GoldenTimePanel.gd")
+var _golden_time_panel: Control = null
+
+func _init_golden_time_panel() -> void:
+	var panel = GoldenTimePanelScript.new()
+	panel.name = "GoldenTimePanel"
+	panel.z_index = 76
+	add_child(panel)
+	_golden_time_panel = panel
+
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("golden_time_started"):
+			gm.golden_time_started.connect(_on_golden_time_started)
+		if gm.has_signal("golden_time_ended"):
+			gm.golden_time_ended.connect(_on_golden_time_ended)
+		if gm.has_signal("golden_time_status"):
+			gm.golden_time_status.connect(_on_golden_time_status)
+
+func _on_golden_time_started(data: Dictionary) -> void:
+	if is_instance_valid(_golden_time_panel):
+		_golden_time_panel.show_golden_time_start(data)
+
+func _on_golden_time_ended(data: Dictionary) -> void:
+	if is_instance_valid(_golden_time_panel):
+		_golden_time_panel.show_golden_time_end(data)
+
+func _on_golden_time_status(data: Dictionary) -> void:
+	if is_instance_valid(_golden_time_panel):
+		_golden_time_panel.update_status(data)
+
+# ---- 稀有連擊累積倍率系統（DAY-126）----
+
+const RareCatchPanelScript = preload("res://scripts/ui/RareCatchPanel.gd")
+var _rare_catch_panel: Control = null
+
+func _init_rare_catch_panel() -> void:
+	var panel = RareCatchPanelScript.new()
+	panel.name = "RareCatchPanel"
+	panel.z_index = 74
+	# 右下角，在 ActivityFeed 上方
+	panel.position = Vector2(1280 - 200, 720 - 200)
+	add_child(panel)
+	_rare_catch_panel = panel
+
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("rare_catch_updated"):
+			gm.rare_catch_updated.connect(_on_rare_catch_updated)
+		if gm.has_signal("rare_catch_broadcasted"):
+			gm.rare_catch_broadcasted.connect(_on_rare_catch_broadcasted)
+		if gm.has_signal("rare_catch_reset"):
+			gm.rare_catch_reset.connect(_on_rare_catch_reset_signal)
+
+func _on_rare_catch_updated(data: Dictionary) -> void:
+	if is_instance_valid(_rare_catch_panel):
+		_rare_catch_panel.on_rare_catch_update(data)
+
+func _on_rare_catch_broadcasted(data: Dictionary) -> void:
+	# 全服廣播：顯示頂部小橫幅
+	var player_name: String = data.get("player_name", "玩家")
+	var icon: String = data.get("icon", "💎")
+	var level_name: String = data.get("level_name", "稀有連擊")
+	var color_str: String = data.get("color", "#00BFFF")
+	var mult_boost: float = data.get("mult_boost", 5.0)
+	var mult_str := "%.0f" % mult_boost
+	var msg := icon + " " + player_name + " 達成 " + level_name + " ×" + mult_str + "！"
+	_show_rare_target_banner(icon, msg, Color(color_str), false)
+
+func _on_rare_catch_reset_signal(data: Dictionary) -> void:
+	if is_instance_valid(_rare_catch_panel):
+		_rare_catch_panel.on_rare_catch_reset(data)
+
+# ---- 天氣湧現事件（DAY-127）----
+
+# DISABLED: const WeatherSurgePanelScript = preload("res://scripts/ui/WeatherSurgePanel.gd")
+var _weather_surge_panel: Control = null
+
+func _init_weather_surge_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 龍怒蓄力大招面板（DAY-128）----
+
+# DISABLED: const DragonWrathPanelScript = preload("res://scripts/ui/DragonWrathPanel.gd")
+var _dragon_wrath_panel: Control = null
+
+func _init_dragon_wrath_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 不死 BOSS 連勝面板（DAY-129）----
+const ImmortalBossPanelScript = preload("res://scripts/ui/ImmortalBossPanel.gd")
+var _immortal_boss_panel: Control = null
+
+func _init_immortal_boss_panel() -> void:
+	var panel = ImmortalBossPanelScript.new()
+	panel.name = "ImmortalBossPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 70
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_immortal_boss_panel = panel
+
+	# 連接 GameManager 訊號
+	GameManager.immortal_boss_spawned.connect(func(data): panel.on_immortal_boss_spawn(data))
+	GameManager.immortal_boss_hit.connect(func(data): panel.on_immortal_boss_hit(data))
+	GameManager.immortal_boss_left.connect(func(data): panel.on_immortal_boss_leave(data))
+	GameManager.immortal_boss_status.connect(func(data): panel.on_immortal_boss_status(data))
+
+# ---- 覺醒 BOSS 面板（DAY-130）----
+const AwakenBossPanelScript = preload("res://scripts/ui/AwakenBossPanel.gd")
+var _awaken_boss_panel: Control = null
+
+func _init_awaken_boss_panel() -> void:
+	var panel = AwakenBossPanelScript.new()
+	panel.name = "AwakenBossPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 69  # 比不死 BOSS 低一層（不死 BOSS z=70）
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_awaken_boss_panel = panel
+
+	GameManager.awaken_boss_spawned.connect(func(data): panel.on_awaken_boss_spawn(data))
+	GameManager.awaken_boss_hit.connect(func(data): panel.on_awaken_boss_hit(data))
+	GameManager.awaken_boss_powerup.connect(func(data): panel.on_awaken_boss_powerup(data))
+	GameManager.awaken_boss_left.connect(func(data): panel.on_awaken_boss_leave(data))
+	GameManager.awaken_boss_status.connect(func(data): panel.on_awaken_boss_status(data))
+
+# ---- 連勝獎勵面板（DAY-131）----
+const WinStreakPanelScript = preload("res://scripts/ui/WinStreakPanel.gd")
+var _win_streak_panel: Control = null
+
+func _init_win_streak_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 閃電鰻連鎖攻擊面板（DAY-132）----
+const LightningEelPanelScript = preload("res://scripts/ui/LightningEelPanel.gd")
+var _lightning_eel_panel: Control = null
+
+func _init_lightning_eel_panel() -> void:
+	var panel = LightningEelPanelScript.new()
+	panel.name = "LightningEelPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 66
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_lightning_eel_panel = panel
+
+	# 設定玩家 ID（用於判斷是否為自己觸發）
+	if GameManager.local_player_id != "":
+		panel.set_player_id(GameManager.local_player_id)
+
+	GameManager.lightning_eel_chain.connect(func(data): panel.show_chain_result(data))
+	GameManager.lightning_eel_status.connect(func(data): panel.update_status(data))
+
+# ---- 狂熱模式面板（DAY-133）----
+const FeverModePanelScript = preload("res://scripts/ui/FeverModePanel.gd")
+var _fever_mode_panel: Control = null
+
+func _init_fever_mode_panel() -> void:
+	var panel = FeverModePanelScript.new()
+	panel.name = "FeverModePanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 65
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_fever_mode_panel = panel
+
+	if GameManager.local_player_id != "":
+		panel.set_player_id(GameManager.local_player_id)
+
+	GameManager.fever_mode_started.connect(func(data): panel.on_fever_start(data))
+	GameManager.fever_mode_ended.connect(func(data): panel.on_fever_end(data))
+	GameManager.fever_mode_status.connect(func(data): panel.on_fever_status(data))
+
+# ---- 失敗補償面板（DAY-135）----
+# DISABLED: const UnluckyBonusPanelScript = preload("res://scripts/ui/UnluckyBonusPanel.gd")
+var _unlucky_bonus_panel: Control = null
+
+func _init_unlucky_bonus_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 競速獵殺面板（DAY-136）----
+const SpeedRacePanelScript = preload("res://scripts/ui/SpeedRacePanel.gd")
+var _speed_race_panel: Control = null
+
+func _init_speed_race_panel() -> void:
+	var panel = SpeedRacePanelScript.new()
+	panel.name = "SpeedRacePanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 79  # 在失敗補償面板（78）之上
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_speed_race_panel = panel
+
+	GameManager.speed_race_started.connect(func(data): panel.on_speed_race_start(data))
+	GameManager.speed_race_ended.connect(func(data): panel.on_speed_race_end(data))
+	GameManager.speed_race_cancelled.connect(func(data): panel.on_speed_race_cancel(data))
+	GameManager.speed_race_result.connect(func(data): panel.on_speed_race_result(data))
+
+# ---- 全服目標懸賞面板（DAY-137）----
+const BountyPanelScript = preload("res://scripts/ui/BountyPanel.gd")
+var _bounty_panel: Control = null
+
+func _init_bounty_panel() -> void:
+	var panel = BountyPanelScript.new()
+	panel.name = "BountyPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 80  # 在競速面板（79）之上
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_bounty_panel = panel
+
+	GameManager.bounty_posted.connect(func(data): panel.on_bounty_posted(data))
+	GameManager.bounty_claimed.connect(func(data): panel.on_bounty_claimed(data))
+	GameManager.bounty_killed.connect(func(data): panel.on_bounty_killed(data))
+	GameManager.bounty_expired.connect(func(data): panel.on_bounty_expired(data))
+
+# ---- 全服倍率風暴面板（DAY-138）----
+const MultStormPanelScript = preload("res://scripts/ui/MultStormPanel.gd")
+var _mult_storm_panel: Control = null
+
+func _init_mult_storm_panel() -> void:
+	var panel = MultStormPanelScript.new()
+	panel.name = "MultStormPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 81  # 在懸賞面板（80）之上
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_mult_storm_panel = panel
+
+	GameManager.mult_storm_started.connect(func(data): panel.on_storm_start(data))
+	GameManager.mult_storm_ended.connect(func(data): panel.on_storm_end(data))
+
+# ---- 雙環輪盤面板（DAY-139）----
+const DualRoulettePanelScript = preload("res://scripts/ui/DualRoulettePanel.gd")
+var _dual_roulette_panel: Control = null
+
+func _init_dual_roulette_panel() -> void:
+	pass  # disabled: broken panel
+# ---- Mega Catch 事件面板（DAY-140）----
+const MegaCatchPanelScript = preload("res://scripts/ui/MegaCatchPanel.gd")
+var _mega_catch_panel: Control = null
+
+func _init_mega_catch_panel() -> void:
+	var panel = MegaCatchPanelScript.new()
+	panel.name = "MegaCatchPanel"
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.z_index = 83  # 在雙環輪盤面板（82）之上
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_mega_catch_panel = panel
+
+	GameManager.mega_catch_started.connect(func(data): panel.on_mega_catch_start(data))
+	GameManager.mega_catch_ended.connect(func(data): panel.on_mega_catch_end(data))
+
+# ---- 鑽頭龍蝦連帶效果面板（DAY-142）----
+
+const DrillLobsterPanelScript = preload("res://scripts/ui/DrillLobsterPanel.gd")
+var _drill_lobster_panel: Control = null
+
+func _init_drill_lobster_panel() -> void:
+	var panel = DrillLobsterPanelScript.new()
+	panel.name = "DrillLobsterPanel"
+	panel.layer = 84  # 在 MegaCatchPanel(83) 之上
+	add_child(panel)
+	panel.setup(_pixel_font)
+	_drill_lobster_panel = panel
+
+# ---- 炸彈蟹連環爆炸面板（DAY-143）----
+
+# DISABLED: const BombCrabPanelScript = preload("res://scripts/ui/BombCrabPanel.gd")
+var _bomb_crab_panel: Control = null
+
+func _init_bomb_crab_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 巨型章魚轉盤面板（DAY-144）----
+
+# DISABLED: const MegaOctopusPanelScript = preload("res://scripts/ui/MegaOctopusPanel.gd")
+var _mega_octopus_panel: Control = null
+
+func _init_mega_octopus_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 巨型鮟鱇魚電擊寶箱面板（DAY-145）----
+
+# DISABLED: const AnglerfishPanelScript = preload("res://scripts/ui/AnglerfishPanel.gd")
+var _anglerfish_panel: Control = null
+
+func _init_anglerfish_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 巨型鹹水鱷魚獵魚面板（DAY-146）----
+
+# DISABLED: const CrocodilePanelScript = preload("res://scripts/ui/CrocodilePanel.gd")
+var _crocodile_panel: Control = null
+
+func _init_crocodile_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 夢幻巨型獎勵魚面板（DAY-147）----
+
+# DISABLED: const GiantPrizeFishPanelScript = preload("res://scripts/ui/GiantPrizeFishPanel.gd")
+var _giant_prize_fish_panel: Control = null
+
+func _init_giant_prize_fish_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 千龍王強化輪盤面板（DAY-148）----
+
+const ChainLongWheelPanelScript = preload("res://scripts/ui/ChainLongWheelPanel.gd")
+var _chainlong_wheel_panel: Control = null
+
+func _init_chainlong_wheel_panel() -> void:
+	pass  # disabled: broken panel
+func _on_chainlong_wheel_start(data: Dictionary) -> void:
+	if not is_instance_valid(_chainlong_wheel_panel):
+		return
+	var my_id = ""
+	var gm = get_node_or_null("/root/GameManager")
+	if gm and gm.has_method("get_player_id"):
+		my_id = gm.get_player_id()
+	var killer_id: String = data.get("killer_id", "")
+	var is_personal: bool = (killer_id == my_id)
+	_chainlong_wheel_panel.show_wheel(
+		data.get("killer_name", ""),
+		data.get("target_mult", 500.0),
+		data.get("base_reward", 0),
+		data.get("spin_secs", 4.0),
+		data.get("inner_slots", [5.0, 10.0, 20.0, 30.0, 50.0]),
+		data.get("outer_slots", [2.0, 3.0, 5.0, 7.0, 10.0, 20.0]),
+		is_personal
+	)
+
+func _on_chainlong_wheel_result(data: Dictionary) -> void:
+	if not is_instance_valid(_chainlong_wheel_panel):
+		return
+	var my_id = ""
+	var gm = get_node_or_null("/root/GameManager")
+	if gm and gm.has_method("get_player_id"):
+		my_id = gm.get_player_id()
+	var killer_id: String = data.get("killer_id", "")
+	var is_personal: bool = (killer_id == my_id)
+	_chainlong_wheel_panel.show_result(
+		data.get("inner_result", 5.0),
+		data.get("outer_result", 2.0),
+		data.get("combined", 10.0),
+		data.get("bonus_reward", 0),
+		data.get("new_balance", 0),
+		data.get("is_mega_win", false),
+		is_personal
+	)
+
+# ---- 黃金水母全場電擊面板（DAY-149）----
+
+const GoldenJellyfishPanelScript = preload("res://scripts/ui/GoldenJellyfishPanel.gd")
+var _golden_jellyfish_panel: Control = null
+
+func _init_golden_jellyfish_panel() -> void:
+	var panel = GoldenJellyfishPanelScript.new()
+	panel.name = "GoldenJellyfishPanel"
+	panel.z_index = 86  # 在 AnglerfishPanel(86) 同層，但黃金水母是不同系統
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_golden_jellyfish_panel = panel
+
+	# 連接黃金水母電擊訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm and gm.has_signal("golden_jellyfish_shock"):
+		gm.golden_jellyfish_shock.connect(_on_golden_jellyfish_shock)
+
+func _on_golden_jellyfish_shock(data: Dictionary) -> void:
+	if not is_instance_valid(_golden_jellyfish_panel):
+		return
+	_golden_jellyfish_panel.handle_shock_event(data)
+
+# ---- 雷霆龍蝦免費射擊面板（DAY-150）----
+
+const ThunderboltLobsterPanelScript = preload("res://scripts/ui/ThunderboltLobsterPanel.gd")
+var _thunderbolt_lobster_panel: Control = null
+
+func _init_thunderbolt_lobster_panel() -> void:
+	var panel = ThunderboltLobsterPanelScript.new()
+	panel.name = "ThunderboltLobsterPanel"
+	panel.z_index = 87  # 在 GoldenJellyfishPanel(86) 之上
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_thunderbolt_lobster_panel = panel
+
+	# 連接雷霆龍蝦訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("thunderbolt_lobster_activate"):
+			gm.thunderbolt_lobster_activate.connect(_on_thunderbolt_lobster_activate)
+		if gm.has_signal("thunderbolt_lobster_shot"):
+			gm.thunderbolt_lobster_shot.connect(_on_thunderbolt_lobster_shot)
+		if gm.has_signal("thunderbolt_lobster_end"):
+			gm.thunderbolt_lobster_end.connect(_on_thunderbolt_lobster_end)
+
+func _on_thunderbolt_lobster_activate(data: Dictionary) -> void:
+	if not is_instance_valid(_thunderbolt_lobster_panel):
+		return
+	_thunderbolt_lobster_panel.handle_activate(data)
+
+func _on_thunderbolt_lobster_shot(data: Dictionary) -> void:
+	if not is_instance_valid(_thunderbolt_lobster_panel):
+		return
+	_thunderbolt_lobster_panel.handle_shot(data)
+
+func _on_thunderbolt_lobster_end(data: Dictionary) -> void:
+	if not is_instance_valid(_thunderbolt_lobster_panel):
+		return
+	_thunderbolt_lobster_panel.handle_end(data)
+
+# ---- 彩虹鳳凰 Power Up 面板（DAY-151）----
+
+const RainbowPhoenixPanelScript = preload("res://scripts/ui/RainbowPhoenixPanel.gd")
+var _rainbow_phoenix_panel: Control = null
+
+func _init_rainbow_phoenix_panel() -> void:
+	var panel = RainbowPhoenixPanelScript.new()
+	panel.name = "RainbowPhoenixPanel"
+	panel.z_index = 88  # 在 ThunderboltLobsterPanel(87) 之上
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_rainbow_phoenix_panel = panel
+
+	# 連接彩虹鳳凰訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("rainbow_phoenix_activate"):
+			gm.rainbow_phoenix_activate.connect(_on_rainbow_phoenix_activate)
+		if gm.has_signal("rainbow_phoenix_end"):
+			gm.rainbow_phoenix_end.connect(_on_rainbow_phoenix_end)
+
+func _on_rainbow_phoenix_activate(data: Dictionary) -> void:
+	if not is_instance_valid(_rainbow_phoenix_panel):
+		return
+	_rainbow_phoenix_panel.handle_activate(data)
+
+func _on_rainbow_phoenix_end(data: Dictionary) -> void:
+	if not is_instance_valid(_rainbow_phoenix_panel):
+		return
+	_rainbow_phoenix_panel.handle_end(data)
+
+# ---- 吸血鬼成長倍率面板（DAY-152）----
+
+const VampirePanelScript = preload("res://scripts/ui/VampirePanel.gd")
+var _vampire_panel: Control = null
+
+func _init_vampire_panel() -> void:
+	var panel = VampirePanelScript.new()
+	panel.name = "VampirePanel"
+	panel.z_index = 85  # 在 BombCrabPanel(85) 同層，吸血鬼是不同系統
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_vampire_panel = panel
+
+	# 連接吸血鬼訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("vampire_grow"):
+			gm.vampire_grow.connect(_on_vampire_grow)
+		if gm.has_signal("vampire_blood_moon"):
+			gm.vampire_blood_moon.connect(_on_vampire_blood_moon)
+		if gm.has_signal("vampire_killed"):
+			gm.vampire_killed.connect(_on_vampire_killed)
+
+func _on_vampire_grow(data: Dictionary) -> void:
+	if not is_instance_valid(_vampire_panel):
+		return
+	_vampire_panel.handle_grow(data)
+
+func _on_vampire_blood_moon(data: Dictionary) -> void:
+	if not is_instance_valid(_vampire_panel):
+		return
+	_vampire_panel.handle_blood_moon(data)
+
+func _on_vampire_killed(data: Dictionary) -> void:
+	if not is_instance_valid(_vampire_panel):
+		return
+	_vampire_panel.handle_killed(data)
+
+# ---- 水晶龍收集大獎面板（DAY-153）----
+
+const CrystalDragonPanelScript = preload("res://scripts/ui/CrystalDragonPanel.gd")
+var _crystal_dragon_panel: Control = null
+
+func _init_crystal_dragon_panel() -> void:
+	var panel = CrystalDragonPanelScript.new()
+	panel.name = "CrystalDragonPanel"
+	panel.z_index = 84  # 在 BombCrabPanel(85) 下方，水晶龍是常駐進度條
+	panel.set_anchors_preset(Control.PRESET_FULL_RECT)
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(panel)
+	_crystal_dragon_panel = panel
+
+	# 連接水晶龍訊號
+	var gm = get_node_or_null("/root/GameManager")
+	if gm:
+		if gm.has_signal("crystal_dragon_drop"):
+			gm.crystal_dragon_drop.connect(_on_crystal_dragon_drop)
+		if gm.has_signal("crystal_dragon_reward"):
+			gm.crystal_dragon_reward.connect(_on_crystal_dragon_reward)
+		if gm.has_signal("crystal_dragon_status"):
+			gm.crystal_dragon_status.connect(_on_crystal_dragon_status)
+
+func _on_crystal_dragon_drop(data: Dictionary) -> void:
+	if not is_instance_valid(_crystal_dragon_panel):
+		return
+	_crystal_dragon_panel.on_crystal_drop(
+		data.get("killer_name", ""),
+		data.get("crystals_gain", 0),
+		data.get("total_crystals", 0),
+		data.get("goal", 50),
+		data.get("progress", 0.0)
+	)
+
+func _on_crystal_dragon_reward(data: Dictionary) -> void:
+	if not is_instance_valid(_crystal_dragon_panel):
+		return
+	_crystal_dragon_panel.on_crystal_reward(
+		data.get("contributors", []),
+		data.get("total_reward", 0),
+		data.get("message", "")
+	)
+
+func _on_crystal_dragon_status(data: Dictionary) -> void:
+	if not is_instance_valid(_crystal_dragon_panel):
+		return
+	_crystal_dragon_panel.update_status(
+		data.get("total_crystals", 0),
+		data.get("goal", 50),
+		data.get("progress", 0.0)
+	)
+
+# ---- 皇家閃電鰻持續連鎖電擊面板（DAY-156）----
+
+# DISABLED: const RoyalChainLightningPanelScript = preload("res://scripts/ui/RoyalChainLightningPanel.gd")
+var _royal_chain_lightning_panel: Control = null
+
+func _init_royal_chain_lightning_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 黃金海龜時間停止面板（DAY-159）----
+
+# DISABLED: const GoldenTurtlePanelScript = preload("res://scripts/ui/GoldenTurtlePanel.gd")
+var _golden_turtle_panel: Control = null
+
+func _init_golden_turtle_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 幸運星魚全場倍率翻倍面板（DAY-160）----
+
+# DISABLED: const LuckyStarFishPanelScript = preload("res://scripts/ui/LuckyStarFishPanel.gd")
+var _lucky_star_fish_panel: Control = null
+
+func _init_lucky_star_fish_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 黃金鯊魚全服狂暴模式面板（DAY-161）----
+
+# DISABLED: const GoldenSharkPanelScript = preload("res://scripts/ui/GoldenSharkPanel.gd")
+var _golden_shark_panel: Control = null
+
+func _init_golden_shark_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 金幣魚王即時獎勵面板（DAY-162）----
+
+# DISABLED: const MoneyFishPanelScript = preload("res://scripts/ui/MoneyFishPanel.gd")
+var _money_fish_panel: Control = null
+
+func _init_money_fish_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 船長魚全服競速模式面板（DAY-163）----
+
+# DISABLED: const CaptainFishPanelScript = preload("res://scripts/ui/CaptainFishPanel.gd")
+var _captain_fish_panel: Control = null
+
+func _init_captain_fish_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 深淵巨鯨全服 Boss 挑戰面板（DAY-164）----
+
+# DISABLED: const AbyssWhalePanelScript = preload("res://scripts/ui/AbyssWhalePanel.gd")
+var _abyss_whale_panel: Control = null
+
+func _init_abyss_whale_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 黑洞漩渦武器視覺效果面板（DAY-166）----
+
+# DISABLED: const BlackHolePanelScript = preload("res://scripts/ui/BlackHolePanel.gd")
+var _black_hole_panel: Control = null
+
+func _init_black_hole_panel() -> void:
+	pass  # disabled: broken panel
+# ---- 黃金輪盤螃蟹面板（DAY-167）----
+
+# DISABLED: const RouletteCrabPanelScript = preload("res://scripts/ui/RouletteCrabPanel.gd")
+var _roulette_crab_panel: Control = null
+
+func _init_roulette_crab_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 獅子舞大獎爆發面板（DAY-168）----
+# DISABLED: const LionDancePanelScript = preload("res://scripts/ui/LionDancePanel.gd")
+var _lion_dance_panel: Control = null
+
+func _init_lion_dance_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 漩渦魚群吸引面板（DAY-169）----
+# DISABLED: const VortexFishPanelScript = preload("res://scripts/ui/VortexFishPanel.gd")
+var _vortex_fish_panel: Control = null
+
+func _init_vortex_fish_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 冰凍炸彈魚面板（DAY-170）----
+# DISABLED: const FreezeBombPanelScript = preload("res://scripts/ui/FreezeBombPanel.gd")
+var _freeze_bomb_panel: Control = null
+
+func _init_freeze_bomb_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 冰釣幸運輪盤面板（DAY-171）----
+# DISABLED: const IceFishingPanelScript = preload("res://scripts/ui/IceFishingPanel.gd")
+var _ice_fishing_panel: Control = null
+
+func _init_ice_fishing_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 幸運彩蛋魚面板（DAY-172）----
+# DISABLED: const LuckyEggPanelScript = preload("res://scripts/ui/LuckyEggPanel.gd")
+var _lucky_egg_panel: Control = null
+
+func _init_lucky_egg_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 彩虹幸運魚面板（DAY-173）----
+# DISABLED: const RainbowLuckyPanelScript = preload("res://scripts/ui/RainbowLuckyPanel.gd")
+var _rainbow_lucky_panel: Control = null
+
+func _init_rainbow_lucky_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 海葵觸手攻擊面板（DAY-174）----
+# DISABLED: const SeaAnemonePanelScript = preload("res://scripts/ui/SeaAnemonePanel.gd")
+var _sea_anemone_panel: Control = null
+
+func _init_sea_anemone_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 幸運骰子魚面板（DAY-175）----
+# DISABLED: const LuckyDicePanelScript = preload("res://scripts/ui/LuckyDicePanel.gd")
+var _lucky_dice_panel: Control = null
+
+func _init_lucky_dice_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 火焰風暴魚面板（DAY-176）----
+# DISABLED: const FireStormPanelScript = preload("res://scripts/ui/FireStormPanel.gd")
+var _fire_storm_panel: Control = null
+
+func _init_fire_storm_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 黃金寶藏魚面板（DAY-177）----
+# DISABLED: const GoldenTreasurePanelScript = preload("res://scripts/ui/GoldenTreasurePanel.gd")
+var _golden_treasure_panel: Control = null
+
+func _init_golden_treasure_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 美人魚治癒面板（DAY-178）----
+const MermaidHealingPanelScript = preload("res://scripts/ui/MermaidHealingPanel.gd")
+var _mermaid_healing_panel: Control = null
+
+func _init_mermaid_healing_panel() -> void:
+	var panel = MermaidHealingPanelScript.new()
+	panel.name = "MermaidHealingPanel"
+	panel.z_index = 66
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_mermaid_healing_panel = panel
+	if GameManager.has_signal("mermaid_healing"):
+		GameManager.mermaid_healing.connect(func(data):
+			if is_instance_valid(_mermaid_healing_panel):
+				_mermaid_healing_panel.handle_mermaid_healing(data)
+		)
+
+## ---- 幸運草魚面板（DAY-179）----
+const LuckyCloverPanelScript = preload("res://scripts/ui/LuckyCloverPanel.gd")
+var _lucky_clover_panel: Control = null
+
+func _init_lucky_clover_panel() -> void:
+	var panel = LuckyCloverPanelScript.new()
+	panel.name = "LuckyCloverPanel"
+	panel.z_index = 65
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_lucky_clover_panel = panel
+	if GameManager.has_signal("lucky_clover_fish"):
+		GameManager.lucky_clover_fish.connect(func(data):
+			if is_instance_valid(_lucky_clover_panel):
+				_lucky_clover_panel.handle_lucky_clover(data)
+		)
+
+## ---- 彩虹鯊魚爆發面板（DAY-180）----
+# DISABLED: const RainbowSharkPanelScript = preload("res://scripts/ui/RainbowSharkPanel.gd")
+var _rainbow_shark_panel: Control = null
+
+func _init_rainbow_shark_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 雷霆鯊魚連鎖閃電面板（DAY-181）----
+const ThunderSharkPanelScript = preload("res://scripts/ui/ThunderSharkPanel.gd")
+var _thunder_shark_panel: Control = null
+
+func _init_thunder_shark_panel() -> void:
+	var panel = ThunderSharkPanelScript.new()
+	panel.name = "ThunderSharkPanel"
+	panel.z_index = 64
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_thunder_shark_panel = panel
+	if GameManager.has_signal("thunder_shark_chain"):
+		GameManager.thunder_shark_chain.connect(func(data):
+			if is_instance_valid(_thunder_shark_panel):
+				_thunder_shark_panel.handle_thunder_shark(data)
+		)
+
+## ---- 吸血鬼魚累積倍率面板（DAY-182）----
+const VampireFishPanelScript = preload("res://scripts/ui/VampireFishPanel.gd")
+var _vampire_fish_panel: Control = null
+
+func _init_vampire_fish_panel() -> void:
+	var panel = VampireFishPanelScript.new()
+	panel.name = "VampireFishPanel"
+	panel.z_index = 63
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_vampire_fish_panel = panel
+	if GameManager.has_signal("vampire_fish"):
+		GameManager.vampire_fish.connect(func(data):
+			if is_instance_valid(_vampire_fish_panel):
+				var my_id: String = GameManager.get("_player_id") if GameManager.get("_player_id") != null else ""
+				_vampire_fish_panel.handle_vampire_fish(data, my_id)
+		)
+
+## ---- 閃電魚自動連鎖面板（DAY-183）----
+const LightningAutoChainPanelScript = preload("res://scripts/ui/LightningAutoChainPanel.gd")
+var _lightning_auto_chain_panel: Control = null
+
+func _init_lightning_auto_chain_panel() -> void:
+	var panel = LightningAutoChainPanelScript.new()
+	panel.name = "LightningAutoChainPanel"
+	panel.z_index = 62
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_lightning_auto_chain_panel = panel
+	if GameManager.has_signal("lightning_auto_chain"):
+		GameManager.lightning_auto_chain.connect(func(data):
+			if is_instance_valid(_lightning_auto_chain_panel):
+				_lightning_auto_chain_panel.handle_lightning_auto_chain(data)
+		)
+
+## ---- 隕石魚隕石雨面板（DAY-184）----
+const MeteorFishPanelScript = preload("res://scripts/ui/MeteorFishPanel.gd")
+var _meteor_fish_panel: Control = null
+
+func _init_meteor_fish_panel() -> void:
+	var panel = MeteorFishPanelScript.new()
+	panel.name = "MeteorFishPanel"
+	panel.z_index = 61
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_meteor_fish_panel = panel
+	if GameManager.has_signal("meteor_fish"):
+		GameManager.meteor_fish.connect(func(data):
+			if is_instance_valid(_meteor_fish_panel):
+				_meteor_fish_panel.handle_meteor_fish(data)
+		)
+
+## ---- 鳳凰魚涅槃重生面板（DAY-185）----
+const PhoenixFishPanelScript = preload("res://scripts/ui/PhoenixFishPanel.gd")
+var _phoenix_fish_panel: Control = null
+
+func _init_phoenix_fish_panel() -> void:
+	var panel = PhoenixFishPanelScript.new()
+	panel.name = "PhoenixFishPanel"
+	panel.z_index = 60
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_phoenix_fish_panel = panel
+	if GameManager.has_signal("phoenix_fish"):
+		GameManager.phoenix_fish.connect(func(data):
+			if is_instance_valid(_phoenix_fish_panel):
+				_phoenix_fish_panel.handle_phoenix_fish(data)
+		)
+
+## ---- 龍龜不死 Boss 面板（DAY-186）----
+const DragonTurtlePanelScript = preload("res://scripts/ui/DragonTurtlePanel.gd")
+var _dragon_turtle_panel: Control = null
+
+func _init_dragon_turtle_panel() -> void:
+	var panel = DragonTurtlePanelScript.new()
+	panel.name = "DragonTurtlePanel"
+	panel.z_index = 59
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_dragon_turtle_panel = panel
+	if GameManager.has_signal("dragon_turtle"):
+		GameManager.dragon_turtle.connect(func(data):
+			if is_instance_valid(_dragon_turtle_panel):
+				_dragon_turtle_panel.handle_dragon_turtle(data)
+		)
+
+## ---- 連鎖爆炸魚面板（DAY-187）----
+const ChainBombPanelScript = preload("res://scripts/ui/ChainBombPanel.gd")
+var _chain_bomb_panel: Control = null
+
+func _init_chain_bomb_panel() -> void:
+	var panel = ChainBombPanelScript.new()
+	panel.name = "ChainBombPanel"
+	panel.z_index = 58
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_chain_bomb_panel = panel
+	if GameManager.has_signal("chain_bomb"):
+		GameManager.chain_bomb.connect(func(data):
+			if is_instance_valid(_chain_bomb_panel):
+				_chain_bomb_panel.handle_chain_bomb(data)
+		)
+
+## ---- 巨型鱷魚獵食面板（DAY-188）----
+const CrocodileHunterPanelScript = preload("res://scripts/ui/CrocodileHunterPanel.gd")
+var _crocodile_hunter_panel: Control = null
+
+func _init_crocodile_hunter_panel() -> void:
+	var panel = CrocodileHunterPanelScript.new()
+	panel.name = "CrocodileHunterPanel"
+	panel.z_index = 57
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_crocodile_hunter_panel = panel
+	if GameManager.has_signal("crocodile_hunter"):
+		GameManager.crocodile_hunter.connect(func(data):
+			if is_instance_valid(_crocodile_hunter_panel):
+				_crocodile_hunter_panel.handle(data)
+		)
+
+## ---- 時間炸彈魚面板（DAY-189）----
+const TimeBombFishPanelScript = preload("res://scripts/ui/TimeBombFishPanel.gd")
+var _time_bomb_fish_panel: Control = null
+
+func _init_time_bomb_fish_panel() -> void:
+	var panel = TimeBombFishPanelScript.new()
+	panel.name = "TimeBombFishPanel"
+	panel.z_index = 56
+	panel.position = Vector2(0, 0)
+	add_child(panel)
+	_time_bomb_fish_panel = panel
+	if GameManager.has_signal("time_bomb_fish"):
+		GameManager.time_bomb_fish.connect(func(data):
+			if is_instance_valid(_time_bomb_fish_panel):
+				_time_bomb_fish_panel.handle(data)
+		)
+
+## ---- 三重幸運魚面板（DAY-190）----
+# DISABLED: const TripleLuckyFishPanelScript = preload("res://scripts/ui/TripleLuckyFishPanel.gd")
+var _triple_lucky_fish_panel: Control = null
+
+func _init_triple_lucky_fish_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 魚群驚嚇連帶面板（DAY-191）----
+# DISABLED: const SchoolPanicPanelScript = preload("res://scripts/ui/SchoolPanicPanel.gd")
+var _school_panic_panel: Control = null
+
+func _init_school_panic_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 搖滾骷髏演唱會面板（DAY-192）----
+# DISABLED: const RockSkeletonConcertPanelScript = preload("res://scripts/ui/RockSkeletonConcertPanel.gd")
+var _rock_skeleton_concert_panel: Control = null
+
+func _init_rock_skeleton_concert_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 電流水母電流網路面板（DAY-193）----
+# DISABLED: const ElectricJellyfishPanelScript = preload("res://scripts/ui/ElectricJellyfishPanel.gd")
+var _electric_jellyfish_panel: Control = null
+
+func _init_electric_jellyfish_panel() -> void:
+	pass  # disabled: broken panel
+## ---- 長龍王雙環輪盤面板（DAY-194）----
+const ChainLongKingPanelScript = preload("res://scripts/ui/ChainLongKingPanel.gd")
+var _chainlong_king_panel = null
+
+func _init_chainlong_king_panel() -> void:
+	var panel = ChainLongKingPanelScript.new()
+	panel.name = "ChainLongKingPanel"
+	panel.layer = 51  # 在 ElectricJellyfishPanel(52) 之下
+	add_child(panel)
+	_chainlong_king_panel = panel
+	# 連接停止按鈕訊號
+	if panel.has_signal("chainlong_king_stop_pressed"):
+		panel.chainlong_king_stop_pressed.connect(_on_chainlong_king_stop_pressed)
+	# 連接 GameManager 訊號
+	if GameManager.has_signal("chainlong_king"):
+		GameManager.chainlong_king.connect(_on_chainlong_king)
+
+func _on_chainlong_king(data: Dictionary) -> void:
+	if is_instance_valid(_chainlong_king_panel):
+		_chainlong_king_panel.handle_chainlong_king(data)
+
+func _on_chainlong_king_stop_pressed(instance_id: String) -> void:
+	GameManager.send_chainlong_king_stop(instance_id)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## ---- 巨型鮟鱇魚電擊寶箱面板（DAY-196）----
+const AnglerfishElectricPanelScript = preload("res://scripts/ui/AnglerfishElectricPanel.gd")
+var _anglerfish_electric_panel = null
+
+func _init_anglerfish_electric_panel() -> void:
+	var panel = AnglerfishElectricPanelScript.new()
+	panel.name = "AnglerfishElectricPanel"
+	panel.layer = 49
+	add_child(panel)
+	_anglerfish_electric_panel = panel
+	if GameManager.has_signal("anglerfish_electric"):
+		GameManager.anglerfish_electric.connect(_on_anglerfish_electric)
+
+func _on_anglerfish_electric(data: Dictionary) -> void:
+	if is_instance_valid(_anglerfish_electric_panel):
+		_anglerfish_electric_panel.handle_anglerfish_electric(data)
+
+## ---- 神秘龍魚八波攻擊面板（DAY-197）----
+const MysticDragonPanelScript = preload("res://scripts/ui/MysticDragonPanel.gd")
+var _mystic_dragon_panel = null
+
+func _init_mystic_dragon_panel() -> void:
+	var panel = MysticDragonPanelScript.new()
+	panel.name = "MysticDragonPanel"
+	panel.layer = 48
+	add_child(panel)
+	_mystic_dragon_panel = panel
+	if GameManager.has_signal("mystic_dragon"):
+		GameManager.mystic_dragon.connect(_on_mystic_dragon)
+
+func _on_mystic_dragon(data: Dictionary) -> void:
+	if is_instance_valid(_mystic_dragon_panel):
+		_mystic_dragon_panel.handle_mystic_dragon(data)
+
+## ---- 幽靈魚分身面板（DAY-198）----
+const GhostFishPanelScript = preload("res://scripts/ui/GhostFishPanel.gd")
+var _ghost_fish_panel = null
+
+func _init_ghost_fish_panel() -> void:
+	var panel = GhostFishPanelScript.new()
+	panel.name = "GhostFishPanel"
+	panel.layer = 47
+	add_child(panel)
+	_ghost_fish_panel = panel
+	if GameManager.has_signal("ghost_fish"):
+		GameManager.ghost_fish.connect(_on_ghost_fish)
+
+func _on_ghost_fish(data: Dictionary) -> void:
+	if is_instance_valid(_ghost_fish_panel):
+		_ghost_fish_panel.handle_ghost_fish(data)
+
+## ---- 雷霆龍蝦免費射擊面板（DAY-199）----
+# ThunderboltLobsterPanelScript already declared above (DAY-150)
+# var _thunderbolt_lobster_panel already declared above
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+## ---- 冰鳳凰覺醒 BOSS 面板（DAY-200）----
+const IcePhoenixPanelScript = preload("res://scripts/ui/IcePhoenixPanel.gd")
+var _ice_phoenix_panel = null
+
+func _init_ice_phoenix_panel() -> void:
+	var panel = IcePhoenixPanelScript.new()
+	panel.name = "IcePhoenixPanel"
+	panel.layer = 45
+	add_child(panel)
+	_ice_phoenix_panel = panel
+	if GameManager.has_signal("ice_phoenix"):
+		GameManager.ice_phoenix.connect(_on_ice_phoenix)
+
+func _on_ice_phoenix(data: Dictionary) -> void:
+	if is_instance_valid(_ice_phoenix_panel):
+		_ice_phoenix_panel.handle_ice_phoenix(data)
+
+## ---- 連環炸彈蟹面板（DAY-201）----
+const SerialBombCrabPanelScript = preload("res://scripts/ui/SerialBombCrabPanel.gd")
+var _serial_bomb_crab_panel = null
+
+func _init_serial_bomb_crab_panel() -> void:
+	pass  # disabled: broken panel
+func _on_serial_bomb_crab(data: Dictionary) -> void:
+	if is_instance_valid(_serial_bomb_crab_panel):
+		_serial_bomb_crab_panel.handle_serial_bomb_crab(data)
+
+## ---- 深淵漩渦魚面板（DAY-202）----
+const AbyssVortexPanelScript = preload("res://scripts/ui/AbyssVortexPanel.gd")
+var _abyss_vortex_panel = null
+
+func _init_abyss_vortex_panel() -> void:
+	var panel = AbyssVortexPanelScript.new()
+	panel.name = "AbyssVortexPanel"
+	panel.layer = 43
+	add_child(panel)
+	_abyss_vortex_panel = panel
+	if GameManager.has_signal("abyss_vortex"):
+		GameManager.abyss_vortex.connect(_on_abyss_vortex)
+
+func _on_abyss_vortex(data: Dictionary) -> void:
+	if is_instance_valid(_abyss_vortex_panel):
+		_abyss_vortex_panel.handle_abyss_vortex(data)
+
+## ---- 座頭鯨覺醒面板（DAY-203）----
+const HumpbackWhalePanelScript = preload("res://scripts/ui/HumpbackWhalePanel.gd")
+var _humpback_whale_panel = null
+
+func _init_humpback_whale_panel() -> void:
+	var panel = HumpbackWhalePanelScript.new()
+	panel.name = "HumpbackWhalePanel"
+	panel.layer = 42
+	add_child(panel)
+	_humpback_whale_panel = panel
+	if GameManager.has_signal("humpback_whale"):
+		GameManager.humpback_whale.connect(_on_humpback_whale)
+
+func _on_humpback_whale(data: Dictionary) -> void:
+	if is_instance_valid(_humpback_whale_panel):
+		_humpback_whale_panel.handle_humpback_whale(data)
+
+## ---- 自由旋轉魚免費射擊面板（DAY-204）----
+const FreeSpinFishPanelScript = preload("res://scripts/ui/FreeSpinFishPanel.gd")
+var _free_spin_fish_panel = null
+
+func _init_free_spin_fish_panel() -> void:
+	var panel = FreeSpinFishPanelScript.new()
+	panel.name = "FreeSpinFishPanel"
+	panel.layer = 41
+	add_child(panel)
+	_free_spin_fish_panel = panel
+	if GameManager.has_signal("free_spin_fish"):
+		GameManager.free_spin_fish.connect(_on_free_spin_fish)
+
+func _on_free_spin_fish(data: Dictionary) -> void:
+	if is_instance_valid(_free_spin_fish_panel):
+		_free_spin_fish_panel.handle_free_spin_fish(data)
+
+## ---- 獎池龍 Jackpot 抽獎面板（DAY-205）----
+const JackpotDragonPanelScript = preload("res://scripts/ui/JackpotDragonPanel.gd")
+var _jackpot_dragon_panel = null
+
+func _init_jackpot_dragon_panel() -> void:
+	var panel = JackpotDragonPanelScript.new()
+	panel.name = "JackpotDragonPanel"
+	panel.layer = 60
+	add_child(panel)
+	_jackpot_dragon_panel = panel
+	if GameManager.has_signal("jackpot_dragon"):
+		GameManager.jackpot_dragon.connect(_on_jackpot_dragon)
+
+func _on_jackpot_dragon(data: Dictionary) -> void:
+	if is_instance_valid(_jackpot_dragon_panel):
+		_jackpot_dragon_panel.handle_jackpot_dragon(data)
+
+## ---- 彗星魚連鎖爆炸面板（DAY-206）----
+const CometFishPanelScript = preload("res://scripts/ui/CometFishPanel.gd")
+var _comet_fish_panel = null
+
+func _init_comet_fish_panel() -> void:
+	var panel = CometFishPanelScript.new()
+	panel.name = "CometFishPanel"
+	panel.layer = 39
+	add_child(panel)
+	_comet_fish_panel = panel
+	if GameManager.has_signal("comet_fish"):
+		GameManager.comet_fish.connect(_on_comet_fish)
+
+func _on_comet_fish(data: Dictionary) -> void:
+	if is_instance_valid(_comet_fish_panel):
+		_comet_fish_panel.handle_comet_fish(data)
+
+## ---- 黃金波浪魚全場倍率衝擊面板（DAY-207）----
+const GoldenWaveFishPanelScript = preload("res://scripts/ui/GoldenWaveFishPanel.gd")
+var _golden_wave_fish_panel = null
+
+func _init_golden_wave_fish_panel() -> void:
+	var panel = GoldenWaveFishPanelScript.new()
+	panel.name = "GoldenWaveFishPanel"
+	panel.layer = 38
+	add_child(panel)
+	_golden_wave_fish_panel = panel
+	if GameManager.has_signal("golden_wave_fish"):
+		GameManager.golden_wave_fish.connect(_on_golden_wave_fish)
+
+func _on_golden_wave_fish(data: Dictionary) -> void:
+	if is_instance_valid(_golden_wave_fish_panel):
+		_golden_wave_fish_panel.handle_golden_wave_fish(data)
+
+# ── 深海龍王全服合力蓄力面板（DAY-208）──────────────────────────────────────
+const DragonKingPanelScript = preload("res://scripts/ui/DragonKingPanel.gd")
+var _dragon_king_panel = null
+
+func _init_dragon_king_panel() -> void:
+	var panel = DragonKingPanelScript.new()
+	panel.name = "DragonKingPanel"
+	panel.layer = 37
+	add_child(panel)
+	_dragon_king_panel = panel
+	if GameManager.has_signal("dragon_king"):
+		GameManager.dragon_king.connect(_on_dragon_king)
+
+func _on_dragon_king(data: Dictionary) -> void:
+	if is_instance_valid(_dragon_king_panel):
+		_dragon_king_panel.handle_dragon_king(data)
+
+# ── 幸運金幣魚即時獎勵面板（DAY-209）──────────────────────────────────────
+const FortuneCoinFishPanelScript = preload("res://scripts/ui/FortuneCoinFishPanel.gd")
+var _fortune_coin_fish_panel = null
+
+func _init_fortune_coin_fish_panel() -> void:
+	var panel = FortuneCoinFishPanelScript.new()
+	panel.name = "FortuneCoinFishPanel"
+	panel.layer = 36
+	add_child(panel)
+	_fortune_coin_fish_panel = panel
+	if GameManager.has_signal("fortune_coin_fish"):
+		GameManager.fortune_coin_fish.connect(_on_fortune_coin_fish)
+
+func _on_fortune_coin_fish(data: Dictionary) -> void:
+	if is_instance_valid(_fortune_coin_fish_panel):
+		_fortune_coin_fish_panel.handle_fortune_coin_fish(data)
+
+# ── DAY-210 幸運熱區魚空間策略面板 ──────────────────────────────────────────
+const LuckyHotZonePanelScript = preload("res://scripts/ui/LuckyHotZonePanel.gd")
+var _lucky_hot_zone_panel = null
+
+func _init_lucky_hot_zone_panel() -> void:
+	var panel = LuckyHotZonePanelScript.new()
+	panel.name = "LuckyHotZonePanel"
+	panel.layer = 35
+	add_child(panel)
+	_lucky_hot_zone_panel = panel
+	if GameManager.has_signal("lucky_hot_zone"):
+		GameManager.lucky_hot_zone.connect(_on_lucky_hot_zone)
+
+func _on_lucky_hot_zone(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_hot_zone_panel):
+		_lucky_hot_zone_panel.handle_lucky_hot_zone(data)
+
+# ── DAY-211 幸運三叉魚互動三轉盤面板 ──────────────────────────────────────────
+# DISABLED: const LuckyTridentPanelScript = preload("res://scripts/ui/LuckyTridentPanel.gd")
+var _lucky_trident_panel = null
+
+func _init_lucky_trident_panel() -> void:
+	pass  # disabled: broken panel
+func _on_lucky_trident(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_trident_panel):
+		_lucky_trident_panel.handle_lucky_trident(data)
+
+# ─── 時間凍結魚系統面板（DAY-212）───────────────────────────────────────────
+const TimeFreezePanelScript = preload("res://scripts/ui/TimeFreezePanel.gd")
+var _time_freeze_panel = null
+
+func _init_time_freeze_panel() -> void:
+	var panel = TimeFreezePanelScript.new()
+	panel.name = "TimeFreezePanel"
+	panel.layer = 33
+	add_child(panel)
+	_time_freeze_panel = panel
+	if GameManager.has_signal("time_freeze_fish"):
+		GameManager.time_freeze_fish.connect(_on_time_freeze_fish)
+
+func _on_time_freeze_fish(data: Dictionary) -> void:
+	if is_instance_valid(_time_freeze_panel):
+		_time_freeze_panel.handle_time_freeze(data)
+
+# ─── 彩虹稜鏡魚系統面板（DAY-213）───────────────────────────────────────────
+const RainbowPrismPanelScript = preload("res://scripts/ui/RainbowPrismPanel.gd")
+
+var _rainbow_prism_panel = null
+
+func _init_rainbow_prism_panel() -> void:
+	var panel = RainbowPrismPanelScript.new()
+	panel.name = "RainbowPrismPanel"
+	panel.layer = 32
+	add_child(panel)
+	_rainbow_prism_panel = panel
+	if GameManager.has_signal("rainbow_prism"):
+		GameManager.rainbow_prism.connect(_on_rainbow_prism)
+
+func _on_rainbow_prism(data: Dictionary) -> void:
+	if is_instance_valid(_rainbow_prism_panel):
+		_rainbow_prism_panel.handle_rainbow_prism(data)
+
+# ─── 黃金累積魚系統面板（DAY-214）───────────────────────────────────────────
+const GoldenAccumulatorPanelScript = preload("res://scripts/ui/GoldenAccumulatorPanel.gd")
+
+var _golden_accumulator_panel = null
+
+func _init_golden_accumulator_panel() -> void:
+	var panel = GoldenAccumulatorPanelScript.new()
+	panel.name = "GoldenAccumulatorPanel"
+	panel.layer = 31
+	add_child(panel)
+	_golden_accumulator_panel = panel
+	if GameManager.has_signal("golden_accumulator"):
+		GameManager.golden_accumulator.connect(_on_golden_accumulator)
+
+func _on_golden_accumulator(data: Dictionary) -> void:
+	if is_instance_valid(_golden_accumulator_panel):
+		_golden_accumulator_panel.handle_golden_accumulator(data)
+
+# ─── 幸運鏡像魚系統面板（DAY-215）───────────────────────────────────────────
+const LuckyMirrorFishPanelScript = preload("res://scripts/ui/LuckyMirrorFishPanel.gd")
+
+var _lucky_mirror_fish_panel = null
+
+func _init_lucky_mirror_fish_panel() -> void:
+	var panel = LuckyMirrorFishPanelScript.new()
+	panel.name = "LuckyMirrorFishPanel"
+	panel.layer = 30
+	add_child(panel)
+	_lucky_mirror_fish_panel = panel
+	if GameManager.has_signal("lucky_mirror_fish"):
+		GameManager.lucky_mirror_fish.connect(_on_lucky_mirror_fish)
+
+func _on_lucky_mirror_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_mirror_fish_panel):
+		_lucky_mirror_fish_panel.handle_lucky_mirror_fish(data)
+
+# ─── 詛咒毒魚系統面板（DAY-216）───────────────────────────────────────────
+const CursedPoisonFishPanelScript = preload("res://scripts/ui/CursedPoisonFishPanel.gd")
+
+var _cursed_poison_fish_panel = null
+
+func _init_cursed_poison_fish_panel() -> void:
+	var panel = CursedPoisonFishPanelScript.new()
+	panel.name = "CursedPoisonFishPanel"
+	panel.layer = 29
+	add_child(panel)
+	_cursed_poison_fish_panel = panel
+	if GameManager.has_signal("cursed_poison_fish"):
+		GameManager.cursed_poison_fish.connect(_on_cursed_poison_fish)
+
+func _on_cursed_poison_fish(data: Dictionary) -> void:
+	if is_instance_valid(_cursed_poison_fish_panel):
+		_cursed_poison_fish_panel.handle_cursed_poison_fish(data)
+
+# ─── 幸運拍賣魚系統面板（DAY-217）───────────────────────────────────────────
+const LuckyAuctionFishPanelScript = preload("res://scripts/ui/LuckyAuctionFishPanel.gd")
+
+var _lucky_auction_fish_panel = null
+
+func _init_lucky_auction_fish_panel() -> void:
+	var panel = LuckyAuctionFishPanelScript.new()
+	panel.name = "LuckyAuctionFishPanel"
+	panel.layer = 28
+	add_child(panel)
+	_lucky_auction_fish_panel = panel
+	if GameManager.has_signal("lucky_auction_fish"):
+		GameManager.lucky_auction_fish.connect(_on_lucky_auction_fish)
+
+func _on_lucky_auction_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_auction_fish_panel):
+		_lucky_auction_fish_panel.handle_lucky_auction_fish(data)
+
+# ─── 幸運進化魚系統面板（DAY-218）───────────────────────────────────────────
+const LuckyEvolutionFishPanelScript = preload("res://scripts/ui/LuckyEvolutionFishPanel.gd")
+
+var _lucky_evolution_fish_panel = null
+
+func _init_lucky_evolution_fish_panel() -> void:
+	var panel = LuckyEvolutionFishPanelScript.new()
+	panel.name = "LuckyEvolutionFishPanel"
+	panel.layer = 27
+	add_child(panel)
+	_lucky_evolution_fish_panel = panel
+	if GameManager.has_signal("lucky_evolution_fish"):
+		GameManager.lucky_evolution_fish.connect(_on_lucky_evolution_fish)
+
+func _on_lucky_evolution_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_evolution_fish_panel):
+		_lucky_evolution_fish_panel.handle_lucky_evolution_fish(data)
+
+# ─── 幸運連鎖感染魚系統面板（DAY-219）───────────────────────────────────────────
+const LuckyInfectionFishPanelScript = preload("res://scripts/ui/LuckyInfectionFishPanel.gd")
+var _lucky_infection_fish_panel = null
+
+func _init_lucky_infection_fish_panel() -> void:
+	var panel = LuckyInfectionFishPanelScript.new()
+	panel.name = "LuckyInfectionFishPanel"
+	panel.layer = 26
+	add_child(panel)
+	_lucky_infection_fish_panel = panel
+	if GameManager.has_signal("lucky_infection_fish"):
+		GameManager.lucky_infection_fish.connect(_on_lucky_infection_fish)
+
+func _on_lucky_infection_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_infection_fish_panel):
+		_lucky_infection_fish_panel.handle_lucky_infection_fish(data)
+
+# ─── 幸運反彈魚系統面板（DAY-220）───────────────────────────────────────────
+# DISABLED: const LuckyRicochetFishPanelScript = preload("res://scripts/ui/LuckyRicochetFishPanel.gd")
+var _lucky_ricochet_fish_panel = null
+
+func _init_lucky_ricochet_fish_panel() -> void:
+	pass  # disabled: broken panel
+func _on_lucky_ricochet_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_ricochet_fish_panel):
+		_lucky_ricochet_fish_panel.handle_lucky_ricochet_fish(data)
+
+# ─── 幸運黑洞魚系統面板（DAY-221）───────────────────────────────────────────
+const LuckyBlackHolePanelScript = preload("res://scripts/ui/LuckyBlackHolePanel.gd")
+var _lucky_black_hole_panel = null
+
+func _init_lucky_black_hole_panel() -> void:
+	pass  # disabled: broken panel
+func _on_lucky_black_hole(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_black_hole_panel):
+		_lucky_black_hole_panel.handle_lucky_black_hole(data)
+
+# ─── 幸運共鳴魚系統面板（DAY-222）───────────────────────────────────────────
+const LuckyResonanceFishPanelScript = preload("res://scripts/ui/LuckyResonanceFishPanel.gd")
+var _lucky_resonance_fish_panel = null
+
+func _init_lucky_resonance_fish_panel() -> void:
+	var panel = LuckyResonanceFishPanelScript.new()
+	panel.name = "LuckyResonanceFishPanel"
+	panel.layer = 23
+	add_child(panel)
+	_lucky_resonance_fish_panel = panel
+	if GameManager.has_signal("lucky_resonance_fish"):
+		GameManager.lucky_resonance_fish.connect(_on_lucky_resonance_fish)
+
+func _on_lucky_resonance_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_resonance_fish_panel):
+		_lucky_resonance_fish_panel.handle_lucky_resonance_fish(data)
+
+# ─── 幸運傳送魚系統面板（DAY-223）───────────────────────────────────────────
+const LuckyTeleportFishPanelScript = preload("res://scripts/ui/LuckyTeleportFishPanel.gd")
+var _lucky_teleport_fish_panel = null
+
+func _init_lucky_teleport_fish_panel() -> void:
+	var panel = LuckyTeleportFishPanelScript.new()
+	panel.name = "LuckyTeleportFishPanel"
+	panel.layer = 22
+	add_child(panel)
+	_lucky_teleport_fish_panel = panel
+	if GameManager.has_signal("lucky_teleport_fish"):
+		GameManager.lucky_teleport_fish.connect(_on_lucky_teleport_fish)
+
+func _on_lucky_teleport_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_teleport_fish_panel):
+		_lucky_teleport_fish_panel.handle_lucky_teleport_fish(data)
+
+# ─── 幸運分裂魚系統面板（DAY-224）───────────────────────────────────────────
+const LuckySplitFishPanelScript = preload("res://scripts/ui/LuckySplitFishPanel.gd")
+var _lucky_split_fish_panel = null
+
+func _init_lucky_split_fish_panel() -> void:
+	var panel = LuckySplitFishPanelScript.new()
+	panel.name = "LuckySplitFishPanel"
+	panel.layer = 21
+	add_child(panel)
+	_lucky_split_fish_panel = panel
+	if GameManager.has_signal("lucky_split_fish"):
+		GameManager.lucky_split_fish.connect(_on_lucky_split_fish)
+
+func _on_lucky_split_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_split_fish_panel):
+		_lucky_split_fish_panel.handle_lucky_split_fish(data)
+
+# ─── 幸運充能魚系統面板（DAY-225）───────────────────────────────────────────
+const LuckyChargeFishPanelScript = preload("res://scripts/ui/LuckyChargeFishPanel.gd")
+var _lucky_charge_fish_panel = null
+
+func _init_lucky_charge_fish_panel() -> void:
+	var panel = LuckyChargeFishPanelScript.new()
+	panel.name = "LuckyChargeFishPanel"
+	panel.layer = 20
+	add_child(panel)
+	_lucky_charge_fish_panel = panel
+	if GameManager.has_signal("lucky_charge_fish"):
+		GameManager.lucky_charge_fish.connect(_on_lucky_charge_fish)
+
+func _on_lucky_charge_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_charge_fish_panel):
+		_lucky_charge_fish_panel.handle_lucky_charge_fish(data)
+
+# ─── 幸運鏈鎖爆炸魚系統面板（DAY-226）───────────────────────────────────────
+const LuckyChainBombPanelScript = preload("res://scripts/ui/LuckyChainBombPanel.gd")
+var _lucky_chain_bomb_panel = null
+
+func _init_lucky_chain_bomb_panel() -> void:
+	var panel = LuckyChainBombPanelScript.new()
+	panel.name = "LuckyChainBombPanel"
+	panel.layer = 19
+	add_child(panel)
+	_lucky_chain_bomb_panel = panel
+	if GameManager.has_signal("lucky_chain_bomb"):
+		GameManager.lucky_chain_bomb.connect(_on_lucky_chain_bomb)
+
+func _on_lucky_chain_bomb(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_chain_bomb_panel):
+		_lucky_chain_bomb_panel.handle_lucky_chain_bomb(data)
+
+# ─── 幸運鏡像時空魚系統面板（DAY-227）───────────────────────────────────────
+const LuckyMirrorTimePanelScript = preload("res://scripts/ui/LuckyMirrorTimePanel.gd")
+var _lucky_mirror_time_panel = null
+
+func _init_lucky_mirror_time_panel() -> void:
+	var panel = LuckyMirrorTimePanelScript.new()
+	panel.name = "LuckyMirrorTimePanel"
+	panel.layer = 18
+	add_child(panel)
+	_lucky_mirror_time_panel = panel
+	if GameManager.has_signal("lucky_mirror_time"):
+		GameManager.lucky_mirror_time.connect(_on_lucky_mirror_time)
+
+func _on_lucky_mirror_time(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_mirror_time_panel):
+		_lucky_mirror_time_panel.handle_lucky_mirror_time(data)
+
+# ─── 幸運量子魚系統面板（DAY-228）───────────────────────────────────────────
+const LuckyQuantumFishPanelScript = preload("res://scripts/ui/LuckyQuantumFishPanel.gd")
+var _lucky_quantum_fish_panel = null
+
+func _init_lucky_quantum_fish_panel() -> void:
+	var panel = LuckyQuantumFishPanelScript.new()
+	panel.name = "LuckyQuantumFishPanel"
+	panel.layer = 17
+	add_child(panel)
+	_lucky_quantum_fish_panel = panel
+	if GameManager.has_signal("lucky_quantum_fish"):
+		GameManager.lucky_quantum_fish.connect(_on_lucky_quantum_fish)
+
+func _on_lucky_quantum_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_quantum_fish_panel):
+		_lucky_quantum_fish_panel.handle_lucky_quantum_fish(data)
+
+# ─── 幸運寄生魚系統面板（DAY-229）───────────────────────────────────────────
+const LuckyParasiteFishPanelScript = preload("res://scripts/ui/LuckyParasiteFishPanel.gd")
+var _lucky_parasite_fish_panel = null
+
+func _init_lucky_parasite_fish_panel() -> void:
+	var panel = LuckyParasiteFishPanelScript.new()
+	panel.name = "LuckyParasiteFishPanel"
+	panel.layer = 16
+	add_child(panel)
+	_lucky_parasite_fish_panel = panel
+	if GameManager.has_signal("lucky_parasite_fish"):
+		GameManager.lucky_parasite_fish.connect(_on_lucky_parasite_fish)
+
+func _on_lucky_parasite_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_parasite_fish_panel):
+		_lucky_parasite_fish_panel.handle_lucky_parasite_fish(data)
+
+# ─── 幸運風暴魚系統面板（DAY-230）───────────────────────────────────────────
+const LuckyStormFishPanelScript = preload("res://scripts/ui/LuckyStormFishPanel.gd")
+var _lucky_storm_fish_panel = null
+
+func _init_lucky_storm_fish_panel() -> void:
+	var panel = LuckyStormFishPanelScript.new()
+	panel.name = "LuckyStormFishPanel"
+	panel.layer = 15
+	add_child(panel)
+	_lucky_storm_fish_panel = panel
+	if GameManager.has_signal("lucky_storm_fish"):
+		GameManager.lucky_storm_fish.connect(_on_lucky_storm_fish)
+
+func _on_lucky_storm_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_storm_fish_panel):
+		_lucky_storm_fish_panel.handle_lucky_storm_fish(data)
+
+# ─── 幸運迴旋鏢魚系統面板（DAY-231）───────────────────────────────────────────
+const LuckyBoomerangFishPanelScript = preload("res://scripts/ui/LuckyBoomerangFishPanel.gd")
+var _lucky_boomerang_fish_panel = null
+
+func _init_lucky_boomerang_fish_panel() -> void:
+	var panel = LuckyBoomerangFishPanelScript.new()
+	panel.name = "LuckyBoomerangFishPanel"
+	panel.layer = 14
+	add_child(panel)
+	_lucky_boomerang_fish_panel = panel
+	if GameManager.has_signal("lucky_boomerang_fish"):
+		GameManager.lucky_boomerang_fish.connect(_on_lucky_boomerang_fish)
+
+func _on_lucky_boomerang_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_boomerang_fish_panel):
+		_lucky_boomerang_fish_panel.handle_lucky_boomerang_fish(data)
+
+# ─── 幸運磁力魚系統面板（DAY-232）───────────────────────────────────────────
+const LuckyMagnetFishPanelScript = preload("res://scripts/ui/LuckyMagnetFishPanel.gd")
+var _lucky_magnet_fish_panel = null
+
+func _init_lucky_magnet_fish_panel() -> void:
+	var panel = LuckyMagnetFishPanelScript.new()
+	panel.name = "LuckyMagnetFishPanel"
+	panel.layer = 13
+	add_child(panel)
+	_lucky_magnet_fish_panel = panel
+	if GameManager.has_signal("lucky_magnet_fish"):
+		GameManager.lucky_magnet_fish.connect(_on_lucky_magnet_fish)
+
+func _on_lucky_magnet_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_magnet_fish_panel):
+		_lucky_magnet_fish_panel.handle_lucky_magnet_fish(data)
+
+# ─── 幸運回聲魚系統面板（DAY-233）───────────────────────────────────────────
+const LuckyEchoFishPanelScript = preload("res://scripts/ui/LuckyEchoFishPanel.gd")
+var _lucky_echo_fish_panel = null
+
+func _init_lucky_echo_fish_panel() -> void:
+	var panel = LuckyEchoFishPanelScript.new()
+	panel.name = "LuckyEchoFishPanel"
+	panel.layer = 12
+	add_child(panel)
+	_lucky_echo_fish_panel = panel
+	if GameManager.has_signal("lucky_echo_fish"):
+		GameManager.lucky_echo_fish.connect(_on_lucky_echo_fish)
+
+func _on_lucky_echo_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_echo_fish_panel):
+		_lucky_echo_fish_panel.handle_lucky_echo_fish(data)
+
+# ─── 幸運漩渦魚系統面板（DAY-234）───────────────────────────────────────────
+const LuckyVortexFishPanelScript = preload("res://scripts/ui/LuckyVortexFishPanel.gd")
+var _lucky_vortex_fish_panel = null
+
+func _init_lucky_vortex_fish_panel() -> void:
+	pass  # disabled: broken panel
+func _on_lucky_vortex_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_vortex_fish_panel):
+		_lucky_vortex_fish_panel.handle_lucky_vortex_fish(data)
+
+# ─── 幸運時間炸彈魚系統面板（DAY-235）───────────────────────────────────────────
+const LuckyTimeBombFishPanelScript = preload("res://scripts/ui/LuckyTimeBombFishPanel.gd")
+var _lucky_time_bomb_fish_panel = null
+
+func _init_lucky_time_bomb_fish_panel() -> void:
+	var panel = LuckyTimeBombFishPanelScript.new()
+	panel.name = "LuckyTimeBombFishPanel"
+	panel.layer = 10
+	add_child(panel)
+	_lucky_time_bomb_fish_panel = panel
+	if GameManager.has_signal("lucky_time_bomb_fish"):
+		GameManager.lucky_time_bomb_fish.connect(_on_lucky_time_bomb_fish)
+
+func _on_lucky_time_bomb_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_time_bomb_fish_panel):
+		_lucky_time_bomb_fish_panel.handle_lucky_time_bomb_fish(data)
+
+# ─── 幸運鏡面世界魚系統面板（DAY-236）───────────────────────────────────────────
+const LuckyMirrorWorldPanelScript = preload("res://scripts/ui/LuckyMirrorWorldPanel.gd")
+var _lucky_mirror_world_panel = null
+
+func _init_lucky_mirror_world_panel() -> void:
+	var panel = LuckyMirrorWorldPanelScript.new()
+	panel.name = "LuckyMirrorWorldPanel"
+	panel.layer = 9
+	add_child(panel)
+	_lucky_mirror_world_panel = panel
+	if GameManager.has_signal("lucky_mirror_world"):
+		GameManager.lucky_mirror_world.connect(_on_lucky_mirror_world)
+
+func _on_lucky_mirror_world(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_mirror_world_panel):
+		_lucky_mirror_world_panel.handle_lucky_mirror_world(data)
+
+# ─── 幸運冰凍世界魚系統面板（DAY-237）───────────────────────────────────────────
+const LuckyFreezeWorldPanelScript = preload("res://scripts/ui/LuckyFreezeWorldPanel.gd")
+var _lucky_freeze_world_panel = null
+
+func _init_lucky_freeze_world_panel() -> void:
+	var panel = LuckyFreezeWorldPanelScript.new()
+	panel.name = "LuckyFreezeWorldPanel"
+	panel.layer = 8
+	add_child(panel)
+	_lucky_freeze_world_panel = panel
+	if GameManager.has_signal("lucky_freeze_world"):
+		GameManager.lucky_freeze_world.connect(_on_lucky_freeze_world)
+
+func _on_lucky_freeze_world(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_freeze_world_panel):
+		_lucky_freeze_world_panel.handle_lucky_freeze_world(data)
+
+# ─── 幸運重力反轉魚系統面板（DAY-238）───────────────────────────────────────────
+# DISABLED: const LuckyGravityFlipPanelScript = preload("res://scripts/ui/LuckyGravityFlipPanel.gd")
+var _lucky_gravity_flip_panel = null
+
+func _init_lucky_gravity_flip_panel() -> void:
+	pass  # disabled: broken panel
+func _on_lucky_gravity_flip(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_gravity_flip_panel):
+		_lucky_gravity_flip_panel.handle_lucky_gravity_flip(data)
+
+# ─── 幸運共鳴爆發魚系統面板（DAY-239）───────────────────────────────────────────
+const LuckySynergyBurstPanelScript = preload("res://scripts/ui/LuckySynergyBurstPanel.gd")
+var _lucky_synergy_burst_panel = null
+
+func _init_lucky_synergy_burst_panel() -> void:
+	var panel = LuckySynergyBurstPanelScript.new()
+	panel.name = "LuckySynergyBurstPanel"
+	panel.layer = 6
+	add_child(panel)
+	_lucky_synergy_burst_panel = panel
+	if GameManager.has_signal("lucky_synergy_burst"):
+		GameManager.lucky_synergy_burst.connect(_on_lucky_synergy_burst)
+
+func _on_lucky_synergy_burst(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_synergy_burst_panel):
+		_lucky_synergy_burst_panel.handle_lucky_synergy_burst(data)
+
+# ─── 幸運賭注魚系統面板（DAY-240）───────────────────────────────────────────
+const LuckyBetFishPanelScript = preload("res://scripts/ui/LuckyBetFishPanel.gd")
+var _lucky_bet_fish_panel = null
+
+func _init_lucky_bet_fish_panel() -> void:
+	var panel = LuckyBetFishPanelScript.new()
+	panel.name = "LuckyBetFishPanel"
+	panel.layer = 5
+	add_child(panel)
+	_lucky_bet_fish_panel = panel
+	if GameManager.has_signal("lucky_bet_fish"):
+		GameManager.lucky_bet_fish.connect(_on_lucky_bet_fish)
+
+func _on_lucky_bet_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_bet_fish_panel):
+		_lucky_bet_fish_panel.handle_lucky_bet_fish(data)
+
+# ─── 幸運連鎖反應魚系統面板（DAY-241）───────────────────────────────────────────
+const LuckyChainReactionPanelScript = preload("res://scripts/ui/LuckyChainReactionPanel.gd")
+var _lucky_chain_reaction_panel = null
+
+func _init_lucky_chain_reaction_panel() -> void:
+	var panel = LuckyChainReactionPanelScript.new()
+	panel.name = "LuckyChainReactionPanel"
+	panel.layer = 4
+	add_child(panel)
+	_lucky_chain_reaction_panel = panel
+	if GameManager.has_signal("lucky_chain_reaction"):
+		GameManager.lucky_chain_reaction.connect(_on_lucky_chain_reaction)
+
+func _on_lucky_chain_reaction(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_chain_reaction_panel):
+		_lucky_chain_reaction_panel.handle_lucky_chain_reaction(data)
+
+# ─── 幸運分身魚系統面板（DAY-242）───────────────────────────────────────────
+const LuckyCloneFishPanelScript = preload("res://scripts/ui/LuckyCloneFishPanel.gd")
+var _lucky_clone_fish_panel = null
+
+func _init_lucky_clone_fish_panel() -> void:
+	var panel = LuckyCloneFishPanelScript.new()
+	panel.name = "LuckyCloneFishPanel"
+	panel.layer = 3
+	add_child(panel)
+	_lucky_clone_fish_panel = panel
+	if GameManager.has_signal("lucky_clone_fish"):
+		GameManager.lucky_clone_fish.connect(_on_lucky_clone_fish)
+
+func _on_lucky_clone_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_clone_fish_panel):
+		_lucky_clone_fish_panel.handle_lucky_clone_fish(data)
+
+# ─── 幸運預言魚系統面板（DAY-243）───────────────────────────────────────────
+# const LuckyProphecyFishPanelScript = null  # disabled: parse error
+var _lucky_prophecy_fish_panel = null
+
+func _init_lucky_prophecy_fish_panel() -> void:
+	pass  # disabled: parse error in LuckyProphecyFishPanel.gd
+
+
+
+
+
+
+
+func _on_lucky_prophecy_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_prophecy_fish_panel):
+		_lucky_prophecy_fish_panel.handle_lucky_prophecy_fish(data)
+
+# ─── 幸運奪旗魚系統面板（DAY-244）───────────────────────────────────────────
+# const LuckyFlagFishPanelScript = null  # disabled: parse error
+var _lucky_flag_fish_panel = null
+
+func _init_lucky_flag_fish_panel() -> void:
+	pass  # disabled: parse error in LuckyFlagFishPanel.gd
+
+
+
+
+
+
+
+func _on_lucky_flag_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_flag_fish_panel):
+		_lucky_flag_fish_panel.handle_lucky_flag_fish(data)
+
+# ─── 幸運幽靈魚系統面板（DAY-245）───────────────────────────────────────────
+const LuckyPhantomFishPanelScript = preload("res://scripts/ui/LuckyPhantomFishPanel.gd")
+var _lucky_phantom_fish_panel = null
+
+func _init_lucky_phantom_fish_panel() -> void:
+	var panel = LuckyPhantomFishPanelScript.new()
+	panel.name = "LuckyPhantomFishPanel"
+	panel.layer = 18
+	add_child(panel)
+	_lucky_phantom_fish_panel = panel
+	if GameManager.has_signal("lucky_phantom_fish"):
+		GameManager.lucky_phantom_fish.connect(_on_lucky_phantom_fish)
+
+func _on_lucky_phantom_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_phantom_fish_panel):
+		_lucky_phantom_fish_panel.handle_lucky_phantom_fish(data)
+
+# ─── 幸運水晶球魚系統面板（DAY-246）───────────────────────────────────────────
+const LuckyCrystalBallFishPanelScript = preload("res://scripts/ui/LuckyCrystalBallFishPanel.gd")
+var _lucky_crystal_ball_fish_panel = null
+
+func _init_lucky_crystal_ball_fish_panel() -> void:
+	var panel = LuckyCrystalBallFishPanelScript.new()
+	panel.name = "LuckyCrystalBallFishPanel"
+	panel.layer = 19
+	add_child(panel)
+	_lucky_crystal_ball_fish_panel = panel
+	if GameManager.has_signal("lucky_crystal_ball_fish"):
+		GameManager.lucky_crystal_ball_fish.connect(_on_lucky_crystal_ball_fish)
+
+func _on_lucky_crystal_ball_fish(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_crystal_ball_fish_panel):
+		_lucky_crystal_ball_fish_panel.handle_lucky_crystal_ball_fish(data)
+
+# ─── 幸運時光倒流魚系統面板（DAY-247）───────────────────────────────────────────
+const LuckyTimeRewindPanelScript = preload("res://scripts/ui/LuckyTimeRewindPanel.gd")
+var _lucky_time_rewind_panel = null
+
+func _init_lucky_time_rewind_panel() -> void:
+	var panel = LuckyTimeRewindPanelScript.new()
+	panel.name = "LuckyTimeRewindPanel"
+	panel.layer = 20
+	add_child(panel)
+	_lucky_time_rewind_panel = panel
+	if GameManager.has_signal("lucky_time_rewind"):
+		GameManager.lucky_time_rewind.connect(_on_lucky_time_rewind)
+
+func _on_lucky_time_rewind(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_time_rewind_panel):
+		_lucky_time_rewind_panel.handle_lucky_time_rewind(data)
+
+# ─── 幸運龍捲風魚系統面板（DAY-248）───────────────────────────────────────────
+const LuckyTornadoPanelScript = preload("res://scripts/ui/LuckyTornadoPanel.gd")
+var _lucky_tornado_panel = null
+
+func _init_lucky_tornado_panel() -> void:
+	var panel = LuckyTornadoPanelScript.new()
+	panel.name = "LuckyTornadoPanel"
+	panel.layer = 21
+	add_child(panel)
+	_lucky_tornado_panel = panel
+	if GameManager.has_signal("lucky_tornado"):
+		GameManager.lucky_tornado.connect(_on_lucky_tornado)
+
+func _on_lucky_tornado(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_tornado_panel):
+		_lucky_tornado_panel.handle_lucky_tornado(data)
+
+# ─── 幸運黑洞爆炸魚系統面板（DAY-249）────────────────────────────────────────
+
+const LuckyBlackHoleExplosionPanelScript = preload("res://scripts/ui/LuckyBlackHoleExplosionPanel.gd")
+var _lucky_black_hole_explosion_panel = null
+
+func _init_lucky_black_hole_explosion_panel() -> void:
+	var panel = LuckyBlackHoleExplosionPanelScript.new()
+	panel.name = "LuckyBlackHoleExplosionPanel"
+	panel.layer = 22
+	add_child(panel)
+	_lucky_black_hole_explosion_panel = panel
+	if GameManager.has_signal("lucky_black_hole_explosion"):
+		GameManager.lucky_black_hole_explosion.connect(_on_lucky_black_hole_explosion)
+
+func _on_lucky_black_hole_explosion(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_black_hole_explosion_panel):
+		_lucky_black_hole_explosion_panel.handle_lucky_black_hole_explosion(data)
+
+# ─── 幸運鏡像分裂魚系統面板（DAY-250）────────────────────────────────────────
+
+const LuckyMirrorSplitPanelScript = preload("res://scripts/ui/LuckyMirrorSplitPanel.gd")
+var _lucky_mirror_split_panel = null
+
+func _init_lucky_mirror_split_panel() -> void:
+	var panel = LuckyMirrorSplitPanelScript.new()
+	panel.name = "LuckyMirrorSplitPanel"
+	panel.layer = 23
+	add_child(panel)
+	_lucky_mirror_split_panel = panel
+	if GameManager.has_signal("lucky_mirror_split"):
+		GameManager.lucky_mirror_split.connect(_on_lucky_mirror_split)
+
+func _on_lucky_mirror_split(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_mirror_split_panel):
+		_lucky_mirror_split_panel.handle_lucky_mirror_split(data)
+
+# ─── 幸運量子糾纏魚系統面板（DAY-251）────────────────────────────────────────
+
+const LuckyQuantumEntanglePanelScript = preload("res://scripts/ui/LuckyQuantumEntanglePanel.gd")
+var _lucky_quantum_entangle_panel = null
+
+func _init_lucky_quantum_entangle_panel() -> void:
+	var panel = LuckyQuantumEntanglePanelScript.new()
+	panel.name = "LuckyQuantumEntanglePanel"
+	panel.layer = 24
+	add_child(panel)
+	_lucky_quantum_entangle_panel = panel
+	if GameManager.has_signal("lucky_quantum_entangle"):
+		GameManager.lucky_quantum_entangle.connect(_on_lucky_quantum_entangle)
+
+func _on_lucky_quantum_entangle(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_quantum_entangle_panel):
+		_lucky_quantum_entangle_panel.handle_lucky_quantum_entangle(data)
+
+# ─── 幸運武器進化魚系統面板（DAY-252）────────────────────────────────────────
+
+const LuckyWeaponEvoPanelScript = preload("res://scripts/ui/LuckyWeaponEvoPanel.gd")
+var _lucky_weapon_evo_panel = null
+
+func _init_lucky_weapon_evo_panel() -> void:
+	var panel = LuckyWeaponEvoPanelScript.new()
+	panel.name = "LuckyWeaponEvoPanel"
+	panel.layer = 25
+	add_child(panel)
+	_lucky_weapon_evo_panel = panel
+	if GameManager.has_signal("lucky_weapon_evo"):
+		GameManager.lucky_weapon_evo.connect(_on_lucky_weapon_evo)
+
+func _on_lucky_weapon_evo(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_weapon_evo_panel):
+		_lucky_weapon_evo_panel.handle_lucky_weapon_evo(data)
+
+# ─── 幸運星際隕石魚系統面板（DAY-253）────────────────────────────────────────
+
+const LuckyMeteorShowerPanelScript = preload("res://scripts/ui/LuckyMeteorShowerPanel.gd")
+var _lucky_meteor_shower_panel = null
+
+func _init_lucky_meteor_shower_panel() -> void:
+	var panel = LuckyMeteorShowerPanelScript.new()
+	panel.name = "LuckyMeteorShowerPanel"
+	panel.layer = 26
+	add_child(panel)
+	_lucky_meteor_shower_panel = panel
+	if GameManager.has_signal("lucky_meteor_shower"):
+		GameManager.lucky_meteor_shower.connect(_on_lucky_meteor_shower)
+
+func _on_lucky_meteor_shower(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_meteor_shower_panel):
+		_lucky_meteor_shower_panel.handle_lucky_meteor_shower(data)
+
+# ─── 幸運龍王降臨魚系統面板（DAY-254）────────────────────────────────────────
+
+const LuckyDragonKingPanelScript = preload("res://scripts/ui/LuckyDragonKingPanel.gd")
+var _lucky_dragon_king_panel = null
+
+func _init_lucky_dragon_king_panel() -> void:
+	var panel = LuckyDragonKingPanelScript.new()
+	panel.name = "LuckyDragonKingPanel"
+	panel.layer = 27
+	add_child(panel)
+	_lucky_dragon_king_panel = panel
+	if GameManager.has_signal("lucky_dragon_king"):
+		GameManager.lucky_dragon_king.connect(_on_lucky_dragon_king)
+
+func _on_lucky_dragon_king(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_dragon_king_panel):
+		_lucky_dragon_king_panel.handle_lucky_dragon_king(data)
+
+# ─── 幸運時空裂縫魚系統面板（DAY-255）────────────────────────────────────────
+
+const LuckyRiftPanelScript = preload("res://scripts/ui/LuckyRiftPanel.gd")
+var _lucky_rift_panel = null
+
+func _init_lucky_rift_panel() -> void:
+	var panel = LuckyRiftPanelScript.new()
+	panel.name = "LuckyRiftPanel"
+	panel.layer = 28
+	add_child(panel)
+	_lucky_rift_panel = panel
+	if GameManager.has_signal("lucky_rift"):
+		GameManager.lucky_rift.connect(_on_lucky_rift)
+
+func _on_lucky_rift(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_rift_panel):
+		_lucky_rift_panel.handle_lucky_rift(data)
+
+# ─── 幸運全服充能魚系統面板（DAY-256）────────────────────────────────────────
+
+const LuckyServerChargePanelScript = preload("res://scripts/ui/LuckyServerChargePanel.gd")
+var _lucky_server_charge_panel = null
+
+func _init_lucky_server_charge_panel() -> void:
+	var panel = LuckyServerChargePanelScript.new()
+	panel.name = "LuckyServerChargePanel"
+	panel.layer = 29
+	add_child(panel)
+	_lucky_server_charge_panel = panel
+	if GameManager.has_signal("lucky_server_charge"):
+		GameManager.lucky_server_charge.connect(_on_lucky_server_charge)
+
+func _on_lucky_server_charge(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_server_charge_panel):
+		_lucky_server_charge_panel.handle_lucky_server_charge(data)
+
+# ─── 幸運公會戰魚系統面板（DAY-257）────────────────────────────────────────
+
+const LuckyGuildWarPanelScript = preload("res://scripts/ui/LuckyGuildWarPanel.gd")
+var _lucky_guild_war_panel = null
+
+func _init_lucky_guild_war_panel() -> void:
+	pass  # disabled: broken panel
+func _on_lucky_guild_war(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_guild_war_panel):
+		_lucky_guild_war_panel.handle_lucky_guild_war(data)
+
+# ─── 幸運閃電風暴魚系統面板（DAY-258）────────────────────────────────────────
+
+const LuckyLightningStormPanelScript = preload("res://scripts/ui/LuckyLightningStormPanel.gd")
+var _lucky_lightning_storm_panel = null
+
+func _init_lucky_lightning_storm_panel() -> void:
+	var panel = LuckyLightningStormPanelScript.new()
+	panel.name = "LuckyLightningStormPanel"
+	panel.layer = 31
+	add_child(panel)
+	_lucky_lightning_storm_panel = panel
+	if GameManager.has_signal("lucky_lightning_storm"):
+		GameManager.lucky_lightning_storm.connect(_on_lucky_lightning_storm)
+
+func _on_lucky_lightning_storm(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_lightning_storm_panel):
+		_lucky_lightning_storm_panel.handle_lucky_lightning_storm(data)
+
+# ─── 幸運星座命運魚系統面板（DAY-259）────────────────────────────────────────
+
+const LuckyZodiacFatePanelScript = preload("res://scripts/ui/LuckyZodiacFatePanel.gd")
+var _lucky_zodiac_fate_panel = null
+
+func _init_lucky_zodiac_fate_panel() -> void:
+	var panel = LuckyZodiacFatePanelScript.new()
+	panel.name = "LuckyZodiacFatePanel"
+	panel.layer = 32
+	add_child(panel)
+	_lucky_zodiac_fate_panel = panel
+	if GameManager.has_signal("lucky_zodiac_fate"):
+		GameManager.lucky_zodiac_fate.connect(_on_lucky_zodiac_fate)
+
+func _on_lucky_zodiac_fate(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_zodiac_fate_panel):
+		_lucky_zodiac_fate_panel.handle_lucky_zodiac_fate(data)
+
+# ─── 幸運寶藏獵人魚系統面板（DAY-260）────────────────────────────────────────
+
+const LuckyTreasureHunterPanelScript = preload("res://scripts/ui/LuckyTreasureHunterPanel.gd")
+var _lucky_treasure_hunter_panel = null
+
+func _init_lucky_treasure_hunter_panel() -> void:
+	var panel = LuckyTreasureHunterPanelScript.new()
+	panel.name = "LuckyTreasureHunterPanel"
+	panel.layer = 33
+	add_child(panel)
+	_lucky_treasure_hunter_panel = panel
+	if GameManager.has_signal("lucky_treasure_hunter"):
+		GameManager.lucky_treasure_hunter.connect(_on_lucky_treasure_hunter)
+
+func _on_lucky_treasure_hunter(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_treasure_hunter_panel):
+		_lucky_treasure_hunter_panel.handle_lucky_treasure_hunter(data)
+
+# ─── 幸運時間膠囊魚系統面板（DAY-261）────────────────────────────────────────
+
+const LuckyTimeCapsulePanelScript = preload("res://scripts/ui/LuckyTimeCapsulePanel.gd")
+var _lucky_time_capsule_panel = null
+
+func _init_lucky_time_capsule_panel() -> void:
+	var panel = LuckyTimeCapsulePanelScript.new()
+	panel.name = "LuckyTimeCapsulePanel"
+	panel.layer = 34
+	add_child(panel)
+	_lucky_time_capsule_panel = panel
+	if GameManager.has_signal("lucky_time_capsule"):
+		GameManager.lucky_time_capsule.connect(_on_lucky_time_capsule)
+
+func _on_lucky_time_capsule(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_time_capsule_panel):
+		_lucky_time_capsule_panel.handle_lucky_time_capsule(data)
+
+# ─── 幸運累積大獎池魚系統面板（DAY-262）──────────────────────────────────────
+
+const LuckyProgressiveJackpotPanelScript = preload("res://scripts/ui/LuckyProgressiveJackpotPanel.gd")
+var _lucky_progressive_jackpot_panel = null
+
+func _init_lucky_progressive_jackpot_panel() -> void:
+	pass  # disabled: broken panel
+func _on_lucky_progressive_jackpot(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_progressive_jackpot_panel):
+		_lucky_progressive_jackpot_panel.handle_lucky_progressive_jackpot(data)
+
+const LuckyElementFusionPanelScript = preload("res://scripts/ui/LuckyElementFusionPanel.gd")
+var _lucky_element_fusion_panel = null
+
+func _init_lucky_element_fusion_panel() -> void:
+	var panel = LuckyElementFusionPanelScript.new()
+	panel.name = "LuckyElementFusionPanel"
+	panel.layer = 36
+	add_child(panel)
+	_lucky_element_fusion_panel = panel
+	if GameManager.has_signal("lucky_element_fusion"):
+		GameManager.lucky_element_fusion.connect(_on_lucky_element_fusion)
+
+func _on_lucky_element_fusion(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_element_fusion_panel):
+		_lucky_element_fusion_panel.handle_event(data)
+
+const LuckyKarmaCyclePanelScript = preload("res://scripts/ui/LuckyKarmaCyclePanel.gd")
+var _lucky_karma_cycle_panel = null
+
+func _init_lucky_karma_cycle_panel() -> void:
+	var panel = LuckyKarmaCyclePanelScript.new()
+	panel.name = "LuckyKarmaCyclePanel"
+	panel.layer = 37
+	add_child(panel)
+	_lucky_karma_cycle_panel = panel
+	if GameManager.has_signal("lucky_karma_cycle"):
+		GameManager.lucky_karma_cycle.connect(_on_lucky_karma_cycle)
+
+func _on_lucky_karma_cycle(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_karma_cycle_panel):
+		_lucky_karma_cycle_panel.handle_event(data)
+
+const LuckySpeedRaceFishPanelScript = preload("res://scripts/ui/LuckySpeedRaceFishPanel.gd")
+var _lucky_speed_race_fish_panel = null
+
+func _init_lucky_speed_race_fish_panel() -> void:
+	var panel = LuckySpeedRaceFishPanelScript.new()
+	panel.name = "LuckySpeedRaceFishPanel"
+	panel.layer = 38
+	add_child(panel)
+	_lucky_speed_race_fish_panel = panel
+	if GameManager.has_signal("lucky_speed_race_fish"):
+		GameManager.lucky_speed_race_fish.connect(_on_lucky_speed_race_fish)
+
+func _on_lucky_speed_race_fish(data: Dictionary) -> void:
+	pass  # disabled: broken panel
+const LuckyChainExplosionPanelScript = preload("res://scripts/ui/LuckyChainExplosionPanel.gd")
+var _lucky_chain_explosion_panel = null
+
+func _init_lucky_chain_explosion_panel() -> void:
+	pass  # disabled: broken panel
+func _on_lucky_chain_explosion(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_chain_explosion_panel):
+		_lucky_chain_explosion_panel.handle_event(data)
+
+const LuckyMultiplierStackPanelScript = preload("res://scripts/ui/LuckyMultiplierStackPanel.gd")
+var _lucky_multiplier_stack_panel = null
+
+func _init_lucky_multiplier_stack_panel() -> void:
+	var panel = LuckyMultiplierStackPanelScript.new()
+	panel.name = "LuckyMultiplierStackPanel"
+	panel.layer = 40
+	add_child(panel)
+	_lucky_multiplier_stack_panel = panel
+	if GameManager.has_signal("lucky_multiplier_stack"):
+		GameManager.lucky_multiplier_stack.connect(_on_lucky_multiplier_stack)
+
+func _on_lucky_multiplier_stack(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_multiplier_stack_panel):
+		_lucky_multiplier_stack_panel.handle_event(data)
+
+const LuckyCountdownBombPanelScript = preload("res://scripts/ui/LuckyCountdownBombPanel.gd")
+var _lucky_countdown_bomb_panel = null
+
+func _init_lucky_countdown_bomb_panel() -> void:
+	var panel = LuckyCountdownBombPanelScript.new()
+	panel.name = "LuckyCountdownBombPanel"
+	panel.layer = 41
+	add_child(panel)
+	_lucky_countdown_bomb_panel = panel
+	if GameManager.has_signal("lucky_countdown_bomb"):
+		GameManager.lucky_countdown_bomb.connect(_on_lucky_countdown_bomb)
+
+func _on_lucky_countdown_bomb(data: Dictionary) -> void:
+	pass  # disabled: broken panel
+const LuckySpinWheelPanelScript = preload("res://scripts/ui/LuckySpinWheelPanel.gd")
+var _lucky_spin_wheel_panel = null
+
+func _init_lucky_spin_wheel_panel() -> void:
+	pass  # disabled: broken panel
+func _on_lucky_spin_wheel(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_spin_wheel_panel):
+		_lucky_spin_wheel_panel.handle_event(data)
+
+const LuckyMirrorDuelPanelScript = preload("res://scripts/ui/LuckyMirrorDuelPanel.gd")
+var _lucky_mirror_duel_panel = null
+
+func _init_lucky_mirror_duel_panel() -> void:
+	var panel = LuckyMirrorDuelPanelScript.new()
+	panel.name = "LuckyMirrorDuelPanel"
+	panel.layer = 43
+	add_child(panel)
+	_lucky_mirror_duel_panel = panel
+	if GameManager.has_signal("lucky_mirror_duel"):
+		GameManager.lucky_mirror_duel.connect(_on_lucky_mirror_duel)
+
+func _on_lucky_mirror_duel(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_mirror_duel_panel):
+		_lucky_mirror_duel_panel.handle(data)
+
+const LuckyRerollPanelScript = preload("res://scripts/ui/LuckyRerollPanel.gd")
+var _lucky_reroll_panel = null
+
+func _init_lucky_reroll_panel() -> void:
+	var panel = LuckyRerollPanelScript.new()
+	panel.name = "LuckyRerollPanel"
+	panel.layer = 44
+	add_child(panel)
+	_lucky_reroll_panel = panel
+	if GameManager.has_signal("lucky_reroll"):
+		GameManager.lucky_reroll.connect(_on_lucky_reroll)
+
+func _on_lucky_reroll(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_reroll_panel):
+		_lucky_reroll_panel.handle(data)
+
+const LuckyQualityMutationPanelScript = preload("res://scripts/ui/LuckyQualityMutationPanel.gd")
+var _lucky_quality_mutation_panel = null
+
+func _init_lucky_quality_mutation_panel() -> void:
+	var panel = LuckyQualityMutationPanelScript.new()
+	panel.name = "LuckyQualityMutationPanel"
+	panel.layer = 45
+	add_child(panel)
+	_lucky_quality_mutation_panel = panel
+	if GameManager.has_signal("lucky_quality_mutation"):
+		GameManager.lucky_quality_mutation.connect(_on_lucky_quality_mutation)
+
+func _on_lucky_quality_mutation(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_quality_mutation_panel):
+		_lucky_quality_mutation_panel.handle(data)
+
+const LuckyResonanceWavePanelScript = preload("res://scripts/ui/LuckyResonanceWavePanel.gd")
+var _lucky_resonance_wave_panel = null
+
+func _init_lucky_resonance_wave_panel() -> void:
+	var panel = LuckyResonanceWavePanelScript.new()
+	panel.name = "LuckyResonanceWavePanel"
+	panel.layer = 46
+	add_child(panel)
+	_lucky_resonance_wave_panel = panel
+	if GameManager.has_signal("lucky_resonance_wave"):
+		GameManager.lucky_resonance_wave.connect(_on_lucky_resonance_wave)
+
+func _on_lucky_resonance_wave(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_resonance_wave_panel):
+		_lucky_resonance_wave_panel.handle(data)
+
+const LuckyFortuneProphecyPanelScript = preload("res://scripts/ui/LuckyFortuneProphecyPanel.gd")
+var _lucky_fortune_prophecy_panel = null
+
+func _init_lucky_fortune_prophecy_panel() -> void:
+	var panel = LuckyFortuneProphecyPanelScript.new()
+	panel.name = "LuckyFortuneProphecyPanel"
+	panel.layer = 47
+	add_child(panel)
+	_lucky_fortune_prophecy_panel = panel
+	if GameManager.has_signal("lucky_fortune_prophecy"):
+		GameManager.lucky_fortune_prophecy.connect(_on_lucky_fortune_prophecy)
+
+func _on_lucky_fortune_prophecy(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_fortune_prophecy_panel):
+		_lucky_fortune_prophecy_panel.handle(data)
+
+const LuckyLuckTotemPanelScript = preload("res://scripts/ui/LuckyLuckTotemPanel.gd")
+var _lucky_luck_totem_panel = null
+
+func _init_lucky_luck_totem_panel() -> void:
+	var panel = LuckyLuckTotemPanelScript.new()
+	panel.name = "LuckyLuckTotemPanel"
+	panel.layer = 48
+	add_child(panel)
+	_lucky_luck_totem_panel = panel
+	if GameManager.has_signal("lucky_luck_totem"):
+		GameManager.lucky_luck_totem.connect(_on_lucky_luck_totem)
+
+func _on_lucky_luck_totem(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_luck_totem_panel):
+		_lucky_luck_totem_panel.handle(data)
+
+const LuckyGoldenHurricanePanelScript = preload("res://scripts/ui/LuckyGoldenHurricanePanel.gd")
+var _lucky_golden_hurricane_panel = null
+
+func _init_lucky_golden_hurricane_panel() -> void:
+	var panel = LuckyGoldenHurricanePanelScript.new()
+	panel.name = "LuckyGoldenHurricanePanel"
+	panel.layer = 49
+	add_child(panel)
+	_lucky_golden_hurricane_panel = panel
+	if GameManager.has_signal("lucky_golden_hurricane"):
+		GameManager.lucky_golden_hurricane.connect(_on_lucky_golden_hurricane)
+
+func _on_lucky_golden_hurricane(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_golden_hurricane_panel):
+		_lucky_golden_hurricane_panel.handle(data)
+
+const LuckyLightningHammerPanelScript = preload("res://scripts/ui/LuckyLightningHammerPanel.gd")
+var _lucky_lightning_hammer_panel = null
+
+func _init_lucky_lightning_hammer_panel() -> void:
+	var panel = LuckyLightningHammerPanelScript.new()
+	panel.name = "LuckyLightningHammerPanel"
+	panel.layer = 50
+	add_child(panel)
+	_lucky_lightning_hammer_panel = panel
+	if GameManager.has_signal("lucky_lightning_hammer"):
+		GameManager.lucky_lightning_hammer.connect(_on_lucky_lightning_hammer)
+
+func _on_lucky_lightning_hammer(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_lightning_hammer_panel):
+		_lucky_lightning_hammer_panel.handle(data)
+
+const LuckyTimeRiftPanelScript = preload("res://scripts/ui/LuckyTimeRiftPanel.gd")
+var _lucky_time_rift_panel = null
+
+func _init_lucky_time_rift_panel() -> void:
+	var panel = LuckyTimeRiftPanelScript.new()
+	panel.name = "LuckyTimeRiftPanel"
+	panel.layer = 51
+	add_child(panel)
+	_lucky_time_rift_panel = panel
+	if GameManager.has_signal("lucky_time_rift"):
+		GameManager.lucky_time_rift.connect(_on_lucky_time_rift)
+
+func _on_lucky_time_rift(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_time_rift_panel):
+		_lucky_time_rift_panel.handle(data)
+
+const LuckyRainbowBridgePanelScript = preload("res://scripts/ui/LuckyRainbowBridgePanel.gd")
+var _lucky_rainbow_bridge_panel = null
+
+func _init_lucky_rainbow_bridge_panel() -> void:
+	var panel = LuckyRainbowBridgePanelScript.new()
+	panel.name = "LuckyRainbowBridgePanel"
+	panel.layer = 52
+	add_child(panel)
+	_lucky_rainbow_bridge_panel = panel
+	if GameManager.has_signal("lucky_rainbow_bridge"):
+		GameManager.lucky_rainbow_bridge.connect(_on_lucky_rainbow_bridge)
+
+func _on_lucky_rainbow_bridge(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_rainbow_bridge_panel):
+		_lucky_rainbow_bridge_panel.handle(data)
+
+const LuckyRareChainPanelScript = preload("res://scripts/ui/LuckyRareChainPanel.gd")
+var _lucky_rare_chain_panel = null
+
+func _init_lucky_rare_chain_panel() -> void:
+	var panel = LuckyRareChainPanelScript.new()
+	panel.name = "LuckyRareChainPanel"
+	panel.layer = 53
+	add_child(panel)
+	_lucky_rare_chain_panel = panel
+	if GameManager.has_signal("lucky_rare_chain"):
+		GameManager.lucky_rare_chain.connect(_on_lucky_rare_chain)
+
+func _on_lucky_rare_chain(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_rare_chain_panel):
+		_lucky_rare_chain_panel.handle(data)
+
+const LuckyGoldMutationPanelScript = preload("res://scripts/ui/LuckyGoldMutationPanel.gd")
+var _lucky_gold_mutation_panel = null
+
+func _init_lucky_gold_mutation_panel() -> void:
+	var panel = LuckyGoldMutationPanelScript.new()
+	panel.name = "LuckyGoldMutationPanel"
+	panel.layer = 54
+	add_child(panel)
+	_lucky_gold_mutation_panel = panel
+	if GameManager.has_signal("lucky_gold_mutation"):
+		GameManager.lucky_gold_mutation.connect(_on_lucky_gold_mutation)
+
+func _on_lucky_gold_mutation(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_gold_mutation_panel):
+		_lucky_gold_mutation_panel.handle(data)
+
+const LuckyStarBurstPanelScript = preload("res://scripts/ui/LuckyStarBurstPanel.gd")
+var _lucky_star_burst_panel = null
+
+func _init_lucky_star_burst_panel() -> void:
+	var panel = LuckyStarBurstPanelScript.new()
+	panel.name = "LuckyStarBurstPanel"
+	panel.layer = 55
+	add_child(panel)
+	_lucky_star_burst_panel = panel
+	if GameManager.has_signal("lucky_star_burst"):
+		GameManager.lucky_star_burst.connect(_on_lucky_star_burst)
+
+func _on_lucky_star_burst(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_star_burst_panel):
+		_lucky_star_burst_panel.handle(data)
+
+const LuckyFourSymbolsPanelScript = preload("res://scripts/ui/LuckyFourSymbolsPanel.gd")
+var _lucky_four_symbols_panel = null
+
+func _init_lucky_four_symbols_panel() -> void:
+	var panel = LuckyFourSymbolsPanelScript.new()
+	panel.name = "LuckyFourSymbolsPanel"
+	panel.layer = 56
+	add_child(panel)
+	_lucky_four_symbols_panel = panel
+	if GameManager.has_signal("lucky_four_symbols"):
+		GameManager.lucky_four_symbols.connect(_on_lucky_four_symbols)
+
+func _on_lucky_four_symbols(data: Dictionary) -> void:
+	pass  # disabled: broken panel
+const LuckyDragonWrathPanelScript = preload("res://scripts/ui/LuckyDragonWrathPanel.gd")
+var _lucky_dragon_wrath_panel = null
+
+func _init_lucky_dragon_wrath_panel() -> void:
+	pass  # disabled: broken panel
+func _on_lucky_dragon_wrath(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_dragon_wrath_panel):
+		_lucky_dragon_wrath_panel.handle(data)
+
+const LuckyPhoenixRebirthPanelScript = preload("res://scripts/ui/LuckyPhoenixRebirthPanel.gd")
+var _lucky_phoenix_rebirth_panel = null
+
+func _init_lucky_phoenix_rebirth_panel() -> void:
+	var panel = LuckyPhoenixRebirthPanelScript.new()
+	panel.name = "LuckyPhoenixRebirthPanel"
+	panel.layer = 58
+	add_child(panel)
+	_lucky_phoenix_rebirth_panel = panel
+	if GameManager.has_signal("lucky_phoenix_rebirth"):
+		GameManager.lucky_phoenix_rebirth.connect(_on_lucky_phoenix_rebirth)
+
+func _on_lucky_phoenix_rebirth(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_phoenix_rebirth_panel):
+		_lucky_phoenix_rebirth_panel.handle_event(data)
+
+const LuckyKrakenPanelScript = preload("res://scripts/ui/LuckyKrakenPanel.gd")
+var _lucky_kraken_panel = null
+
+func _init_lucky_kraken_panel() -> void:
+	var panel = LuckyKrakenPanelScript.new()
+	panel.name = "LuckyKrakenPanel"
+	panel.layer = 59
+	add_child(panel)
+	_lucky_kraken_panel = panel
+	if GameManager.has_signal("lucky_kraken"):
+		GameManager.lucky_kraken.connect(_on_lucky_kraken)
+
+func _on_lucky_kraken(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_kraken_panel):
+		_lucky_kraken_panel.handle_event(data)
+
+const LuckyCosmicPulsePanelScript = preload("res://scripts/ui/LuckyCosmicPulsePanel.gd")
+var _lucky_cosmic_pulse_panel = null
+
+func _init_lucky_cosmic_pulse_panel() -> void:
+	var panel = LuckyCosmicPulsePanelScript.new()
+	panel.name = "LuckyCosmicPulsePanel"
+	panel.layer = 60
+	add_child(panel)
+	_lucky_cosmic_pulse_panel = panel
+	if GameManager.has_signal("lucky_cosmic_pulse"):
+		GameManager.lucky_cosmic_pulse.connect(_on_lucky_cosmic_pulse)
+
+func _on_lucky_cosmic_pulse(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_cosmic_pulse_panel):
+		_lucky_cosmic_pulse_panel.handle_event(data)
+
+const LuckyDominoPanelScript = preload("res://scripts/ui/LuckyDominoPanel.gd")
+var _lucky_domino_panel = null
+
+func _init_lucky_domino_panel() -> void:
+	var panel = LuckyDominoPanelScript.new()
+	panel.name = "LuckyDominoPanel"
+	panel.layer = 61
+	add_child(panel)
+	_lucky_domino_panel = panel
+	if GameManager.has_signal("lucky_domino"):
+		GameManager.lucky_domino.connect(_on_lucky_domino)
+
+func _on_lucky_domino(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_domino_panel):
+		_lucky_domino_panel.handle_event(data)

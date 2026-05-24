@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://gcdpkh0b4fqqt"
-path="res://.godot/imported/T134_fire_storm_fish.png-f11e11f720e58c3f0fd640cb29e3251b.ctex"
+uid="uid://cgxtyf22j7uy2"
+path="res://.godot/imported/T134_fire_storm_fish.png-57afb3586a8f150d1fdb6d71cd6c69a5.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T134_fire_storm_fish.png"
-dest_files=["res://.godot/imported/T134_fire_storm_fish.png-f11e11f720e58c3f0fd640cb29e3251b.ctex"]
+dest_files=["res://.godot/imported/T134_fire_storm_fish.png-57afb3586a8f150d1fdb6d71cd6c69a5.ctex"]
 
 [params]
 

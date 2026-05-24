@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ovq0vvfe4t8c0"
-path="res://.godot/imported/T142_meteor_fish.png-341c18b49cade4cdf612507b8733d636.ctex"
+uid="uid://dbje4pnnf8l2p"
+path="res://.godot/imported/T142_meteor_fish.png-9a8f612e8aad979dc2d83fb705e5b93a.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T142_meteor_fish.png"
-dest_files=["res://.godot/imported/T142_meteor_fish.png-341c18b49cade4cdf612507b8733d636.ctex"]
+dest_files=["res://.godot/imported/T142_meteor_fish.png-9a8f612e8aad979dc2d83fb705e5b93a.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2d0w3mafbv17s"
-path="res://.godot/imported/T223_speedrace.png-97e27181bd21adaebaf4f8d856b19f15.ctex"
+uid="uid://b5tx7tndhwwg"
+path="res://.godot/imported/T223_speedrace.png-02cad5e55895250c0e9e4253d48c6969.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T223_speedrace.png"
-dest_files=["res://.godot/imported/T223_speedrace.png-97e27181bd21adaebaf4f8d856b19f15.ctex"]
+dest_files=["res://.godot/imported/T223_speedrace.png-02cad5e55895250c0e9e4253d48c6969.ctex"]
 
 [params]
 

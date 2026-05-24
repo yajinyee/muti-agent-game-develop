@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ygqbcr9xr1w2w"
-path="res://.godot/imported/T126_lion_dance.png-c63bfebb7466aa5a2d6cda5f2585e020.ctex"
+uid="uid://baa2sgrgetojc"
+path="res://.godot/imported/T126_lion_dance.png-3eb67b9ed36fac6776687fda53108ace.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T126_lion_dance.png"
-dest_files=["res://.godot/imported/T126_lion_dance.png-c63bfebb7466aa5a2d6cda5f2585e020.ctex"]
+dest_files=["res://.godot/imported/T126_lion_dance.png-3eb67b9ed36fac6776687fda53108ace.ctex"]
 
 [params]
 

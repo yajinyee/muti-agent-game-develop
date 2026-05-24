@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://rip5c0q96vwpm"
-path="res://.godot/imported/T170_time_freeze_fish.png-986283df5736acb0eb19fe5131ce14b5.ctex"
+uid="uid://b13nyr3aw3fok"
+path="res://.godot/imported/T170_time_freeze_fish.png-94568d7cf64f6d5ccf7a102f4b9c1484.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T170_time_freeze_fish.png"
-dest_files=["res://.godot/imported/T170_time_freeze_fish.png-986283df5736acb0eb19fe5131ce14b5.ctex"]
+dest_files=["res://.godot/imported/T170_time_freeze_fish.png-94568d7cf64f6d5ccf7a102f4b9c1484.ctex"]
 
 [params]
 

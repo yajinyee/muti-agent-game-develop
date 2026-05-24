@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://mk9i4coobo9u9"
-path="res://.godot/imported/T143_phoenix_fish.png-0e8cff76ea91c7299f2e951a00f3e139.ctex"
+uid="uid://y1wc5wwl3nly"
+path="res://.godot/imported/T143_phoenix_fish.png-638084e4eb5eeda3f67f74be2ffea1c2.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T143_phoenix_fish.png"
-dest_files=["res://.godot/imported/T143_phoenix_fish.png-0e8cff76ea91c7299f2e951a00f3e139.ctex"]
+dest_files=["res://.godot/imported/T143_phoenix_fish.png-638084e4eb5eeda3f67f74be2ffea1c2.ctex"]
 
 [params]
 

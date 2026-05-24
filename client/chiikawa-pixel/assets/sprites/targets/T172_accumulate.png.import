@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://wq0lv0h1phtyd"
-path="res://.godot/imported/T172_accumulate.png-ec662efa88967e6bdd4d8eb63c89765c.ctex"
+uid="uid://dfx8xpvrvhg6j"
+path="res://.godot/imported/T172_accumulate.png-3b2261e35bad06e3935201acca7167e3.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T172_accumulate.png"
-dest_files=["res://.godot/imported/T172_accumulate.png-ec662efa88967e6bdd4d8eb63c89765c.ctex"]
+dest_files=["res://.godot/imported/T172_accumulate.png-3b2261e35bad06e3935201acca7167e3.ctex"]
 
 [params]
 

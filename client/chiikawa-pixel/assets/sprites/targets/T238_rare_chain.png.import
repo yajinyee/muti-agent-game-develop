@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://erfmkl8o820bm"
-path="res://.godot/imported/T238_rare_chain.png-ec9d600a6302c7a85d39478e5743e6b0.ctex"
+uid="uid://v0qykcgou4ju"
+path="res://.godot/imported/T238_rare_chain.png-41e58d4f2c709b882cae80f8be8b86bd.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T238_rare_chain.png"
-dest_files=["res://.godot/imported/T238_rare_chain.png-ec9d600a6302c7a85d39478e5743e6b0.ctex"]
+dest_files=["res://.godot/imported/T238_rare_chain.png-41e58d4f2c709b882cae80f8be8b86bd.ctex"]
 
 [params]
 

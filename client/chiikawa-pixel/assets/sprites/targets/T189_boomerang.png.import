@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nxvht72q7999l"
-path="res://.godot/imported/T189_boomerang.png-7b271339d98d30e2560f780e782c5245.ctex"
+uid="uid://cdnu22b0jon0b"
+path="res://.godot/imported/T189_boomerang.png-d540121cfcb3b226c66ce753ba12a7ff.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T189_boomerang.png"
-dest_files=["res://.godot/imported/T189_boomerang.png-7b271339d98d30e2560f780e782c5245.ctex"]
+dest_files=["res://.godot/imported/T189_boomerang.png-d540121cfcb3b226c66ce753ba12a7ff.ctex"]
 
 [params]
 

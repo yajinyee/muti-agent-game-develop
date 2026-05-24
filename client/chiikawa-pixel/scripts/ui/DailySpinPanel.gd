@@ -1,7 +1,7 @@
-## DailySpinPanel.gd
-## 每日簽到轉盤面板（DAY-092）
-## 每天登入可以免費轉一次，連續 7 天可轉超級轉盤
-## 業界依據：iGaming 2026 最熱門留存機制，每日驚喜感提升留存率 35%+
+﻿## DailySpinPanel.gd
+## 瘥蝪賢頧?Ｘ嚗AY-092嚗?
+## 瘥予?餃?臭誑?祥頧?甈∴???? 7 憭拙頧?蝝???
+## 璆剔?靘?嚗Gaming 2026 ??梢???璈嚗??仿?????????35%+
 
 extends Control
 
@@ -12,7 +12,7 @@ var _can_spin: bool = false
 var _login_streak: int = 0
 var _next_spin_at: int = 0
 
-# UI 節點
+# UI 蝭暺?
 var _panel_bg: ColorRect = null
 var _title_label: Label = null
 var _streak_label: Label = null
@@ -22,7 +22,7 @@ var _slot_nodes: Array = []
 var _result_label: Label = null
 var _countdown_label: Label = null
 
-# 動畫狀態
+# ????
 var _is_spinning: bool = false
 var _spin_angle: float = 0.0
 var _spin_speed: float = 0.0
@@ -30,7 +30,7 @@ var _target_slot: int = -1
 var _spin_timer: float = 0.0
 var _result_timer: float = 0.0
 
-# 轉盤半徑
+# 頧??
 const WHEEL_RADIUS = 120.0
 const WHEEL_CENTER = Vector2(640, 320)
 
@@ -41,21 +41,21 @@ func setup(font: Font) -> void:
 	visible = false
 
 func _build_ui() -> void:
-	# 半透明背景
+	# ???
 	var overlay = ColorRect.new()
 	overlay.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	overlay.color = Color(0, 0, 0, 0.70)
 	overlay.z_index = -1
 	add_child(overlay)
 
-	# 主面板
+	# 銝駁??
 	_panel_bg = ColorRect.new()
 	_panel_bg.size = Vector2(560, 500)
 	_panel_bg.position = Vector2(360, 60)
 	_panel_bg.color = Color(0.04, 0.07, 0.18, 0.97)
 	add_child(_panel_bg)
 
-	# 邊框
+	# ??
 	var border = ColorRect.new()
 	border.size = Vector2(564, 504)
 	border.position = Vector2(358, 58)
@@ -63,9 +63,9 @@ func _build_ui() -> void:
 	border.z_index = -1
 	add_child(border)
 
-	# 標題
+	# 璅?
 	_title_label = Label.new()
-	_title_label.text = "🎡 每日簽到轉盤"
+	_title_label.text = "? 瘥蝪賢頧"
 	_title_label.position = Vector2(360, 70)
 	_title_label.size = Vector2(560, 36)
 	_title_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -75,9 +75,9 @@ func _build_ui() -> void:
 		_title_label.add_theme_font_override("font", _pixel_font)
 	add_child(_title_label)
 
-	# 連續登入天數
+	# ????餃憭拇
 	_streak_label = Label.new()
-	_streak_label.text = "連續登入：0 天"
+	_streak_label.text = "????餃嚗? 憭?"
 	_streak_label.position = Vector2(360, 108)
 	_streak_label.size = Vector2(560, 24)
 	_streak_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -87,15 +87,15 @@ func _build_ui() -> void:
 		_streak_label.add_theme_font_override("font", _pixel_font)
 	add_child(_streak_label)
 
-	# 轉盤格子（8個，圓形排列）
+	# 頧?澆?嚗????耦??嚗?
 	for i in range(8):
 		var slot_node = _create_slot_node(i)
 		add_child(slot_node)
 		_slot_nodes.append(slot_node)
 
-	# 中心指針
+	# 銝剖???
 	var pointer = Label.new()
-	pointer.text = "▼"
+	pointer.text = "??"
 	pointer.position = Vector2(WHEEL_CENTER.x - 10, WHEEL_CENTER.y - WHEEL_RADIUS - 30)
 	pointer.add_theme_color_override("font_color", Color(1.0, 0.3, 0.3))
 	pointer.add_theme_font_size_override("font_size", 24)
@@ -103,9 +103,9 @@ func _build_ui() -> void:
 		pointer.add_theme_font_override("font", _pixel_font)
 	add_child(pointer)
 
-	# 轉動按鈕
+	# 頧???
 	_spin_btn = Button.new()
-	_spin_btn.text = "🎡 轉動！"
+	_spin_btn.text = "? 頧?嚗?"
 	_spin_btn.position = Vector2(560, 430)
 	_spin_btn.size = Vector2(160, 40)
 	_spin_btn.add_theme_color_override("font_color", Color(1.0, 0.90, 0.20))
@@ -114,9 +114,9 @@ func _build_ui() -> void:
 		_spin_btn.add_theme_font_override("font", _pixel_font)
 	add_child(_spin_btn)
 
-	# 關閉按鈕
+	# ????
 	_close_btn = Button.new()
-	_close_btn.text = "✕"
+	_close_btn.text = "??"
 	_close_btn.position = Vector2(890, 68)
 	_close_btn.size = Vector2(30, 30)
 	_close_btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
@@ -125,7 +125,7 @@ func _build_ui() -> void:
 		_close_btn.add_theme_font_override("font", _pixel_font)
 	add_child(_close_btn)
 
-	# 結果標籤
+	# 蝯?璅惜
 	_result_label = Label.new()
 	_result_label.position = Vector2(360, 390)
 	_result_label.size = Vector2(560, 36)
@@ -136,7 +136,7 @@ func _build_ui() -> void:
 		_result_label.add_theme_font_override("font", _pixel_font)
 	add_child(_result_label)
 
-	# 倒數計時標籤
+	# ?閮?璅惜
 	_countdown_label = Label.new()
 	_countdown_label.position = Vector2(360, 480)
 	_countdown_label.size = Vector2(560, 24)
@@ -157,13 +157,13 @@ func _create_slot_node(index: int) -> Control:
 	container.position = pos - Vector2(32, 32)
 	container.size = Vector2(64, 64)
 
-	# 背景圓
+	# ???
 	var bg = ColorRect.new()
 	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	bg.color = Color(0.08, 0.12, 0.28, 0.90)
 	container.add_child(bg)
 
-	# 圖示
+	# ?內
 	var icon_label = Label.new()
 	icon_label.name = "Icon"
 	icon_label.text = "?"
@@ -175,7 +175,7 @@ func _create_slot_node(index: int) -> Control:
 		icon_label.add_theme_font_override("font", _pixel_font)
 	container.add_child(icon_label)
 
-	# 標籤
+	# 璅惜
 	var text_label = Label.new()
 	text_label.name = "Text"
 	text_label.text = ""
@@ -221,7 +221,7 @@ func _on_daily_spin_state(data: Dictionary) -> void:
 	_login_streak = data.get("login_streak", 0)
 	_next_spin_at = data.get("next_spin_at", 0)
 
-	# 更新格子
+	# ?湔?澆?
 	var slots_key = "super_slots" if _is_super else "normal_slots"
 	_slots = data.get(slots_key, [])
 	_update_slot_display()
@@ -243,44 +243,44 @@ func _update_slot_display() -> void:
 
 		if is_instance_valid(text_label):
 			var label = slot_data.get("label", "")
-			# 縮短標籤
+			# 蝮桃璅惜
 			if len(label) > 8:
 				label = label.substr(0, 8)
 			text_label.text = label
 
-		# 超級轉盤格子有金色邊框
+		# 頞?頧?澆????脤?獢?
 		if is_instance_valid(bg) and slot_data.get("is_super", false):
 			bg.color = Color(0.15, 0.12, 0.05, 0.95)
 
 func _update_ui_state() -> void:
-	# 更新標題（超級轉盤）
+	# ?湔璅?嚗?蝝??歹?
 	if _is_super:
-		_title_label.text = "👑 超級轉盤（連續 %d 天）" % _login_streak
+		_title_label.text = "?? 頞?頧嚗?? %d 憭抬?" % _login_streak
 		_title_label.add_theme_color_override("font_color", Color(1.0, 0.85, 0.20))
 	else:
-		_title_label.text = "🎡 每日簽到轉盤"
+		_title_label.text = "? 瘥蝪賢頧"
 		_title_label.add_theme_color_override("font_color", Color(1.0, 0.90, 0.20))
 
-	# 更新連續天數
-	var streak_text = "連續登入：%d 天" % _login_streak
+	# ?湔???憭拇
+	var streak_text = "????餃嚗?d 憭? % _login_streak"
 	if _login_streak >= 7:
-		streak_text += " 👑 超級轉盤解鎖！"
+		streak_text += " ?? 頞?頧閫??嚗?"
 	elif _login_streak >= 3:
-		streak_text += " （再 %d 天解鎖超級轉盤）" % (7 - _login_streak)
+		streak_text += " 嚗? %d 憭抵圾??蝝??歹?" % (7 - _login_streak)
 	_streak_label.text = streak_text
 
-	# 更新按鈕狀態
+	# ?湔?????
 	if is_instance_valid(_spin_btn):
 		if _can_spin:
-			_spin_btn.text = "🎡 轉動！（免費）"
+			_spin_btn.text = "? 頧?嚗??祥嚗?"
 			_spin_btn.disabled = false
 			_spin_btn.add_theme_color_override("font_color", Color(1.0, 0.90, 0.20))
 		else:
-			_spin_btn.text = "⏰ 明天再來"
+			_spin_btn.text = "???予??"
 			_spin_btn.disabled = true
 			_spin_btn.add_theme_color_override("font_color", Color(0.5, 0.5, 0.5))
 
-	# 倒數計時
+	# ?閮?
 	if not _can_spin and _next_spin_at > 0:
 		_countdown_label.visible = true
 		_update_countdown()
@@ -293,13 +293,13 @@ func _update_countdown() -> void:
 	var now_ms = Time.get_unix_time_from_system() * 1000
 	var diff_ms = _next_spin_at - now_ms
 	if diff_ms <= 0:
-		_countdown_label.text = "可以轉了！"
+		_countdown_label.text = "?臭誑頧?嚗?"
 		return
 	var diff_sec = int(diff_ms / 1000)
 	var hours = diff_sec / 3600
 	var minutes = (diff_sec % 3600) / 60
 	var seconds = diff_sec % 60
-	_countdown_label.text = "下次轉盤：%02d:%02d:%02d" % [hours, minutes, seconds]
+	_countdown_label.text = "銝活頧嚗?02d:%02d:%02d" % [hours, minutes, seconds]
 
 func _on_daily_spin_result(data: Dictionary) -> void:
 	var slot_index = data.get("slot_index", 0)
@@ -307,20 +307,20 @@ func _on_daily_spin_result(data: Dictionary) -> void:
 	var is_super = data.get("is_super", false)
 	var new_balance = data.get("new_balance", 0)
 
-	# 播放轉盤動畫
+	# ?剜頧?
 	_play_spin_animation(slot_index, slot, is_super, new_balance)
 
-	# 更新狀態
+	# ?湔???
 	_can_spin = false
 	_update_ui_state()
 
 func _play_spin_animation(target_slot: int, slot: Dictionary, is_super: bool, new_balance: int) -> void:
 	_is_spinning = true
 	_target_slot = target_slot
-	_spin_timer = 2.5  # 轉盤動畫持續 2.5 秒（_process 用來計算 progress）
-	_spin_angle = 0.0  # 重置旋轉角度
+	_spin_timer = 2.5  # 頧??? 2.5 蝘?_process ?其?閮? progress嚗?
+	_spin_angle = 0.0  # ?蔭??閫漲
 
-	# 2.5 秒後停止動畫並顯示結果
+	# 2.5 蝘??迫?銝阡＊蝷箇???
 	var tween = create_tween()
 	tween.tween_delay(2.5)
 	tween.tween_callback(func():
@@ -328,14 +328,14 @@ func _play_spin_animation(target_slot: int, slot: Dictionary, is_super: bool, ne
 			return
 		_is_spinning = false
 		_spin_timer = 0.0
-		# 停止後把格子歸位到靜止位置
+		# ?迫敺??澆?甇訾??圈?甇Ｖ?蝵?
 		_reset_slot_positions()
 		_show_result(slot, is_super, new_balance)
 		_highlight_slot(target_slot)
 	)
 
 func _reset_slot_positions() -> void:
-	# 動畫結束後把格子歸位到靜止位置
+	# ?蝯?敺??澆?甇訾??圈?甇Ｖ?蝵?
 	for i in range(_slot_nodes.size()):
 		var node = _slot_nodes[i]
 		if not is_instance_valid(node):
@@ -360,11 +360,11 @@ func _highlight_slot(index: int) -> void:
 func _show_result(slot: Dictionary, is_super: bool, new_balance: int) -> void:
 	if not is_instance_valid(_result_label):
 		return
-	var icon = slot.get("icon", "🎁")
-	var label = slot.get("label", "獎勵")
-	var result_text = "%s 獲得：%s！" % [icon, label]
+	var icon = slot.get("icon", "??")
+	var label = slot.get("label", "?")
+	var result_text = "%s ?脣?嚗?s嚗? % [icon, label]"
 	if is_super:
-		result_text = "👑 超級獎勵！" + result_text
+		result_text = "?? 頞??嚗? + result_text"
 	_result_label.text = result_text
 	_result_label.add_theme_color_override("font_color",
 		Color(1.0, 0.85, 0.20) if is_super else Color(0.3, 1.0, 0.3))
@@ -375,12 +375,12 @@ func _process(delta: float) -> void:
 	if not visible:
 		return
 
-	# 轉盤旋轉動畫（視覺效果）
+	# 頧???嚗?閬箸???
 	if _is_spinning and _spin_timer > 0:
 		_spin_timer -= delta
 		var elapsed = 2.5 - max(_spin_timer, 0.0)
 		var progress = clamp(elapsed / 2.5, 0.0, 1.0)
-		# 先快後慢的緩動（ease out）
+		# ?翰敺?楨??ease out嚗?
 		var speed = lerp(720.0, 30.0, ease(progress, 2.5))
 		_spin_angle += speed * delta
 		for i in range(_slot_nodes.size()):
@@ -393,12 +393,12 @@ func _process(delta: float) -> void:
 			var pos = WHEEL_CENTER + Vector2(cos(current_angle_rad), sin(current_angle_rad)) * WHEEL_RADIUS
 			node.position = pos - Vector2(32, 32)
 
-	# 結果顯示計時
+	# 蝯?憿舐內閮?
 	if _result_timer > 0:
 		_result_timer -= delta
 		if _result_timer <= 0 and is_instance_valid(_result_label):
 			_result_label.visible = false
 
-	# 倒數計時更新（每秒）
+	# ?閮??湔嚗?蝘?
 	if not _can_spin and _next_spin_at > 0:
 		_update_countdown()

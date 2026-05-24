@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://nekrq3yjr2r9t"
-path="res://.godot/imported/T102_chest_backup.png-fb5a4f404225cca4793cdfd6da8a2957.ctex"
+uid="uid://bsc5yw7r3g50j"
+path="res://.godot/imported/T102_chest_backup.png-6de7b357e3434d3b5b4c698ecd632135.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T102_chest_backup.png"
-dest_files=["res://.godot/imported/T102_chest_backup.png-fb5a4f404225cca4793cdfd6da8a2957.ctex"]
+dest_files=["res://.godot/imported/T102_chest_backup.png-6de7b357e3434d3b5b4c698ecd632135.ctex"]
 
 [params]
 

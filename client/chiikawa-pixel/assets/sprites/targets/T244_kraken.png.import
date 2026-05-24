@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://t244krakendeepsea286"
-path="res://.godot/imported/T244_kraken.png-t244krakendeepsea286.ctex"
+uid="uid://cjeaidvspqwj"
+path="res://.godot/imported/T244_kraken.png-18ad3b9d514436c5b74aee322df3f907.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T244_kraken.png"
-dest_files=["res://.godot/imported/T244_kraken.png-t244krakendeepsea286.ctex"]
+dest_files=["res://.godot/imported/T244_kraken.png-18ad3b9d514436c5b74aee322df3f907.ctex"]
 
 [params]
 

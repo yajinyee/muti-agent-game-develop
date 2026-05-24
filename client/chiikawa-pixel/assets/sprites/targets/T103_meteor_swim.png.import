@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://770b1ce5b40f1700"
-path="res://.godot/imported/T103_meteor_swim.png-770b1ce5b40f170083844380eb711c76.ctex"
+uid="uid://bp3aov0ny5ty6"
+path="res://.godot/imported/T103_meteor_swim.png-fe71c354ca9b3fd118e50a8b626630ea.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T103_meteor_swim.png"
-dest_files=["res://.godot/imported/T103_meteor_swim.png-770b1ce5b40f170083844380eb711c76.ctex"]
+dest_files=["res://.godot/imported/T103_meteor_swim.png-fe71c354ca9b3fd118e50a8b626630ea.ctex"]
 
 [params]
 

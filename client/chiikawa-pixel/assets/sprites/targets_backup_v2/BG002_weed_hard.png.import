@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bp6v61w7duiuk"
-path="res://.godot/imported/BG002_weed_hard.png-61ebe8775833ca29b50afa636e1326dd.ctex"
+path="res://.godot/imported/BG002_weed_hard.png-9ab37b5bb36ae77211b00f7fe8f62fdb.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets_backup_v2/BG002_weed_hard.png"
-dest_files=["res://.godot/imported/BG002_weed_hard.png-61ebe8775833ca29b50afa636e1326dd.ctex"]
+dest_files=["res://.godot/imported/BG002_weed_hard.png-9ab37b5bb36ae77211b00f7fe8f62fdb.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://l6l67x2crau74"
-path="res://.godot/imported/T217_zodiac.png-1874fa59cc31144b3e152d4a7e07598b.ctex"
+uid="uid://lelgsbk2n8xt"
+path="res://.godot/imported/T217_zodiac.png-c79925ce95fd3aa0016c3212c3901244.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T217_zodiac.png"
-dest_files=["res://.godot/imported/T217_zodiac.png-1874fa59cc31144b3e152d4a7e07598b.ctex"]
+dest_files=["res://.godot/imported/T217_zodiac.png-c79925ce95fd3aa0016c3212c3901244.ctex"]
 
 [params]
 

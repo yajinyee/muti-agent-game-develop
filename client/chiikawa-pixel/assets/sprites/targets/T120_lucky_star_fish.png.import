@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://mqn5spwub9n3n"
-path="res://.godot/imported/T120_lucky_star_fish.png-1e7346f71f093479b258307ce360bc8d.ctex"
+uid="uid://5gj1j53mn1td"
+path="res://.godot/imported/T120_lucky_star_fish.png-5b934f474743f034e64c16f9069e4c92.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T120_lucky_star_fish.png"
-dest_files=["res://.godot/imported/T120_lucky_star_fish.png-1e7346f71f093479b258307ce360bc8d.ctex"]
+dest_files=["res://.godot/imported/T120_lucky_star_fish.png-5b934f474743f034e64c16f9069e4c92.ctex"]
 
 [params]
 

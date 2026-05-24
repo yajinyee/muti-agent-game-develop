@@ -3,15 +3,15 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://bxrbelkp8hb5"
-path="res://.godot/imported/usagi_bigwin.png-0da5fbb1caf8b15a764176fa745487e8.ctex"
+path="res://.godot/imported/usagi_bigwin.png-c663b20ccd72a8d73b30647990ff4e61.ctex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://assets/sprites/characters/usagi_bigwin.png"
-dest_files=["res://.godot/imported/usagi_bigwin.png-0da5fbb1caf8b15a764176fa745487e8.ctex"]
+source_file="res://assets/sprites/characters_backup/usagi_bigwin.png"
+dest_files=["res://.godot/imported/usagi_bigwin.png-c663b20ccd72a8d73b30647990ff4e61.ctex"]
 
 [params]
 

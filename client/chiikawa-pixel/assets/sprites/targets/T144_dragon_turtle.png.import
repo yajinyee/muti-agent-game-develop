@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://lxrojsk32w3tm"
-path="res://.godot/imported/T144_dragon_turtle.png-8498d7b59a9084976ff4c4df6b6fb9e5.ctex"
+uid="uid://dj2rmtdechkc"
+path="res://.godot/imported/T144_dragon_turtle.png-dca18309e59545fe48c56d0afb3d0641.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T144_dragon_turtle.png"
-dest_files=["res://.godot/imported/T144_dragon_turtle.png-8498d7b59a9084976ff4c4df6b6fb9e5.ctex"]
+dest_files=["res://.godot/imported/T144_dragon_turtle.png-dca18309e59545fe48c56d0afb3d0641.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://fvcphh4n65gh7"
-path="res://.godot/imported/T234_golden_hurricane.png-f7c2f74f2ea6fef85febe11aa5dd4b82.ctex"
+uid="uid://b0wtvf7fmxkqg"
+path="res://.godot/imported/T234_golden_hurricane.png-360a7e479891ddb5eabf6e6bc642e467.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T234_golden_hurricane.png"
-dest_files=["res://.godot/imported/T234_golden_hurricane.png-f7c2f74f2ea6fef85febe11aa5dd4b82.ctex"]
+dest_files=["res://.godot/imported/T234_golden_hurricane.png-360a7e479891ddb5eabf6e6bc642e467.ctex"]
 
 [params]
 

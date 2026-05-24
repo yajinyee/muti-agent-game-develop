@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://dilin92trvhzt"
-path="res://.godot/imported/T212_dragonking.png-685842ff6f180c3c88bf03040b50c418.ctex"
+uid="uid://dilioa2trvh0t"
+path="res://.godot/imported/T212_dragonking.png-dc3c694ebd3ac2723f9062f8093b8269.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T212_dragonking.png"
-dest_files=["res://.godot/imported/T212_dragonking.png-685842ff6f180c3c88bf03040b50c418.ctex"]
+dest_files=["res://.godot/imported/T212_dragonking.png-dc3c694ebd3ac2723f9062f8093b8269.ctex"]
 
 [params]
 

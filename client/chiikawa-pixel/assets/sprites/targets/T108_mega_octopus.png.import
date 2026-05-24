@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://d756s86c0x9jc"
-path="res://.godot/imported/T108_mega_octopus.png-d911251e509efbb536e9f5b3d97f69ab.ctex"
+uid="uid://drb7683grerk"
+path="res://.godot/imported/T108_mega_octopus.png-1f94fb0ba8204b7272d02dba273ca6a8.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T108_mega_octopus.png"
-dest_files=["res://.godot/imported/T108_mega_octopus.png-d911251e509efbb536e9f5b3d97f69ab.ctex"]
+dest_files=["res://.godot/imported/T108_mega_octopus.png-1f94fb0ba8204b7272d02dba273ca6a8.ctex"]
 
 [params]
 

@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://2s31jltuadhby"
-path="res://.godot/imported/T209_quantum2.png-98da4f760aa7045298670c8b479b8ba9.ctex"
+uid="uid://q8xe7e3bxc0m"
+path="res://.godot/imported/T209_quantum2.png-14221a344ba87fdd840c5b9e8b6bf3c4.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T209_quantum2.png"
-dest_files=["res://.godot/imported/T209_quantum2.png-98da4f760aa7045298670c8b479b8ba9.ctex"]
+dest_files=["res://.godot/imported/T209_quantum2.png-14221a344ba87fdd840c5b9e8b6bf3c4.ctex"]
 
 [params]
 

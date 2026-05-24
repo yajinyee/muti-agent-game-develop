@@ -3,7 +3,7 @@
 importer="texture"
 type="CompressedTexture2D"
 uid="uid://c3ravb2tg7dfo"
-path="res://.godot/imported/T107_bomb_crab.png-70b8f5fc5d125992c28139d817df7af0.ctex"
+path="res://.godot/imported/T107_bomb_crab.png-33ae0370b0b6cdcf4f74dd761c71614c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T107_bomb_crab.png"
-dest_files=["res://.godot/imported/T107_bomb_crab.png-70b8f5fc5d125992c28139d817df7af0.ctex"]
+dest_files=["res://.godot/imported/T107_bomb_crab.png-33ae0370b0b6cdcf4f74dd761c71614c.ctex"]
 
 [params]
 

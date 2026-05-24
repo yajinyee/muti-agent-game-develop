@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://39yvqf40lc5m1"
-path="res://.godot/imported/T219_timecapsule.png-e8a6866d7dd8fd6a75d0ca69d5b21fb9.ctex"
+uid="uid://b74sl1o8mw1co"
+path="res://.godot/imported/T219_timecapsule.png-d224e005c7961007de9e6080b6656a62.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T219_timecapsule.png"
-dest_files=["res://.godot/imported/T219_timecapsule.png-e8a6866d7dd8fd6a75d0ca69d5b21fb9.ctex"]
+dest_files=["res://.godot/imported/T219_timecapsule.png-d224e005c7961007de9e6080b6656a62.ctex"]
 
 [params]
 

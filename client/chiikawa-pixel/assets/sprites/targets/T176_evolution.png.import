@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://bz97l6uvmwq13"
-path="res://.godot/imported/T176_evolution.png-a49ae021f39e9f682e6789d5850828c6.ctex"
+uid="uid://b1a7l6uvmwq13"
+path="res://.godot/imported/T176_evolution.png-226b39bb428c2bc76b6388285aa17d2c.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T176_evolution.png"
-dest_files=["res://.godot/imported/T176_evolution.png-a49ae021f39e9f682e6789d5850828c6.ctex"]
+dest_files=["res://.godot/imported/T176_evolution.png-226b39bb428c2bc76b6388285aa17d2c.ctex"]
 
 [params]
 

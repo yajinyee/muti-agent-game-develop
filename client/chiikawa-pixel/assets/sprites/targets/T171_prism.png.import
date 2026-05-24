@@ -2,8 +2,8 @@
 
 importer="texture"
 type="CompressedTexture2D"
-uid="uid://ogojgpyf9it4c"
-path="res://.godot/imported/T171_prism.png-3b148a38a5e3e5d8a78d9efd36703dbb.ctex"
+uid="uid://cugwoj7okv7t1"
+path="res://.godot/imported/T171_prism.png-e939c02bab144db5d6f03ae888efee37.ctex"
 metadata={
 "vram_texture": false
 }
@@ -11,7 +11,7 @@ metadata={
 [deps]
 
 source_file="res://assets/sprites/targets/T171_prism.png"
-dest_files=["res://.godot/imported/T171_prism.png-3b148a38a5e3e5d8a78d9efd36703dbb.ctex"]
+dest_files=["res://.godot/imported/T171_prism.png-e939c02bab144db5d6f03ae888efee37.ctex"]
 
 [params]
 

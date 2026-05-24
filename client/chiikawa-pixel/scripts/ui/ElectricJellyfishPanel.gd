@@ -1,13 +1,13 @@
-## ElectricJellyfishPanel.gd — 電流水母電流網路面板（DAY-193）
-## 業界依據：King of Ocean 2026「electric jellyfish chains current between adjacent targets,
-## paying multipliers from every link in the chain」
-## 視覺主題：青色電流 + 電流連接線動畫 + 網路拓撲視覺
+﻿## ElectricJellyfishPanel.gd ???餅?瘞湔??餅?蝬脰楝?Ｘ嚗AY-193嚗?
+## 璆剔?靘?嚗ing of Ocean 2026?lectric jellyfish chains current between adjacent targets,
+## paying multipliers from every link in the chain??
+## 閬死銝駁?嚗??脤瘚?+ ?餅???蝺???+ 蝬脰楝?閬死
 
 extends Control
 
-const ELECTRIC_COLOR := Color(0.0, 1.0, 1.0)   # 青色（電流感）
-const KILL_COLOR     := Color(1.0, 1.0, 0.0)   # 黃色（擊破）
-const MISS_COLOR     := Color(0.3, 0.8, 1.0)   # 淡藍（未擊破）
+const ELECTRIC_COLOR := Color(0.0, 1.0, 1.0)   # ?嚗瘚?嚗?
+const KILL_COLOR     := Color(1.0, 1.0, 0.0)   # 暺嚗??湛?
+const MISS_COLOR     := Color(0.3, 0.8, 1.0)   # 瘛∟?嚗?嚗?
 
 var _banner: Control = null
 var _link_counter: Label = null
@@ -27,25 +27,25 @@ func _on_electric_jellyfish(data: Dictionary) -> void:
 	elif phase.begins_with("link_"):
 		_show_link(data)
 
-# ── network_start ──────────────────────────────────────────────────────────────
+# ?? network_start ??????????????????????????????????????????????????????????????
 func _show_network_start(data: Dictionary) -> void:
 	var killer_name: String = data.get("killer_name", "")
 	var link_count: int = data.get("link_count", 0)
 	_total_links = link_count
 	_total_kills = 0
 
-	# 青色閃光（兩次）
+	# ???嚗甈∴?
 	_flash_screen(ELECTRIC_COLOR, 0.5)
 	var t1 = get_tree().create_timer(0.15)
 	t1.timeout.connect(func(): _flash_screen(ELECTRIC_COLOR, 0.35))
 
-	# 頂部橫幅
-	_show_banner("⚡🪼 %s 的電流水母！建立 %d 條電流連接！" % [killer_name, link_count], ELECTRIC_COLOR)
+	# ?璈怠?
+	_show_banner("?♀?%s ?瘚偌瘥?撱箇? %d 璇瘚?嚗? % [killer_name, link_count], ELECTRIC_COLOR)"
 
-	# 連接計數器
+	# ??閮??
 	_show_link_counter(link_count)
 
-# ── link_N 電流連接 ─────────────────────────────────────────────────────────────
+# ?? link_N ?餅??? ?????????????????????????????????????????????????????????????
 func _show_link(data: Dictionary) -> void:
 	var xa: float = data.get("x_a", 0.0)
 	var ya: float = data.get("y_a", 0.0)
@@ -57,46 +57,46 @@ func _show_link(data: Dictionary) -> void:
 
 	var line_color := KILL_COLOR if is_kill else MISS_COLOR
 
-	# 繪製電流連接線
+	# 蝜芾ˊ?餅???蝺?
 	_draw_electric_line(xa, ya, xb, yb, line_color)
 
-	# 擊破時顯示獎勵浮動文字
+	# ??＊蝷箇??菜筑??摮?
 	if is_kill and reward > 0:
 		var mid_x := (xa + xb) / 2.0
 		var mid_y := (ya + yb) / 2.0
 		_show_floating_reward("+%d" % reward, mid_x, mid_y, KILL_COLOR)
 		_total_kills += 1
 
-	# 更新計數器
+	# ?湔閮??
 	if _link_counter and is_instance_valid(_link_counter):
-		_link_counter.text = "⚡ %d/%d 連接 | 擊破 %d" % [link_index, _total_links, _total_kills]
+		_link_counter.text = "??%d/%d ?? | ? %d" % [link_index, _total_links, _total_kills]
 
-# ── network_result 電流網路結果 ─────────────────────────────────────────────────
+# ?? network_result ?餅?蝬脰楝蝯? ?????????????????????????????????????????????????
 func _show_network_result(data: Dictionary) -> void:
 	var total_kills: int = data.get("total_kills", 0)
 	var total_reward: int = data.get("total_reward", 0)
 	var link_count: int = data.get("link_count", 0)
 
-	# 淡出橫幅
+	# 瘛∪璈怠?
 	_hide_banner()
 
-	# 右側滑入結算彈窗
+	# ?喳皛蝯?敶?
 	_show_result_popup(link_count, total_kills, total_reward)
 
-	# 淡出計數器
+	# 瘛∪閮??
 	if _link_counter and is_instance_valid(_link_counter):
 		var tween = create_tween()
 		tween.tween_property(_link_counter, "modulate:a", 0.0, 0.5)
 		tween.tween_callback(_link_counter.queue_free)
 		_link_counter = null
 
-	# 大量連接時額外閃光
+	# 憭折?????憭???
 	if link_count >= 12:
 		_flash_screen(ELECTRIC_COLOR, 0.6)
 	elif total_kills >= 5:
 		_flash_screen(KILL_COLOR, 0.45)
 
-# ── 輔助函數 ────────────────────────────────────────────────────────────────────
+# ?? 頛?賣 ????????????????????????????????????????????????????????????????????
 
 func _flash_screen(color: Color, alpha: float) -> void:
 	var overlay = ColorRect.new()
@@ -145,7 +145,7 @@ func _show_link_counter(link_count: int) -> void:
 		_link_counter.queue_free()
 
 	_link_counter = Label.new()
-	_link_counter.text = "⚡ 0/%d 連接 | 擊破 0" % link_count
+	_link_counter.text = "??0/%d ?? | ? 0" % link_count
 	_link_counter.add_theme_color_override("font_color", ELECTRIC_COLOR)
 	_link_counter.add_theme_font_size_override("font_size", 16)
 	_link_counter.set_anchors_preset(Control.PRESET_BOTTOM_RIGHT)
@@ -156,7 +156,7 @@ func _show_link_counter(link_count: int) -> void:
 	add_child(_link_counter)
 
 func _draw_electric_line(x1: float, y1: float, x2: float, y2: float, color: Color) -> void:
-	# 用多個小 ColorRect 模擬電流線（鋸齒狀）
+	# ?典??? ColorRect 璅⊥?餅?蝺??賊??嚗?
 	var steps := 8
 	var prev_x := x1
 	var prev_y := y1
@@ -164,10 +164,10 @@ func _draw_electric_line(x1: float, y1: float, x2: float, y2: float, color: Colo
 	var dy := (y2 - y1) / steps
 
 	for i in range(1, steps + 1):
-		var nx := x1 + dx * i + randf_range(-6, 6)  # 鋸齒偏移
+		var nx := x1 + dx * i + randf_range(-6, 6)  # ?賊??宏
 		var ny := y1 + dy * i + randf_range(-6, 6)
 
-		# 繪製線段（用細長 ColorRect 近似）
+		# 蝜芾ˊ蝺挾嚗蝝圈 ColorRect 餈撮嚗?
 		var seg_len := sqrt((nx - prev_x) * (nx - prev_x) + (ny - prev_y) * (ny - prev_y))
 		if seg_len < 1.0:
 			prev_x = nx
@@ -179,14 +179,14 @@ func _draw_electric_line(x1: float, y1: float, x2: float, y2: float, color: Colo
 		seg.size = Vector2(seg_len, 3)
 		seg.position = Vector2(prev_x, prev_y - 1.5)
 
-		# 旋轉線段
+		# ??蝺挾
 		var angle := atan2(ny - prev_y, nx - prev_x)
 		seg.rotation = angle
 		seg.pivot_offset = Vector2(0, 1.5)
 
 		add_child(seg)
 
-		# 淡出動畫
+		# 瘛∪?
 		var tween = create_tween()
 		tween.tween_property(seg, "modulate:a", 0.0, 0.6)
 		tween.tween_callback(seg.queue_free)
@@ -194,7 +194,7 @@ func _draw_electric_line(x1: float, y1: float, x2: float, y2: float, color: Colo
 		prev_x = nx
 		prev_y = ny
 
-	# 在兩端顯示電流節點（小圓點）
+	# ?典蝡舫＊蝷粹瘚?暺?撠?暺?
 	_spawn_node_dot(x1, y1, color)
 	_spawn_node_dot(x2, y2, color)
 
@@ -242,10 +242,10 @@ func _show_result_popup(link_count: int, total_kills: int, total_reward: int) ->
 	vbox.add_theme_constant_override("separation", 6)
 	popup.add_child(vbox)
 
-	_add_label(vbox, "⚡🪼 電流網路結束！", ELECTRIC_COLOR, 16)
-	_add_label(vbox, "電流連接：%d 條" % link_count, Color.WHITE, 14)
-	_add_label(vbox, "擊破目標：%d 個" % total_kills, KILL_COLOR, 14)
-	_add_label(vbox, "總獎勵：%d 金幣" % total_reward, ELECTRIC_COLOR, 14)
+	_add_label(vbox, "?♀??餅?蝬脰楝蝯?嚗?, ELECTRIC_COLOR, 16)"
+	_add_label(vbox, "?餅???嚗?d 璇? % link_count, Color.WHITE, 14)"
+	_add_label(vbox, "??格?嚗?d ?? % total_kills, KILL_COLOR, 14)"
+	_add_label(vbox, "蝮賜??蛛?%d ?馳" % total_reward, ELECTRIC_COLOR, 14)
 
 	popup.position.x += 230
 	var tween = create_tween()
