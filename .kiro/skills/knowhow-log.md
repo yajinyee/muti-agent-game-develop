@@ -3584,3 +3584,12 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **問題：** `runDragonWrathMeteors` 在 dragon_wrath_handler.go（DAY-154）已定義
 - **解決：** 新 handler 的函數改名為 `runLuckyDragonWrathMeteors`
 - **教訓：** 新 handler 的函數名稱要加 `Lucky` 前綴，避免與舊版特殊武器 handler 衝突
+
+## 85. 新增 PNG 資產後必須同時建立 .import 檔案（重要）
+- **問題：** T106~T242 共 156 個精靈圖缺少 .import 檔案，Godot HTML5 匯出時無法正確載入
+- **根本原因：** 用 Python 生成 PNG 後，沒有同步建立對應的 .import 檔案
+- **症狀：** Godot 在首次開啟時會自動生成 .import，但 HTML5 匯出時依賴 .import 中的 ctex 路徑
+- **解決工具：** `tools/generate_all_imports.py` — 掃描整個 assets 目錄，為缺少 .import 的 PNG 批次生成
+- **格式：** Godot 4 .import 格式，包含 uid（隨機）、ctex 路徑（MD5 hash）、compress 參數
+- **教訓：** 每次用 Python 生成新 PNG 後，立刻執行 `py tools/generate_all_imports.py` 補齊 .import
+- **驗證指令：** `Get-ChildItem assets -Recurse -Filter "*.png" | Where-Object { -not (Test-Path ($_.FullName + ".import")) } | Measure-Object`
