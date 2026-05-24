@@ -112,6 +112,7 @@ const (
 	EventLuckyReroll              EventType = "lucky_reroll"               // 幸運倍率重擲魚觸發（DAY-271）
 	EventLuckyQualityMutation     EventType = "lucky_quality_mutation"     // 幸運品質突變魚觸發（DAY-272）
 	EventLuckyResonanceWave       EventType = "lucky_resonance_wave"       // 幸運共鳴波魚觸發（DAY-273）
+	EventLuckyFortuneProphecy     EventType = "lucky_fortune_prophecy"     // 幸運命運預言魚觸發（DAY-274）
 )
 
 // Priority 公告優先級
@@ -1935,6 +1936,26 @@ func (m *Manager) buildContent(eventType EventType, playerName string, amount in
 		title = "🌊 共鳴波！"
 		message = msg
 		icon = "🌊"
+		color = c
+		priority = PriorityHigh
+		duration = 4500
+
+	case EventLuckyFortuneProphecy:
+		msg := "🔮 命運預言觸發！"
+		if extra != nil {
+			if m, ok := extra["message"]; ok {
+				msg = m
+			}
+		}
+		c := "#9B59B6"
+		if extra != nil {
+			if cv, ok := extra["color"]; ok {
+				c = cv
+			}
+		}
+		title = "🔮 命運預言！"
+		message = msg
+		icon = "🔮"
 		color = c
 		priority = PriorityHigh
 		duration = 4500

@@ -247,6 +247,7 @@ type Game struct {
 	LuckyReroll             *luckyRerollManager                // 幸運倍率重擲魚系統管理器（DAY-271）
 	LuckyQualityMutation    *luckyQualityMutationManager       // 幸運品質突變魚系統管理器（DAY-272）
 	LuckyResonanceWave      *luckyResonanceWaveManager         // 幸運共鳴波魚系統管理器（DAY-273）
+	LuckyFortuneProphecy    *luckyFortuneProphecyManager       // 幸運命運預言魚系統管理器（DAY-274）
 
 	// 計時器
 	lastSpawnAt        time.Time
@@ -470,6 +471,7 @@ func NewGameWithStore(id string, hub *ws.Hub, s store.Store, initialCoins int) *
 		LuckyReroll:             newLuckyRerollManager(),
 		LuckyQualityMutation:    newLuckyQualityMutationManager(),
 		LuckyResonanceWave:      newLuckyResonanceWaveManager(),
+		LuckyFortuneProphecy:    newLuckyFortuneProphecyManager(),
 		lastSpawnAt:        time.Now(),
 		lastSpecialEventAt: time.Now(),
 		nextSpecialEventIn: 30,
@@ -1636,6 +1638,21 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	if resonanceWaveMult > 1.0 && !isLuckyResonanceWaveFish(t.DefID) {
 		finalReward = int(float64(finalReward) * resonanceWaveMult)
 	}
+	// 套用幸運命運預言魚倍率（DAY-274，×3.0 成真 / ×1.2 落空，個人，一次性）
+	if !isLuckyFortuneProphecyFish(t.DefID) && g.LuckyFortuneProphecy.isFortuneProphecySessionActive(p.ID) {
+		actualMult := t.Def.MultiplierMin
+		if t.Def.MultiplierMax > t.Def.MultiplierMin {
+			actualMult = t.Def.MultiplierMin + rand.Float64()*(t.Def.MultiplierMax-t.Def.MultiplierMin)
+		}
+		targetName := t.DefID
+		if t.Def != nil {
+			targetName = t.Def.Name
+		}
+		prophecyMult := g.notifyFortuneProphecyKill(p, targetName, actualMult, finalReward)
+		if prophecyMult > 1.0 {
+			finalReward = int(float64(finalReward) * prophecyMult)
+		}
+	}
 	// 套用幸運星座命運魚星座祝福/庇護倍率加成（DAY-259，×3.0/1.5 乘法，個人，祝福/庇護期間）
 	zodiacMult := g.LuckyZodiacFate.getLuckyZodiacFateMult(p.ID)
 	if zodiacMult > 1.0 {
@@ -2508,6 +2525,10 @@ func (g *Game) handleKill(p *player.Player, t *target.Target, result *combat.Att
 	// 幸運共鳴波魚：擊破 T231 時觸發共鳴波（DAY-273）
 	if isLuckyResonanceWaveFish(t.DefID) {
 		go g.tryLuckyResonanceWaveFish(p, t.X, t.Y)
+	}
+	// 幸運命運預言魚：擊破 T232 時觸發命運預言（DAY-274）
+	if isLuckyFortuneProphecyFish(t.DefID) {
+		go g.tryLuckyFortuneProphecyFish(p)
 	}
 	// 幸運回聲魚：玩家在回聲模式中擊破任何目標時，觸發回聲分身（DAY-233）
 	if !isLuckyEchoFish(t.DefID) && g.isEchoModeActive(p.ID) {

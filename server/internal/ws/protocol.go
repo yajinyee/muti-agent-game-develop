@@ -614,6 +614,7 @@ const (
 	MsgLuckyReroll                 MessageType = "lucky_reroll"                         // 幸運倍率重擲魚廣播（Server→Client，DAY-271）
 	MsgLuckyQualityMutation        MessageType = "lucky_quality_mutation"                // 幸運品質突變魚廣播（Server→Client，DAY-272）
 	MsgLuckyResonanceWave          MessageType = "lucky_resonance_wave"                  // 幸運共鳴波魚廣播（Server→Client，DAY-273）
+	MsgLuckyFortuneProphecy        MessageType = "lucky_fortune_prophecy"                // 幸運命運預言魚廣播（Server→Client，DAY-274）
 
 	MsgError MessageType = "error"
 	MsgPong             MessageType = "pong"
@@ -6273,4 +6274,24 @@ type LuckyResonanceWavePayload struct {
 	TotalReward   int     `json:"total_reward,omitempty"`  // 總獎勵
 	BurstMult     float64 `json:"burst_mult,omitempty"`    // 全服爆發倍率
 	BurstDurSec   int     `json:"burst_dur_sec,omitempty"` // 全服爆發持續秒數
+}
+
+// LuckyFortuneProphecyPayload 幸運命運預言魚廣播（Server → Client，DAY-274）
+// Event 類型：
+//   - prophecy_start：預言開始（個人，PlayerID/PlayerName/PredictedMult/ExpiresIn）
+//   - prophecy_broadcast：全服廣播（PlayerName/PredictedMult）
+//   - prophecy_fulfilled：預言成真（個人，PlayerID/PlayerName/ActualMult/ResultMult/BonusReward/TargetName）
+//   - prophecy_fulfilled_broadcast：預言成真全服廣播（PlayerName/ActualMult/ResultMult/BonusReward）
+//   - prophecy_failed：預言落空（個人，PlayerID/PlayerName/ActualMult/ResultMult/BonusReward/TargetName）
+//   - prophecy_expire：預言超時（個人，PlayerID/PlayerName/PredictedMult）
+type LuckyFortuneProphecyPayload struct {
+	Event         string  `json:"event"`
+	PlayerID      string  `json:"player_id,omitempty"`
+	PlayerName    string  `json:"player_name,omitempty"`
+	PredictedMult float64 `json:"predicted_mult,omitempty"` // 預言倍率門檻
+	ActualMult    float64 `json:"actual_mult,omitempty"`    // 實際擊破倍率
+	ResultMult    float64 `json:"result_mult,omitempty"`    // 結果倍率加成（3.0 或 1.2）
+	BonusReward   int     `json:"bonus_reward,omitempty"`   // 額外獎勵
+	TargetName    string  `json:"target_name,omitempty"`    // 擊破目標名稱
+	ExpiresIn     int     `json:"expires_in,omitempty"`     // 剩餘秒數
 }

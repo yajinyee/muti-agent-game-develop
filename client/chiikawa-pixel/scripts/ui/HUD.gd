@@ -357,6 +357,7 @@ func _ready() -> void:
 	_init_lucky_reroll_panel()              # 幸運倍率重擲魚系統面板（DAY-271）
 	_init_lucky_quality_mutation_panel()    # 幸運品質突變魚系統面板（DAY-272）
 	_init_lucky_resonance_wave_panel()      # 幸運共鳴波魚系統面板（DAY-273）
+	_init_lucky_fortune_prophecy_panel()    # 幸運命運預言魚系統面板（DAY-274）
 
 ## 憟??摮??唳???Label
 func _apply_pixel_font() -> void:
@@ -5158,3 +5159,19 @@ func _init_lucky_resonance_wave_panel() -> void:
 func _on_lucky_resonance_wave(data: Dictionary) -> void:
 	if is_instance_valid(_lucky_resonance_wave_panel):
 		_lucky_resonance_wave_panel.handle(data)
+
+const LuckyFortuneProphecyPanelScript = preload("res://scripts/ui/LuckyFortuneProphecyPanel.gd")
+var _lucky_fortune_prophecy_panel = null
+
+func _init_lucky_fortune_prophecy_panel() -> void:
+	var panel = LuckyFortuneProphecyPanelScript.new()
+	panel.name = "LuckyFortuneProphecyPanel"
+	panel.layer = 47
+	add_child(panel)
+	_lucky_fortune_prophecy_panel = panel
+	if GameManager.has_signal("lucky_fortune_prophecy"):
+		GameManager.lucky_fortune_prophecy.connect(_on_lucky_fortune_prophecy)
+
+func _on_lucky_fortune_prophecy(data: Dictionary) -> void:
+	if is_instance_valid(_lucky_fortune_prophecy_panel):
+		_lucky_fortune_prophecy_panel.handle(data)

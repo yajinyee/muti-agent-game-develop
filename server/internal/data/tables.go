@@ -876,6 +876,14 @@ var Targets = map[string]*TargetDef{
 	//   - 引爆數 ≥ 5 → 全服 ×1.5 加成 8 秒；個人冷卻 25 秒；全服冷卻 40 秒
 	"T231": {ID: "T231", Name: "幸運共鳴波魚", Type: TargetTypeSpecial, MultiplierMin: 68, MultiplierMax: 127, HP: 108, SpawnWeight: 2, Speed: 14, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_resonance_wave"},
 
+	// T232 幸運命運預言魚（DAY-274）— Lucky Fish by AbraCadabra（2026-05-16）crash mechanic 進化版
+	//   - 擊破 T232 後，Server 預言「下一條被擊破的魚倍率門檻」（預言值 = 隨機 ×2.0 到 ×8.0）
+	//   - 玩家在 20 秒內擊破任何目標：
+	//     若實際倍率 ≥ 預言值 → 「預言成真」×3.0 加成（個人）
+	//     若實際倍率 < 預言值 → 「預言落空」×1.2 安慰獎（個人）
+	//   - 預言值越高，成真機率越低但更有挑戰感；個人冷卻 22 秒；全服冷卻 38 秒
+	"T232": {ID: "T232", Name: "幸運命運預言魚", Type: TargetTypeSpecial, MultiplierMin: 69, MultiplierMax: 129, HP: 109, SpawnWeight: 2, Speed: 13, Lifetime: 16, LaborGain: 15, DifficultyFactor: 16.0, SpecialBehavior: "lucky_fortune_prophecy"},
+
 	"B001": {ID: "B001", Name: "那個孩子", Type: TargetTypeBoss, MultiplierMin: 100, MultiplierMax: 500, HP: 3000, SpawnWeight: 0, Speed: 20, Lifetime: 60, LaborGain: 30, DifficultyFactor: 16.0, SpecialBehavior: "boss_phases"},
 }
 

@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-24（DAY-273 幸運共鳴波魚系統）
+## 最後更新：2026-05-24（DAY-274 幸運命運預言魚系統）
 
 ## 自我評估
 - **完成度：100%**
@@ -8,6 +8,25 @@
 - **規格一致性：100%**
 - **Gameplay Feel：100/100**
 - **整體信心：100/100**
+- **DAY-274 更新（自主觸發）：** 幸運命運預言魚系統（Lucky Fortune Prophecy Fish）✅
+  - **業界依據：** Lucky Fish by AbraCadabra（2026-05-16）crash mechanic + 倍率上升機制進化版，2026 年最新「預言門檻+成真爆發」機制
+  - **設計：** 擊破 T232 後，Server 預言「下一條被擊破的魚倍率門檻」（預言值 = 隨機 ×2.0 到 ×8.0，6 個等級）；玩家在 20 秒內擊破任何目標：若實際倍率 ≥ 預言值 → 「預言成真」×3.0 加成（個人）；若實際倍率 < 預言值 → 「預言落空」×1.2 安慰獎（個人）；預言值越高，成真機率越低但更有挑戰感；個人冷卻 22 秒；全服冷卻 38 秒
+  - **設計差異：** 與共鳴波（T231，同心圓擴散）不同，命運預言是「倍率門檻挑戰」，讓玩家有「這次能達到預言嗎？」的期待感；「6 個預言等級（×2.0/3.0/4.0/5.0/6.0/8.0）」讓每次觸發都有不同難度；「×8.0 最高門檻（3% 機率）」讓玩家有「要是預言到 8.0 就要找高倍率魚」的策略感；「×3.0 成真加成」讓玩家有「達到預言就賺大了」的動力；「×1.2 落空安慰獎」確保即使沒達到也有收益；「全服廣播預言成真」讓所有玩家看到「有人預言成真了」，製造羨慕感
+  - server/internal/game/lucky_fortune_prophecy_handler.go：luckyFortuneProphecyManager（個人冷卻/全服冷卻/activeSessions）；prophecySession（playerID/playerName/prophecyMult/expiresAt/used）；isLuckyFortuneProphecyFish（T232）；isFortuneProphecySessionActive（供 handleKill 使用）；getFortuneProphecyMult（供 handleKill 使用）；rollProphecyMult（6 等級加權隨機）；tryLuckyFortuneProphecyFish（觸發/個人訊息+全服廣播+全服公告）；notifyFortuneProphecyKill（預言結果判定/成真×3.0/落空×1.2/全服廣播+公告）；runProphecyTimeout（goroutine 20秒後超時通知）
+  - server/internal/data/tables.go：新增 T232 幸運命運預言魚（69-129x/HP109/SpawnWeight2/Speed13/Lifetime16）
+  - server/internal/ws/protocol.go：新增 MsgLuckyFortuneProphecy；LuckyFortuneProphecyPayload（6種事件）
+  - server/internal/game/announce/announce.go：新增 EventLuckyFortuneProphecy + case 處理
+  - server/internal/game/game.go：LuckyFortuneProphecy *luckyFortuneProphecyManager；handleKill 加入 isFortuneProphecySessionActive 分支 + notifyFortuneProphecyKill 倍率套用 + isLuckyFortuneProphecyFish 觸發分支
+  - client/chiikawa-pixel/scripts/ui/LuckyFortuneProphecyPanel.gd：紫金預言主題面板（prophecy_start 紫色三次強閃光+頂部橫幅+預言倍率指示器（右上角，顏色依門檻高低）+右側豎向計時條；prophecy_broadcast 全服廣播橫幅；prophecy_fulfilled 金色三次強閃光+「預言成真！×N.N 命中！」大字+結算彈窗；prophecy_fulfilled_broadcast 全服廣播橫幅；prophecy_failed 橙色閃光+「預言落空... ×1.2 安慰獎」浮動文字+結算彈窗；prophecy_expire 超時提示）
+  - client/chiikawa-pixel/scripts/game/GameManager.gd：lucky_fortune_prophecy 訊號 + _handle_lucky_fortune_prophecy
+  - client/chiikawa-pixel/scripts/ui/HUD.gd：整合 LuckyFortuneProphecyPanelScript（layer=47）
+  - client/chiikawa-pixel/scripts/game/TargetManager.gd：新增 T232 映射
+  - 預言等級設計：×2.0（30%）/×3.0（25%）/×4.0（20%）/×5.0（15%）/×6.0（7%）/×8.0（3%）
+  - 結果設計：成真 ×3.0（個人）；落空 ×1.2 安慰獎（個人）；超時無獎勵
+  - 廣播設計：觸發時全服廣播；成真時全服廣播+公告（金色）
+  - 視覺設計：紫金預言主題（#9B59B6 紫 + #FFD700 金 + #FF8C00 橙 + #E8DAEF 淡紫白）；預言倍率指示器（右上角，顏色依門檻：紫→橙→金）；右側豎向計時條（x=-324 與其他計時條錯開）；結算彈窗右側滑入（含實際倍率/加成/額外獎勵/目標名稱）
+  - build/vet 全部通過（零錯誤零警告）
+  - T232 精靈圖：紫金命運預言魚（水晶球+星座符文+六芒星光點+金色預言光芒+紫色光暈）
 - **DAY-273 更新（自主觸發）：** 幸運共鳴波魚系統（Lucky Resonance Wave Fish）✅
   - **業界依據：** Royal Fishing / Jili 2026「連鎖閃電+群體攻擊」趨勢進化版，業界原創「共鳴波擴散+全場同步爆發」機制
   - **設計：** 擊破 T231 後，發出「共鳴波」（3 層同心圓，每層間隔 400ms）；第 1 層（r=150px）HP -20%，35% 機率引爆（×2.0）；第 2 層（r=250px）HP -15%，25% 機率引爆（×1.8）；第 3 層（r=350px）HP -10%，15% 機率引爆（×1.5）；引爆數 ≥ 5 → 全服 ×1.5 加成 8 秒；個人冷卻 25 秒；全服冷卻 40 秒

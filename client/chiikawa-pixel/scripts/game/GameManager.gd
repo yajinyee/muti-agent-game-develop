@@ -278,6 +278,7 @@ signal lucky_mirror_duel(data: Dictionary)            # 幸運鏡像對決魚系
 signal lucky_reroll(data: Dictionary)                 # 幸運倍率重擲魚系統（DAY-271）
 signal lucky_quality_mutation(data: Dictionary)       # 幸運品質突變魚系統（DAY-272）
 signal lucky_resonance_wave(data: Dictionary)         # 幸運共鳴波魚系統（DAY-273）
+signal lucky_fortune_prophecy(data: Dictionary)       # 幸運命運預言魚系統（DAY-274）
 signal royal_chain_lightning(chain_data: Dictionary)   # 皇家閃電鰻持續連鎖電擊（DAY-156）
 signal golden_turtle_time_stop(data: Dictionary)       # 黃金海龜時間停止（DAY-159）
 signal lucky_star_fish(data: Dictionary)               # 幸運星魚全場倍率翻倍（DAY-160）
@@ -801,6 +802,8 @@ func _on_message_received(type: String, payload: Dictionary) -> void:
 			_handle_lucky_quality_mutation(payload)
 		"lucky_resonance_wave":
 			_handle_lucky_resonance_wave(payload)
+		"lucky_fortune_prophecy":
+			_handle_lucky_fortune_prophecy(payload)
 		"golden_turtle_time_stop":
 			_handle_golden_turtle_time_stop(payload)
 		"lucky_star_fish":
@@ -4043,10 +4046,19 @@ func _handle_lucky_resonance_wave(payload: Dictionary) -> void:
 		"wave_burst":
 			var total_explode: int = payload.get("total_explode", 0)
 			var burst_mult: float = payload.get("burst_mult", 1.5)
-			print("[GameManager] ResonanceWave burst! explode=%d mult=×%.1f" % [total_explode, burst_mult])
-		"reroll_used":
-			var best_mult: float = payload.get("best_mult", 1.0)
-			var reward: int = payload.get("reward", 0)
-			print("[GameManager] Reroll used! mult=%.1f reward=%d" % [best_mult, reward])
-		"reroll_expire":
-			print("[GameManager] Reroll expired!")
+			print("[GameManager] ResonanceWave burst! explode=%d mult=x%.1f" % [total_explode, burst_mult])
+
+## 幸運命運預言魚系統（DAY-274）
+func _handle_lucky_fortune_prophecy(payload: Dictionary) -> void:
+	emit_signal("lucky_fortune_prophecy", payload)
+	var event: String = payload.get("event", "")
+	match event:
+		"prophecy_fulfilled":
+			var actual_mult: float = payload.get("actual_mult", 2.0)
+			var bonus_reward: int = payload.get("bonus_reward", 0)
+			print("[GameManager] FortuneProphecy fulfilled! actual=x%.1f bonus=%d" % [actual_mult, bonus_reward])
+		"prophecy_failed":
+			var actual_mult: float = payload.get("actual_mult", 1.0)
+			print("[GameManager] FortuneProphecy failed! actual=x%.1f" % actual_mult)
+		"prophecy_expire":
+			print("[GameManager] FortuneProphecy expired!")
