@@ -3840,3 +3840,47 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **解法：** 在 protocol.go 加入 `MsgCollectGoldenCoin` 訊息類型，Client 點擊黃金幣時發送
 - **注意：** 黃金幣是虛擬目標（不在 targets map 中），需要獨立的點擊處理邏輯
 - **教訓：** 需要玩家互動的 Lucky 系統，必須同時設計 Client→Server 的觸發訊息
+
+## 8. Godot 4 ScreenShake 需要 Camera2D 引用
+- **問題：** ScreenShake.gd 的 `add_trauma()` 沒有效果
+- **原因：** `_camera` 為 null，沒有在 _ready 時自動找到 Camera2D
+- **解決：** 在 `_ready()` 中用 `call_deferred("_find_camera")` 遞迴搜尋場景樹
+- **教訓：** Autoload 節點的 _ready 比場景節點早執行，要用 call_deferred 延遲搜尋
+
+## 9. Godot 4 CanvasLayer 作為 BonusGame 覆蓋層
+- **問題：** BonusGame 需要覆蓋整個畫面，但 Node2D 會被 Camera2D 影響
+- **解決：** BonusGame 繼承 CanvasLayer（layer=80），不受 Camera2D 影響
+- **教訓：** 全螢幕 UI 覆蓋一律用 CanvasLayer，不用 Node2D
+
+## 10. 純 Python 生成 WAV 音效（不需要 Pillow/pygame）
+- **問題：** 遊戲缺少音效，但環境沒有安裝音效庫
+- **解決：** 用 Python 標準庫 `struct` + `math` 直接生成 PCM WAV 格式
+  - WAV = RIFF header + fmt chunk + data chunk
+  - 用正弦波 + 包絡函數 + 噪音合成各種音效
+  - 22050 Hz, 16-bit, mono 足夠遊戲使用
+- **教訓：** 不需要外部庫也能生成基本音效，純數學就夠了
+
+## 11. 純 Python 生成 PNG 圖片（不需要 Pillow）
+- **問題：** 需要生成角色像素圖，但環境沒有 Pillow
+- **解決：** 用 Python 標準庫 `struct` + `zlib` 直接生成 PNG 格式
+  - PNG = signature + IHDR chunk + IDAT chunk（zlib 壓縮）+ IEND chunk
+  - 每行前加 filter byte 0x00（無過濾）
+  - RGBA 格式（color type 6）
+- **教訓：** PNG 格式相對簡單，純 Python 可以生成，不需要 Pillow
+
+## 12. BonusGame 的 Server 通訊設計
+- **問題：** BonusGame 的雜草點擊需要通知 Server，但 Server 才是分數計算的權威
+- **解決：** Client 本地顯示動畫（即時反饋），同時發送 `bonus_click` 給 Server
+  - Server 計算分數後廣播 `bonus_event {event: "click", score: N}`
+  - Client 收到後更新顯示分數
+- **教訓：** 遊戲邏輯在 Server，Client 只做視覺反饋，分數以 Server 為準
+
+## 13. DAY-297 新增功能清單
+- **BonusGame.gd**：完整的 Bonus 遊戲 UI（雜草生成/點擊/計時/結算）
+- **BackgroundManager.gd**：背景管理（海底/BOSS/Bonus 三種場景 + 氣泡系統）
+- **CharacterAnimator.gd**：角色動畫（idle/attack/bigwin 三狀態 + 呼吸動畫）
+- **ScreenShake.gd**：修正自動找 Camera2D 的邏輯
+- **HitEffect.gd**：修正自動找場景根節點的邏輯
+- **音效**：12 個 SFX + 4 個 BGM（純 Python 程式生成）
+- **角色精靈圖**：9 個 PNG（3 角色 × 3 狀態，純 Python 程式生成）
+- **Main.tscn**：加入 BackgroundManager、BonusGame、CharacterAnimator 節點

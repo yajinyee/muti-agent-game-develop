@@ -1,14 +1,45 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-25（DAY-296 T121-T125 鏡像魚+黃金雨+冰凍炸彈+雷暴+大轉盤幸運魚系統 + BaseLuckyPanel 基礎類別）
+## 最後更新：2026-05-25（DAY-297 BonusGame + BackgroundManager + CharacterAnimator + 音效生成 + 角色動畫）
 
 ## 自我評估（誠實版）
 - **Server 實際目標物數量：** 32 種（T001-T006 基礎 + T101-T125 特殊 + B001 BOSS）
 - **Lucky 系統數量：** 20 個（T106-T125）
 - **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
-- **Client 腳本：** GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake + BaseLuckyPanel
-- **美術資產：** T001-T125 精靈圖 + B001 BOSS + 3 個角色 idle 圖
-- **完成度（誠實）：** 基礎遊戲循環完整，Lucky 系統 20 個，BaseLuckyPanel 基礎類別建立，持續擴充中
+- **Client 腳本：** GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake/BonusGame/BackgroundManager/CharacterAnimator + BaseLuckyPanel（12個）
+- **美術資產：** T001-T125 精靈圖 + B001 BOSS + 9 個角色精靈圖（3角色×3狀態）
+- **音效資產：** 12 個 SFX + 4 個 BGM（程式生成 WAV）
+- **完成度（誠實）：** 核心遊戲循環完整（含 Bonus Game），背景管理完整，角色動畫完整，音效完整
+
+## DAY-297 更新（2026-05-25）：BonusGame + BackgroundManager + CharacterAnimator + 音效 ✅
+- **BonusGame.gd**：完整的 Bonus 遊戲 UI（CanvasLayer layer=80）
+  - 雜草生成系統（BG001-BG005，加權隨機，最多 18 個同時存在）
+  - 點擊互動（BG002 硬雜草需要 2 次點擊）
+  - 計時器（15 秒倒數，顏色警示）
+  - 分數顯示 + 跳字特效
+  - 結算彈窗（從中心彈出，顯示分數/倍率/獎勵）
+  - 進場/退場動畫（淡入淡出）
+- **BackgroundManager.gd**：背景管理系統
+  - 三種背景狀態（NORMAL 深海藍 / BOSS 深紅 / BONUS 深綠）
+  - 狀態切換時閃光過場 + 顏色漸變
+  - 氣泡系統（隨機大小/速度/漂移，顏色跟隨狀態）
+  - 海底沙地紋路裝飾
+- **CharacterAnimator.gd**：角色動畫系統
+  - idle 呼吸動畫（上下浮動）
+  - attack 動畫（前傾 + 精靈圖切換）
+  - bigwin 動畫（跳躍 + 閃光 + 精靈圖切換）
+  - 自動跟隨 player_updated 切換角色
+- **音效生成**：tools/generate_sfx.py + tools/generate_bgm.py
+  - 12 個 SFX（attack×3/hit/kill/big_win/coin_drop/boss_warning/boss_enter/bonus_ready/bonus_game/weed_pull）
+  - 4 個 BGM（main_game/boss_enter/boss_rage/bonus_game）
+  - 純 Python 標準庫生成，不需要外部依賴
+- **角色精靈圖**：tools/generate_character_sprites.py
+  - 9 個 PNG（chiikawa/hachiware/usagi × idle/attack/bigwin）
+  - 純 Python 標準庫生成（struct + zlib）
+- **ScreenShake.gd**：修正自動找 Camera2D 邏輯（call_deferred）
+- **HitEffect.gd**：修正自動找場景根節點邏輯
+- **Main.tscn**：加入 BackgroundManager/BonusGame/CharacterAnimator 節點
+- **Cannon.gd**：整合 CharacterAnimator（射擊觸發 attack，大獎觸發 bigwin）
 
 ## DAY-296 更新（2026-05-25）：T121-T125 五個新幸運魚系統 + BaseLuckyPanel ✅
 - **業界依據：** Fishing Fortune 2026「Mirror Fish — duplicates shots」+ Jackpot Fishing Jili「Golden Rain — coins shower」+ Fishing Fortune 2026「Ice Bomb — freeze then explode」+ Royal Fishing Jili「Thunder Storm — random lightning」+ Jili Fishing「Lucky Wheel — spin for rewards」

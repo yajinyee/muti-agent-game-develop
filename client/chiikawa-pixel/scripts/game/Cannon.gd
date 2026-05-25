@@ -100,6 +100,10 @@ func _fire(target_id: String, target_pos: Vector2) -> void:
 	_spawn_projectile(target_pos)
 	var char_id = GameManager.get_character_id()
 	AudioManager.play_attack_by_character(char_id)
+	# 觸發角色攻擊動畫
+	var animator = get_node_or_null("CharacterAnimator")
+	if is_instance_valid(animator):
+		animator.play_attack()
 
 func _spawn_projectile(target_pos: Vector2) -> void:
 	var parent = get_parent()
@@ -181,6 +185,11 @@ func _on_reward_received(reward: Dictionary) -> void:
 	var char_id = GameManager.get_character_id()
 	var text = VOICE_TEXTS.get(char_id, "!")
 	var color = CHAR_COLORS.get(char_id, Color.WHITE)
+
+	# 觸發大獎動畫
+	var animator = get_node_or_null("CharacterAnimator")
+	if is_instance_valid(animator):
+		animator.play_bigwin()
 
 	# 語音字卡
 	var parent = get_parent()

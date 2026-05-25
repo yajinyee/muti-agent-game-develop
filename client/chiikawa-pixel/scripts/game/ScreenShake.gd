@@ -9,6 +9,28 @@ const DECAY = 2.5
 const MAX_OFFSET = 12.0
 const MAX_ROTATION = 0.04
 
+func _ready() -> void:
+	# 自動尋找場景中的 Camera2D
+	call_deferred("_find_camera")
+
+func _find_camera() -> void:
+	var tree = get_tree()
+	if tree == null:
+		return
+	var root = tree.get_root()
+	if root == null:
+		return
+	_camera = _find_camera_in(root)
+
+func _find_camera_in(node: Node) -> Camera2D:
+	if node is Camera2D:
+		return node
+	for child in node.get_children():
+		var result = _find_camera_in(child)
+		if result != null:
+			return result
+	return null
+
 func _process(delta: float) -> void:
 	if _trauma <= 0:
 		return

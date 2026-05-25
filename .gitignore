@@ -48,7 +48,8 @@ tools/__pycache__/
 *.safetensors
 *.ckpt
 *.pth
-*.wav
+# 注意：遊戲音效 WAV 需要追蹤，只排除大型外部音頻
+# *.wav  ← 已移除，遊戲音效需要 commit
 *.mp3
 
 # 除錯暫存

@@ -5,7 +5,22 @@ extends Node
 var _scene_root: Node = null
 
 func _ready() -> void:
-	pass
+	call_deferred("_find_scene_root")
+
+func _find_scene_root() -> void:
+	# 自動尋找 Main 場景根節點
+	var tree = get_tree()
+	if tree == null:
+		return
+	var root = tree.get_root()
+	if root == null:
+		return
+	# 找第一個 Node2D 子節點作為場景根
+	for child in root.get_children():
+		if child is Node2D:
+			_scene_root = child
+			return
+	_scene_root = root
 
 func set_scene_root(root: Node) -> void:
 	_scene_root = root
