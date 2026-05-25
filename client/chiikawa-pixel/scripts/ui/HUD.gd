@@ -25,6 +25,9 @@ var _last_labor: int = 0
 var _lucky_banner: Control = null
 var _announce_queue: Array = []
 var _announce_showing: bool = false
+# DAY-297 Combo UI
+var _combo_label: Label = null
+var _last_combo: int = 0
 
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
@@ -45,6 +48,7 @@ func _ready() -> void:
 	_create_reward_popup()
 	_create_disconnect_overlay()
 	_create_lucky_banner()
+	_create_combo_label()
 	_update_ui()
 
 	# DAY-292 幸運特殊魚訊號連接
@@ -116,6 +120,9 @@ func _update_ui() -> void:
 	else:
 		lock_btn.text = "🔓 LOCK"
 		lock_btn.modulate = Color(0.7, 0.7, 0.7)
+
+	# Combo 顯示
+	_update_combo_display()
 
 func _on_state_changed(new_state: String) -> void:
 	state_label.text = new_state.to_upper().replace("_", " ")
@@ -315,6 +322,44 @@ func _create_lucky_banner() -> void:
 	lbl.add_theme_font_size_override("font_size", 28)
 	lbl.modulate = Color(1.0, 0.9, 0.2)
 	_lucky_banner.add_child(lbl)
+
+# ── DAY-297 Combo UI ──────────────────────────────────────────
+
+func _create_combo_label() -> void:
+	_combo_label = Label.new()
+	_combo_label.name = "ComboLabel"
+	_combo_label.position = Vector2(830, 8)
+	_combo_label.size = Vector2(160, 30)
+	_combo_label.add_theme_font_size_override("font_size", 16)
+	_combo_label.modulate = Color(1.0, 0.85, 0.0)
+	_combo_label.visible = false
+	add_child(_combo_label)
+
+func _update_combo_display() -> void:
+	if not is_instance_valid(_combo_label):
+		return
+	var combo = GameManager.get_combo_count()
+	var bonus = GameManager.get_combo_mult_bonus()
+	if combo < 5:
+		_combo_label.visible = false
+		return
+	_combo_label.visible = true
+	_combo_label.text = "🔥 COMBO x%d (+%.0f%%)" % [combo, bonus * 100]
+	if combo >= 30:
+		_combo_label.modulate = Color(1.0, 0.3, 0.1)
+	elif combo >= 20:
+		_combo_label.modulate = Color(1.0, 0.6, 0.1)
+	elif combo >= 10:
+		_combo_label.modulate = Color(1.0, 0.85, 0.0)
+	else:
+		_combo_label.modulate = Color(1.0, 1.0, 0.5)
+	# 新 Combo 等級時放大動畫
+	if combo != _last_combo and combo in [5, 10, 20, 30]:
+		var tween = _combo_label.create_tween()
+		tween.tween_property(_combo_label, "scale", Vector2(1.4, 1.4), 0.1)
+		tween.tween_property(_combo_label, "scale", Vector2(1.0, 1.0), 0.1)
+		ScreenShake.add_trauma(0.2)
+	_last_combo = combo
 
 func _show_lucky_banner(text: String, color: Color, duration: float = 2.5) -> void:
 	if not is_instance_valid(_lucky_banner):

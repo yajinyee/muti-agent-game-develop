@@ -164,3 +164,9 @@ func get_fire_rate() -> float:
 
 func get_projectile_speed() -> float:
 	return player_data.get("projectile_speed", 700.0)
+
+func get_combo_count() -> int:
+	return player_data.get("combo_count", 0)
+
+func get_combo_mult_bonus() -> float:
+	return player_data.get("combo_mult_bonus", 0.0)

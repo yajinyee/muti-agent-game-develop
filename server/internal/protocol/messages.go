@@ -153,6 +153,9 @@ type PlayerUpdatePayload struct {
 	LockTargetID   string  `json:"lock_target_id"`
 	ProjectileSpeed float64 `json:"projectile_speed"`
 	FireRate       float64 `json:"fire_rate"`
+	// DAY-297 Combo 系統
+	ComboCount     int     `json:"combo_count"`
+	ComboMultBonus float64 `json:"combo_mult_bonus"`
 }
 
 type AnnouncePayload struct {

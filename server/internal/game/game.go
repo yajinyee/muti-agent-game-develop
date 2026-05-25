@@ -378,7 +378,11 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 	}
 
 	if isKill {
-		reward := int(float64(bet.BetCost) * t.Multiplier)
+		// Combo 系統：命中時增加 Combo
+		_, _, comboBonus := p.AddCombo()
+		effectiveMult := t.Multiplier * (1.0 + comboBonus)
+
+		reward := int(float64(bet.BetCost) * effectiveMult)
 		result.Reward = reward
 		result.LaborGain = t.Def.LaborGain
 
@@ -795,6 +799,8 @@ func (g *Game) sendPlayerUpdate(playerID string) {
 		LockTargetID:    p.LockTargetID,
 		ProjectileSpeed: bet.ProjectileSpeed,
 		FireRate:        bet.FireRate,
+		ComboCount:      p.ComboCount,
+		ComboMultBonus:  p.GetComboMultBonus(),
 	})
 }
 
