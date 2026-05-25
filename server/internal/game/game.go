@@ -63,6 +63,12 @@ type Game struct {
 	luckyRocketCannon   *luckyRocketCannonManager
 	luckyDeepWhirlpool  *luckyDeepWhirlpoolManager
 	luckyVampireMult    *luckyVampireMultManager
+	// DAY-296 新增
+	luckyMirrorFish   *luckyMirrorFishManager
+	luckyGoldenRain   *luckyGoldenRainManager
+	luckyFreezeBomb   *luckyFreezeBombManager
+	luckyThunderStorm *luckyThunderStormManager
+	luckyLuckyWheel   *luckyLuckyWheelManager
 
 	lastTick time.Time
 }
@@ -94,6 +100,12 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyRocketCannon:   newLuckyRocketCannonManager(),
 		luckyDeepWhirlpool:  newLuckyDeepWhirlpoolManager(),
 		luckyVampireMult:    newLuckyVampireMultManager(),
+		// DAY-296 新增
+		luckyMirrorFish:   newLuckyMirrorFishManager(),
+		luckyGoldenRain:   newLuckyGoldenRainManager(),
+		luckyFreezeBomb:   newLuckyFreezeBombManager(),
+		luckyThunderStorm: newLuckyThunderStormManager(),
+		luckyLuckyWheel:   newLuckyLuckyWheelManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -415,8 +427,18 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyDeepWhirlpool.tryLuckyDeepWhirlpool(g, playerID, killerName)
 			case isLuckyVampireMultFish(t.Def.ID):
 				g.luckyVampireMult.tryLuckyVampireMult(g, playerID, killerName)
+			// DAY-296 新增
+			case isLuckyMirrorFish(t.Def.ID):
+				g.tryLuckyMirrorFish(playerID, killerName)
+			case isLuckyGoldenRainFish(t.Def.ID):
+				g.tryLuckyGoldenRain(playerID, killerName)
+			case isLuckyFreezeBombFish(t.Def.ID):
+				g.tryLuckyFreezeBomb(playerID, killerName)
+			case isLuckyThunderStormFish(t.Def.ID):
+				g.tryLuckyThunderStorm(playerID, killerName)
+			case isLuckyLuckyWheelFish(t.Def.ID):
+				g.tryLuckyLuckyWheel(playerID, killerName)
 			}
-			// 連鎖爆炸模式：每次擊破觸發 AOE
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
 			}

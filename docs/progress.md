@@ -1,14 +1,27 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-25（DAY-295 T116-T120 千龍王輪盤+龍力散彈+火箭砲+深海漩渦+吸血鬼倍率幸運魚系統）
+## 最後更新：2026-05-25（DAY-296 T121-T125 鏡像魚+黃金雨+冰凍炸彈+雷暴+大轉盤幸運魚系統 + BaseLuckyPanel 基礎類別）
 
 ## 自我評估（誠實版）
-- **Server 實際目標物數量：** 27 種（T001-T006 基礎 + T101-T120 特殊 + B001 BOSS）
-- **Lucky 系統數量：** 15 個（T106-T120）
+- **Server 實際目標物數量：** 32 種（T001-T006 基礎 + T101-T125 特殊 + B001 BOSS）
+- **Lucky 系統數量：** 20 個（T106-T125）
 - **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
-- **Client 腳本：** GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake
-- **美術資產：** T001-T120 精靈圖 + B001 BOSS + 3 個角色 idle 圖
-- **完成度（誠實）：** 基礎遊戲循環完整，Lucky 系統 15 個，持續擴充中
+- **Client 腳本：** GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake + BaseLuckyPanel
+- **美術資產：** T001-T125 精靈圖 + B001 BOSS + 3 個角色 idle 圖
+- **完成度（誠實）：** 基礎遊戲循環完整，Lucky 系統 20 個，BaseLuckyPanel 基礎類別建立，持續擴充中
+
+## DAY-296 更新（2026-05-25）：T121-T125 五個新幸運魚系統 + BaseLuckyPanel ✅
+- **業界依據：** Fishing Fortune 2026「Mirror Fish — duplicates shots」+ Jackpot Fishing Jili「Golden Rain — coins shower」+ Fishing Fortune 2026「Ice Bomb — freeze then explode」+ Royal Fishing Jili「Thunder Storm — random lightning」+ Jili Fishing「Lucky Wheel — spin for rewards」
+- **T121 幸運鏡像魚（110x）：** 擊破後觸發鏡像模式，下 3 次攻擊自動複製一次；3 次全命中 → 完美鏡像：全服 ×1.8 加成 5 秒；個人冷卻 16 秒；全服冷卻 28 秒
+- **T122 幸運黃金雨魚（120x）：** 擊破後觸發黃金雨，全場生成 8-12 個黃金幣可收集；收集 ≥8 個 → 黃金豐收：全服 ×2.0 加成 6 秒；個人冷卻 20 秒；全服冷卻 35 秒
+- **T123 幸運冰凍炸彈魚（130x）：** 擊破後投擲冰凍炸彈，凍結 3 秒後爆炸 HP -60%；命中 ≥5 個 → 冰爆完美：全服 ×2.2 加成 5 秒；個人冷卻 22 秒；全服冷卻 38 秒
+- **T124 幸運雷暴魚（140x）：** 擊破後觸發雷暴，10 秒內 6-7 道閃電隨機落下（HP -30%）；全命中 → 雷暴完美：全服 ×2.3 加成 6 秒；個人冷卻 24 秒；全服冷卻 40 秒
+- **T125 幸運大轉盤魚（160x）：** 擊破後觸發幸運大轉盤（8格：×2/×5/×10/×20/×50/×100/全場HP-50%/大獎）；個人冷卻 18 秒；全服冷卻 30 秒
+- **Server：** 5 個獨立 handler 檔案 + game.go 整合 + protocol 新增 5 個訊息類型 + tables.go 新增 5 個目標
+- **Client：** GameManager 新增 5 個訊號 + TargetManager 新增 T121-T125 映射 + HUD 新增 5 個事件處理
+- **架構：** BaseLuckyPanel.gd 基礎類別建立（標準橫幅/指示器/計時條/結算彈窗/閃光/脈動/浮動文字）
+- **美術：** T121-T125 精靈圖生成完成
+- **build/vet 全部通過（零錯誤零警告）**
 
 ## DAY-295 更新（2026-05-25）：T116-T120 五個新幸運魚系統 ✅
 - **業界依據：** Royal Fishing Jili「ChainLong King 1000x Mega Win」+ Jili 2026「Dragon Power Shotgun 8-direction」+ Jili 2026「Rocket Cannon 3 AOE」+ Jili 2026「Free Deep Sea Whirlpool」+ Jili 2026「Vampire multiplier mode ×5」

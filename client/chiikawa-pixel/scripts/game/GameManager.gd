@@ -32,6 +32,12 @@ signal lucky_dragon_shotgun(data: Dictionary)
 signal lucky_rocket_cannon(data: Dictionary)
 signal lucky_deep_whirlpool(data: Dictionary)
 signal lucky_vampire_mult(data: Dictionary)
+# DAY-296 新增幸運特殊魚訊號
+signal lucky_mirror_fish(data: Dictionary)
+signal lucky_golden_rain(data: Dictionary)
+signal lucky_freeze_bomb(data: Dictionary)
+signal lucky_thunder_storm(data: Dictionary)
+signal lucky_lucky_wheel(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -106,6 +112,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_deep_whirlpool", payload)
 		"lucky_vampire_mult":
 			emit_signal("lucky_vampire_mult", payload)
+		# DAY-296 新增幸運特殊魚事件
+		"lucky_mirror_fish":
+			emit_signal("lucky_mirror_fish", payload)
+		"lucky_golden_rain":
+			emit_signal("lucky_golden_rain", payload)
+		"lucky_freeze_bomb":
+			emit_signal("lucky_freeze_bomb", payload)
+		"lucky_thunder_storm":
+			emit_signal("lucky_thunder_storm", payload)
+		"lucky_lucky_wheel":
+			emit_signal("lucky_lucky_wheel", payload)
 		"pong":
 			pass
 		"error":

@@ -67,6 +67,12 @@ func _ready() -> void:
 	GameManager.lucky_rocket_cannon.connect(_on_lucky_rocket_cannon)
 	GameManager.lucky_deep_whirlpool.connect(_on_lucky_deep_whirlpool)
 	GameManager.lucky_vampire_mult.connect(_on_lucky_vampire_mult)
+	# DAY-296 新增幸運特殊魚訊號連接
+	GameManager.lucky_mirror_fish.connect(_on_lucky_mirror_fish)
+	GameManager.lucky_golden_rain.connect(_on_lucky_golden_rain)
+	GameManager.lucky_freeze_bomb.connect(_on_lucky_freeze_bomb)
+	GameManager.lucky_thunder_storm.connect(_on_lucky_thunder_storm)
+	GameManager.lucky_lucky_wheel.connect(_on_lucky_lucky_wheel)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -667,3 +673,138 @@ func _on_lucky_vampire_mult(data: Dictionary) -> void:
 			var cnt = data.get("absorb_count", 0)
 			var mult = data.get("current_mult", 1.0)
 			_show_lucky_banner("🧛 吸血結束！吸收 %d 次，最終 ×%.1f！" % [cnt, mult], Color(0.6, 0.1, 0.7))
+
+# ── DAY-296 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_mirror_fish(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			var shots = data.get("shots_left", 3)
+			_show_lucky_banner("🪞 %s 觸發鏡像魚！下 %d 次攻擊自動複製！" % [name, shots], Color(0.88, 0.67, 1.0))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"mirror_hit":
+			var shots = data.get("shots_left", 0)
+			var hits = data.get("hit_count", 0)
+			_show_lucky_banner("🪞 鏡像命中！已命中 %d 次，剩餘 %d 次" % [hits, shots], Color(0.88, 0.67, 1.0), 0.8)
+		"perfect_mirror":
+			_show_lucky_banner("🪞✨ 完美鏡像！%s 全服 ×1.8 加成 5 秒！" % name, Color(0.88, 0.67, 1.0), 3.5)
+			ScreenShake.add_trauma(0.5)
+		"perfect_end":
+			_show_lucky_banner("🪞 完美鏡像加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"settle":
+			var hits = data.get("hit_count", 0)
+			var reward = data.get("total_reward", 0)
+			_show_lucky_banner("🪞 鏡像結束！命中 %d 次，獎勵 %d！" % [hits, reward], Color(0.8, 0.6, 1.0))
+			if reward > 0:
+				_show_reward_popup(reward, float(hits))
+		"timeout":
+			_show_lucky_banner("🪞 鏡像時間到！", Color(0.6, 0.6, 0.6), 1.5)
+
+func _on_lucky_golden_rain(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			var total = data.get("total_coins", 10)
+			_show_lucky_banner("🌧️💰 %s 觸發黃金雨！%d 個黃金幣！快去收集！" % [name, total], Color(1.0, 0.85, 0.0))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.35)
+		"coin_collect":
+			var collected = data.get("collected_coins", 0)
+			_show_lucky_banner("💰 收集 %d 個黃金幣！" % collected, Color(1.0, 0.85, 0.0), 0.6)
+		"golden_harvest":
+			var collected = data.get("collected_coins", 0)
+			var reward = data.get("total_reward", 0)
+			_show_lucky_banner("💰✨ 黃金豐收！%s 收集 %d 個！全服 ×2.0 加成 6 秒！" % [name, collected], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.6)
+			if reward > 0:
+				_show_reward_popup(reward, 2.0)
+		"harvest_end":
+			_show_lucky_banner("💰 黃金豐收加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"settle":
+			var collected = data.get("collected_coins", 0)
+			var reward = data.get("total_reward", 0)
+			_show_lucky_banner("🌧️ 黃金雨結束！收集 %d 個，獎勵 %d！" % [collected, reward], Color(1.0, 0.85, 0.0))
+			if reward > 0:
+				_show_reward_popup(reward, float(collected) * 0.3)
+
+func _on_lucky_freeze_bomb(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"freeze_start":
+			var frozen = data.get("frozen_targets", [])
+			_show_lucky_banner("❄️💣 %s 投擲冰凍炸彈！%d 個目標凍結！3 秒後爆炸！" % [name, frozen.size()], Color(0.0, 0.9, 1.0))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"bomb_explode":
+			var hits = data.get("hit_count", 0)
+			_show_lucky_banner("❄️💥 冰凍炸彈爆炸！命中 %d 個！HP -60%！" % hits, Color(0.4, 0.9, 1.0))
+			ScreenShake.add_trauma(0.65)
+		"perfect_freeze":
+			var hits = data.get("hit_count", 0)
+			_show_lucky_banner("❄️💥✨ 冰爆完美！%s 命中 %d 個！全服 ×2.2 加成 5 秒！" % [name, hits], Color(0.0, 0.9, 1.0), 3.5)
+			ScreenShake.add_trauma(0.7)
+		"perfect_end":
+			_show_lucky_banner("❄️ 冰爆完美加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_thunder_storm(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"storm_start":
+			var count = data.get("lightning_count", 6)
+			_show_lucky_banner("⛈️ %s 召喚雷暴！%d 道閃電！10 秒！" % [name, count], Color(1.0, 0.85, 0.0))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"lightning_strike":
+			var no = data.get("strike_no", 1)
+			var hits = data.get("hit_targets", [])
+			var mult = data.get("accum_mult", 1.0)
+			_show_lucky_banner("⚡ 第 %d 道閃電！命中 %d 個！累積 ×%.1f" % [no, hits.size(), mult], Color(1.0, 0.9, 0.2), 0.7)
+			if hits.size() > 0:
+				ScreenShake.add_trauma(0.2)
+		"perfect_storm":
+			var strikes = data.get("hit_strikes", 6)
+			_show_lucky_banner("⛈️✨ 雷暴完美！%s %d 道全命中！全服 ×2.3 加成 6 秒！" % [name, strikes], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.7)
+		"perfect_end":
+			_show_lucky_banner("⛈️ 雷暴完美加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"storm_end":
+			var strikes = data.get("hit_strikes", 0)
+			var mult = data.get("accum_mult", 1.0)
+			var reward = data.get("total_reward", 0)
+			_show_lucky_banner("⛈️ 雷暴結束！%d 道命中，累積 ×%.1f，獎勵 %d！" % [strikes, mult, reward], Color(1.0, 0.85, 0.0))
+			if reward > 0:
+				_show_reward_popup(reward, mult)
+
+func _on_lucky_lucky_wheel(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			var pool = data.get("pool_size", 20000)
+			_show_lucky_banner("🎡 %s 觸發幸運大轉盤！大獎池 %d！" % [name, pool], Color(1.0, 0.42, 0.71))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.35)
+		"spin_result":
+			var slot_name = data.get("slot_name", "×2")
+			var slot_type = data.get("slot_type", "mult")
+			var reward = data.get("reward", 0)
+			match slot_type:
+				"jackpot":
+					_show_lucky_banner("🎡🏆 %s 中大獎！%s！獎勵 %d！" % [name, slot_name, reward], Color(1.0, 0.85, 0.0), 4.0)
+					ScreenShake.add_trauma(0.8)
+					if reward > 0:
+						_show_reward_popup(reward, 100.0)
+				"aoe":
+					_show_lucky_banner("🎡💥 %s 轉到 %s！全場 HP -50%！" % [name, slot_name], Color(1.0, 0.42, 0.71))
+					ScreenShake.add_trauma(0.5)
+				"mult":
+					var mult = data.get("slot_mult", 2.0)
+					_show_lucky_banner("🎡 %s 轉到 %s！獎勵 %d！" % [name, slot_name, reward], Color(1.0, 0.42, 0.71))
+					if reward > 0:
+						_show_reward_popup(reward, mult)

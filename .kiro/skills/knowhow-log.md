@@ -3814,3 +3814,29 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **Deep Sea Whirlpool：** 6 秒漩渦，每秒 HP -8%
 - **Vampire Multiplier：** 每次擊破 +0.5x，最高 ×5 模式 10 秒
 - **來源：** royalfishing.co.uk, royal-fishing.co.uk, royalfishing.uk
+
+## 83. BaseLuckyPanel.gd 組合模式設計（DAY-296）
+- **問題：** Godot 4 inner class 不支援 extends，無法建立 LuckyPanel 基礎類別
+- **解法：** 用靜態方法（static func）的組合模式，而非繼承
+  - `BaseLuckyPanel.create_banner()` — 建立標準橫幅
+  - `BaseLuckyPanel.show_banner()` — 顯示橫幅動畫
+  - `BaseLuckyPanel.create_indicator()` — 建立右上角指示器
+  - `BaseLuckyPanel.create_timer_bar()` — 建立計時條
+  - `BaseLuckyPanel.show_settle_popup()` — 顯示結算彈窗
+  - `BaseLuckyPanel.fullscreen_flash()` — 全螢幕閃光
+  - `BaseLuckyPanel.start_pulse()` — 脈動動畫
+  - `BaseLuckyPanel.spawn_float_text()` — 浮動文字
+- **優點：** 不需要繼承，任何腳本都可以直接呼叫靜態方法
+- **教訓：** Godot 4 的 static func 是實現「工具類別」的最佳方式
+
+## 84. Go sync.Mutex 在 Lucky Handler 中的正確使用（DAY-296）
+- **問題：** Lucky handler 的 goroutine 中需要同時鎖定 game.mu 和 manager.mu，容易死鎖
+- **正確順序：** 永遠先鎖 manager.mu，再鎖 game.mu（不要反過來）
+- **安全模式：** 在 goroutine 中，先 manager.mu.Lock() 讀取資料，Unlock() 後再 game.mu.Lock() 修改遊戲狀態
+- **教訓：** 多個 mutex 的鎖定順序必須一致，否則會死鎖
+
+## 85. Lucky 系統的 collectGoldenCoin 需要 Client 端觸發（DAY-296）
+- **問題：** T122 黃金雨魚的黃金幣需要玩家點擊收集，但 Server 端沒有對應的 Client→Server 訊息
+- **解法：** 在 protocol.go 加入 `MsgCollectGoldenCoin` 訊息類型，Client 點擊黃金幣時發送
+- **注意：** 黃金幣是虛擬目標（不在 targets map 中），需要獨立的點擊處理邏輯
+- **教訓：** 需要玩家互動的 Lucky 系統，必須同時設計 Client→Server 的觸發訊息

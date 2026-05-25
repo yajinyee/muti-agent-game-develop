@@ -148,6 +148,18 @@ var Targets = []TargetDef{
 	// T120 幸運吸血鬼魚：擊破後進入吸血模式，每次擊破吸收倍率，最高 ×5 模式
 	{ID: "T120", Name: "幸運吸血鬼魚", Type: TypeSpecial, Multiplier: 110, HP: 135, SpawnWeight: 3, Speed: 95, Lifetime: 12, LaborGain: 22, Behavior: BehaviorFlee, DiffFactor: 0.95},
 
+	// ── DAY-296 新增特殊目標（110x-160x）────────────────────
+	// T121 幸運鏡像魚：擊破後觸發鏡像模式，下 3 次攻擊自動複製一次
+	{ID: "T121", Name: "幸運鏡像魚", Type: TypeSpecial, Multiplier: 110, HP: 130, SpawnWeight: 3, Speed: 70, Lifetime: 14, LaborGain: 22, Behavior: BehaviorLinear, DiffFactor: 0.95},
+	// T122 幸運黃金雨魚：擊破後觸發黃金雨，全場生成 8-12 個黃金幣可收集
+	{ID: "T122", Name: "幸運黃金雨魚", Type: TypeSpecial, Multiplier: 120, HP: 145, SpawnWeight: 3, Speed: 55, Lifetime: 16, LaborGain: 24, Behavior: BehaviorLinear, DiffFactor: 0.95},
+	// T123 幸運冰凍炸彈魚：擊破後投擲冰凍炸彈，凍結 3 秒後爆炸 HP -60%
+	{ID: "T123", Name: "幸運冰凍炸彈魚", Type: TypeSpecial, Multiplier: 130, HP: 155, SpawnWeight: 3, Speed: 65, Lifetime: 14, LaborGain: 26, Behavior: BehaviorLinear, DiffFactor: 0.95},
+	// T124 幸運雷暴魚：擊破後觸發雷暴，10 秒內 6-7 道閃電隨機落下
+	{ID: "T124", Name: "幸運雷暴魚", Type: TypeSpecial, Multiplier: 140, HP: 165, SpawnWeight: 2, Speed: 80, Lifetime: 13, LaborGain: 28, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T125 幸運大轉盤魚：擊破後觸發幸運大轉盤，8 格隨機獎勵
+	{ID: "T125", Name: "幸運大轉盤魚", Type: TypeSpecial, Multiplier: 160, HP: 185, SpawnWeight: 2, Speed: 50, Lifetime: 18, LaborGain: 32, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }
