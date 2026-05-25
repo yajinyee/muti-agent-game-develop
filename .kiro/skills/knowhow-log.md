@@ -3973,3 +3973,64 @@ contribution_per_shot = betCost × 0.005 × level_share
   - ✨ 浮動徽章（左上角，上下浮動動畫）
 - **觸發條件：** def_id 以 "T1" 開頭，且 T106-T125 範圍內
 - **教訓：** 高價值目標需要多層視覺識別（光暈 + 徽章 + 倍率標籤顏色），不能只靠倍率數字
+
+## 90. Lucky Panel 腳本架構（DAY-300，2026-05-26）
+
+### 問題
+Client 端只有 BaseLuckyPanel.gd 基礎類別，缺少 T106-T125 共 20 個個別 Panel 腳本。
+HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理各自的 UI 狀態。
+
+### 解決方案
+建立 20 個 LuckyXxxPanel.gd 腳本，每個都：
+1. `extends CanvasLayer`（獨立 layer，不互相干擾）
+2. 使用 `const BaseLucky = preload("res://scripts/ui/BaseLuckyPanel.gd")` 組合模式
+3. 提供 `handle_event(data: Dictionary)` 統一入口
+4. 各自有獨特的視覺主題（顏色/圖示/動畫）
+
+### Layer 分配（避免 z-index 衝突）
+- T106 連鎖閃電：layer=20
+- T107 螃蟹魚雷：layer=21
+- T108 渦旋海葵：layer=22
+- T109 黃金龍魚：layer=23
+- T110 雷霆龍蝦：layer=24
+- T111 覺醒鳳凰：layer=25
+- T112 全場震盪：layer=26
+- T113 鑽頭魚雷：layer=27
+- T114 時間凍結：layer=28
+- T115 連鎖爆炸：layer=29
+- T116 千龍王輪盤：layer=30
+- T117 龍力散彈：layer=31
+- T118 火箭砲：layer=32
+- T119 深海漩渦：layer=33
+- T120 吸血鬼：layer=34
+- T121 鏡像魚：layer=35
+- T122 黃金雨：layer=36
+- T123 冰凍炸彈：layer=37
+- T124 雷暴：layer=38
+- T125 大轉盤：layer=39
+
+### 教訓
+- Godot 4 inner class 不支援 extends，用組合模式（preload + static func）替代繼承
+- 每個 Panel 用獨立 CanvasLayer，避免 z-index 衝突
+- `handle_event(data)` 統一入口讓 HUD.gd 可以統一分發事件
+
+## 91. DAY-300 自我評估（2026-05-26）
+
+### 真實狀態
+- Server：20 個 Lucky handler（T106-T125）✅ build OK + vet OK
+- Client Lucky Panel：20 個腳本已建立（T106-T125）✅
+- Client 核心腳本：14 個（GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake/BonusGame/BackgroundManager/CharacterAnimator/PixelCoin + BaseLuckyPanel + LuckyEventSystem）
+- 目標物：32 種（T001-T006 + T101-T125 + B001）
+- 美術資產：T001-T125 精靈圖 + B001 BOSS + 9 個角色精靈圖
+- 音效資產：12 個 SFX + 4 個 BGM
+
+### 品質評估
+- 射擊手感：7/10（基礎功能完整，缺少更多視覺回饋）
+- 視覺清晰度：6/10（Lucky 視覺識別已升級，但整體密度仍需改善）
+- 核心循環流暢度：7/10（射擊→擊破→獎勵→再射擊 流程完整）
+- 特效密度：6/10（HitEffect 已強化，但 Lucky Panel 視覺效果需要在 Godot 中驗證）
+
+### 下一步優先項目
+1. 在 Godot 中驗證 Lucky Panel 腳本是否正確載入
+2. 補齊 TargetManager.gd 中 T106-T125 的 Lucky Panel 整合
+3. 考慮 BOSS Phase 2 系統（血量 < 50% 進入狂暴模式）
