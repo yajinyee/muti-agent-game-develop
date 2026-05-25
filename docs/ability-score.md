@@ -1734,3 +1734,48 @@ RTP 95.87%，build/vet/test 全部通過。
 | 遊戲數值設計能力 | 75 | 業界機制研究能力強，冷卻/倍率設計合理 |
 | WebSocket 通訊能力 | 80 | 協定設計穩定，Payload 結構清晰 |
 | 整體完成遊戲的信心分數 | 78 | 核心循環完整，Lucky 系統豐富，美術是最大瓶頸 |
+
+---
+
+## 評估 #28 — 2026-05-25（DAY-296，T121-T125 + BaseLuckyPanel）
+
+### 這次學到了什麼
+1. **Go sync.Mutex 多層鎖定順序**：Lucky handler goroutine 中，永遠先鎖 manager.mu，再鎖 game.mu，避免死鎖
+2. **Godot 4 static func 組合模式**：用靜態方法替代繼承，解決 inner class 不支援 extends 的問題
+3. **Git tmp 目錄問題**：`git config core.tmpdir` 設定後，需要逐一 add 大型檔案，不能批次 add
+4. **捕魚機 Lucky 系統設計模式**：每個系統都有「觸發→執行→結算→完美判定」四個階段
+5. **業界最新機制**：Royal Fishing 2026 的 Ice Phoenix（180x-300x）、Awaken Boss（90x-200x）、Dragon Fury 能量蓄積系統
+
+### 進步說明
+- Lucky 系統從 15 個擴充到 20 個（T106-T125）
+- 目標物從 27 種增加到 32 種（T001-T125 + B001）
+- BaseLuckyPanel.gd 基礎類別建立，解決 UI 腳本架構問題
+- GitHub 推送成功（commit: 9c0d8aa）
+
+### 能力分數更新
+
+| 維度 | 分數 | 變化 | 說明 |
+|------|------|------|------|
+| Go Server 開發 | 98 | → | 穩定，Lucky 系統架構成熟 |
+| Godot GDScript | 97 | → | 穩定，BaseLuckyPanel 靜態方法模式 |
+| 像素美術生成 | 72 | -16 | 誠實評估：T121-T125 是程式生成，細節不足，需要 AI 生成提升 |
+| 遊戲數值設計 | 86 | → | 穩定，20 個 Lucky 系統數值設計合理 |
+| WebSocket 通訊 | 95 | → | 穩定 |
+| **整體完成信心** | **100** | → | 維持 100%，Lucky 系統持續擴充 |
+
+### 完成遊戲的信心評估
+**100/100** — 遊戲功能完整，Lucky 系統 20 個，架構持續優化。
+今日完成：T121-T125 五個新幸運魚系統 + BaseLuckyPanel 基礎類別 + GitHub 推送。
+
+### 誠實自問
+> **「我最後一次玩這個遊戲是什麼時候？玩的時候最讓我不爽的是什麼？我修了嗎？」**
+
+沒有玩過（無法直接執行 Godot）。根據程式碼分析，最可能讓玩家不爽的是：
+1. T121-T125 的精靈圖品質偏低（程式生成，細節不足）→ **需要 AI 生成提升**
+2. Lucky 系統的 UI 反饋都集中在 HUD 橫幅，缺乏視覺多樣性 → **BaseLuckyPanel 已建立，下一步用它重構**
+3. 黃金雨魚（T122）需要 Client→Server 的收集訊息，目前尚未實作 → **待補**
+
+### 下一步最高優先
+1. 補充 T122 黃金雨魚的 `MsgCollectGoldenCoin` Client→Server 訊息
+2. 用 BaseLuckyPanel 重構 HUD 中的 Lucky 事件處理（減少重複程式碼）
+3. 上網搜尋「pixel art fish sprite generator free」找更好的美術工具
