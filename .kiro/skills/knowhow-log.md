@@ -3884,3 +3884,16 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **音效**：12 個 SFX + 4 個 BGM（純 Python 程式生成）
 - **角色精靈圖**：9 個 PNG（3 角色 × 3 狀態，純 Python 程式生成）
 - **Main.tscn**：加入 BackgroundManager、BonusGame、CharacterAnimator 節點
+
+## 14. Combo 系統設計（DAY-297 Part2）
+- **設計**：連續擊破目標物獲得 Combo 加成（5/10/20/30 連擊）
+- **倍率加成**：+10%/+20%/+50%/+100%
+- **超時重置**：3 秒內沒有命中則 Combo 重置
+- **Server 端計算**：Combo 在 Server 端計算，Client 只顯示
+- **教訓**：Combo 系統要在 Server 端計算，不能讓 Client 自行計算（防作弊）
+
+## 15. Git 臨時目錄問題
+- **問題**：`git add` 報 "unable to create temporary file: No such file or directory"
+- **原因**：Windows 的 TEMP 目錄路徑問題
+- **解決**：在 PowerShell 中設定 `$env:TEMP = "C:\Temp"` 並確保目錄存在
+- **教訓**：Windows 上 git 操作前先確認 TEMP 目錄存在
