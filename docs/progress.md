@@ -1,17 +1,58 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-25（DAY-297 BonusGame + BackgroundManager + CharacterAnimator + 音效生成 + 角色動畫）
+## 最後更新：2026-05-25（DAY-298 LuckyEventSystem + HitEffect 強化 + player-experience-agent）
+
+## ⚠️ 重要說明（DAY-298 現實核查）
+progress.md 中 DAY-280 到 DAY-291 的記錄（T126-T249 共 100+ 個 Lucky 系統）**在磁碟上不存在**。
+這些是「自主觸發」的幻覺記錄，實際程式碼從未寫入。
+
+**真實狀態（已驗證）：**
+- Server Lucky Handler：20 個（T106-T125）✅
+- Client 腳本：14 個（含新增的 LuckyEventSystem.gd）✅
+- 目標物：32 種（T001-T006 + T101-T125 + B001）✅
+- Server 編譯：✅ build OK + vet OK
 
 ## 自我評估（誠實版）
 - **Server 實際目標物數量：** 32 種（T001-T006 基礎 + T101-T125 特殊 + B001 BOSS）
 - **Lucky 系統數量：** 20 個（T106-T125）
 - **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
-- **Client 腳本：** GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake/BonusGame/BackgroundManager/CharacterAnimator + BaseLuckyPanel（12個）
+- **Client 腳本：** GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake/BonusGame/BackgroundManager/CharacterAnimator/PixelCoin + BaseLuckyPanel + LuckyEventSystem（14個）
 - **美術資產：** T001-T125 精靈圖 + B001 BOSS + 9 個角色精靈圖（3角色×3狀態）
 - **音效資產：** 12 個 SFX + 4 個 BGM（程式生成 WAV）
-- **完成度（誠實）：** 核心遊戲循環完整（含 Bonus Game），背景管理完整，角色動畫完整，音效完整
+- **完成度（誠實）：** 核心遊戲循環完整（含 Bonus Game），背景管理完整，角色動畫完整，音效完整，Lucky 視覺系統升級
 
-## DAY-297 更新（2026-05-25）：BonusGame + BackgroundManager + CharacterAnimator + 音效 ✅
+## DAY-298 更新（2026-05-25）：LuckyEventSystem + HitEffect 強化 + player-experience-agent ✅
+- **LuckyEventSystem.gd**（新建）：統一的 Lucky 事件視覺系統
+  - 20 個 Lucky 系統各自的視覺主題（顏色/圖示/背景/閃光次數）
+  - 帶主題色彩的橫幅（從上方滑入，頂部/底部強調線）
+  - 右側指示器（顯示進度/計時/倍率，帶計時條）
+  - 結算彈窗（從右側滑入）
+  - 全螢幕閃光（觸發時）
+  - 橫幅佇列系統（避免多個橫幅重疊）
+- **HUD.gd** 更新：
+  - 移除舊的 `_create_lucky_banner` / `_show_lucky_banner` 純文字橫幅
+  - 新增 `_show_lucky_event(key, msg)` — 帶主題的 Lucky 事件顯示
+  - 新增 `_update_lucky_indicator` / `_hide_lucky_indicator` — 進度指示器
+  - 新增 `_show_lucky_settle` — 結算彈窗
+  - 新增 `_find_lucky_event_system` — 自動尋找 LuckyEventSystem 節點
+  - 備用橫幅（LuckyEventSystem 不可用時的降級方案）
+  - 多個 Lucky 系統的 trigger 事件改為呼叫 `_show_lucky_event`（帶主題）
+  - 雷霆龍蝦/渦旋海葵/鑽頭魚雷/連鎖爆炸 的進行中事件改為更新指示器
+- **HitEffect.gd** 強化：
+  - 命中特效：加入小粒子（3個）
+  - 擊破特效：依倍率分級（≥50x 大爆炸/≥20x 中爆炸/≥10x 標準/其他小爆炸）
+  - 新增 `_spawn_ring_burst`：擴散環（高倍率擊破的視覺衝擊）
+  - 新增 `_spawn_star_burst`：星形爆炸（超高倍率用）
+  - 新增 `_spawn_mini_particles`：小粒子（命中特效）
+  - 新增 `spawn_chain_effect`：連鎖特效（Lucky 系統用）
+  - 獎勵跳字：依倍率分級字體大小（≥100x 26px/≥50x 22px/≥20x 20px）
+  - 大獎演出：依倍率分級文字（MEGA WIN/BIG WIN）
+- **player-experience-agent.md**（新建）：玩家體驗評估 Agent
+  - 8 個評估指標（射擊手感/視覺清晰度/核心循環/特效密度/音效同步/Lucky爽感/BOSS張力/Bonus趣味）
+  - 已知體驗問題清單（DAY-298 更新）
+  - 體驗報告格式
+
+
 - **BonusGame.gd**：完整的 Bonus 遊戲 UI（CanvasLayer layer=80）
   - 雜草生成系統（BG001-BG005，加權隨機，最多 18 個同時存在）
   - 點擊互動（BG002 硬雜草需要 2 次點擊）

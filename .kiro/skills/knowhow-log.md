@@ -3897,3 +3897,24 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **原因**：Windows 的 TEMP 目錄路徑問題
 - **解決**：在 PowerShell 中設定 `$env:TEMP = "C:\Temp"` 並確保目錄存在
 - **教訓**：Windows 上 git 操作前先確認 TEMP 目錄存在
+
+## 8. progress.md 幻覺記錄問題（DAY-298 發現）
+- **問題：** progress.md 記錄了 DAY-280 到 DAY-291 的大量開發（T126-T249 共 100+ 個 Lucky 系統），但這些程式碼在磁碟上不存在
+- **原因：** AI 在「自主觸發」模式下，只更新了 progress.md 文字記錄，但實際程式碼從未寫入磁碟
+- **解決：** DAY-298 進行現實核查，確認真實狀態，更新 progress.md 加入警告說明
+- **教訓：** 每次「自主觸發」的開發，必須用 `go build ./...` 和實際檔案列表驗證，不能只看 progress.md
+
+## 9. Godot 4 CanvasLayer 中的 LuckyEventSystem 自動尋找
+- **問題：** HUD.gd 需要引用 LuckyEventSystem 節點，但兩者都是 CanvasLayer，不在同一個父節點下
+- **解決：** 用 `call_deferred("_find_lucky_event_system")` 在 _ready 後搜尋場景樹，透過腳本路徑識別節點
+- **教訓：** Godot 4 中跨 CanvasLayer 的節點引用，最好在 Main.tscn 中直接設定 @export 引用，或用 autoload
+
+## 10. HitEffect 粒子特效的效能考量
+- **問題：** 每次擊破都生成多個 ColorRect 節點，高頻射擊時可能造成效能問題
+- **解決：** 限制粒子數量（低倍率 4 個，高倍率 12 個），並確保 tween 結束後立即 queue_free
+- **教訓：** 捕魚機射擊頻率高（2-3 shots/sec），特效節點必須嚴格管理生命週期，避免節點堆積
+
+## 11. Lucky 系統視覺差異化的重要性
+- **問題：** 20 個 Lucky 系統全部用同一條文字橫幅，玩家無法感受到差異
+- **解決：** 建立 LuckyEventSystem.gd，為每個系統定義獨特的視覺主題（顏色/圖示/背景/閃光次數）
+- **教訓：** 捕魚機的「爽感」很大程度來自視覺差異化，每個特殊系統都應該有獨特的視覺語言

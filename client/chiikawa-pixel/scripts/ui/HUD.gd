@@ -1,5 +1,6 @@
 ## HUD.gd — 核心 HUD
 ## hud-core-agent 負責維護
+## DAY-298：Lucky 事件視覺系統改由 LuckyEventSystem 處理
 extends CanvasLayer
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
@@ -21,10 +22,8 @@ var _boss_timer_panel: Control = null
 var _boss_time_left: float = 0.0
 var _boss_active: bool = false
 var _last_labor: int = 0
-# DAY-292 幸運特殊魚 UI
-var _lucky_banner: Control = null
-var _announce_queue: Array = []
-var _announce_showing: bool = false
+# DAY-298：Lucky 事件視覺系統（LuckyEventSystem 節點引用，在 Main.tscn 中設定）
+var lucky_event_system: Node = null
 # DAY-297 Combo UI
 var _combo_label: Label = null
 var _last_combo: int = 0
@@ -47,9 +46,10 @@ func _ready() -> void:
 
 	_create_reward_popup()
 	_create_disconnect_overlay()
-	_create_lucky_banner()
 	_create_combo_label()
 	_update_ui()
+	# 嘗試自動找 LuckyEventSystem（如果在同一場景樹中）
+	call_deferred("_find_lucky_event_system")
 
 	# DAY-292 幸運特殊魚訊號連接
 	GameManager.lucky_chain_lightning.connect(_on_lucky_chain_lightning)
@@ -82,6 +82,31 @@ func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
 		_boss_time_left -= delta
 		_update_boss_timer()
+
+func _find_lucky_event_system() -> void:
+	# 在場景樹中尋找 LuckyEventSystem 節點
+	var root = get_tree().get_root()
+	lucky_event_system = _find_node_by_class(root, "LuckyEventSystem")
+	if lucky_event_system == null:
+		# 備用：在同層 CanvasLayer 中找
+		var parent = get_parent()
+		if is_instance_valid(parent):
+			lucky_event_system = parent.get_node_or_null("LuckyEventSystem")
+	if lucky_event_system != null:
+		print("[HUD] LuckyEventSystem found: ", lucky_event_system.get_path())
+	else:
+		print("[HUD] LuckyEventSystem not found, using fallback banner")
+
+func _find_node_by_class(node: Node, class_name_str: String) -> Node:
+	if node.get_script() != null:
+		var path = node.get_script().resource_path
+		if path.ends_with(class_name_str + ".gd"):
+			return node
+	for child in node.get_children():
+		var result = _find_node_by_class(child, class_name_str)
+		if result != null:
+			return result
+	return null
 
 func _on_player_updated(_data: Dictionary) -> void:
 	_update_ui()
@@ -298,30 +323,66 @@ func _on_reconnected() -> void:
 	if is_instance_valid(_disconnect_overlay):
 		_disconnect_overlay.visible = false
 
-# ── DAY-292 幸運特殊魚 UI ─────────────────────────────────────
+# ── DAY-298 幸運特殊魚 UI（改由 LuckyEventSystem 處理）────────
 
-func _create_lucky_banner() -> void:
-	_lucky_banner = Control.new()
-	_lucky_banner.name = "LuckyBanner"
-	_lucky_banner.position = Vector2(0, 120)
-	_lucky_banner.size = Vector2(1280, 80)
-	_lucky_banner.visible = false
-	_lucky_banner.z_index = 60
-	add_child(_lucky_banner)
+func _show_lucky_banner(text: String, color: Color, duration: float = 2.5) -> void:
+	if is_instance_valid(lucky_event_system):
+		lucky_event_system.show_banner(text, color, duration)
+	else:
+		# 備用：直接在 HUD 上顯示簡單橫幅
+		_show_fallback_banner(text, color, duration)
 
-	var bg = ColorRect.new()
-	bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	bg.color = Color(0, 0, 0, 0.75)
-	_lucky_banner.add_child(bg)
+func _show_lucky_event(lucky_key: String, msg: String, duration: float = 2.5) -> void:
+	if is_instance_valid(lucky_event_system):
+		lucky_event_system.show_lucky_banner(lucky_key, msg, duration)
+	else:
+		_show_fallback_banner(msg, Color.WHITE, duration)
 
-	var lbl = Label.new()
-	lbl.name = "BannerLabel"
-	lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
-	lbl.add_theme_font_size_override("font_size", 28)
-	lbl.modulate = Color(1.0, 0.9, 0.2)
-	_lucky_banner.add_child(lbl)
+func _update_lucky_indicator(title: String, value: String, bar_pct: float = -1.0, color: Color = Color(1.0, 0.85, 0.0)) -> void:
+	if is_instance_valid(lucky_event_system):
+		lucky_event_system.update_indicator(title, value, bar_pct, color)
+
+func _hide_lucky_indicator() -> void:
+	if is_instance_valid(lucky_event_system):
+		lucky_event_system.hide_indicator()
+
+func _show_lucky_settle(lines: Array, duration: float = 3.5) -> void:
+	if is_instance_valid(lucky_event_system):
+		lucky_event_system.show_settle(lines, duration)
+
+# 備用橫幅（LuckyEventSystem 不可用時）
+var _fallback_banner: Control = null
+func _show_fallback_banner(text: String, color: Color, duration: float = 2.5) -> void:
+	if not is_instance_valid(_fallback_banner):
+		_fallback_banner = Control.new()
+		_fallback_banner.position = Vector2(0, 120)
+		_fallback_banner.size = Vector2(1280, 80)
+		_fallback_banner.z_index = 60
+		add_child(_fallback_banner)
+		var bg = ColorRect.new()
+		bg.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		bg.color = Color(0, 0, 0, 0.75)
+		_fallback_banner.add_child(bg)
+		var lbl = Label.new()
+		lbl.name = "BannerLabel"
+		lbl.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+		lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+		lbl.vertical_alignment = VERTICAL_ALIGNMENT_CENTER
+		lbl.add_theme_font_size_override("font_size", 28)
+		_fallback_banner.add_child(lbl)
+	var lbl = _fallback_banner.get_node_or_null("BannerLabel")
+	if is_instance_valid(lbl):
+		lbl.text = text
+		lbl.modulate = color
+	_fallback_banner.visible = true
+	_fallback_banner.modulate.a = 1.0
+	var tween = create_tween()
+	tween.tween_interval(duration - 0.5)
+	tween.tween_property(_fallback_banner, "modulate:a", 0.0, 0.5)
+	tween.tween_callback(func():
+		if is_instance_valid(_fallback_banner):
+			_fallback_banner.visible = false
+	)
 
 # ── DAY-297 Combo UI ──────────────────────────────────────────
 
@@ -383,7 +444,7 @@ func _on_lucky_chain_lightning(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("⚡ %s 觸發連鎖閃電！" % name, Color(0.0, 0.9, 1.0))
+			_show_lucky_event("chain_lightning", "⚡ %s 觸發連鎖閃電！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.4)
 		"chain_hit":
@@ -400,7 +461,7 @@ func _on_lucky_crab_torpedo(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("🦀 %s 發射螃蟹魚雷！" % name, Color(1.0, 0.4, 0.1))
+			_show_lucky_event("crab_torpedo", "🦀 %s 發射螃蟹魚雷！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.35)
 		"explosion":
@@ -417,12 +478,13 @@ func _on_lucky_vortex(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("🌀 %s 召喚渦旋海葵！" % name, Color(0.5, 0.2, 0.8))
+			_show_lucky_event("vortex", "🌀 %s 召喚渦旋海葵！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 		"pull":
 			var tl = data.get("time_left", 0.0)
-			_show_lucky_banner("🌀 渦旋中... %.0fs" % tl, Color(0.7, 0.4, 1.0), 0.9)
+			_update_lucky_indicator("🌀 渦旋海葵", "%.0fs" % tl, tl / 8.0, Color(0.7, 0.4, 1.0))
 		"end":
+			_hide_lucky_indicator()
 			_show_lucky_banner("🌀 渦旋爆炸！全場 HP -20%！", Color(0.8, 0.5, 1.0))
 			ScreenShake.add_trauma(0.6)
 
@@ -431,7 +493,7 @@ func _on_lucky_golden_dragon(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("🐉 %s 觸發黃金龍魚輪盤！" % name, Color(1.0, 0.85, 0.0))
+			_show_lucky_event("golden_dragon", "🐉 %s 觸發黃金龍魚輪盤！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 		"spin":
 			var inner = data.get("inner_mult", 1.0)
@@ -451,13 +513,14 @@ func _on_lucky_thunder_lobster(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("🦞⚡ %s 觸發雷霆龍蝦！15 秒免費射擊！" % name, Color(1.0, 0.3, 0.0))
+			_show_lucky_event("thunder_lobster", "🦞⚡ %s 觸發雷霆龍蝦！15 秒免費射擊！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 		"auto_fire":
 			var tl = data.get("time_left", 0.0)
 			var kills = data.get("kill_count", 0)
-			_show_lucky_banner("🦞⚡ 雷霆模式 %.0fs | 擊破 %d 條" % [tl, kills], Color(1.0, 0.5, 0.2), 0.8)
+			_update_lucky_indicator("🦞⚡ 雷霆模式", "%.0fs | %d 條" % [tl, kills], tl / 15.0, Color(1.0, 0.5, 0.2))
 		"end":
+			_hide_lucky_indicator()
 			var reward = data.get("total_reward", 0)
 			var kills = data.get("kill_count", 0)
 			_show_lucky_banner("🦞 雷霆結束！擊破 %d 條，獎勵 %d！" % [kills, reward], Color(1.0, 0.7, 0.3))
@@ -481,20 +544,10 @@ func _on_announce(data: Dictionary) -> void:
 		"high": duration = 3.0
 		"critical": duration = 4.0
 
-	_announce_queue.append({"msg": msg, "color": color, "duration": duration})
-	if not _announce_showing:
-		_process_announce_queue()
+	_show_lucky_banner(msg, color, duration)
 
 func _process_announce_queue() -> void:
-	if _announce_queue.is_empty():
-		_announce_showing = false
-		return
-	_announce_showing = true
-	var item = _announce_queue.pop_front()
-	_show_lucky_banner(item["msg"], item["color"], item["duration"])
-	var tween = create_tween()
-	tween.tween_interval(item["duration"] + 0.2)
-	tween.tween_callback(_process_announce_queue)
+	pass  # DAY-298：佇列邏輯已移至 LuckyEventSystem
 
 # ── DAY-293 新增幸運特殊魚事件處理 ───────────────────────────
 
@@ -503,19 +556,21 @@ func _on_lucky_awakened_phoenix(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"awaken_start":
-			_show_lucky_banner("🔥 %s 觸發覺醒鳳凰！下 5 次攻擊 Power Up！" % name, Color(1.0, 0.42, 0.21))
+			_show_lucky_event("awakened_phoenix", "🔥 %s 觸發覺醒鳳凰！下 5 次攻擊 Power Up！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.35)
 		"power_up":
 			var mult = data.get("power_up_mult", 6.0)
 			var shots = data.get("shots_left", 0)
-			_show_lucky_banner("🔥 Power Up ×%.0f！剩餘 %d 次" % [mult, shots], Color(1.0, 0.6, 0.2), 1.0)
+			_update_lucky_indicator("🔥 覺醒鳳凰", "×%.0f | 剩 %d 次" % [mult, shots], float(shots) / 5.0, Color(1.0, 0.6, 0.2))
 		"perfect_awaken":
+			_hide_lucky_indicator()
 			_show_lucky_banner("🔥✨ 完美覺醒！%s 全服 ×2.0 加成 8 秒！" % name, Color(1.0, 0.85, 0.0), 3.5)
 			ScreenShake.add_trauma(0.6)
 		"perfect_end":
 			_show_lucky_banner("🔥 完美覺醒加成結束", Color(0.7, 0.7, 0.7), 1.5)
 		"awaken_end":
+			_hide_lucky_indicator()
 			var reward = data.get("total_reward", 0)
 			var hits = data.get("hit_count", 0)
 			_show_lucky_banner("🔥 覺醒結束！命中 %d 次，獎勵 %d！" % [hits, reward], Color(1.0, 0.7, 0.3))
@@ -527,7 +582,7 @@ func _on_lucky_shockwave_bomb(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"shockwave_start":
-			_show_lucky_banner("💥 %s 觸發全場震盪！全場 HP -35%！" % name, Color(1.0, 0.27, 0.0))
+			_show_lucky_event("shockwave_bomb", "💥 %s 觸發全場震盪！全場 HP -35%！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.7)
 		"shockwave_hit":
@@ -551,14 +606,15 @@ func _on_lucky_drill_torpedo(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("🚀 %s 發射鑽頭魚雷！穿透最多 5 個目標！" % name, Color(1.0, 0.55, 0.15))
+			_show_lucky_event("drill_torpedo", "🚀 %s 發射鑽頭魚雷！穿透最多 5 個目標！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.4)
 		"penetrate":
 			var cnt = data.get("penetrate_cnt", 0)
 			var mult = data.get("accum_mult", 1.0)
-			_show_lucky_banner("🚀 穿透 %d 個！累積 ×%.1f" % [cnt, mult], Color(1.0, 0.7, 0.3), 0.8)
+			_update_lucky_indicator("🚀 鑽頭魚雷", "穿透 %d | ×%.1f" % [cnt, mult], float(cnt) / 5.0, Color(1.0, 0.55, 0.15))
 		"explode":
+			_hide_lucky_indicator()
 			_show_lucky_banner("💥 魚雷終點爆炸！AOE 傷害！", Color(1.0, 0.4, 0.1))
 			ScreenShake.add_trauma(0.55)
 		"perfect":
@@ -572,10 +628,11 @@ func _on_lucky_time_freeze(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"freeze_start":
-			_show_lucky_banner("❄️ %s 觸發時間凍結！全場凍結 8 秒！傷害 ×1.8！" % name, Color(0.4, 0.85, 1.0))
+			_show_lucky_event("time_freeze", "❄️ %s 觸發時間凍結！全場凍結 8 秒！傷害 ×1.8！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.3)
 		"freeze_end":
+			_hide_lucky_indicator()
 			_show_lucky_banner("❄️💥 冰裂爆炸！全場 HP -25%！", Color(0.6, 0.9, 1.0))
 			ScreenShake.add_trauma(0.5)
 		"perfect_freeze":
@@ -590,20 +647,22 @@ func _on_lucky_chain_explosion(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"chain_start":
-			_show_lucky_banner("💥 %s 觸發連鎖爆炸！12 秒連鎖模式！" % name, Color(0.9, 0.2, 0.15))
+			_show_lucky_event("chain_explosion", "💥 %s 觸發連鎖爆炸！12 秒連鎖模式！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.4)
 		"chain_explode":
 			var cnt = data.get("chain_count", 0)
 			var mult = data.get("accum_mult", 1.0)
-			_show_lucky_banner("💥 連鎖 %d！累積 ×%.1f" % [cnt, mult], Color(1.0, 0.5, 0.2), 0.7)
+			_update_lucky_indicator("💥 連鎖爆炸", "×%.1f | %d 次" % [mult, cnt], -1.0, Color(0.9, 0.2, 0.15))
 			ScreenShake.add_trauma(0.25)
 		"chain_burst":
+			_hide_lucky_indicator()
 			_show_lucky_banner("💥🔥 連鎖爆發！%s 全服 ×2.5 加成 6 秒！" % name, Color(1.0, 0.85, 0.0), 3.5)
 			ScreenShake.add_trauma(0.7)
 		"burst_end":
 			_show_lucky_banner("💥 連鎖爆發加成結束", Color(0.7, 0.7, 0.7), 1.5)
 		"chain_end":
+			_hide_lucky_indicator()
 			var cnt = data.get("chain_count", 0)
 			var reward = data.get("total_reward", 0)
 			_show_lucky_banner("💥 連鎖結束！%d 次連鎖，獎勵 %d！" % [cnt, reward], Color(1.0, 0.6, 0.3))
@@ -617,7 +676,7 @@ func _on_lucky_chain_long_king(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("🐉👑 %s 觸發千龍王輪盤！最高 1000x！" % name, Color(1.0, 0.85, 0.0))
+			_show_lucky_event("chain_long_king", "🐉👑 %s 觸發千龍王輪盤！最高 1000x！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.5)
 		"spin":
@@ -642,7 +701,7 @@ func _on_lucky_dragon_shotgun(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("🐲💥 %s 觸發龍力散彈！8 方向攻擊！" % name, Color(0.8, 0.2, 0.9))
+			_show_lucky_event("dragon_shotgun", "🐲💥 %s 觸發龍力散彈！8 方向攻擊！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.45)
 		"shotgun_fire":
@@ -662,7 +721,7 @@ func _on_lucky_rocket_cannon(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("🚀💥 %s 召喚火箭砲！3 枚火箭！" % name, Color(1.0, 0.3, 0.1))
+			_show_lucky_event("rocket_cannon", "🚀💥 %s 召喚火箭砲！3 枚火箭！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.4)
 		"rocket_launch":
@@ -684,7 +743,7 @@ func _on_lucky_deep_whirlpool(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("🌊🌀 %s 觸發深海漩渦！全場 HP -50%！6 秒！" % name, Color(0.0, 0.6, 0.9))
+			_show_lucky_event("deep_whirlpool", "🌊🌀 %s 觸發深海漩渦！全場 HP -50%！6 秒！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.5)
 		"whirlpool_damage":
@@ -701,7 +760,7 @@ func _on_lucky_vampire_mult(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"trigger":
-			_show_lucky_banner("🧛 %s 觸發吸血鬼！每次擊破吸收倍率！" % name, Color(0.5, 0.0, 0.5))
+			_show_lucky_event("vampire_mult", "🧛 %s 觸發吸血鬼！每次擊破吸收倍率！" % name)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.3)
 		"absorb":
@@ -727,7 +786,7 @@ func _on_lucky_mirror_fish(data: Dictionary) -> void:
 	match event:
 		"trigger":
 			var shots = data.get("shots_left", 3)
-			_show_lucky_banner("🪞 %s 觸發鏡像魚！下 %d 次攻擊自動複製！" % [name, shots], Color(0.88, 0.67, 1.0))
+			_show_lucky_event("mirror_fish", "🪞 %s 觸發鏡像魚！下 %d 次攻擊自動複製！" % [name, shots])
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.3)
 		"mirror_hit":
@@ -754,7 +813,7 @@ func _on_lucky_golden_rain(data: Dictionary) -> void:
 	match event:
 		"trigger":
 			var total = data.get("total_coins", 10)
-			_show_lucky_banner("🌧️💰 %s 觸發黃金雨！%d 個黃金幣！快去收集！" % [name, total], Color(1.0, 0.85, 0.0))
+			_show_lucky_event("golden_rain", "🌧️💰 %s 觸發黃金雨！%d 個黃金幣！快去收集！" % [name, total])
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.35)
 			# 在畫面上生成可點擊的黃金幣
@@ -822,7 +881,7 @@ func _on_lucky_freeze_bomb(data: Dictionary) -> void:
 	match event:
 		"freeze_start":
 			var frozen = data.get("frozen_targets", [])
-			_show_lucky_banner("❄️💣 %s 投擲冰凍炸彈！%d 個目標凍結！3 秒後爆炸！" % [name, frozen.size()], Color(0.0, 0.9, 1.0))
+			_show_lucky_event("freeze_bomb", "❄️💣 %s 投擲冰凍炸彈！%d 個目標凍結！3 秒後爆炸！" % [name, frozen.size()])
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.3)
 		"bomb_explode":
@@ -842,7 +901,7 @@ func _on_lucky_thunder_storm(data: Dictionary) -> void:
 	match event:
 		"storm_start":
 			var count = data.get("lightning_count", 6)
-			_show_lucky_banner("⛈️ %s 召喚雷暴！%d 道閃電！10 秒！" % [name, count], Color(1.0, 0.85, 0.0))
+			_show_lucky_event("thunder_storm", "⛈️ %s 召喚雷暴！%d 道閃電！10 秒！" % [name, count])
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.4)
 		"lightning_strike":
@@ -872,7 +931,7 @@ func _on_lucky_lucky_wheel(data: Dictionary) -> void:
 	match event:
 		"trigger":
 			var pool = data.get("pool_size", 20000)
-			_show_lucky_banner("🎡 %s 觸發幸運大轉盤！大獎池 %d！" % [name, pool], Color(1.0, 0.42, 0.71))
+			_show_lucky_event("lucky_wheel", "🎡 %s 觸發幸運大轉盤！大獎池 %d！" % [name, pool])
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.35)
 		"spin_result":
