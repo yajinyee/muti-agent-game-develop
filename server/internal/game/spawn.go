@@ -9,12 +9,12 @@ import (
 )
 
 const (
-	SpawnInterval = 0.8  // 秒
-	MaxTargets    = 18
+	SpawnInterval  = 0.6  // 秒（從 0.8 加快到 0.6，增加目標物密度）
+	MaxTargets     = 22   // 從 18 增加到 22，讓畫面更豐富
 	MaxBossTargets = 8
-	GameWidth     = 1280.0
-	GameHeight    = 720.0
-	SpawnX        = GameWidth + 50  // 從右側進入
+	GameWidth      = 1280.0
+	GameHeight     = 720.0
+	SpawnX         = GameWidth + 50  // 從右側進入
 )
 
 // spawnY 隨機生成 Y 座標（避開頂部 UI 和底部 UI）

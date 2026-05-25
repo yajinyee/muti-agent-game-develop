@@ -153,10 +153,13 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if tex != null:
 		sprite.texture = tex
 		sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
-		# 目標物放大 2x，確保在畫面上清楚可見
-		sprite.scale = Vector2(2.0, 2.0)
+		# 目標物放大：基礎目標 2.5x，特殊目標 2.8x，確保在畫面上清楚可見
 		if target_type == "boss":
 			sprite.scale = Vector2(3.0, 3.0)
+		elif target_type == "special":
+			sprite.scale = Vector2(2.8, 2.8)
+		else:
+			sprite.scale = Vector2(2.5, 2.5)
 	else:
 		# 備用：ColorRect
 		var rect = ColorRect.new()
