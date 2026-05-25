@@ -118,6 +118,9 @@ func send_trigger_bonus() -> void:
 func send_collect_golden_coin(coin_id: int) -> void:
 	send("collect_golden_coin", {"coin_id": coin_id})
 
+func send_set_display_name(name: String) -> void:
+	send("set_display_name", {"name": name})
+
 func is_connected_to_server() -> bool:
 	return _connected
 

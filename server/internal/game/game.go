@@ -191,6 +191,12 @@ func (g *Game) HandleMessage(clientID string, msgType string, payload json.RawMe
 			return
 		}
 		g.collectGoldenCoin(clientID, req.CoinID)
+	case protocol.MsgSetDisplayName:
+		var req protocol.SetDisplayNameRequest
+		if err := json.Unmarshal(payload, &req); err != nil {
+			return
+		}
+		g.handleSetDisplayName(clientID, req.Name)
 	}
 }
 
@@ -417,7 +423,7 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			})
 
 			// 幸運特殊魚觸發
-			killerName := p.ID // 使用 playerID 作為名稱（可擴展為真實名稱）
+			killerName := p.GetDisplayName() // 使用顯示名稱
 			switch {
 			case isLuckyChainLightningFish(t.Def.ID):
 				g.tryLuckyChainLightning(playerID, killerName)
@@ -840,4 +846,21 @@ func max(a, b int) int {
 		return a
 	}
 	return b
+}
+
+// handleSetDisplayName 設定玩家顯示名稱
+func (g *Game) handleSetDisplayName(playerID string, name string) {
+	if name == "" || len(name) > 20 {
+		return
+	}
+	g.mu.Lock()
+	p, ok := g.players[playerID]
+	if ok {
+		p.DisplayName = name
+	}
+	g.mu.Unlock()
+	if ok {
+		g.sendPlayerUpdate(playerID)
+		log.Printf("[Game] Player %s set display name: %s", playerID, name)
+	}
 }

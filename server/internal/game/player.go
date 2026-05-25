@@ -27,6 +27,7 @@ var ComboLevels = []ComboLevel{
 // Player 代表一個玩家的遊戲狀態
 type Player struct {
 	ID             string
+	DisplayName    string // 玩家顯示名稱（可自訂）
 	Coins          int
 	BetLevel       int
 	IsAuto         bool
@@ -40,11 +41,28 @@ type Player struct {
 }
 
 func NewPlayer(id string) *Player {
-	return &Player{
-		ID:       id,
-		Coins:    InitialCoins,
-		BetLevel: 1,
+	// 預設顯示名稱：ID 前 8 碼
+	displayName := id
+	if len(id) > 8 {
+		displayName = id[:8]
 	}
+	return &Player{
+		ID:          id,
+		DisplayName: displayName,
+		Coins:       InitialCoins,
+		BetLevel:    1,
+	}
+}
+
+// GetDisplayName 取得玩家顯示名稱
+func (p *Player) GetDisplayName() string {
+	if p.DisplayName != "" {
+		return p.DisplayName
+	}
+	if len(p.ID) > 8 {
+		return p.ID[:8]
+	}
+	return p.ID
 }
 
 func (p *Player) GetBetDef() data.BetLevel {

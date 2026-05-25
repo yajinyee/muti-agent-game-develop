@@ -13,6 +13,7 @@ const (
 	MsgTriggerBoss       = "trigger_boss"
 	MsgTriggerBonus      = "trigger_bonus"
 	MsgCollectGoldenCoin = "collect_golden_coin" // T122 黃金雨魚：收集黃金幣
+	MsgSetDisplayName    = "set_display_name"    // 設定玩家顯示名稱
 )
 
 // ── Server → Client ──────────────────────────────────────────
@@ -435,4 +436,9 @@ type LuckyLuckyWheelPayload struct {
 // CollectGoldenCoinRequest T122 黃金雨魚：收集黃金幣請求
 type CollectGoldenCoinRequest struct {
 	CoinID int `json:"coin_id"`
+}
+
+// SetDisplayNameRequest 設定玩家顯示名稱請求
+type SetDisplayNameRequest struct {
+	Name string `json:"name"`
 }
