@@ -394,13 +394,39 @@ func _on_boss_event(event_data: Dictionary) -> void:
 		if _target_nodes.has(instance_id):
 			var node = _target_nodes[instance_id]
 			if is_instance_valid(node):
+				# Phase 2 進入：強烈閃爍 + 放大 + 持續紅色調
 				var tween = node.create_tween()
-				for i in 3:
-					tween.tween_property(node, "modulate", Color(3.0, 0.3, 0.3), 0.08)
-					tween.tween_property(node, "modulate", Color.WHITE, 0.08)
-				tween.tween_property(node, "modulate", Color(1.5, 0.5, 0.5), 0.1)
-				tween.parallel().tween_property(node, "scale", Vector2(1.1, 1.1), 0.3)
-				ScreenShake.add_trauma(0.6)
+				# 5次強烈閃爍
+				for i in 5:
+					tween.tween_property(node, "modulate", Color(4.0, 0.2, 0.2), 0.06)
+					tween.tween_property(node, "modulate", Color(0.5, 0.1, 0.1), 0.06)
+				# 放大到 1.2x（Phase 2 BOSS 更大更威脅）
+				tween.tween_property(node, "scale", Vector2(1.2, 1.2), 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
+				# 持續紅色調（Phase 2 標誌）
+				tween.tween_property(node, "modulate", Color(1.8, 0.4, 0.4), 0.2)
+				# 加入 Phase 2 標記
+				_add_phase2_indicator(node)
+				ScreenShake.add_trauma(0.8)
+				AudioManager.play_bgm(AudioManager.BGM.BOSS_RAGE)
+
+func _add_phase2_indicator(boss_node: Node2D) -> void:
+	# 移除舊的 Phase 2 標記（如果有）
+	var old = boss_node.get_node_or_null("Phase2Label")
+	if is_instance_valid(old):
+		old.queue_free()
+	# 新增 PHASE 2 標籤
+	var lbl = Label.new()
+	lbl.name = "Phase2Label"
+	lbl.text = "⚠ PHASE 2"
+	lbl.position = Vector2(-40, -80)
+	lbl.add_theme_font_size_override("font_size", 14)
+	lbl.modulate = Color(1.0, 0.2, 0.2)
+	lbl.z_index = 15
+	boss_node.add_child(lbl)
+	# 脈動動畫
+	var tween = lbl.create_tween().set_loops()
+	tween.tween_property(lbl, "modulate:a", 0.3, 0.3)
+	tween.tween_property(lbl, "modulate:a", 1.0, 0.3)
 
 # ── 點擊目標 ──────────────────────────────────────────────────
 

@@ -45,6 +45,7 @@ type Game struct {
 	bonusTimer    float64
 	bonusScore    map[string]int // playerID -> score
 	bonusWeedHP   map[string]int // weedID -> hp（BG002 需要連點2次）
+	bossPhase2    bool           // BOSS Phase 2 是否已觸發
 
 	// 幸運特殊魚系統
 	luckyChainLightning  *luckyChainLightningManager
@@ -81,6 +82,7 @@ func NewGame(hub *ws.Hub) *Game {
 		targets:    make(map[string]*Target),
 		bonusScore: make(map[string]int),
 		bonusWeedHP: make(map[string]int),
+		bossPhase2: false,
 		lastTick:   time.Now(),
 
 		// 初始化幸運特殊魚系統
@@ -391,6 +393,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 
 		// 廣播擊破
 		if t.Def.Type == data.TypeBoss {
+			// BOSS Phase 2：HP 降到 50% 以下時觸發
+			if !g.bossPhase2 && t.HPPercent() < 0.5 {
+				g.bossPhase2 = true
+				g.hub.Broadcast(protocol.MsgBossEvent, protocol.BossEventPayload{
+					Event:      "phase_change",
+					InstanceID: t.InstanceID,
+					HP:         t.HP,
+					MaxHP:      t.MaxHP,
+				})
+				log.Printf("[Game] Boss Phase 2 triggered! HP: %d/%d", t.HP, t.MaxHP)
+			}
 			g.handleBossKill(playerID, p, t, reward)
 		} else {
 			delete(g.targets, t.InstanceID)
@@ -486,6 +499,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 	} else {
 		// 未擊破，更新 HP（視覺反饋）
 		t.HP = max(1, t.HP-bet.AttackPower/5)
+		// BOSS Phase 2：HP 降到 50% 以下時觸發（未擊破時也要檢查）
+		if t.Def.Type == data.TypeBoss && !g.bossPhase2 && t.HPPercent() < 0.5 {
+			g.bossPhase2 = true
+			g.hub.Broadcast(protocol.MsgBossEvent, protocol.BossEventPayload{
+				Event:      "phase_change",
+				InstanceID: t.InstanceID,
+				HP:         t.HP,
+				MaxHP:      t.MaxHP,
+			})
+			log.Printf("[Game] Boss Phase 2 triggered (no kill)! HP: %d/%d", t.HP, t.MaxHP)
+		}
 		g.hub.Broadcast(protocol.MsgTargetUpdate, protocol.TargetUpdatePayload{
 			InstanceID: t.InstanceID,
 			HP:         t.HP,
@@ -516,6 +540,7 @@ func (g *Game) spawnBoss() {
 	}
 	g.boss = NewTarget(def, GameWidth/2, GameHeight/2)
 	g.bossTimer = 60.0
+	g.bossPhase2 = false // 重置 Phase 2 狀態
 	g.setState(StateBossBattle)
 
 	// 清除部分普通目標（BOSS 期間最多 8 個）
