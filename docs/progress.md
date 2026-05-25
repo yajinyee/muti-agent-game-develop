@@ -1,6 +1,6 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-25（DAY-298 LuckyEventSystem + HitEffect 強化 + player-experience-agent）
+## 最後更新：2026-05-26（DAY-299 品質修復 + 知識庫更新 + GitHub 同步）
 
 ## ⚠️ 重要說明（DAY-298 現實核查）
 progress.md 中 DAY-280 到 DAY-291 的記錄（T126-T249 共 100+ 個 Lucky 系統）**在磁碟上不存在**。
@@ -11,6 +11,18 @@ progress.md 中 DAY-280 到 DAY-291 的記錄（T126-T249 共 100+ 個 Lucky 系
 - Client 腳本：14 個（含新增的 LuckyEventSystem.gd）✅
 - 目標物：32 種（T001-T006 + T101-T125 + B001）✅
 - Server 編譯：✅ build OK + vet OK
+
+## DAY-299 更新（2026-05-26）：品質修復 + 知識庫更新 ✅
+- **HUD.gd 重複函數修復：** 刪除舊版 `_show_lucky_banner`（引用 `_lucky_banner` 節點的那個），保留新版（委派給 LuckyEventSystem）
+- **知識庫更新：** 新增 knowhow-log 條目 86-89（重複函數 bug、Lucky 架構演進、精靈圖完整性、Handler 命名規範）
+- **全面驗證：**
+  - Server：go build + go vet 全通過（零錯誤零警告）
+  - Client：GameManager 20 訊號 ✅，HUD 20 事件處理 ✅，LuckyEventSystem 20 主題 ✅
+  - TargetManager：T106-T125 全部映射 ✅
+  - Protocol：所有訊息類型完整 ✅
+  - 精靈圖：T106-T125 全部存在 ✅
+  - NetworkManager：send_collect_golden_coin 已實作 ✅
+- **GitHub 同步：** 推送到 main 分支
 
 ## 自我評估（誠實版）
 - **Server 實際目標物數量：** 32 種（T001-T006 基礎 + T101-T125 特殊 + B001 BOSS）

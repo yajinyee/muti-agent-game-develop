@@ -3918,3 +3918,33 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **問題：** 20 個 Lucky 系統全部用同一條文字橫幅，玩家無法感受到差異
 - **解決：** 建立 LuckyEventSystem.gd，為每個系統定義獨特的視覺主題（顏色/圖示/背景/閃光次數）
 - **教訓：** 捕魚機的「爽感」很大程度來自視覺差異化，每個特殊系統都應該有獨特的視覺語言
+
+## 86. GDScript 重複函數定義 Bug（DAY-299）
+- **問題：** HUD.gd 中有兩個 `_show_lucky_banner` 函數定義
+- **根本原因：** DAY-298 重構時，新版函數（委派給 LuckyEventSystem）加在前面，但舊版函數（直接操作 `_lucky_banner` 節點）沒有刪除
+- **症狀：** GDScript 會使用最後定義的函數，導致 LuckyEventSystem 整合失效
+- **修復：** 刪除舊版 `_show_lucky_banner`（引用 `_lucky_banner` 節點的那個）
+- **教訓：** 重構時要搜尋所有同名函數，確認只有一個定義
+
+## 87. Lucky 系統架構演進（DAY-292 → DAY-299）
+- **DAY-292：** 每個 Lucky 系統有獨立的 Panel 腳本（LuckyChainLightningPanel.gd 等）
+- **DAY-298：** 重構為 LuckyEventSystem.gd 統一管理，BaseLuckyPanel.gd 作為基礎類別
+- **優點：** 減少腳本數量（20 個 Panel → 1 個 LuckyEventSystem），統一視覺風格
+- **LUCKY_CONFIGS 字典：** 每個 Lucky 系統的視覺主題（icon/title/color/bg_color/flash_color/shake/flash_times）
+- **API：** `show_lucky_banner(key, msg)` / `show_banner(msg, color)` / `update_indicator(title, value, bar_pct, color)` / `hide_indicator()` / `show_settle(lines)` / `fullscreen_flash(color, times)`
+- **教訓：** 超過 20 個同類型腳本時，必須建立基礎類別或統一管理器
+
+## 88. 目標物精靈圖完整性確認（DAY-299）
+- **T001-T006：** 基礎目標物 ✅
+- **T101-T105：** 特殊目標物 ✅
+- **T106-T125：** 幸運特殊魚 ✅（全部存在）
+- **B001：** BOSS ✅
+- **確認方式：** `dir d:\Kiro\client\chiikawa-pixel\assets\sprites\targets\T*.png`
+- **教訓：** 每次新增目標物後，要確認精靈圖、TargetManager 映射、Server tables.go 三者一致
+
+## 89. Server Lucky Handler 命名規範（DAY-299）
+- **T106-T115：** `lucky_xxx_handler.go`，函數名 `tryLuckyXxx(g, playerID, killerName)`
+- **T116-T120：** `lucky_xxx_handler.go`，函數名 `g.luckyXxx.tryLuckyXxx(g, playerID, killerName)`（使用 manager 方法）
+- **T121-T125：** `lucky_xxx_handler.go`，函數名 `tryLuckyXxx(playerID, killerName)`（直接函數）
+- **注意：** T116-T120 的 handler 使用 struct 方法，T106-T115 和 T121-T125 使用包級函數
+- **教訓：** 新增 Lucky Handler 時要確認呼叫方式，在 game.go 的 switch case 中正確呼叫

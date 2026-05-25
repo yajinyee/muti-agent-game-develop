@@ -422,23 +422,6 @@ func _update_combo_display() -> void:
 		ScreenShake.add_trauma(0.2)
 	_last_combo = combo
 
-func _show_lucky_banner(text: String, color: Color, duration: float = 2.5) -> void:
-	if not is_instance_valid(_lucky_banner):
-		return
-	var lbl = _lucky_banner.get_node_or_null("BannerLabel")
-	if is_instance_valid(lbl):
-		lbl.text = text
-		lbl.modulate = color
-	_lucky_banner.visible = true
-	_lucky_banner.modulate.a = 1.0
-	var tween = create_tween()
-	tween.tween_interval(duration - 0.5)
-	tween.tween_property(_lucky_banner, "modulate:a", 0.0, 0.5)
-	tween.tween_callback(func():
-		if is_instance_valid(_lucky_banner):
-			_lucky_banner.visible = false
-	)
-
 func _on_lucky_chain_lightning(data: Dictionary) -> void:
 	var event = data.get("event", "")
 	var name = data.get("trigger_name", "玩家")
