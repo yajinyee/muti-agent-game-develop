@@ -4,14 +4,15 @@ package protocol
 
 // ── Client → Server ──────────────────────────────────────────
 const (
-	MsgAttack       = "attack"
-	MsgLock         = "lock"
-	MsgAutoToggle   = "auto_toggle"
-	MsgBetChange    = "bet_change"
-	MsgBonusClick   = "bonus_click"
-	MsgPing         = "ping"
-	MsgTriggerBoss  = "trigger_boss"
-	MsgTriggerBonus = "trigger_bonus"
+	MsgAttack            = "attack"
+	MsgLock              = "lock"
+	MsgAutoToggle        = "auto_toggle"
+	MsgBetChange         = "bet_change"
+	MsgBonusClick        = "bonus_click"
+	MsgPing              = "ping"
+	MsgTriggerBoss       = "trigger_boss"
+	MsgTriggerBonus      = "trigger_bonus"
+	MsgCollectGoldenCoin = "collect_golden_coin" // T122 黃金雨魚：收集黃金幣
 )
 
 // ── Server → Client ──────────────────────────────────────────
@@ -426,4 +427,9 @@ type LuckyLuckyWheelPayload struct {
 	SlotType    string  `json:"slot_type,omitempty"`    // "mult" | "aoe" | "jackpot"
 	SlotMult    float64 `json:"slot_mult,omitempty"`    // 倍率
 	Reward      int     `json:"reward,omitempty"`
+}
+
+// CollectGoldenCoinRequest T122 黃金雨魚：收集黃金幣請求
+type CollectGoldenCoinRequest struct {
+	CoinID int `json:"coin_id"`
 }

@@ -712,6 +712,9 @@ func _on_lucky_golden_rain(data: Dictionary) -> void:
 			_show_lucky_banner("🌧️💰 %s 觸發黃金雨！%d 個黃金幣！快去收集！" % [name, total], Color(1.0, 0.85, 0.0))
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 			ScreenShake.add_trauma(0.35)
+			# 在畫面上生成可點擊的黃金幣
+			var positions = data.get("coin_positions", [])
+			_spawn_golden_coins(positions)
 		"coin_collect":
 			var collected = data.get("collected_coins", 0)
 			_show_lucky_banner("💰 收集 %d 個黃金幣！" % collected, Color(1.0, 0.85, 0.0), 0.6)
@@ -730,6 +733,43 @@ func _on_lucky_golden_rain(data: Dictionary) -> void:
 			_show_lucky_banner("🌧️ 黃金雨結束！收集 %d 個，獎勵 %d！" % [collected, reward], Color(1.0, 0.85, 0.0))
 			if reward > 0:
 				_show_reward_popup(reward, float(collected) * 0.3)
+			_clear_golden_coins()
+
+var _golden_coins: Array = []
+
+func _spawn_golden_coins(positions: Array) -> void:
+	_clear_golden_coins()
+	for coin_data in positions:
+		var coin_id = coin_data.get("coin_id", 0)
+		var x = coin_data.get("x", 0.0)
+		var y = coin_data.get("y", 0.0)
+		var btn = Button.new()
+		btn.text = "💰"
+		btn.position = Vector2(x - 20, y - 20)
+		btn.size = Vector2(40, 40)
+		btn.z_index = 55
+		btn.add_theme_font_size_override("font_size", 20)
+		btn.set_meta("coin_id", coin_id)
+		btn.pressed.connect(func():
+			if is_instance_valid(btn):
+				NetworkManager.send_collect_golden_coin(btn.get_meta("coin_id"))
+				var tween = btn.create_tween()
+				tween.tween_property(btn, "scale", Vector2(2.0, 2.0), 0.1)
+				tween.parallel().tween_property(btn, "modulate:a", 0.0, 0.2)
+				tween.tween_callback(func(): if is_instance_valid(btn): btn.queue_free())
+		)
+		add_child(btn)
+		_golden_coins.append(btn)
+		# 進場動畫
+		btn.scale = Vector2.ZERO
+		var tween = btn.create_tween()
+		tween.tween_property(btn, "scale", Vector2(1.0, 1.0), 0.2).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
+
+func _clear_golden_coins() -> void:
+	for coin in _golden_coins:
+		if is_instance_valid(coin):
+			coin.queue_free()
+	_golden_coins.clear()
 
 func _on_lucky_freeze_bomb(data: Dictionary) -> void:
 	var event = data.get("event", "")

@@ -115,6 +115,9 @@ func send_trigger_boss() -> void:
 func send_trigger_bonus() -> void:
 	send("trigger_bonus", {})
 
+func send_collect_golden_coin(coin_id: int) -> void:
+	send("collect_golden_coin", {"coin_id": coin_id})
+
 func is_connected_to_server() -> bool:
 	return _connected
 

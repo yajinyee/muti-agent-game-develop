@@ -183,6 +183,12 @@ func (g *Game) HandleMessage(clientID string, msgType string, payload json.RawMe
 		g.triggerBoss()
 	case protocol.MsgTriggerBonus:
 		g.triggerBonus(clientID)
+	case protocol.MsgCollectGoldenCoin:
+		var req protocol.CollectGoldenCoinRequest
+		if err := json.Unmarshal(payload, &req); err != nil {
+			return
+		}
+		g.collectGoldenCoin(clientID, req.CoinID)
 	}
 }
 
