@@ -129,6 +129,12 @@ var Targets = []TargetDef{
 	{ID: "T111", Name: "幸運覺醒鳳凰魚", Type: TypeSpecial, Multiplier: 90, HP: 110, SpawnWeight: 4, Speed: 75, Lifetime: 14, LaborGain: 18, Behavior: BehaviorLinear, DiffFactor: 0.95},
 	// T112 幸運全場震盪魚：擊破後全場 HP -35%，觸發玩家 10 秒攻擊力 ×2.0
 	{ID: "T112", Name: "幸運全場震盪魚", Type: TypeSpecial, Multiplier: 75, HP: 95, SpawnWeight: 5, Speed: 65, Lifetime: 13, LaborGain: 15, Behavior: BehaviorLinear, DiffFactor: 0.9},
+	// T113 幸運鑽頭魚雷魚：擊破後發射鑽頭魚雷穿透最多 5 個目標（HP -60%），終點爆炸 AOE r=180px
+	{ID: "T113", Name: "幸運鑽頭魚雷魚", Type: TypeSpecial, Multiplier: 85, HP: 105, SpawnWeight: 4, Speed: 80, Lifetime: 13, LaborGain: 17, Behavior: BehaviorLinear, DiffFactor: 0.95},
+	// T114 幸運時間凍結魚：擊破後全場凍結 8 秒（傷害 ×1.8），凍結結束 HP -25%
+	{ID: "T114", Name: "幸運時間凍結魚", Type: TypeSpecial, Multiplier: 95, HP: 115, SpawnWeight: 3, Speed: 55, Lifetime: 15, LaborGain: 19, Behavior: BehaviorLinear, DiffFactor: 0.95},
+	// T115 幸運連鎖爆炸魚：擊破後 12 秒連鎖爆炸模式，每次擊破觸發 AOE r=120px HP -30%
+	{ID: "T115", Name: "幸運連鎖爆炸魚", Type: TypeSpecial, Multiplier: 80, HP: 100, SpawnWeight: 4, Speed: 70, Lifetime: 12, LaborGain: 16, Behavior: BehaviorLinear, DiffFactor: 0.9},
 
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},

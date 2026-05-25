@@ -57,6 +57,10 @@ func _ready() -> void:
 	# DAY-293 新增幸運特殊魚訊號連接
 	GameManager.lucky_awakened_phoenix.connect(_on_lucky_awakened_phoenix)
 	GameManager.lucky_shockwave_bomb.connect(_on_lucky_shockwave_bomb)
+	# DAY-294 新增幸運特殊魚訊號連接
+	GameManager.lucky_drill_torpedo.connect(_on_lucky_drill_torpedo)
+	GameManager.lucky_time_freeze.connect(_on_lucky_time_freeze)
+	GameManager.lucky_chain_explosion.connect(_on_lucky_chain_explosion)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -482,3 +486,69 @@ func _on_lucky_shockwave_bomb(data: Dictionary) -> void:
 			_show_lucky_banner("💥 超級震盪加成結束", Color(0.7, 0.7, 0.7), 1.5)
 		"power_end":
 			_show_lucky_banner("💥 %s 的震盪強化結束" % name, Color(0.6, 0.6, 0.6), 1.5)
+
+# ── DAY-294 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_drill_torpedo(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("🚀 %s 發射鑽頭魚雷！穿透最多 5 個目標！" % name, Color(1.0, 0.55, 0.15))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"penetrate":
+			var cnt = data.get("penetrate_cnt", 0)
+			var mult = data.get("accum_mult", 1.0)
+			_show_lucky_banner("🚀 穿透 %d 個！累積 ×%.1f" % [cnt, mult], Color(1.0, 0.7, 0.3), 0.8)
+		"explode":
+			_show_lucky_banner("💥 魚雷終點爆炸！AOE 傷害！", Color(1.0, 0.4, 0.1))
+			ScreenShake.add_trauma(0.55)
+		"perfect":
+			_show_lucky_banner("🚀💥 完美穿透！%s 全服 ×2.2 加成 6 秒！" % name, Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.65)
+		"perfect_end":
+			_show_lucky_banner("🚀 完美穿透加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_time_freeze(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"freeze_start":
+			_show_lucky_banner("❄️ %s 觸發時間凍結！全場凍結 8 秒！傷害 ×1.8！" % name, Color(0.4, 0.85, 1.0))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"freeze_end":
+			_show_lucky_banner("❄️💥 冰裂爆炸！全場 HP -25%！", Color(0.6, 0.9, 1.0))
+			ScreenShake.add_trauma(0.5)
+		"perfect_freeze":
+			var kills = data.get("kill_count", 0)
+			_show_lucky_banner("❄️✨ 完美凍結！%s 擊破 %d 條！全服 ×2.0 加成 5 秒！" % [name, kills], Color(0.0, 0.9, 1.0), 3.5)
+			ScreenShake.add_trauma(0.6)
+		"perfect_end":
+			_show_lucky_banner("❄️ 完美凍結加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_chain_explosion(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"chain_start":
+			_show_lucky_banner("💥 %s 觸發連鎖爆炸！12 秒連鎖模式！" % name, Color(0.9, 0.2, 0.15))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"chain_explode":
+			var cnt = data.get("chain_count", 0)
+			var mult = data.get("accum_mult", 1.0)
+			_show_lucky_banner("💥 連鎖 %d！累積 ×%.1f" % [cnt, mult], Color(1.0, 0.5, 0.2), 0.7)
+			ScreenShake.add_trauma(0.25)
+		"chain_burst":
+			_show_lucky_banner("💥🔥 連鎖爆發！%s 全服 ×2.5 加成 6 秒！" % name, Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.7)
+		"burst_end":
+			_show_lucky_banner("💥 連鎖爆發加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"chain_end":
+			var cnt = data.get("chain_count", 0)
+			var reward = data.get("total_reward", 0)
+			_show_lucky_banner("💥 連鎖結束！%d 次連鎖，獎勵 %d！" % [cnt, reward], Color(1.0, 0.6, 0.3))
+			if reward > 0:
+				_show_reward_popup(reward, float(cnt) * 0.5)

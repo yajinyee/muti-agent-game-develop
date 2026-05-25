@@ -37,6 +37,9 @@ const (
 	MsgLuckyThunderLobster  = "lucky_thunder_lobster"  // T110 雷霆龍蝦
 	MsgLuckyAwakenedPhoenix = "lucky_awakened_phoenix" // T111 覺醒鳳凰
 	MsgLuckyShockwaveBomb   = "lucky_shockwave_bomb"   // T112 全場震盪
+	MsgLuckyDrillTorpedo    = "lucky_drill_torpedo"    // T113 鑽頭魚雷
+	MsgLuckyTimeFreeze      = "lucky_time_freeze"      // T114 時間凍結
+	MsgLuckyChainExplosion  = "lucky_chain_explosion"  // T115 連鎖爆炸
 )
 
 // ── Envelope ─────────────────────────────────────────────────
@@ -244,4 +247,40 @@ type LuckyShockwaveBombPayload struct {
 	TriggerName string `json:"trigger_name"`
 	HitCount    int    `json:"hit_count,omitempty"`    // 震盪命中目標數
 	TotalReward int    `json:"total_reward,omitempty"`
+}
+
+// LuckyDrillTorpedoPayload T113 鑽頭魚雷
+type LuckyDrillTorpedoPayload struct {
+	Event        string   `json:"event"`          // "trigger" | "penetrate" | "explode" | "perfect" | "perfect_end"
+	TriggerID    string   `json:"trigger_id"`
+	TriggerName  string   `json:"trigger_name"`
+	HitTargets   []string `json:"hit_targets,omitempty"`
+	PenetrateCnt int      `json:"penetrate_cnt,omitempty"`
+	ExplodeX     float64  `json:"explode_x,omitempty"`
+	ExplodeY     float64  `json:"explode_y,omitempty"`
+	AccumMult    float64  `json:"accum_mult,omitempty"`
+	TotalReward  int      `json:"total_reward,omitempty"`
+}
+
+// LuckyTimeFreezePayload T114 時間凍結
+type LuckyTimeFreezePayload struct {
+	Event       string  `json:"event"`        // "freeze_start" | "freeze_end" | "perfect_freeze" | "perfect_end"
+	TriggerID   string  `json:"trigger_id"`
+	TriggerName string  `json:"trigger_name"`
+	Duration    float64 `json:"duration,omitempty"`
+	KillCount   int     `json:"kill_count,omitempty"`
+}
+
+// LuckyChainExplosionPayload T115 連鎖爆炸
+type LuckyChainExplosionPayload struct {
+	Event       string   `json:"event"`        // "chain_start" | "chain_explode" | "chain_burst" | "burst_end" | "chain_end"
+	TriggerID   string   `json:"trigger_id"`
+	TriggerName string   `json:"trigger_name"`
+	Duration    float64  `json:"duration,omitempty"`
+	ExplodeX    float64  `json:"explode_x,omitempty"`
+	ExplodeY    float64  `json:"explode_y,omitempty"`
+	HitTargets  []string `json:"hit_targets,omitempty"`
+	ChainCount  int      `json:"chain_count,omitempty"`
+	AccumMult   float64  `json:"accum_mult,omitempty"`
+	TotalReward int      `json:"total_reward,omitempty"`
 }

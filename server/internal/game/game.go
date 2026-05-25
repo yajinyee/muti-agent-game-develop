@@ -54,6 +54,9 @@ type Game struct {
 	luckyThunderLobster  *luckyThunderLobsterManager
 	luckyAwakenedPhoenix *luckyAwakenedPhoenixManager
 	luckyShockwaveBomb   *luckyShockwaveBombManager
+	luckyDrillTorpedo    *luckyDrillTorpedoManager
+	luckyTimeFreeze      *luckyTimeFreezeManager
+	luckyChainExplosion  *luckyChainExplosionManager
 
 	lastTick time.Time
 }
@@ -76,6 +79,9 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyThunderLobster:  newLuckyThunderLobsterManager(),
 		luckyAwakenedPhoenix: newLuckyAwakenedPhoenixManager(),
 		luckyShockwaveBomb:   newLuckyShockwaveBombManager(),
+		luckyDrillTorpedo:    newLuckyDrillTorpedoManager(),
+		luckyTimeFreeze:      newLuckyTimeFreezeManager(),
+		luckyChainExplosion:  newLuckyChainExplosionManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -380,9 +386,21 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.tryLuckyAwakenedPhoenix(playerID, killerName)
 			case isLuckyShockwaveBombFish(t.Def.ID):
 				g.tryLuckyShockwaveBomb(playerID, killerName)
+			case isLuckyDrillTorpedoFish(t.Def.ID):
+				g.tryLuckyDrillTorpedo(playerID, killerName)
+			case isLuckyTimeFreezeFish(t.Def.ID):
+				g.tryLuckyTimeFreeze(playerID, killerName)
+			case isLuckyChainExplosionFish(t.Def.ID):
+				g.tryLuckyChainExplosion(playerID, killerName)
 			}
-
-			// 覺醒鳳凰 Power Up 消耗（命中任何目標時）
+			// 連鎖爆炸模式：每次擊破觸發 AOE
+			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
+				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
+			}
+			// 凍結期間擊破計數
+			if g.luckyTimeFreeze.isTimeFreezeActive() {
+				g.luckyTimeFreeze.notifyFreezeKill(playerID)
+			}
 			if g.luckyAwakenedPhoenix.isAwakenedPhoenixActive(playerID) {
 				powerUpMult, powerReward, isDone := g.luckyAwakenedPhoenix.consumeAwakenedPhoenixShot(playerID, true, bet.BetCost)
 				if powerReward > 0 {

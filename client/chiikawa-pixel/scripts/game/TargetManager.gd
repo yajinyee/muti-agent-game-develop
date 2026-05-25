@@ -25,6 +25,10 @@ const TARGET_SPRITES = {
 	# DAY-293 新增特殊目標
 	"T111": "res://assets/sprites/targets/T111_awakened_phoenix.png",
 	"T112": "res://assets/sprites/targets/T112_shockwave_bomb.png",
+	# DAY-294 新增特殊目標
+	"T113": "res://assets/sprites/targets/T113_drill_torpedo.png",
+	"T114": "res://assets/sprites/targets/T114_time_freeze.png",
+	"T115": "res://assets/sprites/targets/T115_chain_explosion.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -50,6 +54,10 @@ const TARGET_COLORS = {
 	# DAY-293 新增特殊目標備用顏色
 	"T111": Color(1.0, 0.42, 0.21), # 火橙覺醒鳳凰
 	"T112": Color(1.0, 0.27, 0.0),  # 深橙全場震盪
+	# DAY-294 新增特殊目標備用顏色
+	"T113": Color(1.0, 0.55, 0.15), # 橙色鑽頭魚雷
+	"T114": Color(0.4, 0.85, 1.0),  # 冰藍時間凍結
+	"T115": Color(0.9, 0.2, 0.15),  # 深紅連鎖爆炸
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D

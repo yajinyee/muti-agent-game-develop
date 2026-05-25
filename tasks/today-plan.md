@@ -2,33 +2,34 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-25（DAY-293）
-**整體目標**：T111-T112 覺醒鳳凰+全場震盪幸運魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-25（DAY-294）
+**整體目標**：T113-T115 鑽頭魚雷+時間凍結+連鎖爆炸幸運魚系統 ✅ → 繼續自主推進
 
 ---
 
 ## 今日任務清單
 
-### ✅ DAY-293 啟動檢查
+### ✅ DAY-294 啟動檢查
 
 - [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
 - [x] go vet ./... 確認無警告（VET OK）
-- [x] 上網研究業界最新機制（Royal Fishing Jili Rainbow Phoenix + Classic Arcade Fishing shockwave）
+- [x] 上網研究業界最新機制（Royal Fishing Drill Torpedo + Fishing Fortune Time Freeze + Classic Arcade Chain Explosion）
 
-### ✅ DAY-293 T111-T112 幸運特殊魚系統（P1）
+### ✅ DAY-294 T113-T115 幸運特殊魚系統（P1）
 
-- [x] `data/tables.go`：新增 T111/T112 目標物定義
-- [x] `protocol/messages.go`：新增 MsgLuckyAwakenedPhoenix/MsgLuckyShockwaveBomb + Payload
-- [x] `lucky_awakened_phoenix_handler.go`：T111 覺醒模式（5次Power Up 6x-10x/完美覺醒全服×2.0）
-- [x] `lucky_shockwave_bomb_handler.go`：T112 全場震盪（HP-35%/攻擊力×2.0/超級震盪全服×1.8）
-- [x] `game.go`：整合 2 個新 Lucky manager + handleKill 觸發分支 + 覺醒鳳凰 Power Up 消耗邏輯
-- [x] `GameManager.gd`：新增 lucky_awakened_phoenix/lucky_shockwave_bomb 訊號
-- [x] `TargetManager.gd`：新增 T111/T112 Sprite 映射和備用顏色
-- [x] `HUD.gd`：新增 _on_lucky_awakened_phoenix/_on_lucky_shockwave_bomb 事件處理
-- [x] `generate_t111_t112_sprites.py`：T111/T112 精靈圖（92.5%/91.5% 非透明像素）
-- [x] build/vet 全部通過，GitHub 推送完成（commit: 198af86）
+- [x] `data/tables.go`：新增 T113/T114/T115 目標物定義
+- [x] `protocol/messages.go`：新增 MsgLuckyDrillTorpedo/MsgLuckyTimeFreeze/MsgLuckyChainExplosion + Payload
+- [x] `lucky_drill_torpedo_handler.go`：T113 鑽頭魚雷（穿透 5 個/終點爆炸/完美穿透全服 ×2.2）
+- [x] `lucky_time_freeze_handler.go`：T114 時間凍結（全場凍結 8 秒/傷害 ×1.8/完美凍結全服 ×2.0）
+- [x] `lucky_chain_explosion_handler.go`：T115 連鎖爆炸（12 秒模式/每次擊破 AOE/連鎖爆發全服 ×2.5）
+- [x] `game.go`：整合 3 個新 Lucky manager + handleKill 觸發分支 + 凍結計數 + 連鎖爆炸通知
+- [x] `GameManager.gd`：新增 lucky_drill_torpedo/lucky_time_freeze/lucky_chain_explosion 訊號
+- [x] `TargetManager.gd`：新增 T113-T115 Sprite 映射和備用顏色
+- [x] `HUD.gd`：新增 3 個 Lucky 事件處理 + 訊號連接
+- [x] `generate_t113_t115_sprites.py`：T113/T114/T115 精靈圖（37.1%/41.0%/40.9% 非透明像素）
+- [x] build/vet 全部通過
 
-### 🔄 DAY-294 下一步（自主觸發）
+### 🔄 DAY-295 下一步（自主觸發）
 
 - [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
 - [ ] 考慮新增 BOSS Phase 2 系統（BOSS 血量 < 50% 時進入狂暴模式）
@@ -40,11 +41,11 @@
 
 > **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
 
-- 完成度（誠實）：**基礎遊戲循環完整，Lucky 系統 7 個，持續擴充中**
-- 美術質量：**62/100**（精靈圖程式生成，品質中等，T111/T112 非透明像素 92%+ 品質良好）
+- 完成度（誠實）：**基礎遊戲循環完整，Lucky 系統 10 個，持續擴充中**
+- 美術質量：**63/100**（精靈圖程式生成，品質中等，T113-T115 非透明像素 37-41%）
 - 規格一致性：**基礎功能一致，進階功能持續補充**
-- 特殊目標：**19 種（T001-T006 + T101-T112 + B001）**
-- 最新功能：**T111 覺醒鳳凰（Power Up 6x-10x）+ T112 全場震盪（HP-35% + 攻擊力×2.0）**
+- 特殊目標：**22 種（T001-T006 + T101-T115 + B001）**
+- 最新功能：**T113 鑽頭魚雷（穿透+爆炸）+ T114 時間凍結（全場凍結 8 秒）+ T115 連鎖爆炸（12 秒連鎖模式）**
 - 最高倍率機制：**T109 黃金龍魚輪盤最高 350x**
 
 ---

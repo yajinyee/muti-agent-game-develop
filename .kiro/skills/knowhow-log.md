@@ -3759,3 +3759,30 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **發現：** Lucky handler 的 goroutine 需要在 g.mu.Lock() 外執行（避免死鎖），但需要在 Lock 內讀取玩家資料
 - **解決：** 先在 Lock 內讀取必要資料（betCost、playerID），解鎖後在 goroutine 中執行耗時操作
 - **教訓：** goroutine 中需要 g.mu.Lock() 時，要確保不會和外層 Lock 形成死鎖
+
+## 83. 鑽頭魚雷穿透邏輯設計（2026-05-25 DAY-294）
+- **業界依據：** Royal Fishing Jili「Drill Torpedo — orange mechanical lobster shoots penetrating drill through multiple fish, self-explodes at end of trajectory」
+- **設計要點：** 穿透路徑按 X 座標排序（模擬直線穿透），隨機選左→右或右→左方向
+- **傷害分層：** 穿透 HP -60%（強力但不必死）+ 終點爆炸 AOE HP -40%（r=180px）
+- **倍率設計：** 每次穿透 +1.2x，最高 ×6.0；完美穿透（≥4個）觸發全服 ×2.2
+- **教訓：** 穿透類機制要有「路徑感」，按座標排序比隨機選更有方向感
+
+## 84. 時間凍結機制的狀態管理（2026-05-25 DAY-294）
+- **設計要點：** `isFrozen` + `freezeExpires` 雙重判斷，避免 goroutine 競態
+- **傷害倍率：** 凍結期間 `getFreezeDamageMult()` 返回 1.8，供 handleKill 使用
+- **凍結結束：** goroutine 8 秒後執行冰裂爆炸（全場 HP -25%）+ 完美凍結判定
+- **完美凍結：** 凍結期間擊破 ≥ 4 個，用 `freezeKills` map 追蹤每個玩家的擊破數
+- **教訓：** 凍結期間的傷害倍率要在 handleKill 中套用，不是在 TryKill 中，因為 TryKill 只管擊破機率
+
+## 85. 連鎖爆炸模式的會話管理（2026-05-25 DAY-294）
+- **設計要點：** `activeSessions` map 管理每個玩家的連鎖爆炸會話，支援多玩家同時觸發
+- **AOE 觸發時機：** 在 `notifyChainExplosionKill` 中，每次玩家擊破目標時觸發 AOE
+- **連鎖爆發：** 連鎖計數 ≥ 6 且 `burstBoost == nil` 時觸發（防止重複觸發）
+- **超時結算：** goroutine 12 秒後自動結算，設 `settled = true` 防止重複結算
+- **教訓：** 多玩家同時觸發同類 Lucky 系統時，要用 map 管理各自的會話，不能用單一全局狀態
+
+## 86. Go goroutine 中的 mutex 使用模式（2026-05-25 DAY-294）
+- **問題：** goroutine 中需要讀取 game 狀態，但 game.mu 是 RWMutex
+- **正確模式：** goroutine 開始時 `g.mu.Lock()`，操作完後 `g.mu.Unlock()`，不要用 defer（因為中間有 time.Sleep）
+- **錯誤模式：** 在 goroutine 中用 `defer g.mu.Unlock()`，然後 `time.Sleep`，這會讓 mutex 鎖住整個 sleep 期間
+- **教訓：** goroutine 中有 time.Sleep 的情況，必須手動管理 Lock/Unlock，不能用 defer

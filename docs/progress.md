@@ -1,14 +1,24 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-25（DAY-293 T111-T112 覺醒鳳凰+全場震盪幸運魚系統）
+## 最後更新：2026-05-25（DAY-294 T113-T115 鑽頭魚雷+時間凍結+連鎖爆炸幸運魚系統）
 
 ## 自我評估（誠實版）
-- **Server 實際目標物數量：** 19 種（T001-T006 基礎 + T101-T112 特殊 + B001 BOSS）
-- **Lucky 系統數量：** 7 個（連鎖閃電/螃蟹魚雷/渦旋海葵/黃金龍魚輪盤/雷霆龍蝦/覺醒鳳凰/全場震盪）
+- **Server 實際目標物數量：** 22 種（T001-T006 基礎 + T101-T115 特殊 + B001 BOSS）
+- **Lucky 系統數量：** 10 個（連鎖閃電/螃蟹魚雷/渦旋海葵/黃金龍魚輪盤/雷霆龍蝦/覺醒鳳凰/全場震盪/鑽頭魚雷/時間凍結/連鎖爆炸）
 - **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
 - **Client 腳本：** GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake
-- **美術資產：** T001-T112 精靈圖 + B001 BOSS + 3 個角色 idle 圖
-- **完成度（誠實）：** 基礎遊戲循環完整，Lucky 系統 7 個，持續擴充中
+- **美術資產：** T001-T115 精靈圖 + B001 BOSS + 3 個角色 idle 圖
+- **完成度（誠實）：** 基礎遊戲循環完整，Lucky 系統 10 個，持續擴充中
+
+## DAY-294 更新（2026-05-25）：T113-T115 鑽頭魚雷+時間凍結+連鎖爆炸幸運魚系統 ✅
+- **業界依據：** Royal Fishing Jili「Drill Torpedo — penetrating drill through multiple fish, self-explodes」+ Fishing Fortune 2026「Time Freeze — all fish freeze for 8 seconds」+ Classic Arcade Fishing「chain explosion cascade」
+- **T113 幸運鑽頭魚雷魚（85x）：** 擊破後發射鑽頭魚雷穿透最多 5 個目標（HP -60%）；終點爆炸 AOE r=180px（HP -40%）；穿透數 × 1.2 累積倍率（最高 ×6.0）；穿透 ≥ 4 個 → 完美穿透：全服 ×2.2 加成 6 秒；個人冷卻 18 秒；全服冷卻 30 秒
+- **T114 幸運時間凍結魚（95x）：** 擊破後全場凍結 8 秒（傷害 ×1.8）；凍結結束 HP -25%（冰裂爆炸）；凍結期間擊破 ≥ 4 個 → 完美凍結：全服 ×2.0 加成 5 秒；個人冷卻 20 秒；全服冷卻 35 秒
+- **T115 幸運連鎖爆炸魚（80x）：** 擊破後 12 秒連鎖爆炸模式；每次擊破觸發 AOE r=120px（HP -30%）；連鎖計數 +1，倍率 +0.5x（最高 ×8.0）；連鎖 ≥ 6 次 → 連鎖爆發：全服 ×2.5 加成 6 秒；個人冷卻 22 秒；全服冷卻 38 秒
+- **Server：** 3 個獨立 handler 檔案 + game.go 整合 + protocol 新增 3 個訊息類型 + tables.go 新增 3 個目標
+- **Client：** GameManager 新增 3 個訊號 + TargetManager 新增 T113-T115 映射 + HUD 新增 3 個事件處理
+- **美術：** T113 精靈圖（37.1% 非透明像素）+ T114 精靈圖（41.0%）+ T115 精靈圖（40.9%）
+- **build/vet 全部通過（零錯誤零警告）**
 
 ## DAY-293 更新（2026-05-25）：T111-T112 覺醒鳳凰+全場震盪幸運魚系統 ✅
 - **業界依據：** Royal Fishing Jili「Rainbow Phoenix Power Up 6x-10x boost」+ Classic Arcade Fishing「explosion rate upgrade + shockwave bomb」
