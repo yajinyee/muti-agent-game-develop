@@ -4034,3 +4034,40 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
 1. 在 Godot 中驗證 Lucky Panel 腳本是否正確載入
 2. 補齊 TargetManager.gd 中 T106-T125 的 Lucky Panel 整合
 3. 考慮 BOSS Phase 2 系統（血量 < 50% 進入狂暴模式）
+
+## 92. BOSS Phase 2 系統設計（DAY-300，2026-05-26）
+
+### 設計
+- Server：`bossPhase2 bool` 欄位追蹤狀態，HP < 50% 時廣播 `phase_change`
+- 兩個觸發路徑：擊破時（isKill=true）和未擊破時（HP 更新）都要檢查
+- `spawnBoss()` 重置 `bossPhase2 = false`，確保每次 BOSS 戰都能觸發
+
+### Client 視覺升級
+- 5次強烈閃爍（深紅色 4.0,0.2,0.2 → 暗紅 0.5,0.1,0.1）
+- 放大到 1.2x（ELASTIC 彈性動畫，0.4s）
+- 持續紅色調（1.8,0.4,0.4）
+- 新增 PHASE 2 脈動標籤（左上角，紅色，0.3s 脈動）
+- 觸發 BOSS_RAGE BGM
+- ScreenShake trauma 0.8
+
+### 教訓
+- BOSS Phase 2 要在兩個路徑都檢查（擊破 + 未擊破），否則高 HP 的 BOSS 可能在一擊擊破時跳過 Phase 2
+- `bossPhase2` 欄位要在 `spawnBoss()` 重置，不能在 `handleBossKill()` 重置（那時 BOSS 已死）
+
+## 93. 玩家顯示名稱系統（DAY-300，2026-05-26）
+
+### 設計
+- Player 新增 `DisplayName string` 欄位
+- `NewPlayer()` 預設顯示名稱為 ID 前 8 碼
+- `GetDisplayName()` 方法：優先用 DisplayName，備用 ID 前 8 碼
+- `handleSetDisplayName()` 處理 `set_display_name` 訊息，限制 20 字元
+- Lucky 系統廣播時用 `GetDisplayName()` 而非 `p.ID`
+
+### 效果
+- 玩家可以設定自己的顯示名稱
+- Lucky 系統廣播時顯示「玩家名稱 觸發了 XXX！」而非 ID
+- 增加社交感和個人化體驗
+
+### 教訓
+- 玩家名稱要限制長度（20字元），防止過長名稱破壞 UI
+- 名稱不能為空，要有備用值（ID 前 8 碼）
