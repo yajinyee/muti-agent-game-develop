@@ -1,16 +1,28 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-25（DAY-294 T113-T115 鑽頭魚雷+時間凍結+連鎖爆炸幸運魚系統）
+## 最後更新：2026-05-25（DAY-295 T116-T120 千龍王輪盤+龍力散彈+火箭砲+深海漩渦+吸血鬼倍率幸運魚系統）
 
 ## 自我評估（誠實版）
-- **Server 實際目標物數量：** 22 種（T001-T006 基礎 + T101-T115 特殊 + B001 BOSS）
-- **Lucky 系統數量：** 10 個（連鎖閃電/螃蟹魚雷/渦旋海葵/黃金龍魚輪盤/雷霆龍蝦/覺醒鳳凰/全場震盪/鑽頭魚雷/時間凍結/連鎖爆炸）
+- **Server 實際目標物數量：** 27 種（T001-T006 基礎 + T101-T120 特殊 + B001 BOSS）
+- **Lucky 系統數量：** 15 個（T106-T120）
 - **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
 - **Client 腳本：** GameManager/TargetManager/HUD/Cannon/NetworkManager/AudioManager/HitEffect/ScreenShake
-- **美術資產：** T001-T115 精靈圖 + B001 BOSS + 3 個角色 idle 圖
-- **完成度（誠實）：** 基礎遊戲循環完整，Lucky 系統 10 個，持續擴充中
+- **美術資產：** T001-T120 精靈圖 + B001 BOSS + 3 個角色 idle 圖
+- **完成度（誠實）：** 基礎遊戲循環完整，Lucky 系統 15 個，持續擴充中
 
-## DAY-294 更新（2026-05-25）：T113-T115 鑽頭魚雷+時間凍結+連鎖爆炸幸運魚系統 ✅
+## DAY-295 更新（2026-05-25）：T116-T120 五個新幸運魚系統 ✅
+- **業界依據：** Royal Fishing Jili「ChainLong King 1000x Mega Win」+ Jili 2026「Dragon Power Shotgun 8-direction」+ Jili 2026「Rocket Cannon 3 AOE」+ Jili 2026「Free Deep Sea Whirlpool」+ Jili 2026「Vampire multiplier mode ×5」
+- **T116 幸運千龍王輪盤魚（120-1000x）：** 擊破後觸發千龍王輪盤（內環 2-25x × 外環 5-50x = 最高 1000x）；≥500x 觸發 Mega Win 全服演出；個人冷卻 28 秒；全服冷卻 45 秒
+- **T117 幸運龍力散彈魚（120x）：** 擊破後 8 方向散彈攻擊（每方向最多 2 個目標 HP -40%）；個人冷卻 20 秒；全服冷卻 32 秒
+- **T118 幸運火箭砲魚（130x）：** 擊破後 3 枚火箭砲依序發射（每枚 AOE r=200px HP -50%）；個人冷卻 22 秒；全服冷卻 36 秒
+- **T119 幸運深海漩渦魚（150x）：** 擊破後 6 秒深海漩渦（每秒 HP -8%）；個人冷卻 25 秒；全服冷卻 40 秒
+- **T120 幸運吸血鬼魚（110x）：** 擊破後 20 秒吸血模式；每次擊破吸收 +0.5x（最高 ×5.0）；吸收 ≥8 次 → 進入 10 秒倍率模式；個人冷卻 18 秒；全服冷卻 28 秒
+- **Server：** 5 個獨立 handler 檔案 + game.go 整合 + protocol 新增 5 個訊息類型 + tables.go 新增 5 個目標 + ChainLongKing 輪盤權重
+- **Client：** GameManager 新增 5 個訊號 + TargetManager 新增 T116-T120 映射 + HUD 新增 5 個事件處理
+- **美術：** T116 精靈圖（56.3%）+ T117（33.9%）+ T118（30.2%）+ T119（56.2%）+ T120（46.1%）非透明像素
+- **build/vet 全部通過（零錯誤零警告）**
+
+
 - **業界依據：** Royal Fishing Jili「Drill Torpedo — penetrating drill through multiple fish, self-explodes」+ Fishing Fortune 2026「Time Freeze — all fish freeze for 8 seconds」+ Classic Arcade Fishing「chain explosion cascade」
 - **T113 幸運鑽頭魚雷魚（85x）：** 擊破後發射鑽頭魚雷穿透最多 5 個目標（HP -60%）；終點爆炸 AOE r=180px（HP -40%）；穿透數 × 1.2 累積倍率（最高 ×6.0）；穿透 ≥ 4 個 → 完美穿透：全服 ×2.2 加成 6 秒；個人冷卻 18 秒；全服冷卻 30 秒
 - **T114 幸運時間凍結魚（95x）：** 擊破後全場凍結 8 秒（傷害 ×1.8）；凍結結束 HP -25%（冰裂爆炸）；凍結期間擊破 ≥ 4 個 → 完美凍結：全服 ×2.0 加成 5 秒；個人冷卻 20 秒；全服冷卻 35 秒

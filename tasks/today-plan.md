@@ -2,8 +2,56 @@
 
 > 由 Game Director Agent 維護。每日開始時更新，結束時標記完成狀態。
 
-**日期**：2026-05-25（DAY-294）
-**整體目標**：T113-T115 鑽頭魚雷+時間凍結+連鎖爆炸幸運魚系統 ✅ → 繼續自主推進
+**日期**：2026-05-25（DAY-295）
+**整體目標**：T116-T120 千龍王輪盤+龍力散彈+火箭砲+深海漩渦+吸血鬼倍率幸運魚系統 ✅
+
+---
+
+## 今日任務清單
+
+### ✅ DAY-295 啟動檢查
+
+- [x] go build ./... 確認 Server 編譯狀態（BUILD OK）
+- [x] go vet ./... 確認無警告（VET OK）
+- [x] 上網研究業界最新機制（Royal Fishing Jili ChainLong King 1000x + Dragon Power Shotgun + Rocket Cannon + Deep Sea Whirlpool + Vampire Multiplier）
+
+### ✅ DAY-295 T116-T120 幸運特殊魚系統（P1）
+
+- [x] `data/tables.go`：新增 T116-T120 目標物定義 + ChainLongKing 輪盤權重
+- [x] `protocol/messages.go`：新增 5 個 Lucky 訊息類型 + 5 個 Payload 定義
+- [x] `lucky_chain_long_king_handler.go`：T116 千龍王輪盤（雙環最高 1000x，≥500x Mega Win）
+- [x] `lucky_dragon_shotgun_handler.go`：T117 龍力散彈（8 方向 HP -40%）
+- [x] `lucky_rocket_cannon_handler.go`：T118 火箭砲（3 枚 AOE r=200px HP -50%）
+- [x] `lucky_deep_whirlpool_handler.go`：T119 深海漩渦（6 秒每秒 HP -8%）
+- [x] `lucky_vampire_mult_handler.go`：T120 吸血鬼倍率（每次擊破 +0.5x，最高 ×5 模式）
+- [x] `game.go`：整合 5 個新 Lucky manager + handleKill 觸發分支 + 吸血鬼倍率通知
+- [x] `GameManager.gd`：新增 5 個 Lucky 訊號
+- [x] `TargetManager.gd`：新增 T116-T120 Sprite 映射和備用顏色
+- [x] `HUD.gd`：新增 5 個 Lucky 事件處理 + 訊號連接
+- [x] `generate_t116_t120_sprites.py`：T116-T120 精靈圖（56.3%/33.9%/30.2%/56.2%/46.1% 非透明像素）
+- [x] build/vet 全部通過（零錯誤零警告）
+- [x] knowhow-log 更新（Python 多版本衝突 + Go handler 設計模式 + 業界機制整理）
+
+### 🔄 DAY-296 下一步（自主觸發）
+
+- [ ] 繼續研究業界最新功能，找出下一個最值得實作的機制
+- [ ] 考慮新增 BOSS Phase 2 系統（BOSS 血量 < 50% 時進入狂暴模式）
+- [ ] 考慮優化美術品質（T116-T120 精靈圖非透明像素偏低，可提升）
+
+---
+
+## 每日自問（Game Director 必填）
+
+> **「這遊戲完成度多少？美術質量滿分100分給幾分？玩法跟規格書呈現有100%一致了嗎？」**
+
+- 完成度（誠實）：**基礎遊戲循環完整，Lucky 系統 15 個，持續擴充中**
+- 美術質量：**65/100**（精靈圖程式生成，品質中等，T116-T120 非透明像素 30-56%）
+- 規格一致性：**基礎功能一致，進階功能持續補充**
+- 特殊目標：**27 種（T001-T006 + T101-T120 + B001）**
+- 最新功能：**T116 千龍王輪盤（最高 1000x Mega Win）+ T117 龍力散彈 + T118 火箭砲 + T119 深海漩渦 + T120 吸血鬼倍率**
+- 最高倍率機制：**T116 千龍王輪盤最高 1000x（全遊戲最高）**
+
+
 
 ---
 

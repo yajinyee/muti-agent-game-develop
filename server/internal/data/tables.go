@@ -136,6 +136,18 @@ var Targets = []TargetDef{
 	// T115 幸運連鎖爆炸魚：擊破後 12 秒連鎖爆炸模式，每次擊破觸發 AOE r=120px HP -30%
 	{ID: "T115", Name: "幸運連鎖爆炸魚", Type: TypeSpecial, Multiplier: 80, HP: 100, SpawnWeight: 4, Speed: 70, Lifetime: 12, LaborGain: 16, Behavior: BehaviorLinear, DiffFactor: 0.9},
 
+	// ── DAY-295 新增特殊目標（120x-200x）────────────────────
+	// T116 幸運千龍王輪盤魚：擊破後觸發千龍王輪盤，最高 1000x Mega Win
+	{ID: "T116", Name: "幸運千龍王輪盤魚", Type: TypeSpecial, MinMult: 120, MaxMult: 1000, HP: 160, SpawnWeight: 2, Speed: 60, Lifetime: 16, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T117 幸運龍力散彈魚：擊破後 8 方向散彈攻擊，每方向 HP -40%
+	{ID: "T117", Name: "幸運龍力散彈魚", Type: TypeSpecial, Multiplier: 120, HP: 145, SpawnWeight: 3, Speed: 85, Lifetime: 13, LaborGain: 24, Behavior: BehaviorLinear, DiffFactor: 0.95},
+	// T118 幸運火箭砲魚：擊破後召喚 3 枚火箭砲，每枚 AOE r=200px HP -50%
+	{ID: "T118", Name: "幸運火箭砲魚", Type: TypeSpecial, Multiplier: 130, HP: 155, SpawnWeight: 3, Speed: 75, Lifetime: 14, LaborGain: 26, Behavior: BehaviorLinear, DiffFactor: 0.95},
+	// T119 幸運深海漩渦魚：擊破後免費深海漩渦，全場 HP -50%，持續 6 秒
+	{ID: "T119", Name: "幸運深海漩渦魚", Type: TypeSpecial, Multiplier: 150, HP: 175, SpawnWeight: 2, Speed: 45, Lifetime: 18, LaborGain: 30, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T120 幸運吸血鬼魚：擊破後進入吸血模式，每次擊破吸收倍率，最高 ×5 模式
+	{ID: "T120", Name: "幸運吸血鬼魚", Type: TypeSpecial, Multiplier: 110, HP: 135, SpawnWeight: 3, Speed: 95, Lifetime: 12, LaborGain: 22, Behavior: BehaviorFlee, DiffFactor: 0.95},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }
@@ -187,6 +199,31 @@ var GoldenDragonWeights = []struct {
 	{250, 6},
 	{300, 3},
 	{350, 1},
+}
+
+// 千龍王輪盤倍率權重（T116）— 內環 × 外環 = 最高 1000x
+var ChainLongKingInnerWeights = []struct {
+	Mult   float64
+	Weight int
+}{
+	{2, 40},
+	{5, 25},
+	{10, 15},
+	{15, 10},
+	{20, 7},
+	{25, 3},
+}
+
+var ChainLongKingOuterWeights = []struct {
+	Mult   float64
+	Weight int
+}{
+	{5, 40},
+	{10, 25},
+	{20, 15},
+	{30, 10},
+	{40, 7},
+	{50, 3},
 }
 
 // ── Bonus 目標物 ──────────────────────────────────────────────

@@ -57,6 +57,12 @@ type Game struct {
 	luckyDrillTorpedo    *luckyDrillTorpedoManager
 	luckyTimeFreeze      *luckyTimeFreezeManager
 	luckyChainExplosion  *luckyChainExplosionManager
+	// DAY-295 新增
+	luckyChainLongKing  *luckyChainLongKingManager
+	luckyDragonShotgun  *luckyDragonShotgunManager
+	luckyRocketCannon   *luckyRocketCannonManager
+	luckyDeepWhirlpool  *luckyDeepWhirlpoolManager
+	luckyVampireMult    *luckyVampireMultManager
 
 	lastTick time.Time
 }
@@ -82,6 +88,12 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyDrillTorpedo:    newLuckyDrillTorpedoManager(),
 		luckyTimeFreeze:      newLuckyTimeFreezeManager(),
 		luckyChainExplosion:  newLuckyChainExplosionManager(),
+		// DAY-295 新增
+		luckyChainLongKing:  newLuckyChainLongKingManager(),
+		luckyDragonShotgun:  newLuckyDragonShotgunManager(),
+		luckyRocketCannon:   newLuckyRocketCannonManager(),
+		luckyDeepWhirlpool:  newLuckyDeepWhirlpoolManager(),
+		luckyVampireMult:    newLuckyVampireMultManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -392,6 +404,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.tryLuckyTimeFreeze(playerID, killerName)
 			case isLuckyChainExplosionFish(t.Def.ID):
 				g.tryLuckyChainExplosion(playerID, killerName)
+			// DAY-295 新增
+			case isLuckyChainLongKingFish(t.Def.ID):
+				g.luckyChainLongKing.tryLuckyChainLongKing(g, playerID, killerName)
+			case isLuckyDragonShotgunFish(t.Def.ID):
+				g.luckyDragonShotgun.tryLuckyDragonShotgun(g, playerID, killerName)
+			case isLuckyRocketCannonFish(t.Def.ID):
+				g.luckyRocketCannon.tryLuckyRocketCannon(g, playerID, killerName)
+			case isLuckyDeepWhirlpoolFish(t.Def.ID):
+				g.luckyDeepWhirlpool.tryLuckyDeepWhirlpool(g, playerID, killerName)
+			case isLuckyVampireMultFish(t.Def.ID):
+				g.luckyVampireMult.tryLuckyVampireMult(g, playerID, killerName)
 			}
 			// 連鎖爆炸模式：每次擊破觸發 AOE
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
@@ -400,6 +423,10 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			// 凍結期間擊破計數
 			if g.luckyTimeFreeze.isTimeFreezeActive() {
 				g.luckyTimeFreeze.notifyFreezeKill(playerID)
+			}
+			// 吸血鬼模式：每次擊破吸收倍率
+			if g.luckyVampireMult.isVampireActive(playerID) {
+				g.luckyVampireMult.notifyVampireKill(g, playerID)
 			}
 			if g.luckyAwakenedPhoenix.isAwakenedPhoenixActive(playerID) {
 				powerUpMult, powerReward, isDone := g.luckyAwakenedPhoenix.consumeAwakenedPhoenixShot(playerID, true, bet.BetCost)

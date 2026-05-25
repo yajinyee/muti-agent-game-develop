@@ -61,6 +61,12 @@ func _ready() -> void:
 	GameManager.lucky_drill_torpedo.connect(_on_lucky_drill_torpedo)
 	GameManager.lucky_time_freeze.connect(_on_lucky_time_freeze)
 	GameManager.lucky_chain_explosion.connect(_on_lucky_chain_explosion)
+	# DAY-295 新增幸運特殊魚訊號連接
+	GameManager.lucky_chain_long_king.connect(_on_lucky_chain_long_king)
+	GameManager.lucky_dragon_shotgun.connect(_on_lucky_dragon_shotgun)
+	GameManager.lucky_rocket_cannon.connect(_on_lucky_rocket_cannon)
+	GameManager.lucky_deep_whirlpool.connect(_on_lucky_deep_whirlpool)
+	GameManager.lucky_vampire_mult.connect(_on_lucky_vampire_mult)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -552,3 +558,112 @@ func _on_lucky_chain_explosion(data: Dictionary) -> void:
 			_show_lucky_banner("💥 連鎖結束！%d 次連鎖，獎勵 %d！" % [cnt, reward], Color(1.0, 0.6, 0.3))
 			if reward > 0:
 				_show_reward_popup(reward, float(cnt) * 0.5)
+
+# ── DAY-295 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_chain_long_king(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("🐉👑 %s 觸發千龍王輪盤！最高 1000x！" % name, Color(1.0, 0.85, 0.0))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"spin":
+			var inner = data.get("inner_mult", 1.0)
+			var outer = data.get("outer_mult", 1.0)
+			var final_m = data.get("final_mult", 1.0)
+			_show_lucky_banner("🐉 內環 ×%.0f × 外環 ×%.0f = ×%.0f！" % [inner, outer, final_m], Color(1.0, 0.85, 0.0), 3.0)
+		"result":
+			var reward = data.get("reward", 0)
+			var final_m = data.get("final_mult", 1.0)
+			if reward > 0:
+				_show_reward_popup(reward, final_m)
+			if final_m >= 200:
+				ScreenShake.add_trauma(0.7)
+		"mega_win":
+			var final_m = data.get("final_mult", 1.0)
+			_show_lucky_banner("🐉👑✨ MEGA WIN！×%.0f！千龍王降臨！" % final_m, Color(1.0, 0.85, 0.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_dragon_shotgun(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("🐲💥 %s 觸發龍力散彈！8 方向攻擊！" % name, Color(0.8, 0.2, 0.9))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.45)
+		"shotgun_fire":
+			var dir = data.get("direction", 0)
+			var hits = data.get("total_hits", 0)
+			_show_lucky_banner("🐲 方向 %d 命中！總計 %d 個！" % [dir + 1, hits], Color(0.9, 0.4, 1.0), 0.6)
+			ScreenShake.add_trauma(0.2)
+		"settle":
+			var reward = data.get("total_reward", 0)
+			var hits = data.get("total_hits", 0)
+			_show_lucky_banner("🐲 散彈結束！命中 %d 個，獎勵 %d！" % [hits, reward], Color(0.8, 0.5, 1.0))
+			if reward > 0:
+				_show_reward_popup(reward, float(hits) * 0.4)
+
+func _on_lucky_rocket_cannon(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("🚀💥 %s 召喚火箭砲！3 枚火箭！" % name, Color(1.0, 0.3, 0.1))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"rocket_launch":
+			var no = data.get("rocket_no", 1)
+			_show_lucky_banner("🚀 第 %d 枚火箭發射！" % no, Color(1.0, 0.5, 0.2), 0.6)
+		"rocket_explode":
+			var no = data.get("rocket_no", 1)
+			var hits = data.get("hit_targets", [])
+			_show_lucky_banner("💥 火箭 %d 爆炸！命中 %d 個！" % [no, hits.size()], Color(1.0, 0.4, 0.1), 0.8)
+			ScreenShake.add_trauma(0.5)
+		"settle":
+			var reward = data.get("total_reward", 0)
+			_show_lucky_banner("🚀 火箭砲結束！獎勵 %d！" % reward, Color(1.0, 0.6, 0.3))
+			if reward > 0:
+				_show_reward_popup(reward, 3.0)
+
+func _on_lucky_deep_whirlpool(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("🌊🌀 %s 觸發深海漩渦！全場 HP -50%！6 秒！" % name, Color(0.0, 0.6, 0.9))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"whirlpool_damage":
+			var hits = data.get("hit_count", 0)
+			_show_lucky_banner("🌀 漩渦傷害！命中 %d 個！" % hits, Color(0.2, 0.7, 1.0), 0.7)
+		"settle":
+			var reward = data.get("total_reward", 0)
+			_show_lucky_banner("🌊 深海漩渦結束！獎勵 %d！" % reward, Color(0.0, 0.8, 1.0))
+			if reward > 0:
+				_show_reward_popup(reward, 5.0)
+
+func _on_lucky_vampire_mult(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_banner("🧛 %s 觸發吸血鬼！每次擊破吸收倍率！" % name, Color(0.5, 0.0, 0.5))
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"absorb":
+			var cnt = data.get("absorb_count", 0)
+			var mult = data.get("current_mult", 1.0)
+			_show_lucky_banner("🧛 吸收 %d 次！當前 ×%.1f" % [cnt, mult], Color(0.7, 0.2, 0.8), 0.7)
+		"mult_mode":
+			var mult = data.get("current_mult", 5.0)
+			_show_lucky_banner("🧛✨ %s 進入倍率模式！×%.1f！10 秒！" % [name, mult], Color(0.8, 0.0, 0.8), 3.5)
+			ScreenShake.add_trauma(0.6)
+		"mult_end":
+			_show_lucky_banner("🧛 吸血鬼倍率模式結束", Color(0.5, 0.5, 0.5), 1.5)
+		"settle":
+			var cnt = data.get("absorb_count", 0)
+			var mult = data.get("current_mult", 1.0)
+			_show_lucky_banner("🧛 吸血結束！吸收 %d 次，最終 ×%.1f！" % [cnt, mult], Color(0.6, 0.1, 0.7))

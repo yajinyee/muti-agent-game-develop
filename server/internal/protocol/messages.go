@@ -40,6 +40,13 @@ const (
 	MsgLuckyDrillTorpedo    = "lucky_drill_torpedo"    // T113 鑽頭魚雷
 	MsgLuckyTimeFreeze      = "lucky_time_freeze"      // T114 時間凍結
 	MsgLuckyChainExplosion  = "lucky_chain_explosion"  // T115 連鎖爆炸
+
+	// DAY-295 新增幸運特殊魚事件
+	MsgLuckyChainLongKing   = "lucky_chain_long_king"   // T116 千龍王輪盤
+	MsgLuckyDragonShotgun   = "lucky_dragon_shotgun"    // T117 龍力散彈
+	MsgLuckyRocketCannon    = "lucky_rocket_cannon"     // T118 火箭砲
+	MsgLuckyDeepWhirlpool   = "lucky_deep_whirlpool"    // T119 深海漩渦
+	MsgLuckyVampireMult     = "lucky_vampire_mult"      // T120 吸血鬼倍率
 )
 
 // ── Envelope ─────────────────────────────────────────────────
@@ -283,4 +290,59 @@ type LuckyChainExplosionPayload struct {
 	ChainCount  int      `json:"chain_count,omitempty"`
 	AccumMult   float64  `json:"accum_mult,omitempty"`
 	TotalReward int      `json:"total_reward,omitempty"`
+}
+
+// LuckyChainLongKingPayload T116 千龍王輪盤
+type LuckyChainLongKingPayload struct {
+	Event       string  `json:"event"`        // "trigger" | "spin" | "result" | "mega_win"
+	TriggerID   string  `json:"trigger_id"`
+	TriggerName string  `json:"trigger_name"`
+	InnerMult   float64 `json:"inner_mult,omitempty"`
+	OuterMult   float64 `json:"outer_mult,omitempty"`
+	FinalMult   float64 `json:"final_mult,omitempty"`
+	IsMegaWin   bool    `json:"is_mega_win,omitempty"` // 是否觸發 1000x Mega Win
+	Reward      int     `json:"reward,omitempty"`
+}
+
+// LuckyDragonShotgunPayload T117 龍力散彈
+type LuckyDragonShotgunPayload struct {
+	Event       string   `json:"event"`        // "trigger" | "shotgun_fire" | "settle"
+	TriggerID   string   `json:"trigger_id"`
+	TriggerName string   `json:"trigger_name"`
+	Direction   int      `json:"direction,omitempty"`   // 方向 0-7（8方向）
+	HitTargets  []string `json:"hit_targets,omitempty"` // 命中目標
+	TotalHits   int      `json:"total_hits,omitempty"`  // 總命中數
+	TotalReward int      `json:"total_reward,omitempty"`
+}
+
+// LuckyRocketCannonPayload T118 火箭砲
+type LuckyRocketCannonPayload struct {
+	Event       string   `json:"event"`        // "trigger" | "rocket_launch" | "rocket_explode" | "settle"
+	TriggerID   string   `json:"trigger_id"`
+	TriggerName string   `json:"trigger_name"`
+	RocketNo    int      `json:"rocket_no,omitempty"`    // 第幾枚火箭（1-3）
+	ExplodeX    float64  `json:"explode_x,omitempty"`
+	ExplodeY    float64  `json:"explode_y,omitempty"`
+	HitTargets  []string `json:"hit_targets,omitempty"`
+	TotalReward int      `json:"total_reward,omitempty"`
+}
+
+// LuckyDeepWhirlpoolPayload T119 深海漩渦
+type LuckyDeepWhirlpoolPayload struct {
+	Event       string  `json:"event"`        // "trigger" | "whirlpool_damage" | "settle"
+	TriggerID   string  `json:"trigger_id"`
+	TriggerName string  `json:"trigger_name"`
+	HitCount    int     `json:"hit_count,omitempty"`
+	TotalReward int     `json:"total_reward,omitempty"`
+}
+
+// LuckyVampireMultPayload T120 吸血鬼倍率
+type LuckyVampireMultPayload struct {
+	Event       string  `json:"event"`        // "trigger" | "absorb" | "mult_mode" | "mult_end" | "settle"
+	TriggerID   string  `json:"trigger_id"`
+	TriggerName string  `json:"trigger_name"`
+	AbsorbCount int     `json:"absorb_count,omitempty"` // 已吸收次數
+	CurrentMult float64 `json:"current_mult,omitempty"` // 當前倍率
+	TimeLeft    float64 `json:"time_left,omitempty"`    // 倍率模式剩餘時間
+	TotalReward int     `json:"total_reward,omitempty"`
 }

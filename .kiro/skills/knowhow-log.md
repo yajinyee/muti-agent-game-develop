@@ -3786,3 +3786,31 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **正確模式：** goroutine 開始時 `g.mu.Lock()`，操作完後 `g.mu.Unlock()`，不要用 defer（因為中間有 time.Sleep）
 - **錯誤模式：** 在 goroutine 中用 `defer g.mu.Unlock()`，然後 `time.Sleep`，這會讓 mutex 鎖住整個 sleep 期間
 - **教訓：** goroutine 中有 time.Sleep 的情況，必須手動管理 Lock/Unlock，不能用 defer
+
+## DAY-295 新增知識點
+
+### 20. Windows Python 多版本衝突
+- **問題：** `python` 指向 msys64 的 Python（無 pip），但 Pillow 安裝在 Python312
+- **原因：** PATH 中 msys64 優先於 Python312
+- **解決：** 直接用完整路徑 `C:\Users\yajinyee0306\AppData\Local\Programs\Python\Python312\python.exe`
+- **教訓：** Windows 多 Python 環境下，pip install 成功不代表 `python` 能用，要確認路徑
+
+### 21. Go handler 設計模式（Lucky 系統）
+- **模式：** 每個 Lucky 系統獨立一個 handler 檔案，包含 manager struct + 冷卻管理 + goroutine 非同步執行
+- **關鍵：** goroutine 中操作 game state 必須用 `g.mu.Lock()`，廣播不需要鎖
+- **冷卻設計：** 個人冷卻（playerID → time.Time）+ 全服冷卻（單一 time.Time）
+- **教訓：** 不要在 goroutine 中持有鎖超過必要時間，否則會 deadlock
+
+### 22. progress.md 誠實記錄原則
+- **問題：** progress.md 記錄了 T240-T249 等系統，但 game.go 完全沒有這些 handler
+- **原因：** 之前的記錄是「設計文件」而非「實作完成」的記錄
+- **解決：** 只記錄實際在 game.go + tables.go 中存在的系統
+- **教訓：** progress.md 必須反映實際代碼狀態，不能超前記錄
+
+### 23. Royal Fishing Jili 2026 業界機制整理
+- **ChainLong King（千龍王）：** 雙環輪盤，內環 × 外環，最高 1000x Mega Win
+- **Dragon Power Shotgun：** 8 方向散彈，每方向 HP -40%
+- **Rocket Cannon：** 3 枚火箭砲，每枚 AOE r=200px HP -50%
+- **Deep Sea Whirlpool：** 6 秒漩渦，每秒 HP -8%
+- **Vampire Multiplier：** 每次擊破 +0.5x，最高 ×5 模式 10 秒
+- **來源：** royalfishing.co.uk, royal-fishing.co.uk, royalfishing.uk
