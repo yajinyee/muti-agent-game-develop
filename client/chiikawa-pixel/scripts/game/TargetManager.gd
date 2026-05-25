@@ -197,6 +197,12 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
+	# Lucky 特殊魚標記（T106-T125）
+	if def_id.begins_with("T1") and def_id.length() == 4:
+		var tid_num = int(def_id.substr(1))
+		if tid_num >= 106 and tid_num <= 125:
+			_add_lucky_badge(container, def_id)
+
 	# 特殊搖晃（T103 流星、T104 金草）
 	if def_id in ["T103", "T104"]:
 		var wobble = container.create_tween().set_loops()
@@ -229,6 +235,45 @@ func _add_glow(node: Node2D, multiplier: float) -> void:
 	var tween = glow.create_tween().set_loops()
 	tween.tween_property(glow, "modulate:a", 0.1, 0.4)
 	tween.tween_property(glow, "modulate:a", 1.0, 0.4)
+
+# Lucky 特殊魚標記（T106-T125）— 左上角 LUCKY 徽章 + 脈動光環
+func _add_lucky_badge(node: Node2D, def_id: String) -> void:
+	# 脈動光環（比普通光暈更大更亮）
+	var ring = ColorRect.new()
+	ring.size = Vector2(96, 96)
+	ring.position = Vector2(-48, -48)
+	ring.z_index = -1
+	# 依倍率範圍選顏色
+	var tid_num = int(def_id.substr(1))
+	var ring_color: Color
+	if tid_num >= 121:
+		ring_color = Color(0.88, 0.67, 1.0, 0.35)  # 淡紫（T121-T125）
+	elif tid_num >= 116:
+		ring_color = Color(1.0, 0.85, 0.0, 0.35)   # 金色（T116-T120）
+	elif tid_num >= 111:
+		ring_color = Color(1.0, 0.42, 0.21, 0.35)  # 火橙（T111-T115）
+	else:
+		ring_color = Color(0.0, 0.9, 1.0, 0.35)    # 青藍（T106-T110）
+	ring.color = ring_color
+	node.add_child(ring)
+
+	# 脈動動畫（比普通光暈快）
+	var tween = ring.create_tween().set_loops()
+	tween.tween_property(ring, "modulate:a", 0.05, 0.25)
+	tween.tween_property(ring, "modulate:a", 1.0, 0.25)
+
+	# LUCKY 徽章（左上角小標籤）
+	var badge = Label.new()
+	badge.text = "✨"
+	badge.position = Vector2(-48, -68)
+	badge.add_theme_font_size_override("font_size", 14)
+	badge.z_index = 10
+	node.add_child(badge)
+
+	# 徽章浮動動畫
+	var badge_tween = badge.create_tween().set_loops()
+	badge_tween.tween_property(badge, "position:y", -72.0, 0.5)
+	badge_tween.tween_property(badge, "position:y", -68.0, 0.5)
 
 # ── 目標物更新 ────────────────────────────────────────────────
 
@@ -384,7 +429,8 @@ func _get_texture(def_id: String) -> Texture2D:
 	return null
 
 func _mult_label_color(mult: float) -> Color:
-	if mult >= 50: return Color(1.0, 0.4, 0.1)
-	if mult >= 30: return Color(1.0, 0.85, 0.0)
-	if mult >= 15: return Color(0.8, 0.9, 1.0)
-	return Color(1.0, 1.0, 1.0)
+	if mult >= 100: return Color(1.0, 0.3, 0.1)   # 火紅（超高倍率）
+	if mult >= 50:  return Color(1.0, 0.4, 0.1)   # 橙紅
+	if mult >= 30:  return Color(1.0, 0.85, 0.0)  # 金色
+	if mult >= 15:  return Color(0.8, 0.9, 1.0)   # 淡藍
+	return Color(1.0, 1.0, 1.0)                   # 白色

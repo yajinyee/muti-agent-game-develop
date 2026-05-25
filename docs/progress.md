@@ -12,16 +12,22 @@ progress.md 中 DAY-280 到 DAY-291 的記錄（T126-T249 共 100+ 個 Lucky 系
 - 目標物：32 種（T001-T006 + T101-T125 + B001）✅
 - Server 編譯：✅ build OK + vet OK
 
-## DAY-299 更新（2026-05-26）：品質修復 + 知識庫更新 ✅
+## DAY-299 更新（2026-05-26）：品質修復 + Lucky 視覺識別升級 + QA 自動化 ✅
 - **HUD.gd 重複函數修復：** 刪除舊版 `_show_lucky_banner`（引用 `_lucky_banner` 節點的那個），保留新版（委派給 LuckyEventSystem）
-- **知識庫更新：** 新增 knowhow-log 條目 86-89（重複函數 bug、Lucky 架構演進、精靈圖完整性、Handler 命名規範）
+- **TargetManager.gd Lucky 視覺識別升級：**
+  - 新增 `_add_lucky_badge(node, def_id)` 函數：為 T106-T125 加入特殊視覺標記
+  - 脈動光環（比普通光暈更大更亮，顏色依倍率範圍分組）
+    - T106-T110：青藍色光環
+    - T111-T115：火橙色光環
+    - T116-T120：金色光環
+    - T121-T125：淡紫色光環
+  - ✨ 浮動徽章（左上角，上下浮動動畫）
+  - 倍率標籤顏色升級：新增 100x+ 火紅色等級
+- **QA 自動化腳本：** `tools/qa_check_day299.py`（13 項驗證，全部通過）
+- **知識庫更新：** 新增 knowhow-log 條目 86-89
 - **全面驗證：**
   - Server：go build + go vet 全通過（零錯誤零警告）
-  - Client：GameManager 20 訊號 ✅，HUD 20 事件處理 ✅，LuckyEventSystem 20 主題 ✅
-  - TargetManager：T106-T125 全部映射 ✅
-  - Protocol：所有訊息類型完整 ✅
-  - 精靈圖：T106-T125 全部存在 ✅
-  - NetworkManager：send_collect_golden_coin 已實作 ✅
+  - QA 13/13 全部通過
 - **GitHub 同步：** 推送到 main 分支
 
 ## 自我評估（誠實版）
