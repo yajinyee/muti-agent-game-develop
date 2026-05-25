@@ -3948,3 +3948,28 @@ contribution_per_shot = betCost × 0.005 × level_share
 - **T121-T125：** `lucky_xxx_handler.go`，函數名 `tryLuckyXxx(playerID, killerName)`（直接函數）
 - **注意：** T116-T120 的 handler 使用 struct 方法，T106-T115 和 T121-T125 使用包級函數
 - **教訓：** 新增 Lucky Handler 時要確認呼叫方式，在 game.go 的 switch case 中正確呼叫
+
+## 90. 影片分析發現的目標物密度問題（DAY-299）
+- **問題：** 2026-05-24 錄影分析顯示目標物密度只有 13.2%（極低），特效密度 1.4%（極少）
+- **根本原因：** SpawnInterval=0.8s + MaxTargets=18 在 7 秒短影片中目標物太少
+- **修復：** SpawnInterval 0.8s → 0.6s，MaxTargets 18 → 22
+- **目標物大小：** 基礎 2.0x → 2.5x，特殊 2.0x → 2.8x（讓目標物更明顯）
+- **教訓：** 影片分析是發現「玩家實際看到什麼」的最直接方式，不能只靠程式碼審查
+
+## 91. git 臨時目錄問題（Windows）
+- **問題：** `git add` 報 `unable to create temporary file: No such file or directory`
+- **根本原因：** `.git/objects` 目錄的繼承權限被 Norton 或其他安全軟體修改
+- **解決：** 執行 `powershell -ExecutionPolicy Bypass -File tools/fix_git_permissions.ps1`
+  - `takeown /F .git/objects /R /D Y`
+  - `icacls .git/objects /grant "${username}:F" /T /Q`
+  - `icacls .git/objects /inheritance:e /Q`
+- **教訓：** 每次 git 操作失敗時，先執行 fix_git_permissions.ps1 修復權限
+
+## 92. Lucky 特殊魚視覺識別系統（DAY-299）
+- **問題：** T106-T125 在畫面上和普通目標物視覺差異不大，玩家難以識別
+- **解決：** `_add_lucky_badge(node, def_id)` 函數
+  - 脈動光環（96x96，比普通光暈 80x80 更大）
+  - 顏色依倍率範圍分組（T106-T110 青藍/T111-T115 火橙/T116-T120 金色/T121-T125 淡紫）
+  - ✨ 浮動徽章（左上角，上下浮動動畫）
+- **觸發條件：** def_id 以 "T1" 開頭，且 T106-T125 範圍內
+- **教訓：** 高價值目標需要多層視覺識別（光暈 + 徽章 + 倍率標籤顏色），不能只靠倍率數字
