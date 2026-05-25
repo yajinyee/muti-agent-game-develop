@@ -1,39 +1,19 @@
-[gd_scene load_steps=14 format=3 uid="uid://main"]
+[gd_scene load_steps=7 format=3 uid="uid://main"]
 
 [ext_resource type="Script" path="res://scripts/game/TargetManager.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/game/Cannon.gd" id="2"]
 [ext_resource type="Script" path="res://scripts/ui/HUD.gd" id="3"]
-[ext_resource type="Script" path="res://scripts/game/GameManager.gd" id="4"]
-[ext_resource type="Script" path="res://scripts/game/AudioManager.gd" id="5"]
-[ext_resource type="Script" path="res://scripts/game/HitEffect.gd" id="6"]
-[ext_resource type="Script" path="res://scripts/game/ScreenShake.gd" id="7"]
-[ext_resource type="Script" path="res://scripts/network/NetworkManager.gd" id="8"]
-[ext_resource type="Script" path="res://scripts/game/BackgroundManager.gd" id="9"]
-[ext_resource type="Script" path="res://scripts/game/BonusGame.gd" id="10"]
-[ext_resource type="Script" path="res://scripts/game/CharacterAnimator.gd" id="11"]
+[ext_resource type="Script" path="res://scripts/game/BackgroundManager.gd" id="4"]
+[ext_resource type="Script" path="res://scripts/game/BonusGame.gd" id="5"]
+[ext_resource type="Script" path="res://scripts/game/CharacterAnimator.gd" id="6"]
 
 [node name="Main" type="Node2D"]
-
-[node name="GameManager" type="Node" parent="." groups=["autoload"]]
-script = ExtResource("4")
-
-[node name="AudioManager" type="Node" parent="." groups=["autoload"]]
-script = ExtResource("5")
-
-[node name="NetworkManager" type="Node" parent="." groups=["autoload"]]
-script = ExtResource("8")
-
-[node name="HitEffect" type="Node" parent="." groups=["autoload"]]
-script = ExtResource("6")
-
-[node name="ScreenShake" type="Node" parent="." groups=["autoload"]]
-script = ExtResource("7")
 
 [node name="Camera2D" type="Camera2D" parent="."]
 position = Vector2(640, 360)
 
 [node name="BackgroundManager" type="Node2D" parent="."]
-script = ExtResource("9")
+script = ExtResource("4")
 
 [node name="TargetManager" type="Node2D" parent="."]
 script = ExtResource("1")
@@ -55,7 +35,7 @@ horizontal_alignment = 1
 
 [node name="CharacterAnimator" type="Node2D" parent="Cannon"]
 position = Vector2(0, -40)
-script = ExtResource("11")
+script = ExtResource("6")
 
 [node name="HUD" type="CanvasLayer" parent="."]
 script = ExtResource("3")
@@ -171,4 +151,4 @@ offset_bottom = 42.0
 text = "BONUS"
 
 [node name="BonusGame" type="CanvasLayer" parent="."]
-script = ExtResource("10")
+script = ExtResource("5")
