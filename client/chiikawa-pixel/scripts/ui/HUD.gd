@@ -103,6 +103,12 @@ func _ready() -> void:
 	GameManager.lucky_volcano.connect(_on_lucky_volcano)
 	GameManager.lucky_cosmic_ray.connect(_on_lucky_cosmic_ray)
 	GameManager.lucky_divine_dragon.connect(_on_lucky_divine_dragon)
+	# DAY-307 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
+	GameManager.lucky_quantum.connect(_on_lucky_quantum)
+	GameManager.lucky_supernova.connect(_on_lucky_supernova)
+	GameManager.lucky_infinite.connect(_on_lucky_infinite)
+	GameManager.lucky_genesis.connect(_on_lucky_genesis)
+	GameManager.lucky_rebirth.connect(_on_lucky_rebirth)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1376,3 +1382,107 @@ func _on_lucky_divine_dragon(data: Dictionary) -> void:
 			_show_lucky_banner("🐉 神龍加成結束", Color(0.7, 0.7, 0.7), 1.5)
 		"dragon_leave":
 			_show_lucky_banner("🐉 神龍離去", Color(0.7, 0.7, 0.7), 1.5)
+
+# ── DAY-307 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_quantum(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"quantum_observe":
+			_show_lucky_banner("⚛️ %s 觸發量子觀測！50%% 機率 HP -60%%！" % name, Color(0.0, 0.9, 1.0), 2.5)
+			ScreenShake.add_trauma(0.5)
+		"quantum_result":
+			var observed = data.get("observed_count", 0)
+			_show_lucky_banner("⚛️ 量子觀測！命中 %d 個目標！" % observed, Color(0.0, 0.9, 1.0), 2.0)
+		"quantum_collapse":
+			var observed = data.get("observed_count", 0)
+			var mult = data.get("boost_mult", 5.5)
+			_show_lucky_banner("⚛️✨ 量子坍縮！%s 觀測 %d 個！全服 ×%.1f 加成 12 秒！" % [name, observed, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"quantum_collapse_end":
+			_show_lucky_banner("⚛️ 量子坍縮加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_supernova(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"supernova_explode":
+			_show_lucky_banner("💥 %s 觸發超新星爆炸！全場 HP -70%%！" % name, Color(1.0, 0.4, 0.1), 2.5)
+			ScreenShake.add_trauma(1.0)
+		"supernova_boost":
+			var hits = data.get("hit_count", 0)
+			_show_lucky_banner("💥 超新星命中 %d 個！5 秒倍率 ×3.0！" % hits, Color(1.0, 0.6, 0.2), 2.0)
+		"supernova_perfect":
+			var hits = data.get("hit_count", 0)
+			var mult = data.get("boost_mult", 5.5)
+			_show_lucky_banner("💥✨ 超新星完美！%s 命中 %d 個！全服 ×%.1f 加成 12 秒！" % [name, hits, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"supernova_perfect_end":
+			_show_lucky_banner("💥 超新星完美加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_infinite(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"infinite_start":
+			_show_lucky_banner("♾️ %s 觸發無限模式！20 秒無限累積倍率！" % name, Color(0.6, 0.2, 1.0), 2.5)
+			ScreenShake.add_trauma(0.4)
+		"infinite_kill":
+			var mult = data.get("accum_mult", 1.0)
+			var kills = data.get("kill_count", 0)
+			_update_lucky_indicator("♾️ 無限模式", "×%.1f | %d 次" % [mult, kills], -1.0, Color(0.6, 0.2, 1.0))
+		"infinite_perfect":
+			_hide_lucky_indicator()
+			var mult = data.get("accum_mult", 1.0)
+			var boost = data.get("boost_mult", 6.0)
+			_show_lucky_banner("♾️✨ 無限完美！%s 累積 ×%.1f！全服 ×%.0f 加成 15 秒！" % [name, mult, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"infinite_perfect_end":
+			_show_lucky_banner("♾️ 無限完美加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"infinite_end":
+			_hide_lucky_indicator()
+			var mult = data.get("accum_mult", 1.0)
+			_show_lucky_banner("♾️ 無限模式結束！最終 ×%.1f！" % mult, Color(0.6, 0.2, 1.0), 2.0)
+
+func _on_lucky_genesis(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"genesis_descend":
+			_show_lucky_banner("🌟 %s 召喚創世神降臨！" % name, Color(1.0, 0.85, 0.0), 2.5)
+			ScreenShake.add_trauma(0.8)
+		"genesis_judgment":
+			var kills = data.get("kill_count", 0)
+			_show_lucky_banner("🌟 創世審判！%d 個目標被審判！每個獎勵 ×5.0！" % kills, Color(1.0, 0.85, 0.0), 2.5)
+			ScreenShake.add_trauma(1.0)
+		"genesis_blessing":
+			var kills = data.get("kill_count", 0)
+			var boost = data.get("boost_mult", 6.0)
+			_show_lucky_banner("🌟✨ 創世祝福！%s 審判 %d 個！全服 ×%.0f 加成 15 秒！" % [name, kills, boost], Color(1.0, 0.85, 0.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+		"genesis_blessing_end":
+			_show_lucky_banner("🌟 創世祝福加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_rebirth(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"rebirth_start":
+			_show_lucky_banner("🔥 %s 觸發重生之力！15 秒死亡目標復活！擊破獎勵 ×3.0！" % name, Color(1.0, 0.4, 0.1), 2.5)
+			ScreenShake.add_trauma(0.5)
+		"rebirth_kill":
+			var kills = data.get("rebirth_kills", 0)
+			_update_lucky_indicator("🔥 重生之力", "重生擊破 %d 個" % kills, -1.0, Color(1.0, 0.4, 0.1))
+		"rebirth_perfect":
+			_hide_lucky_indicator()
+			var kills = data.get("rebirth_kills", 0)
+			var boost = data.get("boost_mult", 6.5)
+			_show_lucky_banner("🔥✨ 完美重生！%s 重生擊破 %d 個！全服 ×%.1f 加成 15 秒！" % [name, kills, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"rebirth_perfect_end":
+			_show_lucky_banner("🔥 完美重生加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"rebirth_end":
+			_hide_lucky_indicator()
+			var kills = data.get("rebirth_kills", 0)
+			_show_lucky_banner("🔥 重生之力結束！重生擊破 %d 個！" % kills, Color(1.0, 0.4, 0.1), 2.0)

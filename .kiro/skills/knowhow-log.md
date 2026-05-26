@@ -4285,3 +4285,35 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
   8. `client/scripts/ui/LuckyXxxPanel.gd`（新建 Panel 腳本）
   9. `tools/generate_targets_dayXXX.py`（精靈圖生成）
 - 缺少任何一個步驟都會導致功能不完整
+
+## 107. DAY-307 T146-T150 五個新 Lucky 魚系統（2026-05-27）
+- **T146 量子魚（480x）**：量子觀測機制，50% 機率 HP -60%，觀測 ≥10 → 全服 ×5.5
+- **T147 超新星魚（500x）**：全場 HP -70% + 5 秒倍率 ×3.0，命中 ≥8 → 全服 ×5.5
+- **T148 無限魚（520x）**：20 秒無限累積倍率（每次擊破 +1.0x），≥20x → 全服 ×6.0
+- **T149 創世魚（550x）**：全場目標 HP 歸零（每個獎勵 ×5.0），觸發全服 ×6.0
+- **T150 重生魚（600x）**：15 秒死亡目標復活（HP 50%，擊破獎勵 ×3.0），≥8 → 全服 ×6.5
+- **Server**：5 個 handler + game.go 整合 + protocol 新增 5 個訊息類型 + tables.go 新增 5 個目標
+- **Client**：5 個 Panel + GameManager 新增 5 個訊號 + HUD 新增 5 個 handler + TargetManager 新增映射
+- **美術**：T146-T150 精靈圖生成（33-44% 非透明像素）
+- **build/vet 全部通過（零錯誤零警告）**
+- **關鍵技術**：
+  - `luckyQuantum.getQuantumPerfectMult()` — 量子坍縮全服加成
+  - `luckySupernova.getSupernovaMultBoost()` — 超新星 5 秒倍率加成（臨時）
+  - `luckyInfinite.isInfiniteActive()` + `notifyInfiniteKill()` — 無限模式擊破計數
+  - `luckyRebirth.getRebirthKillMult(instanceID)` — 重生目標擊破倍率加成
+  - `luckyRebirth.notifyRebirthKill()` — 重生目標擊破通知
+
+## 108. TargetManager.gd Lucky badge 顏色分級（2026-05-27）
+- T106-T110：青藍色（0.0, 0.9, 1.0）
+- T111-T115：火橙色（1.0, 0.42, 0.21）
+- T116-T120：金色（1.0, 0.85, 0.0）
+- T121-T125：淡紫色（0.88, 0.67, 1.0）
+- T126-T130：金色（1.0, 0.85, 0.0）
+- T131-T140：亮金色（1.0, 0.95, 0.0）
+- T141+：超亮金色（1.0, 1.0, 0.5）— 最高階視覺
+- **教訓**：倍率越高的 Lucky 魚，badge 顏色越亮，讓玩家直覺感受到價值差異
+
+## 109. Go handler 中的 fmt.Sprintf 替代 itoa/ftoa（2026-05-27）
+- **問題**：自定義 `itoa()` 和 `ftoa()` 函數在 Go 中不存在，需要用 `fmt.Sprintf`
+- **解決**：`fmt.Sprintf("%d", n)` 替代 `itoa(n)`，`fmt.Sprintf("%.1f", f)` 替代 `ftoa(f)`
+- **教訓**：Go 標準庫有 `strconv.Itoa()` 和 `strconv.FormatFloat()`，但 `fmt.Sprintf` 更簡潔

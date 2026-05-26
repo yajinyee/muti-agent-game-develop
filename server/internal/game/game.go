@@ -104,6 +104,13 @@ type Game struct {
 	luckyCosmicRay    *luckyCosmicRayManager
 	luckyDivineDragon *luckyDivineDragonManager
 
+	// DAY-307 新增
+	luckyQuantum  *luckyQuantumManager
+	luckySupernova *luckySupernovaManager
+	luckyInfinite *luckyInfiniteManager
+	luckyGenesis  *luckyGenesisManager
+	luckyRebirth  *luckyRebirthManager
+
 	lastTick time.Time
 }
 
@@ -174,6 +181,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyVolcano:      newLuckyVolcanoManager(),
 		luckyCosmicRay:    newLuckyCosmicRayManager(),
 		luckyDivineDragon: newLuckyDivineDragonManager(),
+
+		// DAY-307 新增
+		luckyQuantum:   newLuckyQuantumManager(),
+		luckySupernova: newLuckySupernovaManager(),
+		luckyInfinite:  newLuckyInfiniteManager(),
+		luckyGenesis:   newLuckyGenesisManager(),
+		luckyRebirth:   newLuckyRebirthManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -548,6 +562,36 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if divineDragonPerfectBoost > 1.0 {
 			effectiveMult *= divineDragonPerfectBoost
 		}
+		// DAY-307 新增全服加成
+		quantumCollapseBoost := g.luckyQuantum.getQuantumPerfectMult()
+		if quantumCollapseBoost > 1.0 {
+			effectiveMult *= quantumCollapseBoost
+		}
+		supernovaPerfectBoost := g.luckySupernova.getSupernovaPerfectMult()
+		if supernovaPerfectBoost > 1.0 {
+			effectiveMult *= supernovaPerfectBoost
+		}
+		supernovaMultBoost := g.luckySupernova.getSupernovaMultBoost()
+		if supernovaMultBoost > 1.0 {
+			effectiveMult *= supernovaMultBoost
+		}
+		infinitePerfectBoost := g.luckyInfinite.getInfinitePerfectMult()
+		if infinitePerfectBoost > 1.0 {
+			effectiveMult *= infinitePerfectBoost
+		}
+		genesisPerfectBoost := g.luckyGenesis.getGenesisPerfectMult()
+		if genesisPerfectBoost > 1.0 {
+			effectiveMult *= genesisPerfectBoost
+		}
+		rebirthPerfectBoost := g.luckyRebirth.getRebirthPerfectMult()
+		if rebirthPerfectBoost > 1.0 {
+			effectiveMult *= rebirthPerfectBoost
+		}
+		// 重生魚：重生目標擊破倍率加成
+		rebirthKillMult := g.luckyRebirth.getRebirthKillMult(t.InstanceID)
+		if rebirthKillMult > 1.0 {
+			effectiveMult *= rebirthKillMult
+		}
 		// 龍捲風期間擊破計數
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
@@ -688,6 +732,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyCosmicRay.tryLuckyCosmicRayFish(g, playerID, killerName)
 			case isLuckyDivineDragonFish(t.Def.ID):
 				g.luckyDivineDragon.tryLuckyDivineDragonFish(g, playerID, killerName)
+			// DAY-307 新增
+			case isLuckyQuantumFish(t.Def.ID):
+				g.luckyQuantum.tryLuckyQuantumFish(g, playerID, killerName)
+			case isLuckySupernovaFish(t.Def.ID):
+				g.luckySupernova.tryLuckySupernovaFish(g, playerID, killerName)
+			case isLuckyInfiniteFish(t.Def.ID):
+				g.luckyInfinite.tryLuckyInfiniteFish(g, playerID, killerName)
+			case isLuckyGenesisFish(t.Def.ID):
+				g.luckyGenesis.tryLuckyGenesisFish(g, playerID, killerName)
+			case isLuckyRebirthFish(t.Def.ID):
+				g.luckyRebirth.tryLuckyRebirthFish(g, playerID, killerName)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -728,6 +783,14 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			// DAY-305 公會戰：擊破計數
 			if g.luckyGuildWar.isGuildWarActive() {
 				g.notifyGuildWarKill(playerID, killerName)
+			}
+			// DAY-307 無限模式：擊破計數
+			if g.luckyInfinite.isInfiniteActive(playerID) {
+				g.luckyInfinite.notifyInfiniteKill(g, playerID)
+			}
+			// DAY-307 重生魚：重生目標擊破通知
+			if g.luckyRebirth.isRebirthActive() {
+				g.luckyRebirth.notifyRebirthKill(g, t.InstanceID)
 			}
 		}
 

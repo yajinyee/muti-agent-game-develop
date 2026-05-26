@@ -210,6 +210,18 @@ var Targets = []TargetDef{
 	// T145 幸運神龍魚：擊破後神龍降臨 20 秒（每 4 秒爪擊 HP -50%），5 次全部命中 ≥5 → 神龍完美全服 ×5.0
 	{ID: "T145", Name: "幸運神龍魚", Type: TypeSpecial, Multiplier: 450, HP: 480, SpawnWeight: 1, Speed: 50, Lifetime: 22, LaborGain: 90, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-307 新增特殊目標（480x-600x）────────────────────────
+	// T146 幸運量子魚：擊破後量子觀測（50% 機率 HP -60%），觀測 ≥10 → 量子坍縮全服 ×5.5
+	{ID: "T146", Name: "幸運量子魚", Type: TypeSpecial, Multiplier: 480, HP: 500, SpawnWeight: 1, Speed: 55, Lifetime: 20, LaborGain: 96, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T147 幸運超新星魚：擊破後全場 HP -70%，5 秒倍率 ×3.0，命中 ≥8 → 超新星完美全服 ×5.5
+	{ID: "T147", Name: "幸運超新星魚", Type: TypeSpecial, Multiplier: 500, HP: 520, SpawnWeight: 1, Speed: 60, Lifetime: 20, LaborGain: 100, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T148 幸運無限魚：擊破後 20 秒無限累積倍率（每次擊破 +1.0x），≥20x → 無限完美全服 ×6.0
+	{ID: "T148", Name: "幸運無限魚", Type: TypeSpecial, Multiplier: 520, HP: 540, SpawnWeight: 1, Speed: 50, Lifetime: 22, LaborGain: 104, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T149 幸運創世魚：擊破後全場目標 HP 歸零（每個獎勵 ×5.0），觸發全服 ×6.0 加成 15 秒
+	{ID: "T149", Name: "幸運創世魚", Type: TypeSpecial, Multiplier: 550, HP: 580, SpawnWeight: 1, Speed: 45, Lifetime: 24, LaborGain: 110, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T150 幸運重生魚：擊破後 15 秒重生之力（死亡目標復活 HP 50%，擊破獎勵 ×3.0），≥8 → 完美重生全服 ×6.5
+	{ID: "T150", Name: "幸運重生魚", Type: TypeSpecial, Multiplier: 600, HP: 640, SpawnWeight: 1, Speed: 40, Lifetime: 26, LaborGain: 120, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

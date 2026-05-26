@@ -67,6 +67,12 @@ const TARGET_SPRITES = {
 	"T143": "res://assets/sprites/targets/T143_volcano.png",
 	"T144": "res://assets/sprites/targets/T144_cosmic_ray.png",
 	"T145": "res://assets/sprites/targets/T145_divine_dragon.png",
+	# DAY-307 新增特殊目標
+	"T146": "res://assets/sprites/targets/T146_quantum.png",
+	"T147": "res://assets/sprites/targets/T147_supernova.png",
+	"T148": "res://assets/sprites/targets/T148_infinite.png",
+	"T149": "res://assets/sprites/targets/T149_genesis.png",
+	"T150": "res://assets/sprites/targets/T150_rebirth.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -134,6 +140,12 @@ const TARGET_COLORS = {
 	"T143": Color(1.0, 0.27, 0.0),  # 火紅火山魚
 	"T144": Color(0.6, 0.2, 1.0),   # 紫色星際魚
 	"T145": Color(1.0, 0.85, 0.0),  # 金色神龍魚
+	# DAY-307 新增特殊目標備用顏色
+	"T146": Color(0.0, 0.9, 1.0),   # 青藍量子魚
+	"T147": Color(1.0, 0.4, 0.1),   # 火橙超新星魚
+	"T148": Color(0.6, 0.2, 1.0),   # 紫色無限魚
+	"T149": Color(1.0, 0.85, 0.0),  # 金色創世魚
+	"T150": Color(1.0, 0.27, 0.0),  # 火橙重生魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
@@ -304,8 +316,10 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 依倍率範圍選顏色
 	var tid_num = int(def_id.substr(1))
 	var ring_color: Color
-	if tid_num >= 131:
-		ring_color = Color(1.0, 0.95, 0.0, 0.50)   # 亮金（T131-T135，最高階）
+	if tid_num >= 141:
+		ring_color = Color(1.0, 1.0, 0.5, 0.60)    # 超亮金（T141+，最高階）
+	elif tid_num >= 131:
+		ring_color = Color(1.0, 0.95, 0.0, 0.50)   # 亮金（T131-T140）
 	elif tid_num >= 126:
 		ring_color = Color(1.0, 0.85, 0.0, 0.40)   # 金色（T126-T130）
 	elif tid_num >= 121:

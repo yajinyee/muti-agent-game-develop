@@ -83,11 +83,18 @@ const (
 	MsgLuckyQualityFish    = "lucky_quality_fish"     // T140 品質魚（品質鑑定）
 
 	// DAY-306 新增幸運特殊魚事件
-	MsgLuckyTornado     = "lucky_tornado"      // T141 龍捲風魚（橫掃全場）
-	MsgLuckyEarthquake  = "lucky_earthquake"   // T142 地震魚（三波同心圓）
-	MsgLuckyVolcano     = "lucky_volcano"      // T143 火山魚（熔岩彈雨）
-	MsgLuckyCosmicRay   = "lucky_cosmic_ray"   // T144 星際魚（8方向光束）
+	MsgLuckyTornado      = "lucky_tornado"       // T141 龍捲風魚（橫掃全場）
+	MsgLuckyEarthquake   = "lucky_earthquake"    // T142 地震魚（三波同心圓）
+	MsgLuckyVolcano      = "lucky_volcano"       // T143 火山魚（熔岩彈雨）
+	MsgLuckyCosmicRay    = "lucky_cosmic_ray"    // T144 星際魚（8方向光束）
 	MsgLuckyDivineDragon = "lucky_divine_dragon" // T145 神龍魚（神龍降臨）
+
+	// DAY-307 新增幸運特殊魚事件
+	MsgLuckyQuantum  = "lucky_quantum"  // T146 量子魚（量子觀測坍縮）
+	MsgLuckySupernova = "lucky_supernova" // T147 超新星魚（全場爆炸+倍率加成）
+	MsgLuckyInfinite = "lucky_infinite" // T148 無限魚（無限累積倍率）
+	MsgLuckyGenesis  = "lucky_genesis"  // T149 創世魚（全場審判）
+	MsgLuckyRebirth  = "lucky_rebirth"  // T150 重生魚（死亡目標復活再擊破）
 )
 // ── Envelope ─────────────────────────────────────────────────
 
@@ -749,6 +756,64 @@ type LuckyDivineDragonPayload struct {
 	ClawNum      int     `json:"claw_num,omitempty"`
 	HitCount     int     `json:"hit_count,omitempty"`
 	PerfectClaws int     `json:"perfect_claws,omitempty"`
+	BoostMult    float64 `json:"boost_mult,omitempty"`
+	BoostSec     int     `json:"boost_sec,omitempty"`
+}
+
+// ── DAY-307 新增 Lucky 特殊魚 Payloads ───────────────────────
+
+// LuckyQuantumPayload T146 量子魚（量子觀測坍縮）
+type LuckyQuantumPayload struct {
+	Event         string  `json:"event"`                      // quantum_observe / quantum_result / quantum_collapse / quantum_collapse_end
+	PlayerID      string  `json:"player_id"`
+	PlayerName    string  `json:"player_name"`
+	ObservedCount int     `json:"observed_count,omitempty"`   // 被觀測到的目標數
+	BoostMult     float64 `json:"boost_mult,omitempty"`
+	BoostSec      int     `json:"boost_sec,omitempty"`
+}
+
+// LuckySupernovaPayload T147 超新星魚（全場爆炸+倍率加成）
+type LuckySupernovaPayload struct {
+	Event      string  `json:"event"`                   // supernova_explode / supernova_boost / supernova_end / supernova_perfect / supernova_perfect_end
+	PlayerID   string  `json:"player_id"`
+	PlayerName string  `json:"player_name"`
+	HitCount   int     `json:"hit_count,omitempty"`
+	MultBoost  float64 `json:"mult_boost,omitempty"`    // 5秒倍率加成
+	BoostSec   int     `json:"boost_sec,omitempty"`
+	BoostMult  float64 `json:"boost_mult,omitempty"`
+}
+
+// LuckyInfinitePayload T148 無限魚（無限累積倍率）
+type LuckyInfinitePayload struct {
+	Event      string  `json:"event"`                   // infinite_start / infinite_kill / infinite_end / infinite_perfect / infinite_perfect_end
+	PlayerID   string  `json:"player_id"`
+	PlayerName string  `json:"player_name"`
+	Duration   float64 `json:"duration,omitempty"`
+	AccumMult  float64 `json:"accum_mult,omitempty"`    // 累積倍率
+	KillCount  int     `json:"kill_count,omitempty"`
+	BoostMult  float64 `json:"boost_mult,omitempty"`
+	BoostSec   int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyGenesisPayload T149 創世魚（全場審判）
+type LuckyGenesisPayload struct {
+	Event       string  `json:"event"`                    // genesis_descend / genesis_judgment / genesis_blessing / genesis_blessing_end
+	PlayerID    string  `json:"player_id"`
+	PlayerName  string  `json:"player_name"`
+	KillCount   int     `json:"kill_count,omitempty"`
+	TotalReward int     `json:"total_reward,omitempty"`
+	MultBoost   float64 `json:"mult_boost,omitempty"`     // 每個目標的倍率加成
+	BoostMult   float64 `json:"boost_mult,omitempty"`
+	BoostSec    int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyRebirthPayload T150 重生魚（死亡目標復活再擊破）
+type LuckyRebirthPayload struct {
+	Event        string  `json:"event"`                    // rebirth_start / rebirth_kill / rebirth_end / rebirth_perfect / rebirth_perfect_end
+	PlayerID     string  `json:"player_id"`
+	PlayerName   string  `json:"player_name"`
+	Duration     float64 `json:"duration,omitempty"`
+	RebirthKills int     `json:"rebirth_kills,omitempty"`  // 重生後被擊破的目標數
 	BoostMult    float64 `json:"boost_mult,omitempty"`
 	BoostSec     int     `json:"boost_sec,omitempty"`
 }
