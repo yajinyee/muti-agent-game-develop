@@ -97,6 +97,12 @@ func _ready() -> void:
 	GameManager.lucky_legend_dragon.connect(_on_lucky_legend_dragon)
 	GameManager.lucky_guild_war.connect(_on_lucky_guild_war)
 	GameManager.lucky_quality_fish.connect(_on_lucky_quality_fish)
+	# DAY-306 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
+	GameManager.lucky_tornado.connect(_on_lucky_tornado)
+	GameManager.lucky_earthquake.connect(_on_lucky_earthquake)
+	GameManager.lucky_volcano.connect(_on_lucky_volcano)
+	GameManager.lucky_cosmic_ray.connect(_on_lucky_cosmic_ray)
+	GameManager.lucky_divine_dragon.connect(_on_lucky_divine_dragon)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1287,3 +1293,86 @@ func _on_lucky_quality_fish(data: Dictionary) -> void:
 			ScreenShake.add_trauma(1.0)
 		"legendary_end":
 			_show_lucky_banner("✨ 傳說品質加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+# ── DAY-306 幸運特殊魚事件處理（備用橫幅，Panel 自行處理主要視覺）────────────────
+
+func _on_lucky_tornado(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"tornado_start":
+			_show_lucky_banner("🌪️ %s 觸發龍捲風橫掃！10 秒全場 HP -40%！" % name, Color(0.0, 0.9, 0.7), 2.5)
+			ScreenShake.add_trauma(0.7)
+		"tornado_perfect":
+			var mult = data.get("boost_mult", 3.8)
+			_show_lucky_banner("🌪️ 完美龍捲風！%s 全服 ×%.1f 加成 9 秒！" % [name, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.9)
+		"tornado_perfect_end":
+			_show_lucky_banner("🌪️ 龍捲風加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_earthquake(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"quake_warning":
+			_show_lucky_banner("🌍 %s 觸發地震波！三波衝擊！" % name, Color(0.8, 0.4, 0.1), 2.5)
+			ScreenShake.add_trauma(0.8)
+		"quake_wave":
+			var wave = data.get("wave_num", 1)
+			var pct = int(data.get("damage_pct", 0.25) * 100)
+			_show_lucky_banner("🌍 第 %d 波地震！HP -%d%%！" % [wave, pct], Color(0.8, 0.4, 0.1), 1.5)
+		"quake_perfect":
+			var mult = data.get("boost_mult", 4.0)
+			_show_lucky_banner("🌍 完美地震！%s 全服 ×%.1f 加成 9 秒！" % [name, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"quake_perfect_end":
+			_show_lucky_banner("🌍 地震加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_volcano(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"volcano_erupt":
+			_show_lucky_banner("🌋 %s 觸發火山爆發！10 顆熔岩彈！" % name, Color(1.0, 0.27, 0.0), 2.5)
+			ScreenShake.add_trauma(0.8)
+		"volcano_perfect":
+			var mult = data.get("boost_mult", 4.2)
+			_show_lucky_banner("🌋 完美火山！%s 全服 ×%.1f 加成 10 秒！" % [name, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"volcano_perfect_end":
+			_show_lucky_banner("🌋 火山加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_cosmic_ray(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"cosmic_start":
+			_show_lucky_banner("✨ %s 觸發星際射線！8 方向光束！" % name, Color(0.6, 0.2, 1.0), 2.5)
+			ScreenShake.add_trauma(0.7)
+		"cosmic_perfect":
+			var mult = data.get("boost_mult", 4.5)
+			_show_lucky_banner("✨ 完美星際！%s 全服 ×%.1f 加成 10 秒！" % [name, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.9)
+		"cosmic_perfect_end":
+			_show_lucky_banner("✨ 星際加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_divine_dragon(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"dragon_descend":
+			_show_lucky_banner("🐉 %s 召喚神龍降臨！20 秒 5 次爪擊！" % name, Color(1.0, 0.85, 0.0), 3.0)
+			ScreenShake.add_trauma(0.9)
+		"dragon_claw":
+			var claw = data.get("claw_num", 1)
+			var hit = data.get("hit_count", 0)
+			_show_lucky_banner("🐉 神龍第 %d 爪！命中 %d 個目標！" % [claw, hit], Color(1.0, 0.85, 0.0), 1.5)
+			ScreenShake.add_trauma(0.6)
+		"dragon_perfect":
+			var mult = data.get("boost_mult", 5.0)
+			_show_lucky_banner("🐉 神龍完美！%s 全服 ×%.1f 加成 12 秒！" % [name, mult], Color(1.0, 0.85, 0.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+		"dragon_perfect_end":
+			_show_lucky_banner("🐉 神龍加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"dragon_leave":
+			_show_lucky_banner("🐉 神龍離去", Color(0.7, 0.7, 0.7), 1.5)

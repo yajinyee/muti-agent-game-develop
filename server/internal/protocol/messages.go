@@ -81,6 +81,13 @@ const (
 	MsgLuckyLegendDragon   = "lucky_legend_dragon"    // T138 傳說龍魚（龍息噴火）
 	MsgLuckyGuildWar       = "lucky_guild_war"        // T139 公會戰魚（全服積分）
 	MsgLuckyQualityFish    = "lucky_quality_fish"     // T140 品質魚（品質鑑定）
+
+	// DAY-306 新增幸運特殊魚事件
+	MsgLuckyTornado     = "lucky_tornado"      // T141 龍捲風魚（橫掃全場）
+	MsgLuckyEarthquake  = "lucky_earthquake"   // T142 地震魚（三波同心圓）
+	MsgLuckyVolcano     = "lucky_volcano"      // T143 火山魚（熔岩彈雨）
+	MsgLuckyCosmicRay   = "lucky_cosmic_ray"   // T144 星際魚（8方向光束）
+	MsgLuckyDivineDragon = "lucky_divine_dragon" // T145 神龍魚（神龍降臨）
 )
 // ── Envelope ─────────────────────────────────────────────────
 
@@ -673,4 +680,75 @@ type LuckyQualityFishPayload struct {
 	Reward     int     `json:"reward,omitempty"`
 	BoostMult  float64 `json:"boost_mult,omitempty"`
 	BoostSec   int     `json:"boost_sec,omitempty"`
+}
+
+// ── DAY-306 新增 Lucky 特殊魚 Payloads ───────────────────────
+
+// LuckyTornadoPayload T141 龍捲風魚（橫掃全場）
+type LuckyTornadoPayload struct {
+	Event      string  `json:"event"`                  // tornado_start / tornado_sweep / tornado_end / tornado_perfect / tornado_perfect_end
+	PlayerID   string  `json:"player_id"`
+	PlayerName string  `json:"player_name"`
+	Duration   float64 `json:"duration,omitempty"`
+	WaveNum    int     `json:"wave_num,omitempty"`
+	HitCount   int     `json:"hit_count,omitempty"`
+	KillCount  int     `json:"kill_count,omitempty"`
+	BoostMult  float64 `json:"boost_mult,omitempty"`
+	BoostSec   int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyEarthquakePayload T142 地震魚（三波同心圓）
+type LuckyEarthquakePayload struct {
+	Event         string  `json:"event"`                     // quake_warning / quake_wave / quake_end / quake_perfect / quake_perfect_end
+	PlayerID      string  `json:"player_id"`
+	PlayerName    string  `json:"player_name"`
+	WaveCount     int     `json:"wave_count,omitempty"`
+	WaveNum       int     `json:"wave_num,omitempty"`
+	DamagePct     float64 `json:"damage_pct,omitempty"`
+	HitCount      int     `json:"hit_count,omitempty"`
+	TotalHitCount int     `json:"total_hit_count,omitempty"`
+	BoostMult     float64 `json:"boost_mult,omitempty"`
+	BoostSec      int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyVolcanoPayload T143 火山魚（熔岩彈雨）
+type LuckyVolcanoPayload struct {
+	Event      string  `json:"event"`                  // volcano_erupt / lava_bomb / volcano_end / volcano_perfect / volcano_perfect_end
+	PlayerID   string  `json:"player_id"`
+	PlayerName string  `json:"player_name"`
+	BombCount  int     `json:"bomb_count,omitempty"`
+	BombNum    int     `json:"bomb_num,omitempty"`
+	BombX      float64 `json:"bomb_x,omitempty"`
+	BombY      float64 `json:"bomb_y,omitempty"`
+	HitCount   int     `json:"hit_count,omitempty"`
+	HitBombs   int     `json:"hit_bombs,omitempty"`
+	BoostMult  float64 `json:"boost_mult,omitempty"`
+	BoostSec   int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyCosmicRayPayload T144 星際魚（8方向光束）
+type LuckyCosmicRayPayload struct {
+	Event         string  `json:"event"`                     // cosmic_start / cosmic_ray / cosmic_end / cosmic_perfect / cosmic_perfect_end
+	PlayerID      string  `json:"player_id"`
+	PlayerName    string  `json:"player_name"`
+	RayCount      int     `json:"ray_count,omitempty"`
+	Direction     int     `json:"direction,omitempty"`       // 0-7（8方向）
+	HitCount      int     `json:"hit_count,omitempty"`
+	TotalHitCount int     `json:"total_hit_count,omitempty"`
+	BoostMult     float64 `json:"boost_mult,omitempty"`
+	BoostSec      int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyDivineDragonPayload T145 神龍魚（神龍降臨）
+type LuckyDivineDragonPayload struct {
+	Event        string  `json:"event"`                   // dragon_descend / dragon_claw / dragon_leave / dragon_perfect / dragon_perfect_end
+	PlayerID     string  `json:"player_id"`
+	PlayerName   string  `json:"player_name"`
+	Duration     float64 `json:"duration,omitempty"`
+	ClawCount    int     `json:"claw_count,omitempty"`
+	ClawNum      int     `json:"claw_num,omitempty"`
+	HitCount     int     `json:"hit_count,omitempty"`
+	PerfectClaws int     `json:"perfect_claws,omitempty"`
+	BoostMult    float64 `json:"boost_mult,omitempty"`
+	BoostSec     int     `json:"boost_sec,omitempty"`
 }

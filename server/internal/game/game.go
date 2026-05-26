@@ -97,6 +97,13 @@ type Game struct {
 	luckyGuildWar      *luckyGuildWarManager
 	luckyQualityFish   *luckyQualityFishManager
 
+	// DAY-306 新增
+	luckyTornado      *luckyTornadoManager
+	luckyEarthquake   *luckyEarthquakeManager
+	luckyVolcano      *luckyVolcanoManager
+	luckyCosmicRay    *luckyCosmicRayManager
+	luckyDivineDragon *luckyDivineDragonManager
+
 	lastTick time.Time
 }
 
@@ -160,6 +167,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyLegendDragon:  newLuckyLegendDragonManager(),
 		luckyGuildWar:      newLuckyGuildWarManager(),
 		luckyQualityFish:   newLuckyQualityFishManager(),
+
+		// DAY-306 新增
+		luckyTornado:      newLuckyTornadoManager(),
+		luckyEarthquake:   newLuckyEarthquakeManager(),
+		luckyVolcano:      newLuckyVolcanoManager(),
+		luckyCosmicRay:    newLuckyCosmicRayManager(),
+		luckyDivineDragon: newLuckyDivineDragonManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -513,6 +527,31 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if qualityLegendaryBoost > 1.0 {
 			effectiveMult *= qualityLegendaryBoost
 		}
+		// DAY-306 新增全服加成
+		tornadoPerfectBoost := g.luckyTornado.getTornadoPerfectMult()
+		if tornadoPerfectBoost > 1.0 {
+			effectiveMult *= tornadoPerfectBoost
+		}
+		earthquakePerfectBoost := g.luckyEarthquake.getEarthquakePerfectMult()
+		if earthquakePerfectBoost > 1.0 {
+			effectiveMult *= earthquakePerfectBoost
+		}
+		volcanoPerfectBoost := g.luckyVolcano.getVolcanoPerfectMult()
+		if volcanoPerfectBoost > 1.0 {
+			effectiveMult *= volcanoPerfectBoost
+		}
+		cosmicRayPerfectBoost := g.luckyCosmicRay.getCosmicRayPerfectMult()
+		if cosmicRayPerfectBoost > 1.0 {
+			effectiveMult *= cosmicRayPerfectBoost
+		}
+		divineDragonPerfectBoost := g.luckyDivineDragon.getDivineDragonPerfectMult()
+		if divineDragonPerfectBoost > 1.0 {
+			effectiveMult *= divineDragonPerfectBoost
+		}
+		// 龍捲風期間擊破計數
+		if g.luckyTornado.isTornadoActive() {
+			g.luckyTornado.notifyTornadoKill(g, playerID)
+		}
 
 		reward := int(float64(bet.BetCost) * effectiveMult)
 		result.Reward = reward
@@ -638,6 +677,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.tryLuckyGuildWarFish(playerID, killerName)
 			case isLuckyQualityFish(t.Def.ID):
 				g.tryLuckyQualityFish(playerID, killerName)
+			// DAY-306 新增
+			case isLuckyTornadoFish(t.Def.ID):
+				g.luckyTornado.tryLuckyTornadoFish(g, playerID, killerName)
+			case isLuckyEarthquakeFish(t.Def.ID):
+				g.luckyEarthquake.tryLuckyEarthquakeFish(g, playerID, killerName)
+			case isLuckyVolcanoFish(t.Def.ID):
+				g.luckyVolcano.tryLuckyVolcanoFish(g, playerID, killerName)
+			case isLuckyCosmicRayFish(t.Def.ID):
+				g.luckyCosmicRay.tryLuckyCosmicRayFish(g, playerID, killerName)
+			case isLuckyDivineDragonFish(t.Def.ID):
+				g.luckyDivineDragon.tryLuckyDivineDragonFish(g, playerID, killerName)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -1067,4 +1117,64 @@ func (g *Game) handleSetDisplayName(playerID string, name string) {
 		g.sendPlayerUpdate(playerID)
 		log.Printf("[Game] Player %s set display name: %s", playerID, name)
 	}
+}
+
+// ── DAY-306 輔助方法 ──────────────────────────────────────────
+
+// broadcast 廣播 Envelope（供 Lucky handler 使用）
+func (g *Game) broadcast(env protocol.Envelope) {
+	g.hub.Broadcast(env.Type, env.Payload)
+}
+
+// sendAnnounce 廣播公告（供 Lucky handler 使用）
+func (g *Game) sendAnnounce(msg, priority, color string) {
+	g.hub.Broadcast(protocol.MsgAnnounce, protocol.AnnouncePayload{
+		Message:  msg,
+		Priority: priority,
+		Color:    color,
+	})
+}
+
+// applyAOEDamage 對範圍內所有目標造成百分比傷害，回傳命中數
+// cx, cy: 中心座標（若 radius >= 99999 則全場）
+// radius: 影響半徑（像素）
+// pct: 傷害百分比（0.0-1.0）
+func (g *Game) applyAOEDamage(cx, cy, radius, pct float64) int {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	hitCount := 0
+	for _, t := range g.targets {
+		if t.Def.Type == "boss" {
+			continue // BOSS 不受 AOE 影響
+		}
+		// 距離判定
+		if radius < 99999 {
+			dx := t.X - cx
+			dy := t.Y - cy
+			if dx*dx+dy*dy > radius*radius {
+				continue
+			}
+		}
+		// 造成傷害
+		damage := int(float64(t.MaxHP) * pct)
+		if damage < 1 {
+			damage = 1
+		}
+		t.HP -= damage
+		if t.HP < 1 {
+			t.HP = 1
+		}
+		hitCount++
+
+		// 廣播 HP 更新
+		g.hub.Broadcast(protocol.MsgTargetUpdate, protocol.TargetUpdatePayload{
+			InstanceID: t.InstanceID,
+			HP:         t.HP,
+			MaxHP:      t.MaxHP,
+			X:          t.X,
+			Y:          t.Y,
+		})
+	}
+	return hitCount
 }

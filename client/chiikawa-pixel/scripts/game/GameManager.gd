@@ -58,6 +58,12 @@ signal lucky_humpback_whale(data: Dictionary)
 signal lucky_legend_dragon(data: Dictionary)
 signal lucky_guild_war(data: Dictionary)
 signal lucky_quality_fish(data: Dictionary)
+# DAY-306 新增幸運特殊魚訊號
+signal lucky_tornado(data: Dictionary)
+signal lucky_earthquake(data: Dictionary)
+signal lucky_volcano(data: Dictionary)
+signal lucky_cosmic_ray(data: Dictionary)
+signal lucky_divine_dragon(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -178,6 +184,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_guild_war", payload)
 		"lucky_quality_fish":
 			emit_signal("lucky_quality_fish", payload)
+		# DAY-306 新增幸運特殊魚事件
+		"lucky_tornado":
+			emit_signal("lucky_tornado", payload)
+		"lucky_earthquake":
+			emit_signal("lucky_earthquake", payload)
+		"lucky_volcano":
+			emit_signal("lucky_volcano", payload)
+		"lucky_cosmic_ray":
+			emit_signal("lucky_cosmic_ray", payload)
+		"lucky_divine_dragon":
+			emit_signal("lucky_divine_dragon", payload)
 		"pong":
 			pass
 		"error":

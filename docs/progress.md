@@ -1,13 +1,55 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-26（DAY-305 T136-T140 五個新 Lucky 魚系統 + GitHub 同步）
+## 最後更新：2026-05-26（DAY-306 T141-T145 五個新 Lucky 魚系統 + applyAOEDamage 輔助方法 + GitHub 同步）
 
-## DAY-305 更新（2026-05-26）：T136-T140 五個新 Lucky 魚系統 ✅
-- **業界研究：** Royal Fishing Jili「Dragon Wrath accumulates with every shot」、「Humpback Whale 90-150x」、「Legend Dragon 120-200x」；Fishing Frenzy Chapter 3「Guild Wars + Fish Quality tier system」
-- **T136 幸運龍怒蓄積魚 v2（260x）：** 業界依據：Royal Fishing「Dragon Wrath system」升級版
-  - 擊破後 30 秒蓄積怒氣，每次射擊 +1（最高 30 點）
-  - 30 秒後爆發隕石雨（隕石數 = 怒氣值，最少 5 顆），每顆 HP -45%
-  - 怒氣值 ≥ 20 → 「完美龍怒」：全服 ×3.5 加成 8 秒
+## DAY-306 更新（2026-05-26）：T141-T145 五個新 Lucky 魚系統 ✅
+- **業界研究：** Fishing Fortune 2026「Tornado sweep」、「Earthquake shockwave」、「Cosmic ray 8-directional beams」；Jili Games 2026「Volcano eruption」；Royal Fishing Jili「Divine Dragon descends from heavens」
+- **T141 幸運龍捲風魚（360x）：** 業界依據：Fishing Fortune 2026「Tornado sweep」
+  - 擊破後龍捲風橫掃 10 秒，每 2 秒全場 HP -40%（5 波）
+  - 龍捲風期間擊破 ≥8 → 完美龍捲風：全服 ×3.8 加成 9 秒
+- **T142 幸運地震魚（380x）：** 業界依據：Fishing Fortune 2026「Earthquake shockwave」
+  - 擊破後三波地震（HP -25%/-35%/-45%），三波命中 ≥12 → 完美地震全服 ×4.0
+- **T143 幸運火山魚（400x）：** 業界依據：Jili Games 2026「Volcano eruption」
+  - 擊破後 10 顆熔岩彈（HP -35%），全部命中 → 完美火山全服 ×4.2
+- **T144 幸運星際魚（420x）：** 業界依據：Fishing Fortune 2026「Cosmic ray」
+  - 擊破後 8 方向光束（HP -30%），命中 ≥16 → 完美星際全服 ×4.5
+- **T145 幸運神龍魚（450x）：** 業界依據：Royal Fishing Jili「Divine Dragon」
+  - 擊破後神龍降臨 20 秒（每 4 秒爪擊 HP -50%），5 次全部命中 ≥5 → 神龍完美全服 ×5.0
+- **Server：** 5 個獨立 handler 檔案 + game.go 整合 + protocol 新增 5 個訊息類型 + tables.go 新增 5 個目標
+  - `lucky_tornado_handler.go`：龍捲風橫掃系統
+  - `lucky_earthquake_handler.go`：三波地震系統
+  - `lucky_volcano_handler.go`：熔岩彈雨系統
+  - `lucky_cosmic_ray_handler.go`：8方向光束系統
+  - `lucky_divine_dragon_handler.go`：神龍降臨系統
+  - **新增 applyAOEDamage 輔助方法**（game.go）：統一 AOE 傷害計算，供所有 handler 使用
+  - **新增 broadcast/sendAnnounce 輔助方法**（game.go）：統一廣播介面
+- **Client：** 5 個新 Lucky Panel + GameManager 新增 5 個訊號 + HUD 新增 5 個事件處理 + TargetManager 新增 T141-T145 映射
+  - `LuckyTornadoPanel.gd`（layer=36）：青綠色 + 擊破計數器 + 完美演出
+  - `LuckyEarthquakePanel.gd`（layer=37）：棕橙色 + 三波指示器 + 命中計數
+  - `LuckyVolcanoPanel.gd`（layer=38）：火紅色 + 熔岩彈計數器 + 落點特效
+  - `LuckyCosmicRayPanel.gd`（layer=39）：紫色 + 8方向指示器 + 命中計數
+  - `LuckyDivineDragonPanel.gd`（layer=40）：金色 + 爪擊計數器 + 完美指示器
+- **美術：** T141-T145 精靈圖生成完成（`tools/generate_targets_day306.py`）
+  - T141（龍捲風魚）：青綠橢圓魚身 + 螺旋龍捲風紋路 + 青綠光環
+  - T142（地震魚）：棕橙圓形魚身 + Z字裂縫紋路 + 震波光環
+  - T143（火山魚）：火紅橢圓魚身 + 熔岩核心 + 4方向火焰光芒
+  - T144（星際魚）：紫色橢圓魚身 + 8方向光束 + 中心星形
+  - T145（神龍魚）：金色大型圓形魚身 + 龍鱗紋路 + 王冠 + 金色光環 + 紅色龍眼
+- **知識庫更新：** knowhow-log 條目 106（T141-T145 五個新 Lucky 魚系統）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-306）
+- **Server 目標物數量：** 52 種（T001-T006 + T101-T145 + B001）
+- **Lucky 系統數量：** 40 個（T106-T145）
+- **Client Lucky Panel 數量：** 46 個（含 BaseLuckyPanel + LuckyEventSystem）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 7/10
+- **視覺清晰度：** 7/10
+- **核心循環流暢度：** 8/10
+- **最需要改善：** T145 神龍魚的 Client 端爪擊視覺效果（需要在 Godot 中實際測試）
+
+
 - **T137 幸運座頭鯨魚（280x）：** 業界依據：Royal Fishing「Humpback Whale 90-150x」
   - 擊破後鯨歌共鳴 4 波（每 2 秒一波，HP -15%）
   - 命中越多下波傷害越高（每 3 個目標 +5%）

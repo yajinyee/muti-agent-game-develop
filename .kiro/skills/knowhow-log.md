@@ -4239,3 +4239,49 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
 - T136 龍怒蓄積：`isDragonWrathV2Active` 在 handleAttack 中呼叫（射擊時計數），不是 handleKill
 - T139 公會戰：`notifyGuildWarKill` 在 handleKill 中呼叫（擊破時計分）
 - T140 品質魚：獎勵直接在 `tryLuckyQualityFish` 中計算並發放，不走 handleKill 的 reward 流程
+
+## 106. DAY-306 T141-T145 五個新 Lucky 魚系統（2026-05-26）
+
+### 新增系統
+- **T141 幸運龍捲風魚（360x）：** 業界依據：Fishing Fortune 2026「Tornado sweep」
+  - 擊破後龍捲風橫掃 10 秒，每 2 秒全場 HP -40%（5 波）
+  - 龍捲風期間擊破 ≥8 → 完美龍捲風：全服 ×3.8 加成 9 秒
+  - 個人冷卻 30 秒；全服冷卻 50 秒
+- **T142 幸運地震魚（380x）：** 業界依據：Fishing Fortune 2026「Earthquake shockwave」
+  - 擊破後三波地震（HP -25%/-35%/-45%，每 3 秒一波）
+  - 三波命中總數 ≥12 → 完美地震：全服 ×4.0 加成 9 秒
+  - 個人冷卻 32 秒；全服冷卻 52 秒
+- **T143 幸運火山魚（400x）：** 業界依據：Jili Games 2026「Volcano eruption」
+  - 擊破後 10 顆熔岩彈隨機落下（每 0.8 秒一顆，AOE r=140px，HP -35%）
+  - 10 顆全部命中 → 完美火山：全服 ×4.2 加成 10 秒
+  - 個人冷卻 34 秒；全服冷卻 55 秒
+- **T144 幸運星際魚（420x）：** 業界依據：Fishing Fortune 2026「Cosmic ray 8-directional beams」
+  - 擊破後 8 方向光束掃射（每 0.5 秒一道，HP -30%）
+  - 8 方向命中總數 ≥16 → 完美星際：全服 ×4.5 加成 10 秒
+  - 個人冷卻 36 秒；全服冷卻 58 秒
+- **T145 幸運神龍魚（450x）：** 業界依據：Royal Fishing Jili「Divine Dragon descends from heavens」
+  - 擊破後神龍降臨 20 秒，每 4 秒爪擊（全場 HP -50%）
+  - 5 次爪擊全部命中 ≥5 個目標 → 神龍完美：全服 ×5.0 加成 12 秒
+  - 個人冷卻 40 秒；全服冷卻 65 秒
+
+### 技術重點
+- **applyAOEDamage 輔助方法：** 在 game.go 新增，供所有 Lucky handler 使用
+  - 參數：cx, cy（中心），radius（半徑，≥99999 表示全場），pct（傷害百分比）
+  - 自動廣播 HP 更新，回傳命中數
+  - BOSS 不受 AOE 影響（保護 BOSS 戰體驗）
+- **broadcast/sendAnnounce 輔助方法：** 統一廣播介面，讓 handler 不需要直接操作 hub
+- **go.mu.Lock 注意：** applyAOEDamage 內部已加鎖，handler 呼叫時不能在鎖內呼叫（否則死鎖）
+- **精靈圖生成：** `tools/generate_targets_day306.py`，純 Python 標準庫（struct + zlib），不需要 Pillow
+
+### 教訓
+- 新增 Lucky handler 時，要同時更新：
+  1. `server/internal/game/lucky_xxx_handler.go`（handler 邏輯）
+  2. `server/internal/protocol/messages.go`（訊息常數 + Payload 定義）
+  3. `server/internal/data/tables.go`（目標物定義）
+  4. `server/internal/game/game.go`（Game struct + NewGame + handleKill + effectiveMult）
+  5. `client/scripts/game/GameManager.gd`（訊號定義 + 訊息處理）
+  6. `client/scripts/game/TargetManager.gd`（Sprite 路徑 + 備用顏色 + Lucky badge 範圍）
+  7. `client/scripts/ui/HUD.gd`（訊號連接 + handler 函數）
+  8. `client/scripts/ui/LuckyXxxPanel.gd`（新建 Panel 腳本）
+  9. `tools/generate_targets_dayXXX.py`（精靈圖生成）
+- 缺少任何一個步驟都會導致功能不完整

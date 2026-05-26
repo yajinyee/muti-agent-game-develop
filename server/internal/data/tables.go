@@ -198,6 +198,18 @@ var Targets = []TargetDef{
 	// T140 幸運品質魚：擊破後品質鑑定（Common/Rare/Epic/Legendary），Legendary → 傳說品質全服 ×5.0
 	{ID: "T140", Name: "幸運品質魚", Type: TypeSpecial, Multiplier: 350, HP: 360, SpawnWeight: 1, Speed: 70, Lifetime: 16, LaborGain: 70, Behavior: BehaviorLinear, DiffFactor: 1.0},
 
+	// ── DAY-306 新增特殊目標（360x-450x）────────────────────────
+	// T141 幸運龍捲風魚：擊破後龍捲風橫掃 10 秒（每 2 秒 HP -40%），擊破 ≥8 → 完美龍捲風全服 ×3.8
+	{ID: "T141", Name: "幸運龍捲風魚", Type: TypeSpecial, Multiplier: 360, HP: 380, SpawnWeight: 1, Speed: 75, Lifetime: 16, LaborGain: 72, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T142 幸運地震魚：擊破後三波地震（HP -25%/-35%/-45%），三波命中 ≥12 → 完美地震全服 ×4.0
+	{ID: "T142", Name: "幸運地震魚", Type: TypeSpecial, Multiplier: 380, HP: 400, SpawnWeight: 1, Speed: 60, Lifetime: 18, LaborGain: 76, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T143 幸運火山魚：擊破後 10 顆熔岩彈（HP -35%），全部命中 → 完美火山全服 ×4.2
+	{ID: "T143", Name: "幸運火山魚", Type: TypeSpecial, Multiplier: 400, HP: 420, SpawnWeight: 1, Speed: 65, Lifetime: 18, LaborGain: 80, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T144 幸運星際魚：擊破後 8 方向光束（HP -30%），命中 ≥16 → 完美星際全服 ×4.5
+	{ID: "T144", Name: "幸運星際魚", Type: TypeSpecial, Multiplier: 420, HP: 440, SpawnWeight: 1, Speed: 70, Lifetime: 16, LaborGain: 84, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T145 幸運神龍魚：擊破後神龍降臨 20 秒（每 4 秒爪擊 HP -50%），5 次全部命中 ≥5 → 神龍完美全服 ×5.0
+	{ID: "T145", Name: "幸運神龍魚", Type: TypeSpecial, Multiplier: 450, HP: 480, SpawnWeight: 1, Speed: 50, Lifetime: 22, LaborGain: 90, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }
