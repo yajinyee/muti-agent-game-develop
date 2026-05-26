@@ -91,6 +91,12 @@ func _ready() -> void:
 	GameManager.lucky_black_hole.connect(_on_lucky_black_hole)
 	GameManager.lucky_bounty_hunter.connect(_on_lucky_bounty_hunter)
 	GameManager.lucky_tsunami.connect(_on_lucky_tsunami)
+	# DAY-305 新增幸運特殊魚訊號連接
+	GameManager.lucky_dragon_wrath_v2.connect(_on_lucky_dragon_wrath_v2)
+	GameManager.lucky_humpback_whale.connect(_on_lucky_humpback_whale)
+	GameManager.lucky_legend_dragon.connect(_on_lucky_legend_dragon)
+	GameManager.lucky_guild_war.connect(_on_lucky_guild_war)
+	GameManager.lucky_quality_fish.connect(_on_lucky_quality_fish)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1182,3 +1188,102 @@ func _on_lucky_tsunami(data: Dictionary) -> void:
 			_show_lucky_banner("🌊 完美海嘯加成結束", Color(0.7, 0.7, 0.7), 1.5)
 		"tsunami_end":
 			pass
+
+# ── DAY-305 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_dragon_wrath_v2(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"wrath_start":
+			_show_lucky_event("dragon_wrath_v2", "🐉 %s 觸發龍怒蓄積！30 秒內射擊蓄積怒氣！" % name)
+			ScreenShake.add_trauma(0.4)
+		"wrath_explode":
+			var wrath = data.get("wrath_value", 0)
+			var meteors = data.get("meteor_count", 0)
+			_show_lucky_banner("🐉 龍怒爆發！%s 怒氣 %d！%d 顆隕石！" % [name, wrath, meteors], Color(1.0, 0.27, 0.0), 2.5)
+			ScreenShake.add_trauma(0.7)
+		"wrath_perfect":
+			var wrath = data.get("wrath_value", 0)
+			_show_lucky_banner("🐉✨ 完美龍怒！%s 怒氣 %d！全服 ×3.5 加成 8 秒！" % [name, wrath], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.9)
+		"wrath_perfect_end":
+			_show_lucky_banner("🐉 完美龍怒加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_humpback_whale(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"song_start":
+			_show_lucky_event("humpback_whale", "🐋 %s 觸發鯨歌共鳴！四波聲波即將衝擊！" % name)
+			ScreenShake.add_trauma(0.3)
+		"song_wave":
+			var wave_num = data.get("wave_num", 1)
+			var hit_count = data.get("hit_count", 0)
+			_show_lucky_banner("🐋 第 %d 波！命中 %d 條！" % [wave_num, hit_count], Color(0.0, 0.7, 1.0), 1.5)
+			ScreenShake.add_trauma(0.3)
+		"song_perfect":
+			var total = data.get("total_hit_count", 0)
+			_show_lucky_banner("🐋✨ 完美鯨歌！%s 四波命中 %d 條！全服 ×3.0 加成 8 秒！" % [name, total], Color(0.0, 0.9, 1.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+		"song_perfect_end":
+			_show_lucky_banner("🐋 完美鯨歌加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_legend_dragon(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"dragon_appear":
+			_show_lucky_event("legend_dragon", "🐲 %s 觸發傳說龍降臨！15 秒內 4 次噴火！" % name)
+			ScreenShake.add_trauma(0.5)
+		"dragon_breath":
+			var breath_num = data.get("breath_num", 1)
+			var hit_count = data.get("hit_count", 0)
+			_show_lucky_banner("🔥 第 %d 次噴火！命中 %d 條！HP -35%%！" % [breath_num, hit_count], Color(1.0, 0.2, 0.0), 1.5)
+			ScreenShake.add_trauma(0.4)
+		"dragon_rage":
+			_show_lucky_banner("🐲✨ 傳說龍怒！%s 完美噴火！全服 ×4.0 加成 10 秒！" % name, Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"dragon_rage_end":
+			_show_lucky_banner("🐲 傳說龍怒加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_guild_war(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"war_start":
+			var target = data.get("target_points", 15)
+			_show_lucky_event("guild_war", "⚔️ %s 觸發公會戰！30 秒內達成 %d 積分！" % [name, target])
+			ScreenShake.add_trauma(0.3)
+		"war_progress":
+			var current = data.get("current_points", 0)
+			var target = data.get("target_points", 15)
+			_update_lucky_indicator("⚔️ 公會戰", "%d/%d 積分" % [current, target], float(current) / float(target), Color(1.0, 0.85, 0.0))
+		"war_victory":
+			_hide_lucky_indicator()
+			var points = data.get("current_points", 0)
+			_show_lucky_banner("⚔️✨ 公會勝利！達成 %d 積分！全服 ×4.5 加成 10 秒！" % points, Color(1.0, 0.5, 0.0), 3.5)
+			ScreenShake.add_trauma(0.9)
+		"war_victory_end":
+			_show_lucky_banner("⚔️ 公會勝利加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"war_timeout":
+			_hide_lucky_indicator()
+
+func _on_lucky_quality_fish(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"quality_result":
+			var tier_name = data.get("tier_name", "Common")
+			var tier_mult = data.get("tier_mult", 2.0)
+			var reward = data.get("reward", 0)
+			var tier_colors = {"Common": Color(0.7,0.7,0.7), "Rare": Color(0.0,0.5,1.0), "Epic": Color(0.6,0.0,1.0), "Legendary": Color(1.0,0.85,0.0)}
+			var color = tier_colors.get(tier_name, Color(0.7,0.7,0.7))
+			_show_lucky_banner("✨ %s 品質鑑定！%s！×%.0f！獎勵 %d！" % [name, tier_name, tier_mult, reward], color, 2.5)
+			if tier_name == "Legendary":
+				ScreenShake.add_trauma(0.8)
+		"legendary_boost":
+			_show_lucky_banner("✨ 傳說品質！%s 抽到 LEGENDARY！全服 ×5.0 加成 12 秒！" % name, Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"legendary_end":
+			_show_lucky_banner("✨ 傳說品質加成結束", Color(0.7, 0.7, 0.7), 1.5)

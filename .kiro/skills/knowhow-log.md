@@ -4213,3 +4213,29 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
 - T133 黑洞：59.9%（最高，黑洞核心 + 吸積盤填充多）
 - T134 賞金獵人：32.6%（橢圓魚身 + 賞金標記）
 - T135 海嘯：47.6%（魚身 + 三波浪光環）
+
+## 105. DAY-305 T136-T140 五個新 Lucky 魚系統（2026-05-26）
+
+### 業界研究成果
+- **Royal Fishing Jili「Dragon Wrath」**：每次射擊蓄積怒氣，怒氣滿後爆發隕石雨，同時攻擊多條魚
+- **Royal Fishing Jili「Humpback Whale 90-150x」**：15x 基礎倍率，聲波攻擊機制
+- **Royal Fishing Jili「Legend Dragon 120-200x」**：20x 基礎倍率，噴火攻擊機制
+- **Fishing Frenzy Chapter 3「Guild Wars」**：公會 10 人合作，地圖控制，BOSS 魚戰鬥
+- **Fishing Frenzy Chapter 3「Fish Quality tier system」**：每次捕獲都有品質值，增加變化性
+
+### 新機制設計原則
+1. **T136 龍怒 v2**：「射擊蓄積 + 爆發」— 比 T248 更強（30 點 vs 20 點），隕石傷害更高（-45% vs -50%）
+2. **T137 座頭鯨**：「四波遞增傷害」— 命中越多下波越強，製造正向反饋循環
+3. **T138 傳說龍**：「噴火計數 + 完美條件」— 4 次全部命中 ≥3 個，難度高但獎勵最高（×4.0）
+4. **T139 公會戰**：「全服積分 + 動態目標」— 玩家數越多目標越高，製造社交感
+5. **T140 品質魚**：「隨機品質抽獎」— 5% Legendary 機率，製造驚喜感
+
+### Go 技術要點
+- **品質抽獎 rollQualityTier()**：加權隨機，不需要外部套件
+- **動態積分目標**：依 `len(g.players)` 動態調整，公平性設計
+- **龍怒蓄積 addWrathV2()**：每次射擊（不是擊破）都計數，需要在 handleAttack 中呼叫
+
+### 注意事項
+- T136 龍怒蓄積：`isDragonWrathV2Active` 在 handleAttack 中呼叫（射擊時計數），不是 handleKill
+- T139 公會戰：`notifyGuildWarKill` 在 handleKill 中呼叫（擊破時計分）
+- T140 品質魚：獎勵直接在 `tryLuckyQualityFish` 中計算並發放，不走 handleKill 的 reward 流程

@@ -1,6 +1,45 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-26（DAY-304 T131-T135 五個新 Lucky 魚系統 + GitHub 同步）
+## 最後更新：2026-05-26（DAY-305 T136-T140 五個新 Lucky 魚系統 + GitHub 同步）
+
+## DAY-305 更新（2026-05-26）：T136-T140 五個新 Lucky 魚系統 ✅
+- **業界研究：** Royal Fishing Jili「Dragon Wrath accumulates with every shot」、「Humpback Whale 90-150x」、「Legend Dragon 120-200x」；Fishing Frenzy Chapter 3「Guild Wars + Fish Quality tier system」
+- **T136 幸運龍怒蓄積魚 v2（260x）：** 業界依據：Royal Fishing「Dragon Wrath system」升級版
+  - 擊破後 30 秒蓄積怒氣，每次射擊 +1（最高 30 點）
+  - 30 秒後爆發隕石雨（隕石數 = 怒氣值，最少 5 顆），每顆 HP -45%
+  - 怒氣值 ≥ 20 → 「完美龍怒」：全服 ×3.5 加成 8 秒
+- **T137 幸運座頭鯨魚（280x）：** 業界依據：Royal Fishing「Humpback Whale 90-150x」
+  - 擊破後鯨歌共鳴 4 波（每 2 秒一波，HP -15%）
+  - 命中越多下波傷害越高（每 3 個目標 +5%）
+  - 4 波命中總數 ≥ 20 → 「完美鯨歌」：全服 ×3.0 加成 8 秒
+- **T138 幸運傳說龍魚（300x）：** 業界依據：Royal Fishing「Legend Dragon 120-200x」
+  - 擊破後傳說龍降臨 15 秒，每 3 秒噴火（HP -35%）
+  - 4 次噴火全部命中 ≥ 3 個目標 → 「傳說龍怒」：全服 ×4.0 加成 10 秒
+- **T139 幸運公會戰魚（320x）：** 業界依據：Fishing Frenzy Chapter 3「Guild Wars」
+  - 擊破後全服 30 秒積分挑戰（動態目標：1人=15分, 2人=22分, 4人=35分）
+  - 達成積分目標 → 「公會勝利」：全服 ×4.5 加成 10 秒
+- **T140 幸運品質魚（350x）：** 業界依據：Fishing Frenzy Chapter 3「Fish Quality tier system」
+  - 擊破後品質鑑定（Common 50%/Rare 30%/Epic 15%/Legendary 5%）
+  - 倍率：Common ×2.0 / Rare ×5.0 / Epic ×15.0 / Legendary ×50.0
+  - 抽到 Legendary → 「傳說品質」：全服 ×5.0 加成 12 秒
+- **Server：** 5 個獨立 handler 檔案 + game.go 整合 + protocol 新增 5 個訊息類型 + tables.go 新增 5 個目標
+- **Client：** 5 個新 Lucky Panel + GameManager 新增 5 個訊號 + HUD 新增 5 個事件處理 + TargetManager 新增 T136-T140 映射
+- **美術：** T136-T140 精靈圖生成完成（30-57% 非透明像素）
+- **知識庫更新：** knowhow-log 條目 105（T136-T140 五個新 Lucky 魚系統）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-305）
+- **Server 目標物數量：** 47 種（T001-T006 + T101-T140 + B001）
+- **Lucky 系統數量：** 35 個（T106-T140）
+- **Client Lucky Panel 數量：** 41 個（含 BaseLuckyPanel + LuckyEventSystem）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 7/10
+- **視覺清晰度：** 7/10
+- **核心循環流暢度：** 8/10
+- **最需要改善：** T140 品質魚的 Legendary 演出視覺效果（需要在 Godot 中實際測試）
+
+
 
 ## DAY-304 更新（2026-05-26）：T131-T135 五個新 Lucky 魚系統 ✅
 - **業界研究：** 搜尋 Royal Fishing Jili、Jili Games、Fishing Fortune 2026 最新機制

@@ -55,6 +55,12 @@ const TARGET_SPRITES = {
 	"T133": "res://assets/sprites/targets/T133_black_hole.png",
 	"T134": "res://assets/sprites/targets/T134_bounty_hunter.png",
 	"T135": "res://assets/sprites/targets/T135_tsunami.png",
+	# DAY-305 新增特殊目標
+	"T136": "res://assets/sprites/targets/T136_dragon_wrath_v2.png",
+	"T137": "res://assets/sprites/targets/T137_humpback_whale.png",
+	"T138": "res://assets/sprites/targets/T138_legend_dragon.png",
+	"T139": "res://assets/sprites/targets/T139_guild_war.png",
+	"T140": "res://assets/sprites/targets/T140_quality_fish.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -110,6 +116,12 @@ const TARGET_COLORS = {
 	"T133": Color(0.3, 0.0, 0.5),   # 深紫黑洞魚
 	"T134": Color(1.0, 0.5, 0.0),   # 火橙賞金獵人魚
 	"T135": Color(0.0, 0.5, 1.0),   # 深藍海嘯魚
+	# DAY-305 新增特殊目標備用顏色
+	"T136": Color(1.0, 0.27, 0.0),  # 火橙龍怒蓄積魚
+	"T137": Color(0.0, 0.4, 0.8),   # 深藍座頭鯨魚
+	"T138": Color(1.0, 0.5, 0.0),   # 金橙傳說龍魚
+	"T139": Color(1.0, 0.85, 0.0),  # 金色公會戰魚
+	"T140": Color(0.6, 0.0, 1.0),   # 紫色品質魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
@@ -231,10 +243,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T135）
+	# Lucky 特殊魚標記（T106-T140）
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 135:
+		if tid_num >= 106 and tid_num <= 140:
 			_add_lucky_badge(container, def_id)
 
 	# 特殊搖晃（T103 流星、T104 金草）

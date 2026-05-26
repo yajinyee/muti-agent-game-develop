@@ -186,6 +186,18 @@ var Targets = []TargetDef{
 	// T135 幸運海嘯魚：擊破後三波海嘯（HP -20%/-30%/-40%），三波命中 ≥5 → 完美海嘯全服 ×3.2
 	{ID: "T135", Name: "幸運海嘯魚", Type: TypeSpecial, Multiplier: 250, HP: 260, SpawnWeight: 1, Speed: 65, Lifetime: 18, LaborGain: 50, Behavior: BehaviorLinear, DiffFactor: 1.0},
 
+	// ── DAY-305 新增特殊目標（260x-350x）────────────────────────
+	// T136 幸運龍怒蓄積魚 v2：擊破後 30 秒蓄積怒氣，每次射擊 +1（最高 30），爆發隕石雨，怒氣 ≥20 → 完美龍怒全服 ×3.5
+	{ID: "T136", Name: "幸運龍怒蓄積魚", Type: TypeSpecial, Multiplier: 260, HP: 280, SpawnWeight: 1, Speed: 70, Lifetime: 18, LaborGain: 52, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T137 幸運座頭鯨魚：擊破後鯨歌共鳴 4 波（每波 HP -15%，命中越多下波傷害越高），命中 ≥20 → 完美鯨歌全服 ×3.0
+	{ID: "T137", Name: "幸運座頭鯨魚", Type: TypeSpecial, Multiplier: 280, HP: 300, SpawnWeight: 1, Speed: 55, Lifetime: 20, LaborGain: 56, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T138 幸運傳說龍魚：擊破後傳說龍降臨 15 秒，每 3 秒噴火（HP -35%），4 次全部命中 ≥3 → 傳說龍怒全服 ×4.0
+	{ID: "T138", Name: "幸運傳說龍魚", Type: TypeSpecial, Multiplier: 300, HP: 320, SpawnWeight: 1, Speed: 60, Lifetime: 20, LaborGain: 60, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T139 幸運公會戰魚：擊破後全服 30 秒積分挑戰，達成積分目標 → 公會勝利全服 ×4.5
+	{ID: "T139", Name: "幸運公會戰魚", Type: TypeSpecial, Multiplier: 320, HP: 340, SpawnWeight: 1, Speed: 65, Lifetime: 18, LaborGain: 64, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T140 幸運品質魚：擊破後品質鑑定（Common/Rare/Epic/Legendary），Legendary → 傳說品質全服 ×5.0
+	{ID: "T140", Name: "幸運品質魚", Type: TypeSpecial, Multiplier: 350, HP: 360, SpawnWeight: 1, Speed: 70, Lifetime: 16, LaborGain: 70, Behavior: BehaviorLinear, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

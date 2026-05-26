@@ -74,8 +74,14 @@ const (
 	MsgLuckyBlackHole    = "lucky_black_hole"    // T133 黑洞魚（吸引+坍縮）
 	MsgLuckyBountyHunter = "lucky_bounty_hunter" // T134 賞金獵人魚（賞金目標系統）
 	MsgLuckyTsunami      = "lucky_tsunami"       // T135 海嘯魚（三波衝擊）
-)
 
+	// DAY-305 新增幸運特殊魚事件
+	MsgLuckyDragonWrathV2  = "lucky_dragon_wrath_v2"  // T136 龍怒蓄積魚 v2（升級版）
+	MsgLuckyHumpbackWhale  = "lucky_humpback_whale"   // T137 座頭鯨魚（鯨歌共鳴）
+	MsgLuckyLegendDragon   = "lucky_legend_dragon"    // T138 傳說龍魚（龍息噴火）
+	MsgLuckyGuildWar       = "lucky_guild_war"        // T139 公會戰魚（全服積分）
+	MsgLuckyQualityFish    = "lucky_quality_fish"     // T140 品質魚（品質鑑定）
+)
 // ── Envelope ─────────────────────────────────────────────────
 
 // Envelope は WebSocket の送受信フォーマット
@@ -598,4 +604,73 @@ type LuckyTsunamiPayload struct {
 	TotalHitCount int     `json:"total_hit_count,omitempty"` // 三波累積命中數
 	BoostMult     float64 `json:"boost_mult,omitempty"`      // 完美海嘯加成倍率
 	BoostSec      int     `json:"boost_sec,omitempty"`       // 加成秒數
+}
+
+// ── DAY-305 新增 Lucky 特殊魚 Payloads ───────────────────────
+
+// LuckyDragonWrathV2Payload T136 龍怒蓄積魚 v2
+type LuckyDragonWrathV2Payload struct {
+	Event       string  `json:"event"`        // wrath_start / wrath_explode / wrath_perfect / wrath_perfect_end / wrath_end
+	PlayerID    string  `json:"player_id"`
+	PlayerName  string  `json:"player_name"`
+	Duration    float64 `json:"duration,omitempty"`
+	MaxWrath    int     `json:"max_wrath,omitempty"`
+	WrathValue  int     `json:"wrath_value,omitempty"`
+	MeteorCount int     `json:"meteor_count,omitempty"`
+	HitCount    int     `json:"hit_count,omitempty"`
+	BoostMult   float64 `json:"boost_mult,omitempty"`
+	BoostSec    int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyHumpbackWhalePayload T137 座頭鯨魚（鯨歌共鳴）
+type LuckyHumpbackWhalePayload struct {
+	Event         string  `json:"event"`                     // song_start / song_wave / song_perfect / song_perfect_end / song_end
+	PlayerID      string  `json:"player_id"`
+	PlayerName    string  `json:"player_name"`
+	WaveCount     int     `json:"wave_count,omitempty"`
+	WaveNum       int     `json:"wave_num,omitempty"`
+	HitCount      int     `json:"hit_count,omitempty"`
+	DamagePct     float64 `json:"damage_pct,omitempty"`
+	TotalHitCount int     `json:"total_hit_count,omitempty"`
+	BoostMult     float64 `json:"boost_mult,omitempty"`
+	BoostSec      int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyLegendDragonPayload T138 傳說龍魚（龍息噴火）
+type LuckyLegendDragonPayload struct {
+	Event          string  `json:"event"`                      // dragon_appear / dragon_breath / dragon_rage / dragon_rage_end / dragon_leave
+	PlayerID       string  `json:"player_id"`
+	PlayerName     string  `json:"player_name"`
+	Duration       float64 `json:"duration,omitempty"`
+	BreathNum      int     `json:"breath_num,omitempty"`
+	HitCount       int     `json:"hit_count,omitempty"`
+	PerfectBreaths int     `json:"perfect_breaths,omitempty"`
+	BoostMult      float64 `json:"boost_mult,omitempty"`
+	BoostSec       int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyGuildWarPayload T139 公會戰魚（全服積分）
+type LuckyGuildWarPayload struct {
+	Event         string  `json:"event"`                    // war_start / war_progress / war_victory / war_victory_end / war_timeout
+	PlayerID      string  `json:"player_id"`
+	PlayerName    string  `json:"player_name"`
+	TargetPoints  int     `json:"target_points,omitempty"`
+	CurrentPoints int     `json:"current_points,omitempty"`
+	Duration      float64 `json:"duration,omitempty"`
+	KillerID      string  `json:"killer_id,omitempty"`
+	KillerName    string  `json:"killer_name,omitempty"`
+	BoostMult     float64 `json:"boost_mult,omitempty"`
+	BoostSec      int     `json:"boost_sec,omitempty"`
+}
+
+// LuckyQualityFishPayload T140 品質魚（品質鑑定）
+type LuckyQualityFishPayload struct {
+	Event      string  `json:"event"`        // quality_result / legendary_boost / legendary_end
+	PlayerID   string  `json:"player_id"`
+	PlayerName string  `json:"player_name"`
+	TierName   string  `json:"tier_name,omitempty"`   // Common / Rare / Epic / Legendary
+	TierMult   float64 `json:"tier_mult,omitempty"`
+	Reward     int     `json:"reward,omitempty"`
+	BoostMult  float64 `json:"boost_mult,omitempty"`
+	BoostSec   int     `json:"boost_sec,omitempty"`
 }

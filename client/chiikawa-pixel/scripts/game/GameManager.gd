@@ -52,6 +52,12 @@ signal lucky_angler_fish(data: Dictionary)
 signal lucky_black_hole(data: Dictionary)
 signal lucky_bounty_hunter(data: Dictionary)
 signal lucky_tsunami(data: Dictionary)
+# DAY-305 新增幸運特殊魚訊號
+signal lucky_dragon_wrath_v2(data: Dictionary)
+signal lucky_humpback_whale(data: Dictionary)
+signal lucky_legend_dragon(data: Dictionary)
+signal lucky_guild_war(data: Dictionary)
+signal lucky_quality_fish(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -161,6 +167,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_bounty_hunter", payload)
 		"lucky_tsunami":
 			emit_signal("lucky_tsunami", payload)
+		# DAY-305 新增幸運特殊魚事件
+		"lucky_dragon_wrath_v2":
+			emit_signal("lucky_dragon_wrath_v2", payload)
+		"lucky_humpback_whale":
+			emit_signal("lucky_humpback_whale", payload)
+		"lucky_legend_dragon":
+			emit_signal("lucky_legend_dragon", payload)
+		"lucky_guild_war":
+			emit_signal("lucky_guild_war", payload)
+		"lucky_quality_fish":
+			emit_signal("lucky_quality_fish", payload)
 		"pong":
 			pass
 		"error":

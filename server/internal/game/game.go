@@ -90,6 +90,13 @@ type Game struct {
 	luckyBountyHunter *luckyBountyHunterManager
 	luckyTsunami      *luckyTsunamiManager
 
+	// DAY-305 新增
+	luckyDragonWrathV2 *luckyDragonWrathV2Manager
+	luckyHumpbackWhale *luckyHumpbackWhaleManager
+	luckyLegendDragon  *luckyLegendDragonManager
+	luckyGuildWar      *luckyGuildWarManager
+	luckyQualityFish   *luckyQualityFishManager
+
 	lastTick time.Time
 }
 
@@ -146,6 +153,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyBlackHole:    newLuckyBlackHoleManager(),
 		luckyBountyHunter: newLuckyBountyHunterManager(),
 		luckyTsunami:      newLuckyTsunamiManager(),
+
+		// DAY-305 新增
+		luckyDragonWrathV2: newLuckyDragonWrathV2Manager(),
+		luckyHumpbackWhale: newLuckyHumpbackWhaleManager(),
+		luckyLegendDragon:  newLuckyLegendDragonManager(),
+		luckyGuildWar:      newLuckyGuildWarManager(),
+		luckyQualityFish:   newLuckyQualityFishManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -478,6 +492,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if tsunamiPerfectBoost > 1.0 {
 			effectiveMult *= tsunamiPerfectBoost
 		}
+		// DAY-305 新增全服加成
+		dragonWrathV2Boost := g.luckyDragonWrathV2.getDragonWrathV2PerfectMult()
+		if dragonWrathV2Boost > 1.0 {
+			effectiveMult *= dragonWrathV2Boost
+		}
+		whaleSongBoost := g.luckyHumpbackWhale.getWhaleSongMult()
+		if whaleSongBoost > 1.0 {
+			effectiveMult *= whaleSongBoost
+		}
+		legendDragonBoost := g.luckyLegendDragon.getLegendDragonRageMult()
+		if legendDragonBoost > 1.0 {
+			effectiveMult *= legendDragonBoost
+		}
+		guildWarBoost := g.luckyGuildWar.getGuildWarVictoryMult()
+		if guildWarBoost > 1.0 {
+			effectiveMult *= guildWarBoost
+		}
+		qualityLegendaryBoost := g.luckyQualityFish.getQualityLegendaryMult()
+		if qualityLegendaryBoost > 1.0 {
+			effectiveMult *= qualityLegendaryBoost
+		}
 
 		reward := int(float64(bet.BetCost) * effectiveMult)
 		result.Reward = reward
@@ -592,6 +627,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.tryLuckyBountyHunterFish(playerID, killerName)
 			case isLuckyTsunamiFish(t.Def.ID):
 				g.tryLuckyTsunamiFish(playerID, killerName)
+			// DAY-305 新增
+			case isLuckyDragonWrathV2Fish(t.Def.ID):
+				g.tryLuckyDragonWrathV2Fish(playerID, killerName)
+			case isLuckyHumpbackWhaleFish(t.Def.ID):
+				g.tryLuckyHumpbackWhaleFish(playerID, killerName)
+			case isLuckyLegendDragonFish(t.Def.ID):
+				g.tryLuckyLegendDragonFish(playerID, killerName)
+			case isLuckyGuildWarFish(t.Def.ID):
+				g.tryLuckyGuildWarFish(playerID, killerName)
+			case isLuckyQualityFish(t.Def.ID):
+				g.tryLuckyQualityFish(playerID, killerName)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -624,6 +670,14 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			// DAY-304 賞金獵人：賞金目標擊破通知
 			if g.luckyBountyHunter.isBountyTarget(t.InstanceID) {
 				g.notifyBountyKill(t.InstanceID, playerID, killerName)
+			}
+			// DAY-305 龍怒蓄積：射擊計數
+			if g.luckyDragonWrathV2.isDragonWrathV2Active(playerID) {
+				g.luckyDragonWrathV2.addWrathV2(playerID)
+			}
+			// DAY-305 公會戰：擊破計數
+			if g.luckyGuildWar.isGuildWarActive() {
+				g.notifyGuildWarKill(playerID, killerName)
 			}
 		}
 
