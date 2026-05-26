@@ -111,6 +111,13 @@ type Game struct {
 	luckyGenesis  *luckyGenesisManager
 	luckyRebirth  *luckyRebirthManager
 
+	// DAY-308 新增
+	luckyAwakenedCroc *luckyAwakenedCrocManager
+	luckyVampireV2    *luckyVampireV2Manager
+	luckySuperAwaken  *luckySuperAwakenManager
+	luckyGiantPrize   *luckyGiantPrizeManager
+	luckyImmortalBoss *luckyImmortalBossManager
+
 	lastTick time.Time
 }
 
@@ -188,6 +195,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyInfinite:  newLuckyInfiniteManager(),
 		luckyGenesis:   newLuckyGenesisManager(),
 		luckyRebirth:   newLuckyRebirthManager(),
+
+		// DAY-308 新增
+		luckyAwakenedCroc: newLuckyAwakenedCrocManager(),
+		luckyVampireV2:    newLuckyVampireV2Manager(),
+		luckySuperAwaken:  newLuckySuperAwakenManager(),
+		luckyGiantPrize:   newLuckyGiantPrizeManager(),
+		luckyImmortalBoss: newLuckyImmortalBossManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -592,6 +606,31 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if rebirthKillMult > 1.0 {
 			effectiveMult *= rebirthKillMult
 		}
+		// DAY-308 新增全服加成
+		awakenedCrocBoost := g.luckyAwakenedCroc.getCrocPerfectMult()
+		if awakenedCrocBoost > 1.0 {
+			effectiveMult *= awakenedCrocBoost
+		}
+		vampireV2Boost := g.luckyVampireV2.getVampireV2PerfectMult()
+		if vampireV2Boost > 1.0 {
+			effectiveMult *= vampireV2Boost
+		}
+		vampireV2KillMult := g.luckyVampireV2.getVampireV2KillMult(playerID)
+		if vampireV2KillMult > 1.0 {
+			effectiveMult *= vampireV2KillMult
+		}
+		superAwakenBoost := g.luckySuperAwaken.getSuperAwakenPerfectMult()
+		if superAwakenBoost > 1.0 {
+			effectiveMult *= superAwakenBoost
+		}
+		giantPrizeBoost := g.luckyGiantPrize.getGiantPrizePerfectMult()
+		if giantPrizeBoost > 1.0 {
+			effectiveMult *= giantPrizeBoost
+		}
+		immortalBossBoost := g.luckyImmortalBoss.getImmortalBossPerfectMult()
+		if immortalBossBoost > 1.0 {
+			effectiveMult *= immortalBossBoost
+		}
 		// 龍捲風期間擊破計數
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
@@ -743,6 +782,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyGenesis.tryLuckyGenesisFish(g, playerID, killerName)
 			case isLuckyRebirthFish(t.Def.ID):
 				g.luckyRebirth.tryLuckyRebirthFish(g, playerID, killerName)
+			// DAY-308 新增
+			case isLuckyAwakenedCrocFish(t.Def.ID):
+				g.luckyAwakenedCroc.tryLuckyAwakenedCrocFish(g, p)
+			case isLuckyVampireV2Fish(t.Def.ID):
+				g.luckyVampireV2.tryLuckyVampireV2Fish(g, p)
+			case isLuckySuperAwakenFish(t.Def.ID):
+				g.luckySuperAwaken.tryLuckySuperAwakenFish(g, p)
+			case isLuckyGiantPrizeFish(t.Def.ID):
+				g.luckyGiantPrize.tryLuckyGiantPrizeFish(g, p)
+			case isLuckyImmortalBossFish(t.Def.ID):
+				g.luckyImmortalBoss.tryLuckyImmortalBossFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -792,6 +842,10 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			if g.luckyRebirth.isRebirthActive() {
 				g.luckyRebirth.notifyRebirthKill(g, t.InstanceID)
 			}
+			// DAY-308 吸血鬼升級：擊破計數（有 session 就通知）
+			g.luckyVampireV2.notifyVampireV2Kill(g, p)
+			// DAY-308 不死 BOSS：擊破通知
+			g.luckyImmortalBoss.notifyImmortalBossKill(g, p)
 		}
 
 		// 獎勵通知（單播）

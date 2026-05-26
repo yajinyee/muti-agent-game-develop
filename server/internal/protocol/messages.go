@@ -95,6 +95,13 @@ const (
 	MsgLuckyInfinite = "lucky_infinite" // T148 無限魚（無限累積倍率）
 	MsgLuckyGenesis  = "lucky_genesis"  // T149 創世魚（全場審判）
 	MsgLuckyRebirth  = "lucky_rebirth"  // T150 重生魚（死亡目標復活再擊破）
+
+	// DAY-308 新增幸運特殊魚事件
+	MsgLuckyAwakenedCroc = "lucky_awakened_croc" // T151 覺醒鱷魚（自動獵魚 20 秒）
+	MsgLuckyVampireV2    = "lucky_vampire_v2"    // T152 吸血鬼升級魚（倍率上限 ×10.0）
+	MsgLuckySuperAwaken  = "lucky_super_awaken"  // T153 超級覺醒魚（全場審判 + 全服 ×7.0）
+	MsgLuckyGiantPrize   = "lucky_giant_prize"   // T154 巨型獎勵魚（5 次隨機大獎）
+	MsgLuckyImmortalBoss = "lucky_immortal_boss" // T155 不死 BOSS 魚（5 條命遞增倍率）
 )
 // ── Envelope ─────────────────────────────────────────────────
 

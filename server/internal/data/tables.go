@@ -222,6 +222,18 @@ var Targets = []TargetDef{
 	// T150 幸運重生魚：擊破後 15 秒重生之力（死亡目標復活 HP 50%，擊破獎勵 ×3.0），≥8 → 完美重生全服 ×6.5
 	{ID: "T150", Name: "幸運重生魚", Type: TypeSpecial, Multiplier: 600, HP: 640, SpawnWeight: 1, Speed: 40, Lifetime: 26, LaborGain: 120, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-308 新增特殊目標（650x-750x）────────────────────────
+	// T151 幸運覺醒鱷魚：擊破後覺醒鱷魚自動獵魚 20 秒（每次獵魚 ×3.0），獵魚 ≥8 → 完美覺醒全服 ×3.5 加成 9 秒
+	{ID: "T151", Name: "幸運覺醒鱷魚", Type: TypeSpecial, Multiplier: 650, HP: 680, SpawnWeight: 1, Speed: 45, Lifetime: 26, LaborGain: 130, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T152 幸運吸血鬼升級魚：擊破後 25 秒吸血模式（每次擊破 +1.5x，最高 ×10.0），吸收 ≥10 → 完美吸血全服 ×4.0 加成 10 秒
+	{ID: "T152", Name: "幸運吸血鬼升級魚", Type: TypeSpecial, Multiplier: 680, HP: 720, SpawnWeight: 1, Speed: 50, Lifetime: 24, LaborGain: 136, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T153 幸運超級覺醒魚：擊破後全場 HP 歸零（每個獎勵 ×4.0），觸發全服 ×7.0 加成 15 秒
+	{ID: "T153", Name: "幸運超級覺醒魚", Type: TypeSpecial, Multiplier: 700, HP: 750, SpawnWeight: 1, Speed: 40, Lifetime: 28, LaborGain: 140, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T154 幸運巨型獎勵魚：擊破後 5 次隨機大獎（×5.0-×50.0），平均 ≥20x → 完美大獎全服 ×4.5 加成 10 秒
+	{ID: "T154", Name: "幸運巨型獎勵魚", Type: TypeSpecial, Multiplier: 720, HP: 780, SpawnWeight: 1, Speed: 55, Lifetime: 22, LaborGain: 144, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T155 幸運不死 BOSS 魚：擊破後召喚不死 BOSS（5 條命，每次擊破倍率 +0.5x），18 秒內耗盡 5 條命 → 完美不死全服 ×5.0 加成 12 秒
+	{ID: "T155", Name: "幸運不死 BOSS 魚", Type: TypeSpecial, Multiplier: 750, HP: 820, SpawnWeight: 1, Speed: 35, Lifetime: 30, LaborGain: 150, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

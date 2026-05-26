@@ -57,9 +57,18 @@ func _process(delta: float) -> void:
 		if not is_instance_valid(node):
 			continue
 		var mult = node.get_meta("multiplier", 2.0)
+		# 評分系統（knowhow-log #71）
 		var score = mult * 2.0
+		# HP 低的優先（快要擊破）
+		var hp_bar = node.get_node_or_null("HPBar")
+		var hp_bg = node.get_node_or_null("HPBarBG")
+		if is_instance_valid(hp_bar) and is_instance_valid(hp_bg) and hp_bg.size.x > 0:
+			var hp_pct = hp_bar.size.x / hp_bg.size.x
+			score += (1.0 - hp_pct) * 30.0
+		# 快要離開畫面的優先
 		if node.position.x < 400:
 			score += 20.0
+		# BOSS 最優先
 		if node.get_meta("target_type", "") == "boss":
 			score += 500.0
 		if score > best_score:

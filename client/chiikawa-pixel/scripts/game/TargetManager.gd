@@ -73,6 +73,12 @@ const TARGET_SPRITES = {
 	"T148": "res://assets/sprites/targets/T148_infinite.png",
 	"T149": "res://assets/sprites/targets/T149_genesis.png",
 	"T150": "res://assets/sprites/targets/T150_rebirth.png",
+	# DAY-308 新增特殊目標
+	"T151": "res://assets/sprites/targets/T151_awakened_croc.png",
+	"T152": "res://assets/sprites/targets/T152_vampire_v2.png",
+	"T153": "res://assets/sprites/targets/T153_super_awaken.png",
+	"T154": "res://assets/sprites/targets/T154_giant_prize.png",
+	"T155": "res://assets/sprites/targets/T155_immortal_boss.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -146,6 +152,12 @@ const TARGET_COLORS = {
 	"T148": Color(0.6, 0.2, 1.0),   # 紫色無限魚
 	"T149": Color(1.0, 0.85, 0.0),  # 金色創世魚
 	"T150": Color(1.0, 0.27, 0.0),  # 火橙重生魚
+	# DAY-308 新增特殊目標備用顏色
+	"T151": Color(0.0, 0.8, 0.3),   # 深綠覺醒鱷魚
+	"T152": Color(0.6, 0.0, 0.8),   # 深紫吸血鬼升級魚
+	"T153": Color(1.0, 0.4, 0.0),   # 火橙超級覺醒魚
+	"T154": Color(1.0, 0.85, 0.0),  # 金色巨型獎勵魚
+	"T155": Color(0.9, 0.1, 0.1),   # 深紅不死 BOSS 魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
@@ -267,10 +279,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T150）
+	# Lucky 特殊魚標記（T106-T155）
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 150:
+		if tid_num >= 106 and tid_num <= 155:
 			_add_lucky_badge(container, def_id)
 
 	# 特殊搖晃（T103 流星、T104 金草）

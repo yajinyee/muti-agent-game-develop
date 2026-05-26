@@ -109,6 +109,12 @@ func _ready() -> void:
 	GameManager.lucky_infinite.connect(_on_lucky_infinite)
 	GameManager.lucky_genesis.connect(_on_lucky_genesis)
 	GameManager.lucky_rebirth.connect(_on_lucky_rebirth)
+	# DAY-308 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
+	GameManager.lucky_awakened_croc.connect(_on_lucky_awakened_croc)
+	GameManager.lucky_vampire_v2.connect(_on_lucky_vampire_v2)
+	GameManager.lucky_super_awaken.connect(_on_lucky_super_awaken)
+	GameManager.lucky_giant_prize.connect(_on_lucky_giant_prize)
+	GameManager.lucky_immortal_boss.connect(_on_lucky_immortal_boss)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1486,3 +1492,116 @@ func _on_lucky_rebirth(data: Dictionary) -> void:
 			_hide_lucky_indicator()
 			var kills = data.get("rebirth_kills", 0)
 			_show_lucky_banner("🔥 重生之力結束！重生擊破 %d 個！" % kills, Color(1.0, 0.4, 0.1), 2.0)
+
+# ── DAY-308 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_awakened_croc(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"croc_awaken":
+			_show_lucky_event("awakened_croc", "🐊 %s 觸發覺醒鱷魚！鱷魚開始獵魚 20 秒！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"croc_hunt":
+			var cnt = data.get("hunt_count", 0)
+			var reward = data.get("reward", 0)
+			_show_lucky_banner("🐊 獵魚 %d 條！+%d！" % [cnt, reward], Color(0.0, 0.8, 0.3), 0.8)
+		"croc_perfect":
+			var cnt = data.get("hunt_count", 0)
+			var boost = data.get("boost_mult", 3.5)
+			_show_lucky_banner("🐊✨ 完美覺醒！%s 獵魚 %d 條！全服 ×%.1f 加成 9 秒！" % [name, cnt, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.6)
+		"croc_perfect_end":
+			_show_lucky_banner("🐊 完美覺醒加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_vampire_v2(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"vampire_v2_start":
+			_show_lucky_event("vampire_v2", "🧛 %s 觸發吸血鬼升級！25 秒吸血模式！最高 ×10.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"absorb_v2":
+			var cnt = data.get("absorb_count", 0)
+			var mult = data.get("current_mult", 1.0)
+			_update_lucky_indicator("🧛 吸血鬼升級", "吸收 %d 次 | ×%.1f" % [cnt, mult], float(cnt) / 10.0, Color(0.6, 0.0, 0.8))
+		"mult_mode_v2":
+			var mult = data.get("current_mult", 1.0)
+			_show_lucky_banner("🧛 倍率模式！×%.1f！12 秒！" % mult, Color(0.6, 0.0, 0.8), 2.0)
+		"vampire_v2_perfect":
+			_hide_lucky_indicator()
+			var cnt = data.get("absorb_count", 0)
+			var boost = data.get("boost_mult", 4.0)
+			_show_lucky_banner("🧛✨ 完美吸血！%s 吸收 %d 次！全服 ×%.1f 加成 10 秒！" % [name, cnt, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.6)
+		"vampire_v2_perfect_end":
+			_hide_lucky_indicator()
+			_show_lucky_banner("🧛 完美吸血加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_super_awaken(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"super_awaken_start":
+			_show_lucky_event("super_awaken", "⚡ %s 觸發超級覺醒！全場 HP 歸零！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.7)
+		"super_awaken_result":
+			var hits = data.get("hit_count", 0)
+			var reward = data.get("total_reward", 0)
+			_show_lucky_banner("⚡ 審判 %d 條！獎勵 %d！" % [hits, reward], Color(1.0, 0.4, 0.0), 2.0)
+		"super_awaken_boost":
+			var boost = data.get("boost_mult", 7.0)
+			_show_lucky_banner("⚡✨ 超級覺醒！%s 全服 ×%.0f 加成 15 秒！" % [name, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+		"super_awaken_boost_end":
+			_show_lucky_banner("⚡ 超級覺醒加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_giant_prize(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"giant_prize_start":
+			_show_lucky_event("giant_prize", "🎁 %s 觸發巨型獎勵魚！5 次隨機大獎！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"prize_drop":
+			var no = data.get("prize_no", 1)
+			var mult = data.get("prize_mult", 1.0)
+			var reward = data.get("reward", 0)
+			_show_lucky_banner("🎁 第 %d 次！×%.0f  +%d！" % [no, mult, reward], Color(1.0, 0.85, 0.0), 0.8)
+			if mult >= 30:
+				ScreenShake.add_trauma(0.3)
+		"giant_prize_perfect":
+			var total = data.get("total_reward", 0)
+			var boost = data.get("boost_mult", 4.5)
+			_show_lucky_banner("🎁✨ 完美大獎！%s 獲得 %d！全服 ×%.1f 加成 10 秒！" % [name, total, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.6)
+		"giant_prize_perfect_end":
+			_show_lucky_banner("🎁 完美大獎加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_immortal_boss(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"immortal_spawn":
+			_show_lucky_event("immortal_boss", "💀 %s 召喚不死 BOSS！5 條命，倍率遞增！18 秒！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BOSS_ENTER)
+			ScreenShake.add_trauma(0.6)
+		"immortal_kill":
+			var lives = data.get("lives_left", 0)
+			var mult = data.get("current_mult", 2.0)
+			var reward = data.get("reward", 0)
+			_show_lucky_banner("💀 擊破！剩 %d 條命！×%.1f  +%d！" % [lives, mult, reward], Color(0.9, 0.1, 0.1), 0.8)
+			ScreenShake.add_trauma(0.3)
+		"immortal_perfect":
+			var total = data.get("total_reward", 0)
+			var boost = data.get("boost_mult", 5.0)
+			_show_lucky_banner("💀✨ 完美不死！%s 耗盡 5 條命！獲得 %d！全服 ×%.1f 加成 12 秒！" % [name, total, boost], Color(1.0, 0.85, 0.0), 4.0)
+			ScreenShake.add_trauma(0.8)
+		"immortal_perfect_end":
+			_show_lucky_banner("💀 完美不死加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"immortal_timeout":
+			_show_lucky_banner("💀 不死 BOSS 離開了", Color(0.6, 0.6, 0.6), 1.5)

@@ -70,6 +70,12 @@ signal lucky_supernova(data: Dictionary)
 signal lucky_infinite(data: Dictionary)
 signal lucky_genesis(data: Dictionary)
 signal lucky_rebirth(data: Dictionary)
+# DAY-308 新增幸運特殊魚訊號
+signal lucky_awakened_croc(data: Dictionary)
+signal lucky_vampire_v2(data: Dictionary)
+signal lucky_super_awaken(data: Dictionary)
+signal lucky_giant_prize(data: Dictionary)
+signal lucky_immortal_boss(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -212,6 +218,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_genesis", payload)
 		"lucky_rebirth":
 			emit_signal("lucky_rebirth", payload)
+		# DAY-308 新增幸運特殊魚事件
+		"lucky_awakened_croc":
+			emit_signal("lucky_awakened_croc", payload)
+		"lucky_vampire_v2":
+			emit_signal("lucky_vampire_v2", payload)
+		"lucky_super_awaken":
+			emit_signal("lucky_super_awaken", payload)
+		"lucky_giant_prize":
+			emit_signal("lucky_giant_prize", payload)
+		"lucky_immortal_boss":
+			emit_signal("lucky_immortal_boss", payload)
 		"pong":
 			pass
 		"error":
