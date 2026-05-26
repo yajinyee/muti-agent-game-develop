@@ -77,6 +77,10 @@ func _ready() -> void:
 	GameManager.lucky_freeze_bomb.connect(_on_lucky_freeze_bomb)
 	GameManager.lucky_thunder_storm.connect(_on_lucky_thunder_storm)
 	GameManager.lucky_lucky_wheel.connect(_on_lucky_lucky_wheel)
+	# DAY-301 新增幸運特殊魚訊號連接
+	GameManager.lucky_jackpot_fish.connect(_on_lucky_jackpot_fish)
+	GameManager.lucky_coop_fish.connect(_on_lucky_coop_fish)
+	GameManager.lucky_time_warp.connect(_on_lucky_time_warp)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -935,3 +939,83 @@ func _on_lucky_lucky_wheel(data: Dictionary) -> void:
 					_show_lucky_banner("🎡 %s 轉到 %s！獎勵 %d！" % [name, slot_name, reward], Color(1.0, 0.42, 0.71))
 					if reward > 0:
 						_show_reward_popup(reward, mult)
+
+# ── DAY-301 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_jackpot_fish(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"trigger":
+			_show_lucky_event("jackpot_fish", "🏆 %s 觸發進階 Jackpot！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"jackpot_result":
+			var tier = data.get("tier_name", "Mini")
+			var reward = data.get("reward", 0)
+			var tier_idx = data.get("tier_idx", 0)
+			var colors = [Color(0.7, 0.4, 0.2), Color(0.8, 0.8, 0.9), Color(1.0, 0.55, 0.0), Color(1.0, 0.85, 0.0)]
+			_show_lucky_banner("🏆 %s 中 %s Jackpot！獲得 %d！" % [name, tier, reward], colors[clamp(tier_idx, 0, 3)], 3.0)
+			if reward > 0:
+				_show_reward_popup(reward, float(tier_idx + 1) * 10.0)
+			if tier_idx == 3:
+				ScreenShake.add_trauma(0.8)
+		"grand_boost":
+			var mult = data.get("boost_mult", 3.0)
+			var secs = data.get("boost_secs", 10)
+			_show_lucky_banner("🏆✨ GRAND JACKPOT！%s 全服 ×%.0f 加成 %d 秒！" % [name, mult, secs], Color(1.0, 0.85, 0.0), 4.0)
+			ScreenShake.add_trauma(0.9)
+		"grand_boost_end":
+			_show_lucky_banner("🏆 Grand Jackpot 加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_coop_fish(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"coop_start":
+			var target = data.get("target_points", 8)
+			_show_lucky_event("coop_fish", "🤝 %s 發起全服合作！目標 %d 點！20 秒！" % [name, target])
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"coop_progress":
+			var current = data.get("current_points", 0)
+			var target = data.get("target_points", 8)
+			var tl = data.get("time_left", 0.0)
+			_update_lucky_indicator("🤝 全服合作", "%d/%d 點" % [current, target], float(current) / float(max(target, 1)), Color(0.0, 0.9, 1.0))
+		"coop_success":
+			_hide_lucky_indicator()
+			var boost = data.get("boost_mult", 4.0)
+			var secs = data.get("boost_secs", 8)
+			_show_lucky_banner("🤝✨ 全服合作成功！全服 ×%.0f 加成 %d 秒！" % [boost, secs], Color(0.0, 1.0, 0.5), 3.5)
+			ScreenShake.add_trauma(0.7)
+		"coop_timeout":
+			_hide_lucky_indicator()
+			var current = data.get("current_points", 0)
+			var target = data.get("target_points", 8)
+			_show_lucky_banner("🤝 合作挑戰時間到！達成 %d/%d 點" % [current, target], Color(0.6, 0.6, 0.6), 2.0)
+		"coop_boost_end":
+			_show_lucky_banner("🤝 全服合作加成結束", Color(0.6, 0.6, 0.6), 1.5)
+
+func _on_lucky_time_warp(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"warp_start":
+			var duration = data.get("duration", 10.0)
+			var dmg = data.get("damage_mult", 2.0)
+			_show_lucky_event("time_warp", "⏰ %s 觸發時間扭曲！全場慢速 %.0f 秒！傷害 ×%.0f！" % [name, duration, dmg])
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.35)
+		"warp_end":
+			_hide_lucky_indicator()
+			var kills = data.get("kill_count", 0)
+			_show_lucky_banner("⏰💥 時間扭曲結束！全場 HP -20%！擊破 %d 條！" % kills, Color(0.55, 0.2, 0.86))
+			ScreenShake.add_trauma(0.5)
+		"time_collapse":
+			var kills = data.get("kill_count", 0)
+			var boost = data.get("boost_mult", 2.5)
+			var secs = data.get("boost_secs", 6)
+			_show_lucky_banner("⏰💥 時間崩潰！%s 擊破 %d 條！全服 ×%.0f 加成 %d 秒！" % [name, kills, boost, secs], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.7)
+		"collapse_end":
+			_show_lucky_banner("⏰ 時間崩潰加成結束", Color(0.6, 0.6, 0.6), 1.5)

@@ -71,6 +71,11 @@ type Game struct {
 	luckyThunderStorm *luckyThunderStormManager
 	luckyLuckyWheel   *luckyLuckyWheelManager
 
+	// DAY-301 新增
+	luckyJackpotFish *luckyJackpotFishManager
+	luckyCoopFish    *luckyCoopFishManager
+	luckyTimeWarp    *luckyTimeWarpManager
+
 	lastTick time.Time
 }
 
@@ -108,6 +113,11 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyFreezeBomb:   newLuckyFreezeBombManager(),
 		luckyThunderStorm: newLuckyThunderStormManager(),
 		luckyLuckyWheel:   newLuckyLuckyWheelManager(),
+
+		// DAY-301 新增
+		luckyJackpotFish: newLuckyJackpotFishManager(),
+		luckyCoopFish:    newLuckyCoopFishManager(),
+		luckyTimeWarp:    newLuckyTimeWarpManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -355,6 +365,9 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		return
 	}
 
+	// Jackpot 貢獻（每次下注）
+	g.luckyJackpotFish.ContributeBet(bet.BetCost)
+
 	// 找目標
 	var t *Target
 	if req.TargetID != "" {
@@ -389,6 +402,20 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		// Combo 系統：命中時增加 Combo
 		_, _, comboBonus := p.AddCombo()
 		effectiveMult := t.Multiplier * (1.0 + comboBonus)
+
+		// DAY-301 全服加成倍率疊加
+		jackpotBoost := g.luckyJackpotFish.getGrandBoostMult()
+		coopBoost := g.luckyCoopFish.getCoopBoostMult()
+		warpDmgMult := g.luckyTimeWarp.getTimeWarpDamageMult()
+		if jackpotBoost > 1.0 {
+			effectiveMult *= jackpotBoost
+		}
+		if coopBoost > 1.0 {
+			effectiveMult *= coopBoost
+		}
+		if warpDmgMult > 1.0 {
+			effectiveMult *= warpDmgMult
+		}
 
 		reward := int(float64(bet.BetCost) * effectiveMult)
 		result.Reward = reward
@@ -467,6 +494,13 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.tryLuckyThunderStorm(playerID, killerName)
 			case isLuckyLuckyWheelFish(t.Def.ID):
 				g.tryLuckyLuckyWheel(playerID, killerName)
+			// DAY-301 新增
+			case isLuckyJackpotFish(t.Def.ID):
+				g.tryLuckyJackpotFish(playerID, killerName)
+			case isLuckyCoopFish(t.Def.ID):
+				g.tryLuckyCoopFish(playerID, killerName)
+			case isLuckyTimeWarpFish(t.Def.ID):
+				g.tryLuckyTimeWarp(playerID, killerName)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -487,6 +521,14 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 					result.Reward = reward
 					g.notifyAwakenedPhoenixShot(playerID, killerName, powerUpMult, powerReward, isDone)
 				}
+			}
+			// 全服合作魚：擊破計數
+			if g.luckyCoopFish.isCoopActive() {
+				g.notifyCoopKill(playerID, killerName, false)
+			}
+			// 時間扭曲魚：擊破計數
+			if g.luckyTimeWarp.isTimeWarpActive() {
+				g.luckyTimeWarp.notifyWarpKill(playerID)
 			}
 		}
 

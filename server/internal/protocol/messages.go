@@ -56,6 +56,11 @@ const (
 	MsgLuckyFreezeBomb   = "lucky_freeze_bomb"   // T123 冰凍炸彈魚
 	MsgLuckyThunderStorm = "lucky_thunder_storm" // T124 雷暴魚
 	MsgLuckyLuckyWheel   = "lucky_lucky_wheel"   // T125 大轉盤魚
+
+	// DAY-301 新增幸運特殊魚事件
+	MsgLuckyJackpotFish = "lucky_jackpot_fish" // T126 進階 Jackpot 魚
+	MsgLuckyCoopFish    = "lucky_coop_fish"    // T127 全服合作魚
+	MsgLuckyTimeWarp    = "lucky_time_warp"    // T128 時間扭曲魚
 )
 
 // ── Envelope ─────────────────────────────────────────────────
@@ -441,4 +446,47 @@ type CollectGoldenCoinRequest struct {
 // SetDisplayNameRequest 設定玩家顯示名稱請求
 type SetDisplayNameRequest struct {
 	Name string `json:"name"`
+}
+
+// ── DAY-301 新增 Lucky 特殊魚 Payloads ───────────────────────
+
+// LuckyJackpotFishPayload T126 進階 Jackpot 魚
+type LuckyJackpotFishPayload struct {
+	Event       string  `json:"event"`                  // "trigger" | "jackpot_result" | "grand_boost" | "grand_boost_end"
+	TriggerID   string  `json:"trigger_id"`
+	TriggerName string  `json:"trigger_name"`
+	MiniPool    int     `json:"mini_pool,omitempty"`
+	MinorPool   int     `json:"minor_pool,omitempty"`
+	MajorPool   int     `json:"major_pool,omitempty"`
+	GrandPool   int     `json:"grand_pool,omitempty"`
+	TierName    string  `json:"tier_name,omitempty"`    // "Mini" | "Minor" | "Major" | "Grand"
+	TierIdx     int     `json:"tier_idx,omitempty"`     // 0-3
+	Reward      int     `json:"reward,omitempty"`
+	BoostMult   float64 `json:"boost_mult,omitempty"`
+	BoostSecs   int     `json:"boost_secs,omitempty"`
+}
+
+// LuckyCoopFishPayload T127 全服合作魚
+type LuckyCoopFishPayload struct {
+	Event         string  `json:"event"`                   // "coop_start" | "coop_progress" | "coop_success" | "coop_timeout" | "coop_boost_end"
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	TargetPoints  int     `json:"target_points,omitempty"`
+	CurrentPoints int     `json:"current_points,omitempty"`
+	TimeLeft      float64 `json:"time_left,omitempty"`
+	BoostMult     float64 `json:"boost_mult,omitempty"`
+	BoostSecs     int     `json:"boost_secs,omitempty"`
+}
+
+// LuckyTimeWarpPayload T128 時間扭曲魚
+type LuckyTimeWarpPayload struct {
+	Event       string  `json:"event"`                  // "warp_start" | "warp_end" | "time_collapse" | "collapse_end"
+	TriggerID   string  `json:"trigger_id"`
+	TriggerName string  `json:"trigger_name"`
+	Duration    float64 `json:"duration,omitempty"`
+	SpeedMult   float64 `json:"speed_mult,omitempty"`   // 目標移動速度倍率（0.3）
+	DamageMult  float64 `json:"damage_mult,omitempty"`  // 傷害倍率（2.0）
+	KillCount   int     `json:"kill_count,omitempty"`
+	BoostMult   float64 `json:"boost_mult,omitempty"`
+	BoostSecs   int     `json:"boost_secs,omitempty"`
 }

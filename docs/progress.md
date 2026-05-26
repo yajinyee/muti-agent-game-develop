@@ -1,6 +1,44 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-26（DAY-300 Lucky Panel 腳本補齊 + 知識庫更新 + GitHub 同步）
+## 最後更新：2026-05-26（DAY-301 T126-T128 三個新 Lucky 魚系統 + GitHub 同步）
+
+## DAY-301 更新（2026-05-26）：T126-T128 三個新 Lucky 魚系統 ✅
+- **T126 幸運進階 Jackpot 魚（150x）：** 四層 Progressive Jackpot（Mini/Minor/Major/Grand）
+  - 每次下注自動貢獻 0.5% 到獎池；Mini 60% / Minor 25% / Major 12% / Grand 3% 機率
+  - Grand Jackpot 觸發全服 ×3.0 加成 10 秒；個人冷卻 20 秒；全服冷卻 35 秒
+- **T127 幸運全服合作魚（140x）：** 全服玩家一起貢獻傷害，20 秒內達到目標點數
+  - 目標點數依在線玩家數動態調整（1人=8點, 2人=11點, 4人=17點）
+  - 達成 → 全服 ×4.0 加成 8 秒；依貢獻比例分配個人獎勵；個人冷卻 25 秒；全服冷卻 45 秒
+- **T128 幸運時間扭曲魚（130x）：** 全場目標移動速度 ×0.3，持續 10 秒，傷害 ×2.0
+  - 扭曲期間擊破 ≥ 6 個 → 時間崩潰：全服 ×2.5 加成 6 秒
+  - 扭曲結束時全場爆炸 HP -20%；個人冷卻 22 秒；全服冷卻 38 秒
+- **Server：** 3 個獨立 handler 檔案 + game.go 整合 + protocol 新增 3 個訊息類型 + tables.go 新增 3 個目標
+  - `lucky_jackpot_fish_handler.go`：Progressive Jackpot 四層獎池系統
+  - `lucky_coop_fish_handler.go`：全服合作挑戰系統
+  - `lucky_time_warp_handler.go`：時間扭曲 + 傷害倍率系統
+  - Jackpot 貢獻：每次 `handleAttack` 的 `SpendCoins` 後自動呼叫 `ContributeBet()`
+  - 全服加成疊加：`jackpotBoost × coopBoost × warpDmgMult` 全部套用到 `effectiveMult`
+- **Client：** 3 個新 Lucky Panel + GameManager 新增 3 個訊號 + HUD 新增 3 個事件處理
+  - `LuckyJackpotFishPanel.gd`（layer=26）：四層獎池顯示 + 王冠 + 閃光
+  - `LuckyCoopFishPanel.gd`（layer=27）：合作進度條 + 全服廣播
+  - `LuckyTimeWarpPanel.gd`（layer=28）：計時條 + 傷害加成指示器
+- **美術：** T126-T128 精靈圖生成完成
+  - T126（1462 非透明像素）：金色魚身 + 四層光環 + 王冠 + 閃光星星
+  - T127（1325 非透明像素）：青藍色魚身 + 小魚圍繞 + 握手圖案
+  - T128（1118 非透明像素）：紫色魚身 + 時鐘圖案 + 扭曲光環
+- **TargetManager 更新：** T126-T128 Sprite 路徑 + 備用顏色 + Lucky badge 範圍擴展到 T128
+- **知識庫更新：** knowhow-log 條目 94-97
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-301）
+- **Server 目標物數量：** 35 種（T001-T006 + T101-T128 + B001）
+- **Lucky 系統數量：** 23 個（T106-T128）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 7/10
+- **視覺清晰度：** 7/10（Lucky badge 系統有效）
+- **核心循環流暢度：** 8/10
+- **最需要改善：** Client 端時間扭曲的速度效果整合
 
 ## DAY-300 更新（2026-05-26）：20 個 Lucky Panel 腳本補齊 ✅
 - **LuckyChainLightningPanel.gd**（T106）：閃電主題，青藍色，連鎖計數器

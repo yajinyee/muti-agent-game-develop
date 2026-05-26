@@ -160,6 +160,14 @@ var Targets = []TargetDef{
 	// T125 幸運大轉盤魚：擊破後觸發幸運大轉盤，8 格隨機獎勵
 	{ID: "T125", Name: "幸運大轉盤魚", Type: TypeSpecial, Multiplier: 160, HP: 185, SpawnWeight: 2, Speed: 50, Lifetime: 18, LaborGain: 32, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-301 新增特殊目標（150x-200x）────────────────────
+	// T126 幸運進階 Jackpot 魚：擊破後觸發四層 Jackpot 抽獎（Mini/Minor/Major/Grand）
+	{ID: "T126", Name: "幸運進階Jackpot魚", Type: TypeSpecial, Multiplier: 150, HP: 180, SpawnWeight: 2, Speed: 55, Lifetime: 18, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T127 幸運全服合作魚：擊破後觸發全服合作挑戰，20 秒內全服共同擊破目標點數
+	{ID: "T127", Name: "幸運全服合作魚", Type: TypeSpecial, Multiplier: 140, HP: 170, SpawnWeight: 2, Speed: 60, Lifetime: 16, LaborGain: 28, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T128 幸運時間扭曲魚：擊破後全場目標速度 ×0.3，持續 10 秒，傷害 ×2.0
+	{ID: "T128", Name: "幸運時間扭曲魚", Type: TypeSpecial, Multiplier: 130, HP: 160, SpawnWeight: 3, Speed: 70, Lifetime: 14, LaborGain: 26, Behavior: BehaviorLinear, DiffFactor: 0.95},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

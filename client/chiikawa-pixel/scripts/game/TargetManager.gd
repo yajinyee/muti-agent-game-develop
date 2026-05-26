@@ -41,6 +41,10 @@ const TARGET_SPRITES = {
 	"T123": "res://assets/sprites/targets/T123_freeze_bomb.png",
 	"T124": "res://assets/sprites/targets/T124_thunder_storm.png",
 	"T125": "res://assets/sprites/targets/T125_lucky_wheel.png",
+	# DAY-301 新增特殊目標
+	"T126": "res://assets/sprites/targets/T126_jackpot_fish.png",
+	"T127": "res://assets/sprites/targets/T127_coop_fish.png",
+	"T128": "res://assets/sprites/targets/T128_time_warp.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -82,16 +86,23 @@ const TARGET_COLORS = {
 	"T123": Color(0.0, 0.9, 1.0),   # 冰藍冰凍炸彈魚
 	"T124": Color(1.0, 0.9, 0.2),   # 黃色雷暴魚
 	"T125": Color(1.0, 0.42, 0.71), # 粉紅大轉盤魚
+	# DAY-301 新增特殊目標備用顏色
+	"T126": Color(1.0, 0.85, 0.0),  # 金色進階 Jackpot 魚
+	"T127": Color(0.0, 0.9, 1.0),   # 青藍全服合作魚
+	"T128": Color(0.55, 0.2, 0.86), # 紫色時間扭曲魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
 var _cached_textures: Dictionary = {}
+var _time_warp_speed_mult: float = 1.0  # 時間扭曲速度倍率（DAY-301）
 
 func _ready() -> void:
 	GameManager.target_spawned.connect(_on_target_spawned)
 	GameManager.target_updated.connect(_on_target_updated)
 	GameManager.target_killed.connect(_on_target_killed)
 	GameManager.boss_event.connect(_on_boss_event)
+	# DAY-301 時間扭曲訊號
+	GameManager.lucky_time_warp.connect(_on_lucky_time_warp_for_speed)
 
 func _process(delta: float) -> void:
 	_update_positions(delta)
@@ -102,7 +113,7 @@ func _update_positions(delta: float) -> void:
 		if not is_instance_valid(node):
 			continue
 		var behavior = node.get_meta("behavior", "linear")
-		var speed = node.get_meta("speed", 0.0)
+		var speed = node.get_meta("speed", 0.0) * _time_warp_speed_mult
 		if node.get_meta("is_fleeing", false):
 			speed = node.get_meta("flee_speed", speed * 2.5)
 
@@ -200,10 +211,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T125）
+	# Lucky 特殊魚標記（T106-T128）
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 125:
+		if tid_num >= 106 and tid_num <= 128:
 			_add_lucky_badge(container, def_id)
 
 	# 特殊搖晃（T103 流星、T104 金草）
@@ -249,7 +260,9 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 依倍率範圍選顏色
 	var tid_num = int(def_id.substr(1))
 	var ring_color: Color
-	if tid_num >= 121:
+	if tid_num >= 126:
+		ring_color = Color(1.0, 0.85, 0.0, 0.40)   # 金色（T126-T128，最高階）
+	elif tid_num >= 121:
 		ring_color = Color(0.88, 0.67, 1.0, 0.35)  # 淡紫（T121-T125）
 	elif tid_num >= 116:
 		ring_color = Color(1.0, 0.85, 0.0, 0.35)   # 金色（T116-T120）
@@ -463,3 +476,25 @@ func _mult_label_color(mult: float) -> Color:
 	if mult >= 30:  return Color(1.0, 0.85, 0.0)  # 金色
 	if mult >= 15:  return Color(0.8, 0.9, 1.0)   # 淡藍
 	return Color(1.0, 1.0, 1.0)                   # 白色
+
+# ── DAY-301 時間扭曲速度效果 ──────────────────────────────────
+
+func _on_lucky_time_warp_for_speed(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"warp_start":
+			_time_warp_speed_mult = data.get("speed_mult", 0.3)
+			# 視覺提示：所有目標物變藍色調
+			for instance_id in _target_nodes:
+				var node = _target_nodes[instance_id]
+				if is_instance_valid(node):
+					var tween = node.create_tween()
+					tween.tween_property(node, "modulate", Color(0.7, 0.8, 1.2), 0.3)
+		"warp_end", "time_collapse", "collapse_end":
+			_time_warp_speed_mult = 1.0
+			# 恢復正常顏色
+			for instance_id in _target_nodes:
+				var node = _target_nodes[instance_id]
+				if is_instance_valid(node):
+					var tween = node.create_tween()
+					tween.tween_property(node, "modulate", Color.WHITE, 0.3)
