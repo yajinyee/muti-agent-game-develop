@@ -42,6 +42,8 @@ signal lucky_lucky_wheel(data: Dictionary)
 signal lucky_jackpot_fish(data: Dictionary)
 signal lucky_coop_fish(data: Dictionary)
 signal lucky_time_warp(data: Dictionary)
+# DAY-302 新增幸運特殊魚訊號
+signal lucky_chain_meteor(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -134,6 +136,9 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_coop_fish", payload)
 		"lucky_time_warp":
 			emit_signal("lucky_time_warp", payload)
+		# DAY-302 新增幸運特殊魚事件
+		"lucky_chain_meteor":
+			emit_signal("lucky_chain_meteor", payload)
 		"pong":
 			pass
 		"error":

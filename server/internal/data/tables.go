@@ -167,6 +167,8 @@ var Targets = []TargetDef{
 	{ID: "T127", Name: "幸運全服合作魚", Type: TypeSpecial, Multiplier: 140, HP: 170, SpawnWeight: 2, Speed: 60, Lifetime: 16, LaborGain: 28, Behavior: BehaviorLinear, DiffFactor: 1.0},
 	// T128 幸運時間扭曲魚：擊破後全場目標速度 ×0.3，持續 10 秒，傷害 ×2.0
 	{ID: "T128", Name: "幸運時間扭曲魚", Type: TypeSpecial, Multiplier: 130, HP: 160, SpawnWeight: 3, Speed: 70, Lifetime: 14, LaborGain: 26, Behavior: BehaviorLinear, DiffFactor: 0.95},
+	// T129 幸運連鎖隕石魚：擊破後觸發連鎖隕石雨，5 顆隕石依序落下，每顆命中觸發連鎖擴大
+	{ID: "T129", Name: "幸運連鎖隕石魚", Type: TypeSpecial, Multiplier: 160, HP: 190, SpawnWeight: 2, Speed: 65, Lifetime: 16, LaborGain: 32, Behavior: BehaviorLinear, DiffFactor: 1.0},
 
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},

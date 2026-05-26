@@ -1,6 +1,39 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-26（DAY-301 T126-T128 三個新 Lucky 魚系統 + GitHub 同步）
+## 最後更新：2026-05-26（DAY-302 BOSS Phase 3 + T129 連鎖隕石魚 + Agent 架構完善 + GitHub 同步）
+
+## DAY-302 更新（2026-05-26）：BOSS Phase 3 絕望模式 + T129 連鎖隕石魚 + Agent 架構完善 ✅
+- **BOSS Phase 3 絕望模式：** HP ≤ 20% 觸發，比 Phase 2 更強烈的視覺效果
+  - Server：`bossPhase3 bool` 欄位 + `spawnBoss()` 重置 + `handleAttack()` 兩個分支都檢查
+  - Client：`_on_boss_event()` 讀取 `phase` 欄位，phase==3 走獨立邏輯
+  - 視覺：5次快速閃爍（0.04s）+ 縮放 1.3x + 深紅色調 Color(2.5,0.2,0.2) + "💀 PHASE 3 絕望模式！" 標籤（18px）
+  - BGM：切換到 boss_rage.wav（最緊張的 BGM）
+  - ScreenShake trauma=1.0（最強震動）
+- **T129 幸運連鎖隕石魚（160x）：** 擊破後觸發連鎖隕石雨，5 顆隕石依序落下
+  - 每 600ms 落下一顆，每顆 AOE r=150px，HP -40%
+  - 每顆命中至少 1 個目標 → 連鎖：下一顆 AOE 半徑 +30px（最大 r=300px）
+  - 5 顆全部命中（無空揮）→「完美隕石雨」：全服 ×2.5 加成 7 秒
+  - 個人冷卻 26 秒；全服冷卻 42 秒
+  - **Server：** `lucky_chain_meteor_handler.go` + `game.go` 整合 + `protocol/messages.go` 新增 `MsgLuckyChainMeteor` + `tables.go` 新增 T129
+  - **Client：** `LuckyChainMeteorPanel.gd`（layer=29）+ `GameManager.gd` 新增訊號 + `HUD.gd` 新增事件處理 + `TargetManager.gd` 新增 T129 映射
+  - **美術：** T129 精靈圖（火橙漸層魚身 + 隕石裂縫紋路 + 金色核心 + 5個連鎖標記 + 火焰光芒）
+- **Agent 架構完善：** 補齊 AGENTS.md 中定義但 agents/ 目錄缺少的所有 Agent 文件
+  - 新增/確認 27 個 Agent 文件（server-core/combat/event/infra、target-system/boss-battle/cannon/bonus-game/game-state、hud-core/social-ui/screen-recorder、hit-effect/screen-effect/environment、network、sfx、target-design/pixel/ai、boss-art/background-art/ui-art、qa-playtest/video-analysis/research/skill-librarian）
+  - 每個文件都有 Role/職責邊界（✅/❌）/主要檔案/Validation Rules/Work Report Format
+- **知識庫更新：** knowhow-log 條目 98-102（BOSS Phase 3 設計/Agent 架構/連鎖隕石雨/Go 多 Phase 廣播/自主開發循環）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-302）
+- **Server 目標物數量：** 36 種（T001-T006 + T101-T129 + B001）
+- **Lucky 系統數量：** 24 個（T106-T129）
+- **BOSS Phase 系統：** 3 個 Phase（Phase 1 正常 / Phase 2 HP≤50% / Phase 3 HP≤20% 絕望模式）
+- **Agent 文件數量：** 51 個（agents/ 目錄完整）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 7/10
+- **視覺清晰度：** 7/10
+- **核心循環流暢度：** 8/10
+- **最需要改善：** T129 精靈圖品質（程式生成，待 AI 生成提升）
 
 ## DAY-301 更新（2026-05-26）：T126-T128 三個新 Lucky 魚系統 ✅
 - **T126 幸運進階 Jackpot 魚（150x）：** 四層 Progressive Jackpot（Mini/Minor/Major/Grand）

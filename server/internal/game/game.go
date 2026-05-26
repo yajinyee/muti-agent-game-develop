@@ -46,6 +46,7 @@ type Game struct {
 	bonusScore    map[string]int // playerID -> score
 	bonusWeedHP   map[string]int // weedID -> hp（BG002 需要連點2次）
 	bossPhase2    bool           // BOSS Phase 2 是否已觸發
+	bossPhase3    bool           // BOSS Phase 3 是否已觸發（絕望模式，HP ≤ 20%）
 
 	// 幸運特殊魚系統
 	luckyChainLightning  *luckyChainLightningManager
@@ -76,6 +77,9 @@ type Game struct {
 	luckyCoopFish    *luckyCoopFishManager
 	luckyTimeWarp    *luckyTimeWarpManager
 
+	// DAY-302 新增
+	luckyChainMeteor *luckyChainMeteorManager
+
 	lastTick time.Time
 }
 
@@ -88,6 +92,7 @@ func NewGame(hub *ws.Hub) *Game {
 		bonusScore: make(map[string]int),
 		bonusWeedHP: make(map[string]int),
 		bossPhase2: false,
+		bossPhase3: false,
 		lastTick:   time.Now(),
 
 		// 初始化幸運特殊魚系統
@@ -118,6 +123,9 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyJackpotFish: newLuckyJackpotFishManager(),
 		luckyCoopFish:    newLuckyCoopFishManager(),
 		luckyTimeWarp:    newLuckyTimeWarpManager(),
+
+		// DAY-302 新增
+		luckyChainMeteor: newLuckyChainMeteorManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -416,6 +424,11 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if warpDmgMult > 1.0 {
 			effectiveMult *= warpDmgMult
 		}
+		// DAY-302 連鎖隕石完美加成
+		chainMeteorBoost := g.luckyChainMeteor.getChainMeteorPerfectMult()
+		if chainMeteorBoost > 1.0 {
+			effectiveMult *= chainMeteorBoost
+		}
 
 		reward := int(float64(bet.BetCost) * effectiveMult)
 		result.Reward = reward
@@ -436,6 +449,18 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 					MaxHP:      t.MaxHP,
 				})
 				log.Printf("[Game] Boss Phase 2 triggered! HP: %d/%d", t.HP, t.MaxHP)
+			}
+			// BOSS Phase 3：HP 降到 20% 以下時觸發（絕望模式）
+			if !g.bossPhase3 && t.HPPercent() < 0.2 {
+				g.bossPhase3 = true
+				g.hub.Broadcast(protocol.MsgBossEvent, protocol.BossEventPayload{
+					Event:      "phase_change",
+					Phase:      3,
+					InstanceID: t.InstanceID,
+					HP:         t.HP,
+					MaxHP:      t.MaxHP,
+				})
+				log.Printf("[Game] Boss Phase 3 triggered (絕望模式)! HP: %d/%d", t.HP, t.MaxHP)
 			}
 			g.handleBossKill(playerID, p, t, reward)
 		} else {
@@ -501,6 +526,9 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.tryLuckyCoopFish(playerID, killerName)
 			case isLuckyTimeWarpFish(t.Def.ID):
 				g.tryLuckyTimeWarp(playerID, killerName)
+			// DAY-302 新增
+			case isLuckyChainMeteorFish(t.Def.ID):
+				g.tryLuckyChainMeteor(playerID, killerName)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -558,6 +586,18 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			})
 			log.Printf("[Game] Boss Phase 2 triggered (no kill)! HP: %d/%d", t.HP, t.MaxHP)
 		}
+		// BOSS Phase 3：HP 降到 20% 以下時觸發（未擊破時也要檢查，絕望模式）
+		if t.Def.Type == data.TypeBoss && !g.bossPhase3 && t.HPPercent() < 0.2 {
+			g.bossPhase3 = true
+			g.hub.Broadcast(protocol.MsgBossEvent, protocol.BossEventPayload{
+				Event:      "phase_change",
+				Phase:      3,
+				InstanceID: t.InstanceID,
+				HP:         t.HP,
+				MaxHP:      t.MaxHP,
+			})
+			log.Printf("[Game] Boss Phase 3 triggered (no kill, 絕望模式)! HP: %d/%d", t.HP, t.MaxHP)
+		}
 		g.hub.Broadcast(protocol.MsgTargetUpdate, protocol.TargetUpdatePayload{
 			InstanceID: t.InstanceID,
 			HP:         t.HP,
@@ -589,6 +629,7 @@ func (g *Game) spawnBoss() {
 	g.boss = NewTarget(def, GameWidth/2, GameHeight/2)
 	g.bossTimer = 60.0
 	g.bossPhase2 = false // 重置 Phase 2 狀態
+	g.bossPhase3 = false // 重置 Phase 3 狀態
 	g.setState(StateBossBattle)
 
 	// 清除部分普通目標（BOSS 期間最多 8 個）

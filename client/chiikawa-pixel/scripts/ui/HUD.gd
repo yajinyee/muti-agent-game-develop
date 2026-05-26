@@ -81,6 +81,8 @@ func _ready() -> void:
 	GameManager.lucky_jackpot_fish.connect(_on_lucky_jackpot_fish)
 	GameManager.lucky_coop_fish.connect(_on_lucky_coop_fish)
 	GameManager.lucky_time_warp.connect(_on_lucky_time_warp)
+	# DAY-302 新增幸運特殊魚訊號連接
+	GameManager.lucky_chain_meteor.connect(_on_lucky_chain_meteor)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1019,3 +1021,29 @@ func _on_lucky_time_warp(data: Dictionary) -> void:
 			ScreenShake.add_trauma(0.7)
 		"collapse_end":
 			_show_lucky_banner("⏰ 時間崩潰加成結束", Color(0.6, 0.6, 0.6), 1.5)
+
+# ── DAY-302 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_chain_meteor(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"meteor_start":
+			_show_lucky_event("chain_meteor", "☄️ %s 觸發連鎖隕石雨！5 顆隕石依序落下！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"meteor_hit":
+			var idx = data.get("meteor_index", 1)
+			var radius = data.get("aoe_radius", 150.0)
+			var hits = data.get("hit_count", 0)
+			_update_lucky_indicator("☄️ 連鎖隕石", "第 %d/5 顆 r=%.0f 命中 %d" % [idx, radius, hits], float(idx) / 5.0, Color(1.0, 0.5, 0.2))
+			ScreenShake.add_trauma(0.35)
+		"meteor_miss":
+			var idx = data.get("meteor_index", 1)
+			_update_lucky_indicator("☄️ 連鎖隕石", "第 %d/5 顆 空揮！" % idx, float(idx) / 5.0, Color(0.6, 0.6, 0.6))
+		"meteor_perfect":
+			_hide_lucky_indicator()
+			_show_lucky_banner("☄️✨ 完美隕石雨！%s 全服 ×2.5 加成 7 秒！" % name, Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+		"meteor_perfect_end":
+			_show_lucky_banner("☄️ 完美隕石雨加成結束", Color(0.7, 0.7, 0.7), 1.5)

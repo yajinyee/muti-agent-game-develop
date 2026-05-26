@@ -4117,3 +4117,40 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
 - **視覺清晰度評分：** 7/10（Lucky badge 系統有效，T126-T128 新增金色/青藍/紫色識別）
 - **核心循環流暢度：** 8/10（射擊→擊破→Lucky 觸發→全服廣播→獎勵 完整）
 - **最需要改善：** Client 端時間扭曲的速度效果（需要 TargetManager 整合 warp_start 訊號）
+
+## 98. BOSS Phase 3 絕望模式設計（DAY-302）
+- **觸發條件**：BOSS HP ≤ 20%（Phase 2 是 ≤ 50%）
+- **Server 實作**：`bossPhase3 bool` 欄位 + `spawnBoss()` 重置 + `handleAttack()` 兩個分支（isKill 和未擊破）都要檢查
+- **Client 實作**：`_on_boss_event()` 讀取 `phase` 欄位，phase==3 走獨立邏輯
+- **視覺差異**：Phase 2（1.2x 縮放/0.06s 閃爍/Color(1.8,0.4,0.4)）vs Phase 3（1.3x 縮放/0.04s 閃爍/Color(2.5,0.2,0.2)）
+- **教訓**：多 Phase 系統要用 `phase` 欄位而不是多個 event 類型，這樣 Client 可以統一處理
+
+## 99. Agent 架構完善（DAY-302）
+- **問題**：AGENTS.md 定義了 38 個 Agent，但 agents/ 目錄只有部分文件
+- **解決**：補齊所有缺少的 Agent 文件（27 個），每個都有 Role/職責邊界/主要檔案/Validation Rules
+- **教訓**：Agent 文件是「活文件」，要隨著功能擴展持續更新，不能只有架構圖沒有實際文件
+
+## 100. 連鎖隕石雨機制設計（DAY-302）
+- **業界依據**：Royal Fishing Jili Dragon Wrath + Fishing Fortune meteor shower cascade
+- **設計亮點**：「每顆隕石命中觸發連鎖，AOE 半徑 +30px」讓玩家有「場上魚越多，隕石越強」的策略感
+- **技術實作**：goroutine 每 600ms 落下一顆，`applyChainMeteorDamage` 對所有目標造成 HP -40%
+- **完美條件**：5 顆全部命中（無空揮）→ 全服 ×2.5 加成 7 秒
+- **教訓**：連鎖機制要有「失敗條件」（空揮），讓玩家感受到「要趁魚多的時候觸發」的時機感
+
+## 101. Go 多 Phase BOSS 廣播模式（DAY-302）
+- **問題**：Phase 2 和 Phase 3 都用 `boss_event` + `event: "phase_change"`，但 Client 需要區分
+- **解決**：在 `BossEventPayload` 加入 `Phase int` 欄位，預設 0（Phase 2 廣播時不設 Phase，Client 預設為 2）
+- **正確做法**：Phase 3 廣播時明確設 `Phase: 3`，Client 讀取 `phase` 欄位判斷
+- **教訓**：協定設計要考慮向後相容，新增欄位比新增訊息類型更安全
+
+## 102. 自主開發循環最佳實踐（DAY-302）
+- **正確流程**：
+  1. 讀取 progress.md 確認上次進度
+  2. go build + go vet 確認編譯狀態
+  3. 上網研究業界最新機制
+  4. 設計新功能（Server + Client 同步）
+  5. 實作 + 驗證（build/vet）
+  6. 更新知識庫
+  7. 推送 GitHub
+- **禁止**：跳過任何步驟，特別是「上網研究」和「知識庫更新」
+- **教訓**：每次循環都要有「新知識輸入」，不能只是機械式地加功能

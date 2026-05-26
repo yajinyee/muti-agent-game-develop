@@ -61,6 +61,9 @@ const (
 	MsgLuckyJackpotFish = "lucky_jackpot_fish" // T126 進階 Jackpot 魚
 	MsgLuckyCoopFish    = "lucky_coop_fish"    // T127 全服合作魚
 	MsgLuckyTimeWarp    = "lucky_time_warp"    // T128 時間扭曲魚
+
+	// DAY-302 新增幸運特殊魚事件
+	MsgLuckyChainMeteor = "lucky_chain_meteor" // T129 連鎖隕石魚
 )
 
 // ── Envelope ─────────────────────────────────────────────────
@@ -489,4 +492,18 @@ type LuckyTimeWarpPayload struct {
 	KillCount   int     `json:"kill_count,omitempty"`
 	BoostMult   float64 `json:"boost_mult,omitempty"`
 	BoostSecs   int     `json:"boost_secs,omitempty"`
+}
+
+// ── DAY-302 新增 Lucky 特殊魚 Payloads ───────────────────────
+
+// LuckyChainMeteorPayload T129 連鎖隕石魚事件
+type LuckyChainMeteorPayload struct {
+	Event       string  `json:"event"`        // meteor_start / meteor_hit / meteor_miss / meteor_perfect / meteor_perfect_end
+	PlayerID    string  `json:"player_id"`
+	PlayerName  string  `json:"player_name"`
+	MeteorIndex int     `json:"meteor_index"` // 第幾顆（1-5）
+	AOERadius   float64 `json:"aoe_radius"`   // 當前 AOE 半徑
+	HitCount    int     `json:"hit_count"`    // 命中目標數
+	PerfectMult float64 `json:"perfect_mult"` // 完美加成倍率
+	ExpiresAt   int64   `json:"expires_at"`   // 完美加成到期時間
 }

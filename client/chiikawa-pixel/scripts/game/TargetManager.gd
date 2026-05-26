@@ -45,6 +45,8 @@ const TARGET_SPRITES = {
 	"T126": "res://assets/sprites/targets/T126_jackpot_fish.png",
 	"T127": "res://assets/sprites/targets/T127_coop_fish.png",
 	"T128": "res://assets/sprites/targets/T128_time_warp.png",
+	# DAY-302 新增特殊目標
+	"T129": "res://assets/sprites/targets/T129_chain_meteor.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -90,6 +92,8 @@ const TARGET_COLORS = {
 	"T126": Color(1.0, 0.85, 0.0),  # 金色進階 Jackpot 魚
 	"T127": Color(0.0, 0.9, 1.0),   # 青藍全服合作魚
 	"T128": Color(0.55, 0.2, 0.86), # 紫色時間扭曲魚
+	# DAY-302 新增特殊目標備用顏色
+	"T129": Color(0.9, 0.4, 0.1),   # 火橙連鎖隕石魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
@@ -211,10 +215,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T128）
+	# Lucky 特殊魚標記（T106-T129）
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 128:
+		if tid_num >= 106 and tid_num <= 129:
 			_add_lucky_badge(container, def_id)
 
 	# 特殊搖晃（T103 流星、T104 金草）
@@ -261,7 +265,7 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	var tid_num = int(def_id.substr(1))
 	var ring_color: Color
 	if tid_num >= 126:
-		ring_color = Color(1.0, 0.85, 0.0, 0.40)   # 金色（T126-T128，最高階）
+		ring_color = Color(1.0, 0.85, 0.0, 0.40)   # 金色（T126-T129，最高階）
 	elif tid_num >= 121:
 		ring_color = Color(0.88, 0.67, 1.0, 0.35)  # 淡紫（T121-T125）
 	elif tid_num >= 116:
@@ -403,24 +407,41 @@ func _spawn_coin_rain(pos: Vector2) -> void:
 func _on_boss_event(event_data: Dictionary) -> void:
 	var event = event_data.get("event", "")
 	if event == "phase_change":
+		var phase = event_data.get("phase", 2)
 		var instance_id = event_data.get("instance_id", "")
 		if _target_nodes.has(instance_id):
 			var node = _target_nodes[instance_id]
 			if is_instance_valid(node):
-				# Phase 2 進入：強烈閃爍 + 放大 + 持續紅色調
-				var tween = node.create_tween()
-				# 5次強烈閃爍
-				for i in 5:
-					tween.tween_property(node, "modulate", Color(4.0, 0.2, 0.2), 0.06)
-					tween.tween_property(node, "modulate", Color(0.5, 0.1, 0.1), 0.06)
-				# 放大到 1.2x（Phase 2 BOSS 更大更威脅）
-				tween.tween_property(node, "scale", Vector2(1.2, 1.2), 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
-				# 持續紅色調（Phase 2 標誌）
-				tween.tween_property(node, "modulate", Color(1.8, 0.4, 0.4), 0.2)
-				# 加入 Phase 2 標記
-				_add_phase2_indicator(node)
-				ScreenShake.add_trauma(0.8)
-				AudioManager.play_bgm(AudioManager.BGM.BOSS_RAGE)
+				if phase == 3:
+					# Phase 3 絕望模式：更快閃爍 + 更大縮放 + 深紅色調
+					var tween = node.create_tween()
+					# 5次快速閃爍（比 Phase 2 更快，0.04s vs 0.06s）
+					for i in 5:
+						tween.tween_property(node, "modulate", Color(5.0, 0.1, 0.1), 0.04)
+						tween.tween_property(node, "modulate", Color(0.3, 0.05, 0.05), 0.04)
+					# 放大到 1.3x（比 Phase 2 的 1.2x 更大）
+					tween.tween_property(node, "scale", Vector2(1.3, 1.3), 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
+					# 持續深紅色調（比 Phase 2 更深）
+					tween.tween_property(node, "modulate", Color(2.5, 0.2, 0.2), 0.2)
+					# 加入 Phase 3 標記
+					_add_phase3_indicator(node)
+					ScreenShake.add_trauma(1.0)
+					AudioManager.play_bgm(AudioManager.BGM.BOSS_RAGE)
+				else:
+					# Phase 2 進入：強烈閃爍 + 放大 + 持續紅色調
+					var tween = node.create_tween()
+					# 5次強烈閃爍
+					for i in 5:
+						tween.tween_property(node, "modulate", Color(4.0, 0.2, 0.2), 0.06)
+						tween.tween_property(node, "modulate", Color(0.5, 0.1, 0.1), 0.06)
+					# 放大到 1.2x（Phase 2 BOSS 更大更威脅）
+					tween.tween_property(node, "scale", Vector2(1.2, 1.2), 0.4).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
+					# 持續紅色調（Phase 2 標誌）
+					tween.tween_property(node, "modulate", Color(1.8, 0.4, 0.4), 0.2)
+					# 加入 Phase 2 標記
+					_add_phase2_indicator(node)
+					ScreenShake.add_trauma(0.8)
+					AudioManager.play_bgm(AudioManager.BGM.BOSS_RAGE)
 
 func _add_phase2_indicator(boss_node: Node2D) -> void:
 	# 移除舊的 Phase 2 標記（如果有）
@@ -440,6 +461,26 @@ func _add_phase2_indicator(boss_node: Node2D) -> void:
 	var tween = lbl.create_tween().set_loops()
 	tween.tween_property(lbl, "modulate:a", 0.3, 0.3)
 	tween.tween_property(lbl, "modulate:a", 1.0, 0.3)
+
+func _add_phase3_indicator(boss_node: Node2D) -> void:
+	# 移除舊的 Phase 2 / Phase 3 標記（如果有）
+	for label_name in ["Phase2Label", "Phase3Label"]:
+		var old = boss_node.get_node_or_null(label_name)
+		if is_instance_valid(old):
+			old.queue_free()
+	# 新增 PHASE 3 標籤（紅色，更大字體）
+	var lbl = Label.new()
+	lbl.name = "Phase3Label"
+	lbl.text = "💀 PHASE 3 絕望模式！"
+	lbl.position = Vector2(-72, -96)
+	lbl.add_theme_font_size_override("font_size", 18)
+	lbl.modulate = Color(1.0, 0.0, 0.0)
+	lbl.z_index = 20
+	boss_node.add_child(lbl)
+	# 快速脈動動畫（比 Phase 2 更快）
+	var tween = lbl.create_tween().set_loops()
+	tween.tween_property(lbl, "modulate:a", 0.1, 0.15)
+	tween.tween_property(lbl, "modulate:a", 1.0, 0.15)
 
 # ── 點擊目標 ──────────────────────────────────────────────────
 
