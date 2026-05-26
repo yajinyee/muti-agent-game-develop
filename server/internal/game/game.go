@@ -83,6 +83,13 @@ type Game struct {
 	// DAY-303 新增
 	luckyCrashFish *luckyCrashFishManager
 
+	// DAY-304 新增
+	luckyElectricEel  *luckyElectricEelManager
+	luckyAnglerFish   *luckyAnglerFishManager
+	luckyBlackHole    *luckyBlackHoleManager
+	luckyBountyHunter *luckyBountyHunterManager
+	luckyTsunami      *luckyTsunamiManager
+
 	lastTick time.Time
 }
 
@@ -132,6 +139,13 @@ func NewGame(hub *ws.Hub) *Game {
 
 		// DAY-303 新增
 		luckyCrashFish: newLuckyCrashFishManager(),
+
+		// DAY-304 新增
+		luckyElectricEel:  newLuckyElectricEelManager(),
+		luckyAnglerFish:   newLuckyAnglerFishManager(),
+		luckyBlackHole:    newLuckyBlackHoleManager(),
+		luckyBountyHunter: newLuckyBountyHunterManager(),
+		luckyTsunami:      newLuckyTsunamiManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -443,6 +457,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if crashPerfectBoost > 1.0 {
 			effectiveMult *= crashPerfectBoost
 		}
+		// DAY-304 新增全服加成
+		eelSuperBoost := g.luckyElectricEel.getEelSuperMult()
+		if eelSuperBoost > 1.0 {
+			effectiveMult *= eelSuperBoost
+		}
+		anglerPerfectBoost := g.luckyAnglerFish.getAnglerPerfectMult()
+		if anglerPerfectBoost > 1.0 {
+			effectiveMult *= anglerPerfectBoost
+		}
+		blackHoleSingularityBoost := g.luckyBlackHole.getBlackHoleSingularityMult()
+		if blackHoleSingularityBoost > 1.0 {
+			effectiveMult *= blackHoleSingularityBoost
+		}
+		bountyPerfectBoost := g.luckyBountyHunter.getBountyPerfectMult()
+		if bountyPerfectBoost > 1.0 {
+			effectiveMult *= bountyPerfectBoost
+		}
+		tsunamiPerfectBoost := g.luckyTsunami.getTsunamiPerfectMult()
+		if tsunamiPerfectBoost > 1.0 {
+			effectiveMult *= tsunamiPerfectBoost
+		}
 
 		reward := int(float64(bet.BetCost) * effectiveMult)
 		result.Reward = reward
@@ -546,6 +581,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			// DAY-303 新增
 			case isLuckyCrashFish(t.Def.ID):
 				g.tryLuckyCrashFish(playerID, killerName)
+			// DAY-304 新增
+			case isLuckyElectricEelFish(t.Def.ID):
+				g.tryLuckyElectricEelFish(playerID, killerName)
+			case isLuckyAnglerFish(t.Def.ID):
+				g.tryLuckyAnglerFish(playerID, killerName)
+			case isLuckyBlackHoleFish(t.Def.ID):
+				g.tryLuckyBlackHoleFish(playerID, killerName)
+			case isLuckyBountyHunterFish(t.Def.ID):
+				g.tryLuckyBountyHunterFish(playerID, killerName)
+			case isLuckyTsunamiFish(t.Def.ID):
+				g.tryLuckyTsunamiFish(playerID, killerName)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -574,6 +620,10 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			// 時間扭曲魚：擊破計數
 			if g.luckyTimeWarp.isTimeWarpActive() {
 				g.luckyTimeWarp.notifyWarpKill(playerID)
+			}
+			// DAY-304 賞金獵人：賞金目標擊破通知
+			if g.luckyBountyHunter.isBountyTarget(t.InstanceID) {
+				g.notifyBountyKill(t.InstanceID, playerID, killerName)
 			}
 		}
 

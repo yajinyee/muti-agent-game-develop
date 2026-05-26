@@ -174,6 +174,18 @@ var Targets = []TargetDef{
 	// T130 幸運崩潰魚：擊破後觸發崩潰倍率，倍率每 0.5 秒 +0.3x，玩家可隨時收割，崩潰前收割 ≥5.0x 觸發完美收割
 	{ID: "T130", Name: "幸運崩潰魚", Type: TypeSpecial, Multiplier: 170, HP: 200, SpawnWeight: 2, Speed: 70, Lifetime: 16, LaborGain: 34, Behavior: BehaviorLinear, DiffFactor: 1.0},
 
+	// ── DAY-304 新增特殊目標（180x-250x）────────────────────────
+	// T131 幸運電鰻魚：擊破後持續放電 12 秒，每 1.5 秒電擊最近 3 條魚（HP -25%），連鎖加速，累積 ≥8 次 → 超級放電全服 ×2.5
+	{ID: "T131", Name: "幸運電鰻魚", Type: TypeSpecial, Multiplier: 180, HP: 210, SpawnWeight: 2, Speed: 75, Lifetime: 16, LaborGain: 36, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T132 幸運巨型安康魚：擊破後誘餌吸引 5 秒（傷害 ×1.8），然後電擊爆炸全場 HP -30%，命中 ≥8 → 完美誘捕全服 ×2.8
+	{ID: "T132", Name: "幸運巨型安康魚", Type: TypeSpecial, Multiplier: 190, HP: 220, SpawnWeight: 2, Speed: 60, Lifetime: 18, LaborGain: 38, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T133 幸運黑洞魚：擊破後黑洞吸引 8 秒（速度 ×0.2），然後坍縮全場 HP -50%，命中 ≥10 → 奇點爆發全服 ×3.0
+	{ID: "T133", Name: "幸運黑洞魚", Type: TypeSpecial, Multiplier: 200, HP: 230, SpawnWeight: 1, Speed: 50, Lifetime: 20, LaborGain: 40, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T134 幸運賞金獵人魚：擊破後標記 3 個賞金目標（HP -20%），30 秒內全部擊破 → 完美賞金全服 ×3.5
+	{ID: "T134", Name: "幸運賞金獵人魚", Type: TypeSpecial, Multiplier: 220, HP: 240, SpawnWeight: 1, Speed: 80, Lifetime: 16, LaborGain: 44, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T135 幸運海嘯魚：擊破後三波海嘯（HP -20%/-30%/-40%），三波命中 ≥5 → 完美海嘯全服 ×3.2
+	{ID: "T135", Name: "幸運海嘯魚", Type: TypeSpecial, Multiplier: 250, HP: 260, SpawnWeight: 1, Speed: 65, Lifetime: 18, LaborGain: 50, Behavior: BehaviorLinear, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

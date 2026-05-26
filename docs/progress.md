@@ -1,6 +1,67 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-26（DAY-303 T130 崩潰魚 + Lucky Panel 補齊 + GitHub 同步）
+## 最後更新：2026-05-26（DAY-304 T131-T135 五個新 Lucky 魚系統 + GitHub 同步）
+
+## DAY-304 更新（2026-05-26）：T131-T135 五個新 Lucky 魚系統 ✅
+- **業界研究：** 搜尋 Royal Fishing Jili、Jili Games、Fishing Fortune 2026 最新機制
+- **T131 幸運電鰻魚（180x）：** 業界依據：Royal Fishing「60x lightning eel chain reactions」升級版
+  - 擊破後持續放電 12 秒，每 1.5 秒電擊最近 3 條魚（HP -25%）
+  - 每次電擊命中 ≥2 條 → 連鎖加速（間隔縮短 0.1s，最短 0.5s）
+  - 12 秒內累積電擊 ≥ 8 次 → 「超級放電」：全服 ×2.5 加成 7 秒
+  - 個人冷卻 22 秒；全服冷卻 38 秒
+- **T132 幸運巨型安康魚（190x）：** 業界依據：Jili「Giant Anglerfish shoots electricity to open treasure chests」
+  - 擊破後觸發「深海誘餌」5 秒（傷害 ×1.8）
+  - 5 秒後「電擊爆炸」：全場 HP -30%
+  - 電擊命中 ≥ 8 個目標 → 「完美誘捕」：全服 ×2.8 加成 7 秒
+  - 個人冷卻 24 秒；全服冷卻 40 秒
+- **T133 幸運黑洞魚（200x）：** 業界依據：Godot vortex water shader + 黑洞吸引機制
+  - 擊破後「黑洞吸引」8 秒（目標速度 ×0.2）
+  - 8 秒後「黑洞坍縮」：全場 HP -50%
+  - 坍縮命中 ≥ 10 個目標 → 「奇點爆發」：全服 ×3.0 加成 8 秒
+  - 個人冷卻 28 秒；全服冷卻 45 秒
+- **T134 幸運賞金獵人魚（220x）：** 業界依據：Fishing Frenzy Chapter 3「Guild Wars + Boss Fish」
+  - 擊破後隨機標記場上 3 條目標為「賞金目標」（HP -20% 弱化 + 金色標記）
+  - 每擊破一個賞金目標 → 觸發玩家獲得 ×3.0 獎勵
+  - 30 秒內擊破全部 3 個 → 「完美賞金」：全服 ×3.5 加成 8 秒
+  - 個人冷卻 26 秒；全服冷卻 42 秒
+- **T135 幸運海嘯魚（250x）：** 業界依據：Fishing Fortune 2026「multiplier cascade system」
+  - 擊破後三波海嘯依序衝擊（HP -20%/-30%/-40%）
+  - 三波命中總數 ≥ 5 → 「完美海嘯」：全服 ×3.2 加成 8 秒
+  - 個人冷卻 30 秒；全服冷卻 48 秒
+- **Server：** 5 個獨立 handler 檔案 + game.go 整合 + protocol 新增 5 個訊息類型 + tables.go 新增 5 個目標
+  - `lucky_electric_eel_handler.go`：持續放電連鎖系統
+  - `lucky_anglerfish_handler.go`：誘餌+電擊爆炸系統
+  - `lucky_black_hole_handler.go`：黑洞吸引+坍縮系統
+  - `lucky_bounty_hunter_handler.go`：賞金目標系統
+  - `lucky_tsunami_handler.go`：三波海嘯系統
+- **Client：** 5 個新 Lucky Panel + GameManager 新增 5 個訊號 + HUD 新增 5 個事件處理 + TargetManager 新增 T131-T135 映射
+  - `LuckyElectricEelPanel.gd`（layer=31）：電黃色 + 電擊計數器 + 超級放電演出
+  - `LuckyAnglerFishPanel.gd`（layer=32）：青藍色 + 誘餌計時條 + 電擊爆炸演出
+  - `LuckyBlackHolePanel.gd`（layer=33）：深紫黑色 + 吸引計時條 + 坍縮演出
+  - `LuckyBountyHunterPanel.gd`（layer=34）：火橙色 + 賞金計數器 + 完美賞金演出
+  - `LuckyTsunamiPanel.gd`（layer=35）：深藍色 + 三波指示器 + 完美海嘯演出
+- **美術：** T131-T135 精靈圖生成完成
+  - T131（1229 非透明像素，30.0%）：電黃魚身 + 電弧 + 電光暈
+  - T132（1538 非透明像素，37.5%）：深海青藍魚身 + 大嘴牙齒 + 誘餌燈
+  - T133（2453 非透明像素，59.9%）：深紫黑洞核心 + 吸積盤 + 引力線
+  - T134（1337 非透明像素，32.6%）：火橙魚身 + 賞金星星 + 瞄準線
+  - T135（1948 非透明像素，47.6%）：深藍魚身 + 三波浪光環
+- **Lucky badge 升級：** T131-T135 使用亮金色光環（最高階視覺）
+- **知識庫更新：** knowhow-log 條目 104（T131-T135 五個新 Lucky 魚系統）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-304）
+- **Server 目標物數量：** 42 種（T001-T006 + T101-T135 + B001）
+- **Lucky 系統數量：** 30 個（T106-T135）
+- **Client Lucky Panel 數量：** 36 個（含 BaseLuckyPanel + LuckyEventSystem）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 7/10
+- **視覺清晰度：** 7/10
+- **核心循環流暢度：** 8/10
+- **最需要改善：** T133 黑洞魚的 Client 端吸引視覺效果（需要在 Godot 中實際測試）
+
+
 
 ## DAY-303 更新（2026-05-26）：T130 幸運崩潰魚 + Lucky Panel 補齊 + 新 Agent 研究 ✅
 - **Lucky Panel 補齊：** 補齊 DAY-301/302 缺少的 3 個 Client Panel 腳本

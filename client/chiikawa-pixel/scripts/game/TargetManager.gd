@@ -49,6 +49,12 @@ const TARGET_SPRITES = {
 	"T129": "res://assets/sprites/targets/T129_chain_meteor.png",
 	# DAY-303 新增特殊目標
 	"T130": "res://assets/sprites/targets/T130_crash_fish.png",
+	# DAY-304 新增特殊目標
+	"T131": "res://assets/sprites/targets/T131_electric_eel.png",
+	"T132": "res://assets/sprites/targets/T132_angler_fish.png",
+	"T133": "res://assets/sprites/targets/T133_black_hole.png",
+	"T134": "res://assets/sprites/targets/T134_bounty_hunter.png",
+	"T135": "res://assets/sprites/targets/T135_tsunami.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -98,6 +104,12 @@ const TARGET_COLORS = {
 	"T129": Color(0.9, 0.4, 0.1),   # 火橙連鎖隕石魚
 	# DAY-303 新增特殊目標備用顏色
 	"T130": Color(0.8, 0.1, 0.1),   # 深紅崩潰魚
+	# DAY-304 新增特殊目標備用顏色
+	"T131": Color(1.0, 0.95, 0.0),  # 電黃電鰻魚
+	"T132": Color(0.0, 0.9, 1.0),   # 青藍巨型安康魚
+	"T133": Color(0.3, 0.0, 0.5),   # 深紫黑洞魚
+	"T134": Color(1.0, 0.5, 0.0),   # 火橙賞金獵人魚
+	"T135": Color(0.0, 0.5, 1.0),   # 深藍海嘯魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
@@ -219,10 +231,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T129）
+	# Lucky 特殊魚標記（T106-T135）
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 129:
+		if tid_num >= 106 and tid_num <= 135:
 			_add_lucky_badge(container, def_id)
 
 	# 特殊搖晃（T103 流星、T104 金草）
@@ -268,8 +280,10 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 依倍率範圍選顏色
 	var tid_num = int(def_id.substr(1))
 	var ring_color: Color
-	if tid_num >= 126:
-		ring_color = Color(1.0, 0.85, 0.0, 0.40)   # 金色（T126-T129，最高階）
+	if tid_num >= 131:
+		ring_color = Color(1.0, 0.95, 0.0, 0.50)   # 亮金（T131-T135，最高階）
+	elif tid_num >= 126:
+		ring_color = Color(1.0, 0.85, 0.0, 0.40)   # 金色（T126-T130）
 	elif tid_num >= 121:
 		ring_color = Color(0.88, 0.67, 1.0, 0.35)  # 淡紫（T121-T125）
 	elif tid_num >= 116:

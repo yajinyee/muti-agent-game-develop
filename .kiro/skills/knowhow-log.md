@@ -4181,3 +4181,35 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
 - **問題：** `LuckyCrashFishPanel.gd` 誤用 `NetworkManager.send_message()`，但正確方法是 `NetworkManager.send()`
 - **解法：** 改為 `NetworkManager.send("crash_harvest", {})`
 - **教訓：** NetworkManager 的通用發送方法是 `send(type, payload)`，不是 `send_message`
+
+## 104. DAY-304 T131-T135 五個新 Lucky 魚系統（2026-05-26）
+
+### 業界研究成果
+- **Royal Fishing Jili「Lightning Eel」**：60x 連鎖閃電，電擊附近魚直到斷開，製造連鎖捕獲序列
+- **Jili Games「Giant Anglerfish」**：安康魚可以射出電力開寶箱，巨型鱷魚覺醒獵魚積累大獎
+- **Fishing Fortune 2026「multiplier cascade system」**：90 秒內連續稀有捕獲，倍率從 2x 累積到 500x
+- **Fishing Frenzy Chapter 3「Guild Wars + Boss Fish」**：公會戰 + BOSS 魚 + 品質值系統
+
+### 新機制設計原則
+1. **T131 電鰻**：「持續放電 + 連鎖加速」— 越打越快，製造緊張感
+2. **T132 安康魚**：「誘餌期 + 爆炸」— 兩段式，等待期製造期待感
+3. **T133 黑洞**：「吸引期 + 坍縮」— 視覺衝擊最強，全場 HP -50%
+4. **T134 賞金獵人**：「標記目標 + 限時獵殺」— 策略性，需要玩家主動配合
+5. **T135 海嘯**：「三波遞增傷害」— 每波都有視覺反饋，累積感強
+
+### Go 技術要點
+- **Fisher-Yates shuffle 替代方案**：`time.Now().UnixNano() % (i+1)` 作為簡單隨機，不需要 `math/rand`
+- **多 goroutine 協調**：每個 handler 用獨立 goroutine，不阻塞主循環
+- **全服倍率疊加**：所有 Lucky 系統的 boost 都在 `handleAttack` 中疊加到 `effectiveMult`
+
+### Client 技術要點
+- **CanvasLayer layer 值**：T131=31, T132=32, T133=33, T134=34, T135=35（依序遞增）
+- **_process 計時器**：用 `_lure_timer -= delta` 做倒數，比 Timer 節點更輕量
+- **訊號連接**：Panel 自行連接 GameManager 訊號，HUD 做備用橫幅
+
+### 精靈圖品質
+- T131 電鰻：30.0%（細長魚身，透明邊緣多，正常）
+- T132 安康魚：37.5%（圓形魚身 + 誘餌燈）
+- T133 黑洞：59.9%（最高，黑洞核心 + 吸積盤填充多）
+- T134 賞金獵人：32.6%（橢圓魚身 + 賞金標記）
+- T135 海嘯：47.6%（魚身 + 三波浪光環）

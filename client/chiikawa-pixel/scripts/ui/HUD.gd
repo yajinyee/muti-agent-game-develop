@@ -85,6 +85,12 @@ func _ready() -> void:
 	GameManager.lucky_chain_meteor.connect(_on_lucky_chain_meteor)
 	# DAY-303 新增幸運特殊魚訊號連接
 	GameManager.lucky_crash_fish.connect(_on_lucky_crash_fish)
+	# DAY-304 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
+	GameManager.lucky_electric_eel.connect(_on_lucky_electric_eel)
+	GameManager.lucky_angler_fish.connect(_on_lucky_angler_fish)
+	GameManager.lucky_black_hole.connect(_on_lucky_black_hole)
+	GameManager.lucky_bounty_hunter.connect(_on_lucky_bounty_hunter)
+	GameManager.lucky_tsunami.connect(_on_lucky_tsunami)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1080,3 +1086,99 @@ func _on_lucky_crash_fish(data: Dictionary) -> void:
 			ScreenShake.add_trauma(0.7)
 		"perfect_end":
 			_show_lucky_banner("💰 完美收割加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+# ── DAY-304 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_electric_eel(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"eel_start":
+			_show_lucky_event("electric_eel", "⚡ %s 觸發電鰻放電！持續 12 秒連鎖電擊！" % name)
+			ScreenShake.add_trauma(0.3)
+		"eel_super":
+			var shock_count = data.get("shock_count", 0)
+			_show_lucky_banner("⚡ 超級放電！%s 電擊 %d 次！全服 ×2.5 加成 7 秒！" % [name, shock_count], Color(1.0, 0.95, 0.0), 3.5)
+			ScreenShake.add_trauma(0.7)
+		"eel_super_end":
+			_show_lucky_banner("⚡ 超級放電加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_angler_fish(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"lure_start":
+			_show_lucky_event("angler_fish", "🎣 %s 觸發深海誘餌！傷害 ×1.8！5 秒後電擊爆炸！" % name)
+			ScreenShake.add_trauma(0.3)
+		"explosion":
+			var hit_count = data.get("hit_count", 0)
+			_show_lucky_banner("⚡ 電擊爆炸！命中 %d 條魚！HP -30%%！" % hit_count, Color(0.0, 0.9, 1.0), 2.5)
+			ScreenShake.add_trauma(0.6)
+		"perfect":
+			var hit_count = data.get("hit_count", 0)
+			_show_lucky_banner("🎣✨ 完美誘捕！%s 命中 %d 條！全服 ×2.8 加成 7 秒！" % [name, hit_count], Color(0.0, 1.0, 0.5), 3.5)
+			ScreenShake.add_trauma(0.7)
+		"perfect_end":
+			_show_lucky_banner("🎣 完美誘捕加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_black_hole(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"black_hole_start":
+			_show_lucky_event("black_hole", "🌑 %s 觸發黑洞！目標速度 ×0.2！8 秒後坍縮！" % name)
+			ScreenShake.add_trauma(0.4)
+		"collapse":
+			var hit_count = data.get("hit_count", 0)
+			_show_lucky_banner("💥 黑洞坍縮！命中 %d 條魚！HP -50%%！" % hit_count, Color(0.6, 0.0, 1.0), 2.5)
+			ScreenShake.add_trauma(0.8)
+		"singularity":
+			var hit_count = data.get("hit_count", 0)
+			_show_lucky_banner("🌑✨ 奇點爆發！%s 吸入 %d 條！全服 ×3.0 加成 8 秒！" % [name, hit_count], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"singularity_end":
+			_show_lucky_banner("🌑 奇點爆發加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_bounty_hunter(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"bounty_start":
+			var total = data.get("total_bounty", 3)
+			_show_lucky_event("bounty_hunter", "🎯 %s 觸發賞金任務！標記 %d 個賞金目標！" % [name, total])
+			ScreenShake.add_trauma(0.3)
+		"bounty_kill":
+			var kill_count = data.get("kill_count", 0)
+			var total = data.get("total_bounty", 3)
+			_update_lucky_indicator("🎯 賞金任務", "%d/%d 已獵殺" % [kill_count, total], float(kill_count) / float(total), Color(1.0, 0.5, 0.0))
+		"bounty_perfect":
+			_hide_lucky_indicator()
+			var kill_count = data.get("kill_count", 0)
+			_show_lucky_banner("🎯✨ 完美賞金！%s 獵殺全部 %d 個！全服 ×3.5 加成 8 秒！" % [name, kill_count], Color(1.0, 0.3, 0.1), 3.5)
+			ScreenShake.add_trauma(0.8)
+		"bounty_perfect_end":
+			_show_lucky_banner("🎯 完美賞金加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"bounty_timeout":
+			_hide_lucky_indicator()
+
+func _on_lucky_tsunami(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"tsunami_warning":
+			_show_lucky_event("tsunami", "🌊 %s 觸發海嘯！三波衝擊即將來臨！" % name)
+			ScreenShake.add_trauma(0.4)
+		"wave_hit":
+			var wave_num = data.get("wave_num", 1)
+			var hit_count = data.get("hit_count", 0)
+			var dmg_pct = data.get("damage_pct", 0.2)
+			_show_lucky_banner("🌊 第 %d 波！命中 %d 條！HP -%d%%！" % [wave_num, hit_count, int(dmg_pct * 100)], Color(0.0, 0.5 + wave_num * 0.15, 1.0), 1.5)
+			ScreenShake.add_trauma(0.3 + wave_num * 0.1)
+		"tsunami_perfect":
+			var total = data.get("total_hit_count", 0)
+			_show_lucky_banner("🌊✨ 完美海嘯！%s 三波命中 %d 條！全服 ×3.2 加成 8 秒！" % [name, total], Color(0.0, 0.85, 1.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"tsunami_perfect_end":
+			_show_lucky_banner("🌊 完美海嘯加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"tsunami_end":
+			pass

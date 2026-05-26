@@ -67,6 +67,13 @@ const (
 
 	// DAY-303 新增幸運特殊魚事件
 	MsgLuckyCrashFish = "lucky_crash_fish" // T130 崩潰魚（Crash mechanic）
+
+	// DAY-304 新增幸運特殊魚事件
+	MsgLuckyElectricEel  = "lucky_electric_eel"  // T131 電鰻魚（持續放電連鎖）
+	MsgLuckyAnglerFish   = "lucky_angler_fish"   // T132 巨型安康魚（誘餌+電擊爆炸）
+	MsgLuckyBlackHole    = "lucky_black_hole"    // T133 黑洞魚（吸引+坍縮）
+	MsgLuckyBountyHunter = "lucky_bounty_hunter" // T134 賞金獵人魚（賞金目標系統）
+	MsgLuckyTsunami      = "lucky_tsunami"       // T135 海嘯魚（三波衝擊）
 )
 
 // ── Envelope ─────────────────────────────────────────────────
@@ -524,4 +531,71 @@ type LuckyCrashFishPayload struct {
 	Reward      int     `json:"reward"`       // 收割獎勵
 	BoostMult   float64 `json:"boost_mult"`   // 完美收割全服加成倍率
 	BoostSecs   int     `json:"boost_secs"`   // 完美收割加成秒數
+}
+
+// ── DAY-304 新增 Lucky 特殊魚 Payloads ───────────────────────
+
+// LuckyElectricEelPayload T131 電鰻魚（持續放電連鎖）
+type LuckyElectricEelPayload struct {
+	Event      string  `json:"event"`       // eel_start / eel_shock / eel_end / eel_super / eel_super_end
+	PlayerID   string  `json:"player_id"`
+	PlayerName string  `json:"player_name"`
+	Duration   float64 `json:"duration,omitempty"`   // 持續時間（秒）
+	HitCount   int     `json:"hit_count,omitempty"`  // 本次電擊命中數
+	ShockCount int     `json:"shock_count,omitempty"` // 累積電擊次數
+	TimeLeft   float64 `json:"time_left,omitempty"`  // 剩餘時間
+	BoostMult  float64 `json:"boost_mult,omitempty"` // 超級放電加成倍率
+	BoostSec   int     `json:"boost_sec,omitempty"`  // 加成秒數
+}
+
+// LuckyAnglerFishPayload T132 巨型安康魚（誘餌+電擊爆炸）
+type LuckyAnglerFishPayload struct {
+	Event      string  `json:"event"`        // lure_start / explosion / perfect / perfect_end / lure_end
+	PlayerID   string  `json:"player_id"`
+	PlayerName string  `json:"player_name"`
+	LureSec    int     `json:"lure_sec,omitempty"`    // 誘餌持續秒數
+	DamageMult float64 `json:"damage_mult,omitempty"` // 誘餌期間傷害倍率
+	HitCount   int     `json:"hit_count,omitempty"`   // 電擊命中數
+	BoostMult  float64 `json:"boost_mult,omitempty"`  // 完美誘捕加成倍率
+	BoostSec   int     `json:"boost_sec,omitempty"`   // 加成秒數
+}
+
+// LuckyBlackHolePayload T133 黑洞魚（吸引+坍縮）
+type LuckyBlackHolePayload struct {
+	Event      string  `json:"event"`        // black_hole_start / collapse / singularity / singularity_end / black_hole_end
+	PlayerID   string  `json:"player_id"`
+	PlayerName string  `json:"player_name"`
+	Duration   float64 `json:"duration,omitempty"`   // 黑洞持續秒數
+	HitCount   int     `json:"hit_count,omitempty"`  // 坍縮命中數
+	BoostMult  float64 `json:"boost_mult,omitempty"` // 奇點爆發加成倍率
+	BoostSec   int     `json:"boost_sec,omitempty"`  // 加成秒數
+}
+
+// LuckyBountyHunterPayload T134 賞金獵人魚（賞金目標系統）
+type LuckyBountyHunterPayload struct {
+	Event         string   `json:"event"`                    // bounty_start / bounty_kill / bounty_perfect / bounty_perfect_end / bounty_timeout
+	PlayerID      string   `json:"player_id"`
+	PlayerName    string   `json:"player_name"`
+	BountyTargets []string `json:"bounty_targets,omitempty"` // 賞金目標 instance_id 列表
+	TotalBounty   int      `json:"total_bounty,omitempty"`   // 賞金目標總數
+	Duration      float64  `json:"duration,omitempty"`       // 任務持續秒數
+	KillerID      string   `json:"killer_id,omitempty"`      // 擊破者 ID
+	KillerName    string   `json:"killer_name,omitempty"`    // 擊破者名稱
+	KillCount     int      `json:"kill_count,omitempty"`     // 已擊破賞金目標數
+	BoostMult     float64  `json:"boost_mult,omitempty"`     // 完美賞金加成倍率
+	BoostSec      int      `json:"boost_sec,omitempty"`      // 加成秒數
+}
+
+// LuckyTsunamiPayload T135 海嘯魚（三波衝擊）
+type LuckyTsunamiPayload struct {
+	Event         string  `json:"event"`                     // tsunami_warning / wave_hit / tsunami_perfect / tsunami_perfect_end / tsunami_end
+	PlayerID      string  `json:"player_id"`
+	PlayerName    string  `json:"player_name"`
+	WaveCount     int     `json:"wave_count,omitempty"`      // 總波數
+	WaveNum       int     `json:"wave_num,omitempty"`        // 當前波次（1-3）
+	HitCount      int     `json:"hit_count,omitempty"`       // 本波命中數
+	DamagePct     float64 `json:"damage_pct,omitempty"`      // 本波傷害百分比
+	TotalHitCount int     `json:"total_hit_count,omitempty"` // 三波累積命中數
+	BoostMult     float64 `json:"boost_mult,omitempty"`      // 完美海嘯加成倍率
+	BoostSec      int     `json:"boost_sec,omitempty"`       // 加成秒數
 }
