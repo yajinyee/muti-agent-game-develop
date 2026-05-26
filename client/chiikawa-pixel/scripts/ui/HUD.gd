@@ -83,6 +83,8 @@ func _ready() -> void:
 	GameManager.lucky_time_warp.connect(_on_lucky_time_warp)
 	# DAY-302 新增幸運特殊魚訊號連接
 	GameManager.lucky_chain_meteor.connect(_on_lucky_chain_meteor)
+	# DAY-303 新增幸運特殊魚訊號連接
+	GameManager.lucky_crash_fish.connect(_on_lucky_crash_fish)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1047,3 +1049,34 @@ func _on_lucky_chain_meteor(data: Dictionary) -> void:
 			ScreenShake.add_trauma(0.8)
 		"meteor_perfect_end":
 			_show_lucky_banner("☄️ 完美隕石雨加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+# ── DAY-303 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_crash_fish(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	var mult = data.get("current_mult", 1.0)
+	match event:
+		"crash_start":
+			_show_lucky_event("crash_fish", "💥 %s 觸發崩潰倍率！倍率持續上升！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"mult_rise":
+			_update_lucky_indicator("💥 崩潰倍率", "×%.1f" % mult, -1.0, Color(0.8, 0.1, 0.1))
+		"harvest":
+			_hide_lucky_indicator()
+			var reward = data.get("reward", 0)
+			_show_lucky_banner("💰 %s 收割！×%.1f！獎勵 %d！" % [name, mult, reward], Color(0.2, 0.9, 0.2), 2.5)
+			if reward > 0:
+				_show_reward_popup(reward, mult)
+		"crash":
+			_hide_lucky_indicator()
+			_show_lucky_banner("💥 崩潰！%s 的 ×%.1f 歸零！" % [name, mult], Color(0.8, 0.1, 0.1), 2.5)
+			ScreenShake.add_trauma(0.6)
+		"perfect_harvest":
+			var boost = data.get("boost_mult", 2.0)
+			var secs = data.get("boost_secs", 5)
+			_show_lucky_banner("💰✨ 完美收割！%s ×%.1f！全服 ×%.0f 加成 %d 秒！" % [name, mult, boost, secs], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.7)
+		"perfect_end":
+			_show_lucky_banner("💰 完美收割加成結束", Color(0.7, 0.7, 0.7), 1.5)

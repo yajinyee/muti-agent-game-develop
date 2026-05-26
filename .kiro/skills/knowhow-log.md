@@ -4154,3 +4154,30 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
   7. 推送 GitHub
 - **禁止**：跳過任何步驟，特別是「上網研究」和「知識庫更新」
 - **教訓**：每次循環都要有「新知識輸入」，不能只是機械式地加功能
+
+## 103. DAY-303 Lucky Panel 補齊 + T130 崩潰魚系統（2026-05-26）
+
+### 補齊缺少的 Lucky Panel 腳本
+- **問題：** DAY-301/302 新增了 T126-T129 的 Server handler，但 Client 端缺少對應的 Panel 腳本
+- **補齊：** `LuckyCoopFishPanel.gd`（T127）、`LuckyTimeWarpPanel.gd`（T128）、`LuckyChainMeteorPanel.gd`（T129）
+- **注意：** `LuckyJackpotFishPanel.gd`（T126）已存在，不需要重建
+- **教訓：** 每次新增 Server Lucky handler 後，必須同步建立 Client Panel 腳本，不能只靠 HUD.gd 的事件處理
+
+### T130 幸運崩潰魚（Crash mechanic）
+- **業界依據：** Lucky Fish by AbraCadabra「crash mechanic — multiplier rises until crash, cash out anytime」
+- **設計：** 擊破後觸發崩潰倍率，每 0.5 秒 +0.3x（最高 10.0x），玩家可隨時收割，崩潰前收割 ≥5.0x 觸發完美收割全服 ×2.0 加成 5 秒
+- **Server：** `lucky_crash_fish_handler.go` + `game.go` 整合 + `protocol/messages.go` 新增 `MsgLuckyCrashFish` + `tables.go` 新增 T130
+- **Client：** `LuckyCrashFishPanel.gd`（layer=30）+ `GameManager.gd` 新增訊號 + `HUD.gd` 新增事件處理 + `TargetManager.gd` 新增 T130 映射
+- **美術：** T130 精靈圖（深紅漸層魚身 + 崩潰裂縫紋路 + 上升倍率符號 + 爆炸光芒 + 警告符號）39.3% 非透明像素
+- **收割按鈕：** 只有觸發者才能看到收割按鈕，用 `GameManager.get_player_id()` 比對
+- **教訓：** Crash mechanic 需要 Client 端主動發送 `crash_harvest` 訊息，Server 端驗證是否為觸發者
+
+### GameManager.get_player_id() 新增
+- **問題：** `LuckyCrashFishPanel.gd` 需要比對當前玩家 ID，但 GameManager 沒有 `get_player_id()` 方法
+- **解法：** 在 GameManager.gd 末尾加入 `func get_player_id() -> String: return NetworkManager.get_player_id()`
+- **教訓：** 需要玩家 ID 的功能要通過 GameManager 代理，不要直接呼叫 NetworkManager
+
+### NetworkManager.send vs send_message
+- **問題：** `LuckyCrashFishPanel.gd` 誤用 `NetworkManager.send_message()`，但正確方法是 `NetworkManager.send()`
+- **解法：** 改為 `NetworkManager.send("crash_harvest", {})`
+- **教訓：** NetworkManager 的通用發送方法是 `send(type, payload)`，不是 `send_message`

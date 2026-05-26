@@ -170,6 +170,10 @@ var Targets = []TargetDef{
 	// T129 幸運連鎖隕石魚：擊破後觸發連鎖隕石雨，5 顆隕石依序落下，每顆命中觸發連鎖擴大
 	{ID: "T129", Name: "幸運連鎖隕石魚", Type: TypeSpecial, Multiplier: 160, HP: 190, SpawnWeight: 2, Speed: 65, Lifetime: 16, LaborGain: 32, Behavior: BehaviorLinear, DiffFactor: 1.0},
 
+	// ── DAY-303 新增特殊目標（170x）────────────────────────────
+	// T130 幸運崩潰魚：擊破後觸發崩潰倍率，倍率每 0.5 秒 +0.3x，玩家可隨時收割，崩潰前收割 ≥5.0x 觸發完美收割
+	{ID: "T130", Name: "幸運崩潰魚", Type: TypeSpecial, Multiplier: 170, HP: 200, SpawnWeight: 2, Speed: 70, Lifetime: 16, LaborGain: 34, Behavior: BehaviorLinear, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

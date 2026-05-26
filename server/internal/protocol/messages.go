@@ -64,6 +64,9 @@ const (
 
 	// DAY-302 新增幸運特殊魚事件
 	MsgLuckyChainMeteor = "lucky_chain_meteor" // T129 連鎖隕石魚
+
+	// DAY-303 新增幸運特殊魚事件
+	MsgLuckyCrashFish = "lucky_crash_fish" // T130 崩潰魚（Crash mechanic）
 )
 
 // ── Envelope ─────────────────────────────────────────────────
@@ -506,4 +509,19 @@ type LuckyChainMeteorPayload struct {
 	HitCount    int     `json:"hit_count"`    // 命中目標數
 	PerfectMult float64 `json:"perfect_mult"` // 完美加成倍率
 	ExpiresAt   int64   `json:"expires_at"`   // 完美加成到期時間
+}
+
+// ── DAY-303 新增 Lucky 特殊魚 Payloads ───────────────────────
+
+// LuckyCrashFishPayload T130 崩潰魚（Crash mechanic）
+type LuckyCrashFishPayload struct {
+	Event       string  `json:"event"`        // crash_start / mult_rise / harvest / crash / perfect_harvest / perfect_end
+	PlayerID    string  `json:"player_id"`
+	PlayerName  string  `json:"player_name"`
+	CurrentMult float64 `json:"current_mult"` // 當前倍率
+	CrashIn     float64 `json:"crash_in"`     // 距離崩潰的秒數（僅 crash_start）
+	TimeLeft    float64 `json:"time_left"`    // 剩餘時間
+	Reward      int     `json:"reward"`       // 收割獎勵
+	BoostMult   float64 `json:"boost_mult"`   // 完美收割全服加成倍率
+	BoostSecs   int     `json:"boost_secs"`   // 完美收割加成秒數
 }

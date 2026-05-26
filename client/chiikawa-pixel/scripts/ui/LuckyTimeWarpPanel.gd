@@ -1,34 +1,50 @@
 ## LuckyTimeWarpPanel.gd — T128 幸運時間扭曲魚 UI
 ## lucky-panel-agent 負責維護
-## 業界依據：業界原創「時間扭曲 — 全場目標移動速度降低 70%，持續 10 秒，傷害 ×2.0」
-## 視覺主題：深紫色 + 時鐘 + 扭曲光環 + 計時條
+## 業界依據：Fishing Fortune 2026「Time Warp — all fish slow to 30% speed, damage ×2.0 for 10s」
+## 視覺主題：紫色 + 計時條 + 傷害加成指示器 + 時鐘圖案
 extends CanvasLayer
 
-const LAYER_Z = 28
+const LAYER_Z = 28  # CanvasLayer layer 值
 
-const COLOR_WARP    = Color(0.55, 0.2, 0.86)  # 紫色
-const COLOR_COLLAPSE = Color(0.5, 0.0, 0.8)   # 深紫（崩潰）
-const COLOR_DAMAGE  = Color(1.0, 0.5, 0.0)    # 橙色（傷害加成）
-const COLOR_BG      = Color(0.04, 0.0, 0.08, 0.88)
+# 顏色主題
+const COLOR_WARP     = Color(0.55, 0.2, 0.86)   # 紫色（扭曲主色）
+const COLOR_DAMAGE   = Color(1.0, 0.4, 0.1)     # 橙紅（傷害加成）
+const COLOR_COLLAPSE = Color(1.0, 0.85, 0.0)    # 金色（時間崩潰）
+const COLOR_BG       = Color(0.05, 0.0, 0.1, 0.88)
 
 var _banner: Control = null
-var _warp_indicator: Control = null
+var _warp_panel: Control = null
+var _result_popup: Control = null
 var _flash_overlay: ColorRect = null
-var _warp_timer: float = 0.0
+var _timer_bar: ColorRect = null
+var _timer_label: Label = null
+var _kill_label: Label = null
+var _dmg_label: Label = null
 var _warp_active: bool = false
+var _warp_duration: float = 10.0
+var _warp_elapsed: float = 0.0
 
 func _ready() -> void:
 	layer = LAYER_Z
 	_create_flash_overlay()
-	_create_warp_indicator()
+	_create_warp_panel()
 	GameManager.lucky_time_warp.connect(_on_lucky_time_warp)
 
 func _process(delta: float) -> void:
-	if _warp_active and _warp_timer > 0:
-		_warp_timer -= delta
-		_update_warp_timer()
-		if _warp_timer <= 0:
-			_warp_active = false
+	if _warp_active and is_instance_valid(_timer_bar):
+		_warp_elapsed += delta
+		var pct = 1.0 - (_warp_elapsed / _warp_duration)
+		pct = clamp(pct, 0.0, 1.0)
+		_timer_bar.size.x = 284.0 * pct
+		# 顏色隨時間變化：紫→橙→紅
+		if pct > 0.5:
+			_timer_bar.color = COLOR_WARP
+		elif pct > 0.25:
+			_timer_bar.color = Color(0.8, 0.3, 0.9)
+		else:
+			_timer_bar.color = Color(1.0, 0.2, 0.5)
+		if is_instance_valid(_timer_label):
+			_timer_label.text = "%.0fs" % max(0.0, _warp_duration - _warp_elapsed)
 
 func _create_flash_overlay() -> void:
 	_flash_overlay = ColorRect.new()
@@ -37,87 +53,73 @@ func _create_flash_overlay() -> void:
 	_flash_overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(_flash_overlay)
 
-func _create_warp_indicator() -> void:
-	_warp_indicator = Control.new()
-	_warp_indicator.position = Vector2(960, 130)
-	_warp_indicator.size = Vector2(300, 90)
-	_warp_indicator.visible = false
-	add_child(_warp_indicator)
+func _create_warp_panel() -> void:
+	# 右上角時間扭曲狀態顯示
+	_warp_panel = Control.new()
+	_warp_panel.position = Vector2(960, 10)
+	_warp_panel.size = Vector2(300, 100)
+	_warp_panel.visible = false
+	add_child(_warp_panel)
 
 	var bg = ColorRect.new()
-	bg.size = _warp_indicator.size
+	bg.size = _warp_panel.size
 	bg.color = COLOR_BG
-	_warp_indicator.add_child(bg)
+	_warp_panel.add_child(bg)
 
 	var title = Label.new()
-	title.name = "Title"
-	title.text = "⏰ 時間扭曲"
+	title.text = "⏰ 時間扭曲進行中"
 	title.position = Vector2(8, 4)
-	title.add_theme_font_size_override("font_size", 14)
+	title.add_theme_font_size_override("font_size", 13)
 	title.modulate = COLOR_WARP
-	_warp_indicator.add_child(title)
+	_warp_panel.add_child(title)
 
-	var dmg_lbl = Label.new()
-	dmg_lbl.name = "DmgLabel"
-	dmg_lbl.text = "傷害 ×2.0 | 速度 ×0.3"
-	dmg_lbl.position = Vector2(8, 24)
-	dmg_lbl.add_theme_font_size_override("font_size", 13)
-	dmg_lbl.modulate = COLOR_DAMAGE
-	_warp_indicator.add_child(dmg_lbl)
-
-	var time_lbl = Label.new()
-	time_lbl.name = "TimeLabel"
-	time_lbl.text = "10.0s"
-	time_lbl.position = Vector2(8, 44)
-	time_lbl.add_theme_font_size_override("font_size", 22)
-	time_lbl.modulate = Color.WHITE
-	_warp_indicator.add_child(time_lbl)
-
-	# 計時條
+	# 計時條背景
 	var bar_bg = ColorRect.new()
-	bar_bg.name = "BarBG"
-	bar_bg.size = Vector2(284, 10)
-	bar_bg.position = Vector2(8, 72)
+	bar_bg.position = Vector2(8, 26)
+	bar_bg.size = Vector2(284, 14)
 	bar_bg.color = Color(0.1, 0.0, 0.15)
-	_warp_indicator.add_child(bar_bg)
+	_warp_panel.add_child(bar_bg)
 
-	var bar = ColorRect.new()
-	bar.name = "Bar"
-	bar.size = Vector2(284, 10)
-	bar.position = Vector2(8, 72)
-	bar.color = COLOR_WARP
-	_warp_indicator.add_child(bar)
+	# 計時條填充
+	_timer_bar = ColorRect.new()
+	_timer_bar.position = Vector2(8, 26)
+	_timer_bar.size = Vector2(284, 14)
+	_timer_bar.color = COLOR_WARP
+	_warp_panel.add_child(_timer_bar)
 
-func _update_warp_timer() -> void:
-	if not is_instance_valid(_warp_indicator):
-		return
-	var time_lbl = _warp_indicator.get_node_or_null("TimeLabel")
-	if is_instance_valid(time_lbl):
-		time_lbl.text = "%.1fs" % max(0, _warp_timer)
-		if _warp_timer <= 3:
-			time_lbl.modulate = Color(1.0, 0.3, 0.3)
-		elif _warp_timer <= 6:
-			time_lbl.modulate = Color(1.0, 0.8, 0.2)
-		else:
-			time_lbl.modulate = Color.WHITE
-	var bar = _warp_indicator.get_node_or_null("Bar")
-	var bar_bg = _warp_indicator.get_node_or_null("BarBG")
-	if is_instance_valid(bar) and is_instance_valid(bar_bg):
-		var pct = _warp_timer / 10.0
-		bar.size.x = bar_bg.size.x * pct
-		if pct <= 0.3:
-			bar.color = Color(1.0, 0.3, 0.3)
-		elif pct <= 0.6:
-			bar.color = Color(0.8, 0.5, 1.0)
-		else:
-			bar.color = COLOR_WARP
+	# 計時器文字
+	_timer_label = Label.new()
+	_timer_label.name = "TimerLabel"
+	_timer_label.text = "10s"
+	_timer_label.position = Vector2(8, 44)
+	_timer_label.add_theme_font_size_override("font_size", 14)
+	_timer_label.modulate = Color(0.9, 0.7, 1.0)
+	_warp_panel.add_child(_timer_label)
 
-func _show_warp_start(name: String, duration: float, speed_mult: float, damage_mult: float) -> void:
+	# 傷害加成標籤
+	_dmg_label = Label.new()
+	_dmg_label.name = "DmgLabel"
+	_dmg_label.text = "傷害 ×2.0"
+	_dmg_label.position = Vector2(160, 44)
+	_dmg_label.add_theme_font_size_override("font_size", 14)
+	_dmg_label.modulate = COLOR_DAMAGE
+	_warp_panel.add_child(_dmg_label)
+
+	# 擊破計數
+	_kill_label = Label.new()
+	_kill_label.name = "KillLabel"
+	_kill_label.text = "擊破 0 條"
+	_kill_label.position = Vector2(8, 68)
+	_kill_label.add_theme_font_size_override("font_size", 14)
+	_kill_label.modulate = Color(0.8, 0.6, 1.0)
+	_warp_panel.add_child(_kill_label)
+
+func _show_start_banner(name: String, duration: float, dmg: float) -> void:
 	if is_instance_valid(_banner):
 		_banner.queue_free()
 	_banner = Control.new()
 	_banner.position = Vector2(0, 100)
-	_banner.size = Vector2(1280, 80)
+	_banner.size = Vector2(1280, 90)
 	add_child(_banner)
 
 	var bg = ColorRect.new()
@@ -125,36 +127,39 @@ func _show_warp_start(name: String, duration: float, speed_mult: float, damage_m
 	bg.color = COLOR_BG
 	_banner.add_child(bg)
 
+	# 頂部紫色線
 	var top_line = ColorRect.new()
 	top_line.size = Vector2(1280, 3)
 	top_line.color = COLOR_WARP
 	_banner.add_child(top_line)
 
 	var lbl = Label.new()
-	lbl.text = "⏰ %s 觸發時間扭曲！全場慢速 %.0f 秒！傷害 ×%.0f！" % [name, duration, damage_mult]
+	lbl.text = "⏰ %s 觸發時間扭曲！全場慢速 %.0f 秒！" % [name, duration]
 	lbl.position = Vector2(0, 10)
 	lbl.size = Vector2(1280, 40)
 	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.add_theme_font_size_override("font_size", 26)
+	lbl.add_theme_font_size_override("font_size", 28)
 	lbl.modulate = COLOR_WARP
 	_banner.add_child(lbl)
 
 	var sub = Label.new()
-	sub.text = "目標移動速度 ×%.1f！趁現在瘋狂射擊！" % speed_mult
+	sub.text = "傷害 ×%.0f！趁慢速瘋狂打魚！擊破 ≥6 條觸發時間崩潰！" % dmg
 	sub.position = Vector2(0, 50)
-	sub.size = Vector2(1280, 25)
+	sub.size = Vector2(1280, 30)
 	sub.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	sub.add_theme_font_size_override("font_size", 13)
-	sub.modulate = Color(0.8, 0.7, 1.0)
+	sub.add_theme_font_size_override("font_size", 16)
+	sub.modulate = Color(0.9, 0.7, 1.0)
 	_banner.add_child(sub)
 
+	# 底部紫色線
 	var bot_line = ColorRect.new()
 	bot_line.size = Vector2(1280, 3)
-	bot_line.position = Vector2(0, 77)
+	bot_line.position = Vector2(0, 87)
 	bot_line.color = COLOR_WARP
 	_banner.add_child(bot_line)
 
-	_banner.position.y = -80
+	# 滑入動畫
+	_banner.position.y = -90
 	var tween = _banner.create_tween()
 	tween.tween_property(_banner, "position:y", 100.0, 0.3).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_BACK)
 	tween.tween_interval(3.0)
@@ -165,93 +170,65 @@ func _show_warp_start(name: String, duration: float, speed_mult: float, damage_m
 			_banner = null
 	)
 
-	# 啟動計時器
-	_warp_timer = duration
-	_warp_active = true
-	if is_instance_valid(_warp_indicator):
-		_warp_indicator.visible = true
-		_warp_indicator.modulate.a = 1.0
+func _show_collapse_popup(name: String, kills: int, boost: float, secs: int) -> void:
+	if is_instance_valid(_result_popup):
+		_result_popup.queue_free()
 
-func _show_warp_end(kill_count: int) -> void:
-	_warp_active = false
-	if is_instance_valid(_warp_indicator):
-		var tween = _warp_indicator.create_tween()
-		tween.tween_property(_warp_indicator, "modulate:a", 0.0, 0.5)
-		tween.tween_callback(func():
-			if is_instance_valid(_warp_indicator):
-				_warp_indicator.visible = false
-				_warp_indicator.modulate.a = 1.0
-		)
-
-	# 扭曲結束爆炸提示
-	var end_lbl = Label.new()
-	end_lbl.text = "⏰💥 時間扭曲結束！全場 HP -20%！擊破 %d 條！" % kill_count
-	end_lbl.position = Vector2(0, 300)
-	end_lbl.size = Vector2(1280, 40)
-	end_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	end_lbl.add_theme_font_size_override("font_size", 22)
-	end_lbl.modulate = COLOR_WARP
-	add_child(end_lbl)
-	var tween = end_lbl.create_tween()
-	tween.tween_property(end_lbl, "position:y", 260.0, 0.5)
-	tween.tween_interval(1.5)
-	tween.tween_property(end_lbl, "modulate:a", 0.0, 0.5)
-	tween.tween_callback(func():
-		if is_instance_valid(end_lbl):
-			end_lbl.queue_free()
-	)
-	ScreenShake.add_trauma(0.5)
-
-func _show_time_collapse(name: String, kill_count: int, boost_mult: float, boost_secs: int) -> void:
 	_do_flash(COLOR_COLLAPSE, 5)
-	ScreenShake.add_trauma(0.7)
 
-	var popup = Control.new()
-	popup.position = Vector2(340, 200)
-	popup.size = Vector2(600, 180)
-	add_child(popup)
+	_result_popup = Control.new()
+	_result_popup.position = Vector2(340, 200)
+	_result_popup.size = Vector2(600, 180)
+	add_child(_result_popup)
 
 	var bg = ColorRect.new()
-	bg.size = popup.size
-	bg.color = Color(0.08, 0.0, 0.12, 0.92)
-	popup.add_child(bg)
+	bg.size = _result_popup.size
+	bg.color = COLOR_BG
+	_result_popup.add_child(bg)
 
-	var lbl = Label.new()
-	lbl.text = "⏰💥 時間崩潰！"
-	lbl.position = Vector2(0, 15)
-	lbl.size = Vector2(600, 50)
-	lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	lbl.add_theme_font_size_override("font_size", 32)
-	lbl.modulate = COLOR_COLLAPSE
-	popup.add_child(lbl)
+	var border = ColorRect.new()
+	border.size = _result_popup.size
+	border.color = Color(1.0, 0.85, 0.0, 0.2)
+	_result_popup.add_child(border)
+
+	var title_lbl = Label.new()
+	title_lbl.text = "⏰💥 時間崩潰！"
+	title_lbl.position = Vector2(0, 15)
+	title_lbl.size = Vector2(600, 50)
+	title_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	title_lbl.add_theme_font_size_override("font_size", 32)
+	title_lbl.modulate = COLOR_COLLAPSE
+	_result_popup.add_child(title_lbl)
 
 	var detail_lbl = Label.new()
-	detail_lbl.text = "%s 扭曲期間擊破 %d 條！" % [name, kill_count]
+	detail_lbl.text = "%s 擊破 %d 條！" % [name, kills]
 	detail_lbl.position = Vector2(0, 70)
-	detail_lbl.size = Vector2(600, 35)
+	detail_lbl.size = Vector2(600, 30)
 	detail_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	detail_lbl.add_theme_font_size_override("font_size", 18)
-	detail_lbl.modulate = Color(0.8, 0.6, 1.0)
-	popup.add_child(detail_lbl)
+	detail_lbl.modulate = Color(0.9, 0.9, 0.9)
+	_result_popup.add_child(detail_lbl)
 
 	var boost_lbl = Label.new()
-	boost_lbl.text = "全服 ×%.0f 加成 %d 秒！" % [boost_mult, boost_secs]
-	boost_lbl.position = Vector2(0, 115)
+	boost_lbl.text = "全服 ×%.0f 加成 %d 秒！" % [boost, secs]
+	boost_lbl.position = Vector2(0, 110)
 	boost_lbl.size = Vector2(600, 50)
 	boost_lbl.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	boost_lbl.add_theme_font_size_override("font_size", 26)
-	boost_lbl.modulate = Color(1.0, 0.85, 0.0)
-	popup.add_child(boost_lbl)
+	boost_lbl.add_theme_font_size_override("font_size", 24)
+	boost_lbl.modulate = COLOR_WARP
+	_result_popup.add_child(boost_lbl)
 
-	popup.scale = Vector2.ZERO
-	popup.pivot_offset = Vector2(300, 90)
-	var tween = popup.create_tween()
-	tween.tween_property(popup, "scale", Vector2(1.0, 1.0), 0.3).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
+	# 彈出動畫
+	_result_popup.scale = Vector2.ZERO
+	_result_popup.pivot_offset = Vector2(300, 90)
+	var tween = _result_popup.create_tween()
+	tween.tween_property(_result_popup, "scale", Vector2(1.0, 1.0), 0.3).set_ease(Tween.EASE_OUT).set_trans(Tween.TRANS_ELASTIC)
 	tween.tween_interval(3.0)
-	tween.tween_property(popup, "modulate:a", 0.0, 0.5)
+	tween.tween_property(_result_popup, "modulate:a", 0.0, 0.5)
 	tween.tween_callback(func():
-		if is_instance_valid(popup):
-			popup.queue_free()
+		if is_instance_valid(_result_popup):
+			_result_popup.queue_free()
+			_result_popup = null
 	)
 
 func _do_flash(color: Color, count: int) -> void:
@@ -267,23 +244,39 @@ func _on_lucky_time_warp(data: Dictionary) -> void:
 	var name = data.get("trigger_name", "玩家")
 	match event:
 		"warp_start":
-			_show_warp_start(
-				name,
-				data.get("duration", 10.0),
-				data.get("speed_mult", 0.3),
-				data.get("damage_mult", 2.0)
-			)
+			var duration = data.get("duration", 10.0)
+			var dmg = data.get("damage_mult", 2.0)
+			_show_start_banner(name, duration, dmg)
+			# 啟動計時器
+			_warp_active = true
+			_warp_duration = duration
+			_warp_elapsed = 0.0
+			if is_instance_valid(_warp_panel):
+				_warp_panel.visible = true
+			if is_instance_valid(_dmg_label):
+				_dmg_label.text = "傷害 ×%.0f" % dmg
+			if is_instance_valid(_kill_label):
+				_kill_label.text = "擊破 0 條"
 			_do_flash(COLOR_WARP, 3)
 			ScreenShake.add_trauma(0.35)
 			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 		"warp_end":
-			_show_warp_end(data.get("kill_count", 0))
+			_warp_active = false
+			if is_instance_valid(_warp_panel):
+				_warp_panel.visible = false
+			var kills = data.get("kill_count", 0)
+			if is_instance_valid(_kill_label):
+				_kill_label.text = "擊破 %d 條" % kills
+			_do_flash(COLOR_WARP, 2)
+			ScreenShake.add_trauma(0.5)
 		"time_collapse":
-			_show_time_collapse(
-				name,
-				data.get("kill_count", 0),
-				data.get("boost_mult", 2.5),
-				data.get("boost_secs", 6)
-			)
+			_warp_active = false
+			if is_instance_valid(_warp_panel):
+				_warp_panel.visible = false
+			var kills = data.get("kill_count", 0)
+			var boost = data.get("boost_mult", 2.5)
+			var secs = data.get("boost_secs", 6)
+			_show_collapse_popup(name, kills, boost, secs)
+			ScreenShake.add_trauma(0.7)
 		"collapse_end":
-			pass  # 靜默處理
+			pass  # HUD 已處理橫幅

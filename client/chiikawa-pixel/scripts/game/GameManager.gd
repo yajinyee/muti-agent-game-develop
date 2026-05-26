@@ -44,6 +44,8 @@ signal lucky_coop_fish(data: Dictionary)
 signal lucky_time_warp(data: Dictionary)
 # DAY-302 新增幸運特殊魚訊號
 signal lucky_chain_meteor(data: Dictionary)
+# DAY-303 新增幸運特殊魚訊號
+signal lucky_crash_fish(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -139,6 +141,9 @@ func _on_message(type: String, payload: Dictionary) -> void:
 		# DAY-302 新增幸運特殊魚事件
 		"lucky_chain_meteor":
 			emit_signal("lucky_chain_meteor", payload)
+		# DAY-303 新增幸運特殊魚事件
+		"lucky_crash_fish":
+			emit_signal("lucky_crash_fish", payload)
 		"pong":
 			pass
 		"error":
@@ -186,3 +191,6 @@ func get_combo_count() -> int:
 
 func get_combo_mult_bonus() -> float:
 	return player_data.get("combo_mult_bonus", 0.0)
+
+func get_player_id() -> String:
+	return NetworkManager.get_player_id()

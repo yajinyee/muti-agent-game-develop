@@ -80,6 +80,9 @@ type Game struct {
 	// DAY-302 新增
 	luckyChainMeteor *luckyChainMeteorManager
 
+	// DAY-303 新增
+	luckyCrashFish *luckyCrashFishManager
+
 	lastTick time.Time
 }
 
@@ -126,6 +129,9 @@ func NewGame(hub *ws.Hub) *Game {
 
 		// DAY-302 新增
 		luckyChainMeteor: newLuckyChainMeteorManager(),
+
+		// DAY-303 新增
+		luckyCrashFish: newLuckyCrashFishManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -215,6 +221,9 @@ func (g *Game) HandleMessage(clientID string, msgType string, payload json.RawMe
 			return
 		}
 		g.handleSetDisplayName(clientID, req.Name)
+	case "crash_harvest":
+		// T130 崩潰魚：玩家點擊收割
+		g.handleCrashHarvest(clientID)
 	}
 }
 
@@ -429,6 +438,11 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if chainMeteorBoost > 1.0 {
 			effectiveMult *= chainMeteorBoost
 		}
+		// DAY-303 崩潰魚完美收割加成
+		crashPerfectBoost := g.luckyCrashFish.getCrashPerfectMult()
+		if crashPerfectBoost > 1.0 {
+			effectiveMult *= crashPerfectBoost
+		}
 
 		reward := int(float64(bet.BetCost) * effectiveMult)
 		result.Reward = reward
@@ -529,6 +543,9 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			// DAY-302 新增
 			case isLuckyChainMeteorFish(t.Def.ID):
 				g.tryLuckyChainMeteor(playerID, killerName)
+			// DAY-303 新增
+			case isLuckyCrashFish(t.Def.ID):
+				g.tryLuckyCrashFish(playerID, killerName)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

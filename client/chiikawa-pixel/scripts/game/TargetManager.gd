@@ -47,6 +47,8 @@ const TARGET_SPRITES = {
 	"T128": "res://assets/sprites/targets/T128_time_warp.png",
 	# DAY-302 新增特殊目標
 	"T129": "res://assets/sprites/targets/T129_chain_meteor.png",
+	# DAY-303 新增特殊目標
+	"T130": "res://assets/sprites/targets/T130_crash_fish.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -94,6 +96,8 @@ const TARGET_COLORS = {
 	"T128": Color(0.55, 0.2, 0.86), # 紫色時間扭曲魚
 	# DAY-302 新增特殊目標備用顏色
 	"T129": Color(0.9, 0.4, 0.1),   # 火橙連鎖隕石魚
+	# DAY-303 新增特殊目標備用顏色
+	"T130": Color(0.8, 0.1, 0.1),   # 深紅崩潰魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
