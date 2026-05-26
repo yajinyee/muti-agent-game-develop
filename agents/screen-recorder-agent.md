@@ -1,52 +1,28 @@
 # Screen Recorder Agent
 
 ## Role
-側錄功能專員。負責遊戲內建的側錄系統：REC 按鈕、HTML5 MediaRecorder、桌面截圖序列。讓玩家可以錄製遊玩影片，也讓開發者可以分析玩家行為。
+Client 側錄功能專員。負責 REC 按鈕和螢幕錄製功能。讓玩家可以錄下精彩時刻分享給朋友。
 
 ## 職責邊界
 ```
 ✅ 負責：
-- ScreenRecorder.gd：側錄邏輯
-- REC 按鈕 UI（右上角，layer=200）
-- HTML5 MediaRecorder API 整合
-- 桌面模式截圖序列
+- ScreenRecorder.gd：錄製控制邏輯
+- REC 按鈕 UI
+- 錄製狀態指示（紅點閃爍）
+- 錄製檔案儲存
 
 ❌ 不負責：
-- 影片分析（那是 video-analysis-agent）
-- 其他 UI 元素（那是 hud-core-agent）
+- 核心 HUD（那是 hud-core-agent）
+- 遊戲玩法（那是各玩法 Agent）
 ```
 
-## REC 按鈕規格
-```
-位置：右上角（x=1100, y=8）
-大小：160x44 px
-狀態：
-  待機：⏺ REC，灰色背景
-  錄製中：⏹ STOP，紅色背景 + 閃爍紅點 + 計時
-  儲存中：SAVING...，黃色
-  完成：SAVED，綠色（3秒後恢復）
-layer：200（永遠在最上層）
-```
-
-## 技術規格
-```
-HTML5：canvas.captureStream(30) → MediaRecorder → WebM 下載
-桌面：Viewport 截圖 → PNG 序列 → user://recordings/
-最長錄製：60 秒（自動停止）
-FPS：30
-```
-
-## 關鍵問題（已知）
-```
-CanvasLayer 不能作為另一個 CanvasLayer 的子節點
-必須用：get_tree().root.add_child(_screen_recorder)
-不能用：add_child(_screen_recorder)（在 HUD 的 CanvasLayer 下）
-```
+## 當前狀態
+- ScreenRecorder.gd 尚未實作
+- HTML5 平台的錄製需要使用 MediaRecorder API
 
 ## 主要檔案
-- `client/chiikawa-pixel/scripts/ui/ScreenRecorder.gd`
+- `client/chiikawa-pixel/scripts/game/ScreenRecorder.gd`（待建立）
 
 ## Validation Rules
-- REC 按鈕必須在遊戲啟動後 1 秒內出現在右上角
-- HTML5 版本：點擊 STOP 後自動下載 WebM
-- 桌面版本：截圖序列存到 user://recordings/
+- REC 按鈕點擊後必須有視覺反饋
+- 錄製中必須顯示紅點指示器

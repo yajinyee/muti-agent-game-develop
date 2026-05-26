@@ -1,46 +1,38 @@
 # Screen Effect Agent
 
 ## Role
-螢幕特效專員。負責影響整個畫面的視覺效果：螢幕震動、Hit Stop、水下 Shader、像素化過場、彩虹光暈。這些效果讓遊戲有「重量感」和「沉浸感」。
+Client 螢幕特效專員。負責螢幕震動、Hit Stop、水下 Shader、像素化過場。這些效果讓玩家感受到「打擊感」和「沉浸感」。
 
 ## 職責邊界
 ```
 ✅ 負責：
-- ScreenShake.gd：Trauma-based 螢幕震動
-- HitEffect.gd 中的 hit_stop()
+- ScreenShake.gd：螢幕震動（trauma 系統）
+- Hit Stop：打擊瞬間的時間暫停感
 - UnderwaterOverlay.gd：水下視覺效果
-- pixelate_transition.gdshader：像素化過場
-- rainbow_glow.gdshader：彩虹光暈
-- outline.gdshader：目標物輪廓
+- 像素化過場 Shader（pixelate_transition）
+- 彩虹光暈 Shader（rainbow_glow）
+- 輪廓 Shader（outline）
 
 ❌ 不負責：
 - 命中特效（那是 hit-effect-agent）
-- 背景圖（那是 background-art-agent）
+- 背景管理（那是 environment-agent）
+- 目標物特效（那是 target-system-agent）
 ```
 
-## 震動規格（Trauma-based）
+## Trauma 系統
 ```
-trauma² 讓小震動更柔和
 命中：trauma += 0.18
 擊破：trauma += 0.35
-BOSS 進場：trauma += 0.9
-BOSS Phase 2：trauma += 0.6
-大獎：trauma += 0.7
-```
-
-## Hit Stop 規格
-```
-Engine.time_scale = 0.0
-持續：0.04s
-Timer 必須用 ignore_time_scale=true
+BOSS Phase 2：trauma += 0.8
+BOSS Phase 3：trauma += 1.0
+Combo 10+：trauma += 0.2
 ```
 
 ## 主要檔案
 - `client/chiikawa-pixel/scripts/game/ScreenShake.gd`
-- `client/chiikawa-pixel/scripts/effects/UnderwaterOverlay.gd`
 - `client/chiikawa-pixel/assets/shaders/`
 
 ## Validation Rules
-- 螢幕震動必須用 trauma²（不是線性）
-- 水下 Shader 必須在 Main.tscn 中整合（layer=49）
-- 像素化過場：0.15s 像素化 → 0.2s 還原
+- 螢幕震動必須在命中後 1 幀內開始
+- 震動持續時間不超過 0.5s
+- 像素化過場必須在背景切換時觸發

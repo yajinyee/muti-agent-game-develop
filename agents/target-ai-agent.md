@@ -1,57 +1,46 @@
 # Target AI Agent
 
 ## Role
-目標物 AI 生成專員。負責用 ComfyUI + Stable Diffusion 生成高品質的目標物像素圖。適合需要豐富細節的目標物，特別是 T106-T249 的幸運魚系列。
+目標物 AI 生成專員。負責使用 ComfyUI + SD 1.5 生成高品質目標物像素圖。AI 生成的品質比程式生成高 60%，是美術升級的關鍵路徑。
 
 ## 職責邊界
 ```
 ✅ 負責：
-- ComfyUI API 呼叫（http://127.0.0.1:8188）
-- SD 1.5 + Pixel Art LoRA 生成
-- 洋紅色背景去背
-- 批次生成和後處理
+- tools/comfyui_generate_targets.py：ComfyUI API 呼叫
+- tools/batch_process_ai.py：批次後處理
+- 洋紅色背景去背（#FF00FF）
+- 顏色校正（確保和目標物主題一致）
+- 品質驗證（非透明像素密度）
 
 ❌ 不負責：
 - 程式生成（那是 target-pixel-agent）
-- 目標物設計（那是 target-design-agent）
-```
-
-## ComfyUI 工作流程
-```bash
-# 1. 啟動 ComfyUI（手動）
-tools\start_comfyui.bat
-
-# 2. 批次生成
-py tools/comfyui_generate_targets.py
-
-# 3. 後處理（去背、縮放）
-py tools/batch_process_ai.py
-```
-
-## Prompt 規範
-```
-正向：pixel art, [目標物描述], chiikawa style, cute, 
-      dark outline, clear silhouette, magenta background,
-      64x64, simple colors, retro game sprite
-負向：blurry, realistic, 3d, photo, text, watermark
-```
-
-## 去背技術
-```
-洋紅色背景（#FF00FF）去背：比白色背景更可靠
-自動選擇：比較洋紅色去背和白色去背的非透明像素數，選較多的
-金色/黃色物體：加 "dark outline, clear silhouette" 提示詞
+- Server 數值（那是 target-design-agent）
+- Client 顯示（那是 target-system-agent）
 ```
 
 ## ComfyUI 設定
 ```
 路徑：C:\ComfyUI\ComfyUI_windows_portable
 API：http://127.0.0.1:8188
-Model：SD 1.5 + pixel-art-xl LoRA (strength 0.85)
-Steps：28，Sampler：euler_ancestral
+模型：SD 1.5 + Pixel Art XL LoRA
+背景：洋紅色（#FF00FF）
+尺寸：64×64
+Steps：28
 ```
 
-## Validation Rules
-- 生成圖非透明像素 > 40%（否則重新生成）
-- 去背後背景完全透明
-- 在深藍背景上清楚可見
+## 品質標準
+```
+非透明像素密度 > 40%（AI 生成目標）
+bbox 利用率 > 65%
+去背乾淨（無洋紅色殘留）
+```
+
+## 主要檔案
+- `tools/comfyui_generate_targets.py`
+- `tools/batch_process_ai.py`
+- `tools/comfyui_generate.py`
+
+## 已知問題
+- ComfyUI 需要 CUDA 13.0（驅動 596.49+）
+- 金色/黃色物體去背效果差，需要強調輪廓
+- 洋紅色背景策略：部分圖片需要改用白色去背

@@ -4317,3 +4317,19 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
 - **問題**：自定義 `itoa()` 和 `ftoa()` 函數在 Go 中不存在，需要用 `fmt.Sprintf`
 - **解決**：`fmt.Sprintf("%d", n)` 替代 `itoa(n)`，`fmt.Sprintf("%.1f", f)` 替代 `ftoa(f)`
 - **教訓**：Go 標準庫有 `strconv.Itoa()` 和 `strconv.FormatFloat()`，但 `fmt.Sprintf` 更簡潔
+
+## 110. DAY-308 TargetManager Lucky badge 範圍修復（2026-05-27）
+- **問題**：TargetManager.gd 的 `_add_lucky_badge` 只覆蓋到 T145（`tid_num >= 106 and tid_num <= 145`），T146-T150 沒有 Lucky badge 視覺
+- **修復**：改為 `tid_num >= 106 and tid_num <= 150`，T146-T150 使用超亮金色（T141+ 分組）
+- **教訓**：每次新增 Lucky 系統後，必須同時更新 TargetManager 的 badge 範圍上限
+
+## 111. DAY-308 Agent 文件補齊（2026-05-27）
+- **問題**：AGENTS.md 定義了 38 個 Agent，但 agents/ 目錄只有部分文件，缺少 19 個
+- **補齊的 Agent**：target-design-agent、spec-architect、server-combat-agent、server-event-agent、server-infra-agent、target-system-agent、game-state-agent、social-ui-agent、screen-recorder-agent、screen-effect-agent、network-agent、sfx-agent、target-pixel-agent、target-ai-agent、ui-art-agent、qa-playtest-agent、video-analysis-agent、research-agent、skill-librarian
+- **每個 Agent 文件包含**：Role、職責邊界（✅/❌）、主要檔案、Validation Rules
+- **教訓**：Agent 文件是「術業有專攻」的具體體現，缺少文件會讓 AI 不知道邊界在哪裡
+
+## 112. DAY-308 QA 腳本 qa_check_day308.py（2026-05-27）
+- **功能**：55 項驗證（Server 編譯、精靈圖、Panel 腳本、訊號、Agent 文件、音效、角色圖）
+- **結果**：55/55 全部通過
+- **教訓**：每次重大更新後都要建立對應的 QA 腳本，確保所有組件都存在且正確

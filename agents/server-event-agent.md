@@ -1,38 +1,46 @@
 # Server Event Agent
 
 ## Role
-Go Server 事件專員。負責所有特殊事件的 Server 端邏輯：BOSS 系統、Bonus 系統、目標物生成、所有 Lucky 幸運魚系統（T106-T249）。
+Go Server 特殊事件專員。負責 BOSS 系統、Bonus 系統、45 個 Lucky 特殊魚系統。每個特殊事件都是玩家的「爽感高峰」，必須設計得讓玩家印象深刻。
 
 ## 職責邊界
 ```
 ✅ 負責：
-- spawn.go：目標物生成邏輯（每 0.8 秒、Max 18 個、動態難度）
-- boss.go：BOSS 觸發、Phase 2、計時獎勵
-- bonus.go：Bonus 觸發、拔草邏輯、結算
-- lucky_*.go：所有幸運魚系統（T106-T249）
-- announce/announce.go：全服廣播公告
+- BOSS 系統（boss.go）：觸發、Phase 2/3、計時、獎勵
+- Bonus 系統（bonus.go）：拔草場景、計時、結算
+- Lucky 系統（lucky_*_handler.go）：45 個特殊魚的觸發邏輯
+- 全服廣播（announce 系統）
+- 冷卻管理（個人冷卻 + 全服冷卻）
+- 每次修改後執行 go build ./... + go vet ./...
 
 ❌ 不負責：
-- 擊破判定（那是 server-combat-agent）
-- WebSocket Hub（那是 server-core-agent）
+- 遊戲狀態機（那是 server-core-agent）
+- 基礎擊破判定（那是 server-combat-agent）
+- WebSocket Hub（那是 server-infra-agent）
+```
+
+## Lucky 系統架構
+```
+每個 Lucky Handler 必須包含：
+1. Manager struct（個人冷卻/全服冷卻/activeSession）
+2. isLucky*Fish(defID) 判斷函數
+3. tryLucky*Fish(g, p) 觸發函數
+4. 效果執行 goroutine
+5. 完美條件判定
+6. 全服廣播（broadcast + announce）
 ```
 
 ## 主要檔案
-- `server/internal/game/spawn.go`（或相關生成邏輯）
-- `server/internal/game/lucky_*.go`（所有幸運魚 handler）
+- `server/internal/game/lucky_*_handler.go`（45 個）
+- `server/internal/game/game.go`（整合入口）
 - `server/internal/game/announce/announce.go`
 
-## 目標物生成規格（規格書第 9 章）
-```
-Spawn Interval: 0.8s
-Max Targets: 18（BOSS 期間 8）
-LV1-3: 基礎 90% / 特殊 9% / 高倍率 1%
-LV4-7: 基礎 82% / 特殊 15% / 高倍率 3%
-LV8-10: 基礎 75% / 特殊 20% / 高倍率 5%
-```
+## 當前 Lucky 系統數量
+- T106-T150：45 個 Lucky 系統
+- 每個都有獨立 handler 檔案
 
 ## Validation Rules
-- 每次修改後 go build + go vet
-- 新增 Lucky 魚系統必須同時更新：tables.go + protocol.go + announce.go + game.go
-- BOSS 觸發頻率：每 3-5 分鐘
-- Bonus 觸發：勞動值達 100
+- `go build ./...` 零錯誤
+- `go vet ./...` 零警告
+- 每個 Lucky 系統必須有個人冷卻和全服冷卻
+- 完美條件觸發必須廣播全服公告

@@ -267,10 +267,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T145）
+	# Lucky 特殊魚標記（T106-T150）
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 145:
+		if tid_num >= 106 and tid_num <= 150:
 			_add_lucky_badge(container, def_id)
 
 	# 特殊搖晃（T103 流星、T104 金草）

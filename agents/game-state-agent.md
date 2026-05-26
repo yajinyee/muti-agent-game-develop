@@ -1,50 +1,38 @@
 # Game State Agent
 
 ## Role
-遊戲狀態機專員。負責 GameManager.gd——整個 Client 的神經中樞。管理遊戲狀態、訊號分發、玩家資料快取。所有 Agent 都透過 GameManager 的訊號溝通。
+Client 遊戲狀態機專員。負責 GameManager.gd，這是 Client 端的神經中樞。所有 Server 訊息都通過 GameManager 分發給各個子系統。
 
 ## 職責邊界
 ```
 ✅ 負責：
-- GameManager.gd：狀態機、訊號定義、玩家資料
-- 所有 WebSocket 訊息的解析和分發
-- 遊戲狀態轉換（NormalPlay/BossWarning/BossBattle/BonusGame）
-- 玩家資料快取（coins, bet_level, character_id, labor_value）
+- GameManager.gd：訊號定義、訊息分發、玩家資料快取
+- 遊戲狀態追蹤（current_state）
+- 玩家資料存取介面（get_coins、get_bet_level 等）
+- 新訊息類型的訊號定義和分發
 
 ❌ 不負責：
-- 具體的遊戲邏輯（那是各個專責 Agent）
-- WebSocket 連線（那是 network-agent）
-- UI 顯示（那是各個 UI Agent）
+- 網路連線（那是 network-agent）
+- UI 顯示（那是 hud-core-agent）
+- 目標物管理（那是 target-system-agent）
+- 射擊邏輯（那是 cannon-agent）
 ```
 
-## 訊號清單（必須完整）
-```gdscript
-# 核心訊號
-signal player_updated(data)
-signal game_state_changed(new_state)
-signal reward_received(reward)
-signal attack_result(result)
+## 訊號架構
+```
+基礎訊號（10個）：
+player_updated, game_state_changed, reward_received,
+attack_result, target_spawned, target_updated, target_killed,
+boss_event, bonus_event, announce
 
-# 目標物訊號
-signal target_spawned(data)
-signal target_updated(data)
-signal target_killed(data)
-
-# 特殊事件訊號
-signal boss_event(event_data)
-signal bonus_event(event_data)
-
-# Lucky 魚訊號（每個 Lucky 魚系統一個）
-signal lucky_immortal_boss(data)
-signal lucky_wrath_charge(data)
-signal lucky_time_rift_v2(data)
-# ... 其他 Lucky 訊號
+Lucky 訊號（45個）：
+lucky_chain_lightning ~ lucky_rebirth（T106-T150）
 ```
 
 ## 主要檔案
 - `client/chiikawa-pixel/scripts/game/GameManager.gd`
 
 ## Validation Rules
-- 每個 Server 訊息類型必須有對應的訊號
-- 訊號必須在收到訊息後 1 幀內發出
-- 玩家資料快取必須在 player_update 後立即更新
+- 每個新 Lucky 系統必須在 GameManager 新增對應訊號
+- 每個訊號必須在 _on_message 的 match 中處理
+- 玩家資料存取必須有預設值（避免 null 錯誤）

@@ -1,53 +1,46 @@
 # Target Pixel Agent
 
 ## Role
-目標物像素圖（程式生成）專員。負責用 Python Pillow 程式生成目標物像素圖。適合需要精確控制顏色和形狀的目標物，特別是規格書定義的核心目標物（T001-T105）。
+目標物像素圖生成專員。負責 T001-T249 的程式生成像素圖。每個目標物都要有清晰的視覺識別度，讓玩家一眼就能辨識。
 
 ## 職責邊界
 ```
 ✅ 負責：
-- 用 Python Pillow 程式生成目標物像素圖
-- 確保每個目標物有獨特的視覺識別度
-- 生成 Spritesheet（targets_sheet.png）
-- 確保目標物在 2x scale 後清楚可見（128x128 px）
+- tools/generate_targets_v3.py：基礎目標物生成
+- tools/generate_targets_day*.py：每日新目標物生成
+- 64×64 像素圖生成（NEAREST 插值）
+- 顏色設計（和目標物主題呼應）
+- 非透明像素密度 > 30%
 
 ❌ 不負責：
 - AI 生成（那是 target-ai-agent）
-- 目標物設計（那是 target-design-agent）
+- Server 數值（那是 target-design-agent）
+- Client 顯示（那是 target-system-agent）
 ```
 
-## 像素圖技術規範
+## 生成技術
 ```
-基礎尺寸：64x64 px
-輸出：PNG，透明背景
-非透明像素：> 30%（否則在遊戲中看不見）
-顏色：3-5 色調色盤（像素風格）
-陰影：3色陰影法（亮/中/暗）
-輪廓：1px 深色輪廓
-```
-
-## 工具
-```bash
-py tools/generate_targets_v3.py  # 生成目標物
-py tools/generate_spritesheet.py  # 組合 Spritesheet
+1. 逐像素繪製（putpixel）
+2. fill_circle_shaded（帶陰影的圓形）
+3. fill_rect_shaded（帶陰影的矩形）
+4. 3色陰影法（LIGHT/MID/DARK）
+5. 輸出 64×64 PNG（RGBA）
 ```
 
-## 核心目標物視覺規格
+## 品質標準
 ```
-T001 像素雜草：綠色，靜止，簡單形狀
-T002 綠色小蟲：綠色，橢圓，有觸角
-T003 紅色小蟲：紅色，橢圓，有觸角
-T004 藍色小蟲：藍色，橢圓，有觸角
-T005 布丁：黃色，圓形，有腳
-T006 蘑菇：棕色，蘑菇形，有斑點
-T101 擬態怪物：灰色，不規則形
-T102 寶箱怪：金色，箱子形，有眼睛
-T103 流星：白色，橢圓，有尾跡
-T104 金色雜草：金色，草形，發光
-T105 金幣魚：金色，魚形，有鱗片
+非透明像素密度 > 30%（整體面積）
+bbox 利用率 > 60%
+有眼睛和表情（讓目標物有個性）
+顏色和主題呼應
 ```
 
-## Validation Rules
-- 每個目標物必須有獨特的剪影（靠剪影辨識）
-- 非透明像素 > 30%
-- 在深藍背景上清楚可見
+## 主要檔案
+- `tools/generate_targets_v3.py`
+- `tools/generate_targets_day*.py`
+- `client/chiikawa-pixel/assets/sprites/targets/`
+
+## 當前狀態
+- T001-T006：基礎目標物（有眼睛）
+- T101-T150：特殊目標物（程式生成）
+- B001：BOSS（程式生成）
