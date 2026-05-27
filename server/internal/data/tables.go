@@ -258,6 +258,18 @@ var Targets = []TargetDef{
 	// T165 幸運神話覺醒魚：擊破後全場目標倍率 ×3.0，持續 25 秒，25 秒內擊破 ≥15 個 → 神話完美全服 ×8.0 加成 20 秒（最長加成）
 	{ID: "T165", Name: "幸運神話覺醒魚", Type: TypeSpecial, Multiplier: 1250, HP: 1300, SpawnWeight: 1, Speed: 30, Lifetime: 36, LaborGain: 250, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-312 新增特殊目標（1300x-1500x）────────────────────────
+	// T166 幸運星際門戶魚：擊破後開啟星際門戶，傳送 5 個目標到中央（HP -50%），全部傳送 → 完美門戶全服 ×5.5 加成 12 秒
+	{ID: "T166", Name: "幸運星際門戶魚", Type: TypeSpecial, Multiplier: 1300, HP: 1360, SpawnWeight: 1, Speed: 40, Lifetime: 34, LaborGain: 260, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T167 幸運龍魂融合魚：擊破後龍魂融合 30 秒（每次擊破 +1 魂，最高 50 魂），50 魂 → 龍魂爆發全場 HP -90%，全服 ×9.0 加成 18 秒
+	{ID: "T167", Name: "幸運龍魂融合魚", Type: TypeSpecial, Multiplier: 1350, HP: 1400, SpawnWeight: 1, Speed: 35, Lifetime: 36, LaborGain: 270, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T168 幸運時空裂縫魚：擊破後時空裂縫 20 秒（每 4 秒瞬間擊破 3 個目標，獎勵 ×4.0），裂縫期間擊破 ≥12 → 時空完美全服 ×7.5 加成 16 秒
+	{ID: "T168", Name: "幸運時空裂縫魚", Type: TypeSpecial, Multiplier: 1400, HP: 1450, SpawnWeight: 1, Speed: 45, Lifetime: 32, LaborGain: 280, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T169 幸運神聖審判魚：擊破後神聖審判 25 秒（每 5 秒一波神聖光柱 HP -30%），5 波全部命中 ≥5 → 神聖完美全服 ×8.5 加成 18 秒
+	{ID: "T169", Name: "幸運神聖審判魚", Type: TypeSpecial, Multiplier: 1450, HP: 1500, SpawnWeight: 1, Speed: 30, Lifetime: 38, LaborGain: 290, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T170 幸運宇宙大爆炸魚：擊破後全場 HP 歸零（每個獎勵 ×8.0），觸發全服 ×12.0 加成 25 秒（遊戲最高倍率機制）
+	{ID: "T170", Name: "幸運宇宙大爆炸魚", Type: TypeSpecial, Multiplier: 1500, HP: 1560, SpawnWeight: 1, Speed: 25, Lifetime: 40, LaborGain: 300, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

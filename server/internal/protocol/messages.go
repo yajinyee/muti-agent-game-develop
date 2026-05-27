@@ -116,6 +116,13 @@ const (
 	MsgLuckyElementalFusion = "lucky_elemental_fusion" // T163 元素融合魚（火/冰/雷三元素）
 	MsgLuckyTreasureHunter  = "lucky_treasure_hunter"  // T164 寶藏獵人魚（5 個隨機寶藏）
 	MsgLuckyMythAwaken      = "lucky_myth_awaken"      // T165 神話覺醒魚（全場倍率 ×3.0，25 秒）
+
+	// DAY-312 新增幸運特殊魚事件
+	MsgLuckyStarPortal    = "lucky_star_portal"    // T166 星際門戶魚（傳送 5 個目標到中央）
+	MsgLuckyDragonSoul    = "lucky_dragon_soul"    // T167 龍魂融合魚（吸收 50 魂→全場 HP -90%）
+	MsgLuckySpacetimeRift = "lucky_spacetime_rift" // T168 時空裂縫魚（每 4 秒瞬間擊破 3 個）
+	MsgLuckyHolyJudgment  = "lucky_holy_judgment"  // T169 神聖審判魚（5 波神聖光柱 HP -30%）
+	MsgLuckyBigBang       = "lucky_big_bang"       // T170 宇宙大爆炸魚（全場清空 + 全服 ×12.0）
 )
 // ── Envelope ─────────────────────────────────────────────────
 

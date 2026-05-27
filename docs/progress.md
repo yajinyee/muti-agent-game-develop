@@ -1,6 +1,52 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-27（DAY-311 射擊手感強化 + T161 精靈圖修復 + Server 協定升級 + QA 23/23 + GitHub 同步）
+## 最後更新：2026-05-27（DAY-312 T166-T170 五個新 Lucky 魚系統 + Server 協定升級 + QA 55/55 + GitHub 同步）
+
+## DAY-312 更新（2026-05-27）：T166-T170 五個新 Lucky 魚系統 ✅
+- **業界研究：** Fishing Carnival「portal teleport mechanic」、Royal Fishing「Dragon Wrath energy accumulation」升級版、Fishing Fortune「time warp + multiplier cascade」組合、Jili「Super Awakening 3000x」升級版、Fishing Carnival「Big Bang mechanic」
+- **T166 幸運星際門戶魚（1300x）：** 擊破後開啟星際門戶，傳送 5 個目標到中央（HP -50%），完美門戶全服 ×5.5 加成 12 秒
+- **T167 幸運龍魂融合魚（1350x）：** 擊破後龍魂融合 30 秒（每次擊破 +1 魂，最高 50 魂），50 魂 → 龍魂爆發全場 HP -90%，全服 ×9.0 加成 18 秒
+- **T168 幸運時空裂縫魚（1400x）：** 擊破後時空裂縫 20 秒（每 4 秒瞬間擊破 3 個目標，獎勵 ×4.0），裂縫期間擊破 ≥12 → 時空完美全服 ×7.5 加成 16 秒
+- **T169 幸運神聖審判魚（1450x）：** 擊破後神聖審判 25 秒（每 5 秒一波神聖光柱 HP -30%），5 波全部命中 ≥5 → 神聖完美全服 ×8.5 加成 18 秒
+- **T170 幸運宇宙大爆炸魚（1500x）：** 擊破後全場 HP 歸零（每個獎勵 ×8.0），觸發全服 ×12.0 加成 25 秒（超越 T160 成為遊戲最高倍率機制）
+- **Server：** 5 個獨立 handler 檔案 + game.go 整合 + protocol 新增 5 個訊息類型 + tables.go 新增 5 個目標
+  - `lucky_star_portal_handler.go`：星際門戶傳送系統（applyStarPortalTeleport 新方法）
+  - `lucky_dragon_soul_handler.go`：龍魂融合吸收系統（30 秒計時 + 魂計數）
+  - `lucky_spacetime_rift_handler.go`：時空裂縫瞬間擊破系統（applyRiftInstantKill 新方法）
+  - `lucky_holy_judgment_handler.go`：神聖審判 5 波系統（每波 HP -30%）
+  - `lucky_big_bang_handler.go`：宇宙大爆炸系統（全場清空 + 全服 ×12.0）
+- **Client：** 5 個新 Lucky Panel + GameManager 新增 5 個訊號 + HUD 新增 5 個事件處理 + TargetManager 新增 T166-T170 映射
+  - `LuckyStarPortalPanel.gd`（layer=61）：深紫色 + 傳送計數器 + 完美門戶演出
+  - `LuckyDragonSoulPanel.gd`（layer=62）：龍紅色 + 龍魂進度條 + 龍魂爆發演出
+  - `LuckySpacetimeRiftPanel.gd`（layer=63）：深藍色 + 波次指示器 + 擊破計數
+  - `LuckyHolyJudgmentPanel.gd`（layer=64）：神聖橙金色 + 5 個波次指示點 + 完美演出
+  - `LuckyBigBangPanel.gd`（layer=65）：深紅色 + 清場計數 + 全服加成顯示
+- **美術：** T166-T170 精靈圖生成完成（`tools/generate_targets_day312.py`）
+  - T166（星際門戶）：深紫橢圓魚身 + 星際光環 + 8方向傳送粒子 + 中心星形（90.9%）
+  - T167（龍魂融合）：龍紅橢圓魚身 + 龍鱗紋路 + 8方向龍魂火焰射線（90.9%）
+  - T168（時空裂縫）：深藍橢圓魚身 + Z字裂縫紋路 + 時鐘符號（90.9%）
+  - T169（神聖審判）：神聖橙金大型魚身 + 12方向光柱 + 天秤符號（93.6%）
+  - T170（宇宙大爆炸）：深紅大型魚身 + 16方向爆炸光芒 + 宇宙粒子 + 三層光環（94.9%）
+- **新增 Game 方法：** `applyStarPortalTeleport`（傳送目標到中央）、`applyRiftInstantKill`（瞬間擊破 n 個目標）
+- **Lucky badge 升級：** T166+ 使用極亮白金色光環（最高階視覺）
+- **知識庫更新：** knowhow-log 條目 114
+- **QA 腳本：** `tools/qa_check_day312.py`（55 項驗證，55/55 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-312）
+- **Server 目標物數量：** 77 種（T001-T006 + T101-T170 + B001）
+- **Lucky 系統數量：** 65 個（T106-T170）
+- **Client Lucky Panel 數量：** 71 個（含 BaseLuckyPanel + LuckyEventSystem）
+- **Agent 文件數量：** 53 個（agents/ 目錄）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（DAY-311 強化後維持）
+- **視覺清晰度：** 7/10
+- **核心循環流暢度：** 8/10
+- **最高倍率機制：** T170 宇宙大爆炸全服 ×12.0（超越 T160 的 ×10.0）
+- **最需要改善：** Lucky Panel 架構重構（71 個腳本超過警戒線 50 個）
+
+
 
 ## DAY-311 更新（2026-05-27）：射擊手感強化 + T161 精靈圖修復 + Server 協定升級 ✅
 - **問題診斷：** 射擊手感連續 10+ 天停在 7/10，根本原因是 Hit Stop 太短 + 投射物視覺太簡陋 + 命中特效位置不準確

@@ -127,6 +127,12 @@ func _ready() -> void:
 	GameManager.lucky_elemental_fusion.connect(_on_lucky_elemental_fusion)
 	GameManager.lucky_treasure_hunter.connect(_on_lucky_treasure_hunter)
 	GameManager.lucky_myth_awaken.connect(_on_lucky_myth_awaken)
+	# DAY-312 新增幸運特殊魚訊號連接
+	GameManager.lucky_star_portal.connect(_on_lucky_star_portal)
+	GameManager.lucky_dragon_soul.connect(_on_lucky_dragon_soul)
+	GameManager.lucky_spacetime_rift.connect(_on_lucky_spacetime_rift)
+	GameManager.lucky_holy_judgment.connect(_on_lucky_holy_judgment)
+	GameManager.lucky_big_bang.connect(_on_lucky_big_bang)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1817,4 +1823,91 @@ func _on_lucky_myth_awaken(data: Dictionary) -> void:
 				ScreenShake.add_trauma(1.0)
 			else:
 				_show_lucky_banner("🌟 神話覺醒結束", Color(0.7, 0.7, 0.7), 1.5)
+			_hide_lucky_indicator()
+
+# DAY-312 新增幸運特殊魚事件處理
+func _on_lucky_star_portal(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"portal_open":
+			_show_lucky_event("lucky_star_portal", "🌌 星際門戶開啟！傳送 5 個目標！")
+			ScreenShake.add_trauma(0.5)
+		"portal_teleport":
+			var count = data.get("teleport_count", 0)
+			_update_lucky_indicator("🌌 星際門戶", "傳送 %d/5 個" % count, 1.0, Color(0.49, 0.11, 0.64))
+		"portal_perfect":
+			var boost = data.get("boost_mult", 5.5)
+			var secs = data.get("boost_secs", 12)
+			_show_lucky_banner("🌌 完美門戶！全服 ×%.1f 加成 %d 秒！" % [boost, secs], Color(0.8, 0.4, 1.0), 3.5)
+			ScreenShake.add_trauma(0.7)
+			_hide_lucky_indicator()
+		"portal_end":
+			_hide_lucky_indicator()
+
+func _on_lucky_dragon_soul(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"soul_fusion_start":
+			_show_lucky_event("lucky_dragon_soul", "🐉 龍魂融合！30 秒吸收龍魂！")
+			ScreenShake.add_trauma(0.6)
+		"soul_burst":
+			var souls = data.get("soul_count", 0)
+			_update_lucky_indicator("🐉 龍魂融合", "龍魂 %d/50" % souls, 1.0, Color(0.83, 0.18, 0.18))
+		"soul_perfect":
+			var boost = data.get("boost_mult", 9.0)
+			var secs = data.get("boost_secs", 18)
+			_show_lucky_banner("🐉 龍魂完美！全場 HP -90%%！全服 ×%.1f 加成 %d 秒！" % [boost, secs], Color(1.0, 0.44, 0.07), 4.0)
+			ScreenShake.add_trauma(1.0)
+			_hide_lucky_indicator()
+
+func _on_lucky_spacetime_rift(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"rift_open":
+			_show_lucky_event("lucky_spacetime_rift", "⏳ 時空裂縫！每 4 秒瞬間擊破 3 個！")
+			ScreenShake.add_trauma(0.5)
+		"rift_wave":
+			var wave = data.get("wave", 0)
+			var kills = data.get("kill_count", 0)
+			_update_lucky_indicator("⏳ 時空裂縫", "第 %d 波 擊破 %d 個" % [wave, kills], 1.0, Color(0.08, 0.27, 0.75))
+		"rift_perfect":
+			var boost = data.get("boost_mult", 7.5)
+			var secs = data.get("boost_secs", 16)
+			_show_lucky_banner("⏳ 時空完美！全服 ×%.1f 加成 %d 秒！" % [boost, secs], Color(0.4, 0.7, 1.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+			_hide_lucky_indicator()
+		"rift_end":
+			_hide_lucky_indicator()
+
+func _on_lucky_holy_judgment(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"judgment_start":
+			_show_lucky_event("lucky_holy_judgment", "✨ 神聖審判！5 波神聖光柱降臨！")
+			ScreenShake.add_trauma(0.6)
+		"judgment_wave":
+			var wave = data.get("wave", 0)
+			var hits = data.get("hit_count", 0)
+			_update_lucky_indicator("✨ 神聖審判", "第 %d 波 命中 %d 個" % [wave, hits], 1.0, Color(0.96, 0.50, 0.09))
+		"judgment_perfect":
+			var boost = data.get("boost_mult", 8.5)
+			var secs = data.get("boost_secs", 18)
+			_show_lucky_banner("✨ 神聖完美！5 波全部命中！全服 ×%.1f 加成 %d 秒！" % [boost, secs], Color(1.0, 0.9, 0.4), 4.0)
+			ScreenShake.add_trauma(1.0)
+			_hide_lucky_indicator()
+		"judgment_end":
+			_hide_lucky_indicator()
+
+func _on_lucky_big_bang(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"big_bang_start":
+			_show_lucky_event("lucky_big_bang", "💥 宇宙大爆炸！全場 HP 歸零！")
+			ScreenShake.add_trauma(1.0)
+		"big_bang_complete":
+			var hit = data.get("hit_count", 0)
+			var boost = data.get("boost_mult", 12.0)
+			var secs = data.get("boost_secs", 25)
+			_show_lucky_banner("💥 宇宙大爆炸！清場 %d 個！全服 ×%.1f 加成 %d 秒！" % [hit, boost, secs], Color(1.0, 0.3, 0.0), 5.0)
+			ScreenShake.add_trauma(1.0)
 			_hide_lucky_indicator()

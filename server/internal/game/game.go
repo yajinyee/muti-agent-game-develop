@@ -132,6 +132,13 @@ type Game struct {
 	luckyTreasureHunter  *luckyTreasureHunterManager
 	luckyMythAwaken      *luckyMythAwakenManager
 
+	// DAY-312 新增
+	luckyStarPortal    *luckyStarPortalManager
+	luckyDragonSoul    *luckyDragonSoulManager
+	luckySpacetimeRift *luckySpacetimeRiftManager
+	luckyHolyJudgment  *luckyHolyJudgmentManager
+	luckyBigBang       *luckyBigBangManager
+
 	lastTick time.Time
 }
 
@@ -230,6 +237,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyElementalFusion: newLuckyElementalFusionManager(),
 		luckyTreasureHunter:  newLuckyTreasureHunterManager(),
 		luckyMythAwaken:      newLuckyMythAwakenManager(),
+
+		// DAY-312 新增
+		luckyStarPortal:    newLuckyStarPortalManager(),
+		luckyDragonSoul:    newLuckyDragonSoulManager(),
+		luckySpacetimeRift: newLuckySpacetimeRiftManager(),
+		luckyHolyJudgment:  newLuckyHolyJudgmentManager(),
+		luckyBigBang:       newLuckyBigBangManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -729,6 +743,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			effectiveMult *= mythMult
 			g.luckyMythAwaken.onKillDuringMyth(playerID)
 		}
+		// DAY-312 新增全服加成
+		starPortalPerfectBoost := g.luckyStarPortal.getStarPortalPerfectMult()
+		if starPortalPerfectBoost > 1.0 {
+			effectiveMult *= starPortalPerfectBoost
+		}
+		dragonSoulPerfectBoost := g.luckyDragonSoul.getDragonSoulPerfectMult()
+		if dragonSoulPerfectBoost > 1.0 {
+			effectiveMult *= dragonSoulPerfectBoost
+		}
+		spacetimeRiftPerfectBoost := g.luckySpacetimeRift.getSpacetimeRiftPerfectMult()
+		if spacetimeRiftPerfectBoost > 1.0 {
+			effectiveMult *= spacetimeRiftPerfectBoost
+		}
+		holyJudgmentPerfectBoost := g.luckyHolyJudgment.getHolyJudgmentPerfectMult()
+		if holyJudgmentPerfectBoost > 1.0 {
+			effectiveMult *= holyJudgmentPerfectBoost
+		}
+		bigBangPerfectBoost := g.luckyBigBang.getBigBangPerfectMult()
+		if bigBangPerfectBoost > 1.0 {
+			effectiveMult *= bigBangPerfectBoost
+		}
 		// 龍捲風期間擊破計數
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
@@ -913,6 +948,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyTreasureHunter.tryLuckyTreasureHunterFish(g, p)
 			case isLuckyMythAwakenFish(t.Def.ID):
 				g.luckyMythAwaken.tryLuckyMythAwakenFish(g, p)
+			// DAY-312 新增
+			case isLuckyStarPortalFish(t.Def.ID):
+				g.luckyStarPortal.tryLuckyStarPortalFish(g, p)
+			case isLuckyDragonSoulFish(t.Def.ID):
+				g.luckyDragonSoul.tryLuckyDragonSoulFish(g, p)
+			case isLuckySpacetimeRiftFish(t.Def.ID):
+				g.luckySpacetimeRift.tryLuckySpacetimeRiftFish(g, p)
+			case isLuckyHolyJudgmentFish(t.Def.ID):
+				g.luckyHolyJudgment.tryLuckyHolyJudgmentFish(g, p)
+			case isLuckyBigBangFish(t.Def.ID):
+				g.luckyBigBang.tryLuckyBigBangFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -976,6 +1022,16 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			g.luckyMultCascade.notifyMultCascadeKill(g, p)
 			// DAY-309 覺醒 BOSS v2：Power Up 計數
 			g.luckyAwakenBossV2.notifyAwakenBossV2Kill(g, p)
+			// DAY-310 連擊爆發：擊破計數
+			g.luckyComboBurst.onKillDuringComboBurst(g, p)
+			// DAY-310 時間炸彈：能量累積
+			g.luckyTimeBomb.onKillDuringTimeBomb(g, p)
+			// DAY-310 神話覺醒：擊破計數
+			g.luckyMythAwaken.onKillDuringMyth(playerID)
+			// DAY-312 龍魂融合：魂計數
+			g.luckyDragonSoul.onKillDuringDragonSoul(playerID)
+			// DAY-312 時空裂縫：擊破計數
+			g.luckySpacetimeRift.onKillDuringRift(playerID)
 		}
 
 		// 獎勵通知（單播）

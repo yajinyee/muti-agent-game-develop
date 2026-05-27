@@ -91,6 +91,12 @@ const TARGET_SPRITES = {
 	"T163": "res://assets/sprites/targets/T163_elemental_fusion.png",
 	"T164": "res://assets/sprites/targets/T164_treasure_hunter.png",
 	"T165": "res://assets/sprites/targets/T165_myth_awaken.png",
+	# DAY-312 新增
+	"T166": "res://assets/sprites/targets/T166_star_portal.png",
+	"T167": "res://assets/sprites/targets/T167_dragon_soul.png",
+	"T168": "res://assets/sprites/targets/T168_spacetime_rift.png",
+	"T169": "res://assets/sprites/targets/T169_holy_judgment.png",
+	"T170": "res://assets/sprites/targets/T170_big_bang.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -182,6 +188,12 @@ const TARGET_COLORS = {
 	"T163": Color(0.6, 0.2, 0.9),   # 深紫元素融合魚
 	"T164": Color(1.0, 0.75, 0.1),  # 金色寶藏獵人魚
 	"T165": Color(0.9, 0.8, 0.1),   # 神聖金色神話覺醒魚
+	# DAY-312 新增
+	"T166": Color(0.49, 0.11, 0.64), # 深紫星際門戶魚
+	"T167": Color(0.83, 0.18, 0.18), # 龍紅龍魂融合魚
+	"T168": Color(0.08, 0.27, 0.75), # 深藍時空裂縫魚
+	"T169": Color(0.96, 0.50, 0.09), # 神聖橙金神聖審判魚
+	"T170": Color(0.72, 0.07, 0.07), # 深紅宇宙大爆炸魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
@@ -352,7 +364,9 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 依倍率範圍選顏色
 	var tid_num = int(def_id.substr(1))
 	var ring_color: Color
-	if tid_num >= 141:
+	if tid_num >= 166:
+		ring_color = Color(1.0, 1.0, 0.8, 0.70)    # 極亮白金（T166+，DAY-312 最高階）
+	elif tid_num >= 141:
 		ring_color = Color(1.0, 1.0, 0.5, 0.60)    # 超亮金（T141+，最高階）
 	elif tid_num >= 131:
 		ring_color = Color(1.0, 0.95, 0.0, 0.50)   # 亮金（T131-T140）

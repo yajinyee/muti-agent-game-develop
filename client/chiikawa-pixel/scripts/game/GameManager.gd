@@ -88,6 +88,12 @@ signal lucky_time_bomb(data: Dictionary)
 signal lucky_elemental_fusion(data: Dictionary)
 signal lucky_treasure_hunter(data: Dictionary)
 signal lucky_myth_awaken(data: Dictionary)
+# DAY-312 新增幸運特殊魚訊號
+signal lucky_star_portal(data: Dictionary)
+signal lucky_dragon_soul(data: Dictionary)
+signal lucky_spacetime_rift(data: Dictionary)
+signal lucky_holy_judgment(data: Dictionary)
+signal lucky_big_bang(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -263,6 +269,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_treasure_hunter", payload)
 		"lucky_myth_awaken":
 			emit_signal("lucky_myth_awaken", payload)
+		# DAY-312 新增
+		"lucky_star_portal":
+			emit_signal("lucky_star_portal", payload)
+		"lucky_dragon_soul":
+			emit_signal("lucky_dragon_soul", payload)
+		"lucky_spacetime_rift":
+			emit_signal("lucky_spacetime_rift", payload)
+		"lucky_holy_judgment":
+			emit_signal("lucky_holy_judgment", payload)
+		"lucky_big_bang":
+			emit_signal("lucky_big_bang", payload)
 		"pong":
 			pass
 		"error":

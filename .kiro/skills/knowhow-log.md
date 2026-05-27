@@ -4422,3 +4422,16 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
 - **原因：** PowerShell 使用 `;` 而非 `&&` 作為命令分隔符
 - **解決：** 分開執行兩個命令，或使用 cmd.exe
 - **教訓：** Windows PowerShell 環境下不能用 `&&`，要分開執行
+
+## 114. DAY-312 T166-T170 五個新 Lucky 魚系統（2026-05-27）
+- **業界依據：** Fishing Carnival「portal teleport mechanic」、Royal Fishing「Dragon Wrath energy accumulation」升級版、Fishing Fortune「time warp + multiplier cascade」組合、Jili「Super Awakening 3000x」升級版、Fishing Carnival「Big Bang mechanic」
+- **T166 星際門戶魚（1300x）：** 傳送 5 個目標到中央（HP -50%），完美門戶全服 ×5.5 加成 12 秒
+- **T167 龍魂融合魚（1350x）：** 30 秒吸收龍魂（最高 50 魂），50 魂 → 龍魂爆發全場 HP -90%，全服 ×9.0 加成 18 秒
+- **T168 時空裂縫魚（1400x）：** 20 秒每 4 秒瞬間擊破 3 個目標（獎勵 ×4.0），擊破 ≥12 → 時空完美全服 ×7.5 加成 16 秒
+- **T169 神聖審判魚（1450x）：** 25 秒每 5 秒一波神聖光柱（全場 HP -30%），5 波全部命中 ≥5 → 神聖完美全服 ×8.5 加成 18 秒
+- **T170 宇宙大爆炸魚（1500x）：** 全場 HP 歸零（每個獎勵 ×8.0），觸發全服 ×12.0 加成 25 秒（超越 T160 的最高倍率）
+- **精靈圖品質：** T166-T170 全部 90.9%-94.9% 非透明像素（優秀）
+- **QA：** 55/55 全部通過
+- **新技術：** `applyRiftInstantKill` — 瞬間擊破 n 個隨機目標並給予獎勵
+- **新技術：** `applyStarPortalTeleport` — 傳送目標到中央並造成 HP -50%
+- **教訓：** T170 宇宙大爆炸（×12.0）超越 T160 終極審判（×10.0），成為遊戲最高倍率機制
