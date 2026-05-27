@@ -108,6 +108,12 @@ signal lucky_arctic_storm(data: Dictionary)
 signal lucky_fisher_wild(data: Dictionary)
 signal lucky_risk_level(data: Dictionary)
 signal lucky_cosmic_pulse(data: Dictionary)
+# DAY-316 新增幸運特殊魚訊號
+signal lucky_mirror_universe(data: Dictionary)
+signal lucky_gravity_field(data: Dictionary)
+signal lucky_time_acceleration(data: Dictionary)
+signal lucky_nebula_vortex(data: Dictionary)
+signal lucky_cosmic_judgment(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -319,6 +325,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_risk_level", payload)
 		"lucky_cosmic_pulse":
 			emit_signal("lucky_cosmic_pulse", payload)
+		# DAY-316 新增
+		"lucky_mirror_universe":
+			emit_signal("lucky_mirror_universe", payload)
+		"lucky_gravity_field":
+			emit_signal("lucky_gravity_field", payload)
+		"lucky_time_acceleration":
+			emit_signal("lucky_time_acceleration", payload)
+		"lucky_nebula_vortex":
+			emit_signal("lucky_nebula_vortex", payload)
+		"lucky_cosmic_judgment":
+			emit_signal("lucky_cosmic_judgment", payload)
 		"pong":
 			pass
 		"error":

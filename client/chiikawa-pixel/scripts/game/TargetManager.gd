@@ -339,10 +339,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T185）— DAY-315 擴展到 T185
+	# Lucky 特殊魚標記（T106-T190）— DAY-316 擴展到 T190
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 185:
+		if tid_num >= 106 and tid_num <= 190:
 			_add_lucky_badge(container, def_id)
 	if def_id in ["T103", "T104"]:
 		var wobble = container.create_tween().set_loops()

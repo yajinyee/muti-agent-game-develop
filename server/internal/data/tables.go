@@ -311,6 +311,23 @@ var Targets = []TargetDef{
 	// 業界依據：Fishing Fortune multiplier cascade（2x→500x）升級版
 	{ID: "T185", Name: "幸運宇宙脈衝魚", Type: TypeSpecial, Multiplier: 2100, HP: 2200, SpawnWeight: 1, Speed: 20, Lifetime: 48, LaborGain: 420, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-316 新增特殊目標（2150x-2500x）────────────────────────
+	// T186 幸運鏡像宇宙魚：擊破後開啟鏡像宇宙 25 秒，複製場上最強 3 個目標（HP 50%，獎勵 ×2.0）
+	// 業界依據：Royal Fishing「Mirror Fish」+ 量子糾纏概念
+	{ID: "T186", Name: "幸運鏡像宇宙魚", Type: TypeSpecial, Multiplier: 2150, HP: 2260, SpawnWeight: 1, Speed: 30, Lifetime: 48, LaborGain: 430, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T187 幸運引力場魚：擊破後引力場 15 秒（目標速度 ×0.1），15 秒後引力爆炸（HP -55%，獎勵 ×9.0），命中 ≥12 → 全服 ×17.5 加成 37 秒
+	// 業界依據：Black Hole Fishing（SDG Games, 2026）引力吸引機制
+	{ID: "T187", Name: "幸運引力場魚", Type: TypeSpecial, Multiplier: 2200, HP: 2320, SpawnWeight: 1, Speed: 25, Lifetime: 50, LaborGain: 440, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T188 幸運時間加速魚：擊破後時間加速 30 秒（目標速度 ×0.15，射擊速度 ×3.0，獎勵 ×2.5），擊破 ≥20 → 全服 ×18.0 加成 38 秒（新最高）
+	// 業界依據：Fishing Fortune「time warp」升級版 + 時間操控概念
+	{ID: "T188", Name: "幸運時間加速魚", Type: TypeSpecial, Multiplier: 2300, HP: 2420, SpawnWeight: 1, Speed: 35, Lifetime: 46, LaborGain: 460, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T189 幸運星雲漩渦魚：擊破後星雲漩渦 20 秒（每秒全場 HP -8%，獎勵 ×1.5），累積命中 ≥20 → 全服 ×18.5 加成 39 秒
+	// 業界依據：Fishing Carnival「vortex anemone」+ 星雲能量吸收概念
+	{ID: "T189", Name: "幸運星雲漩渦魚", Type: TypeSpecial, Multiplier: 2400, HP: 2520, SpawnWeight: 1, Speed: 20, Lifetime: 52, LaborGain: 480, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T190 幸運宇宙審判魚：擊破後宇宙審判（全場 HP 歸零，每個獎勵 ×14.0），觸發全服 ×19.0 加成 40 秒（新最高全服倍率機制）
+	// 業界依據：Fishing Fortune「ultimate judgment」+ 宇宙終極機制
+	{ID: "T190", Name: "幸運宇宙審判魚", Type: TypeSpecial, Multiplier: 2500, HP: 2640, SpawnWeight: 1, Speed: 15, Lifetime: 55, LaborGain: 500, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

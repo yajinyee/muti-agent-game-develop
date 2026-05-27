@@ -156,6 +156,13 @@ type Game struct {
 	luckyRiskLevel   *luckyRiskLevelManager
 	luckyCosmicPulse *luckyCosmicPulseManager
 
+	// DAY-316 新增
+	luckyMirrorUniverse   *luckyMirrorUniverseManager
+	luckyGravityField     *luckyGravityFieldManager
+	luckyTimeAcceleration *luckyTimeAccelerationManager
+	luckyNebulaVortex     *luckyNebulaVortexManager
+	luckyCosmicJudgment   *luckyCosmicJudgmentManager
+
 	lastTick time.Time
 }
 
@@ -278,6 +285,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyFisherWild:  newLuckyFisherWildManager(),
 		luckyRiskLevel:   newLuckyRiskLevelManager(),
 		luckyCosmicPulse: newLuckyCosmicPulseManager(),
+
+		// DAY-316 新增
+		luckyMirrorUniverse:   newLuckyMirrorUniverseManager(),
+		luckyGravityField:     newLuckyGravityFieldManager(),
+		luckyTimeAcceleration: newLuckyTimeAccelerationManager(),
+		luckyNebulaVortex:     newLuckyNebulaVortexManager(),
+		luckyCosmicJudgment:   newLuckyCosmicJudgmentManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -847,6 +861,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if cosmicPulseBoost > 1.0 {
 			effectiveMult *= cosmicPulseBoost
 		}
+		// DAY-316 新增全服加成
+		mirrorUniverseBoost := g.luckyMirrorUniverse.getMirrorUniverseMult()
+		if mirrorUniverseBoost > 1.0 {
+			effectiveMult *= mirrorUniverseBoost
+		}
+		gravityFieldBoost := g.luckyGravityField.getGravityFieldMult()
+		if gravityFieldBoost > 1.0 {
+			effectiveMult *= gravityFieldBoost
+		}
+		timeAccelerationBoost := g.luckyTimeAcceleration.getTimeAccelerationMult()
+		if timeAccelerationBoost > 1.0 {
+			effectiveMult *= timeAccelerationBoost
+		}
+		nebulaVortexBoost := g.luckyNebulaVortex.getNebulaVortexMult()
+		if nebulaVortexBoost > 1.0 {
+			effectiveMult *= nebulaVortexBoost
+		}
+		cosmicJudgmentBoost := g.luckyCosmicJudgment.getCosmicJudgmentMult()
+		if cosmicJudgmentBoost > 1.0 {
+			effectiveMult *= cosmicJudgmentBoost
+		}
 		// 龍捲風期間擊破計數
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
@@ -1067,6 +1102,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyRiskLevel.tryLuckyRiskLevelFish(g, p)
 			case isLuckyCosmicPulseFish(t.Def.ID):
 				g.luckyCosmicPulse.tryLuckyCosmicPulseFish(g, p)
+			// DAY-316 新增
+			case isLuckyMirrorUniverseFish(t.Def.ID):
+				g.luckyMirrorUniverse.tryLuckyMirrorUniverseFish(g, p)
+			case isLuckyGravityFieldFish(t.Def.ID):
+				g.luckyGravityField.tryLuckyGravityFieldFish(g, p)
+			case isLuckyTimeAccelerationFish(t.Def.ID):
+				g.luckyTimeAcceleration.tryLuckyTimeAccelerationFish(g, p)
+			case isLuckyNebulaVortexFish(t.Def.ID):
+				g.luckyNebulaVortex.tryLuckyNebulaVortexFish(g, p)
+			case isLuckyCosmicJudgmentFish(t.Def.ID):
+				g.luckyCosmicJudgment.tryLuckyCosmicJudgmentFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -1146,6 +1192,10 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			g.luckySpacetimeRift.onKillDuringRift(playerID)
 			// DAY-314 多重宇宙：擊破計數
 			g.luckyMultiverse.onKill(g, p)
+			// DAY-316 時間加速：擊破計數
+			if g.luckyTimeAcceleration.isTimeAccelerationActive() {
+				g.luckyTimeAcceleration.onKill(playerID)
+			}
 		}
 
 		// 獎勵通知（單播）

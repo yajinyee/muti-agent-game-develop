@@ -140,6 +140,13 @@ const (
 	MsgLuckyFisherWild  = "lucky_fisher_wild"  // T183 漁夫野生魚（3 個 Wild 目標，全服 ×17.0）
 	MsgLuckyRiskLevel   = "lucky_risk_level"   // T184 風險等級魚（5 等級選擇，最高 ×3000，全服 ×17.5）
 	MsgLuckyCosmicPulse = "lucky_cosmic_pulse" // T185 宇宙脈衝魚（全場 HP -45%，全服 ×16.0 新最高）
+
+	// DAY-316 新增幸運特殊魚事件
+	MsgLuckyMirrorUniverse   = "lucky_mirror_universe"   // T186 鏡像宇宙魚（複製最強 3 個目標，全服 ×17.0）
+	MsgLuckyGravityField     = "lucky_gravity_field"     // T187 引力場魚（引力吸引+爆炸 HP -55%，全服 ×17.5）
+	MsgLuckyTimeAcceleration = "lucky_time_acceleration" // T188 時間加速魚（目標速度 ×0.15，射擊 ×3.0，全服 ×18.0 新最高）
+	MsgLuckyNebulaVortex     = "lucky_nebula_vortex"     // T189 星雲漩渦魚（每秒 HP -8%，持續 20 秒，全服 ×18.5）
+	MsgLuckyCosmicJudgment   = "lucky_cosmic_judgment"   // T190 宇宙審判魚（全場清空 ×14.0，全服 ×19.0 新最高）
 )
 // ── Envelope ─────────────────────────────────────────────────
 

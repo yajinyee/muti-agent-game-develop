@@ -147,6 +147,12 @@ func _ready() -> void:
 	GameManager.lucky_fisher_wild.connect(_on_lucky_fisher_wild)
 	GameManager.lucky_risk_level.connect(_on_lucky_risk_level)
 	GameManager.lucky_cosmic_pulse.connect(_on_lucky_cosmic_pulse)
+	# DAY-316 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
+	GameManager.lucky_mirror_universe.connect(_on_lucky_mirror_universe)
+	GameManager.lucky_gravity_field.connect(_on_lucky_gravity_field)
+	GameManager.lucky_time_acceleration.connect(_on_lucky_time_acceleration)
+	GameManager.lucky_nebula_vortex.connect(_on_lucky_nebula_vortex)
+	GameManager.lucky_cosmic_judgment.connect(_on_lucky_cosmic_judgment)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -2141,4 +2147,76 @@ func _on_lucky_cosmic_pulse(data: Dictionary) -> void:
 			var boost_mult = data.get("boost_mult", 16.0)
 			var boost_secs = data.get("boost_secs", 35)
 			_show_lucky_banner("🌌🏆 宇宙脈衝完成！%s 清場 %d 個！全服 ×%.1f 加成 %d 秒！（新最高）" % [name, hit_count, boost_mult, boost_secs], Color(0.4, 0.0, 1.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+# DAY-316 新增幸運特殊魚事件處理（備用橫幅，Panel 自行處理詳細 UI）
+func _on_lucky_mirror_universe(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"mirror_universe_start":
+			_show_lucky_event("lucky_mirror_universe", "🪞 %s 開啟鏡像宇宙！複製最強 3 個目標！獎勵 ×2.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.8)
+		"mirror_perfect":
+			var boost_mult = data.get("boost_mult", 17.0)
+			var boost_secs = data.get("boost_secs", 36)
+			_show_lucky_banner("🪞🏆 鏡像完美！%s 全部擊破！全服 ×%.1f 加成 %d 秒！" % [name, boost_mult, boost_secs], Color(0.2, 0.4, 1.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_gravity_field(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"gravity_field_start":
+			_show_lucky_event("lucky_gravity_field", "🌀 %s 啟動引力場！目標速度 ×0.1！15 秒後爆炸！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.7)
+		"gravity_perfect":
+			var boost_mult = data.get("boost_mult", 17.5)
+			var boost_secs = data.get("boost_secs", 37)
+			_show_lucky_banner("🌀🏆 引力完美！%s 命中 %d 個！全服 ×%.1f 加成 %d 秒！" % [name, data.get("hit_count", 0), boost_mult, boost_secs], Color(0.4, 0.2, 1.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_time_acceleration(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"time_acceleration_start":
+			_show_lucky_event("lucky_time_acceleration", "⚡ %s 啟動時間加速！射擊速度 ×3.0！30 秒！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.9)
+		"time_acceleration_perfect":
+			var boost_mult = data.get("boost_mult", 18.0)
+			var boost_secs = data.get("boost_secs", 38)
+			_show_lucky_banner("⚡🏆 時間完美！%s 擊破 %d 個！全服 ×%.1f 加成 %d 秒！（新最高）" % [name, data.get("kill_count", 0), boost_mult, boost_secs], Color(1.0, 0.7, 0.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_nebula_vortex(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"nebula_vortex_start":
+			_show_lucky_event("lucky_nebula_vortex", "🌌 %s 召喚星雲漩渦！每秒全場 HP -8%%！持續 20 秒！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.8)
+		"nebula_perfect":
+			var boost_mult = data.get("boost_mult", 18.5)
+			var boost_secs = data.get("boost_secs", 39)
+			_show_lucky_banner("🌌🏆 星雲完美！%s 累積命中 %d 次！全服 ×%.1f 加成 %d 秒！" % [name, data.get("total_hits", 0), boost_mult, boost_secs], Color(0.5, 0.1, 1.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_cosmic_judgment(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"cosmic_judgment_start":
+			_show_lucky_event("lucky_cosmic_judgment", "⚖️ %s 召喚宇宙審判！全場 HP 歸零！全服 ×19.0！（新最高）" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(1.0)
+		"cosmic_judgment_complete":
+			var hit_count = data.get("hit_count", 0)
+			var boost_mult = data.get("boost_mult", 19.0)
+			var boost_secs = data.get("boost_secs", 40)
+			_show_lucky_banner("⚖️🏆 宇宙審判完成！%s 清場 %d 個！全服 ×%.1f 加成 %d 秒！（新最高）" % [name, hit_count, boost_mult, boost_secs], Color(1.0, 0.1, 0.1), 4.5)
 			ScreenShake.add_trauma(1.0)

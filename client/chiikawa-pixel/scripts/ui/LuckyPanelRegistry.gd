@@ -109,6 +109,12 @@ const SIGNAL_TO_PANEL: Dictionary = {
 	"lucky_fisher_wild":       "LuckyFisherWildPanel",
 	"lucky_risk_level":        "LuckyRiskLevelPanel",
 	"lucky_cosmic_pulse":      "LuckyCosmicPulsePanel",
+	# DAY-316 新增
+	"lucky_mirror_universe":   "LuckyMirrorUniversePanel",
+	"lucky_gravity_field":     "LuckyGravityFieldPanel",
+	"lucky_time_acceleration": "LuckyTimeAccelerationPanel",
+	"lucky_nebula_vortex":     "LuckyNebulaVortexPanel",
+	"lucky_cosmic_judgment":   "LuckyCosmicJudgmentPanel",
 }
 
 func _ready() -> void:
