@@ -4480,3 +4480,33 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
 - **問題：** `g.applyAOEDamage(p, 0.35)` 參數不對，實際簽名是 `applyAOEDamage(cx, cy, radius, pct float64)`
 - **解法：** 全場 AOE 用 `g.applyAOEDamage(640, 360, 9999, 0.35)`（中心點 + 超大半徑）
 - **教訓：** 呼叫輔助方法前要確認函數簽名，不要假設參數順序
+
+## 122. DAY-315 新 Lucky 魚系統設計模式（2026-05-28）
+
+### T181-T185 業界依據
+- **T181 突變魚**：Fisch mutations system（150+ mutations, 17x bonus）— 隨機突變機制，150 種突變表，傳說突變觸發全服加成
+- **T182 北極風暴魚**：Arctic Mechanics（500x multiplier, fast pace）— 快速節奏 8 波攻擊，每 0.3 秒一波
+- **T183 漁夫野生魚**：Big Bass Splash 1000（Fisherman Wild + Fish Cash mechanic）— 標記 Wild 目標，擊破獎勵 ×5.0
+- **T184 風險等級魚**：BGaming Fishing Club 2（5 risk levels, max x3000）— 5 等級選擇，最高 ×3000
+- **T185 宇宙脈衝魚**：Fishing Fortune multiplier cascade 升級版 — 全場 HP -45%，全服 ×16.0（新最高）
+
+### 關鍵技術點
+- `t.IsBoss` 不存在，要用 `t.Def.Type != data.TypeBoss` 判斷是否為 BOSS
+- 新 handler 需要 import `chiikawa-game/internal/data` 才能使用 `data.TypeBoss`
+- FisherWild 的 Wild 目標追蹤用 `isWildTarget(instanceID)` + `onWildKilled(g, instanceID)` 模式
+- 風險等級用 `rand.Float64()` + 累積機率實現加權隨機
+
+### 精靈圖密度
+- T181（突變）：84.6%，T182（北極）：81.7%，T183（漁夫）：71.6%，T184（風險）：63.5%，T185（宇宙）：91.8%
+- 全部超過 60% 門檻，品質良好
+
+## 123. 全服倍率機制演進（DAY-315 更新）
+
+| 版本 | 最高全服倍率 | 觸發條件 |
+|------|------------|---------|
+| T160 | ×10.0 | 終極審判全場清空 |
+| T170 | ×12.0 | 宇宙大爆炸全場清空 |
+| T180 | ×15.0 | 終焉之力全場清空 ×10.0 |
+| T185 | ×16.0 | 宇宙脈衝全場 HP -45% ×12.0（新最高）|
+
+T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 是目前最高全服加成。

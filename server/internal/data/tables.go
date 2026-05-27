@@ -294,6 +294,23 @@ var Targets = []TargetDef{
 	// T180 幸運終焉之力魚：擊破後全場 HP 歸零（每個獎勵 ×10.0），觸發全服 ×15.0 加成 30 秒（超越 T170 成為新最高倍率機制）
 	{ID: "T180", Name: "幸運終焉之力魚", Type: TypeSpecial, Multiplier: 1800, HP: 1900, SpawnWeight: 1, Speed: 20, Lifetime: 45, LaborGain: 360, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-315 新增特殊目標（1850x-2100x）────────────────────────
+	// T181 幸運突變魚：擊破後觸發隨機突變（150種突變，最高 ×17.0 加成），突變 ≥10x → 全服 ×16.0 加成 32 秒
+	// 業界依據：Fisch mutations system（150+ mutations, 17x bonus）
+	{ID: "T181", Name: "幸運突變魚", Type: TypeSpecial, Multiplier: 1850, HP: 1950, SpawnWeight: 1, Speed: 35, Lifetime: 42, LaborGain: 370, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T182 幸運北極風暴魚：擊破後快速節奏 500x 連擊（每 0.3 秒一波，共 8 波），全部命中 → 全服 ×16.5 加成 33 秒
+	// 業界依據：Arctic Mechanics（500x multiplier, fast pace）
+	{ID: "T182", Name: "幸運北極風暴魚", Type: TypeSpecial, Multiplier: 1900, HP: 2000, SpawnWeight: 1, Speed: 45, Lifetime: 38, LaborGain: 380, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T183 幸運漁夫野生魚：擊破後標記 3 個 Wild 目標（HP -50%，擊破獎勵 ×5.0），全部擊破 → 全服 ×17.0 加成 35 秒
+	// 業界依據：Big Bass Splash 1000（Fisherman Wild + Fish Cash mechanic）
+	{ID: "T183", Name: "幸運漁夫野生魚", Type: TypeSpecial, Multiplier: 1950, HP: 2050, SpawnWeight: 1, Speed: 30, Lifetime: 44, LaborGain: 390, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T184 幸運風險等級魚：擊破後選擇 5 個風險等級（低風險 ×5.0 / 中 ×20.0 / 高 ×100.0 / 極高 ×500.0 / 最高 ×3000.0），最高等級 → 全服 ×17.5 加成 36 秒
+	// 業界依據：BGaming Fishing Club 2（5 risk levels, max x3000）
+	{ID: "T184", Name: "幸運風險等級魚", Type: TypeSpecial, Multiplier: 2000, HP: 2100, SpawnWeight: 1, Speed: 25, Lifetime: 46, LaborGain: 400, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T185 幸運宇宙脈衝魚：擊破後宇宙脈衝波（全場 HP -45%，每個獎勵 ×12.0），觸發全服 ×16.0 加成 35 秒（新最高倍率機制）
+	// 業界依據：Fishing Fortune multiplier cascade（2x→500x）升級版
+	{ID: "T185", Name: "幸運宇宙脈衝魚", Type: TypeSpecial, Multiplier: 2100, HP: 2200, SpawnWeight: 1, Speed: 20, Lifetime: 48, LaborGain: 420, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

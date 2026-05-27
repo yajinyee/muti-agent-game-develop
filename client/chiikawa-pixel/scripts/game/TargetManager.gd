@@ -339,10 +339,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T175）— DAY-313 擴展到 T175
+	# Lucky 特殊魚標記（T106-T185）— DAY-315 擴展到 T185
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 175:
+		if tid_num >= 106 and tid_num <= 185:
 			_add_lucky_badge(container, def_id)
 	if def_id in ["T103", "T104"]:
 		var wobble = container.create_tween().set_loops()
@@ -386,11 +386,14 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 依倍率範圍選顏色
 	var tid_num = int(def_id.substr(1))
 	var ring_color: Color
-	if tid_num >= 171:
+	if tid_num >= 181:
+		ring_color = Color(1.0, 0.85, 0.0, 0.95)   # 最亮金（T181+，DAY-315 最高階）
+	elif tid_num >= 171:
 		ring_color = Color(1.0, 0.85, 0.0, 0.85)   # 超亮金（T171+，Progressive Jackpot）
 	elif tid_num >= 166:
 		ring_color = Color(1.0, 1.0, 0.8, 0.70)    # 極亮白金（T166+，DAY-312 最高階）
 	elif tid_num >= 141:
+		ring_color = Color(1.0, 1.0, 0.5, 0.60)    # 超亮金（T141+，最高階）
 		ring_color = Color(1.0, 1.0, 0.5, 0.60)    # 超亮金（T141+，最高階）
 	elif tid_num >= 131:
 		ring_color = Color(1.0, 0.95, 0.0, 0.50)   # 亮金（T131-T140）

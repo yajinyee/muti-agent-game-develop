@@ -133,6 +133,13 @@ const (
 	MsgLuckyFateWheel   = "lucky_fate_wheel"   // T178 命運之輪魚（3 次旋轉，最高 ×50.0，全服 ×11.0）
 	MsgLuckyDivineRealm = "lucky_divine_realm" // T179 神域降臨魚（5 波神域光柱 HP -35%，全服 ×14.0）
 	MsgLuckyFinalPower  = "lucky_final_power"  // T180 終焉之力魚（全場清空 ×10.0，全服 ×15.0 新最高）
+
+	// DAY-315 新增幸運特殊魚事件
+	MsgLuckyMutation    = "lucky_mutation"     // T181 突變魚（150種突變，最高 ×17.0，全服 ×16.0）
+	MsgLuckyArcticStorm = "lucky_arctic_storm" // T182 北極風暴魚（8 波快速連擊，全服 ×16.5）
+	MsgLuckyFisherWild  = "lucky_fisher_wild"  // T183 漁夫野生魚（3 個 Wild 目標，全服 ×17.0）
+	MsgLuckyRiskLevel   = "lucky_risk_level"   // T184 風險等級魚（5 等級選擇，最高 ×3000，全服 ×17.5）
+	MsgLuckyCosmicPulse = "lucky_cosmic_pulse" // T185 宇宙脈衝魚（全場 HP -45%，全服 ×16.0 新最高）
 )
 // ── Envelope ─────────────────────────────────────────────────
 

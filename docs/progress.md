@@ -1,6 +1,51 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-27（DAY-314 T176-T180 五個新 Lucky 魚系統 + 新最高倍率 ×15.0 + QA 70/70 + GitHub 同步）
+## 最後更新：2026-05-28（DAY-315 T181-T185 五個新 Lucky 魚系統 + 新最高全服倍率 ×16.0 + QA 64/64 + GitHub 同步）
+
+## DAY-315 更新（2026-05-28）：T181-T185 五個新 Lucky 魚系統 + 新最高全服倍率 ×16.0 ✅
+- **業界研究：** Fisch mutations（150+ mutations, 17x）、Arctic Mechanics（500x fast pace）、Big Bass Splash 1000（Fisherman Wild）、BGaming Fishing Club 2（5 risk levels, x3000）、Fishing Fortune multiplier cascade
+- **T181 幸運突變魚（1850x）：** 擊破後觸發隨機突變（150種突變，最高 ×17.0 加成），突變 ≥10x → 全服 ×16.0 加成 32 秒
+- **T182 幸運北極風暴魚（1900x）：** 擊破後快速節奏 8 波冰雪攻擊（每 0.3 秒一波，每波 HP -15%），全部 8 波命中 ≥3 → 全服 ×16.5 加成 33 秒
+- **T183 幸運漁夫野生魚（1950x）：** 擊破後標記 3 個 Wild 目標（HP -50%，擊破獎勵 ×5.0），30 秒內全部擊破 → 全服 ×17.0 加成 35 秒
+- **T184 幸運風險等級魚（2000x）：** 擊破後選擇 5 個風險等級（低 ×5.0 / 中 ×20.0 / 高 ×100.0 / 極高 ×500.0 / 最高 ×3000.0），最高等級 → 全服 ×17.5 加成 36 秒
+- **T185 幸運宇宙脈衝魚（2100x）：** 擊破後宇宙脈衝波（全場 HP -45%，每個獎勵 ×12.0），觸發全服 ×16.0 加成 35 秒（超越 T180 成為新最高全服倍率機制）
+- **Server：** 5 個獨立 handler 檔案 + game.go 整合 + protocol 新增 5 個訊息類型 + tables.go 新增 5 個目標
+  - `lucky_mutation_handler.go`：150 種突變表 + 加權隨機 + 傳說突變觸發全服加成
+  - `lucky_arctic_storm_handler.go`：8 波快速攻擊（每 0.3 秒）+ 完美判定
+  - `lucky_fisher_wild_handler.go`：Wild 目標標記 + 30 秒計時 + 全部擊破觸發完美
+  - `lucky_risk_level_handler.go`：5 等級加權隨機（40%/30%/18%/10%/2%）+ 最高 ×3000
+  - `lucky_cosmic_pulse_handler.go`：全場清空 ×12.0 + 全服 ×16.0（新最高）
+- **Client：** 5 個新 Lucky Panel + GameManager 新增 5 個訊號 + HUD 新增 5 個事件處理 + TargetManager 擴展到 T185 + LuckyPanelRegistry 更新
+  - `LuckyMutationPanel.gd`（layer=76）：深紫色 + 突變名稱顯示 + 倍率顯示
+  - `LuckyArcticStormPanel.gd`（layer=77）：冰藍色 + 波次計數器 + 命中計數
+  - `LuckyFisherWildPanel.gd`（layer=78）：深藍色 + Wild 目標計數 + 30 秒計時
+  - `LuckyRiskLevelPanel.gd`（layer=79）：火橙色 + 等級顯示 + 最高 ×3000 提示
+  - `LuckyCosmicPulsePanel.gd`（layer=80）：深紫色 + 清場計數 + 全服加成顯示
+- **美術：** T181-T185 精靈圖生成完成（`tools/generate_targets_day315.py`）
+  - T181（突變）：深紫橢圓魚身 + DNA 螺旋紋路 + 多色光環（84.6%）
+  - T182（北極風暴）：冰藍橢圓魚身 + 冰晶紋路 + 8 波射線 + 雪花符號（81.7%）
+  - T183（漁夫野生）：深藍橢圓魚身 + 3 個 Wild 標記 + 釣魚線（71.6%）
+  - T184（風險等級）：火橙橢圓魚身 + 5 個等級指示器 + 骰子符號（63.5%）
+  - T185（宇宙脈衝）：深紫大型魚身 + 16 道光芒 + 三層光環 + 宇宙粒子（91.8%）
+- **LuckyPanelRegistry 更新：** 新增 5 個 Panel 映射（總計 91 個）
+- **知識庫更新：** knowhow-log 條目 122-123
+- **QA 腳本：** `tools/qa_check_day315.py`（64 項驗證，64/64 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-315）
+- **Server 目標物數量：** 92 種（T001-T006 + T101-T185 + B001）
+- **Lucky 系統數量：** 80 個（T106-T185）
+- **Client Lucky Panel 數量：** 86 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry）
+- **Agent 文件數量：** 54 個（agents/ 目錄）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7/10
+- **核心循環流暢度：** 8/10
+- **最高倍率機制：** T185 宇宙脈衝全服 ×16.0（超越 T180 的 ×15.0）
+- **最高個人倍率：** T184 風險等級最高 ×3000
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最需要改善：** 視覺清晰度（7/10 → 目標 8/10）
 
 ## DAY-314 更新（2026-05-27）：T176-T180 五個新 Lucky 魚系統 + 新最高倍率 ×15.0 ✅
 - **業界研究：** Fishing Frenzy Chapter 3「parallel dimension mechanic」、「time loop mechanic」、「fate wheel mechanic」、「divine realm mechanic」、「ultimate power mechanic」

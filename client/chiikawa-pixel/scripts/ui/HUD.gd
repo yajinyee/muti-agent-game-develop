@@ -141,6 +141,12 @@ func _ready() -> void:
 	GameManager.lucky_fate_wheel.connect(_on_lucky_fate_wheel)
 	GameManager.lucky_divine_realm.connect(_on_lucky_divine_realm)
 	GameManager.lucky_final_power.connect(_on_lucky_final_power)
+	# DAY-315 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
+	GameManager.lucky_mutation.connect(_on_lucky_mutation)
+	GameManager.lucky_arctic_storm.connect(_on_lucky_arctic_storm)
+	GameManager.lucky_fisher_wild.connect(_on_lucky_fisher_wild)
+	GameManager.lucky_risk_level.connect(_on_lucky_risk_level)
+	GameManager.lucky_cosmic_pulse.connect(_on_lucky_cosmic_pulse)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -2031,4 +2037,108 @@ func _on_lucky_final_power(data: Dictionary) -> void:
 			var hit_count = data.get("hit_count", 0)
 			var boost_mult = data.get("boost_mult", 15.0)
 			_show_lucky_banner("💀🏆 終焉之力！%s 清場 %d 個！全服 ×%.0f 加成 30 秒！" % [name, hit_count, boost_mult], Color(1.0, 0.1, 0.1), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+# ── DAY-315 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_mutation(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"mutation_start":
+			var mut_name = data.get("mutation_name", "突變")
+			var mut_mult = data.get("mutation_mult", 1.0)
+			_show_lucky_event("lucky_mutation", "🧬 %s 觸發突變！【%s】×%.1f！" % [name, mut_name, mut_mult])
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"mutation_perfect":
+			var mut_name = data.get("mutation_name", "傳說突變")
+			var mut_mult = data.get("mutation_mult", 17.0)
+			var boost_mult = data.get("boost_mult", 16.0)
+			var boost_secs = data.get("boost_secs", 32)
+			_show_lucky_banner("🧬✨ 傳說突變！%s【%s】×%.1f！全服 ×%.1f 加成 %d 秒！" % [name, mut_name, mut_mult, boost_mult, boost_secs], Color(0.6, 0.0, 1.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+		"mutation_complete":
+			var mut_name = data.get("mutation_name", "突變")
+			var mut_mult = data.get("mutation_mult", 1.0)
+			_show_lucky_banner("🧬 突變完成！【%s】×%.1f！" % [mut_name, mut_mult], Color(0.5, 0.0, 0.8), 2.5)
+
+func _on_lucky_arctic_storm(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"arctic_storm_start":
+			_show_lucky_event("lucky_arctic_storm", "❄️ %s 觸發北極風暴！8 波冰雪攻擊！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"arctic_wave":
+			var wave = data.get("wave", 0)
+			var total_hit = data.get("total_hit", 0)
+			_update_lucky_indicator("❄️ 北極風暴", "第 %d/8 波 命中 %d 個" % [wave, total_hit], float(wave) / 8.0, Color(0.0, 0.7, 1.0))
+		"arctic_storm_perfect":
+			var total_hit = data.get("total_hit", 0)
+			var boost_mult = data.get("boost_mult", 16.5)
+			var boost_secs = data.get("boost_secs", 33)
+			_show_lucky_banner("❄️🏆 完美北極風暴！%s 8 波全中！命中 %d 個！全服 ×%.1f 加成 %d 秒！" % [name, total_hit, boost_mult, boost_secs], Color(0.0, 0.8, 1.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+			_hide_lucky_indicator()
+		"arctic_storm_complete":
+			_hide_lucky_indicator()
+
+func _on_lucky_fisher_wild(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"fisher_wild_start":
+			var wild_count = data.get("wild_count", 3)
+			_show_lucky_event("lucky_fisher_wild", "🎣 %s 觸發漁夫野生！標記 %d 個 Wild 目標！擊破獎勵 ×5.0！" % [name, wild_count])
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"wild_killed":
+			var killed = data.get("killed", 0)
+			var total = data.get("total", 3)
+			_update_lucky_indicator("🎣 漁夫野生", "Wild %d/%d 已擊破" % [killed, total], float(killed) / float(total), Color(0.2, 0.6, 1.0))
+		"fisher_wild_perfect":
+			_hide_lucky_indicator()
+			var killed = data.get("killed", 3)
+			var boost_mult = data.get("boost_mult", 17.0)
+			var boost_secs = data.get("boost_secs", 35)
+			_show_lucky_banner("🎣🏆 完美漁夫！%s 擊破 %d 個 Wild！全服 ×%.1f 加成 %d 秒！" % [name, killed, boost_mult, boost_secs], Color(0.1, 0.5, 1.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+		"fisher_wild_timeout":
+			_hide_lucky_indicator()
+
+func _on_lucky_risk_level(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"risk_level_start":
+			_show_lucky_event("lucky_risk_level", "🎰 %s 觸發風險等級！最高 ×3000！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"risk_level_jackpot":
+			var risk_name = data.get("risk_name", "最高風險")
+			var risk_mult = data.get("risk_mult", 3000.0)
+			var boost_mult = data.get("boost_mult", 17.5)
+			var boost_secs = data.get("boost_secs", 36)
+			_show_lucky_banner("🎰🏆 最高風險！%s 抽中 ×%.0f！全服 ×%.1f 加成 %d 秒！" % [name, risk_mult, boost_mult, boost_secs], Color(1.0, 0.85, 0.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+		"risk_level_result":
+			var risk_name = data.get("risk_name", "低風險")
+			var risk_mult = data.get("risk_mult", 5.0)
+			_show_lucky_banner("🎰 風險結果！%s 抽中【%s】×%.1f！" % [name, risk_name, risk_mult], Color(0.9, 0.3, 0.0), 2.5)
+
+func _on_lucky_cosmic_pulse(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"cosmic_pulse_start":
+			_show_lucky_event("lucky_cosmic_pulse", "🌌 %s 引動宇宙脈衝！全場 HP -45%%！全服 ×16.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(1.0)
+		"cosmic_pulse_complete":
+			var hit_count = data.get("hit_count", 0)
+			var boost_mult = data.get("boost_mult", 16.0)
+			var boost_secs = data.get("boost_secs", 35)
+			_show_lucky_banner("🌌🏆 宇宙脈衝完成！%s 清場 %d 個！全服 ×%.1f 加成 %d 秒！（新最高）" % [name, hit_count, boost_mult, boost_secs], Color(0.4, 0.0, 1.0), 4.5)
 			ScreenShake.add_trauma(1.0)

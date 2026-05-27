@@ -149,6 +149,13 @@ type Game struct {
 	luckyDivineRealm *luckyDivineRealmManager
 	luckyFinalPower  *luckyFinalPowerManager
 
+	// DAY-315 新增
+	luckyMutation    *luckyMutationManager
+	luckyArcticStorm *luckyArcticStormManager
+	luckyFisherWild  *luckyFisherWildManager
+	luckyRiskLevel   *luckyRiskLevelManager
+	luckyCosmicPulse *luckyCosmicPulseManager
+
 	lastTick time.Time
 }
 
@@ -264,6 +271,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyFateWheel:   newLuckyFateWheelManager(),
 		luckyDivineRealm: newLuckyDivineRealmManager(),
 		luckyFinalPower:  newLuckyFinalPowerManager(),
+
+		// DAY-315 新增
+		luckyMutation:    newLuckyMutationManager(),
+		luckyArcticStorm: newLuckyArcticStormManager(),
+		luckyFisherWild:  newLuckyFisherWildManager(),
+		luckyRiskLevel:   newLuckyRiskLevelManager(),
+		luckyCosmicPulse: newLuckyCosmicPulseManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -812,6 +826,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if finalPowerBoost > 1.0 {
 			effectiveMult *= finalPowerBoost
 		}
+		// DAY-315 新增全服加成
+		mutationBoost := g.luckyMutation.getMutationMult()
+		if mutationBoost > 1.0 {
+			effectiveMult *= mutationBoost
+		}
+		arcticStormBoost := g.luckyArcticStorm.getArcticStormMult()
+		if arcticStormBoost > 1.0 {
+			effectiveMult *= arcticStormBoost
+		}
+		fisherWildBoost := g.luckyFisherWild.getFisherWildMult()
+		if fisherWildBoost > 1.0 {
+			effectiveMult *= fisherWildBoost
+		}
+		riskLevelBoost := g.luckyRiskLevel.getRiskLevelMult()
+		if riskLevelBoost > 1.0 {
+			effectiveMult *= riskLevelBoost
+		}
+		cosmicPulseBoost := g.luckyCosmicPulse.getCosmicPulseMult()
+		if cosmicPulseBoost > 1.0 {
+			effectiveMult *= cosmicPulseBoost
+		}
 		// 龍捲風期間擊破計數
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
@@ -1021,6 +1056,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyDivineRealm.tryLuckyDivineRealmFish(g, p)
 			case isLuckyFinalPowerFish(t.Def.ID):
 				g.luckyFinalPower.tryLuckyFinalPowerFish(g, p)
+			// DAY-315 新增
+			case isLuckyMutationFish(t.Def.ID):
+				g.luckyMutation.tryLuckyMutationFish(g, p)
+			case isLuckyArcticStormFish(t.Def.ID):
+				g.luckyArcticStorm.tryLuckyArcticStormFish(g, p)
+			case isLuckyFisherWildFish(t.Def.ID):
+				g.luckyFisherWild.tryLuckyFisherWildFish(g, p)
+			case isLuckyRiskLevelFish(t.Def.ID):
+				g.luckyRiskLevel.tryLuckyRiskLevelFish(g, p)
+			case isLuckyCosmicPulseFish(t.Def.ID):
+				g.luckyCosmicPulse.tryLuckyCosmicPulseFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -1053,6 +1099,10 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			// DAY-304 賞金獵人：賞金目標擊破通知
 			if g.luckyBountyHunter.isBountyTarget(t.InstanceID) {
 				g.notifyBountyKill(t.InstanceID, playerID, killerName)
+			}
+			// DAY-315 漁夫野生：Wild 目標擊破通知
+			if g.luckyFisherWild.isWildTarget(t.InstanceID) {
+				g.luckyFisherWild.onWildKilled(g, t.InstanceID)
 			}
 			// DAY-305 龍怒蓄積：射擊計數
 			if g.luckyDragonWrathV2.isDragonWrathV2Active(playerID) {
