@@ -234,6 +234,18 @@ var Targets = []TargetDef{
 	// T155 幸運不死 BOSS 魚：擊破後召喚不死 BOSS（5 條命，每次擊破倍率 +0.5x），18 秒內耗盡 5 條命 → 完美不死全服 ×5.0 加成 12 秒
 	{ID: "T155", Name: "幸運不死 BOSS 魚", Type: TypeSpecial, Multiplier: 750, HP: 820, SpawnWeight: 1, Speed: 35, Lifetime: 30, LaborGain: 150, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-309 新增特殊目標（800x-1000x）────────────────────────
+	// T156 幸運冰鳳凰魚：擊破後冰凍全場 10 秒（傷害 ×1.5），鳳凰重生爆炸（HP -60%），命中 ≥8 → 完美鳳凰全服 ×5.5 加成 12 秒
+	{ID: "T156", Name: "幸運冰鳳凰魚", Type: TypeSpecial, Multiplier: 800, HP: 860, SpawnWeight: 1, Speed: 40, Lifetime: 28, LaborGain: 160, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T157 幸運龍怒能量魚：擊破後能量累積 15 秒（每次擊破 +10 能量），滿 100 → 龍怒全場（HP -80%），命中 ≥10 → 完美龍怒全服 ×6.0 加成 13 秒
+	{ID: "T157", Name: "幸運龍怒能量魚", Type: TypeSpecial, Multiplier: 850, HP: 900, SpawnWeight: 1, Speed: 45, Lifetime: 26, LaborGain: 170, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T158 幸運倍率瀑布魚：擊破後 30 秒倍率瀑布（每次擊破 +0.5x，最高 ×20.0），30 秒內達到 ×15.0 → 完美瀑布全服 ×6.5 加成 14 秒
+	{ID: "T158", Name: "幸運倍率瀑布魚", Type: TypeSpecial, Multiplier: 900, HP: 940, SpawnWeight: 1, Speed: 50, Lifetime: 24, LaborGain: 180, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T159 幸運覺醒 BOSS 魚 v2：擊破後 8 次 Power Up（每次 8x-15x 隨機），全部命中 → 完美覺醒全服 ×7.0 加成 15 秒
+	{ID: "T159", Name: "幸運覺醒BOSS魚v2", Type: TypeSpecial, Multiplier: 950, HP: 980, SpawnWeight: 1, Speed: 40, Lifetime: 30, LaborGain: 190, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T160 幸運終極審判魚：擊破後全場目標 HP 歸零（每個獎勵 ×6.0），觸發全服 ×10.0 加成 20 秒（最高倍率機制）
+	{ID: "T160", Name: "幸運終極審判魚", Type: TypeSpecial, Multiplier: 1000, HP: 1050, SpawnWeight: 1, Speed: 35, Lifetime: 32, LaborGain: 200, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

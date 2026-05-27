@@ -79,6 +79,12 @@ const TARGET_SPRITES = {
 	"T153": "res://assets/sprites/targets/T153_super_awaken.png",
 	"T154": "res://assets/sprites/targets/T154_giant_prize.png",
 	"T155": "res://assets/sprites/targets/T155_immortal_boss.png",
+	# DAY-309 新增
+	"T156": "res://assets/sprites/targets/T156_ice_phoenix.png",
+	"T157": "res://assets/sprites/targets/T157_dragon_fury.png",
+	"T158": "res://assets/sprites/targets/T158_mult_cascade.png",
+	"T159": "res://assets/sprites/targets/T159_awaken_boss_v2.png",
+	"T160": "res://assets/sprites/targets/T160_ultimate_judgment.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -158,6 +164,12 @@ const TARGET_COLORS = {
 	"T153": Color(1.0, 0.4, 0.0),   # 火橙超級覺醒魚
 	"T154": Color(1.0, 0.85, 0.0),  # 金色巨型獎勵魚
 	"T155": Color(0.9, 0.1, 0.1),   # 深紅不死 BOSS 魚
+	# DAY-309 新增
+	"T156": Color(0.0, 0.8, 1.0),   # 冰藍冰鳳凰魚
+	"T157": Color(1.0, 0.3, 0.0),   # 火橙龍怒能量魚
+	"T158": Color(0.1, 0.4, 1.0),   # 深藍倍率瀑布魚
+	"T159": Color(1.0, 0.6, 0.0),   # 金橙覺醒 BOSS v2 魚
+	"T160": Color(0.8, 0.0, 0.0),   # 深紅終極審判魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
@@ -279,7 +291,7 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T155）
+	# Lucky 特殊魚標記（T106-T160）
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
 		if tid_num >= 106 and tid_num <= 155:

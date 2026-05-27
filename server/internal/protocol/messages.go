@@ -102,6 +102,13 @@ const (
 	MsgLuckySuperAwaken  = "lucky_super_awaken"  // T153 超級覺醒魚（全場審判 + 全服 ×7.0）
 	MsgLuckyGiantPrize   = "lucky_giant_prize"   // T154 巨型獎勵魚（5 次隨機大獎）
 	MsgLuckyImmortalBoss = "lucky_immortal_boss" // T155 不死 BOSS 魚（5 條命遞增倍率）
+
+	// DAY-309 新增幸運特殊魚事件
+	MsgLuckyIcePhoenix       = "lucky_ice_phoenix"       // T156 冰鳳凰魚（冰凍+鳳凰重生）
+	MsgLuckyDragonFury       = "lucky_dragon_fury"       // T157 龍怒能量魚（能量累積→全場攻擊）
+	MsgLuckyMultCascade      = "lucky_mult_cascade"      // T158 倍率瀑布魚（連續擊破累積倍率）
+	MsgLuckyAwakenBossV2     = "lucky_awaken_boss_v2"    // T159 覺醒 BOSS 魚 v2（8 次 Power Up）
+	MsgLuckyUltimateJudgment = "lucky_ultimate_judgment" // T160 終極審判魚（全場清空 + 全服 ×10.0）
 )
 // ── Envelope ─────────────────────────────────────────────────
 

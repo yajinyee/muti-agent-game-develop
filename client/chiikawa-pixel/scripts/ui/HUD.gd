@@ -115,6 +115,12 @@ func _ready() -> void:
 	GameManager.lucky_super_awaken.connect(_on_lucky_super_awaken)
 	GameManager.lucky_giant_prize.connect(_on_lucky_giant_prize)
 	GameManager.lucky_immortal_boss.connect(_on_lucky_immortal_boss)
+	# DAY-309 新增幸運特殊魚訊號連接
+	GameManager.lucky_ice_phoenix.connect(_on_lucky_ice_phoenix)
+	GameManager.lucky_dragon_fury.connect(_on_lucky_dragon_fury)
+	GameManager.lucky_mult_cascade.connect(_on_lucky_mult_cascade)
+	GameManager.lucky_awaken_boss_v2.connect(_on_lucky_awaken_boss_v2)
+	GameManager.lucky_ultimate_judgment.connect(_on_lucky_ultimate_judgment)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1605,3 +1611,128 @@ func _on_lucky_immortal_boss(data: Dictionary) -> void:
 			_show_lucky_banner("💀 完美不死加成結束", Color(0.7, 0.7, 0.7), 1.5)
 		"immortal_timeout":
 			_show_lucky_banner("💀 不死 BOSS 離開了", Color(0.6, 0.6, 0.6), 1.5)
+
+# ── DAY-309 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_ice_phoenix(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"freeze_start":
+			_show_lucky_event("ice_phoenix", "🧊🔥 %s 召喚冰鳳凰！全場凍結 10 秒！傷害 ×1.5！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"phoenix_rebirth":
+			var hit = data.get("hit_count", 0)
+			_show_lucky_banner("🔥 鳳凰重生爆炸！命中 %d 個！" % hit, Color(1.0, 0.5, 0.0))
+			ScreenShake.add_trauma(0.6)
+		"phoenix_perfect":
+			var boost = data.get("boost_mult", 5.5)
+			var secs = data.get("boost_secs", 12)
+			_show_lucky_banner("🔥✨ 完美鳳凰！%s 全服 ×%.1f 加成 %d 秒！" % [name, boost, secs], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+		"phoenix_perfect_end":
+			_show_lucky_banner("🔥 完美鳳凰加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+func _on_lucky_dragon_fury(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"energy_start":
+			_show_lucky_event("dragon_fury", "🐉 %s 啟動龍怒蓄能！15 秒累積 100 能量！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"energy_gain":
+			var energy = data.get("energy", 0)
+			_update_lucky_indicator("🐉 龍怒蓄能", "能量: %d/100" % energy, float(energy) / 100.0, Color(1.0, 0.3, 0.0))
+		"fury_unleash":
+			_hide_lucky_indicator()
+			_show_lucky_banner("🐉💥 龍怒爆發！%s 全場 HP -80%%！" % name, Color(1.0, 0.1, 0.0))
+			ScreenShake.add_trauma(0.9)
+		"fury_perfect":
+			var boost = data.get("boost_mult", 6.0)
+			var secs = data.get("boost_secs", 13)
+			_show_lucky_banner("🐉✨ 完美龍怒！%s 全服 ×%.1f 加成 %d 秒！" % [name, boost, secs], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"fury_perfect_end":
+			_show_lucky_banner("🐉 完美龍怒加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"energy_timeout":
+			_hide_lucky_indicator()
+			var energy = data.get("energy", 0)
+			_show_lucky_banner("🐉 能量不足（%d/100），龍怒未觸發" % energy, Color(0.6, 0.6, 0.6))
+
+func _on_lucky_mult_cascade(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"cascade_start":
+			_show_lucky_event("mult_cascade", "🌊 %s 啟動倍率瀑布！30 秒每次擊破 +0.5x！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"cascade_rise":
+			var mult = data.get("current_mult", 1.0)
+			var kills = data.get("kill_count", 0)
+			_update_lucky_indicator("🌊 倍率瀑布", "×%.1f | %d 次" % [mult, kills], mult / 20.0, Color(0.1, 0.4, 1.0))
+		"cascade_perfect":
+			var peak = data.get("peak_mult", 15.0)
+			var boost = data.get("boost_mult", 6.5)
+			var secs = data.get("boost_secs", 14)
+			_hide_lucky_indicator()
+			_show_lucky_banner("🌊✨ 完美瀑布！倍率達 ×%.1f！%s 全服 ×%.1f 加成 %d 秒！" % [peak, name, boost, secs], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+		"cascade_perfect_end":
+			_show_lucky_banner("🌊 完美瀑布加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"cascade_end":
+			_hide_lucky_indicator()
+			var final_mult = data.get("final_mult", 1.0)
+			_show_lucky_banner("🌊 瀑布結束！最終倍率 ×%.1f" % final_mult, Color(0.3, 0.6, 1.0))
+
+func _on_lucky_awaken_boss_v2(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"awaken_start":
+			_show_lucky_event("awaken_boss_v2", "⚡ %s 覺醒 BOSS！8 次 Power Up（8x-15x）！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"power_up":
+			var mult = data.get("power_up_mult", 8.0)
+			var shots = data.get("shots_left", 0)
+			var hits = data.get("hit_count", 0)
+			_update_lucky_indicator("⚡ 覺醒 BOSS v2", "×%.1f | %d/8" % [mult, hits], float(hits) / 8.0, Color(1.0, 0.6, 0.0))
+		"awaken_perfect":
+			_hide_lucky_indicator()
+			var boost = data.get("boost_mult", 7.0)
+			var secs = data.get("boost_secs", 15)
+			_show_lucky_banner("⚡✨ 完美覺醒！%s 8 次全命中！全服 ×%.1f 加成 %d 秒！" % [name, boost, secs], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"awaken_perfect_end":
+			_show_lucky_banner("⚡ 完美覺醒加成結束", Color(0.7, 0.7, 0.7), 1.5)
+		"awaken_timeout":
+			_hide_lucky_indicator()
+			var hit = data.get("hit_count", 0)
+			_show_lucky_banner("⚡ 覺醒結束！命中 %d/8 次" % hit, Color(0.6, 0.6, 0.6))
+
+func _on_lucky_ultimate_judgment(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"judgment_start":
+			_show_lucky_event("ultimate_judgment", "⚖️💥 %s 降下終極審判！全場 HP 歸零！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.8)
+		"judgment_execute":
+			var hit = data.get("hit_count", 0)
+			var mult = data.get("reward_mult", 6.0)
+			_show_lucky_banner("⚖️ 審判執行！清場 %d 個！每個獎勵 ×%.1f！" % [hit, mult], Color(0.8, 0.0, 0.0))
+			ScreenShake.add_trauma(1.0)
+		"judgment_boost":
+			var boost = data.get("boost_mult", 10.0)
+			var secs = data.get("boost_secs", 20)
+			var hit = data.get("hit_count", 0)
+			_show_lucky_banner("⚖️✨ 終極審判完成！清場 %d 個！全服 ×%.1f 加成 %d 秒！" % [hit, boost, secs], Color(1.0, 0.85, 0.0), 4.0)
+			_update_lucky_indicator("⚖️ 終極審判", "×%.1f 加成中" % boost, 1.0, Color(1.0, 0.85, 0.0))
+			ScreenShake.add_trauma(1.0)
+		"judgment_boost_end":
+			_hide_lucky_indicator()
+			_show_lucky_banner("⚖️ 終極審判加成結束", Color(0.7, 0.7, 0.7), 1.5)

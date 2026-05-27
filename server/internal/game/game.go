@@ -118,6 +118,13 @@ type Game struct {
 	luckyGiantPrize   *luckyGiantPrizeManager
 	luckyImmortalBoss *luckyImmortalBossManager
 
+	// DAY-309 新增
+	luckyIcePhoenix       *luckyIcePhoenixManager
+	luckyDragonFury       *luckyDragonFuryManager
+	luckyMultCascade      *luckyMultCascadeManager
+	luckyAwakenBossV2     *luckyAwakenBossV2Manager
+	luckyUltimateJudgment *luckyUltimateJudgmentManager
+
 	lastTick time.Time
 }
 
@@ -202,6 +209,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckySuperAwaken:  newLuckySuperAwakenManager(),
 		luckyGiantPrize:   newLuckyGiantPrizeManager(),
 		luckyImmortalBoss: newLuckyImmortalBossManager(),
+
+		// DAY-309 新增
+		luckyIcePhoenix:       newLuckyIcePhoenixManager(),
+		luckyDragonFury:       newLuckyDragonFuryManager(),
+		luckyMultCascade:      newLuckyMultCascadeManager(),
+		luckyAwakenBossV2:     newLuckyAwakenBossV2Manager(),
+		luckyUltimateJudgment: newLuckyUltimateJudgmentManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -631,6 +645,32 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if immortalBossBoost > 1.0 {
 			effectiveMult *= immortalBossBoost
 		}
+		// DAY-309 新增全服加成
+		icePhoenixBoost := g.luckyIcePhoenix.getIcePhoenixPerfectMult()
+		if icePhoenixBoost > 1.0 {
+			effectiveMult *= icePhoenixBoost
+		}
+		dragonFuryBoost := g.luckyDragonFury.getDragonFuryPerfectMult()
+		if dragonFuryBoost > 1.0 {
+			effectiveMult *= dragonFuryBoost
+		}
+		multCascadeBoost := g.luckyMultCascade.getMultCascadePerfectMult()
+		if multCascadeBoost > 1.0 {
+			effectiveMult *= multCascadeBoost
+		}
+		// 倍率瀑布：個人擊破倍率加成
+		multCascadeKillBonus := g.luckyMultCascade.getMultCascadeKillBonus(playerID)
+		if multCascadeKillBonus > 1.0 {
+			effectiveMult *= multCascadeKillBonus
+		}
+		awakenBossV2Boost := g.luckyAwakenBossV2.getAwakenBossV2PerfectMult()
+		if awakenBossV2Boost > 1.0 {
+			effectiveMult *= awakenBossV2Boost
+		}
+		ultimateJudgmentBoost := g.luckyUltimateJudgment.getUltimateJudgmentPerfectMult()
+		if ultimateJudgmentBoost > 1.0 {
+			effectiveMult *= ultimateJudgmentBoost
+		}
 		// 龍捲風期間擊破計數
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
@@ -793,6 +833,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyGiantPrize.tryLuckyGiantPrizeFish(g, p)
 			case isLuckyImmortalBossFish(t.Def.ID):
 				g.luckyImmortalBoss.tryLuckyImmortalBossFish(g, p)
+			// DAY-309 新增
+			case isLuckyIcePhoenixFish(t.Def.ID):
+				g.luckyIcePhoenix.tryLuckyIcePhoenixFish(g, p)
+			case isLuckyDragonFuryFish(t.Def.ID):
+				g.luckyDragonFury.tryLuckyDragonFuryFish(g, p)
+			case isLuckyMultCascadeFish(t.Def.ID):
+				g.luckyMultCascade.tryLuckyMultCascadeFish(g, p)
+			case isLuckyAwakenBossV2Fish(t.Def.ID):
+				g.luckyAwakenBossV2.tryLuckyAwakenBossV2Fish(g, p)
+			case isLuckyUltimateJudgmentFish(t.Def.ID):
+				g.luckyUltimateJudgment.tryLuckyUltimateJudgmentFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -846,6 +897,16 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			g.luckyVampireV2.notifyVampireV2Kill(g, p)
 			// DAY-308 不死 BOSS：擊破通知
 			g.luckyImmortalBoss.notifyImmortalBossKill(g, p)
+			// DAY-309 冰鳳凰：凍結期間擊破計數
+			if g.luckyIcePhoenix.isIcePhoenixFrozen() {
+				g.luckyIcePhoenix.notifyIcePhoenixKill(g, p)
+			}
+			// DAY-309 龍怒能量：擊破計數
+			g.luckyDragonFury.notifyDragonFuryKill(g, p)
+			// DAY-309 倍率瀑布：擊破計數
+			g.luckyMultCascade.notifyMultCascadeKill(g, p)
+			// DAY-309 覺醒 BOSS v2：Power Up 計數
+			g.luckyAwakenBossV2.notifyAwakenBossV2Kill(g, p)
 		}
 
 		// 獎勵通知（單播）
@@ -1292,6 +1353,36 @@ func (g *Game) applyAOEDamage(cx, cy, radius, pct float64) int {
 			X:          t.X,
 			Y:          t.Y,
 		})
+	}
+	return hitCount
+}
+
+// applyUltimateJudgment — T160 終極審判：全場目標 HP 歸零，每個獎勵 rewardMult 倍
+// 返回命中目標數
+func (g *Game) applyUltimateJudgment(p *Player, rewardMult float64) int {
+	g.mu.Lock()
+	defer g.mu.Unlock()
+
+	hitCount := 0
+	bet := p.GetBetDef()
+	var toDelete []string
+	for id, t := range g.targets {
+		t.HP = 0
+		reward := int(float64(bet.BetCost) * rewardMult)
+		p.AddCoins(reward)
+		toDelete = append(toDelete, id)
+		g.hub.Broadcast(protocol.MsgTargetKill, protocol.TargetKillPayload{
+			InstanceID: t.InstanceID,
+			DefID:      t.Def.ID,
+			Multiplier: t.Multiplier * rewardMult,
+			Reward:     reward,
+			LaborGain:  0,
+			KillerID:   p.ID,
+		})
+		hitCount++
+	}
+	for _, id := range toDelete {
+		delete(g.targets, id)
 	}
 	return hitCount
 }

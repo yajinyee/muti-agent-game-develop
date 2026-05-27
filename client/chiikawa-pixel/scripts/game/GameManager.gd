@@ -76,6 +76,12 @@ signal lucky_vampire_v2(data: Dictionary)
 signal lucky_super_awaken(data: Dictionary)
 signal lucky_giant_prize(data: Dictionary)
 signal lucky_immortal_boss(data: Dictionary)
+# DAY-309 新增幸運特殊魚訊號
+signal lucky_ice_phoenix(data: Dictionary)
+signal lucky_dragon_fury(data: Dictionary)
+signal lucky_mult_cascade(data: Dictionary)
+signal lucky_awaken_boss_v2(data: Dictionary)
+signal lucky_ultimate_judgment(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -229,6 +235,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_giant_prize", payload)
 		"lucky_immortal_boss":
 			emit_signal("lucky_immortal_boss", payload)
+		# DAY-309 新增幸運特殊魚事件
+		"lucky_ice_phoenix":
+			emit_signal("lucky_ice_phoenix", payload)
+		"lucky_dragon_fury":
+			emit_signal("lucky_dragon_fury", payload)
+		"lucky_mult_cascade":
+			emit_signal("lucky_mult_cascade", payload)
+		"lucky_awaken_boss_v2":
+			emit_signal("lucky_awaken_boss_v2", payload)
+		"lucky_ultimate_judgment":
+			emit_signal("lucky_ultimate_judgment", payload)
 		"pong":
 			pass
 		"error":
