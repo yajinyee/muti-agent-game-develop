@@ -200,6 +200,12 @@ const TARGET_COLORS = {
 	"T168": Color(0.08, 0.27, 0.75), # 深藍時空裂縫魚
 	"T169": Color(0.96, 0.50, 0.09), # 神聖橙金神聖審判魚
 	"T170": Color(0.72, 0.07, 0.07), # 深紅宇宙大爆炸魚
+	# DAY-313 新增（Progressive Jackpot 系列）
+	"T171": Color(0.2, 0.8, 0.2),    # 綠色 Mini Jackpot 魚
+	"T172": Color(0.13, 0.59, 0.95), # 藍色 Minor Jackpot 魚
+	"T173": Color(1.0, 0.6, 0.0),    # 橙色 Major Jackpot 魚
+	"T174": Color(1.0, 0.85, 0.0),   # 金色 Grand Jackpot 魚
+	"T175": Color(0.9, 0.7, 0.1),    # 金黃色 Jackpot Trigger 魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
@@ -321,13 +327,11 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T160）
+	# Lucky 特殊魚標記（T106-T175）— DAY-313 擴展到 T175
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 155:
+		if tid_num >= 106 and tid_num <= 175:
 			_add_lucky_badge(container, def_id)
-
-	# 特殊搖晃（T103 流星、T104 金草）
 	if def_id in ["T103", "T104"]:
 		var wobble = container.create_tween().set_loops()
 		var deg = 5.0 if def_id == "T103" else 3.0
@@ -360,7 +364,7 @@ func _add_glow(node: Node2D, multiplier: float) -> void:
 	tween.tween_property(glow, "modulate:a", 0.1, 0.4)
 	tween.tween_property(glow, "modulate:a", 1.0, 0.4)
 
-# Lucky 特殊魚標記（T106-T125）— 左上角 LUCKY 徽章 + 脈動光環
+# Lucky 特殊魚標記（T106-T175）— 左上角 LUCKY 徽章 + 脈動光環
 func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 脈動光環（比普通光暈更大更亮）
 	var ring = ColorRect.new()
@@ -370,7 +374,9 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 依倍率範圍選顏色
 	var tid_num = int(def_id.substr(1))
 	var ring_color: Color
-	if tid_num >= 166:
+	if tid_num >= 171:
+		ring_color = Color(1.0, 0.85, 0.0, 0.85)   # 超亮金（T171+，Progressive Jackpot）
+	elif tid_num >= 166:
 		ring_color = Color(1.0, 1.0, 0.8, 0.70)    # 極亮白金（T166+，DAY-312 最高階）
 	elif tid_num >= 141:
 		ring_color = Color(1.0, 1.0, 0.5, 0.60)    # 超亮金（T141+，最高階）
@@ -396,7 +402,11 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 
 	# LUCKY 徽章（左上角小標籤）
 	var badge = Label.new()
-	badge.text = "✨"
+	# Progressive Jackpot 系列用特殊圖示
+	if tid_num >= 171:
+		badge.text = "🎰"
+	else:
+		badge.text = "✨"
 	badge.position = Vector2(-48, -68)
 	badge.add_theme_font_size_override("font_size", 14)
 	badge.z_index = 10
