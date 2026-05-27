@@ -1,6 +1,44 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-27（DAY-310 T161-T165 五個新 Lucky 魚系統 + combo-system-agent + QA 61/61 + GitHub 同步）
+## 最後更新：2026-05-27（DAY-311 射擊手感強化 + T161 精靈圖修復 + Server 協定升級 + QA 23/23 + GitHub 同步）
+
+## DAY-311 更新（2026-05-27）：射擊手感強化 + T161 精靈圖修復 + Server 協定升級 ✅
+- **問題診斷：** 射擊手感連續 10+ 天停在 7/10，根本原因是 Hit Stop 太短 + 投射物視覺太簡陋 + 命中特效位置不準確
+- **T161 精靈圖修復：** 密度從 21.5% 提升到 70.8%（目標 35%+）
+  - 加入外層火焰光暈（低透明度大橢圓）
+  - 加入 20 個隨機火焰粒子散佈在魚身周圍
+  - 加粗連擊符號（×）
+  - 加入雙層外圈火焰環
+- **Cannon.gd 手感強化（DAY-311）：**
+  - Hit Stop：0.04s → 0.06s（+50%，更明顯的打擊感）
+  - 螢幕震動：0.18 → 0.25（+39%）
+  - 命中閃光：白閃強度 2.5 → 3.0 + 加入彈跳縮放動畫（scale 1.15 → 1.0）
+  - 投射物升級：ColorRect → Node2D 三層結構（外層光暈 + 核心 + 高光點）
+  - 新增 `_spawn_impact_burst()`：命中點生成 4 個方向小粒子爆炸
+  - 記錄 `_last_fire_pos` 作為命中位置備用
+- **Server 協定升級（DAY-311）：**
+  - `AttackResultPayload` 新增 `PosX`、`PosY` 欄位
+  - 命中時回傳目標物實際位置（`t.X`、`t.Y`）
+  - 未命中時回傳點擊位置（`req.ClickX`、`req.ClickY`）
+  - 解決 spec-architect 記錄的「attack_result 缺少位置資訊」問題
+- **新增 Agent：** `target-design-agent.md`（目標物設計規格）、`spec-architect.md`（協定一致性）
+- **知識庫更新：** knowhow-log 條目 12-16（精靈圖密度、命中位置、投射物視覺、Hit Stop、PowerShell 語法）
+- **QA 腳本：** `tools/qa_check_day311.py`（23 項驗證，23/23 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-311）
+- **Server 目標物數量：** 72 種（T001-T006 + T101-T165 + B001）
+- **Lucky 系統數量：** 60 個（T106-T165）
+- **Client Lucky Panel 數量：** 66 個（含 BaseLuckyPanel + LuckyEventSystem）
+- **Agent 文件數量：** 53 個（agents/ 目錄）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（↑ 從 7/10，Hit Stop 加強 + 投射物升級 + 命中特效改善）
+- **視覺清晰度：** 7/10（T161 精靈圖修復後略有提升）
+- **核心循環流暢度：** 8/10
+- **最需要改善：** Lucky Panel 架構重構（65 個腳本超過警戒線 50 個）
+
+
 
 ## DAY-310 更新（2026-05-27）：T161-T165 五個新 Lucky 魚系統 + combo-system-agent ✅
 - **業界研究：** Combo multiplier system、Time Bomb mechanic、Elemental fusion system、Treasure Hunt mechanic、Myth mode

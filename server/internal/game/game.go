@@ -498,6 +498,8 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			TargetID:    req.TargetID,
 			IsHit:       false,
 			CharacterID: p.GetCharacterID(),
+			PosX:        req.ClickX,
+			PosY:        req.ClickY,
 		})
 		return
 	}
@@ -511,6 +513,8 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		Damage:      bet.AttackPower,
 		CharacterID: p.GetCharacterID(),
 		Multiplier:  t.Multiplier,
+		PosX:        t.X,
+		PosY:        t.Y,
 	}
 
 	if isKill {

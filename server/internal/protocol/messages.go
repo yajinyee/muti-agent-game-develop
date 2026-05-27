@@ -174,6 +174,9 @@ type AttackResultPayload struct {
 	LaborGain   int     `json:"labor_gain"`
 	CharacterID string  `json:"character_id"`
 	Multiplier  float64 `json:"multiplier"`
+	// DAY-311 加入命中位置（供 Client 特效使用）
+	PosX float64 `json:"pos_x"`
+	PosY float64 `json:"pos_y"`
 }
 
 type RewardPayload struct {
