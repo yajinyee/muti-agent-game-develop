@@ -109,6 +109,13 @@ const (
 	MsgLuckyMultCascade      = "lucky_mult_cascade"      // T158 倍率瀑布魚（連續擊破累積倍率）
 	MsgLuckyAwakenBossV2     = "lucky_awaken_boss_v2"    // T159 覺醒 BOSS 魚 v2（8 次 Power Up）
 	MsgLuckyUltimateJudgment = "lucky_ultimate_judgment" // T160 終極審判魚（全場清空 + 全服 ×10.0）
+
+	// DAY-310 新增幸運特殊魚事件
+	MsgLuckyComboBurst      = "lucky_combo_burst"      // T161 連擊爆發魚（連擊累積倍率 ×15.0）
+	MsgLuckyTimeBomb        = "lucky_time_bomb"        // T162 時間炸彈魚（30 秒倒數爆炸）
+	MsgLuckyElementalFusion = "lucky_elemental_fusion" // T163 元素融合魚（火/冰/雷三元素）
+	MsgLuckyTreasureHunter  = "lucky_treasure_hunter"  // T164 寶藏獵人魚（5 個隨機寶藏）
+	MsgLuckyMythAwaken      = "lucky_myth_awaken"      // T165 神話覺醒魚（全場倍率 ×3.0，25 秒）
 )
 // ── Envelope ─────────────────────────────────────────────────
 

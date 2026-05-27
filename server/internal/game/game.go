@@ -125,6 +125,13 @@ type Game struct {
 	luckyAwakenBossV2     *luckyAwakenBossV2Manager
 	luckyUltimateJudgment *luckyUltimateJudgmentManager
 
+	// DAY-310 新增
+	luckyComboBurst      *luckyComboBurstManager
+	luckyTimeBomb        *luckyTimeBombManager
+	luckyElementalFusion *luckyElementalFusionManager
+	luckyTreasureHunter  *luckyTreasureHunterManager
+	luckyMythAwaken      *luckyMythAwakenManager
+
 	lastTick time.Time
 }
 
@@ -216,6 +223,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyMultCascade:      newLuckyMultCascadeManager(),
 		luckyAwakenBossV2:     newLuckyAwakenBossV2Manager(),
 		luckyUltimateJudgment: newLuckyUltimateJudgmentManager(),
+
+		// DAY-310 新增
+		luckyComboBurst:      newLuckyComboBurstManager(),
+		luckyTimeBomb:        newLuckyTimeBombManager(),
+		luckyElementalFusion: newLuckyElementalFusionManager(),
+		luckyTreasureHunter:  newLuckyTreasureHunterManager(),
+		luckyMythAwaken:      newLuckyMythAwakenManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -671,6 +685,46 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if ultimateJudgmentBoost > 1.0 {
 			effectiveMult *= ultimateJudgmentBoost
 		}
+		// DAY-310 新增全服加成
+		comboBurstPerfectBoost := g.luckyComboBurst.getComboBurstPerfectMult()
+		if comboBurstPerfectBoost > 1.0 {
+			effectiveMult *= comboBurstPerfectBoost
+		}
+		// 連擊爆發：個人連擊倍率加成
+		comboBurstKillMult := g.luckyComboBurst.onKillDuringComboBurst(g, p)
+		if comboBurstKillMult > 1.0 {
+			effectiveMult *= comboBurstKillMult
+		}
+		timeBombPerfectBoost := g.luckyTimeBomb.getTimeBombPerfectMult()
+		if timeBombPerfectBoost > 1.0 {
+			effectiveMult *= timeBombPerfectBoost
+		}
+		// 時間炸彈：擊破時增加能量
+		g.luckyTimeBomb.onKillDuringTimeBomb(g, p)
+		elementalFusionPerfectBoost := g.luckyElementalFusion.getElementalFusionPerfectMult()
+		if elementalFusionPerfectBoost > 1.0 {
+			effectiveMult *= elementalFusionPerfectBoost
+		}
+		treasureHunterPerfectBoost := g.luckyTreasureHunter.getTreasureHunterPerfectMult()
+		if treasureHunterPerfectBoost > 1.0 {
+			effectiveMult *= treasureHunterPerfectBoost
+		}
+		// 寶藏獵人：寶藏目標倍率加成
+		treasureMult := g.luckyTreasureHunter.getTreasureMult(playerID, t.InstanceID)
+		if treasureMult > 1.0 {
+			effectiveMult *= treasureMult
+			g.luckyTreasureHunter.onTreasureKilled(g, p, t.InstanceID)
+		}
+		mythAwakenPerfectBoost := g.luckyMythAwaken.getMythAwakenPerfectMult()
+		if mythAwakenPerfectBoost > 1.0 {
+			effectiveMult *= mythAwakenPerfectBoost
+		}
+		// 神話覺醒：全場目標倍率 ×3.0
+		mythMult := g.luckyMythAwaken.getMythMult()
+		if mythMult > 1.0 {
+			effectiveMult *= mythMult
+			g.luckyMythAwaken.onKillDuringMyth(playerID)
+		}
 		// 龍捲風期間擊破計數
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
@@ -844,6 +898,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyAwakenBossV2.tryLuckyAwakenBossV2Fish(g, p)
 			case isLuckyUltimateJudgmentFish(t.Def.ID):
 				g.luckyUltimateJudgment.tryLuckyUltimateJudgmentFish(g, p)
+			// DAY-310 新增
+			case isLuckyComboBurstFish(t.Def.ID):
+				g.luckyComboBurst.tryLuckyComboBurstFish(g, p)
+			case isLuckyTimeBombFish(t.Def.ID):
+				g.luckyTimeBomb.tryLuckyTimeBombFish(g, p)
+			case isLuckyElementalFusionFish(t.Def.ID):
+				g.luckyElementalFusion.tryLuckyElementalFusionFish(g, p)
+			case isLuckyTreasureHunterFish(t.Def.ID):
+				g.luckyTreasureHunter.tryLuckyTreasureHunterFish(g, p)
+			case isLuckyMythAwakenFish(t.Def.ID):
+				g.luckyMythAwaken.tryLuckyMythAwakenFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

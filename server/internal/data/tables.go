@@ -246,6 +246,18 @@ var Targets = []TargetDef{
 	// T160 幸運終極審判魚：擊破後全場目標 HP 歸零（每個獎勵 ×6.0），觸發全服 ×10.0 加成 20 秒（最高倍率機制）
 	{ID: "T160", Name: "幸運終極審判魚", Type: TypeSpecial, Multiplier: 1000, HP: 1050, SpawnWeight: 1, Speed: 35, Lifetime: 32, LaborGain: 200, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-310 新增特殊目標（1050x-1250x）────────────────────────
+	// T161 幸運連擊爆發魚：擊破後 20 秒連擊模式，每次擊破 Combo +1（倍率 +0.5x，最高 ×15.0），Combo ≥10 → 完美連擊全服 ×5.5 加成 12 秒
+	{ID: "T161", Name: "幸運連擊爆發魚", Type: TypeSpecial, Multiplier: 1050, HP: 1100, SpawnWeight: 1, Speed: 45, Lifetime: 30, LaborGain: 210, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T162 幸運時間炸彈魚：擊破後 30 秒倒數炸彈，每次擊破 +1 能量（最高 30），爆炸時每點能量 HP -2%，能量 ≥20 → 完美爆炸全服 ×6.0 加成 13 秒
+	{ID: "T162", Name: "幸運時間炸彈魚", Type: TypeSpecial, Multiplier: 1100, HP: 1150, SpawnWeight: 1, Speed: 40, Lifetime: 32, LaborGain: 220, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T163 幸運元素融合魚：擊破後 25 秒三元素融合（火/冰/雷），每元素全場 HP -25%，三元素全觸發 → 元素爆發全服 ×6.5 加成 14 秒
+	{ID: "T163", Name: "幸運元素融合魚", Type: TypeSpecial, Multiplier: 1150, HP: 1200, SpawnWeight: 1, Speed: 35, Lifetime: 34, LaborGain: 230, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T164 幸運寶藏獵人魚：擊破後標記 5 個隨機寶藏（×10-×100），30 秒內全部擊破 → 完美寶藏全服 ×7.0 加成 15 秒
+	{ID: "T164", Name: "幸運寶藏獵人魚", Type: TypeSpecial, Multiplier: 1200, HP: 1250, SpawnWeight: 1, Speed: 50, Lifetime: 30, LaborGain: 240, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T165 幸運神話覺醒魚：擊破後全場目標倍率 ×3.0，持續 25 秒，25 秒內擊破 ≥15 個 → 神話完美全服 ×8.0 加成 20 秒（最長加成）
+	{ID: "T165", Name: "幸運神話覺醒魚", Type: TypeSpecial, Multiplier: 1250, HP: 1300, SpawnWeight: 1, Speed: 30, Lifetime: 36, LaborGain: 250, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

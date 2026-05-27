@@ -1,6 +1,50 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-27（DAY-309 T156-T160 五個新 Lucky 魚系統 + QA 55/55 + GitHub 同步）
+## 最後更新：2026-05-27（DAY-310 T161-T165 五個新 Lucky 魚系統 + combo-system-agent + QA 61/61 + GitHub 同步）
+
+## DAY-310 更新（2026-05-27）：T161-T165 五個新 Lucky 魚系統 + combo-system-agent ✅
+- **業界研究：** Combo multiplier system、Time Bomb mechanic、Elemental fusion system、Treasure Hunt mechanic、Myth mode
+- **T161 幸運連擊爆發魚（1050x）：** 20 秒連擊模式，每次擊破 Combo +1（倍率 +0.5x，最高 ×15.0），Combo ≥10 → 完美連擊全服 ×5.5 加成 12 秒
+- **T162 幸運時間炸彈魚（1100x）：** 30 秒倒數炸彈，每次擊破 +1 能量（最高 30），爆炸時每點能量 HP -2%，能量 ≥20 → 完美爆炸全服 ×6.0 加成 13 秒
+- **T163 幸運元素融合魚（1150x）：** 25 秒三元素融合（火/冰/雷），每元素全場 HP -25%，三元素全觸發 → 元素爆發全服 ×6.5 加成 14 秒
+- **T164 幸運寶藏獵人魚（1200x）：** 標記 5 個隨機寶藏（×10-×100），30 秒內全部擊破 → 完美寶藏全服 ×7.0 加成 15 秒
+- **T165 幸運神話覺醒魚（1250x）：** 全場目標倍率 ×3.0，持續 25 秒，擊破 ≥15 個 → 神話完美全服 ×8.0 加成 20 秒（最長加成）
+- **Server：** 5 個獨立 handler 檔案 + game.go 整合 + protocol 新增 5 個訊息類型 + tables.go 新增 5 個目標
+  - `lucky_combo_burst_handler.go`：連擊爆發系統（Combo 計數 + 倍率加成）
+  - `lucky_time_bomb_handler.go`：時間炸彈系統（能量累積 + 爆炸傷害）
+  - `lucky_elemental_fusion_handler.go`：元素融合系統（火/冰/雷三元素依序觸發）
+  - `lucky_treasure_hunter_handler.go`：寶藏獵人系統（隨機標記 + 倍率獎勵）
+  - `lucky_myth_awaken_handler.go`：神話覺醒系統（全場倍率 ×3.0 + 擊破計數）
+- **Client：** 5 個新 Lucky Panel + GameManager 新增 5 個訊號 + HUD 新增 5 個事件處理 + TargetManager 新增 T161-T165 映射
+  - `LuckyComboBurstPanel.gd`（layer=56）：火橙色 + Combo 計數器 + 倍率顯示 + 進度條
+  - `LuckyTimeBombPanel.gd`（layer=57）：深紅色 + 能量條 + 倒數顯示
+  - `LuckyElementalFusionPanel.gd`（layer=58）：深紫色 + 三元素指示器 + 觸發狀態
+  - `LuckyTreasureHunterPanel.gd`（layer=59）：金色 + 5 個寶藏指示點 + 找到計數
+  - `LuckyMythAwakenPanel.gd`（layer=60）：神聖金色 + 全場倍率顯示 + 擊破計數
+- **美術：** T161-T165 精靈圖生成完成（`tools/generate_targets_day310.py`）
+  - T161（連擊爆發）：火橙橢圓魚身 + 8方向火焰光芒 + 中心爆炸圓（21.5%）
+  - T162（時間炸彈）：深紅圓形炸彈身 + 導線 + 倒數符號 + 裂縫紋路（35.4%）
+  - T163（元素融合）：深紫橢圓魚身 + 三元素符號 + 融合光環（32.3%）
+  - T164（寶藏獵人）：金色橢圓魚身 + 5個寶石 + 獵人瞄準線 + 金色光環（35.9%）
+  - T165（神話覺醒）：神聖金色圓形魚身 + 12方向光芒 + 雙層光環 + 星形符號（42.6%）
+- **新增 Agent：** `combo-system-agent.md`（連擊系統專屬 Agent）
+- **知識庫更新：** knowhow-log 條目 113
+- **QA 腳本：** `tools/qa_check_day310.py`（61 項驗證，61/61 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-310）
+- **Server 目標物數量：** 72 種（T001-T006 + T101-T165 + B001）
+- **Lucky 系統數量：** 60 個（T106-T165）
+- **Client Lucky Panel 數量：** 66 個（含 BaseLuckyPanel + LuckyEventSystem）
+- **Agent 文件數量：** 52 個（agents/ 目錄）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 7/10
+- **視覺清晰度：** 7/10
+- **核心循環流暢度：** 8/10
+- **最需要改善：** T161 連擊爆發魚的精靈圖密度偏低（21.5%，需要改善）
+
+
 
 ## DAY-309 更新（2026-05-27）：T156-T160 五個新 Lucky 魚系統 ✅
 - **業界研究：** Royal Fishing「Ice Phoenix 180-300x」、「Dragon Fury energy accumulation → full-screen attack」、「Awaken Boss Power Up 6x-10x」；Fishing Fortune「Multiplier Cascade 2x→500x」

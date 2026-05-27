@@ -85,6 +85,12 @@ const TARGET_SPRITES = {
 	"T158": "res://assets/sprites/targets/T158_mult_cascade.png",
 	"T159": "res://assets/sprites/targets/T159_awaken_boss_v2.png",
 	"T160": "res://assets/sprites/targets/T160_ultimate_judgment.png",
+	# DAY-310 新增
+	"T161": "res://assets/sprites/targets/T161_combo_burst.png",
+	"T162": "res://assets/sprites/targets/T162_time_bomb.png",
+	"T163": "res://assets/sprites/targets/T163_elemental_fusion.png",
+	"T164": "res://assets/sprites/targets/T164_treasure_hunter.png",
+	"T165": "res://assets/sprites/targets/T165_myth_awaken.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -170,6 +176,12 @@ const TARGET_COLORS = {
 	"T158": Color(0.1, 0.4, 1.0),   # 深藍倍率瀑布魚
 	"T159": Color(1.0, 0.6, 0.0),   # 金橙覺醒 BOSS v2 魚
 	"T160": Color(0.8, 0.0, 0.0),   # 深紅終極審判魚
+	# DAY-310 新增
+	"T161": Color(1.0, 0.4, 0.1),   # 火橙連擊爆發魚
+	"T162": Color(0.9, 0.2, 0.1),   # 深紅時間炸彈魚
+	"T163": Color(0.6, 0.2, 0.9),   # 深紫元素融合魚
+	"T164": Color(1.0, 0.75, 0.1),  # 金色寶藏獵人魚
+	"T165": Color(0.9, 0.8, 0.1),   # 神聖金色神話覺醒魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D

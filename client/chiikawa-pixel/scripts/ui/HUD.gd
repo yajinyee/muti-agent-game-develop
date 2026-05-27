@@ -121,6 +121,12 @@ func _ready() -> void:
 	GameManager.lucky_mult_cascade.connect(_on_lucky_mult_cascade)
 	GameManager.lucky_awaken_boss_v2.connect(_on_lucky_awaken_boss_v2)
 	GameManager.lucky_ultimate_judgment.connect(_on_lucky_ultimate_judgment)
+	# DAY-310 新增幸運特殊魚訊號連接
+	GameManager.lucky_combo_burst.connect(_on_lucky_combo_burst)
+	GameManager.lucky_time_bomb.connect(_on_lucky_time_bomb)
+	GameManager.lucky_elemental_fusion.connect(_on_lucky_elemental_fusion)
+	GameManager.lucky_treasure_hunter.connect(_on_lucky_treasure_hunter)
+	GameManager.lucky_myth_awaken.connect(_on_lucky_myth_awaken)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1736,3 +1742,79 @@ func _on_lucky_ultimate_judgment(data: Dictionary) -> void:
 		"judgment_boost_end":
 			_hide_lucky_indicator()
 			_show_lucky_banner("⚖️ 終極審判加成結束", Color(0.7, 0.7, 0.7), 1.5)
+
+# DAY-310 新增幸運特殊魚事件處理
+func _on_lucky_combo_burst(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"start":
+			_show_lucky_event("lucky_combo_burst", "🔥 連擊爆發模式！20 秒連擊累積倍率！")
+		"combo_update":
+			var combo = data.get("combo", 0)
+			var mult = data.get("mult", 1.0)
+			_update_lucky_indicator("🔥 連擊爆發", "Combo %d ×%.1f" % [combo, mult], 1.0, Color(1.0, 0.4, 0.1))
+		"end":
+			if data.get("perfect", false):
+				_show_lucky_banner("🔥 完美連擊！全服 ×5.5 加成 12 秒！", Color(1.0, 0.4, 0.1), 3.0)
+				ScreenShake.add_trauma(0.7)
+			_hide_lucky_indicator()
+
+func _on_lucky_time_bomb(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"start":
+			_show_lucky_event("lucky_time_bomb", "💣 時間炸彈啟動！30 秒倒數！")
+		"energy_update":
+			var energy = data.get("energy", 0)
+			_update_lucky_indicator("💣 時間炸彈", "能量 %d/30" % energy, 1.0, Color(0.9, 0.2, 0.1))
+		"explode":
+			if data.get("perfect", false):
+				_show_lucky_banner("💣 完美爆炸！全服 ×6.0 加成 13 秒！", Color(0.9, 0.2, 0.1), 3.0)
+				ScreenShake.add_trauma(1.0)
+			else:
+				_show_lucky_banner("💣 炸彈爆炸！", Color(0.9, 0.2, 0.1), 2.0)
+			_hide_lucky_indicator()
+
+func _on_lucky_elemental_fusion(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"start":
+			_show_lucky_event("lucky_elemental_fusion", "⚡ 元素融合開始！火/冰/雷三元素！")
+		"element_trigger":
+			var elem = data.get("element", "")
+			var elem_names = {"fire": "🔥 火元素", "ice": "❄️ 冰元素", "thunder": "⚡ 雷元素"}
+			_show_lucky_banner(elem_names.get(elem, "元素") + " 觸發！全場 HP -25%！", Color(0.6, 0.2, 0.9), 2.0)
+			ScreenShake.add_trauma(0.5)
+		"end":
+			if data.get("perfect", false):
+				_show_lucky_banner("⚡🔥❄️ 元素爆發！全服 ×6.5 加成 14 秒！", Color(0.6, 0.2, 0.9), 3.5)
+				ScreenShake.add_trauma(0.8)
+			_hide_lucky_indicator()
+
+func _on_lucky_treasure_hunter(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"start":
+			_show_lucky_event("lucky_treasure_hunter", "💎 寶藏獵人！找到 5 個寶藏！")
+		"treasure_found":
+			var found = data.get("found", 0)
+			var remaining = data.get("remaining", 0)
+			_update_lucky_indicator("💎 寶藏獵人", "找到 %d/5 個" % found, 1.0, Color(1.0, 0.75, 0.1))
+			if data.get("perfect", false):
+				_show_lucky_banner("💎 完美寶藏！全服 ×7.0 加成 15 秒！", Color(1.0, 0.75, 0.1), 3.5)
+				ScreenShake.add_trauma(0.8)
+				_hide_lucky_indicator()
+
+func _on_lucky_myth_awaken(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"start":
+			_show_lucky_event("lucky_myth_awaken", "🌟 神話覺醒！全場倍率 ×3.0！25 秒！")
+			ScreenShake.add_trauma(0.6)
+		"end":
+			if data.get("perfect", false):
+				_show_lucky_banner("🌟 神話完美！全服 ×8.0 加成 20 秒！", Color(0.9, 0.8, 0.1), 4.0)
+				ScreenShake.add_trauma(1.0)
+			else:
+				_show_lucky_banner("🌟 神話覺醒結束", Color(0.7, 0.7, 0.7), 1.5)
+			_hide_lucky_indicator()
