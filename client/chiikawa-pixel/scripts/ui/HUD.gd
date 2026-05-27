@@ -133,6 +133,8 @@ func _ready() -> void:
 	GameManager.lucky_spacetime_rift.connect(_on_lucky_spacetime_rift)
 	GameManager.lucky_holy_judgment.connect(_on_lucky_holy_judgment)
 	GameManager.lucky_big_bang.connect(_on_lucky_big_bang)
+	# DAY-313 新增幸運特殊魚訊號連接（Progressive Jackpot 系列）
+	GameManager.lucky_jackpot_pool.connect(_on_lucky_jackpot_pool)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1911,3 +1913,29 @@ func _on_lucky_big_bang(data: Dictionary) -> void:
 			_show_lucky_banner("💥 宇宙大爆炸！清場 %d 個！全服 ×%.1f 加成 %d 秒！" % [hit, boost, secs], Color(1.0, 0.3, 0.0), 5.0)
 			ScreenShake.add_trauma(1.0)
 			_hide_lucky_indicator()
+
+# ── DAY-313 Progressive Jackpot Pool 事件處理 ────────────────
+
+func _on_lucky_jackpot_pool(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"jackpot_win":
+			var tier = data.get("tier", "")
+			var tier_name = data.get("tier_name", "Jackpot")
+			var reward = data.get("reward", 0)
+			var player_name = data.get("player_name", "玩家")
+			var color: Color
+			match tier:
+				"mini":  color = Color(0.2, 0.8, 0.2)
+				"minor": color = Color(0.13, 0.59, 0.95)
+				"major": color = Color(1.0, 0.6, 0.0)
+				"grand": color = Color(1.0, 0.85, 0.0)
+				_:       color = Color(1.0, 0.85, 0.0)
+			_show_lucky_banner("🎰 %s！%s 獲得 %d 金幣！" % [tier_name, player_name, reward], color, 4.0)
+			if tier == "grand":
+				ScreenShake.add_trauma(1.0)
+			elif tier == "major":
+				ScreenShake.add_trauma(0.6)
+		"pool_update":
+			# 獎池更新由各 Panel 自行處理，HUD 不需要額外顯示
+			pass

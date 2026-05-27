@@ -139,6 +139,9 @@ type Game struct {
 	luckyHolyJudgment  *luckyHolyJudgmentManager
 	luckyBigBang       *luckyBigBangManager
 
+	// DAY-313 新增
+	luckyJackpotPool *luckyJackpotPoolManager
+
 	lastTick time.Time
 }
 
@@ -244,6 +247,9 @@ func NewGame(hub *ws.Hub) *Game {
 		luckySpacetimeRift: newLuckySpacetimeRiftManager(),
 		luckyHolyJudgment:  newLuckyHolyJudgmentManager(),
 		luckyBigBang:       newLuckyBigBangManager(),
+
+		// DAY-313 新增
+		luckyJackpotPool: newLuckyJackpotPoolManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -496,6 +502,8 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 
 	// Jackpot 貢獻（每次下注）
 	g.luckyJackpotFish.ContributeBet(bet.BetCost)
+	// DAY-313 Progressive Jackpot Pool 貢獻
+	g.luckyJackpotPool.onShot(g, playerID, bet.BetCost)
 
 	// 找目標
 	var t *Target
@@ -959,6 +967,9 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyHolyJudgment.tryLuckyHolyJudgmentFish(g, p)
 			case isLuckyBigBangFish(t.Def.ID):
 				g.luckyBigBang.tryLuckyBigBangFish(g, p)
+			// DAY-313 新增 Progressive Jackpot 系列
+			case isLuckyJackpotPoolFish(t.Def.ID):
+				g.luckyJackpotPool.onTargetKill(g, p, t.Def.ID)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

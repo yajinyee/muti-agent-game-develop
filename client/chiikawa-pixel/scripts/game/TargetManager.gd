@@ -97,6 +97,12 @@ const TARGET_SPRITES = {
 	"T168": "res://assets/sprites/targets/T168_spacetime_rift.png",
 	"T169": "res://assets/sprites/targets/T169_holy_judgment.png",
 	"T170": "res://assets/sprites/targets/T170_big_bang.png",
+	# DAY-313 新增（Progressive Jackpot 系列）
+	"T171": "res://assets/sprites/targets/T171_jackpot_mini.png",
+	"T172": "res://assets/sprites/targets/T172_jackpot_minor.png",
+	"T173": "res://assets/sprites/targets/T173_jackpot_major.png",
+	"T174": "res://assets/sprites/targets/T174_jackpot_grand.png",
+	"T175": "res://assets/sprites/targets/T175_jackpot_trigger.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）

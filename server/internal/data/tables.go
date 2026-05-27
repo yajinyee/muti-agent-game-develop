@@ -270,6 +270,18 @@ var Targets = []TargetDef{
 	// T170 幸運宇宙大爆炸魚：擊破後全場 HP 歸零（每個獎勵 ×8.0），觸發全服 ×12.0 加成 25 秒（遊戲最高倍率機制）
 	{ID: "T170", Name: "幸運宇宙大爆炸魚", Type: TypeSpecial, Multiplier: 1500, HP: 1560, SpawnWeight: 1, Speed: 25, Lifetime: 40, LaborGain: 300, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-313 新增特殊目標（Progressive Jackpot 系列）────────────────────────
+	// T171 幸運 Mini Jackpot 魚：擊破後直接觸發 Mini Jackpot（50x 起跳累積獎池）
+	{ID: "T171", Name: "幸運Mini Jackpot魚", Type: TypeSpecial, Multiplier: 50, HP: 60, SpawnWeight: 4, Speed: 85, Lifetime: 12, LaborGain: 10, Behavior: BehaviorFlee, DiffFactor: 0.85},
+	// T172 幸運 Minor Jackpot 魚：擊破後直接觸發 Minor Jackpot（200x 起跳累積獎池）
+	{ID: "T172", Name: "幸運Minor Jackpot魚", Type: TypeSpecial, Multiplier: 200, HP: 220, SpawnWeight: 2, Speed: 75, Lifetime: 14, LaborGain: 40, Behavior: BehaviorLinear, DiffFactor: 0.95},
+	// T173 幸運 Major Jackpot 魚：擊破後直接觸發 Major Jackpot（1000x 起跳累積獎池）
+	{ID: "T173", Name: "幸運Major Jackpot魚", Type: TypeSpecial, Multiplier: 1000, HP: 1050, SpawnWeight: 1, Speed: 60, Lifetime: 18, LaborGain: 200, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T174 幸運 Grand Jackpot 魚：擊破後直接觸發 Grand Jackpot（5000x 起跳累積獎池）
+	{ID: "T174", Name: "幸運Grand Jackpot魚", Type: TypeSpecial, Multiplier: 5000, HP: 5200, SpawnWeight: 1, Speed: 40, Lifetime: 30, LaborGain: 1000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T175 幸運 Jackpot Trigger 魚：擊破後隨機觸發四層之一（Mini 60%/Minor 30%/Major 8%/Grand 2%）
+	{ID: "T175", Name: "幸運Jackpot觸發魚", Type: TypeSpecial, Multiplier: 200, HP: 240, SpawnWeight: 2, Speed: 70, Lifetime: 16, LaborGain: 40, Behavior: BehaviorLinear, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

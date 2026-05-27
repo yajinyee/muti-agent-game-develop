@@ -1,6 +1,58 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-27（DAY-312 T166-T170 五個新 Lucky 魚系統 + Server 協定升級 + QA 55/55 + GitHub 同步）
+## 最後更新：2026-05-27（DAY-313 Progressive Jackpot 系統 + LuckyPanelRegistry 架構重構 + QA 49/49 + GitHub 同步）
+
+## DAY-313 更新（2026-05-27）：Progressive Jackpot 系統 + LuckyPanelRegistry 架構重構 ✅
+- **業界研究：** Jili Jackpot Fishing 四層 Progressive Jackpot（Mini/Minor/Major/Grand），RTP 97%，最高 888x
+- **Progressive Jackpot 系統：** 四層累積獎池，每次射擊按比例累積，觸發機率 Mini 0.5% → Grand 0.005%
+- **T171 幸運 Mini Jackpot 魚（50x）：** 擊破後直接觸發 Mini Jackpot（50x 起跳累積獎池）
+- **T172 幸運 Minor Jackpot 魚（200x）：** 擊破後直接觸發 Minor Jackpot（200x 起跳累積獎池）
+- **T173 幸運 Major Jackpot 魚（1000x）：** 擊破後直接觸發 Major Jackpot（1000x 起跳累積獎池）
+- **T174 幸運 Grand Jackpot 魚（5000x）：** 擊破後直接觸發 Grand Jackpot（5000x 起跳累積獎池）
+- **T175 幸運 Jackpot Trigger 魚（200x）：** 擊破後隨機觸發四層之一（Mini 60%/Minor 30%/Major 8%/Grand 2%）
+- **Server：** `lucky_jackpot_pool_handler.go`（累積獎池管理器）+ game.go 整合 + protocol 新增 MsgLuckyJackpotPool + tables.go 新增 5 個目標
+  - `jackpotPool` 結構：四層獎池 + 觸發機率 + 冷卻保護
+  - `addContribution`：每次射擊累積獎池
+  - `tryTrigger`：從高到低檢查觸發（Grand 優先）
+  - `payout`：發放獎池並重置到起始值
+  - `broadcastPoolUpdate`：每 5 秒廣播獎池狀態
+- **Client：** 5 個新 Lucky Panel + GameManager 新增 lucky_jackpot_pool 訊號 + HUD 新增事件處理 + TargetManager 新增 T171-T175 映射
+  - `LuckyJackpotMiniPanel.gd`（layer=66）：綠色 + 獎池顯示
+  - `LuckyJackpotMinorPanel.gd`（layer=67）：藍色 + 獎池顯示
+  - `LuckyJackpotMajorPanel.gd`（layer=68）：橙色 + 震動效果
+  - `LuckyJackpotGrandPanel.gd`（layer=69）：金色 + 全螢幕慶典演出（4 秒）
+  - `LuckyJackpotTriggerPanel.gd`（layer=70）：彩虹四色 + 機率顯示
+- **架構重構：** `LuckyPanelRegistry.gd` — 統一管理 76 個 Lucky Panel 的訊號連接
+  - `SIGNAL_TO_PANEL` 映射表（76 個訊號）
+  - `_scan_and_register`：自動掃描場景樹找到所有 Panel
+  - `connect_all_signals`：驗證所有 Panel 已正確連接
+  - 解決 HUD.gd 65+ 個訊號連接的架構問題
+- **美術：** T171-T175 精靈圖生成完成（`tools/generate_targets_day313.py`）
+  - T171（Mini）：綠色魚身 + 4 道光芒 + 星星裝飾（32.4%）
+  - T172（Minor）：藍色魚身 + 6 道光芒 + 菱形標誌（37.7%）
+  - T173（Major）：橙色魚身 + 8 道光芒 + 六角星（44.0%）
+  - T174（Grand）：金色魚身 + 12 道光芒 + 三層光環 + 皇冠（48.1%）
+  - T175（Trigger）：彩虹四色 + 12 道光芒 + 大背景光暈（71.0%）
+- **新增 Agent：** `progressive-jackpot-agent.md`（Progressive Jackpot 系統專屬 Agent）
+- **知識庫更新：** knowhow-log 條目 115-118
+- **QA 腳本：** `tools/qa_check_day313.py`（49 項驗證，49/49 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-313）
+- **Server 目標物數量：** 82 種（T001-T006 + T101-T175 + B001）
+- **Lucky 系統數量：** 70 個（T106-T175）
+- **Client Lucky Panel 數量：** 76 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry）
+- **Agent 文件數量：** 54 個（agents/ 目錄）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7/10
+- **核心循環流暢度：** 8/10
+- **最高倍率機制：** T170 宇宙大爆炸全服 ×12.0（維持）
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最需要改善：** 視覺清晰度（7/10 → 目標 8/10）、Lucky Panel 架構重構已完成 Registry 但 HUD.gd 仍有 65+ 個處理函數
+
+
 
 ## DAY-312 更新（2026-05-27）：T166-T170 五個新 Lucky 魚系統 ✅
 - **業界研究：** Fishing Carnival「portal teleport mechanic」、Royal Fishing「Dragon Wrath energy accumulation」升級版、Fishing Fortune「time warp + multiplier cascade」組合、Jili「Super Awakening 3000x」升級版、Fishing Carnival「Big Bang mechanic」

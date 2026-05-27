@@ -4435,3 +4435,28 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
 - **新技術：** `applyRiftInstantKill` — 瞬間擊破 n 個隨機目標並給予獎勵
 - **新技術：** `applyStarPortalTeleport` — 傳送目標到中央並造成 HP -50%
 - **教訓：** T170 宇宙大爆炸（×12.0）超越 T160 終極審判（×10.0），成為遊戲最高倍率機制
+
+## 115. DAY-313 Progressive Jackpot 系統設計
+- **業界研究：** Jili Jackpot Fishing 四層 Progressive Jackpot（Mini/Minor/Major/Grand），RTP 97%
+- **累積機制：** 每次射擊按比例累積（Mini +0.01x，Minor +0.005x，Major +0.002x，Grand +0.001x）
+- **觸發機率：** Mini 0.5%，Minor 0.1%，Major 0.02%，Grand 0.005%（每次射擊）
+- **冷卻保護：** Mini 30s，Minor 60s，Major 120s，Grand 300s（防止連續觸發）
+- **教訓：** Progressive Jackpot 的核心是「看得到的增長」，每 5 秒廣播一次獎池狀態讓玩家感受到累積
+
+## 116. Go 函數名稱衝突問題
+- **問題：** `isLuckyJackpotFish` 在 `lucky_jackpot_fish_handler.go` 和新的 `lucky_jackpot_pool_handler.go` 中重複定義
+- **原因：** Go 同一個 package 內不允許重複函數名稱
+- **解決：** 新函數改名為 `isLuckyJackpotPoolFish`，明確區分 T126（舊 Jackpot 魚）和 T171-T175（新 Progressive Jackpot 系列）
+- **教訓：** 新增 handler 時要先搜尋現有函數名稱，避免衝突
+
+## 117. LuckyPanelRegistry 架構重構
+- **問題：** HUD.gd 有 65+ 個訊號連接，每次新增 Lucky 魚都要在 HUD.gd 加 3 行（訊號定義 + 連接 + 處理函數）
+- **解決：** 建立 `LuckyPanelRegistry.gd`，統一管理所有 Panel 的訊號連接
+  - 每個 Panel 在自己的 `_ready()` 中連接訊號（自治）
+  - Registry 只做掃描和驗證，不做實際連接
+- **教訓：** 超過 50 個同類型腳本時必須建立基礎架構，否則維護成本指數增長
+
+## 118. Windows MSYS2 Python 的 Pillow 安裝問題
+- **問題：** `python` 指向 MSYS2 的 Python，沒有 pip，無法安裝 Pillow
+- **解決：** 使用 `C:\Users\yajinyee0306\AppData\Local\Programs\Python\Python312\python.exe` 執行腳本
+- **教訓：** Windows 上有多個 Python 環境時，要明確指定路徑，不能依賴 `python` 命令

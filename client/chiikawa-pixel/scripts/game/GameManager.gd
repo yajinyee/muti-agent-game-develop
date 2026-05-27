@@ -94,6 +94,8 @@ signal lucky_dragon_soul(data: Dictionary)
 signal lucky_spacetime_rift(data: Dictionary)
 signal lucky_holy_judgment(data: Dictionary)
 signal lucky_big_bang(data: Dictionary)
+# DAY-313 新增幸運特殊魚訊號（Progressive Jackpot 系列）
+signal lucky_jackpot_pool(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}

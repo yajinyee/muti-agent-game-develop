@@ -123,6 +123,9 @@ const (
 	MsgLuckySpacetimeRift = "lucky_spacetime_rift" // T168 時空裂縫魚（每 4 秒瞬間擊破 3 個）
 	MsgLuckyHolyJudgment  = "lucky_holy_judgment"  // T169 神聖審判魚（5 波神聖光柱 HP -30%）
 	MsgLuckyBigBang       = "lucky_big_bang"       // T170 宇宙大爆炸魚（全場清空 + 全服 ×12.0）
+
+	// DAY-313 新增幸運特殊魚事件（Progressive Jackpot 系列）
+	MsgLuckyJackpotPool = "lucky_jackpot_pool" // T171-T175 累積獎池系統（Mini/Minor/Major/Grand）
 )
 // ── Envelope ─────────────────────────────────────────────────
 
