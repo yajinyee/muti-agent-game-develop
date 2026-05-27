@@ -96,6 +96,12 @@ signal lucky_holy_judgment(data: Dictionary)
 signal lucky_big_bang(data: Dictionary)
 # DAY-313 新增幸運特殊魚訊號（Progressive Jackpot 系列）
 signal lucky_jackpot_pool(data: Dictionary)
+# DAY-314 新增幸運特殊魚訊號
+signal lucky_multiverse(data: Dictionary)
+signal lucky_time_loop(data: Dictionary)
+signal lucky_fate_wheel(data: Dictionary)
+signal lucky_divine_realm(data: Dictionary)
+signal lucky_final_power(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -282,6 +288,20 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_holy_judgment", payload)
 		"lucky_big_bang":
 			emit_signal("lucky_big_bang", payload)
+		# DAY-313 新增
+		"lucky_jackpot_pool":
+			emit_signal("lucky_jackpot_pool", payload)
+		# DAY-314 新增
+		"lucky_multiverse":
+			emit_signal("lucky_multiverse", payload)
+		"lucky_time_loop":
+			emit_signal("lucky_time_loop", payload)
+		"lucky_fate_wheel":
+			emit_signal("lucky_fate_wheel", payload)
+		"lucky_divine_realm":
+			emit_signal("lucky_divine_realm", payload)
+		"lucky_final_power":
+			emit_signal("lucky_final_power", payload)
 		"pong":
 			pass
 		"error":

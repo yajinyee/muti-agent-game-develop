@@ -97,6 +97,12 @@ const SIGNAL_TO_PANEL: Dictionary = {
 	"lucky_jackpot_major":     "LuckyJackpotMajorPanel",
 	"lucky_jackpot_grand":     "LuckyJackpotGrandPanel",
 	"lucky_jackpot_trigger":   "LuckyJackpotTriggerPanel",
+	# DAY-314 新增
+	"lucky_multiverse":        "LuckyMultiversePanel",
+	"lucky_time_loop":         "LuckyTimeLoopPanel",
+	"lucky_fate_wheel":        "LuckyFateWheelPanel",
+	"lucky_divine_realm":      "LuckyDivineRealmPanel",
+	"lucky_final_power":       "LuckyFinalPowerPanel",
 }
 
 func _ready() -> void:

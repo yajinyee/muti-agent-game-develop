@@ -135,6 +135,12 @@ func _ready() -> void:
 	GameManager.lucky_big_bang.connect(_on_lucky_big_bang)
 	# DAY-313 新增幸運特殊魚訊號連接（Progressive Jackpot 系列）
 	GameManager.lucky_jackpot_pool.connect(_on_lucky_jackpot_pool)
+	# DAY-314 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
+	GameManager.lucky_multiverse.connect(_on_lucky_multiverse)
+	GameManager.lucky_time_loop.connect(_on_lucky_time_loop)
+	GameManager.lucky_fate_wheel.connect(_on_lucky_fate_wheel)
+	GameManager.lucky_divine_realm.connect(_on_lucky_divine_realm)
+	GameManager.lucky_final_power.connect(_on_lucky_final_power)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -1939,3 +1945,90 @@ func _on_lucky_jackpot_pool(data: Dictionary) -> void:
 		"pool_update":
 			# 獎池更新由各 Panel 自行處理，HUD 不需要額外顯示
 			pass
+
+# ── DAY-314 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_multiverse(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"multiverse_start":
+			_show_lucky_event("multiverse", "🌌 %s 開啟多重宇宙！3 個平行宇宙！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"multiverse_perfect":
+			var boost_mult = data.get("boost_mult", 13.0)
+			_show_lucky_banner("🌌✨ 多重宇宙完美！%s 全服 ×%.0f 加成 28 秒！" % [name, boost_mult], Color(0.8, 0.3, 1.0), 4.0)
+			ScreenShake.add_trauma(0.8)
+		"multiverse_end":
+			_show_lucky_banner("🌌 多重宇宙結束", Color(0.6, 0.6, 0.6), 1.5)
+
+func _on_lucky_time_loop(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"time_loop_start":
+			_show_lucky_event("time_loop", "⏰ %s 開啟時間迴圈！3 次迴圈！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"loop_reset":
+			var loop_no = data.get("loop_no", 1)
+			var loop_mult = data.get("loop_mult", 1.5)
+			_show_lucky_banner("⏰ 第 %d 次迴圈！獎勵 ×%.1f！" % [loop_no, loop_mult], Color(0.2, 0.6, 1.0), 1.5)
+		"time_loop_perfect":
+			var boost_mult = data.get("boost_mult", 10.0)
+			_show_lucky_banner("⏰✨ 時間迴圈完美！%s 全服 ×%.0f 加成 22 秒！" % [name, boost_mult], Color(0.0, 0.7, 1.0), 4.0)
+			ScreenShake.add_trauma(0.7)
+
+func _on_lucky_fate_wheel(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"fate_wheel_start":
+			_show_lucky_event("fate_wheel", "🎡 %s 旋轉命運之輪！最高 ×50！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"wheel_spin":
+			var spin_no = data.get("spin_no", 1)
+			var mult = data.get("mult", 1.0)
+			_show_lucky_banner("🎡 第 %d 轉 ×%.0f！" % [spin_no, mult], Color(1.0, 0.6, 0.0), 1.2)
+		"fate_wheel_perfect":
+			var boost_mult = data.get("boost_mult", 11.0)
+			_show_lucky_banner("🎡✨ 命運完美！%s 全服 ×%.0f 加成 24 秒！" % [name, boost_mult], Color(1.0, 0.7, 0.0), 4.0)
+			ScreenShake.add_trauma(0.7)
+		"fate_wheel_end":
+			_show_lucky_banner("🎡 命運之輪結束", Color(0.6, 0.6, 0.6), 1.5)
+
+func _on_lucky_divine_realm(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"divine_realm_start":
+			_show_lucky_event("divine_realm", "✨ %s 召喚神域！5 波神域光柱！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"divine_wave":
+			var wave_no = data.get("wave_no", 1)
+			var hits = data.get("hits", 0)
+			_show_lucky_banner("✨ 第 %d 波！命中 %d 個！" % [wave_no, hits], Color(1.0, 0.85, 0.0), 1.0)
+			ScreenShake.add_trauma(0.3)
+		"divine_realm_perfect":
+			var boost_mult = data.get("boost_mult", 14.0)
+			_show_lucky_banner("✨🏆 神域完美！%s 全服 ×%.0f 加成 30 秒！" % [name, boost_mult], Color(1.0, 0.9, 0.0), 4.0)
+			ScreenShake.add_trauma(0.9)
+		"divine_realm_end":
+			_show_lucky_banner("✨ 神域降臨結束", Color(0.6, 0.6, 0.6), 1.5)
+
+func _on_lucky_final_power(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"final_power_start":
+			_show_lucky_event("final_power", "💀 %s 引動終焉之力！全場 HP 歸零！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(1.0)
+		"final_power_complete":
+			var hit_count = data.get("hit_count", 0)
+			var boost_mult = data.get("boost_mult", 15.0)
+			_show_lucky_banner("💀🏆 終焉之力！%s 清場 %d 個！全服 ×%.0f 加成 30 秒！" % [name, hit_count, boost_mult], Color(1.0, 0.1, 0.1), 4.5)
+			ScreenShake.add_trauma(1.0)

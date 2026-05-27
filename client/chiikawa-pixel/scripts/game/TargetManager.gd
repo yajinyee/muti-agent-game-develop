@@ -103,6 +103,12 @@ const TARGET_SPRITES = {
 	"T173": "res://assets/sprites/targets/T173_jackpot_major.png",
 	"T174": "res://assets/sprites/targets/T174_jackpot_grand.png",
 	"T175": "res://assets/sprites/targets/T175_jackpot_trigger.png",
+	# DAY-314 新增
+	"T176": "res://assets/sprites/targets/T176_multiverse.png",
+	"T177": "res://assets/sprites/targets/T177_time_loop.png",
+	"T178": "res://assets/sprites/targets/T178_fate_wheel.png",
+	"T179": "res://assets/sprites/targets/T179_divine_realm.png",
+	"T180": "res://assets/sprites/targets/T180_final_power.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -206,6 +212,12 @@ const TARGET_COLORS = {
 	"T173": Color(1.0, 0.6, 0.0),    # 橙色 Major Jackpot 魚
 	"T174": Color(1.0, 0.85, 0.0),   # 金色 Grand Jackpot 魚
 	"T175": Color(0.9, 0.7, 0.1),    # 金黃色 Jackpot Trigger 魚
+	# DAY-314 新增
+	"T176": Color(0.49, 0.11, 0.64), # 深紫多重宇宙魚
+	"T177": Color(0.08, 0.39, 0.75), # 深藍時間迴圈魚
+	"T178": Color(0.97, 0.50, 0.09), # 火橙命運之輪魚
+	"T179": Color(0.98, 0.66, 0.15), # 神聖橙金神域降臨魚
+	"T180": Color(0.72, 0.07, 0.07), # 深紅終焉之力魚
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D

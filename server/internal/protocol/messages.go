@@ -126,6 +126,13 @@ const (
 
 	// DAY-313 新增幸運特殊魚事件（Progressive Jackpot 系列）
 	MsgLuckyJackpotPool = "lucky_jackpot_pool" // T171-T175 累積獎池系統（Mini/Minor/Major/Grand）
+
+	// DAY-314 新增幸運特殊魚事件
+	MsgLuckyMultiverse  = "lucky_multiverse"   // T176 多重宇宙魚（3 個平行宇宙，全服 ×13.0）
+	MsgLuckyTimeLoop    = "lucky_time_loop"    // T177 時間迴圈魚（3 次迴圈，獎勵 ×1.5 遞增，全服 ×10.0）
+	MsgLuckyFateWheel   = "lucky_fate_wheel"   // T178 命運之輪魚（3 次旋轉，最高 ×50.0，全服 ×11.0）
+	MsgLuckyDivineRealm = "lucky_divine_realm" // T179 神域降臨魚（5 波神域光柱 HP -35%，全服 ×14.0）
+	MsgLuckyFinalPower  = "lucky_final_power"  // T180 終焉之力魚（全場清空 ×10.0，全服 ×15.0 新最高）
 )
 // ── Envelope ─────────────────────────────────────────────────
 

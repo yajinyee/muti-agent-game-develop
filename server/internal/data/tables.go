@@ -282,6 +282,18 @@ var Targets = []TargetDef{
 	// T175 幸運 Jackpot Trigger 魚：擊破後隨機觸發四層之一（Mini 60%/Minor 30%/Major 8%/Grand 2%）
 	{ID: "T175", Name: "幸運Jackpot觸發魚", Type: TypeSpecial, Multiplier: 200, HP: 240, SpawnWeight: 2, Speed: 70, Lifetime: 16, LaborGain: 40, Behavior: BehaviorLinear, DiffFactor: 1.0},
 
+	// ── DAY-314 新增特殊目標（1550x-1800x）────────────────────────
+	// T176 幸運多重宇宙魚：擊破後開啟 3 個平行宇宙，每個宇宙擊破 5 個目標，全部完成 → 全服 ×13.0 加成 28 秒
+	{ID: "T176", Name: "幸運多重宇宙魚", Type: TypeSpecial, Multiplier: 1550, HP: 1620, SpawnWeight: 1, Speed: 30, Lifetime: 40, LaborGain: 310, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T177 幸運時間迴圈魚：擊破後 3 次時間迴圈（每次 15 秒，獎勵 ×1.5 遞增），全部完成 → 全服 ×10.0 加成 22 秒
+	{ID: "T177", Name: "幸運時間迴圈魚", Type: TypeSpecial, Multiplier: 1600, HP: 1680, SpawnWeight: 1, Speed: 35, Lifetime: 50, LaborGain: 320, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T178 幸運命運之輪魚：擊破後觸發命運之輪（3 次旋轉，最高 ×50.0），連續 3 次 ≥20x → 全服 ×11.0 加成 24 秒
+	{ID: "T178", Name: "幸運命運之輪魚", Type: TypeSpecial, Multiplier: 1650, HP: 1720, SpawnWeight: 1, Speed: 40, Lifetime: 36, LaborGain: 330, Behavior: BehaviorLinear, DiffFactor: 1.0},
+	// T179 幸運神域降臨魚：擊破後神域降臨 30 秒（每 6 秒神域波 HP -35%），5 波全部命中 ≥6 → 全服 ×14.0 加成 30 秒
+	{ID: "T179", Name: "幸運神域降臨魚", Type: TypeSpecial, Multiplier: 1700, HP: 1780, SpawnWeight: 1, Speed: 25, Lifetime: 42, LaborGain: 340, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T180 幸運終焉之力魚：擊破後全場 HP 歸零（每個獎勵 ×10.0），觸發全服 ×15.0 加成 30 秒（超越 T170 成為新最高倍率機制）
+	{ID: "T180", Name: "幸運終焉之力魚", Type: TypeSpecial, Multiplier: 1800, HP: 1900, SpawnWeight: 1, Speed: 20, Lifetime: 45, LaborGain: 360, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

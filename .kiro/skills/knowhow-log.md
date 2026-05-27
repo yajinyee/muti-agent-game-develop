@@ -4460,3 +4460,23 @@ HUD.gd 雖然有所有事件處理函數，但沒有獨立的 Panel 節點管理
 - **問題：** `python` 指向 MSYS2 的 Python，沒有 pip，無法安裝 Pillow
 - **解決：** 使用 `C:\Users\yajinyee0306\AppData\Local\Programs\Python\Python312\python.exe` 執行腳本
 - **教訓：** Windows 上有多個 Python 環境時，要明確指定路徑，不能依賴 `python` 命令
+
+## 119. DAY-314 T176-T180 五個新 Lucky 魚系統（2026-05-27）
+- **業界依據：** Fishing Frenzy Chapter 3「parallel dimension mechanic」、「time loop mechanic」、「fate wheel mechanic」、「divine realm mechanic」、「ultimate power mechanic」
+- **T176 多重宇宙魚（1550x）：** 3 個平行宇宙，每個宇宙擊破 5 個目標，全部完成 → 全服 ×13.0 加成 28 秒
+- **T177 時間迴圈魚（1600x）：** 3 次迴圈（每次 15 秒，獎勵 ×1.5 遞增），全部完成 → 全服 ×10.0 加成 22 秒
+- **T178 命運之輪魚（1650x）：** 3 次旋轉（最高 ×50.0），連續 3 次 ≥20x → 全服 ×11.0 加成 24 秒
+- **T179 神域降臨魚（1700x）：** 5 波神域光柱（每波 HP -35%），5 波全部命中 ≥6 → 全服 ×14.0 加成 30 秒
+- **T180 終焉之力魚（1800x）：** 全場 HP 歸零（每個獎勵 ×10.0），觸發全服 ×15.0 加成 30 秒（超越 T170 成為新最高倍率機制）
+- **QA：** 70/70 全部通過
+- **build/vet：** 全部通過（零錯誤零警告）
+
+## 120. fmt.Sprintf 中 % 符號的轉義
+- **問題：** `fmt.Sprintf("HP -35%！", ...)` 中的 `%！` 被 Go 解析為格式化動詞，導致 `go vet` 警告
+- **解法：** 用 `%%` 表示字面量 `%`：`fmt.Sprintf("HP -35%%！", ...)`
+- **教訓：** Go 的 fmt.Sprintf 中，任何 `%` 後面跟非格式化字元都會被視為錯誤，要用 `%%` 轉義
+
+## 121. Go handler 中 applyAOEDamage 的正確呼叫方式
+- **問題：** `g.applyAOEDamage(p, 0.35)` 參數不對，實際簽名是 `applyAOEDamage(cx, cy, radius, pct float64)`
+- **解法：** 全場 AOE 用 `g.applyAOEDamage(640, 360, 9999, 0.35)`（中心點 + 超大半徑）
+- **教訓：** 呼叫輔助方法前要確認函數簽名，不要假設參數順序

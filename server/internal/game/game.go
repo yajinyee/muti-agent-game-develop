@@ -142,6 +142,13 @@ type Game struct {
 	// DAY-313 新增
 	luckyJackpotPool *luckyJackpotPoolManager
 
+	// DAY-314 新增
+	luckyMultiverse  *luckyMultiverseManager
+	luckyTimeLoop    *luckyTimeLoopManager
+	luckyFateWheel   *luckyFateWheelManager
+	luckyDivineRealm *luckyDivineRealmManager
+	luckyFinalPower  *luckyFinalPowerManager
+
 	lastTick time.Time
 }
 
@@ -250,6 +257,13 @@ func NewGame(hub *ws.Hub) *Game {
 
 		// DAY-313 新增
 		luckyJackpotPool: newLuckyJackpotPoolManager(),
+
+		// DAY-314 新增
+		luckyMultiverse:  newLuckyMultiverseManager(),
+		luckyTimeLoop:    newLuckyTimeLoopManager(),
+		luckyFateWheel:   newLuckyFateWheelManager(),
+		luckyDivineRealm: newLuckyDivineRealmManager(),
+		luckyFinalPower:  newLuckyFinalPowerManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -772,6 +786,32 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if bigBangPerfectBoost > 1.0 {
 			effectiveMult *= bigBangPerfectBoost
 		}
+		// DAY-314 新增全服加成
+		multiversePerfectBoost := g.luckyMultiverse.getMultiversePerfectMult()
+		if multiversePerfectBoost > 1.0 {
+			effectiveMult *= multiversePerfectBoost
+		}
+		timeLoopPerfectBoost := g.luckyTimeLoop.getTimeLoopPerfectMult()
+		if timeLoopPerfectBoost > 1.0 {
+			effectiveMult *= timeLoopPerfectBoost
+		}
+		// 時間迴圈：個人擊破倍率加成
+		timeLoopKillMult := g.luckyTimeLoop.getTimeLoopMult()
+		if timeLoopKillMult > 1.0 {
+			effectiveMult *= timeLoopKillMult
+		}
+		fateWheelPerfectBoost := g.luckyFateWheel.getFateWheelPerfectMult()
+		if fateWheelPerfectBoost > 1.0 {
+			effectiveMult *= fateWheelPerfectBoost
+		}
+		divineRealmPerfectBoost := g.luckyDivineRealm.getDivineRealmPerfectMult()
+		if divineRealmPerfectBoost > 1.0 {
+			effectiveMult *= divineRealmPerfectBoost
+		}
+		finalPowerBoost := g.luckyFinalPower.getFinalPowerMult()
+		if finalPowerBoost > 1.0 {
+			effectiveMult *= finalPowerBoost
+		}
 		// 龍捲風期間擊破計數
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
@@ -970,6 +1010,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			// DAY-313 新增 Progressive Jackpot 系列
 			case isLuckyJackpotPoolFish(t.Def.ID):
 				g.luckyJackpotPool.onTargetKill(g, p, t.Def.ID)
+			// DAY-314 新增
+			case isLuckyMultiverseFish(t.Def.ID):
+				g.luckyMultiverse.tryLuckyMultiverseFish(g, p)
+			case isLuckyTimeLoopFish(t.Def.ID):
+				g.luckyTimeLoop.tryLuckyTimeLoopFish(g, p)
+			case isLuckyFateWheelFish(t.Def.ID):
+				g.luckyFateWheel.tryLuckyFateWheelFish(g, p)
+			case isLuckyDivineRealmFish(t.Def.ID):
+				g.luckyDivineRealm.tryLuckyDivineRealmFish(g, p)
+			case isLuckyFinalPowerFish(t.Def.ID):
+				g.luckyFinalPower.tryLuckyFinalPowerFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -1043,6 +1094,8 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			g.luckyDragonSoul.onKillDuringDragonSoul(playerID)
 			// DAY-312 時空裂縫：擊破計數
 			g.luckySpacetimeRift.onKillDuringRift(playerID)
+			// DAY-314 多重宇宙：擊破計數
+			g.luckyMultiverse.onKill(g, p)
 		}
 
 		// 獎勵通知（單播）
