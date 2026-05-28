@@ -177,6 +177,13 @@ type Game struct {
 	luckyDivineRevival  *luckyDivineRevivalManager
 	luckyGenesisEpoch   *luckyGenesisEpochManager
 
+	// DAY-319 新增
+	luckyEnergyStorm       *luckyEnergyStormManager
+	luckyCrystalResonance  *luckyCrystalResonanceManager
+	luckyFateJudgment      *luckyFateJudgmentManager
+	luckyTimeReversal      *luckyTimeReversalManager
+	luckyCosmicSingularity *luckyCosmicSingularityManager
+
 	lastTick time.Time
 }
 
@@ -320,6 +327,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyChaosExplosion: newLuckyChaosExplosionManager(),
 		luckyDivineRevival:  newLuckyDivineRevivalManager(),
 		luckyGenesisEpoch:   newLuckyGenesisEpochManager(),
+
+		// DAY-319 新增
+		luckyEnergyStorm:       newLuckyEnergyStormManager(),
+		luckyCrystalResonance:  newLuckyCrystalResonanceManager(),
+		luckyFateJudgment:      newLuckyFateJudgmentManager(),
+		luckyTimeReversal:      newLuckyTimeReversalManager(),
+		luckyCosmicSingularity: newLuckyCosmicSingularityManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -931,7 +945,60 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if cosmicEndBoost > 1.0 {
 			effectiveMult *= cosmicEndBoost
 		}
-		// 龍捲風期間擊破計數
+		// DAY-318 新增全服加成
+		dragonKingBoost := g.luckyDragonKing.getDragonKingMult()
+		if dragonKingBoost > 1.0 {
+			effectiveMult *= dragonKingBoost
+		}
+		eternalCycleBoost := g.luckyEternalCycle.getEternalCycleMult()
+		if eternalCycleBoost > 1.0 {
+			effectiveMult *= eternalCycleBoost
+		}
+		chaosExplosionBoost := g.luckyChaosExplosion.getChaosExplosionMult()
+		if chaosExplosionBoost > 1.0 {
+			effectiveMult *= chaosExplosionBoost
+		}
+		divineRevivalBoost := g.luckyDivineRevival.getDivineRevivalMult()
+		if divineRevivalBoost > 1.0 {
+			effectiveMult *= divineRevivalBoost
+		}
+		genesisEpochBoost := g.luckyGenesisEpoch.getGenesisEpochMult()
+		if genesisEpochBoost > 1.0 {
+			effectiveMult *= genesisEpochBoost
+		}
+		// DAY-319 新增全服加成
+		energyStormBoost := g.luckyEnergyStorm.getEnergyStormMult()
+		if energyStormBoost > 1.0 {
+			effectiveMult *= energyStormBoost
+		}
+		crystalResonanceBoost := g.luckyCrystalResonance.getCrystalResonanceMult()
+		if crystalResonanceBoost > 1.0 {
+			effectiveMult *= crystalResonanceBoost
+		}
+		fateJudgmentBoost := g.luckyFateJudgment.getFateJudgmentMult()
+		if fateJudgmentBoost > 1.0 {
+			effectiveMult *= fateJudgmentBoost
+		}
+		// 命運審判：命運目標倍率加成
+		fateTargetMult := g.luckyFateJudgment.getFateTargetMult(t.InstanceID)
+		if fateTargetMult > 1.0 {
+			effectiveMult *= fateTargetMult
+			g.luckyFateJudgment.onFateTargetKilled(t.InstanceID)
+		}
+		timeReversalBoost := g.luckyTimeReversal.getTimeReversalMult()
+		if timeReversalBoost > 1.0 {
+			effectiveMult *= timeReversalBoost
+		}
+		// 時間逆流：逆流目標倍率加成
+		reversalTargetMult := g.luckyTimeReversal.getReversalTargetMult(t.InstanceID)
+		if reversalTargetMult > 1.0 {
+			effectiveMult *= reversalTargetMult
+			g.luckyTimeReversal.onReversalTargetKilled(t.InstanceID)
+		}
+		cosmicSingularityBoost := g.luckyCosmicSingularity.getCosmicSingularityMult()
+		if cosmicSingularityBoost > 1.0 {
+			effectiveMult *= cosmicSingularityBoost
+		}
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
 		}
@@ -1184,6 +1251,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyDivineRevival.tryLuckyDivineRevivalFish(g, p)
 			case isLuckyGenesisEpochFish(t.Def.ID):
 				g.luckyGenesisEpoch.tryLuckyGenesisEpochFish(g, p)
+			// DAY-319 新增
+			case isLuckyEnergyStormFish(t.Def.ID):
+				g.luckyEnergyStorm.tryLuckyEnergyStormFish(g, p)
+			case isLuckyCrystalResonanceFish(t.Def.ID):
+				g.luckyCrystalResonance.tryLuckyCrystalResonanceFish(g, p)
+			case isLuckyFateJudgmentFish(t.Def.ID):
+				g.luckyFateJudgment.tryLuckyFateJudgmentFish(g, p)
+			case isLuckyTimeReversalFish(t.Def.ID):
+				g.luckyTimeReversal.tryLuckyTimeReversalFish(g, p)
+			case isLuckyCosmicSingularityFish(t.Def.ID):
+				g.luckyCosmicSingularity.tryLuckyCosmicSingularityFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

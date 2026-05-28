@@ -132,6 +132,12 @@ const TARGET_SPRITES = {
 	"T198": "res://assets/sprites/targets/T198_chaos_explosion.png",
 	"T199": "res://assets/sprites/targets/T199_divine_revival.png",
 	"T200": "res://assets/sprites/targets/T200_genesis_epoch.png",
+	# DAY-319 新增
+	"T201": "res://assets/sprites/targets/T201_energy_storm.png",
+	"T202": "res://assets/sprites/targets/T202_crystal_resonance.png",
+	"T203": "res://assets/sprites/targets/T203_fate_judgment.png",
+	"T204": "res://assets/sprites/targets/T204_time_reversal.png",
+	"T205": "res://assets/sprites/targets/T205_cosmic_singularity.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -265,6 +271,12 @@ const TARGET_COLORS = {
 	"T198": Color(0.7, 0.1, 0.0),    # 深紅（混沌爆炸魚，混沌光環）
 	"T199": Color(0.6, 0.6, 0.0),    # 深金（神聖復活魚，神聖光芒）
 	"T200": Color(0.0, 0.0, 0.0),    # 純黑（創世紀元魚，里程碑最高階）
+	# DAY-319 新增
+	"T201": Color(0.0, 0.8, 0.8),    # 青藍（能量風暴魚，連鎖電擊）
+	"T202": Color(0.7, 0.7, 1.0),    # 水晶白藍（水晶共鳴魚，全場共鳴）
+	"T203": Color(0.8, 0.7, 0.0),    # 金色（命運審判魚，命運之輪）
+	"T204": Color(0.4, 0.4, 0.9),    # 深藍紫（時間逆流魚，時間逆流）
+	"T205": Color(0.8, 0.0, 0.8),    # 洋紅（宇宙奇點魚，史上最高）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D

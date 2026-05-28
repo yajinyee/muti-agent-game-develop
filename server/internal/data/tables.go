@@ -362,6 +362,23 @@ var Targets = []TargetDef{
 	// 業界依據：終極里程碑機制 + 史上最高全服倍率（超越 T195 的 ×22.0）
 	{ID: "T200", Name: "幸運創世紀元魚", Type: TypeSpecial, Multiplier: 5000, HP: 5000, SpawnWeight: 1, Speed: 1, Lifetime: 80, LaborGain: 1000, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-319 新增特殊目標（5200x-8888x）────────────────────────
+	// T201 幸運能量風暴魚：5 波連鎖電擊（每波全場 HP -30%），全服 ×26.0 加成 52 秒
+	// 業界依據：Royal Fishing「60x lightning eel chain reaction」升級版 + 2026 能量風暴機制
+	{ID: "T201", Name: "幸運能量風暴魚", Type: TypeSpecial, Multiplier: 5200, HP: 5200, SpawnWeight: 1, Speed: 1, Lifetime: 82, LaborGain: 1040, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T202 幸運水晶共鳴魚：全場共鳴爆炸（每個獎勵 ×30.0），全服 ×27.0 加成 54 秒
+	// 業界依據：Fishing Legend 2025「Crystal Resonance」全場共鳴爆炸機制
+	{ID: "T202", Name: "幸運水晶共鳴魚", Type: TypeSpecial, Multiplier: 5500, HP: 5500, SpawnWeight: 1, Speed: 1, Lifetime: 84, LaborGain: 1100, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T203 幸運命運審判魚：隨機 5 個目標各 ×50-×500，全服 ×28.0 加成 56 秒
+	// 業界依據：Fishing Fortune「Fate Judgment」升級版 + 2026 命運審判機制
+	{ID: "T203", Name: "幸運命運審判魚", Type: TypeSpecial, Multiplier: 5800, HP: 5800, SpawnWeight: 1, Speed: 1, Lifetime: 86, LaborGain: 1160, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T204 幸運時間逆流魚：最近死亡的 10 個目標全部復活（HP 100%，獎勵 ×5.0），全服 ×29.0 加成 58 秒
+	// 業界依據：T199 神聖復活魚升級版 + 2026 時間逆流機制（最多 10 個目標）
+	{ID: "T204", Name: "幸運時間逆流魚", Type: TypeSpecial, Multiplier: 6000, HP: 6000, SpawnWeight: 1, Speed: 1, Lifetime: 88, LaborGain: 1200, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T205 幸運宇宙奇點魚：全場 HP 歸零（每個獎勵 ×30.0），全服 ×30.0 加成 60 秒（史上最高，超越 T200 的 ×25.0）
+	// 業界依據：終極宇宙奇點機制 + 2026 最高倍率設計（8888x 吉祥數字）
+	{ID: "T205", Name: "幸運宇宙奇點魚", Type: TypeSpecial, Multiplier: 8888, HP: 8888, SpawnWeight: 1, Speed: 1, Lifetime: 90, LaborGain: 1777, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

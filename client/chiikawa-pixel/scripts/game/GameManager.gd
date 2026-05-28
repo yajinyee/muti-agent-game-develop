@@ -126,6 +126,12 @@ signal lucky_eternal_cycle(data: Dictionary)
 signal lucky_chaos_explosion(data: Dictionary)
 signal lucky_divine_revival(data: Dictionary)
 signal lucky_genesis_epoch(data: Dictionary)
+# DAY-319 新增幸運特殊魚訊號
+signal lucky_energy_storm(data: Dictionary)
+signal lucky_crystal_resonance(data: Dictionary)
+signal lucky_fate_judgment(data: Dictionary)
+signal lucky_time_reversal(data: Dictionary)
+signal lucky_cosmic_singularity(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -370,6 +376,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_divine_revival", payload)
 		"lucky_genesis_epoch":
 			emit_signal("lucky_genesis_epoch", payload)
+		# DAY-319 新增
+		"lucky_energy_storm":
+			emit_signal("lucky_energy_storm", payload)
+		"lucky_crystal_resonance":
+			emit_signal("lucky_crystal_resonance", payload)
+		"lucky_fate_judgment":
+			emit_signal("lucky_fate_judgment", payload)
+		"lucky_time_reversal":
+			emit_signal("lucky_time_reversal", payload)
+		"lucky_cosmic_singularity":
+			emit_signal("lucky_cosmic_singularity", payload)
 		"pong":
 			pass
 		"error":
