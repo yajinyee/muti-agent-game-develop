@@ -1,24 +1,25 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-28（DAY-320 HUD.gd 補齊 DAY-318/319 訊號連接 + 10 個新 Lucky 處理函數 + Server build OK）
+## 最後更新：2026-05-28（DAY-320 HUD.gd 補齊 DAY-318/319 訊號連接 + LuckyPanelRegistry 設計缺陷修復 + QA 68/68 + GitHub 同步）
 
-## DAY-320 更新（2026-05-28）：HUD.gd 訊號連接補齊 + Client 整合完整性修復 ✅
-- **問題發現：** HUD.gd 的 `_ready()` 缺少 DAY-318（T196-T200）和 DAY-319（T201-T205）共 10 個 Lucky 訊號連接
-- **根本原因：** 每次新增 Lucky 系統時，GameManager.gd 和 LuckyPanelRegistry.gd 有更新，但 HUD.gd 的備用橫幅連接被遺漏
-- **修復內容：**
-  - HUD.gd `_ready()` 補齊 DAY-318 5 個訊號連接（dragon_king/eternal_cycle/chaos_explosion/divine_revival/genesis_epoch）
-  - HUD.gd `_ready()` 補齊 DAY-319 5 個訊號連接（energy_storm/crystal_resonance/fate_judgment/time_reversal/cosmic_singularity）
-  - HUD.gd 末尾補齊 10 個 Lucky 處理函數（備用橫幅模式）
-- **HUD.gd 統計：** 2330 行，96 個 Lucky 處理函數，96 個 Lucky 訊號連接
+## DAY-320 更新（2026-05-28）：Client 整合完整性修復 + LuckyPanelRegistry 設計缺陷修復 ✅
+- **問題 1 發現：** HUD.gd 的 `_ready()` 缺少 DAY-318（T196-T200）和 DAY-319（T201-T205）共 10 個 Lucky 訊號連接
+- **問題 2 發現：** LuckyPanelRegistry.connect_all_signals() 只做 print 驗證，沒有實際連接訊號到 Panel 的 handle_event()
+- **修復 1：** HUD.gd 補齊 DAY-318/319 各 5 個訊號連接和處理函數（備用橫幅模式）
+- **修復 2：** LuckyPanelRegistry.connect_all_signals() 真正連接 GameManager 訊號到 Panel.handle_event()
+- **修復 2 細節：** 使用 Callable + is_connected 防止重複連接，_init_all_panels 掃描後自動呼叫
+- **Agent 文件更新：** server-event-agent.md（100 個 Lucky 系統）+ lucky-panel-agent.md（架構說明 + Checklist）
+- **QA 腳本：** qa_check_day320.py（68 項驗證，68/68 全部通過）
+- **knowhow-log 更新：** 條目 30/31/32（Lucky 訊號連接遺漏 + 三層架構同步 + LuckyPanelRegistry 設計缺陷）
 - **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
-- **Client 整合完整性：** GameManager（100 個訊號）+ LuckyPanelRegistry（100 個 Panel）+ HUD（96 個備用橫幅）
-- **GitHub 同步：** 推送到 main 分支
+- **GitHub 同步：** 推送到 main 分支（5 個 commits）
 
 ## 自我評估（DAY-320）
-- **HUD.gd 訊號連接完整性：** 96/100（T106-T205 全部有備用橫幅，但 jackpot_pool 等特殊訊號不在計數內）
-- **Client 整合完整性：** ✅ 所有 100 個 Lucky 系統都有 GameManager 訊號 + LuckyPanelRegistry + HUD 備用橫幅
-- **架構技術債：** HUD.gd 2330 行（超過警戒線），但 LuckyPanelRegistry 已建立，下一步是讓 Panel 自行連接並清理 HUD 的舊函數
-- **最需要改善：** HUD.gd 架構重構（把 Lucky 處理函數移到各自 Panel，HUD 只保留核心 UI）
+- **HUD.gd 訊號連接完整性：** 96/100（T106-T205 全部有備用橫幅）
+- **LuckyPanelRegistry 功能：** ✅ 修復設計缺陷，Panel.handle_event() 現在會被正確呼叫
+- **Client 整合完整性：** GameManager（100 個訊號）+ LuckyPanelRegistry（100 個 Panel + 真正連接）+ HUD（96 個備用橫幅）
+- **架構技術債：** HUD.gd 2330 行（超過警戒線），但 LuckyPanelRegistry 已修復，Panel 現在是主要處理者
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
 
 
 
