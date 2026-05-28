@@ -328,6 +328,23 @@ var Targets = []TargetDef{
 	// 業界依據：Fishing Fortune「ultimate judgment」+ 宇宙終極機制
 	{ID: "T190", Name: "幸運宇宙審判魚", Type: TypeSpecial, Multiplier: 2500, HP: 2640, SpawnWeight: 1, Speed: 15, Lifetime: 55, LaborGain: 500, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-317 新增特殊目標（2600x-3000x）────────────────────────
+	// T191 幸運 PvP 競技魚：全服 PvP 競技 30 秒，擊破最多目標者獲得 ×20.0 加成 35 秒，全服 ×19.5 加成 40 秒
+	// 業界依據：PvP 競技機制 + 全服競爭設計
+	{ID: "T191", Name: "幸運PvP競技魚", Type: TypeSpecial, Multiplier: 2600, HP: 2750, SpawnWeight: 1, Speed: 12, Lifetime: 58, LaborGain: 520, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T192 幸運技能連鎖魚：技能連鎖 25 秒，每次擊破提升技能等級（Lv.1-10），Lv.10 → 全服 ×20.0 加成 38 秒
+	// 業界依據：技能連鎖升級機制 + 等級倍率設計
+	{ID: "T192", Name: "幸運技能連鎖魚", Type: TypeSpecial, Multiplier: 2700, HP: 2860, SpawnWeight: 1, Speed: 10, Lifetime: 60, LaborGain: 540, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T193 幸運全服大爆炸魚：全服大爆炸，全場 HP 歸零，每個獎勵 ×15.0，觸發全服 ×20.5 加成 40 秒（新最高）
+	// 業界依據：全場清空機制升級版 + 超高全服倍率
+	{ID: "T193", Name: "幸運全服大爆炸魚", Type: TypeSpecial, Multiplier: 2800, HP: 2970, SpawnWeight: 1, Speed: 8, Lifetime: 62, LaborGain: 560, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T194 幸運時空折疊魚：時空折疊 20 秒，所有目標倍率 ×3.0，射擊速度 ×2.0，觸發全服 ×21.0 加成 42 秒（新最高）
+	// 業界依據：時空操控機制 + 全場倍率加成設計
+	{ID: "T194", Name: "幸運時空折疊魚", Type: TypeSpecial, Multiplier: 2900, HP: 3080, SpawnWeight: 1, Speed: 6, Lifetime: 65, LaborGain: 580, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T195 幸運宇宙終焉魚：宇宙終焉，全場 HP 歸零，每個獎勵 ×20.0，觸發全服 ×22.0 加成 45 秒（史上最高）
+	// 業界依據：終極清場機制 + 史上最高全服倍率（超越 T190 的 ×19.0）
+	{ID: "T195", Name: "幸運宇宙終焉魚", Type: TypeSpecial, Multiplier: 3000, HP: 3200, SpawnWeight: 1, Speed: 5, Lifetime: 68, LaborGain: 600, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

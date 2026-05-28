@@ -153,6 +153,12 @@ func _ready() -> void:
 	GameManager.lucky_time_acceleration.connect(_on_lucky_time_acceleration)
 	GameManager.lucky_nebula_vortex.connect(_on_lucky_nebula_vortex)
 	GameManager.lucky_cosmic_judgment.connect(_on_lucky_cosmic_judgment)
+	# DAY-317 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
+	GameManager.lucky_pvp_battle.connect(_on_lucky_pvp_battle)
+	GameManager.lucky_skill_chain.connect(_on_lucky_skill_chain)
+	GameManager.lucky_global_explosion.connect(_on_lucky_global_explosion)
+	GameManager.lucky_spacetime_fold.connect(_on_lucky_spacetime_fold)
+	GameManager.lucky_cosmic_end.connect(_on_lucky_cosmic_end)
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
@@ -2219,4 +2225,89 @@ func _on_lucky_cosmic_judgment(data: Dictionary) -> void:
 			var boost_mult = data.get("boost_mult", 19.0)
 			var boost_secs = data.get("boost_secs", 40)
 			_show_lucky_banner("⚖️🏆 宇宙審判完成！%s 清場 %d 個！全服 ×%.1f 加成 %d 秒！（新最高）" % [name, hit_count, boost_mult, boost_secs], Color(1.0, 0.1, 0.1), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+# ── DAY-317 新增幸運特殊魚事件處理 ───────────────────────────
+
+func _on_lucky_pvp_battle(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"pvp_battle_start":
+			_show_lucky_event("lucky_pvp_battle", "⚔️ %s 發起全服 PvP 競技！30 秒內擊破最多目標者獲得 ×20.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.8)
+		"pvp_battle_complete":
+			var winner_name = data.get("winner_name", "玩家")
+			var global_boost_mult = data.get("global_boost_mult", 19.5)
+			var global_boost_secs = data.get("global_boost_secs", 40)
+			_show_lucky_banner("⚔️🏆 PvP 競技結束！%s 獲勝！全服 ×%.1f 加成 %d 秒！" % [winner_name, global_boost_mult, global_boost_secs], Color(0.8, 0.1, 0.1), 4.5)
+			ScreenShake.add_trauma(0.9)
+
+func _on_lucky_skill_chain(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"skill_chain_start":
+			_show_lucky_event("lucky_skill_chain", "🔗 %s 啟動技能連鎖！25 秒！擊破提升等級！Lv.10 → 全服 ×20.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.7)
+		"skill_chain_level_up":
+			var level = data.get("level", 1)
+			var level_mult = data.get("level_mult", 2.0)
+			_show_lucky_banner("🔗 技能等級 Lv.%d！×%.1f！" % [level, level_mult], Color(0.2, 0.5, 1.0), 1.0)
+		"skill_chain_complete":
+			var final_level = data.get("final_level", 1)
+			var global_boost_mult = data.get("global_boost_mult", 19.5)
+			var global_boost_secs = data.get("global_boost_secs", 35)
+			var is_perfect = data.get("is_perfect", false)
+			if is_perfect:
+				_show_lucky_banner("🔗🏆 完美連鎖！%s 達到 Lv.10！全服 ×%.1f 加成 %d 秒！（新最高）" % [name, global_boost_mult, global_boost_secs], Color(1.0, 0.85, 0.0), 4.5)
+				ScreenShake.add_trauma(1.0)
+			else:
+				_show_lucky_banner("🔗 技能連鎖結束！%s Lv.%d！全服 ×%.1f 加成 %d 秒！" % [name, final_level, global_boost_mult, global_boost_secs], Color(0.3, 0.6, 1.0), 3.5)
+				ScreenShake.add_trauma(0.6)
+
+func _on_lucky_global_explosion(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"global_explosion_start":
+			_show_lucky_event("lucky_global_explosion", "💥 %s 引爆全服大爆炸！全場 HP 歸零！每個獎勵 ×15.0！全服 ×20.5！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(1.0)
+		"global_explosion_complete":
+			var hit_count = data.get("hit_count", 0)
+			var boost_mult = data.get("boost_mult", 20.5)
+			var boost_secs = data.get("boost_secs", 40)
+			_show_lucky_banner("💥🏆 全服大爆炸完成！%s 清場 %d 個！全服 ×%.1f 加成 %d 秒！（新最高）" % [name, hit_count, boost_mult, boost_secs], Color(1.0, 0.2, 0.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_spacetime_fold(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"spacetime_fold_start":
+			_show_lucky_event("lucky_spacetime_fold", "🌀 %s 折疊時空！20 秒！目標倍率 ×3.0！射擊速度 ×2.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.9)
+		"spacetime_fold_complete":
+			var boost_mult = data.get("boost_mult", 21.0)
+			var boost_secs = data.get("boost_secs", 42)
+			_show_lucky_banner("🌀🏆 時空折疊結束！%s 全服 ×%.1f 加成 %d 秒！（新最高）" % [name, boost_mult, boost_secs], Color(0.6, 0.2, 1.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_cosmic_end(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"cosmic_end_start":
+			_show_lucky_event("lucky_cosmic_end", "☄️ %s 召喚宇宙終焉！全場 HP 歸零！每個獎勵 ×20.0！全服 ×22.0！（史上最高）" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(1.0)
+		"cosmic_end_complete":
+			var hit_count = data.get("hit_count", 0)
+			var boost_mult = data.get("boost_mult", 22.0)
+			var boost_secs = data.get("boost_secs", 45)
+			_show_lucky_banner("☄️👑 宇宙終焉完成！%s 清場 %d 個！全服 ×%.1f 加成 %d 秒！（史上最高）" % [name, hit_count, boost_mult, boost_secs], Color(1.0, 0.85, 0.0), 5.0)
 			ScreenShake.add_trauma(1.0)

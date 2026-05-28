@@ -163,6 +163,13 @@ type Game struct {
 	luckyNebulaVortex     *luckyNebulaVortexManager
 	luckyCosmicJudgment   *luckyCosmicJudgmentManager
 
+	// DAY-317 新增
+	luckyPvpBattle       *luckyPvpBattleManager
+	luckySkillChain      *luckySkillChainManager
+	luckyGlobalExplosion *luckyGlobalExplosionManager
+	luckySpacetimeFold   *luckySpacetimeFoldManager
+	luckyCosmicEnd       *luckyCosmicEndManager
+
 	lastTick time.Time
 }
 
@@ -292,6 +299,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyTimeAcceleration: newLuckyTimeAccelerationManager(),
 		luckyNebulaVortex:     newLuckyNebulaVortexManager(),
 		luckyCosmicJudgment:   newLuckyCosmicJudgmentManager(),
+
+		// DAY-317 新增
+		luckyPvpBattle:       newLuckyPvpBattleManager(),
+		luckySkillChain:      newLuckySkillChainManager(),
+		luckyGlobalExplosion: newLuckyGlobalExplosionManager(),
+		luckySpacetimeFold:   newLuckySpacetimeFoldManager(),
+		luckyCosmicEnd:       newLuckyCosmicEndManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -882,6 +896,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if cosmicJudgmentBoost > 1.0 {
 			effectiveMult *= cosmicJudgmentBoost
 		}
+		// DAY-317 新增全服加成
+		pvpBattleBoost := g.luckyPvpBattle.getPvpBattleMult()
+		if pvpBattleBoost > 1.0 {
+			effectiveMult *= pvpBattleBoost
+		}
+		skillChainBoost := g.luckySkillChain.getSkillChainMult()
+		if skillChainBoost > 1.0 {
+			effectiveMult *= skillChainBoost
+		}
+		globalExplosionBoost := g.luckyGlobalExplosion.getGlobalExplosionMult()
+		if globalExplosionBoost > 1.0 {
+			effectiveMult *= globalExplosionBoost
+		}
+		spacetimeFoldBoost := g.luckySpacetimeFold.getSpacetimeFoldMult()
+		if spacetimeFoldBoost > 1.0 {
+			effectiveMult *= spacetimeFoldBoost
+		}
+		cosmicEndBoost := g.luckyCosmicEnd.getCosmicEndMult()
+		if cosmicEndBoost > 1.0 {
+			effectiveMult *= cosmicEndBoost
+		}
 		// 龍捲風期間擊破計數
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
@@ -1113,6 +1148,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyNebulaVortex.tryLuckyNebulaVortexFish(g, p)
 			case isLuckyCosmicJudgmentFish(t.Def.ID):
 				g.luckyCosmicJudgment.tryLuckyCosmicJudgmentFish(g, p)
+			// DAY-317 新增
+			case isLuckyPvpBattleFish(t.Def.ID):
+				g.luckyPvpBattle.tryLuckyPvpBattleFish(g, p)
+			case isLuckySkillChainFish(t.Def.ID):
+				g.luckySkillChain.tryLuckySkillChainFish(g, p)
+			case isLuckyGlobalExplosionFish(t.Def.ID):
+				g.luckyGlobalExplosion.tryLuckyGlobalExplosionFish(g, p)
+			case isLuckySpacetimeFoldFish(t.Def.ID):
+				g.luckySpacetimeFold.tryLuckySpacetimeFoldFish(g, p)
+			case isLuckyCosmicEndFish(t.Def.ID):
+				g.luckyCosmicEnd.tryLuckyCosmicEndFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -1195,6 +1241,10 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			// DAY-316 時間加速：擊破計數
 			if g.luckyTimeAcceleration.isTimeAccelerationActive() {
 				g.luckyTimeAcceleration.onKill(playerID)
+			}
+			// DAY-317 技能連鎖：擊破提升等級
+			if g.luckySkillChain.isSkillChainActive(playerID) {
+				g.luckySkillChain.onKillDuringSkillChain(g, p)
 			}
 		}
 

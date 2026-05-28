@@ -147,6 +147,13 @@ const (
 	MsgLuckyTimeAcceleration = "lucky_time_acceleration" // T188 時間加速魚（目標速度 ×0.15，射擊 ×3.0，全服 ×18.0 新最高）
 	MsgLuckyNebulaVortex     = "lucky_nebula_vortex"     // T189 星雲漩渦魚（每秒 HP -8%，持續 20 秒，全服 ×18.5）
 	MsgLuckyCosmicJudgment   = "lucky_cosmic_judgment"   // T190 宇宙審判魚（全場清空 ×14.0，全服 ×19.0 新最高）
+
+	// DAY-317 新增幸運特殊魚事件
+	MsgLuckyPvpBattle        = "lucky_pvp_battle"        // T191 PvP 競技魚（全服競技 30 秒，勝者 ×20.0，全服 ×19.5）
+	MsgLuckySkillChain       = "lucky_skill_chain"       // T192 技能連鎖魚（Lv.1-10，Lv.10 → 全服 ×20.0）
+	MsgLuckyGlobalExplosion  = "lucky_global_explosion"  // T193 全服大爆炸魚（全場清空 ×15.0，全服 ×20.5 新最高）
+	MsgLuckySpacetimeFold    = "lucky_spacetime_fold"    // T194 時空折疊魚（目標倍率 ×3.0，射擊 ×2.0，全服 ×21.0 新最高）
+	MsgLuckyCosmicEnd        = "lucky_cosmic_end"        // T195 宇宙終焉魚（全場清空 ×20.0，全服 ×22.0 史上最高）
 )
 // ── Envelope ─────────────────────────────────────────────────
 
