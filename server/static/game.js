@@ -128,6 +128,12 @@ function handleMessage(type, payload) {
     case 'announce':
       showAnnounce(payload.message, payload.color || '#ffd700');
       break;
+    default:
+      // Lucky 系統事件：統一顯示公告橫幅
+      if (type.startsWith('lucky_')) {
+        handleLuckyEvent(type, payload);
+      }
+      break;
   }
 }
 
@@ -311,6 +317,54 @@ function handleBonusEvent(payload) {
   switch(payload.event) {
     case 'start':  showAnnounce('🌿 BONUS GAME START!', '#44ff44'); break;
     case 'result': showAnnounce(`🎉 BONUS! x${payload.multiplier.toFixed(1)} +${payload.reward}`, '#ffd700'); break;
+  }
+}
+
+// ── Lucky 系統事件處理 ────────────────────────────────────────
+const LUCKY_NAMES = {
+  lucky_chain_lightning: '⚡ 連鎖閃電',
+  lucky_crab_torpedo: '🦀 螃蟹魚雷',
+  lucky_vortex: '🌀 渦旋海葵',
+  lucky_golden_dragon: '🐉 黃金龍魚',
+  lucky_thunder_lobster: '🦞 雷霆龍蝦',
+  lucky_awakened_phoenix: '🔥 覺醒鳳凰',
+  lucky_shockwave_bomb: '💥 全場震盪',
+  lucky_drill_torpedo: '🚀 鑽頭魚雷',
+  lucky_time_freeze: '❄️ 時間凍結',
+  lucky_chain_explosion: '💥 連鎖爆炸',
+  lucky_chain_long_king: '👑 千龍王輪盤',
+  lucky_dragon_shotgun: '🐲 龍力散彈',
+  lucky_rocket_cannon: '🚀 火箭砲',
+  lucky_deep_whirlpool: '🌊 深海漩渦',
+  lucky_vampire_mult: '🧛 吸血鬼',
+  lucky_jackpot_pool: '🎰 Progressive Jackpot',
+  lucky_dragon_king: '👑 龍王輪盤',
+  lucky_genesis_epoch: '🌌 創世紀元',
+  lucky_energy_storm: '⚡ 能量風暴',
+  lucky_crystal_resonance: '💎 水晶共鳴',
+  lucky_fate_judgment: '⚖️ 命運審判',
+  lucky_time_reversal: '⏪ 時間逆流',
+  lucky_cosmic_singularity: '🌌 宇宙奇點',
+};
+
+function handleLuckyEvent(type, payload) {
+  const event = payload.event || '';
+  const name = LUCKY_NAMES[type] || type.replace('lucky_', '').replace(/_/g, ' ').toUpperCase();
+  const triggerName = payload.trigger_name || payload.player_name || '玩家';
+  
+  // 只顯示觸發事件（不顯示每個 tick 更新）
+  if (event === 'trigger' || event === 'jackpot_win' || event === 'start' || event === 'win') {
+    let msg = `✨ ${name}`;
+    if (triggerName) msg += ` — ${triggerName}`;
+    if (payload.multiplier) msg += ` ×${payload.multiplier.toFixed ? payload.multiplier.toFixed(1) : payload.multiplier}`;
+    if (payload.reward) msg += ` +${payload.reward}`;
+    if (payload.tier_name) msg += ` [${payload.tier_name}]`;
+    showAnnounce(msg, '#ffd700');
+    screenShake(5);
+  } else if (event === 'settle' || event === 'end') {
+    let msg = `🏆 ${name} 結算`;
+    if (payload.total_reward) msg += ` +${payload.total_reward}`;
+    showAnnounce(msg, '#ffaa00');
   }
 }
 
