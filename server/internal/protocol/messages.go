@@ -175,6 +175,13 @@ const (
 	MsgLuckyPathFish        = "lucky_path_fish"        // T208 路徑魚（路徑越遠倍率越高，最高 ×20,000，全服 ×33.0）
 	MsgLuckyChainEel        = "lucky_chain_eel"        // T209 連鎖電鰻魚（8 條連鎖電擊 ×40.0，全服 ×34.0）
 	MsgLuckyUltimateMiracle = "lucky_ultimate_miracle" // T210 終極奇蹟魚（全場 ×50.0，全服 ×35.0 新史上最高）
+
+	// DAY-324 新增幸運特殊魚事件
+	MsgLuckyAvalanche         = "lucky_avalanche"          // T211 雪崩魚（8 波連鎖消除，每波 +5.0，全服 ×36.0）
+	MsgLuckyCrashMultiplier   = "lucky_crash_multiplier"   // T212 崩潰倍率魚（Crash 機制，完美收割 ≥40.0，全服 ×36.5）
+	MsgLuckyMultiplierLadder  = "lucky_multiplier_ladder"  // T213 倍率梯魚（Lv.1-10，Lv.10 → 全服 ×37.0）
+	MsgLuckyIceFishingWheel   = "lucky_ice_fishing_wheel"  // T214 冰釣輪盤魚（3 次旋轉最高 ×5000，全服 ×37.5）
+	MsgLuckyGlobalAvalanche   = "lucky_global_avalanche"   // T215 全服雪崩魚（5 波全服消除，全服 ×38.0 新史上最高）
 )
 // ── Envelope ─────────────────────────────────────────────────
 

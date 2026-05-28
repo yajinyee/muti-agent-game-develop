@@ -396,6 +396,23 @@ var Targets = []TargetDef{
 	// 業界依據：終極奇蹟機制 + 2026 最高倍率設計（16888x 吉祥數字，超越 T205 的 8888x）
 	{ID: "T210", Name: "幸運終極奇蹟魚", Type: TypeSpecial, Multiplier: 16888, HP: 16888, SpawnWeight: 1, Speed: 1, Lifetime: 100, LaborGain: 3377, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-324 新增特殊目標（17000x-22000x）────────────────────────
+	// T211 幸運雪崩魚：Avalanche Cascade 機制，8 波連鎖消除，每波倍率 +5.0，全部命中 → 全服 ×36.0 加成 72 秒
+	// 業界依據：Relax Gaming「Cod of Thunder Dream Drop」Multiplier Ladder（2026）
+	{ID: "T211", Name: "幸運雪崩魚", Type: TypeSpecial, Multiplier: 17000, HP: 17000, SpawnWeight: 1, Speed: 1, Lifetime: 102, LaborGain: 3400, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T212 幸運崩潰倍率魚：Crash Multiplier 機制，倍率持續上升直到崩潰，完美收割（≥40.0）→ 全服 ×36.5 加成 73 秒
+	// 業界依據：cardsrealm.com「Hybrid Crash Game」趨勢（2026-05）
+	{ID: "T212", Name: "幸運崩潰倍率魚", Type: TypeSpecial, Multiplier: 18000, HP: 18000, SpawnWeight: 1, Speed: 1, Lifetime: 104, LaborGain: 3600, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T213 幸運倍率梯魚：Multiplier Ladder 機制，每次擊破提升梯度（Lv.1-10），Lv.10 → 全服 ×37.0 加成 74 秒
+	// 業界依據：Relax Gaming「Cod of Thunder Dream Drop」Multiplier Ladder（2026）
+	{ID: "T213", Name: "幸運倍率梯魚", Type: TypeSpecial, Multiplier: 19000, HP: 19000, SpawnWeight: 1, Speed: 1, Lifetime: 106, LaborGain: 3800, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T214 幸運冰釣輪盤魚：Ice Fishing Wheel 機制，3 次旋轉（最高 ×5000），最高單次 ≥2000 → 全服 ×37.5 加成 75 秒
+	// 業界依據：Evolution Gaming「Ice Fishing」最高 5000x（2026）
+	{ID: "T214", Name: "幸運冰釣輪盤魚", Type: TypeSpecial, Multiplier: 20000, HP: 20000, SpawnWeight: 1, Speed: 1, Lifetime: 108, LaborGain: 4000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T215 幸運全服雪崩魚：Global Avalanche 機制，5 波全服連鎖消除，每波 ×8.0，全服 ×38.0 加成 76 秒（新史上最高）
+	// 業界依據：Avalanche Reels + Global Multiplier 組合（2026 最新趨勢）
+	{ID: "T215", Name: "幸運全服雪崩魚", Type: TypeSpecial, Multiplier: 22000, HP: 22000, SpawnWeight: 1, Speed: 1, Lifetime: 110, LaborGain: 4400, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

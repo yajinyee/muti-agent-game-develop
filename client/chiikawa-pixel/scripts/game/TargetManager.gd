@@ -177,6 +177,12 @@ const TARGET_SPRITES = {
 	"T208": "res://assets/sprites/targets/T208_path_fish.png",
 	"T209": "res://assets/sprites/targets/T209_chain_eel.png",
 	"T210": "res://assets/sprites/targets/T210_ultimate_miracle.png",
+	# DAY-324 新增
+	"T211": "res://assets/sprites/targets/T211_avalanche.png",
+	"T212": "res://assets/sprites/targets/T212_crash_multiplier.png",
+	"T213": "res://assets/sprites/targets/T213_multiplier_ladder.png",
+	"T214": "res://assets/sprites/targets/T214_ice_fishing_wheel.png",
+	"T215": "res://assets/sprites/targets/T215_global_avalanche.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -322,6 +328,12 @@ const TARGET_COLORS = {
 	"T208": Color(0.0, 1.0, 1.0),    # 青藍（路徑魚，路徑光軌）
 	"T209": Color(0.8, 0.0, 1.0),    # 深紫（連鎖電鰻魚，紫粉電鰻）
 	"T210": Color(1.0, 1.0, 1.0),    # 純白（終極奇蹟魚，新史上最高）
+	# DAY-324 新增
+	"T211": Color(0.0, 0.75, 1.0),   # 冰藍（雪崩魚，Avalanche Cascade）
+	"T212": Color(1.0, 0.27, 0.0),   # 火橙紅（崩潰倍率魚，Crash Multiplier）
+	"T213": Color(1.0, 0.84, 0.0),   # 金色（倍率梯魚，Multiplier Ladder）
+	"T214": Color(0.0, 0.81, 0.82),  # 冰青（冰釣輪盤魚，Ice Fishing Wheel）
+	"T215": Color(0.53, 0.81, 0.98), # 天藍（全服雪崩魚，Global Avalanche 新史上最高）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D

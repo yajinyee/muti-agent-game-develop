@@ -138,6 +138,12 @@ signal lucky_guild_battle(data: Dictionary)
 signal lucky_path_fish(data: Dictionary)
 signal lucky_chain_eel(data: Dictionary)
 signal lucky_ultimate_miracle(data: Dictionary)
+# DAY-324 新增
+signal lucky_avalanche(data: Dictionary)
+signal lucky_crash_multiplier(data: Dictionary)
+signal lucky_multiplier_ladder(data: Dictionary)
+signal lucky_ice_fishing_wheel(data: Dictionary)
+signal lucky_global_avalanche(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -404,6 +410,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_chain_eel", payload)
 		"lucky_ultimate_miracle":
 			emit_signal("lucky_ultimate_miracle", payload)
+		# DAY-324 新增
+		"lucky_avalanche":
+			emit_signal("lucky_avalanche", payload)
+		"lucky_crash_multiplier":
+			emit_signal("lucky_crash_multiplier", payload)
+		"lucky_multiplier_ladder":
+			emit_signal("lucky_multiplier_ladder", payload)
+		"lucky_ice_fishing_wheel":
+			emit_signal("lucky_ice_fishing_wheel", payload)
+		"lucky_global_avalanche":
+			emit_signal("lucky_global_avalanche", payload)
 		"pong":
 			pass
 		"error":

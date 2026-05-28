@@ -1,6 +1,44 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-29（DAY-323 T206-T210 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+## 最後更新：2026-05-29（DAY-324 T211-T215 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+
+## DAY-324 更新（2026-05-29）：T211-T215 五個新 Lucky 魚系統 + 業界研究 ✅
+- **業界研究：** Relax Gaming「Cod of Thunder Dream Drop」Multiplier Ladder（2026）、cardsrealm.com「Hybrid Crash Game」趨勢（2026-05）、Evolution Gaming「Ice Fishing」最高 5000x（2026）、Avalanche Reels + Global Multiplier 組合
+- **T211 幸運雪崩魚（17000x）：** Avalanche Cascade 機制，8 波連鎖消除，每波倍率 +5.0，全服 ×36.0 加成 72 秒（超越 T210 的 ×35.0）
+- **T212 幸運崩潰倍率魚（18000x）：** Crash Multiplier 機制，倍率持續上升直到崩潰，完美收割（≥40.0）→ 全服 ×36.5 加成 73 秒
+- **T213 幸運倍率梯魚（19000x）：** Multiplier Ladder 機制，每次擊破提升梯度（Lv.1-10），Lv.10 → 全服 ×37.0 加成 74 秒
+- **T214 幸運冰釣輪盤魚（20000x）：** Ice Fishing Wheel 機制，3 次旋轉（最高 ×5000），最高單次 ≥2000 → 全服 ×37.5 加成 75 秒
+- **T215 幸運全服雪崩魚（22000x）：** Global Avalanche 機制，5 波全服連鎖消除，每波 ×8.0，全服 ×38.0 加成 76 秒（新史上最高）
+- **Server：** 5 個 handler 檔案 + tables.go + messages.go + game.go 整合
+- **Client：** 5 個 Lucky Panel + GameManager 5 個訊號 + TargetManager T211-T215 + LuckyPanelRegistry 更新
+- **美術：** T211-T215 精靈圖生成完成（`tools/generate_targets_day324.py`）
+  - T211（雪崩）：冰藍色魚身 + 8 波雪崩光芒 + 雪花符號 + 三層冰環（55.2%）
+  - T212（崩潰倍率）：火橙紅色魚身 + 崩潰裂縫 + 上升箭頭 + 12 道爆炸光芒（54.3%）
+  - T213（倍率梯）：金色魚身 + 梯子符號（10 級）+ 16 道金色光芒（53.3%）
+  - T214（冰釣輪盤）：冰青色魚身 + 5 色輪盤扇形 + 冰晶裝飾（62.4%）
+  - T215（全服雪崩）：天藍色大型魚身 + 40 道光芒 + 全球符號 + 五層光環（69.2%）
+- **知識庫更新：** knowhow-log 條目 141/142/143/144/145（DAY-324 五個新機制）
+- **QA 腳本：** `tools/qa_check_day324.py`（71 項驗證，71/71 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-324）
+- **Server 目標物數量：** 122 種（T001-T006 + T101-T215 + B001）
+- **Lucky 系統數量：** 110 個（T106-T215）
+- **Client Lucky Panel 數量：** 116 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry）
+- **Agent 文件數量：** 54 個（agents/ 目錄）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（維持，Shader 系統已建立，需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **最高全服倍率：** T215 全服雪崩 ×38.0（新史上最高，超越 T210 的 ×35.0）
+- **最高個人倍率：** T184 風險等級 ×3000
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最高路徑倍率：** T208 路徑魚最高 ×20,000（Fish Road 機制）
+- **最高輪盤倍率：** T214 冰釣輪盤最高 ×5000（Ice Fishing Wheel 機制）
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
+
+
 
 ## DAY-323 更新（2026-05-29）：T206-T210 五個新 Lucky 魚系統 + 業界研究 ✅
 - **業界研究：** Games Global Fever Boost™（2026-05-28 最新）、Fishing Frenzy Chapter 3 Guild Wars（2026-05-27）、Fish Road 路徑機制、Royal Fishing 紫粉色電鰻升級版

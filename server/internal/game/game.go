@@ -191,6 +191,13 @@ type Game struct {
 	luckyChainEel        *luckyChainEelManager
 	luckyUltimateMiracle *luckyUltimateMiracleManager
 
+	// DAY-324 新增
+	luckyAvalanche        *luckyAvalancheManager
+	luckyCrashMultiplier  *luckyCrashMultiplierManager
+	luckyMultiplierLadder *luckyMultiplierLadderManager
+	luckyIceFishingWheel  *luckyIceFishingWheelManager
+	luckyGlobalAvalanche  *luckyGlobalAvalancheManager
+
 	lastTick time.Time
 }
 
@@ -348,6 +355,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyPathFish:        newLuckyPathFishManager(),
 		luckyChainEel:        newLuckyChainEelManager(),
 		luckyUltimateMiracle: newLuckyUltimateMiracleManager(),
+
+		// DAY-324 新增
+		luckyAvalanche:        newLuckyAvalancheManager(),
+		luckyCrashMultiplier:  newLuckyCrashMultiplierManager(),
+		luckyMultiplierLadder: newLuckyMultiplierLadderManager(),
+		luckyIceFishingWheel:  newLuckyIceFishingWheelManager(),
+		luckyGlobalAvalanche:  newLuckyGlobalAvalancheManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -1315,6 +1329,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyChainEel.tryLuckyChainEelFish(g, p)
 			case isLuckyUltimateMiracleFish(t.Def.ID):
 				g.luckyUltimateMiracle.tryLuckyUltimateMiracleFish(g, p)
+			// DAY-324 新增
+			case isLuckyAvalancheFish(t.Def.ID):
+				g.luckyAvalanche.tryLuckyAvalancheFish(g, p)
+			case isLuckyCrashMultiplierFish(t.Def.ID):
+				g.luckyCrashMultiplier.tryLuckyCrashMultiplierFish(g, p)
+			case isLuckyMultiplierLadderFish(t.Def.ID):
+				g.luckyMultiplierLadder.tryLuckyMultiplierLadderFish(g, p)
+			case isLuckyIceFishingWheelFish(t.Def.ID):
+				g.luckyIceFishingWheel.tryLuckyIceFishingWheelFish(g, p)
+			case isLuckyGlobalAvalancheFish(t.Def.ID):
+				g.luckyGlobalAvalanche.tryLuckyGlobalAvalancheFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -1352,6 +1377,8 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			if g.luckyFisherWild.isWildTarget(t.InstanceID) {
 				g.luckyFisherWild.onWildKilled(g, t.InstanceID)
 			}
+			// DAY-324 倍率梯：擊破通知
+			g.luckyMultiplierLadder.onKill(g, playerID)
 			// DAY-305 龍怒蓄積：射擊計數
 			if g.luckyDragonWrathV2.isDragonWrathV2Active(playerID) {
 				g.luckyDragonWrathV2.addWrathV2(playerID)
