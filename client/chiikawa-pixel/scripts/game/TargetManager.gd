@@ -109,6 +109,18 @@ const TARGET_SPRITES = {
 	"T178": "res://assets/sprites/targets/T178_fate_wheel.png",
 	"T179": "res://assets/sprites/targets/T179_divine_realm.png",
 	"T180": "res://assets/sprites/targets/T180_final_power.png",
+	# DAY-315 新增
+	"T181": "res://assets/sprites/targets/T181_mutation.png",
+	"T182": "res://assets/sprites/targets/T182_arctic_storm.png",
+	"T183": "res://assets/sprites/targets/T183_fisher_wild.png",
+	"T184": "res://assets/sprites/targets/T184_risk_level.png",
+	"T185": "res://assets/sprites/targets/T185_cosmic_pulse.png",
+	# DAY-316 新增
+	"T186": "res://assets/sprites/targets/T186_mirror_universe.png",
+	"T187": "res://assets/sprites/targets/T187_gravity_field.png",
+	"T188": "res://assets/sprites/targets/T188_time_acceleration.png",
+	"T189": "res://assets/sprites/targets/T189_nebula_vortex.png",
+	"T190": "res://assets/sprites/targets/T190_cosmic_judgment.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -218,6 +230,18 @@ const TARGET_COLORS = {
 	"T178": Color(0.97, 0.50, 0.09), # 火橙命運之輪魚
 	"T179": Color(0.98, 0.66, 0.15), # 神聖橙金神域降臨魚
 	"T180": Color(0.72, 0.07, 0.07), # 深紅終焉之力魚
+	# DAY-315 新增
+	"T181": Color(0.6, 0.0, 0.9),    # 深紫突變魚（150種突變）
+	"T182": Color(0.0, 0.8, 1.0),    # 冰藍北極風暴魚（8波快速連擊）
+	"T183": Color(0.2, 0.9, 0.3),    # 翠綠漁夫野生魚（3個Wild目標）
+	"T184": Color(1.0, 0.2, 0.0),    # 深紅風險等級魚（最高×3000）
+	"T185": Color(0.7, 0.0, 1.0),    # 深紫宇宙脈衝魚（全場HP-45%）
+	# DAY-316 新增
+	"T186": Color(0.0, 0.3, 0.9),    # 深藍鏡像宇宙魚（複製最強3個目標）
+	"T187": Color(0.5, 0.0, 0.8),    # 深紫引力場魚（引力吸引+爆炸）
+	"T188": Color(1.0, 0.4, 0.0),    # 火橙時間加速魚（射擊速度×3.0）
+	"T189": Color(0.4, 0.0, 0.7),    # 深紫星雲漩渦魚（每秒HP-8%）
+	"T190": Color(0.8, 0.0, 0.0),    # 深紅宇宙審判魚（全場清空×14.0）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
@@ -330,7 +354,15 @@ func _create_target_node(data: Dictionary) -> Node2D:
 		var mult_label = Label.new()
 		mult_label.text = "x%.0f" % multiplier
 		mult_label.position = Vector2(-20, 36)
-		mult_label.add_theme_font_size_override("font_size", 14)
+		# 視覺清晰度改善（DAY-317）：高倍率用更大字體
+		var font_size = 14
+		if multiplier >= 500:
+			font_size = 20
+		elif multiplier >= 100:
+			font_size = 17
+		elif multiplier >= 30:
+			font_size = 15
+		mult_label.add_theme_font_size_override("font_size", font_size)
 		mult_label.modulate = _mult_label_color(multiplier)
 		mult_label.name = "MultLabel"
 		container.add_child(mult_label)
@@ -364,19 +396,31 @@ func _create_target_node(data: Dictionary) -> Node2D:
 
 func _add_glow(node: Node2D, multiplier: float) -> void:
 	var glow = ColorRect.new()
-	glow.size = Vector2(80, 80)
-	glow.position = Vector2(-40, -40)
+	# 視覺清晰度改善（DAY-317）：依倍率調整光暈大小
+	var glow_size = 80.0
+	if multiplier >= 1000:
+		glow_size = 120.0
+	elif multiplier >= 500:
+		glow_size = 100.0
+	elif multiplier >= 100:
+		glow_size = 90.0
+	glow.size = Vector2(glow_size, glow_size)
+	glow.position = -Vector2(glow_size / 2, glow_size / 2)
 	glow.z_index = -1
-	if multiplier >= 50:
-		glow.color = Color(1.0, 0.4, 0.1, 0.3)
+	if multiplier >= 1000:
+		glow.color = Color(1.0, 0.0, 0.5, 0.45)   # 宇宙粉紅（超高倍率）
+	elif multiplier >= 500:
+		glow.color = Color(0.8, 0.0, 1.0, 0.40)   # 深紫（極高倍率）
+	elif multiplier >= 100:
+		glow.color = Color(1.0, 0.4, 0.1, 0.35)   # 火橙（高倍率）
 	else:
-		glow.color = Color(1.0, 0.85, 0.0, 0.25)
+		glow.color = Color(1.0, 0.85, 0.0, 0.25)  # 金色（中高倍率）
 	node.add_child(glow)
 	var tween = glow.create_tween().set_loops()
 	tween.tween_property(glow, "modulate:a", 0.1, 0.4)
 	tween.tween_property(glow, "modulate:a", 1.0, 0.4)
 
-# Lucky 特殊魚標記（T106-T175）— 左上角 LUCKY 徽章 + 脈動光環
+# Lucky 特殊魚標記（T106-T190）— 左上角 LUCKY 徽章 + 脈動光環
 func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 脈動光環（比普通光暈更大更亮）
 	var ring = ColorRect.new()
@@ -386,14 +430,15 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 依倍率範圍選顏色
 	var tid_num = int(def_id.substr(1))
 	var ring_color: Color
-	if tid_num >= 181:
+	if tid_num >= 186:
+		ring_color = Color(1.0, 0.0, 0.5, 1.0)     # 宇宙粉紅（T186+，DAY-316 最高階）
+	elif tid_num >= 181:
 		ring_color = Color(1.0, 0.85, 0.0, 0.95)   # 最亮金（T181+，DAY-315 最高階）
 	elif tid_num >= 171:
 		ring_color = Color(1.0, 0.85, 0.0, 0.85)   # 超亮金（T171+，Progressive Jackpot）
 	elif tid_num >= 166:
 		ring_color = Color(1.0, 1.0, 0.8, 0.70)    # 極亮白金（T166+，DAY-312 最高階）
 	elif tid_num >= 141:
-		ring_color = Color(1.0, 1.0, 0.5, 0.60)    # 超亮金（T141+，最高階）
 		ring_color = Color(1.0, 1.0, 0.5, 0.60)    # 超亮金（T141+，最高階）
 	elif tid_num >= 131:
 		ring_color = Color(1.0, 0.95, 0.0, 0.50)   # 亮金（T131-T140）
@@ -418,10 +463,14 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# LUCKY 徽章（左上角小標籤）
 	var badge = Label.new()
 	# Progressive Jackpot 系列用特殊圖示
-	if tid_num >= 171:
-		badge.text = "🎰"
+	if tid_num >= 186:
+		badge.text = "🌌"  # 宇宙（T186+，DAY-316 最高階）
+	elif tid_num >= 181:
+		badge.text = "💫"  # 宇宙星（T181+，DAY-315 最高階）
+	elif tid_num >= 171:
+		badge.text = "🎰"  # 老虎機（T171+，Progressive Jackpot）
 	else:
-		badge.text = "✨"
+		badge.text = "✨"  # 閃光（T106-T170）
 	badge.position = Vector2(-48, -68)
 	badge.add_theme_font_size_override("font_size", 14)
 	badge.z_index = 10

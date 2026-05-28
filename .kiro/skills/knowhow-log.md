@@ -4548,3 +4548,42 @@ T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 
 - 每個 DAY 的最高全服倍率都在遞增，給玩家持續的「新最高」驚喜感
 - 全服倍率加成時間也在遞增（35s → 36s → 37s → 38s → 39s → 40s）
 - 教訓：每次新增最高倍率機制，要在 announce 中明確標注「新最高」，讓玩家感受到進步
+
+## 126. TargetManager 新增目標物時必須同步更新三個地方（DAY-317）
+- **問題：** DAY-315/316 新增了 T181-T190，但 TargetManager.gd 的 TARGET_SPRITES 和 TARGET_COLORS 只到 T180
+- **原因：** 每次新增目標物時，只更新了 Server（tables.go + handler）和 Client Lucky Panel，忘記更新 TargetManager 的 Sprite 路徑和備用顏色
+- **解決：** 補齊 T181-T190 的 TARGET_SPRITES 路徑和 TARGET_COLORS 備用顏色
+- **教訓：** 新增目標物時必須同步更新以下三個地方：
+  1. `server/internal/data/tables.go`（目標物定義）
+  2. `server/internal/game/game.go`（handler 整合）
+  3. `client/chiikawa-pixel/scripts/game/TargetManager.gd`（Sprite 路徑 + 備用顏色）
+- **預防：** QA 腳本應包含 TargetManager Sprite 路徑驗證（DAY-317 已加入）
+
+## 127. 視覺清晰度改善：倍率標籤和光暈的分層設計（DAY-317）
+- **問題：** 視覺清晰度 7/10，高倍率目標（×500, ×1000+）和低倍率目標視覺差異不夠明顯
+- **解決：** 
+  - 倍率標籤字體大小分層：≥500x → 20px，≥100x → 17px，≥30x → 15px，其他 → 14px
+  - 光暈大小分層：≥1000x → 120px，≥500x → 100px，≥100x → 90px，其他 → 80px
+  - 光暈顏色分層：≥1000x 宇宙粉紅，≥500x 深紫，≥100x 火橙，其他金色
+- **教訓：** 視覺層次設計要和數值層次對應，讓玩家一眼就能識別高價值目標
+- **業界原則（binary.ph 2026-05-16）：** 顏色和大小必須在多個資產中保持一致，形成清晰的視覺語言
+
+## 128. Lucky Badge 圖示分層設計（DAY-317）
+- **設計：** 依目標物等級使用不同圖示，強化視覺層次感
+  - T186+（DAY-316 最高階）：🌌（宇宙）
+  - T181+（DAY-315 最高階）：💫（星）
+  - T171+（Progressive Jackpot）：🎰（老虎機）
+  - T106+（一般 Lucky）：✨（閃光）
+- **教訓：** 圖示選擇要和主題對應，宇宙系列用宇宙圖示，Jackpot 系列用老虎機圖示
+- **注意：** 圖示在 HTML5 環境中需要確認字體支援，部分 emoji 可能顯示為方塊
+
+## 129. 重複賦值 bug 的發現（DAY-317）
+- **問題：** TargetManager.gd 的 `_add_lucky_badge` 函數中，T141+ 的 `ring_color` 有兩行相同賦值
+  ```gdscript
+  elif tid_num >= 141:
+      ring_color = Color(1.0, 1.0, 0.5, 0.60)    # 超亮金（T141+，最高階）
+      ring_color = Color(1.0, 1.0, 0.5, 0.60)    # 超亮金（T141+，最高階）  ← 重複
+  ```
+- **原因：** 複製貼上時沒有刪除重複行
+- **解決：** 在 DAY-317 修復時順帶清除重複行
+- **教訓：** 每次修改 if-elif 鏈時，要檢查是否有重複賦值

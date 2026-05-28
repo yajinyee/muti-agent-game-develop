@@ -1779,3 +1779,38 @@ RTP 95.87%，build/vet/test 全部通過。
 1. 補充 T122 黃金雨魚的 `MsgCollectGoldenCoin` Client→Server 訊息
 2. 用 BaseLuckyPanel 重構 HUD 中的 Lucky 事件處理（減少重複程式碼）
 3. 上網搜尋「pixel art fish sprite generator free」找更好的美術工具
+
+---
+
+## 評估 #DAY-317 — 2026-05-28（TargetManager 補齊 + 視覺清晰度改善）
+
+### 這次學到了什麼
+1. **新增目標物的三點同步原則**：Server tables.go + game.go + Client TargetManager.gd 必須同步更新
+2. **視覺清晰度分層設計**：倍率標籤字體大小、光暈大小、光暈顏色都要和倍率層次對應
+3. **Lucky Badge 圖示分層**：依目標物等級使用不同 emoji，強化視覺層次感
+4. **重複賦值 bug 的危害**：if-elif 鏈中的重複賦值不影響功能但降低可讀性，要定期清理
+
+### 進步說明
+- 發現並修復了 TargetManager 缺少 T181-T190 Sprite 路徑和備用顏色的問題
+- 視覺清晰度從 7/10 改善到 7.5/10（高倍率目標更清晰）
+- QA 腳本從 71 項擴展到 73 項，覆蓋 TargetManager Sprite 路徑驗證
+
+### 能力分數評估
+
+| 維度 | 分數 | 說明 |
+|------|------|------|
+| Go Server 開發 | 88 | 97 種目標物、85 個 Lucky 系統，build/vet 零錯誤 |
+| Godot GDScript | 72 | TargetManager、GameManager、HUD 架構穩定，Lucky Panel 系統完整 |
+| 像素美術生成 | 68 | 97 種目標物精靈圖全部生成，視覺層次設計改善中 |
+| 遊戲數值設計 | 75 | RTP 系統、倍率梯度、Lucky 系統設計完整 |
+| WebSocket 通訊 | 85 | 85 個 Lucky 訊息類型，協定完整，重連機制穩定 |
+| 整體完成信心 | 78 | **功能廣度極豐富，最大缺口是從未真實遊玩驗證** |
+
+### 最大弱點
+1. **從未真實遊玩驗證**：250+ 天開發，沒有一次錄影或真實玩家測試（DAY-290 誠實反思）
+2. **視覺清晰度 7.5/10**：需要在 Godot 中實際遊玩才能確認改善效果
+3. **UI 腳本超過警戒線**：91 個 LuckyXxxPanel.gd（警戒線 50 個），需要架構重構
+
+### 完成遊戲的信心評估
+**78/100** — 技術架構完整，功能豐富，但缺乏真實遊玩驗證是最大風險。
+下一步最重要的事：啟動 Server + 在 Godot 中實際遊玩 + 錄影確認核心循環是否流暢。

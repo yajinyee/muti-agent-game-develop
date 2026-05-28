@@ -1,6 +1,37 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-28（DAY-316 T186-T190 五個新 Lucky 魚系統 + 新最高全服倍率 ×19.0 + QA 71/71 + GitHub 同步）
+## 最後更新：2026-05-28（DAY-317 TargetManager T181-T190 補齊 + 視覺清晰度改善 + QA 73/73 + GitHub 同步）
+
+## DAY-317 更新（2026-05-28）：TargetManager T181-T190 補齊 + 視覺清晰度改善 ✅
+- **問題發現：** TargetManager.gd 的 TARGET_SPRITES 和 TARGET_COLORS 只到 T180，缺少 T181-T190（DAY-315/316 新增的目標物）
+- **修復 TARGET_SPRITES：** 補齊 T181-T190 的 Sprite 路徑（mutation/arctic_storm/fisher_wild/risk_level/cosmic_pulse/mirror_universe/gravity_field/time_acceleration/nebula_vortex/cosmic_judgment）
+- **修復 TARGET_COLORS：** 補齊 T181-T190 的備用顏色（深紫/冰藍/翠綠/深紅/深紫/深藍/深紫/火橙/深紫/深紅）
+- **Lucky Badge 圖示升級：** T186+ 使用 🌌（宇宙），T181+ 使用 💫（星），T171+ 使用 🎰（老虎機），T106+ 使用 ✨（閃光）
+- **Lucky Badge 光環顏色升級：** T186+ 宇宙粉紅（1.0, 0.0, 0.5, 1.0），T181+ 最亮金（0.95 alpha）
+- **視覺清晰度改善（7/10 → 目標 8/10）：**
+  - 倍率標籤字體大小依倍率調整：≥500x → 20px，≥100x → 17px，≥30x → 15px，其他 → 14px
+  - 光暈大小依倍率調整：≥1000x → 120px，≥500x → 100px，≥100x → 90px，其他 → 80px
+  - 光暈顏色分層：≥1000x 宇宙粉紅，≥500x 深紫，≥100x 火橙，其他金色
+  - 修復重複的 `ring_color` 賦值 bug（T141+ 有兩行相同賦值）
+- **QA 腳本：** `tools/qa_check_day317.py`（73 項驗證，73/73 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-317）
+- **Server 目標物數量：** 97 種（T001-T006 + T101-T190 + B001）
+- **Lucky 系統數量：** 85 個（T106-T190）
+- **Client Lucky Panel 數量：** 91 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry）
+- **Agent 文件數量：** 54 個（agents/ 目錄）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（從 7/10 改善，高倍率目標更清晰）
+- **核心循環流暢度：** 8/10
+- **最高倍率機制：** T190 宇宙審判全服 ×19.0
+- **最高個人倍率：** T184 風險等級最高 ×3000
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
+
+
 
 ## DAY-316 更新（2026-05-28）：T186-T190 五個新 Lucky 魚系統 + 新最高全服倍率 ×19.0 ✅
 - **業界研究：** Royal Fishing「Mirror Fish」量子糾纏、Black Hole Fishing（SDG Games, 2026）引力吸引、Fishing Fortune「time warp」升級版、Fishing Carnival「vortex anemone」星雲能量、Fishing Fortune「ultimate judgment」宇宙終極
