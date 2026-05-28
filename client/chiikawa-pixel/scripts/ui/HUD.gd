@@ -478,27 +478,70 @@ func _show_fallback_banner(text: String, color: Color, duration: float = 2.5) ->
 			_fallback_banner.visible = false
 	)
 
-# ── DAY-297 Combo UI ──────────────────────────────────────────
+# ── DAY-297/322 Combo UI ──────────────────────────────────────
 
 func _create_combo_label() -> void:
 	_combo_label = Label.new()
 	_combo_label.name = "ComboLabel"
-	_combo_label.position = Vector2(830, 8)
-	_combo_label.size = Vector2(160, 30)
-	_combo_label.add_theme_font_size_override("font_size", 16)
+	_combo_label.position = Vector2(820, 6)
+	_combo_label.size = Vector2(200, 36)
+	_combo_label.add_theme_font_size_override("font_size", 18)
 	_combo_label.modulate = Color(1.0, 0.85, 0.0)
 	_combo_label.visible = false
 	add_child(_combo_label)
+	# DAY-322：連接 ComboSystem 訊號（如果存在）
+	call_deferred("_connect_combo_system")
 
-func _update_combo_display() -> void:
+func _connect_combo_system() -> void:
+	var tree = get_tree()
+	if tree == null:
+		return
+	var combo_sys = tree.get_root().find_child("ComboSystem", true, false)
+	if is_instance_valid(combo_sys):
+		if combo_sys.has_signal("combo_updated") and not combo_sys.combo_updated.is_connected(_on_combo_updated):
+			combo_sys.combo_updated.connect(_on_combo_updated)
+		if combo_sys.has_signal("combo_milestone") and not combo_sys.combo_milestone.is_connected(_on_combo_milestone):
+			combo_sys.combo_milestone.connect(_on_combo_milestone)
+
+func _on_combo_updated(count: int) -> void:
 	if not is_instance_valid(_combo_label):
 		return
-	var combo = GameManager.get_combo_count()
-	var bonus = GameManager.get_combo_mult_bonus()
+	if count < 5:
+		_combo_label.visible = false
+		return
+	_combo_label.visible = true
+	_combo_label.text = "🔥 COMBO x%d" % count
+	if count >= 50:
+		_combo_label.modulate = Color(1.0, 0.0, 0.5)
+	elif count >= 20:
+		_combo_label.modulate = Color(0.8, 0.0, 1.0)
+	elif count >= 10:
+		_combo_label.modulate = Color(1.0, 0.3, 0.1)
+	else:
+		_combo_label.modulate = Color(1.0, 0.85, 0.0)
+	_last_combo = count
+
+func _on_combo_milestone(count: int) -> void:
+	if not is_instance_valid(_combo_label):
+		return
+	var tween = _combo_label.create_tween()
+	tween.tween_property(_combo_label, "scale", Vector2(1.6, 1.6), 0.08)
+	tween.tween_property(_combo_label, "scale", Vector2(1.0, 1.0), 0.12)
+
+func _update_combo_display() -> void:
+	# 備用：如果 ComboSystem 不存在，用 GameManager 的 combo 數據
+	if not is_instance_valid(_combo_label):
+		return
+	var combo = 0
+	if GameManager.has_method("get_combo_count"):
+		combo = GameManager.get_combo_count()
 	if combo < 5:
 		_combo_label.visible = false
 		return
 	_combo_label.visible = true
+	var bonus = 0.0
+	if GameManager.has_method("get_combo_mult_bonus"):
+		bonus = GameManager.get_combo_mult_bonus()
 	_combo_label.text = "🔥 COMBO x%d (+%.0f%%)" % [combo, bonus * 100]
 	if combo >= 30:
 		_combo_label.modulate = Color(1.0, 0.3, 0.1)
@@ -508,7 +551,6 @@ func _update_combo_display() -> void:
 		_combo_label.modulate = Color(1.0, 0.85, 0.0)
 	else:
 		_combo_label.modulate = Color(1.0, 1.0, 0.5)
-	# 新 Combo 等級時放大動畫
 	if combo != _last_combo and combo in [5, 10, 20, 30]:
 		var tween = _combo_label.create_tween()
 		tween.tween_property(_combo_label, "scale", Vector2(1.4, 1.4), 0.1)
