@@ -144,6 +144,8 @@ func _init_all_panels() -> void:
 	var root = get_tree().get_root()
 	_scan_and_register(root)
 	print("[LuckyPanelRegistry] 已註冊 %d 個 Lucky Panel" % _panels.size())
+	# DAY-320：掃描完成後自動連接所有訊號
+	connect_all_signals()
 
 func _scan_and_register(node: Node) -> void:
 	## 遞迴掃描節點，找到所有 Lucky Panel
@@ -172,15 +174,28 @@ func get_panel_count() -> int:
 
 ## 連接 GameManager 的所有 Lucky 訊號到對應 Panel
 ## 這個方法取代 HUD.gd 中的 65+ 個 connect() 呼叫
+## DAY-320：修復設計缺陷，真正連接訊號到 Panel 的 handle_event()
 func connect_all_signals() -> void:
+	var connected = 0
+	var skipped = 0
 	for signal_name in SIGNAL_TO_PANEL:
 		if not GameManager.has_signal(signal_name):
+			skipped += 1
 			continue
 		var panel = _panels.get(signal_name, null)
-		if panel == null:
+		if not is_instance_valid(panel):
+			skipped += 1
 			continue
-		# 每個 Panel 自己在 _ready() 中連接訊號，這裡只做驗證
-		print("[LuckyPanelRegistry] ✓ %s → %s" % [signal_name, panel.name])
+		if not panel.has_method("handle_event"):
+			skipped += 1
+			continue
+		# 連接 GameManager 訊號到 Panel 的 handle_event()
+		# 使用 Callable 確保正確綁定
+		var callable = Callable(panel, "handle_event")
+		if not GameManager.is_connected(signal_name, callable):
+			GameManager.connect(signal_name, callable)
+			connected += 1
+	print("[LuckyPanelRegistry] 已連接 %d 個訊號，跳過 %d 個" % [connected, skipped])
 
 ## 廣播事件到所有 Panel（用於全局事件如 big_bang）
 func broadcast_event(event_name: String, data: Dictionary) -> void:
