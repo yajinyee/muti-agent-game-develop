@@ -8,6 +8,18 @@ extends Node
 ## 所有已註冊的 Lucky Panel 實例
 var _panels: Dictionary = {}
 
+## Progressive Jackpot Panel 映射（tier → Panel 腳本名稱）
+## 這些 Panel 統一由 lucky_jackpot_pool 訊號分發
+const JACKPOT_TIER_TO_PANEL: Dictionary = {
+	"mini":    "LuckyJackpotMiniPanel",
+	"minor":   "LuckyJackpotMinorPanel",
+	"major":   "LuckyJackpotMajorPanel",
+	"grand":   "LuckyJackpotGrandPanel",
+	"trigger": "LuckyJackpotTriggerPanel",
+}
+## Jackpot Panel 實例（tier → Panel）
+var _jackpot_panels: Dictionary = {}
+
 ## 訊號→Panel 映射表（訊號名稱 → Panel 腳本名稱）
 const SIGNAL_TO_PANEL: Dictionary = {
 	# DAY-292
@@ -91,12 +103,13 @@ const SIGNAL_TO_PANEL: Dictionary = {
 	"lucky_spacetime_rift":    "LuckySpacetimeRiftPanel",
 	"lucky_holy_judgment":     "LuckyHolyJudgmentPanel",
 	"lucky_big_bang":          "LuckyBigBangPanel",
-	# DAY-313 Progressive Jackpot
-	"lucky_jackpot_mini":      "LuckyJackpotMiniPanel",
-	"lucky_jackpot_minor":     "LuckyJackpotMinorPanel",
-	"lucky_jackpot_major":     "LuckyJackpotMajorPanel",
-	"lucky_jackpot_grand":     "LuckyJackpotGrandPanel",
-	"lucky_jackpot_trigger":   "LuckyJackpotTriggerPanel",
+	# DAY-313 Progressive Jackpot（統一由 lucky_jackpot_pool 訊號分發）
+	# 注意：這 5 個 Panel 都監聽 lucky_jackpot_pool，由 _dispatch_jackpot_pool 分發
+	# "lucky_jackpot_mini":   "LuckyJackpotMiniPanel",   # 由 lucky_jackpot_pool 分發
+	# "lucky_jackpot_minor":  "LuckyJackpotMinorPanel",  # 由 lucky_jackpot_pool 分發
+	# "lucky_jackpot_major":  "LuckyJackpotMajorPanel",  # 由 lucky_jackpot_pool 分發
+	# "lucky_jackpot_grand":  "LuckyJackpotGrandPanel",  # 由 lucky_jackpot_pool 分發
+	# "lucky_jackpot_trigger":"LuckyJackpotTriggerPanel",# 由 lucky_jackpot_pool 分發
 	# DAY-314 新增
 	"lucky_multiverse":        "LuckyMultiversePanel",
 	"lucky_time_loop":         "LuckyTimeLoopPanel",
@@ -156,6 +169,12 @@ func _scan_and_register(node: Node) -> void:
 			if path.ends_with(panel_class + ".gd"):
 				_panels[signal_name] = node
 				break
+		# 掃描 Jackpot Panel
+		for tier in JACKPOT_TIER_TO_PANEL:
+			var panel_class = JACKPOT_TIER_TO_PANEL[tier]
+			if path.ends_with(panel_class + ".gd"):
+				_jackpot_panels[tier] = node
+				break
 	for child in node.get_children():
 		_scan_and_register(child)
 
@@ -195,7 +214,37 @@ func connect_all_signals() -> void:
 		if not GameManager.is_connected(signal_name, callable):
 			GameManager.connect(signal_name, callable)
 			connected += 1
+	# 連接 lucky_jackpot_pool 訊號（分發到各 Jackpot Panel）
+	if GameManager.has_signal("lucky_jackpot_pool"):
+		var callable = Callable(self, "_dispatch_jackpot_pool")
+		if not GameManager.is_connected("lucky_jackpot_pool", callable):
+			GameManager.connect("lucky_jackpot_pool", callable)
+			connected += 1
 	print("[LuckyPanelRegistry] 已連接 %d 個訊號，跳過 %d 個" % [connected, skipped])
+	print("[LuckyPanelRegistry] Jackpot Panel 數量：%d" % _jackpot_panels.size())
+
+## 分發 lucky_jackpot_pool 訊號到對應 Jackpot Panel
+func _dispatch_jackpot_pool(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var tier = data.get("tier", "")
+	# pool_update 廣播給所有 Jackpot Panel
+	if event == "pool_update":
+		for t in _jackpot_panels:
+			var panel = _jackpot_panels[t]
+			if is_instance_valid(panel) and panel.has_method("handle_event"):
+				panel.handle_event(data)
+		return
+	# jackpot_win 只發給對應 tier 的 Panel
+	if tier != "" and _jackpot_panels.has(tier):
+		var panel = _jackpot_panels[tier]
+		if is_instance_valid(panel) and panel.has_method("handle_event"):
+			panel.handle_event(data)
+	# T175 trigger 魚：發給 trigger Panel
+	var target_id = data.get("target_id", "")
+	if target_id == "T175" and _jackpot_panels.has("trigger"):
+		var panel = _jackpot_panels["trigger"]
+		if is_instance_valid(panel) and panel.has_method("handle_event"):
+			panel.handle_event(data)
 
 ## 廣播事件到所有 Panel（用於全局事件如 big_bang）
 func broadcast_event(event_name: String, data: Dictionary) -> void:

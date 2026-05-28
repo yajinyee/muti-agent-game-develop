@@ -4694,3 +4694,20 @@ T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 
   3. `_init_all_panels()` 掃描完成後自動呼叫 `connect_all_signals()`
 - **教訓：** 設計文件說「Panel 自行連接」但沒有實際實作，要用 QA 腳本驗證訊號是否真的連接了
 - **驗證方法：** 在 Godot 中執行遊戲，觀察 `[LuckyPanelRegistry] 已連接 X 個訊號` 的 print 輸出
+
+## 33. Main.tscn 缺少 Lucky Panel 節點（DAY-321）
+- **問題：** LuckyPanelRegistry 的 `_scan_and_register()` 掃描場景樹找 Lucky Panel，但 Main.tscn 中沒有這些節點
+- **根本原因：** 每次新增 Lucky Panel 腳本時，只更新了 GDScript 和 LuckyPanelRegistry 的映射表，但沒有在 Main.tscn 中加入對應節點
+- **解決：** 建立 `tools/generate_main_tscn.py` 自動生成 Main.tscn，包含所有 100 個 Lucky Panel 節點
+- **教訓：** Godot 場景中的節點必須在 .tscn 文件中明確定義，腳本存在 ≠ 節點存在
+- **預防：** 每次新增 Lucky Panel 腳本後，必須重新執行 generate_main_tscn.py 更新 Main.tscn
+
+## 34. Progressive Jackpot 訊號分發架構（DAY-321）
+- **問題：** LuckyPanelRegistry 期望 5 個獨立 Jackpot 訊號（lucky_jackpot_mini 等），但 Server 只發送 `lucky_jackpot_pool`
+- **根本原因：** 設計時沒有統一 Server 訊號名稱和 Client Panel 映射
+- **解決：** 在 LuckyPanelRegistry 加入 `_jackpot_panels` 字典和 `_dispatch_jackpot_pool()` 分發方法
+  - `pool_update` 事件：廣播給所有 5 個 Jackpot Panel（顯示獎池金額）
+  - `jackpot_win` 事件：只發給對應 tier 的 Panel（mini/minor/major/grand）
+  - T175 trigger 魚：額外發給 trigger Panel
+- **教訓：** 當 Server 用統一訊號但 Client 需要分發時，在 Registry 層做分發，不要在 GameManager 層做
+- **模式：** `_dispatch_xxx()` 方法是處理「一對多」訊號分發的標準模式

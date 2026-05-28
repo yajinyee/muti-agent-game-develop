@@ -1,4 +1,4 @@
-[gd_scene load_steps=7 format=3 uid="uid://main"]
+[gd_scene load_steps=109 format=3 uid="uid://main"]
 
 [ext_resource type="Script" path="res://scripts/game/TargetManager.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/game/Cannon.gd" id="2"]
@@ -6,6 +6,110 @@
 [ext_resource type="Script" path="res://scripts/game/BackgroundManager.gd" id="4"]
 [ext_resource type="Script" path="res://scripts/game/BonusGame.gd" id="5"]
 [ext_resource type="Script" path="res://scripts/game/CharacterAnimator.gd" id="6"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyEventSystem.gd" id="7"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyPanelRegistry.gd" id="8"]
+[ext_resource type="Script" path="res://scripts/ui/BaseLuckyPanel.gd" id="9"]
+
+[ext_resource type="Script" path="res://scripts/ui/LuckyChainLightningPanel.gd" id="10"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCrabTorpedoPanel.gd" id="11"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyVortexPanel.gd" id="12"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGoldenDragonPanel.gd" id="13"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyThunderLobsterPanel.gd" id="14"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyAwakenedPhoenixPanel.gd" id="15"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyShockwaveBombPanel.gd" id="16"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDrillTorpedoPanel.gd" id="17"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTimeFreezePanel.gd" id="18"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyChainExplosionPanel.gd" id="19"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyChainLongKingPanel.gd" id="20"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDragonShotgunPanel.gd" id="21"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyRocketCannonPanel.gd" id="22"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDeepWhirlpoolPanel.gd" id="23"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyVampireMultPanel.gd" id="24"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyMirrorFishPanel.gd" id="25"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGoldenRainPanel.gd" id="26"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyFreezeBombPanel.gd" id="27"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyThunderStormPanel.gd" id="28"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyLuckyWheelPanel.gd" id="29"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyJackpotFishPanel.gd" id="30"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCoopFishPanel.gd" id="31"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTimeWarpPanel.gd" id="32"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyChainMeteorPanel.gd" id="33"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCrashFishPanel.gd" id="34"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyElectricEelPanel.gd" id="35"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyAnglerFishPanel.gd" id="36"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyBlackHolePanel.gd" id="37"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyBountyHunterPanel.gd" id="38"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTsunamiPanel.gd" id="39"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDragonWrathV2Panel.gd" id="40"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyHumpbackWhalePanel.gd" id="41"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyLegendDragonPanel.gd" id="42"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGuildWarPanel.gd" id="43"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyQualityFishPanel.gd" id="44"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTornadoPanel.gd" id="45"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyEarthquakePanel.gd" id="46"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyVolcanoPanel.gd" id="47"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCosmicRayPanel.gd" id="48"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDivineDragonPanel.gd" id="49"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyQuantumPanel.gd" id="50"]
+[ext_resource type="Script" path="res://scripts/ui/LuckySupernovaPanel.gd" id="51"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyInfinitePanel.gd" id="52"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGenesisPanel.gd" id="53"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyRebirthPanel.gd" id="54"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyAwakenedCrocPanel.gd" id="55"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyVampireV2Panel.gd" id="56"]
+[ext_resource type="Script" path="res://scripts/ui/LuckySuperAwakenPanel.gd" id="57"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGiantPrizePanel.gd" id="58"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyImmortalBossPanel.gd" id="59"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyIcePhoenixPanel.gd" id="60"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDragonFuryPanel.gd" id="61"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyMultCascadePanel.gd" id="62"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyAwakenBossV2Panel.gd" id="63"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyUltimateJudgmentPanel.gd" id="64"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyComboBurstPanel.gd" id="65"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTimeBombPanel.gd" id="66"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyElementalFusionPanel.gd" id="67"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTreasureHunterPanel.gd" id="68"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyMythAwakenPanel.gd" id="69"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyStarPortalPanel.gd" id="70"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDragonSoulPanel.gd" id="71"]
+[ext_resource type="Script" path="res://scripts/ui/LuckySpacetimeRiftPanel.gd" id="72"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyHolyJudgmentPanel.gd" id="73"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyBigBangPanel.gd" id="74"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyJackpotMiniPanel.gd" id="75"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyJackpotMinorPanel.gd" id="76"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyJackpotMajorPanel.gd" id="77"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyJackpotGrandPanel.gd" id="78"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyJackpotTriggerPanel.gd" id="79"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyMultiversePanel.gd" id="80"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTimeLoopPanel.gd" id="81"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyFateWheelPanel.gd" id="82"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDivineRealmPanel.gd" id="83"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyFinalPowerPanel.gd" id="84"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyMutationPanel.gd" id="85"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyArcticStormPanel.gd" id="86"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyFisherWildPanel.gd" id="87"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyRiskLevelPanel.gd" id="88"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCosmicPulsePanel.gd" id="89"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyMirrorUniversePanel.gd" id="90"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGravityFieldPanel.gd" id="91"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTimeAccelerationPanel.gd" id="92"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyNebulaVortexPanel.gd" id="93"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCosmicJudgmentPanel.gd" id="94"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyPvpBattlePanel.gd" id="95"]
+[ext_resource type="Script" path="res://scripts/ui/LuckySkillChainPanel.gd" id="96"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGlobalExplosionPanel.gd" id="97"]
+[ext_resource type="Script" path="res://scripts/ui/LuckySpacetimeFoldPanel.gd" id="98"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCosmicEndPanel.gd" id="99"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDragonKingPanel.gd" id="100"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyEternalCyclePanel.gd" id="101"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyChaosExplosionPanel.gd" id="102"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDivineRevivalPanel.gd" id="103"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGenesisEpochPanel.gd" id="104"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyEnergyStormPanel.gd" id="105"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCrystalResonancePanel.gd" id="106"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyFateJudgmentPanel.gd" id="107"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTimeReversalPanel.gd" id="108"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCosmicSingularityPanel.gd" id="109"]
 
 [node name="Main" type="Node2D"]
 
@@ -152,3 +256,310 @@ text = "BONUS"
 
 [node name="BonusGame" type="CanvasLayer" parent="."]
 script = ExtResource("5")
+
+[node name="LuckyEventSystem" type="CanvasLayer" parent="."]
+layer = 62
+script = ExtResource("7")
+
+[node name="LuckyPanelRegistry" type="Node" parent="."]
+script = ExtResource("8")
+
+[node name="LuckyChainLightningPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("10")
+
+[node name="LuckyCrabTorpedoPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("11")
+
+[node name="LuckyVortexPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("12")
+
+[node name="LuckyGoldenDragonPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("13")
+
+[node name="LuckyThunderLobsterPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("14")
+
+[node name="LuckyAwakenedPhoenixPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("15")
+
+[node name="LuckyShockwaveBombPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("16")
+
+[node name="LuckyDrillTorpedoPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("17")
+
+[node name="LuckyTimeFreezePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("18")
+
+[node name="LuckyChainExplosionPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("19")
+
+[node name="LuckyChainLongKingPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("20")
+
+[node name="LuckyDragonShotgunPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("21")
+
+[node name="LuckyRocketCannonPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("22")
+
+[node name="LuckyDeepWhirlpoolPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("23")
+
+[node name="LuckyVampireMultPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("24")
+
+[node name="LuckyMirrorFishPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("25")
+
+[node name="LuckyGoldenRainPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("26")
+
+[node name="LuckyFreezeBombPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("27")
+
+[node name="LuckyThunderStormPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("28")
+
+[node name="LuckyLuckyWheelPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("29")
+
+[node name="LuckyJackpotFishPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("30")
+
+[node name="LuckyCoopFishPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("31")
+
+[node name="LuckyTimeWarpPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("32")
+
+[node name="LuckyChainMeteorPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("33")
+
+[node name="LuckyCrashFishPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("34")
+
+[node name="LuckyElectricEelPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("35")
+
+[node name="LuckyAnglerFishPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("36")
+
+[node name="LuckyBlackHolePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("37")
+
+[node name="LuckyBountyHunterPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("38")
+
+[node name="LuckyTsunamiPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("39")
+
+[node name="LuckyDragonWrathV2Panel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("40")
+
+[node name="LuckyHumpbackWhalePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("41")
+
+[node name="LuckyLegendDragonPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("42")
+
+[node name="LuckyGuildWarPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("43")
+
+[node name="LuckyQualityFishPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("44")
+
+[node name="LuckyTornadoPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("45")
+
+[node name="LuckyEarthquakePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("46")
+
+[node name="LuckyVolcanoPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("47")
+
+[node name="LuckyCosmicRayPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("48")
+
+[node name="LuckyDivineDragonPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("49")
+
+[node name="LuckyQuantumPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("50")
+
+[node name="LuckySupernovaPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("51")
+
+[node name="LuckyInfinitePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("52")
+
+[node name="LuckyGenesisPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("53")
+
+[node name="LuckyRebirthPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("54")
+
+[node name="LuckyAwakenedCrocPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("55")
+
+[node name="LuckyVampireV2Panel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("56")
+
+[node name="LuckySuperAwakenPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("57")
+
+[node name="LuckyGiantPrizePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("58")
+
+[node name="LuckyImmortalBossPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("59")
+
+[node name="LuckyIcePhoenixPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("60")
+
+[node name="LuckyDragonFuryPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("61")
+
+[node name="LuckyMultCascadePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("62")
+
+[node name="LuckyAwakenBossV2Panel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("63")
+
+[node name="LuckyUltimateJudgmentPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("64")
+
+[node name="LuckyComboBurstPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("65")
+
+[node name="LuckyTimeBombPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("66")
+
+[node name="LuckyElementalFusionPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("67")
+
+[node name="LuckyTreasureHunterPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("68")
+
+[node name="LuckyMythAwakenPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("69")
+
+[node name="LuckyStarPortalPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("70")
+
+[node name="LuckyDragonSoulPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("71")
+
+[node name="LuckySpacetimeRiftPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("72")
+
+[node name="LuckyHolyJudgmentPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("73")
+
+[node name="LuckyBigBangPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("74")
+
+[node name="LuckyJackpotMiniPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("75")
+
+[node name="LuckyJackpotMinorPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("76")
+
+[node name="LuckyJackpotMajorPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("77")
+
+[node name="LuckyJackpotGrandPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("78")
+
+[node name="LuckyJackpotTriggerPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("79")
+
+[node name="LuckyMultiversePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("80")
+
+[node name="LuckyTimeLoopPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("81")
+
+[node name="LuckyFateWheelPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("82")
+
+[node name="LuckyDivineRealmPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("83")
+
+[node name="LuckyFinalPowerPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("84")
+
+[node name="LuckyMutationPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("85")
+
+[node name="LuckyArcticStormPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("86")
+
+[node name="LuckyFisherWildPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("87")
+
+[node name="LuckyRiskLevelPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("88")
+
+[node name="LuckyCosmicPulsePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("89")
+
+[node name="LuckyMirrorUniversePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("90")
+
+[node name="LuckyGravityFieldPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("91")
+
+[node name="LuckyTimeAccelerationPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("92")
+
+[node name="LuckyNebulaVortexPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("93")
+
+[node name="LuckyCosmicJudgmentPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("94")
+
+[node name="LuckyPvpBattlePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("95")
+
+[node name="LuckySkillChainPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("96")
+
+[node name="LuckyGlobalExplosionPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("97")
+
+[node name="LuckySpacetimeFoldPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("98")
+
+[node name="LuckyCosmicEndPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("99")
+
+[node name="LuckyDragonKingPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("100")
+
+[node name="LuckyEternalCyclePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("101")
+
+[node name="LuckyChaosExplosionPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("102")
+
+[node name="LuckyDivineRevivalPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("103")
+
+[node name="LuckyGenesisEpochPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("104")
+
+[node name="LuckyEnergyStormPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("105")
+
+[node name="LuckyCrystalResonancePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("106")
+
+[node name="LuckyFateJudgmentPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("107")
+
+[node name="LuckyTimeReversalPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("108")
+
+[node name="LuckyCosmicSingularityPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("109")

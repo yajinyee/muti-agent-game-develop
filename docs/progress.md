@@ -1,8 +1,28 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-28（DAY-320 HUD.gd 補齊 DAY-318/319 訊號連接 + LuckyPanelRegistry 設計缺陷修復 + QA 68/68 + GitHub 同步）
+## 最後更新：2026-05-28（DAY-321 Main.tscn 完整性修復 + LuckyPanelRegistry Jackpot 分發修復 + QA 39/39 + GitHub 同步）
 
-## DAY-320 更新（2026-05-28）：Client 整合完整性修復 + LuckyPanelRegistry 設計缺陷修復 ✅
+## DAY-321 更新（2026-05-28）：Main.tscn 完整性修復 + Lucky Panel 架構完善 ✅
+- **問題發現：** Main.tscn 缺少 LuckyEventSystem、LuckyPanelRegistry 和所有 100 個 Lucky Panel 節點
+- **問題發現：** LuckyPanelRegistry 的 Jackpot Panel 映射使用 5 個獨立訊號，但 Server 只發送 `lucky_jackpot_pool`
+- **修復 1：** 重新生成 Main.tscn（load_steps=109），加入 LuckyEventSystem + LuckyPanelRegistry + 100 個 Lucky Panel 節點
+- **修復 2：** LuckyPanelRegistry 加入 `_jackpot_panels` 字典和 `_dispatch_jackpot_pool()` 分發方法
+- **修復 2 細節：** pool_update 廣播給所有 Jackpot Panel，jackpot_win 只發給對應 tier 的 Panel
+- **工具：** tools/generate_main_tscn.py（自動生成 Main.tscn）
+- **QA 腳本：** tools/qa_check_day321.py（39 項驗證，39/39 全部通過）
+- **knowhow-log 更新：** 條目 33/34（Main.tscn 節點缺失 + Jackpot 訊號分發架構）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-321）
+- **Main.tscn 完整性：** ✅ 100% 完整（所有節點存在）
+- **Lucky Panel 架構：** ✅ 100 個 Panel 全部在場景中，LuckyPanelRegistry 正確分發
+- **Jackpot 系統：** ✅ 5 個 Jackpot Panel 透過 _dispatch_jackpot_pool 正確接收訊號
+- **Server 目標物數量：** 112 種（T001-T006 + T101-T205 + B001）
+- **Lucky 系統數量：** 100 個（T106-T205）
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
+
+
 - **問題 1 發現：** HUD.gd 的 `_ready()` 缺少 DAY-318（T196-T200）和 DAY-319（T201-T205）共 10 個 Lucky 訊號連接
 - **問題 2 發現：** LuckyPanelRegistry.connect_all_signals() 只做 print 驗證，沒有實際連接訊號到 Panel 的 handle_event()
 - **修復 1：** HUD.gd 補齊 DAY-318/319 各 5 個訊號連接和處理函數（備用橫幅模式）
