@@ -184,6 +184,13 @@ type Game struct {
 	luckyTimeReversal      *luckyTimeReversalManager
 	luckyCosmicSingularity *luckyCosmicSingularityManager
 
+	// DAY-323 新增
+	luckyFeverBoost      *luckyFeverBoostManager
+	luckyGuildBattle     *luckyGuildBattleManager
+	luckyPathFish        *luckyPathFishManager
+	luckyChainEel        *luckyChainEelManager
+	luckyUltimateMiracle *luckyUltimateMiracleManager
+
 	lastTick time.Time
 }
 
@@ -334,6 +341,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyFateJudgment:      newLuckyFateJudgmentManager(),
 		luckyTimeReversal:      newLuckyTimeReversalManager(),
 		luckyCosmicSingularity: newLuckyCosmicSingularityManager(),
+
+		// DAY-323 新增
+		luckyFeverBoost:      newLuckyFeverBoostManager(),
+		luckyGuildBattle:     newLuckyGuildBattleManager(),
+		luckyPathFish:        newLuckyPathFishManager(),
+		luckyChainEel:        newLuckyChainEelManager(),
+		luckyUltimateMiracle: newLuckyUltimateMiracleManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -999,6 +1013,34 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if cosmicSingularityBoost > 1.0 {
 			effectiveMult *= cosmicSingularityBoost
 		}
+		// DAY-323 新增全服加成
+		feverBoostMult := g.luckyFeverBoost.getFeverBoostMult()
+		if feverBoostMult > 1.0 {
+			effectiveMult *= feverBoostMult
+		}
+		guildBattleMult := g.luckyGuildBattle.getGuildBattleMult()
+		if guildBattleMult > 1.0 {
+			effectiveMult *= guildBattleMult
+		}
+		pathFishMult := g.luckyPathFish.getPathFishMult()
+		if pathFishMult > 1.0 {
+			effectiveMult *= pathFishMult
+		}
+		// 路徑魚：擊破時推進路徑
+		pathKillMult := g.luckyPathFish.onKillDuringPath(g, p)
+		if pathKillMult > 1.0 {
+			effectiveMult *= pathKillMult
+		}
+		chainEelMult := g.luckyChainEel.getChainEelMult()
+		if chainEelMult > 1.0 {
+			effectiveMult *= chainEelMult
+		}
+		ultimateMiracleMult := g.luckyUltimateMiracle.getUltimateMiracleMult()
+		if ultimateMiracleMult > 1.0 {
+			effectiveMult *= ultimateMiracleMult
+		}
+		// 公會戰：擊破計數
+		g.luckyGuildBattle.onKillDuringBattle(playerID)
 		if g.luckyTornado.isTornadoActive() {
 			g.luckyTornado.notifyTornadoKill(g, playerID)
 		}
@@ -1262,6 +1304,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyTimeReversal.tryLuckyTimeReversalFish(g, p)
 			case isLuckyCosmicSingularityFish(t.Def.ID):
 				g.luckyCosmicSingularity.tryLuckyCosmicSingularityFish(g, p)
+			// DAY-323 新增
+			case isLuckyFeverBoostFish(t.Def.ID):
+				g.luckyFeverBoost.tryLuckyFeverBoostFish(g, p)
+			case isLuckyGuildBattleFish(t.Def.ID):
+				g.luckyGuildBattle.tryLuckyGuildBattleFish(g, p)
+			case isLuckyPathFish(t.Def.ID):
+				g.luckyPathFish.tryLuckyPathFish(g, p)
+			case isLuckyChainEelFish(t.Def.ID):
+				g.luckyChainEel.tryLuckyChainEelFish(g, p)
+			case isLuckyUltimateMiracleFish(t.Def.ID):
+				g.luckyUltimateMiracle.tryLuckyUltimateMiracleFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

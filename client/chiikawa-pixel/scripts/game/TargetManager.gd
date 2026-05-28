@@ -171,6 +171,12 @@ const TARGET_SPRITES = {
 	"T203": "res://assets/sprites/targets/T203_fate_judgment.png",
 	"T204": "res://assets/sprites/targets/T204_time_reversal.png",
 	"T205": "res://assets/sprites/targets/T205_cosmic_singularity.png",
+	# DAY-323 新增
+	"T206": "res://assets/sprites/targets/T206_fever_boost.png",
+	"T207": "res://assets/sprites/targets/T207_guild_battle.png",
+	"T208": "res://assets/sprites/targets/T208_path_fish.png",
+	"T209": "res://assets/sprites/targets/T209_chain_eel.png",
+	"T210": "res://assets/sprites/targets/T210_ultimate_miracle.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -310,6 +316,12 @@ const TARGET_COLORS = {
 	"T203": Color(0.8, 0.7, 0.0),    # 金色（命運審判魚，命運之輪）
 	"T204": Color(0.4, 0.4, 0.9),    # 深藍紫（時間逆流魚，時間逆流）
 	"T205": Color(0.8, 0.0, 0.8),    # 洋紅（宇宙奇點魚，史上最高）
+	# DAY-323 新增
+	"T206": Color(1.0, 0.4, 0.0),    # 火橙（Fever Boost 魚，Fever Boost™）
+	"T207": Color(1.0, 0.85, 0.0),   # 金色（公會戰魚，公會戰旗幟）
+	"T208": Color(0.0, 1.0, 1.0),    # 青藍（路徑魚，路徑光軌）
+	"T209": Color(0.8, 0.0, 1.0),    # 深紫（連鎖電鰻魚，紫粉電鰻）
+	"T210": Color(1.0, 1.0, 1.0),    # 純白（終極奇蹟魚，新史上最高）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D

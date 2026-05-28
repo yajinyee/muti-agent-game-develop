@@ -379,6 +379,23 @@ var Targets = []TargetDef{
 	// 業界依據：終極宇宙奇點機制 + 2026 最高倍率設計（8888x 吉祥數字）
 	{ID: "T205", Name: "幸運宇宙奇點魚", Type: TypeSpecial, Multiplier: 8888, HP: 8888, SpawnWeight: 1, Speed: 1, Lifetime: 90, LaborGain: 1777, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-323 新增特殊目標（9500x-16888x）────────────────────────
+	// T206 幸運 Fever Boost 魚：Fever Boost™ 機制（Games Global 2026-05-28），30 秒內所有特效機率翻倍，全場倍率 ×2.0，全服 ×31.0 加成 62 秒
+	// 業界依據：Games Global「Fishin' Pots of Gold」Fever Boost™（2026-05-28 最新）
+	{ID: "T206", Name: "幸運FeverBoost魚", Type: TypeSpecial, Multiplier: 9500, HP: 9500, SpawnWeight: 1, Speed: 1, Lifetime: 92, LaborGain: 1900, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T207 幸運公會戰魚：全服公會戰 45 秒，擊破最多目標的玩家獲得 ×35.0，全服 ×32.0 加成 64 秒
+	// 業界依據：Fishing Frenzy Chapter 3「Guild Wars + Boss Fish」（2026-05-27）
+	{ID: "T207", Name: "幸運公會戰魚", Type: TypeSpecial, Multiplier: 10000, HP: 10000, SpawnWeight: 1, Speed: 1, Lifetime: 94, LaborGain: 2000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T208 幸運路徑魚：Fish Road 機制，路徑越遠倍率越高（最高 20,000x），全服 ×33.0 加成 66 秒
+	// 業界依據：Fish Road「路徑越遠倍率越高，最高 20,000x」（fishroad.eu）
+	{ID: "T208", Name: "幸運路徑魚", Type: TypeSpecial, Multiplier: 11000, HP: 11000, SpawnWeight: 1, Speed: 1, Lifetime: 96, LaborGain: 2200, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T209 幸運連鎖電鰻魚：Royal Fishing 紫粉色電鰻升級版，連鎖電擊 8 條魚，每條 ×40.0，全服 ×34.0 加成 68 秒
+	// 業界依據：Royal Fishing「Purple/Pink Lightning Eel chain reaction」升級版（royal-fishing.co.uk）
+	{ID: "T209", Name: "幸運連鎖電鰻魚", Type: TypeSpecial, Multiplier: 12000, HP: 12000, SpawnWeight: 1, Speed: 1, Lifetime: 98, LaborGain: 2400, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T210 幸運終極奇蹟魚：終極機制，全場 HP 歸零（每個獎勵 ×50.0），全服 ×35.0 加成 70 秒（新史上最高）
+	// 業界依據：終極奇蹟機制 + 2026 最高倍率設計（16888x 吉祥數字，超越 T205 的 8888x）
+	{ID: "T210", Name: "幸運終極奇蹟魚", Type: TypeSpecial, Multiplier: 16888, HP: 16888, SpawnWeight: 1, Speed: 1, Lifetime: 100, LaborGain: 3377, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

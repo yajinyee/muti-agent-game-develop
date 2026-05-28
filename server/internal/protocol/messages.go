@@ -168,6 +168,13 @@ const (
 	MsgLuckyFateJudgment       = "lucky_fate_judgment"       // T203 命運審判魚（5 個目標 ×50-×500，全服 ×28.0）
 	MsgLuckyTimeReversal       = "lucky_time_reversal"       // T204 時間逆流魚（10 個目標復活 ×5.0，全服 ×29.0）
 	MsgLuckyCosmicSingularity  = "lucky_cosmic_singularity"  // T205 宇宙奇點魚（全場 ×30.0，全服 ×30.0 史上最高）
+
+	// DAY-323 新增幸運特殊魚事件
+	MsgLuckyFeverBoost      = "lucky_fever_boost"      // T206 Fever Boost 魚（全場倍率 ×2.0，30 秒，全服 ×31.0）
+	MsgLuckyGuildBattle     = "lucky_guild_battle"     // T207 公會戰魚（全服公會戰 45 秒，勝者 ×35.0，全服 ×32.0）
+	MsgLuckyPathFish        = "lucky_path_fish"        // T208 路徑魚（路徑越遠倍率越高，最高 ×20,000，全服 ×33.0）
+	MsgLuckyChainEel        = "lucky_chain_eel"        // T209 連鎖電鰻魚（8 條連鎖電擊 ×40.0，全服 ×34.0）
+	MsgLuckyUltimateMiracle = "lucky_ultimate_miracle" // T210 終極奇蹟魚（全場 ×50.0，全服 ×35.0 新史上最高）
 )
 // ── Envelope ─────────────────────────────────────────────────
 
