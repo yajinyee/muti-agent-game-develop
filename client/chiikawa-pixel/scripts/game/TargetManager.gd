@@ -1,6 +1,39 @@
 ## TargetManager.gd — 目標物系統
 ## target-system-agent 負責維護
+## DAY-322：加入 Shader 支援（sprite_outline / tier_glow / hit_flash）
+##           視覺分層系統：依倍率等級自動套用不同視覺強度
+##           目標：視覺清晰度 7.5/10 → 8.5/10
 extends Node2D
+
+# ── Shader 預載 ───────────────────────────────────────────────
+const SHADER_OUTLINE = preload("res://assets/shaders/sprite_outline.gdshader")
+const SHADER_TIER_GLOW = preload("res://assets/shaders/tier_glow.gdshader")
+const SHADER_HIT_FLASH = preload("res://assets/shaders/hit_flash.gdshader")
+
+# 倍率等級定義（視覺分層）
+# Tier 0: <10x   → 無特效（基礎目標）
+# Tier 1: 10-29x → 白色輪廓
+# Tier 2: 30-99x → 金色輪廓 + 金色光暈
+# Tier 3: 100-499x → 橙紅輪廓 + 橙色光暈 + 脈動
+# Tier 4: 500-999x → 紫色輪廓 + 紫色光暈 + 快速脈動
+# Tier 5: 1000x+  → 宇宙粉紅輪廓 + 彩虹光暈 + 最快脈動
+const TIER_THRESHOLDS = [1000.0, 500.0, 100.0, 30.0, 10.0]
+const TIER_OUTLINE_COLORS = [
+	Color(1.0, 0.0, 0.5, 1.0),   # Tier 5: 宇宙粉紅
+	Color(0.8, 0.0, 1.0, 1.0),   # Tier 4: 深紫
+	Color(1.0, 0.4, 0.1, 1.0),   # Tier 3: 火橙
+	Color(1.0, 0.85, 0.0, 1.0),  # Tier 2: 金色
+	Color(0.9, 0.9, 0.9, 0.8),   # Tier 1: 白色
+]
+const TIER_GLOW_COLORS = [
+	Color(1.0, 0.0, 0.5, 0.9),   # Tier 5
+	Color(0.8, 0.0, 1.0, 0.8),   # Tier 4
+	Color(1.0, 0.4, 0.1, 0.7),   # Tier 3
+	Color(1.0, 0.85, 0.0, 0.6),  # Tier 2
+	Color(0.9, 0.9, 0.9, 0.4),   # Tier 1
+]
+const TIER_PULSE_SPEEDS = [4.0, 3.0, 2.5, 1.5, 1.0]
+const TIER_GLOW_RADII = [6.0, 5.0, 4.0, 3.0, 2.0]
 
 # 目標物 Sprite 路徑
 const TARGET_SPRITES = {
@@ -358,6 +391,13 @@ func _create_target_node(data: Dictionary) -> Node2D:
 			sprite.scale = Vector2(2.8, 2.8)
 		else:
 			sprite.scale = Vector2(2.5, 2.5)
+
+		# DAY-322：套用 Hit Flash Shader（受擊閃白更精確）
+		var hit_mat = ShaderMaterial.new()
+		hit_mat.shader = SHADER_HIT_FLASH
+		hit_mat.set_shader_parameter("flash_intensity", 0.0)
+		sprite.material = hit_mat
+		sprite.name = "Sprite"
 	else:
 		# 備用：ColorRect
 		var rect = ColorRect.new()
@@ -367,6 +407,11 @@ func _create_target_node(data: Dictionary) -> Node2D:
 		rect.color = TARGET_COLORS.get(def_id, Color(0.8, 0.2, 0.8))
 		container.add_child(rect)
 	container.add_child(sprite)
+
+	# DAY-322：依倍率等級套用 Outline + Tier Glow Shader
+	var tier = _get_multiplier_tier(multiplier)
+	if tier >= 0 and target_type != "boss":
+		_apply_tier_shaders(container, sprite, multiplier, tier)
 
 	# HP 條
 	var hp_max = data.get("max_hp", 1)
@@ -570,6 +615,15 @@ func update_target_hp(instance_id: String, hp: int, max_hp: int) -> void:
 		hp_bar.color = Color(1.0, 0.2, 0.2)
 
 func _flash_hit(node: Node2D) -> void:
+	# DAY-322：優先使用 Hit Flash Shader（更精確，只閃有像素的地方）
+	var sprite = node.get_node_or_null("Sprite")
+	if is_instance_valid(sprite) and sprite.material is ShaderMaterial:
+		var mat = sprite.material as ShaderMaterial
+		var tween = node.create_tween()
+		tween.tween_method(func(v: float): mat.set_shader_parameter("flash_intensity", v), 0.0, 1.0, 0.04)
+		tween.tween_method(func(v: float): mat.set_shader_parameter("flash_intensity", v), 1.0, 0.0, 0.08)
+		return
+	# 備用：舊的 modulate 方式
 	for child in node.get_children():
 		if child is Sprite2D:
 			var tween = node.create_tween()
@@ -741,11 +795,103 @@ func _get_texture(def_id: String) -> Texture2D:
 	return null
 
 func _mult_label_color(mult: float) -> Color:
-	if mult >= 100: return Color(1.0, 0.3, 0.1)   # 火紅（超高倍率）
-	if mult >= 50:  return Color(1.0, 0.4, 0.1)   # 橙紅
-	if mult >= 30:  return Color(1.0, 0.85, 0.0)  # 金色
-	if mult >= 15:  return Color(0.8, 0.9, 1.0)   # 淡藍
+	if mult >= 1000: return Color(1.0, 0.0, 0.5)  # 宇宙粉紅（Tier 5）
+	if mult >= 500:  return Color(0.8, 0.0, 1.0)  # 深紫（Tier 4）
+	if mult >= 100:  return Color(1.0, 0.3, 0.1)  # 火紅（Tier 3）
+	if mult >= 50:   return Color(1.0, 0.4, 0.1)  # 橙紅
+	if mult >= 30:   return Color(1.0, 0.85, 0.0) # 金色（Tier 2）
+	if mult >= 15:   return Color(0.8, 0.9, 1.0)  # 淡藍
 	return Color(1.0, 1.0, 1.0)                   # 白色
+
+# ── DAY-322 視覺分層 Shader 系統 ──────────────────────────────
+
+## 取得倍率等級（-1 = 無特效，0-4 = Tier 1-5）
+func _get_multiplier_tier(multiplier: float) -> int:
+	for i in TIER_THRESHOLDS.size():
+		if multiplier >= TIER_THRESHOLDS[i]:
+			return i
+	return -1  # <10x，無特效
+
+## 套用 Outline + Tier Glow Shader
+func _apply_tier_shaders(container: Node2D, sprite: Sprite2D, multiplier: float, tier: int) -> void:
+	if tier < 0 or tier >= TIER_OUTLINE_COLORS.size():
+		return
+
+	var outline_color = TIER_OUTLINE_COLORS[tier]
+	var glow_color = TIER_GLOW_COLORS[tier]
+	var pulse_speed = TIER_PULSE_SPEEDS[tier]
+	var glow_radius = TIER_GLOW_RADII[tier]
+
+	# 建立 Outline Sprite（在原始 Sprite 後面一層）
+	var outline_sprite = Sprite2D.new()
+	outline_sprite.texture = sprite.texture
+	outline_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+	outline_sprite.scale = sprite.scale
+	outline_sprite.z_index = sprite.z_index - 1
+	outline_sprite.name = "OutlineSprite"
+
+	var outline_mat = ShaderMaterial.new()
+	outline_mat.shader = SHADER_OUTLINE
+	outline_mat.set_shader_parameter("outline_color", outline_color)
+	outline_mat.set_shader_parameter("outline_width", 1.5 + float(tier) * 0.3)
+	outline_mat.set_shader_parameter("pulse_speed", pulse_speed)
+	outline_mat.set_shader_parameter("pulse_min", 0.3)
+	outline_mat.set_shader_parameter("enable_pulse", tier >= 2)  # Tier 2+ 才脈動
+	outline_sprite.material = outline_mat
+	container.add_child(outline_sprite)
+	container.move_child(outline_sprite, 0)  # 移到最底層
+
+	# Tier 3+ 加入 Tier Glow（光暈效果）
+	if tier >= 2:
+		var glow_sprite = Sprite2D.new()
+		glow_sprite.texture = sprite.texture
+		glow_sprite.texture_filter = CanvasItem.TEXTURE_FILTER_NEAREST
+		glow_sprite.scale = sprite.scale * (1.0 + float(tier) * 0.05)
+		glow_sprite.z_index = sprite.z_index - 2
+		glow_sprite.name = "GlowSprite"
+
+		var glow_mat = ShaderMaterial.new()
+		glow_mat.shader = SHADER_TIER_GLOW
+		glow_mat.set_shader_parameter("glow_color", glow_color)
+		glow_mat.set_shader_parameter("glow_radius", glow_radius)
+		glow_mat.set_shader_parameter("glow_intensity", 1.0 + float(tier) * 0.3)
+		glow_mat.set_shader_parameter("pulse_speed", pulse_speed * 0.7)
+		glow_mat.set_shader_parameter("pulse_amplitude", 0.15 + float(tier) * 0.05)
+		glow_sprite.material = glow_mat
+		container.add_child(glow_sprite)
+		container.move_child(glow_sprite, 0)  # 移到最底層
+
+	# Tier 5（1000x+）：額外加入彩虹旋轉光環
+	if tier == 0:
+		_add_rainbow_ring(container, multiplier)
+
+## 彩虹旋轉光環（Tier 5 / 1000x+ 專用）
+func _add_rainbow_ring(container: Node2D, multiplier: float) -> void:
+	var ring_count = 3
+	for i in ring_count:
+		var ring = ColorRect.new()
+		var ring_size = 110.0 + float(i) * 15.0
+		ring.size = Vector2(ring_size, ring_size)
+		ring.position = -Vector2(ring_size / 2, ring_size / 2)
+		ring.z_index = -3 - i
+		ring.name = "RainbowRing_%d" % i
+		# 彩虹顏色循環
+		var hue = float(i) / float(ring_count)
+		ring.color = Color.from_hsv(hue, 1.0, 1.0, 0.3)
+		container.add_child(ring)
+		container.move_child(ring, 0)
+		# 旋轉動畫（每個環速度不同）
+		var rot_tween = ring.create_tween().set_loops()
+		var rot_speed = (0.8 + float(i) * 0.3) * (1.0 if i % 2 == 0 else -1.0)
+		rot_tween.tween_property(ring, "rotation", TAU * rot_speed, 2.0)
+		# 顏色循環動畫
+		var color_tween = ring.create_tween().set_loops()
+		color_tween.tween_method(
+			func(h: float): ring.color = Color.from_hsv(h, 1.0, 1.0, 0.3),
+			float(i) / float(ring_count),
+			float(i) / float(ring_count) + 1.0,
+			3.0
+		)
 
 # ── DAY-301 時間扭曲速度效果 ──────────────────────────────────
 

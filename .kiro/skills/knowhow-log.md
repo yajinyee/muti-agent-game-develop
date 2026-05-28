@@ -4718,3 +4718,37 @@ T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 
 - **設計：** `handleLuckyEvent()` 只顯示觸發事件（trigger/jackpot_win/start/win），不顯示每個 tick 更新
 - **教訓：** Web 客戶端的訊息處理要有 fallback 機制，不能只處理已知的訊息類型
 - **模式：** `type.startsWith('lucky_')` 是處理大量同類型訊息的最佳模式，不需要列舉所有 100 個 Lucky 訊號
+
+## 36. Godot 4 Shader 視覺分層系統（DAY-322）
+- **問題：** 目標物視覺清晰度停在 7.5/10，高倍率目標物與低倍率目標物視覺差異不夠明顯
+- **根本原因：** 原本只用 ColorRect 做光暈，沒有輪廓 Shader，玩家難以在 1 秒內識別高價值目標
+- **解決：** 建立三個 Shader 系統：
+  1. `hit_flash.gdshader`：受擊閃白（精確版，只影響有像素的地方）
+  2. `sprite_outline.gdshader`：目標物輪廓（8方向採樣，脈動效果）
+  3. `tier_glow.gdshader`：分層光暈（依倍率等級調整強度）
+- **Tier 系統：** 5個等級（<10x 無特效 → 1000x+ 彩虹旋轉光環）
+- **教訓：** 視覺清晰度不能只靠 ColorRect 光暈，需要 Shader 輪廓才能讓目標物在複雜背景下清楚可見
+
+## 37. Godot 4 ShaderMaterial 套用到 Sprite2D 的正確方式（DAY-322）
+- **問題：** 想在 Sprite2D 上套用 Shader，但 Sprite2D 的 material 屬性需要 ShaderMaterial 物件
+- **正確做法：**
+  ```gdscript
+  var mat = ShaderMaterial.new()
+  mat.shader = preload("res://assets/shaders/my_shader.gdshader")
+  mat.set_shader_parameter("param_name", value)
+  sprite.material = mat
+  ```
+- **動態更新參數：** `mat.set_shader_parameter("flash_intensity", 0.8)`
+- **教訓：** Shader 參數名稱必須與 .gdshader 中的 `uniform` 名稱完全一致，否則靜默失敗
+
+## 38. Godot 4 多層 Sprite 視覺效果架構（DAY-322）
+- **問題：** 想讓目標物有「輪廓 + 光暈 + 原始 Sprite」三層效果
+- **架構：**
+  ```
+  Container (Node2D)
+  ├── GlowSprite (Sprite2D, z_index=-2, tier_glow shader)
+  ├── OutlineSprite (Sprite2D, z_index=-1, sprite_outline shader)
+  └── Sprite (Sprite2D, z_index=0, hit_flash shader)
+  ```
+- **關鍵：** 用 `container.move_child(node, 0)` 把光暈/輪廓移到最底層
+- **教訓：** 多層視覺效果要用多個 Sprite2D 節點，不要試圖在一個 Shader 裡做所有事

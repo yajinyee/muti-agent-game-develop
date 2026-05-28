@@ -45,16 +45,20 @@ ping            心跳
 - [ ] `client/GameManager.gd` 新增對應 signal
 - [ ] `client/GameManager.gd` 的 `_on_message()` 新增對應 match case
 - [ ] `client/HUD.gd` 連接對應 signal 並處理 UI 更新
+- [ ] `client/LuckyPanelRegistry.gd` 連接 signal 到對應 Panel.handle_event()（DAY-320 修復）
 
-## 已知協定問題（DAY-311）
+## 已知協定問題（DAY-322）
 
-### attack_result 缺少位置資訊
+### attack_result 缺少位置資訊（低優先）
 - **問題**：`attack_result` 訊息目前只有 `is_hit`、`damage`，缺少 `pos_x`、`pos_y`
 - **影響**：Cannon.gd 的 `_spawn_impact_burst()` 無法取得正確命中位置
-- **修復方向**：Server 在 `attack_result` 中加入命中位置，或 Client 自行記錄最後射擊位置
+- **臨時解法**：Cannon.gd 使用最後一次射擊的目標位置作為命中位置備用
+- **狀態**：已記錄，低優先，不影響核心玩法
 
-### 臨時解法（DAY-311）
-Cannon.gd 使用最後一次射擊的目標位置作為命中位置備用。
+### Lucky 系統訊息數量（已解決）
+- **問題**：100 個 Lucky 系統（T106-T205）各有獨立訊息類型
+- **解決**：LuckyPanelRegistry 統一管理訊號連接（DAY-320 修復）
+- **狀態**：✅ 已解決
 
 ## 規格文件清單
 - `docs/progress.md`：開發進度追蹤

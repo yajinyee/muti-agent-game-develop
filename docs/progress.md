@@ -1,8 +1,35 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-28（DAY-321 Main.tscn 完整性修復 + LuckyPanelRegistry Jackpot 分發修復 + QA 39/39 + GitHub 同步）
+## 最後更新：2026-05-28（DAY-322 Shader 視覺分層系統 + 視覺清晰度提升 + Agent 文件更新 + GitHub 同步）
 
-## DAY-321 更新（2026-05-28）：Main.tscn 完整性修復 + Lucky Panel 架構完善 ✅
+## DAY-322 更新（2026-05-28）：Shader 視覺分層系統 + 視覺清晰度提升 ✅
+- **問題發現：** 視覺清晰度停在 7.5/10，高倍率目標物與低倍率目標物視覺差異不夠明顯
+- **問題發現：** assets/shaders/ 目錄是空的，沒有任何 Shader 資產
+- **修復 1：** 建立三個 Shader 文件：
+  - `hit_flash.gdshader`：受擊閃白（精確版，只影響有像素的地方）
+  - `sprite_outline.gdshader`：目標物輪廓（8方向採樣，脈動效果）
+  - `tier_glow.gdshader`：分層光暈（依倍率等級調整強度）
+- **修復 2：** TargetManager.gd 加入 Tier 視覺分層系統（5個等級）：
+  - Tier 5（1000x+）：宇宙粉紅輪廓 + 強光暈 + 彩虹旋轉光環
+  - Tier 4（500-999x）：深紫輪廓 + 強光暈 + 快速脈動
+  - Tier 3（100-499x）：火橙輪廓 + 中光暈 + 脈動
+  - Tier 2（30-99x）：金色輪廓 + 弱光暈 + 慢脈動
+  - Tier 1（10-29x）：白色靜態輪廓
+- **修復 3：** 受擊閃白改用 hit_flash Shader（比 modulate 更精確）
+- **Agent 更新：** visual-clarity-agent.md（Shader 系統 + Tier 分層）+ target-design-agent.md（DAY-322 狀態）+ spec-architect.md（協定問題更新）
+- **knowhow-log 更新：** 條目 36/37/38（Shader 系統 + ShaderMaterial 套用 + 多層 Sprite 架構）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-322）
+- **視覺清晰度：** 7.5/10 → 預計 8.5/10（Shader 系統加入後，需要 Godot 實際驗證）
+- **Shader 系統：** ✅ 三個 Shader 建立完成，TargetManager 整合完成
+- **Agent 文件完整性：** ✅ visual-clarity-agent / target-design-agent / spec-architect 全部更新
+- **Server 目標物數量：** 112 種（T001-T006 + T101-T205 + B001）
+- **Lucky 系統數量：** 100 個（T106-T205）
+- **最需要改善：** 在 Godot 實際遊玩驗證 Shader 效果，確認 Tier 分層視覺正確
+
+
 - **問題發現：** Main.tscn 缺少 LuckyEventSystem、LuckyPanelRegistry 和所有 100 個 Lucky Panel 節點
 - **問題發現：** LuckyPanelRegistry 的 Jackpot Panel 映射使用 5 個獨立訊號，但 Server 只發送 `lucky_jackpot_pool`
 - **修復 1：** 重新生成 Main.tscn（load_steps=109），加入 LuckyEventSystem + LuckyPanelRegistry + 100 個 Lucky Panel 節點
