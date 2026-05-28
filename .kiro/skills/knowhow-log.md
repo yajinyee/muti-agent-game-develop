@@ -4711,3 +4711,10 @@ T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 
   - T175 trigger 魚：額外發給 trigger Panel
 - **教訓：** 當 Server 用統一訊號但 Client 需要分發時，在 Registry 層做分發，不要在 GameManager 層做
 - **模式：** `_dispatch_xxx()` 方法是處理「一對多」訊號分發的標準模式
+
+## 35. Web 客戶端 game.js 的 Lucky 系統處理模式（DAY-321）
+- **問題：** game.js 的 handleMessage 沒有處理 `lucky_*` 訊息，所有 Lucky 系統事件都被忽略
+- **解決：** 在 switch 的 default 分支加入 `if (type.startsWith('lucky_'))` 判斷，統一呼叫 `handleLuckyEvent()`
+- **設計：** `handleLuckyEvent()` 只顯示觸發事件（trigger/jackpot_win/start/win），不顯示每個 tick 更新
+- **教訓：** Web 客戶端的訊息處理要有 fallback 機制，不能只處理已知的訊息類型
+- **模式：** `type.startsWith('lucky_')` 是處理大量同類型訊息的最佳模式，不需要列舉所有 100 個 Lucky 訊號
