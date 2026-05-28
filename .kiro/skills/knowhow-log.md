@@ -4683,3 +4683,14 @@ T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 
   2. `LuckyPanelRegistry.gd`：在 `SIGNAL_TO_PANEL` 字典加入 `"lucky_xxx": "LuckyXxxPanel"`
   3. `HUD.gd`：在 `_ready()` 加入 `GameManager.lucky_xxx.connect(_on_lucky_xxx)` + 在末尾加入 `func _on_lucky_xxx(data: Dictionary) -> void:` 處理函數
 - **驗證指令：** `Select-String -Pattern "GameManager\.lucky_" | Measure-Object` 應等於 `Select-String -Pattern "func _on_lucky_" | Measure-Object`
+
+## 32. LuckyPanelRegistry.connect_all_signals() 設計缺陷
+- **問題：** `connect_all_signals()` 只做 print 驗證，沒有實際連接訊號到 Panel 的 `handle_event()`
+- **根本原因：** 設計時假設「Panel 自己在 `_ready()` 中連接訊號」，但 Panel 的 `_ready()` 根本沒有連接訊號
+- **影響：** 所有 Lucky 事件都由 HUD.gd 的備用橫幅處理，Panel 的 `handle_event()` 永遠不會被呼叫
+- **修復方式：** 
+  1. `connect_all_signals()` 真正連接 `GameManager.signal_name` 到 `panel.handle_event()`
+  2. 使用 `Callable(panel, "handle_event")` + `is_connected()` 防止重複連接
+  3. `_init_all_panels()` 掃描完成後自動呼叫 `connect_all_signals()`
+- **教訓：** 設計文件說「Panel 自行連接」但沒有實際實作，要用 QA 腳本驗證訊號是否真的連接了
+- **驗證方法：** 在 Godot 中執行遊戲，觀察 `[LuckyPanelRegistry] 已連接 X 個訊號` 的 print 輸出
