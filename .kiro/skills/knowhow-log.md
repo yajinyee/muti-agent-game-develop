@@ -4667,3 +4667,19 @@ T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 
 - **data.Targets 指標**：`for i := range data.Targets { defPtr = &data.Targets[i] }` — 不能用 `*def` 傳給 `NewTarget`
 - **QA 結果**：92/92 全部通過
 - **精靈圖密度**：T201 92.2%、T202 89.4%、T203 89.5%、T204 89.4%、T205 92.2%
+
+## 30. HUD.gd Lucky 訊號連接遺漏模式
+- **問題：** 每次新增 Lucky 系統（DAY-318、DAY-319），GameManager.gd 和 LuckyPanelRegistry.gd 有更新，但 HUD.gd 的備用橫幅連接被遺漏
+- **根本原因：** 三個文件需要同步更新，但沒有自動化檢查機制
+- **修復方式：** 手動補齊 HUD.gd 的 `_ready()` 訊號連接和末尾的處理函數
+- **預防方法：** 每次新增 Lucky 系統後，用 `Select-String -Pattern "GameManager\.lucky_" | Measure-Object` 確認 HUD.gd 的連接數量等於 GameManager.gd 的訊號數量
+- **教訓：** 多文件同步更新時，要建立 checklist 確保每個文件都更新了
+- **DAY-320 修復：** 補齊 DAY-318（5個）+ DAY-319（5個）= 10 個缺失的訊號連接和處理函數
+
+## 31. Lucky 系統三層架構同步原則
+- **架構：** GameManager.gd（訊號定義 + emit）→ LuckyPanelRegistry.gd（Panel 映射）→ HUD.gd（備用橫幅）
+- **每次新增 Lucky 系統必須更新的三個文件：**
+  1. `GameManager.gd`：加入 `signal lucky_xxx(data: Dictionary)` + `emit_signal("lucky_xxx", payload)` 的 match case
+  2. `LuckyPanelRegistry.gd`：在 `SIGNAL_TO_PANEL` 字典加入 `"lucky_xxx": "LuckyXxxPanel"`
+  3. `HUD.gd`：在 `_ready()` 加入 `GameManager.lucky_xxx.connect(_on_lucky_xxx)` + 在末尾加入 `func _on_lucky_xxx(data: Dictionary) -> void:` 處理函數
+- **驗證指令：** `Select-String -Pattern "GameManager\.lucky_" | Measure-Object` 應等於 `Select-String -Pattern "func _on_lucky_" | Measure-Object`
