@@ -1856,3 +1856,40 @@ RTP 95.87%，build/vet/test 全部通過。
 1. **視覺清晰度提升**（7.5/10 → 8/10）：確認高倍率目標的光暈和倍率標籤在實際遊玩中清晰可見
 2. **HUD.gd 架構重構**：把 Lucky 處理函數移到各自 Panel，HUD 只保留核心 UI（目標：< 500 行）
 3. **Server 壓力測試**：確認 100 個 Lucky 系統的 handler 在高負載下穩定
+
+---
+
+## 評估 #DAY-321 — 2026-05-28（Main.tscn 完整性修復 + Lucky Panel 架構完善）
+
+### 這次學到了什麼
+1. **Godot 場景節點必須在 .tscn 中明確定義**：腳本存在 ≠ 節點存在，LuckyPanelRegistry 掃描場景樹找 Panel，但 Main.tscn 中沒有這些節點
+2. **Progressive Jackpot 訊號分發架構**：Server 用統一訊號 `lucky_jackpot_pool`，Client 用 `_dispatch_jackpot_pool()` 分發到各 Panel
+3. **generate_main_tscn.py 自動化工具**：每次新增 Lucky Panel 後，用 Python 腳本自動生成 Main.tscn，避免手動維護 109 個節點
+4. **git tmpdir 問題**：Windows 上 git add 失敗時，設定 `$env:TEMP = "C:\Temp"` 解決
+5. **QA 腳本的預期值要反映實際設計**：Lucky Handler 數量是 96（不是 93），Jackpot Panel 用特殊分發機制
+
+### 進步說明
+- 修復了 Main.tscn 缺少 100 個 Lucky Panel 節點的關鍵問題
+- 修復了 LuckyPanelRegistry 的 Jackpot 訊號分發設計缺陷
+- 建立了 generate_main_tscn.py 自動化工具，未來新增 Panel 更方便
+- QA 39/39 全部通過
+
+### 能力分數評估（DAY-321）
+
+| 維度 | 分數 | 說明 |
+|------|------|------|
+| Go Server 開發 | 92 | 112 種目標物，100 個 Lucky 系統，build OK + vet OK，架構穩定 |
+| Godot GDScript | 82 | 完整的 Client 架構，Lucky Panel 系統，場景管理熟練 |
+| 像素美術生成 | 78 | 112 個 PNG 全部存在，程式生成品質穩定 |
+| 遊戲數值設計 | 80 | SpawnWeight 合理，Lucky 系統觸發率設計完整 |
+| WebSocket 通訊 | 88 | Server-Client 訊號完整，100 個 Lucky 訊號正確分發 |
+| 整體完成信心 | 85 | **架構完整，主要缺口是實際遊玩驗證（從未玩過）** |
+
+### 最大弱點
+1. **從未實際玩過遊戲**：所有驗證都是靜態分析，沒有動態遊玩測試
+2. **視覺清晰度未驗證**：7.5/10 是估計值，需要 Godot 實際遊玩確認
+3. **音效品質**：純 Python 生成的 WAV 音效品質有限，需要更好的音效
+
+### 完成遊戲的信心評估
+**85/100** — 架構完整，Server + Client 全部連接，Lucky Panel 系統修復。
+主要障礙是實際遊玩驗證和視覺品質提升。
