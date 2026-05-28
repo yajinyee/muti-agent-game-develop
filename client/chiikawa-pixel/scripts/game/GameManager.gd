@@ -120,6 +120,12 @@ signal lucky_skill_chain(data: Dictionary)
 signal lucky_global_explosion(data: Dictionary)
 signal lucky_spacetime_fold(data: Dictionary)
 signal lucky_cosmic_end(data: Dictionary)
+# DAY-318 新增幸運特殊魚訊號
+signal lucky_dragon_king(data: Dictionary)
+signal lucky_eternal_cycle(data: Dictionary)
+signal lucky_chaos_explosion(data: Dictionary)
+signal lucky_divine_revival(data: Dictionary)
+signal lucky_genesis_epoch(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -353,6 +359,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_spacetime_fold", payload)
 		"lucky_cosmic_end":
 			emit_signal("lucky_cosmic_end", payload)
+		# DAY-318 新增
+		"lucky_dragon_king":
+			emit_signal("lucky_dragon_king", payload)
+		"lucky_eternal_cycle":
+			emit_signal("lucky_eternal_cycle", payload)
+		"lucky_chaos_explosion":
+			emit_signal("lucky_chaos_explosion", payload)
+		"lucky_divine_revival":
+			emit_signal("lucky_divine_revival", payload)
+		"lucky_genesis_epoch":
+			emit_signal("lucky_genesis_epoch", payload)
 		"pong":
 			pass
 		"error":

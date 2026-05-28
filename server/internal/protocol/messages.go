@@ -154,6 +154,13 @@ const (
 	MsgLuckyGlobalExplosion  = "lucky_global_explosion"  // T193 全服大爆炸魚（全場清空 ×15.0，全服 ×20.5 新最高）
 	MsgLuckySpacetimeFold    = "lucky_spacetime_fold"    // T194 時空折疊魚（目標倍率 ×3.0，射擊 ×2.0，全服 ×21.0 新最高）
 	MsgLuckyCosmicEnd        = "lucky_cosmic_end"        // T195 宇宙終焉魚（全場清空 ×20.0，全服 ×22.0 史上最高）
+
+	// DAY-318 新增幸運特殊魚事件
+	MsgLuckyDragonKing     = "lucky_dragon_king"     // T196 龍王輪盤魚（雙環輪盤最高 ×25.0，全服 ×23.0）
+	MsgLuckyEternalCycle   = "lucky_eternal_cycle"   // T197 永恆循環魚（10 波遞增，全服 ×23.5）
+	MsgLuckyChaosExplosion = "lucky_chaos_explosion" // T198 混沌爆炸魚（3-8 目標同時爆炸，全服 ×24.0）
+	MsgLuckyDivineRevival  = "lucky_divine_revival"  // T199 神聖復活魚（5 個目標復活強化，全服 ×24.5）
+	MsgLuckyGenesisEpoch   = "lucky_genesis_epoch"   // T200 創世紀元魚（里程碑第 200 個，全場 ×25.0，全服 ×25.0 史上最高）
 )
 // ── Envelope ─────────────────────────────────────────────────
 

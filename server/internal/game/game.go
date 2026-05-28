@@ -170,6 +170,13 @@ type Game struct {
 	luckySpacetimeFold   *luckySpacetimeFoldManager
 	luckyCosmicEnd       *luckyCosmicEndManager
 
+	// DAY-318 新增
+	luckyDragonKing     *luckyDragonKingManager
+	luckyEternalCycle   *luckyEternalCycleManager
+	luckyChaosExplosion *luckyChaosExplosionManager
+	luckyDivineRevival  *luckyDivineRevivalManager
+	luckyGenesisEpoch   *luckyGenesisEpochManager
+
 	lastTick time.Time
 }
 
@@ -306,6 +313,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyGlobalExplosion: newLuckyGlobalExplosionManager(),
 		luckySpacetimeFold:   newLuckySpacetimeFoldManager(),
 		luckyCosmicEnd:       newLuckyCosmicEndManager(),
+
+		// DAY-318 新增
+		luckyDragonKing:     newLuckyDragonKingManager(),
+		luckyEternalCycle:   newLuckyEternalCycleManager(),
+		luckyChaosExplosion: newLuckyChaosExplosionManager(),
+		luckyDivineRevival:  newLuckyDivineRevivalManager(),
+		luckyGenesisEpoch:   newLuckyGenesisEpochManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -1159,6 +1173,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckySpacetimeFold.tryLuckySpacetimeFoldFish(g, p)
 			case isLuckyCosmicEndFish(t.Def.ID):
 				g.luckyCosmicEnd.tryLuckyCosmicEndFish(g, p)
+			// DAY-318 新增
+			case isLuckyDragonKingFish(t.Def.ID):
+				g.luckyDragonKing.tryLuckyDragonKingFish(g, p)
+			case isLuckyEternalCycleFish(t.Def.ID):
+				g.luckyEternalCycle.tryLuckyEternalCycleFish(g, p)
+			case isLuckyChaosExplosionFish(t.Def.ID):
+				g.luckyChaosExplosion.tryLuckyChaosExplosionFish(g, p)
+			case isLuckyDivineRevivalFish(t.Def.ID):
+				g.luckyDivineRevival.tryLuckyDivineRevivalFish(g, p)
+			case isLuckyGenesisEpochFish(t.Def.ID):
+				g.luckyGenesisEpoch.tryLuckyGenesisEpochFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

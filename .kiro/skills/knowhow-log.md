@@ -4610,3 +4610,47 @@ T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 
   - T195 宇宙終焉：×22.0（45 秒，史上最高）
 - **設計規則：** 每個新目標物的全服倍率比前一個高 0.5x，持續時間也略長
 - **教訓：** 倍率梯度要讓玩家一眼就能看出「這個比那個更強」，不能讓玩家困惑
+
+## 132. 里程碑目標物設計原則（DAY-318）
+- **背景：** T200 是第 200 個 Lucky 目標物，具有里程碑意義
+- **設計決策：**
+  - 倍率設為 5000x（遠超 T199 的 3400x），強調里程碑的特殊性
+  - 全服倍率 ×25.0（超越 T195 的 ×22.0），史上最高
+  - 精靈圖用純黑色 + 白色輪廓（最高階視覺語言）
+  - Lucky badge 用 🌌（宇宙）圖示，ring_color 用純白色
+  - 25 道光芒（對應 ×25.0 倍率）
+- **教訓：** 里程碑目標物要在視覺、數值、機制三個層面都體現「特殊性」
+
+## 133. Go handler 中 Player.BetCost 不存在（DAY-318）
+- **問題：** 新 handler 中使用 `p.BetCost` 報錯 `undefined`
+- **原因：** Player 結構沒有 BetCost 欄位，BetCost 在 BetLevel 定義中
+- **正確做法：** `p.GetBetDef().BetCost`
+- **教訓：** 每次新增 handler 時，要先確認 Player 結構的欄位，不能假設有 BetCost
+
+## 134. TargetKillPayload 欄位名稱（DAY-318）
+- **問題：** 新 handler 中使用 `protocol.TargetKillPayload{ID: ...}` 報錯
+- **原因：** TargetKillPayload 的欄位名稱是 `InstanceID`，不是 `ID`
+- **正確做法：** `protocol.TargetKillPayload{InstanceID: targets[i].id, Reward: reward}`
+- **教訓：** 使用 protocol 結構時要先查看定義，不能假設欄位名稱
+
+## 135. 神聖復活魚的 spawnTargetByID 不存在（DAY-318）
+- **問題：** T199 handler 需要根據 defID 生成新目標物，但 `g.spawnTargetByID()` 不存在
+- **解決：** 用 `data.GetTarget(rec.defID)` 取得定義，再用 `NewTarget(def, SpawnX, spawnY())` 生成
+- **完整流程：**
+  ```go
+  def, ok := data.GetTarget(rec.defID)
+  if !ok { continue }
+  newTarget := NewTarget(def, SpawnX, spawnY())
+  g.targets[newTarget.InstanceID] = newTarget
+  g.hub.Broadcast(protocol.MsgTargetSpawn, g.targetSpawnPayload(newTarget))
+  ```
+- **教訓：** 需要根據 defID 生成目標物時，用 data.GetTarget + NewTarget 組合，不要假設有 spawnTargetByID
+
+## 136. 全服倍率梯度 T196-T200（DAY-318）
+- **設計：** 每個新目標物的全服倍率比前一個高 0.5x，持續時間也略長
+  - T196 龍王輪盤：×23.0（46 秒）
+  - T197 永恆循環：×23.5（47 秒）
+  - T198 混沌爆炸：×24.0（48 秒）
+  - T199 神聖復活：×24.5（49 秒）
+  - T200 創世紀元：×25.0（50 秒，史上最高）
+- **教訓：** 倍率梯度要讓玩家一眼就能看出「這個比那個更強」，每次 +0.5x 是合理的遞增幅度

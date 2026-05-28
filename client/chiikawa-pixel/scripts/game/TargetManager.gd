@@ -127,6 +127,11 @@ const TARGET_SPRITES = {
 	"T193": "res://assets/sprites/targets/T193_global_explosion.png",
 	"T194": "res://assets/sprites/targets/T194_spacetime_fold.png",
 	"T195": "res://assets/sprites/targets/T195_cosmic_end.png",
+	"T196": "res://assets/sprites/targets/T196_dragon_king.png",
+	"T197": "res://assets/sprites/targets/T197_eternal_cycle.png",
+	"T198": "res://assets/sprites/targets/T198_chaos_explosion.png",
+	"T199": "res://assets/sprites/targets/T199_divine_revival.png",
+	"T200": "res://assets/sprites/targets/T200_genesis_epoch.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -254,6 +259,12 @@ const TARGET_COLORS = {
 	"T193": Color(0.9, 0.05, 0.05),  # 深紅爆炸（全服大爆炸魚，多層光環）
 	"T194": Color(0.45, 0.1, 0.65),  # 藍紫折疊（時空折疊魚，時空裂縫）
 	"T195": Color(0.05, 0.0, 0.05),  # 黑色+金色（宇宙終焉魚，終焉符文）
+	# DAY-318 新增特殊目標備用顏色
+	"T196": Color(0.8, 0.35, 0.0),   # 深橙金（龍王輪盤魚，雙環輪盤）
+	"T197": Color(0.0, 0.2, 0.6),    # 深藍（永恆循環魚，無限符號）
+	"T198": Color(0.7, 0.1, 0.0),    # 深紅（混沌爆炸魚，混沌光環）
+	"T199": Color(0.6, 0.6, 0.0),    # 深金（神聖復活魚，神聖光芒）
+	"T200": Color(0.0, 0.0, 0.0),    # 純黑（創世紀元魚，里程碑最高階）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
@@ -386,7 +397,7 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	# Lucky 特殊魚標記（T106-T195）— DAY-317 擴展到 T195
 	if def_id.begins_with("T1") and def_id.length() == 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 195:
+		if tid_num >= 106 and tid_num <= 200:
 			_add_lucky_badge(container, def_id)
 	if def_id in ["T103", "T104"]:
 		var wobble = container.create_tween().set_loops()
@@ -442,7 +453,9 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 依倍率範圍選顏色
 	var tid_num = int(def_id.substr(1))
 	var ring_color: Color
-	if tid_num >= 191:
+	if tid_num >= 196:
+		ring_color = Color(1.0, 1.0, 1.0, 1.0)     # 純白（T196+，DAY-318 里程碑最高階）
+	elif tid_num >= 191:
 		ring_color = Color(1.0, 0.85, 0.0, 1.0)    # 最亮金（T191+，DAY-317 最高階）
 	elif tid_num >= 186:
 		ring_color = Color(1.0, 0.0, 0.5, 1.0)     # 宇宙粉紅（T186+，DAY-316 最高階）
@@ -477,7 +490,9 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# LUCKY 徽章（左上角小標籤）
 	var badge = Label.new()
 	# Progressive Jackpot 系列用特殊圖示
-	if tid_num >= 191:
+	if tid_num >= 196:
+		badge.text = "🌌"  # 宇宙（T196+，DAY-318 里程碑最高階）
+	elif tid_num >= 191:
 		badge.text = "💀"  # 終焉（T191+，DAY-317 最高階）
 	elif tid_num >= 186:
 		badge.text = "🌌"  # 宇宙（T186+，DAY-316 最高階）

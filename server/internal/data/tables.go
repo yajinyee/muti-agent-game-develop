@@ -345,6 +345,23 @@ var Targets = []TargetDef{
 	// 業界依據：終極清場機制 + 史上最高全服倍率（超越 T190 的 ×19.0）
 	{ID: "T195", Name: "幸運宇宙終焉魚", Type: TypeSpecial, Multiplier: 3000, HP: 3200, SpawnWeight: 1, Speed: 5, Lifetime: 68, LaborGain: 600, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-318 新增特殊目標（3100x-5000x）────────────────────────
+	// T196 幸運龍王輪盤魚：雙環輪盤，內環 × 外環 = 最高 ×25.0，觸發全服 ×23.0 加成 46 秒
+	// 業界依據：Royal Fishing「ChainLong King Wheel」雙環輪盤機制升級版
+	{ID: "T196", Name: "幸運龍王輪盤魚", Type: TypeSpecial, Multiplier: 3100, HP: 3300, SpawnWeight: 1, Speed: 4, Lifetime: 70, LaborGain: 620, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T197 幸運永恆循環魚：永恆循環 10 波，每波獎勵遞增（×1.0 → ×10.0），全服 ×23.5 加成 47 秒
+	// 業界依據：Fishing Fortune「time loop」升級版 + 永恆循環概念
+	{ID: "T197", Name: "幸運永恆循環魚", Type: TypeSpecial, Multiplier: 3200, HP: 3420, SpawnWeight: 1, Speed: 3, Lifetime: 72, LaborGain: 640, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T198 幸運混沌爆炸魚：混沌爆炸，隨機 3-8 個目標同時爆炸，倍率疊加最高 ×30.0，全服 ×24.0 加成 48 秒
+	// 業界依據：Fishing Carnival「Big Bang」升級版 + 混沌隨機機制
+	{ID: "T198", Name: "幸運混沌爆炸魚", Type: TypeSpecial, Multiplier: 3300, HP: 3540, SpawnWeight: 1, Speed: 3, Lifetime: 74, LaborGain: 660, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T199 幸運神聖復活魚：最近死亡的 5 個目標全部復活（HP 80%，獎勵 ×4.0），全服 ×24.5 加成 49 秒
+	// 業界依據：Phoenix rebirth 機制升級版 + 神聖復活概念
+	{ID: "T199", Name: "幸運神聖復活魚", Type: TypeSpecial, Multiplier: 3400, HP: 3660, SpawnWeight: 1, Speed: 2, Lifetime: 76, LaborGain: 680, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T200 幸運創世紀元魚：里程碑第 200 個 Lucky 目標，全場 HP 歸零，每個獎勵 ×25.0，全服 ×25.0 加成 50 秒（史上最高）
+	// 業界依據：終極里程碑機制 + 史上最高全服倍率（超越 T195 的 ×22.0）
+	{ID: "T200", Name: "幸運創世紀元魚", Type: TypeSpecial, Multiplier: 5000, HP: 5000, SpawnWeight: 1, Speed: 1, Lifetime: 80, LaborGain: 1000, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }
