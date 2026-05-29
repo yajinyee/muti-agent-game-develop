@@ -224,6 +224,13 @@ type Game struct {
 	luckyTimeStop           *luckyTimeStopManager
 	luckyCosmicRestart      *luckyCosmicRestartManager
 
+	// DAY-329 新增
+	luckyFeverBoostUltimate  *luckyFeverBoostUltimateManager
+	luckyRapidRichesUltimate *luckyRapidRichesUltimateManager
+	luckyIceFishingMaster    *luckyIceFishingMasterManager
+	luckyCosmicMiracle       *luckyCosmicMiracleManager
+	luckyGenesisUltimate     *luckyGenesisUltimateManager
+
 	lastTick time.Time
 }
 
@@ -414,6 +421,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyHolyPillar:         newLuckyHolyPillarManager(),
 		luckyTimeStop:           newLuckyTimeStopManager(),
 		luckyCosmicRestart:      newLuckyCosmicRestartManager(),
+
+		// DAY-329 新增
+		luckyFeverBoostUltimate:  newLuckyFeverBoostUltimateManager(),
+		luckyRapidRichesUltimate: newLuckyRapidRichesUltimateManager(),
+		luckyIceFishingMaster:    newLuckyIceFishingMasterManager(),
+		luckyCosmicMiracle:       newLuckyCosmicMiracleManager(),
+		luckyGenesisUltimate:     newLuckyGenesisUltimateManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -1128,6 +1142,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if cosmicRestartMult > 1.0 {
 			effectiveMult *= cosmicRestartMult
 		}
+		// DAY-329 新增倍率計算
+		feverBoostUltimateMult := g.luckyFeverBoostUltimate.getFeverBoostUltimateMult()
+		if feverBoostUltimateMult > 1.0 {
+			effectiveMult *= feverBoostUltimateMult
+		}
+		rapidRichesUltimateMult := g.luckyRapidRichesUltimate.getRapidRichesUltimateMult()
+		if rapidRichesUltimateMult > 1.0 {
+			effectiveMult *= rapidRichesUltimateMult
+		}
+		iceFishingMasterMult := g.luckyIceFishingMaster.getIceFishingMasterMult()
+		if iceFishingMasterMult > 1.0 {
+			effectiveMult *= iceFishingMasterMult
+		}
+		cosmicMiracleMult := g.luckyCosmicMiracle.getCosmicMiracleMult()
+		if cosmicMiracleMult > 1.0 {
+			effectiveMult *= cosmicMiracleMult
+		}
+		genesisUltimateMult := g.luckyGenesisUltimate.getGenesisUltimateMult()
+		if genesisUltimateMult > 1.0 {
+			effectiveMult *= genesisUltimateMult
+		}
 		// 公會戰：擊破計數
 		g.luckyGuildBattle.onKillDuringBattle(playerID)
 		if g.luckyTornado.isTornadoActive() {
@@ -1455,6 +1490,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyTimeStop.tryLuckyTimeStopFish(g, p)
 			case isLuckyCosmicRestartFish(t.Def.ID):
 				g.luckyCosmicRestart.tryLuckyCosmicRestartFish(g, p)
+			// DAY-329 新增
+			case isLuckyFeverBoostUltimateFish(t.Def.ID):
+				g.luckyFeverBoostUltimate.tryLuckyFeverBoostUltimateFish(g, p)
+			case isLuckyRapidRichesUltimateFish(t.Def.ID):
+				g.luckyRapidRichesUltimate.tryLuckyRapidRichesUltimateFish(g, p)
+			case isLuckyIceFishingMasterFish(t.Def.ID):
+				g.luckyIceFishingMaster.tryLuckyIceFishingMasterFish(g, p)
+			case isLuckyCosmicMiracleFish(t.Def.ID):
+				g.luckyCosmicMiracle.tryLuckyCosmicMiracleFish(g, p)
+			case isLuckyGenesisUltimateFish(t.Def.ID):
+				g.luckyGenesisUltimate.tryLuckyGenesisUltimateFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

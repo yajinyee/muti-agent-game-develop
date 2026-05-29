@@ -208,6 +208,13 @@ const (
 	MsgLuckyHolyPillar         = "lucky_holy_pillar"         // T231 神聖光柱魚（12 道光柱 HP -50%，全服 ×46.5）
 	MsgLuckyTimeStop           = "lucky_time_stop"           // T232 時間停止魚（凍結 15 秒 ×5.0，全服 ×47.0）
 	MsgLuckyCosmicRestart      = "lucky_cosmic_restart"      // T233 宇宙重啟魚（全場 ×100.0，全服 ×47.5 新史上最高）
+
+	// DAY-329 新增幸運特殊魚事件
+	MsgLuckyFeverBoostUltimate    = "lucky_fever_boost_ultimate"    // T234 Fever Boost升級魚（清除普通目標 ×2.0，全服 ×48.0）
+	MsgLuckyRapidRichesUltimate   = "lucky_rapid_riches_ultimate"   // T235 快速暴富升級魚（3秒連擊 ×300.0，全服 ×48.5）
+	MsgLuckyIceFishingMaster      = "lucky_ice_fishing_master"      // T236 冰釣大師魚（5次旋轉最高 ×8000，全服 ×49.0）
+	MsgLuckyCosmicMiracle         = "lucky_cosmic_miracle"          // T237 宇宙奇蹟魚（全場 ×120.0 + 8道光柱，全服 ×49.5）
+	MsgLuckyGenesisUltimate       = "lucky_genesis_ultimate"        // T238 創世終極魚（全場 ×150.0，全服 ×50.0 里程碑）
 )
 // ── Envelope ─────────────────────────────────────────────────
 
@@ -932,4 +939,83 @@ type LuckyRebirthPayload struct {
 	RebirthKills int     `json:"rebirth_kills,omitempty"`  // 重生後被擊破的目標數
 	BoostMult    float64 `json:"boost_mult,omitempty"`
 	BoostSec     int     `json:"boost_sec,omitempty"`
+}
+
+// ── DAY-329 新增 Lucky 特殊魚 Payloads ───────────────────────
+
+// LuckyFeverBoostUltimatePayload T234 Fever Boost 升級魚
+type LuckyFeverBoostUltimatePayload struct {
+	Event         string  `json:"event"`                    // fever_start / fever_clear / fever_perfect / fever_end
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	DamageMult    float64 `json:"damage_mult,omitempty"`    // 特殊目標傷害倍率（2.0）
+	Duration      int     `json:"duration,omitempty"`       // Fever 持續秒數
+	NormalCleared int     `json:"normal_cleared,omitempty"` // 清除的普通目標數
+	SpecialCount  int     `json:"special_count,omitempty"`  // 場上特殊目標數
+	ClearReward   int     `json:"clear_reward,omitempty"`   // 清除獎勵
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`   // 全服加成倍率
+	GlobalSeconds int     `json:"global_seconds,omitempty"` // 全服加成秒數
+}
+
+// LuckyRapidRichesUltimatePayload T235 快速暴富升級魚
+type LuckyRapidRichesUltimatePayload struct {
+	Event         string  `json:"event"`                    // rapid_start / rapid_perfect / rapid_end
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	PerMult       float64 `json:"per_mult,omitempty"`       // 每次擊破倍率（300.0）
+	WindowSecs    int     `json:"window_secs,omitempty"`    // 連擊視窗秒數（3）
+	ComboHits     int     `json:"combo_hits,omitempty"`     // 連擊次數
+	TotalMult     float64 `json:"total_mult,omitempty"`     // 總倍率
+	Reward        int     `json:"reward,omitempty"`         // 獎勵
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyIceFishingMasterPayload T236 冰釣大師魚
+type LuckyIceFishingMasterPayload struct {
+	Event         string  `json:"event"`                    // ice_start / ice_spin / ice_perfect / ice_end
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	SpinCount     int     `json:"spin_count,omitempty"`     // 旋轉次數（5）
+	MaxMult       float64 `json:"max_mult,omitempty"`       // 最高倍率（8000）
+	SpinNo        int     `json:"spin_no,omitempty"`        // 第幾次旋轉
+	SpinMult      float64 `json:"spin_mult,omitempty"`      // 本次旋轉倍率
+	SpinReward    int     `json:"spin_reward,omitempty"`    // 本次旋轉獎勵
+	TotalReward   int     `json:"total_reward,omitempty"`   // 累積獎勵
+	MaxSpin       float64 `json:"max_spin,omitempty"`       // 最高單次旋轉
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyCosmicMiraclePayload T237 宇宙奇蹟魚
+type LuckyCosmicMiraclePayload struct {
+	Event         string  `json:"event"`                    // miracle_start / miracle_pillar / miracle_perfect / miracle_end
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	PerMult       float64 `json:"per_mult,omitempty"`       // 每個目標倍率（120.0）
+	PillarCount   int     `json:"pillar_count,omitempty"`   // 光柱數量（8）
+	PillarNo      int     `json:"pillar_no,omitempty"`      // 第幾道光柱
+	HitCount      int     `json:"hit_count,omitempty"`      // 命中數
+	TargetCount   int     `json:"target_count,omitempty"`   // 目標總數
+	TotalMult     float64 `json:"total_mult,omitempty"`     // 總倍率
+	Reward        int     `json:"reward,omitempty"`         // 獎勵
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyGenesisUltimatePayload T238 創世終極魚（里程碑：全服 ×50.0）
+type LuckyGenesisUltimatePayload struct {
+	Event         string  `json:"event"`                    // genesis_start / genesis_pillar / genesis_milestone
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	PerMult       float64 `json:"per_mult,omitempty"`       // 每個目標倍率（150.0）
+	PillarCount   int     `json:"pillar_count,omitempty"`   // 光柱數量（12）
+	PillarNo      int     `json:"pillar_no,omitempty"`      // 第幾道光柱
+	GlobalTarget  float64 `json:"global_target,omitempty"`  // 全服目標倍率（50.0）
+	TargetCount   int     `json:"target_count,omitempty"`   // 目標總數
+	TotalMult     float64 `json:"total_mult,omitempty"`     // 總倍率
+	Reward        int     `json:"reward,omitempty"`         // 獎勵
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+	Milestone     string  `json:"milestone,omitempty"`      // "GLOBAL_50X"
 }

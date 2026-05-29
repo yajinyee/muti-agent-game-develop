@@ -5054,3 +5054,35 @@ if xxxMult > 1.0 {
 3. 更新 `load_steps` 數值（= 原值 + 新增 ext_resource 數量）
 
 **DAY-328 狀態：** Main.tscn load_steps=138，包含 T224-T233 共 10 個新 Panel 節點
+
+## 162. DAY-329 五個新 Lucky 機制（業界最新 2026-05-29）
+
+- **T234 Fever Boost™ Ultimate**：清除普通目標只留特殊目標（×2.0 傷害），完美觸發全服 ×48.0（96 秒）
+  - 業界依據：Games Global「Fishin' Pots of Gold Gold Blitz Ultimate Fever Boost」（2026-05-28）
+  - 關鍵設計：Fever 期間清除普通目標，讓玩家專注攻擊高倍率特殊目標
+- **T235 Rapid Riches Ultimate**：3 秒極速連擊視窗（每次 ×300.0），連擊 ≥10 次完美，全服 ×48.5（97 秒）
+  - 業界依據：Reflex Gaming「Big Game Fishing Rapid Riches」升級版（2026-05）
+  - 關鍵設計：比 T220 的 5 秒縮短到 3 秒，但每次倍率從 ×200 提升到 ×300
+- **T236 Ice Fishing Master**：5 次旋轉（最高 ×8000），最高單次 ≥3000 完美，全服 ×49.0（98 秒）
+  - 業界依據：Evolution Gaming「Ice Fishing Live」最高 5000x 升級版（2026）
+  - 關鍵設計：比 T214 的 3 次旋轉增加到 5 次，最高倍率從 ×5000 提升到 ×8000
+- **T237 Cosmic Miracle**：全場 HP 歸零（每個 ×120.0）+ 8 道宇宙光柱，命中 ≥12 完美，全服 ×49.5（99 秒）
+  - 業界依據：終極清場機制 + 神聖光柱機制融合升級版（2026）
+  - 關鍵設計：比 T233 的 ×100.0 提升到 ×120.0，加入 8 道光柱視覺效果
+- **T238 Genesis Ultimate（里程碑）**：全場清空（每個 ×150.0）+ 12 道創世光柱，全服 ×50.0（100 秒）
+  - 業界依據：終極清場機制 + 創世機制融合終極版（2026）
+  - 里程碑：史上第一個全服 ×50.0，無條件觸發（不需要完美條件）
+
+## 163. Go build 在 Windows 上的 .git\tmp2 問題（DAY-329）
+
+- **問題：** `go build ./...` 報錯 `GetFileAttributesEx d:\Kiro\.git\tmp2: The system cannot find the file specified`
+- **原因：** Go 工具鏈在 Windows 上需要 `.git\tmp2` 目錄存在
+- **解決：** `New-Item -ItemType Directory -Path "d:\Kiro\.git\tmp2" -Force`
+- **教訓：** 每次新開發環境或 .git 目錄有問題時，先確認 `.git\tmp2` 是否存在
+
+## 164. Python 多版本環境下的 Pillow 安裝（DAY-329）
+
+- **問題：** `pip install Pillow` 成功但 `python` 仍找不到 PIL
+- **原因：** Windows 上 `python` 指向 msys64 的 Python（沒有 pip），而 `pip` 指向另一個 Python
+- **解決：** 直接用完整路徑 `C:\Users\yajinyee0306\AppData\Local\Programs\Python\Python312\python.exe`
+- **教訓：** Windows 多 Python 環境下，永遠用完整路徑執行 Python 腳本

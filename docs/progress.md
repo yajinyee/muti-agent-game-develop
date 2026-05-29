@@ -1,6 +1,45 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-29（DAY-328 T229-T233 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+## 最後更新：2026-05-29（DAY-329 T234-T238 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+
+## DAY-329 更新（2026-05-29）：T234-T238 五個新 Lucky 魚系統 + 業界研究 ✅
+- **業界研究：** Games Global「Fishin' Pots of Gold Gold Blitz Ultimate Fever Boost」Fever Boost™ 機制（2026-05-28）、Reflex Gaming「Big Game Fishing Rapid Riches」快速獎勵升級版（2026-05）、Evolution Gaming「Ice Fishing Live」最高 5000x 升級版（2026）、終極清場機制融合升級版（2026）
+- **T234 幸運FeverBoost升級魚（95000x）：** Fever Boost™ Ultimate，清除普通目標只留特殊目標（×2.0 傷害），完美觸發（特殊 ≥5）→ 全服 ×48.0 加成 96 秒（新史上最高，超越 T233 的 ×47.5）
+- **T235 幸運快速暴富升級魚（100000x）：** Rapid Riches Ultimate，3 秒極速連擊（每次 ×300.0），連擊 ≥10 → 全服 ×48.5 加成 97 秒
+- **T236 幸運冰釣大師魚（108888x）：** Ice Fishing Master，5 次旋轉（最高 ×8000），最高單次 ≥3000 → 全服 ×49.0 加成 98 秒
+- **T237 幸運宇宙奇蹟魚（118888x）：** Cosmic Miracle，全場 HP 歸零（每個 ×120.0）+ 8 道光柱，命中 ≥12 → 全服 ×49.5 加成 99 秒
+- **T238 幸運創世終極魚（128888x）：** Genesis Ultimate（里程碑），全場清空（每個 ×150.0）+ 12 道光柱，全服 ×50.0 加成 100 秒（史上第一個全服 ×50.0）
+- **Server：** 5 個 handler 檔案 + tables.go + messages.go + game.go 整合（struct + NewGame + handleKill + effectiveMult）
+- **Client：** 5 個 Lucky Panel + GameManager 5 個訊號 + TargetManager T234-T238 + LuckyPanelRegistry 更新
+- **美術：** T234-T238 精靈圖生成完成（`tools/generate_targets_day329.py`）
+  - T234（FeverBoost升級）：橙紅色魚身 + 火焰符號 + 特殊目標光環
+  - T235（快速暴富升級）：金黃色魚身 + 閃電符號 + 速度線
+  - T236（冰釣大師）：冰藍色魚身 + 雪花符號 + 冰晶光環
+  - T237（宇宙奇蹟）：深紫色大型魚身 + 8道光柱指示 + 多層光環
+  - T238（創世終極）：純金色超大型魚身 + 12道光柱 + 里程碑光環
+- **知識庫更新：** knowhow-log 條目 162/163/164（DAY-329 三個新知識點）
+- **QA 腳本：** `tools/qa_check_day329.py`（85 項驗證，85/85 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-329）
+- **Server 目標物數量：** 145 種（T001-T006 + T101-T238 + B001）
+- **Lucky 系統數量：** 133 個（T106-T238）
+- **Client Lucky Panel 數量：** 139 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（維持，需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **最高全服倍率：** T238 創世終極 ×50.0（里程碑：史上第一個全服 ×50.0）
+- **最高個人倍率：** T184 風險等級 ×3000
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最高旋轉倍率：** T236 冰釣大師魚 ×8000（Ice Fishing Master 機制）
+- **最高連擊倍率：** T235 快速暴富升級魚 ×300.0 × 連擊數（Rapid Riches Ultimate 機制）
+- **最高清場倍率：** T238 創世終極魚 ×150.0 × 目標數（Genesis Ultimate 機制）
+- **里程碑：** T238 是第一個達到全服 ×50.0 的機制，也是第一個 ×150.0 單目標清場機制
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
+
+
 
 ## DAY-328 更新（2026-05-29）：T229-T233 五個新 Lucky 魚系統 + 業界研究 ✅
 - **業界研究：** Black Hole Fishing 引力機制升級版（2026）、Royal Fishing 連鎖電擊升級版（2026）、神聖審判機制升級版（2026）、時間凍結機制終極升級版（2026）、終極清場機制升級版（2026）

@@ -486,6 +486,28 @@ var Targets = []TargetDef{
 	// 業界依據：終極清場機制升級版 + Cosmic Restart 概念（2026）
 	{ID: "T233", Name: "幸運宇宙重啟魚", Type: TypeSpecial, Multiplier: 88888, HP: 88888, SpawnWeight: 1, Speed: 1, Lifetime: 146, LaborGain: 17777, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-329 新增特殊目標（95000x-128888x）────────────────────────
+	// T234 幸運Fever Boost升級魚：Fever Boost™ Ultimate，清除普通目標只留高倍率特殊目標（×2.0 傷害加成），持續 20 秒
+	// 完美觸發（場上特殊目標 ≥5 個）→ 全服 ×48.0 加成 96 秒（新史上最高，超越 T233 的 ×47.5）
+	// 業界依據：Games Global「Fishin' Pots of Gold Gold Blitz Ultimate Fever Boost」（2026-05-28）
+	{ID: "T234", Name: "幸運FeverBoost升級魚", Type: TypeSpecial, Multiplier: 95000, HP: 95000, SpawnWeight: 1, Speed: 1, Lifetime: 148, LaborGain: 19000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T235 幸運快速暴富升級魚：Rapid Riches Ultimate，3 秒極速連擊視窗（每次擊破 ×300.0），連擊 ≥10 次 → 完美暴富
+	// 全服 ×48.5 加成 97 秒（超越 T234 的 ×48.0）
+	// 業界依據：Reflex Gaming「Big Game Fishing Rapid Riches」升級版（2026-05）
+	{ID: "T235", Name: "幸運快速暴富升級魚", Type: TypeSpecial, Multiplier: 100000, HP: 100000, SpawnWeight: 1, Speed: 1, Lifetime: 150, LaborGain: 20000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T236 幸運冰釣大師魚：Ice Fishing Master，5 次旋轉（每次最高 ×8000），最高單次 ≥3000 → 完美冰釣
+	// 全服 ×49.0 加成 98 秒（超越 T235 的 ×48.5）
+	// 業界依據：Evolution Gaming「Ice Fishing Live」最高 5000x 升級版（2026）
+	{ID: "T236", Name: "幸運冰釣大師魚", Type: TypeSpecial, Multiplier: 108888, HP: 108888, SpawnWeight: 1, Speed: 1, Lifetime: 152, LaborGain: 21777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T237 幸運宇宙奇蹟魚：Cosmic Miracle，全場 HP 歸零（每個目標 ×120.0）+ 8 道宇宙光柱
+	// 命中 ≥12 個 → 完美奇蹟，全服 ×49.5 加成 99 秒（超越 T236 的 ×49.0）
+	// 業界依據：終極清場機制 + 神聖光柱機制融合升級版（2026）
+	{ID: "T237", Name: "幸運宇宙奇蹟魚", Type: TypeSpecial, Multiplier: 118888, HP: 118888, SpawnWeight: 1, Speed: 1, Lifetime: 154, LaborGain: 23777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T238 幸運創世終極魚：Genesis Ultimate（里程碑：全服 ×50.0）
+	// 全場清空（每個目標 ×150.0）+ 12 道創世光柱，全服 ×50.0 加成 100 秒（史上第一個全服 ×50.0）
+	// 業界依據：終極清場機制 + 創世機制融合終極版（2026）
+	{ID: "T238", Name: "幸運創世終極魚", Type: TypeSpecial, Multiplier: 128888, HP: 128888, SpawnWeight: 1, Speed: 1, Lifetime: 156, LaborGain: 25777, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

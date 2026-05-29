@@ -180,6 +180,12 @@ const SIGNAL_TO_PANEL: Dictionary = {
 	"lucky_holy_pillar":         "LuckyHolyPillarPanel",
 	"lucky_time_stop":           "LuckyTimeStopPanel",
 	"lucky_cosmic_restart":      "LuckyCosmicRestartPanel",
+	# DAY-329 新增
+	"lucky_fever_boost_ultimate":  "LuckyFeverBoostUltimatePanel",
+	"lucky_rapid_riches_ultimate": "LuckyRapidRichesUltimatePanel",
+	"lucky_ice_fishing_master":    "LuckyIceFishingMasterPanel",
+	"lucky_cosmic_miracle":        "LuckyCosmicMiraclePanel",
+	"lucky_genesis_ultimate":      "LuckyGenesisUltimatePanel",
 }
 
 func _ready() -> void:

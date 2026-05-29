@@ -205,6 +205,12 @@ const TARGET_SPRITES = {
 	"T231": "res://assets/sprites/targets/T231_holy_pillar.png",
 	"T232": "res://assets/sprites/targets/T232_time_stop.png",
 	"T233": "res://assets/sprites/targets/T233_cosmic_restart.png",
+	# DAY-329 新增
+	"T234": "res://assets/sprites/targets/T234_fever_boost_ultimate.png",
+	"T235": "res://assets/sprites/targets/T235_rapid_riches_ultimate.png",
+	"T236": "res://assets/sprites/targets/T236_ice_fishing_master.png",
+	"T237": "res://assets/sprites/targets/T237_cosmic_miracle.png",
+	"T238": "res://assets/sprites/targets/T238_genesis_ultimate.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -378,6 +384,12 @@ const TARGET_COLORS = {
 	"T231": Color(1.0, 1.0, 0.0),     # 黃色（神聖光柱魚，Holy Pillar 全服 ×46.5）
 	"T232": Color(0.0, 0.8, 1.0),     # 冰藍（時間停止魚，Time Stop 全服 ×47.0）
 	"T233": Color(1.0, 0.0, 1.0),     # 洋紅（宇宙重啟魚，Cosmic Restart 全服 ×47.5 新史上最高）
+	# DAY-329 新增
+	"T234": Color(1.0, 0.4, 0.0),     # 橙紅（Fever Boost升級魚，全服 ×48.0）
+	"T235": Color(1.0, 0.85, 0.0),    # 金黃（快速暴富升級魚，全服 ×48.5）
+	"T236": Color(0.0, 0.75, 1.0),    # 冰藍（冰釣大師魚，全服 ×49.0）
+	"T237": Color(0.58, 0.0, 0.83),   # 深紫（宇宙奇蹟魚，全服 ×49.5）
+	"T238": Color(1.0, 0.84, 0.0),    # 純金（創世終極魚，全服 ×50.0 里程碑）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D

@@ -167,6 +167,12 @@ signal lucky_super_chain(data: Dictionary)
 signal lucky_holy_pillar(data: Dictionary)
 signal lucky_time_stop(data: Dictionary)
 signal lucky_cosmic_restart(data: Dictionary)
+# DAY-329 新增訊號
+signal lucky_fever_boost_ultimate(data: Dictionary)
+signal lucky_rapid_riches_ultimate(data: Dictionary)
+signal lucky_ice_fishing_master(data: Dictionary)
+signal lucky_cosmic_miracle(data: Dictionary)
+signal lucky_genesis_ultimate(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -484,6 +490,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_time_stop", payload)
 		"lucky_cosmic_restart":
 			emit_signal("lucky_cosmic_restart", payload)
+		# DAY-329 新增
+		"lucky_fever_boost_ultimate":
+			emit_signal("lucky_fever_boost_ultimate", payload)
+		"lucky_rapid_riches_ultimate":
+			emit_signal("lucky_rapid_riches_ultimate", payload)
+		"lucky_ice_fishing_master":
+			emit_signal("lucky_ice_fishing_master", payload)
+		"lucky_cosmic_miracle":
+			emit_signal("lucky_cosmic_miracle", payload)
+		"lucky_genesis_ultimate":
+			emit_signal("lucky_genesis_ultimate", payload)
 		"pong":
 			pass
 		"error":
