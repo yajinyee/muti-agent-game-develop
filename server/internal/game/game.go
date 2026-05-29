@@ -231,6 +231,13 @@ type Game struct {
 	luckyCosmicMiracle       *luckyCosmicMiracleManager
 	luckyGenesisUltimate     *luckyGenesisUltimateManager
 
+	// DAY-331 新增
+	luckySharkSpark       *luckySharkSparkManager
+	luckyWinterIce        *luckyWinterIceManager
+	luckyAtlantisFrenzy   *luckyAtlantisFrenzyManager
+	luckyFishingTimeWheel *luckyFishingTimeWheelManager
+	luckyUltimateShark    *luckyUltimateSharkManager
+
 	lastTick time.Time
 }
 
@@ -428,6 +435,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyIceFishingMaster:    newLuckyIceFishingMasterManager(),
 		luckyCosmicMiracle:       newLuckyCosmicMiracleManager(),
 		luckyGenesisUltimate:     newLuckyGenesisUltimateManager(),
+
+		// DAY-331 新增
+		luckySharkSpark:       newLuckySharkSparkManager(),
+		luckyWinterIce:        newLuckyWinterIceManager(),
+		luckyAtlantisFrenzy:   newLuckyAtlantisFrenzyManager(),
+		luckyFishingTimeWheel: newLuckyFishingTimeWheelManager(),
+		luckyUltimateShark:    newLuckyUltimateSharkManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -1163,6 +1177,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if genesisUltimateMult > 1.0 {
 			effectiveMult *= genesisUltimateMult
 		}
+		// DAY-331 新增倍率加成
+		sharkSparkMult := g.luckySharkSpark.getSharkSparkMult()
+		if sharkSparkMult > 1.0 {
+			effectiveMult *= sharkSparkMult
+		}
+		winterIceMult := g.luckyWinterIce.getWinterIceMult()
+		if winterIceMult > 1.0 {
+			effectiveMult *= winterIceMult
+		}
+		atlantisFrenzyMult := g.luckyAtlantisFrenzy.getAtlantisFrenzyMult()
+		if atlantisFrenzyMult > 1.0 {
+			effectiveMult *= atlantisFrenzyMult
+		}
+		fishingTimeWheelMult := g.luckyFishingTimeWheel.getFishingTimeWheelMult()
+		if fishingTimeWheelMult > 1.0 {
+			effectiveMult *= fishingTimeWheelMult
+		}
+		ultimateSharkMult := g.luckyUltimateShark.getUltimateSharkMult()
+		if ultimateSharkMult > 1.0 {
+			effectiveMult *= ultimateSharkMult
+		}
 		// 公會戰：擊破計數
 		g.luckyGuildBattle.onKillDuringBattle(playerID)
 		if g.luckyTornado.isTornadoActive() {
@@ -1501,6 +1536,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyCosmicMiracle.tryLuckyCosmicMiracleFish(g, p)
 			case isLuckyGenesisUltimateFish(t.Def.ID):
 				g.luckyGenesisUltimate.tryLuckyGenesisUltimateFish(g, p)
+			// DAY-331 新增
+			case isLuckySharkSparkFish(t.Def.ID):
+				g.luckySharkSpark.tryLuckySharkSparkFish(g, p)
+			case isLuckyWinterIceFish(t.Def.ID):
+				g.luckyWinterIce.tryLuckyWinterIceFish(g, p)
+			case isLuckyAtlantisFrenzyFish(t.Def.ID):
+				g.luckyAtlantisFrenzy.tryLuckyAtlantisFrenzyFish(g, p)
+			case isLuckyFishingTimeWheelFish(t.Def.ID):
+				g.luckyFishingTimeWheel.tryLuckyFishingTimeWheelFish(g, p)
+			case isLuckyUltimateSharkFish(t.Def.ID):
+				g.luckyUltimateShark.tryLuckyUltimateSharkFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

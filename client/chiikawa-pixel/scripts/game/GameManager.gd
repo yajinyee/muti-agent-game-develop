@@ -174,6 +174,13 @@ signal lucky_ice_fishing_master(data: Dictionary)
 signal lucky_cosmic_miracle(data: Dictionary)
 signal lucky_genesis_ultimate(data: Dictionary)
 
+# DAY-331 新增訊號
+signal lucky_shark_spark(data: Dictionary)
+signal lucky_winter_ice(data: Dictionary)
+signal lucky_atlantis_frenzy(data: Dictionary)
+signal lucky_fishing_time_wheel(data: Dictionary)
+signal lucky_ultimate_shark(data: Dictionary)
+
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
 var current_state: String = "normal_play"
@@ -501,6 +508,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_cosmic_miracle", payload)
 		"lucky_genesis_ultimate":
 			emit_signal("lucky_genesis_ultimate", payload)
+		# DAY-331 新增
+		"lucky_shark_spark":
+			emit_signal("lucky_shark_spark", payload)
+		"lucky_winter_ice":
+			emit_signal("lucky_winter_ice", payload)
+		"lucky_atlantis_frenzy":
+			emit_signal("lucky_atlantis_frenzy", payload)
+		"lucky_fishing_time_wheel":
+			emit_signal("lucky_fishing_time_wheel", payload)
+		"lucky_ultimate_shark":
+			emit_signal("lucky_ultimate_shark", payload)
 		"pong":
 			pass
 		"error":

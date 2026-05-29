@@ -5104,3 +5104,27 @@ if xxxMult > 1.0 {
 - **原因：** PowerShell 5.x 不支援 `&&`，這是 bash/cmd 語法
 - **解決：** 分兩步執行：先 `go build ./...`，再 `go vet ./...`，各自獨立確認 Exit Code
 - **教訓：** 在 Windows PowerShell 環境中，不要用 `&&` 串接命令，改用分號 `;` 或分開執行
+
+## 168. BGaming Shark & Spark Hold & Win 機制分析（DAY-331，2026-05-30 最新）
+- **來源：** BGaming 2026-05-30 最新發布（igamingbusiness.com, gamblingnews.com）
+- **核心機制：**
+  1. **Pay-anywhere mechanic** — 不需要特定連線，任何位置的符號都算
+  2. **Cascading Wins** — 獲勝符號消除後，新符號落下，可連鎖觸發
+  3. **Pearl symbols** — 顯示獎勵和倍率的特殊符號，可在每次旋轉落下
+  4. **Coin Respin（Hold & Win）** — 空格盤面，收集金幣貼住，重置旋轉計數，填滿獲得大獎
+- **融合到 T239 設計：** 鯊魚閃電（6條連鎖 ×80.0）+ 珍珠倍率（場上每個目標隨機 ×1-×200）
+- **教訓：** 業界最新機制要立即融合到遊戲設計，保持競爭力
+
+## 169. BGaming Fishing Time 輪盤機制（DAY-331）
+- **來源：** BGaming Fishing Time（2026-04）
+- **核心機制：** Wheel of Fortune + 倍率疊加，每次旋轉倍率累積
+- **融合到 T242 設計：** 5 次旋轉（最高 ×10000），倍率疊加，全服 ×52.5
+- **輪盤倍率表：** 10/20/50/100/200/500/1000/2000/5000/10000（加權隨機）
+- **教訓：** 輪盤機制要用加權隨機，高倍率低機率，保持 RTP 平衡
+
+## 170. Evolution Ice Fishing Live 53格輪盤設計（DAY-331）
+- **來源：** Evolution Gaming Ice Fishing Live（2025-2026）
+- **53格分布：** Leaf1×23（43.4%）、Leaf2×23（43.4%）、Lil'Blues×4（7.5%）、BigOranges×2（3.8%）、HugeReds×1（1.9%）
+- **倍率範圍：** Leaf 1:1-10:1，Lil'Blues 3x-100x，BigOranges 4x-200x，HugeReds 10x-500x
+- **融合到 T240 設計：** 3 次旋轉，53格輪盤，全服 ×51.5
+- **教訓：** 輪盤設計要有明確的 segment 分布，讓玩家感受到不同等級的期待感

@@ -508,6 +508,28 @@ var Targets = []TargetDef{
 	// 業界依據：終極清場機制 + 創世機制融合終極版（2026）
 	{ID: "T238", Name: "幸運創世終極魚", Type: TypeSpecial, Multiplier: 128888, HP: 128888, SpawnWeight: 1, Speed: 1, Lifetime: 156, LaborGain: 25777, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// DAY-331 新增：T239-T243（業界研究：BGaming Shark & Spark Hold & Win 2026-05-30 最新）
+	// T239 幸運鯊魚閃電魚：Shark & Spark 機制（里程碑：全服 ×51.0）
+	// 鯊魚閃電 + 珍珠倍率組合，閃電連鎖 6 條（每條 ×80.0），全服 ×51.0 加成 102 秒
+	// 業界依據：BGaming Shark & Spark Hold & Win（2026-05-30 最新發布）
+	{ID: "T239", Name: "幸運鯊魚閃電魚", Type: TypeSpecial, Multiplier: 138888, HP: 138888, SpawnWeight: 1, Speed: 1, Lifetime: 158, LaborGain: 27777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T240 幸運冬季冰釣魚：Winter Ice Fishing 機制（全服 ×51.5）
+	// 冰下魚群 + 53格輪盤，3 次旋轉（最高 ×500），全服 ×51.5 加成 103 秒
+	// 業界依據：BGaming Winter Fishing Club（2026-01）+ Evolution Ice Fishing Live（2025-2026）
+	{ID: "T240", Name: "幸運冬季冰釣魚", Type: TypeSpecial, Multiplier: 148888, HP: 148888, SpawnWeight: 1, Speed: 1, Lifetime: 160, LaborGain: 29777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T241 幸運大西洋狂潮魚：Big Atlantis Frenzy 機制（全服 ×52.0）
+	// 亞特蘭提斯爆炸 + 連鎖消除，7 波 Fish 符號（×5-×500），全服 ×52.0 加成 104 秒
+	// 業界依據：BGaming Big Atlantis Frenzy（2025-2026）
+	{ID: "T241", Name: "幸運大西洋狂潮魚", Type: TypeSpecial, Multiplier: 158888, HP: 158888, SpawnWeight: 1, Speed: 1, Lifetime: 162, LaborGain: 31777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T242 幸運釣魚時間魚：Fishing Time Wheel 機制（全服 ×52.5）
+	// 命運輪盤 + 倍率疊加，5 次旋轉（最高 ×10000），全服 ×52.5 加成 105 秒
+	// 業界依據：BGaming Fishing Time（2026-04）
+	{ID: "T242", Name: "幸運釣魚時間魚", Type: TypeSpecial, Multiplier: 168888, HP: 168888, SpawnWeight: 1, Speed: 1, Lifetime: 164, LaborGain: 33777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T243 幸運終極鯊魚魚：Ultimate Shark 機制（里程碑：全服 ×53.0）
+	// 終極鯊魚清場（每個 ×180.0）+ 14 次鯊魚咬合，全服 ×53.0 加成 106 秒（新史上最高）
+	// 業界依據：Shark & Spark Hold & Win 終極版（2026-05-30）
+	{ID: "T243", Name: "幸運終極鯊魚魚", Type: TypeSpecial, Multiplier: 188888, HP: 188888, SpawnWeight: 1, Speed: 1, Lifetime: 166, LaborGain: 37777, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

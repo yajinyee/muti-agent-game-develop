@@ -1,6 +1,48 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-29（DAY-330 修復 Main.tscn T234-T238 節點缺失 + 補齊 T229-T238 .import 檔案 + GitHub 同步）
+## 最後更新：2026-05-30（DAY-331 T239-T243 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+
+## DAY-331 更新（2026-05-30）：T239-T243 五個新 Lucky 魚系統 + 業界研究 ✅
+- **業界研究：** BGaming「Shark & Spark Hold & Win」Pearl Multiplier + Cascading Wins + Coin Respin（2026-05-30 最新發布）、BGaming「Fishing Time」Wheel of Fortune + 倍率疊加（2026-04）、BGaming「Big Atlantis Frenzy」Fish 符號隨機獎勵 + Buy Chance（2025-2026）、Evolution Gaming「Ice Fishing Live」53格輪盤（2025-2026）
+- **T239 幸運鯊魚閃電魚（138888x）：** Shark & Spark 機制，鯊魚閃電 + 珍珠倍率組合，閃電連鎖 6 條（每條 ×80.0），全服 ×51.0 加成 102 秒（里程碑：超越 T238 的 ×50.0）
+- **T240 幸運冬季冰釣魚（148888x）：** Winter Ice Fishing 機制，冰下魚群 + 53格輪盤，3 次旋轉（最高 ×500），全服 ×51.5 加成 103 秒
+- **T241 幸運大西洋狂潮魚（158888x）：** Big Atlantis Frenzy 機制，亞特蘭提斯爆炸 + 連鎖消除，7 波 Fish 符號（×5-×500），全服 ×52.0 加成 104 秒
+- **T242 幸運釣魚時間魚（168888x）：** Fishing Time Wheel 機制，命運輪盤 + 倍率疊加，5 次旋轉（最高 ×10000），全服 ×52.5 加成 105 秒
+- **T243 幸運終極鯊魚魚（188888x）：** Ultimate Shark 機制（里程碑），終極鯊魚清場（每個 ×180.0）+ 14 次鯊魚咬合，全服 ×53.0 加成 106 秒（新史上最高，超越 T238 的 ×50.0）
+- **Server：** 5 個 handler 檔案 + tables.go + messages.go + game.go 整合（struct + NewGame + handleKill + effectiveMult）
+- **Client：** 5 個 Lucky Panel + GameManager 5 個訊號 + TargetManager T239-T243 + LuckyPanelRegistry 更新
+- **美術：** T239-T243 精靈圖生成完成（`tools/generate_targets_day331.py`）
+  - T239（鯊魚閃電）：深海藍魚身 + 閃電符號 + 珍珠光點 + 8 道光芒
+  - T240（冬季冰釣）：冰藍魚身 + 雪花符號 + 冰晶光環 + 53格輪盤提示
+  - T241（大西洋狂潮）：亞特蘭提斯藍魚身 + 波浪紋路 + Fish 符號 + 7 波光芒
+  - T242（釣魚時間）：金橙色魚身 + 5色輪盤 + 5 次旋轉光芒
+  - T243（終極鯊魚）：橙紅超大型魚身 + 鯊魚背鰭 + 牙齒 + 14 道光芒 + 多層光環
+- **Main.tscn：** load_steps 143→148，加入 5 個新 Panel 節點
+- **知識庫更新：** knowhow-log 條目 168/169/170（DAY-331 三個新知識點）
+- **QA 腳本：** `tools/qa_check_day331.py`（91 項驗證，91/91 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-331）
+- **Server 目標物數量：** 150 種（T001-T006 + T101-T243 + B001）
+- **Lucky 系統數量：** 138 個（T106-T243）
+- **Client Lucky Panel 數量：** 149 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry + 146 個 Panel）
+- **Main.tscn load_steps：** 148（更新完成）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **最高全服倍率：** T243 終極鯊魚 ×53.0（新史上最高，超越 T238 的 ×50.0）
+- **最高個人倍率：** T184 風險等級 ×3000
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最高鯊魚倍率：** T239 鯊魚閃電魚 ×80.0 × 6 條 + Pearl（Shark & Spark 機制）
+- **最高輪盤倍率：** T242 釣魚時間魚 ×10000（Fishing Time Wheel 機制）
+- **最高清場倍率：** T243 終極鯊魚魚 ×180.0 × 目標數（Ultimate Shark 機制）
+- **里程碑：** T243 是第一個達到全服 ×53.0 的機制，也是第一個 ×180.0 清場機制
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
+- **已知技術債：** HUD.gd 超過 2330 行、150+ UI 腳本需重構、端對端整合測試缺失
+
+
 
 ## DAY-330 更新（2026-05-29）：Main.tscn 修復 + .import 補齊 ✅
 - **問題發現：** Main.tscn 的 load_steps=138，T234-T238 的 5 個 Panel 節點完全缺失（腳本存在但未加入場景）

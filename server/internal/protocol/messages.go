@@ -1019,3 +1019,82 @@ type LuckyGenesisUltimatePayload struct {
 	GlobalSeconds int     `json:"global_seconds,omitempty"`
 	Milestone     string  `json:"milestone,omitempty"`      // "GLOBAL_50X"
 }
+
+// DAY-331 新增幸運特殊魚事件
+const (
+	MsgLuckySharkSpark       = "lucky_shark_spark"        // T239 幸運鯊魚閃電魚（Shark & Spark，全服 ×51.0）
+	MsgLuckyWinterIce        = "lucky_winter_ice"         // T240 幸運冬季冰釣魚（Winter Ice Fishing，全服 ×51.5）
+	MsgLuckyAtlantisFrenzy   = "lucky_atlantis_frenzy"    // T241 幸運大西洋狂潮魚（Big Atlantis Frenzy，全服 ×52.0）
+	MsgLuckyFishingTimeWheel = "lucky_fishing_time_wheel" // T242 幸運釣魚時間魚（Fishing Time Wheel，全服 ×52.5）
+	MsgLuckyUltimateShark    = "lucky_ultimate_shark"     // T243 幸運終極鯊魚魚（Ultimate Shark，全服 ×53.0 里程碑）
+)
+
+// LuckySharkSparkPayload T239 幸運鯊魚閃電魚
+type LuckySharkSparkPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	ChainCount    int     `json:"chain_count,omitempty"`
+	PerChain      float64 `json:"per_chain,omitempty"`
+	TotalChain    float64 `json:"total_chain,omitempty"`
+	TotalPearl    float64 `json:"total_pearl,omitempty"`
+	TotalMult     float64 `json:"total_mult,omitempty"`
+	Reward        int     `json:"reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+	Milestone     string  `json:"milestone,omitempty"`
+}
+
+// LuckyWinterIcePayload T240 幸運冬季冰釣魚
+type LuckyWinterIcePayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	Spins         int     `json:"spins,omitempty"`
+	BestSpin      float64 `json:"best_spin,omitempty"`
+	TotalMult     float64 `json:"total_mult,omitempty"`
+	Reward        int     `json:"reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyAtlantisFrenzyPayload T241 幸運大西洋狂潮魚
+type LuckyAtlantisFrenzyPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	WaveCount     int     `json:"wave_count,omitempty"`
+	TotalMult     float64 `json:"total_mult,omitempty"`
+	Reward        int     `json:"reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyFishingTimeWheelPayload T242 幸運釣魚時間魚
+type LuckyFishingTimeWheelPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	Spins         int     `json:"spins,omitempty"`
+	BestSpin      float64 `json:"best_spin,omitempty"`
+	TotalMult     float64 `json:"total_mult,omitempty"`
+	Reward        int     `json:"reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyUltimateSharkPayload T243 幸運終極鯊魚魚（里程碑：全服 ×53.0）
+type LuckyUltimateSharkPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	PerMult       float64 `json:"per_mult,omitempty"`
+	BiteCount     int     `json:"bite_count,omitempty"`
+	BiteNo        int     `json:"bite_no,omitempty"`
+	TargetCount   int     `json:"target_count,omitempty"`
+	TotalMult     float64 `json:"total_mult,omitempty"`
+	Reward        int     `json:"reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+	Milestone     string  `json:"milestone,omitempty"`
+}

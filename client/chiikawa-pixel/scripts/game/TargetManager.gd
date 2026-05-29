@@ -211,6 +211,12 @@ const TARGET_SPRITES = {
 	"T236": "res://assets/sprites/targets/T236_ice_fishing_master.png",
 	"T237": "res://assets/sprites/targets/T237_cosmic_miracle.png",
 	"T238": "res://assets/sprites/targets/T238_genesis_ultimate.png",
+	# DAY-331 新增
+	"T239": "res://assets/sprites/targets/T239_shark_spark.png",
+	"T240": "res://assets/sprites/targets/T240_winter_ice.png",
+	"T241": "res://assets/sprites/targets/T241_atlantis_frenzy.png",
+	"T242": "res://assets/sprites/targets/T242_fishing_time_wheel.png",
+	"T243": "res://assets/sprites/targets/T243_ultimate_shark.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -390,6 +396,12 @@ const TARGET_COLORS = {
 	"T236": Color(0.0, 0.75, 1.0),    # 冰藍（冰釣大師魚，全服 ×49.0）
 	"T237": Color(0.58, 0.0, 0.83),   # 深紫（宇宙奇蹟魚，全服 ×49.5）
 	"T238": Color(1.0, 0.84, 0.0),    # 純金（創世終極魚，全服 ×50.0 里程碑）
+	# DAY-331 新增
+	"T239": Color(0.0, 0.75, 1.0),    # 深海藍（鯊魚閃電魚，Shark & Spark 全服 ×51.0 里程碑）
+	"T240": Color(0.53, 0.81, 0.98),  # 冰藍（冬季冰釣魚，Winter Ice Fishing 全服 ×51.5）
+	"T241": Color(0.12, 0.56, 1.0),   # 亞特蘭提斯藍（大西洋狂潮魚，全服 ×52.0）
+	"T242": Color(1.0, 0.75, 0.0),    # 金橙（釣魚時間魚，Fishing Time Wheel 全服 ×52.5）
+	"T243": Color(1.0, 0.27, 0.0),    # 鯊魚橙紅（終極鯊魚魚，全服 ×53.0 新史上最高）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
