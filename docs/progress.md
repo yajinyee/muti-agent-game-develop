@@ -1,6 +1,14 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-29（DAY-329 T234-T238 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+## 最後更新：2026-05-29（DAY-330 修復 Main.tscn T234-T238 節點缺失 + 補齊 T229-T238 .import 檔案 + GitHub 同步）
+
+## DAY-330 更新（2026-05-29）：Main.tscn 修復 + .import 補齊 ✅
+- **問題發現：** Main.tscn 的 load_steps=138，T234-T238 的 5 個 Panel 節點完全缺失（腳本存在但未加入場景）
+- **Main.tscn 修復：** load_steps 138→143，加入 ext_resource id="138"-"142"（T234-T238 五個 Panel），加入 5 個 CanvasLayer 節點到 LuckyPanelRegistry 下
+- **T229-T238 .import 補齊：** 建立 10 個 .import 檔案（T229-T233 DAY-328 缺失 + T234-T238 DAY-329 缺失）
+- **Server 驗證：** go build ./... ✅ + go vet ./... ✅（零錯誤零警告）
+- **知識庫更新：** knowhow-log 條目 165/166/167（三個新知識點）
+- **GitHub 同步：** 推送到 main 分支
 
 ## DAY-329 更新（2026-05-29）：T234-T238 五個新 Lucky 魚系統 + 業界研究 ✅
 - **業界研究：** Games Global「Fishin' Pots of Gold Gold Blitz Ultimate Fever Boost」Fever Boost™ 機制（2026-05-28）、Reflex Gaming「Big Game Fishing Rapid Riches」快速獎勵升級版（2026-05）、Evolution Gaming「Ice Fishing Live」最高 5000x 升級版（2026）、終極清場機制融合升級版（2026）

@@ -5086,3 +5086,21 @@ if xxxMult > 1.0 {
 - **原因：** Windows 上 `python` 指向 msys64 的 Python（沒有 pip），而 `pip` 指向另一個 Python
 - **解決：** 直接用完整路徑 `C:\Users\yajinyee0306\AppData\Local\Programs\Python\Python312\python.exe`
 - **教訓：** Windows 多 Python 環境下，永遠用完整路徑執行 Python 腳本
+
+## 165. Main.tscn 每次新增 Lucky Panel 後必須同步三個地方（DAY-330）
+- **問題：** DAY-329 新增 T234-T238 五個 Lucky Panel，腳本和 LuckyPanelRegistry 都有更新，但 Main.tscn 的 ext_resource 和節點完全缺失
+- **原因：** 開發流程只記錄了「腳本建立」和「Registry 更新」，沒有強制要求同步 Main.tscn
+- **解決：** 補齊 Main.tscn：load_steps 138→143，加入 id="138"-"142" 的 ext_resource，加入 5 個 CanvasLayer 節點
+- **教訓：** 新增 Lucky Panel 必須同步三個地方：① 腳本檔案 ② LuckyPanelRegistry.gd 的 SIGNAL_TO_PANEL ③ Main.tscn 的 ext_resource + 節點。缺一不可。
+
+## 166. T229-T238 精靈圖缺少 .import 檔案（DAY-330）
+- **問題：** T229-T238 的 10 個精靈圖（DAY-328/329 生成）都缺少 .import 檔案，Godot 無法載入
+- **原因：** 美術生成腳本只生成 .png，沒有同步生成 .import
+- **解決：** 手動建立 10 個 .import 檔案，uid 使用遞增序號（dag678676784 到 dag678676793）
+- **教訓：** 每次執行美術生成腳本後，必須立即執行 `tools/generate_all_imports.py` 補齊 .import 檔案。或在生成腳本中直接加入 .import 生成邏輯。
+
+## 167. PowerShell 不支援 && 語法（DAY-330）
+- **問題：** `go build ./... && echo BUILD_OK` 在 PowerShell 中報錯 `'&&' 語彙基元不是有效的陳述式分隔符號`
+- **原因：** PowerShell 5.x 不支援 `&&`，這是 bash/cmd 語法
+- **解決：** 分兩步執行：先 `go build ./...`，再 `go vet ./...`，各自獨立確認 Exit Code
+- **教訓：** 在 Windows PowerShell 環境中，不要用 `&&` 串接命令，改用分號 `;` 或分開執行
