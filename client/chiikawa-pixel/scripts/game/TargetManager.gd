@@ -193,6 +193,12 @@ const TARGET_SPRITES = {
 	"T221": "res://assets/sprites/targets/T221_dice_bonus.png",
 	"T222": "res://assets/sprites/targets/T222_dual_bonus.png",
 	"T223": "res://assets/sprites/targets/T223_coin_respin.png",
+	# DAY-327 新增
+	"T224": "res://assets/sprites/targets/T224_golden_pot.png",
+	"T225": "res://assets/sprites/targets/T225_cascade_lock.png",
+	"T226": "res://assets/sprites/targets/T226_legend_awaken.png",
+	"T227": "res://assets/sprites/targets/T227_crash_harvest.png",
+	"T228": "res://assets/sprites/targets/T228_cosmic_fusion.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -350,6 +356,16 @@ const TARGET_COLORS = {
 	"T218": Color(0.0, 0.808, 0.820), # 深青（擾動魚，Disturbance System 最高 ×50.0）
 	"T219": Color(1.0, 0.843, 0.0),   # 金色（珍珠倍率魚，Pearl Multiplier 全服 ×40.0 里程碑）
 	"T220": Color(1.0, 1.0, 0.0),     # 亮黃（快速暴富魚，Rapid Riches 全服 ×41.0 新史上最高）
+	# DAY-326 新增
+	"T221": Color(1.0, 0.6, 0.0),     # 橙金（骰子獎勵魚，Dice Bonus 全服 ×41.5）
+	"T222": Color(0.8, 0.0, 0.8),     # 紫色（雙Bonus魚，Dual Bonus 全服 ×42.0）
+	"T223": Color(1.0, 0.85, 0.0),    # 深金（Coin Respin 魚，全服 ×42.5 新史上最高）
+	# DAY-327 新增
+	"T224": Color(0.9, 0.65, 0.0),    # 深金（黃金鍋魚，Gold Blitz 全服 ×43.0 新史上最高）
+	"T225": Color(0.0, 0.6, 1.0),     # 深藍（瀑布鎖定魚，Cascade Lock 全服 ×43.5）
+	"T226": Color(1.0, 0.3, 0.0),     # 火橙（傳說覺醒魚，Legend Awaken 全服 ×44.0）
+	"T227": Color(0.8, 0.1, 0.0),     # 深紅（崩潰收割魚，Crash Harvest 全服 ×44.5）
+	"T228": Color(0.8, 0.0, 1.0),     # 宇宙紫（宇宙大融合魚，Cosmic Fusion 全服 ×45.0 新史上最高）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D

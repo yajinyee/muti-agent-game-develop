@@ -442,6 +442,28 @@ var Targets = []TargetDef{
 	// 業界依據：BGaming「Shark & Spark Hold & Win」Coin Respin（2026-05-28）
 	{ID: "T223", Name: "幸運CoinRespin魚", Type: TypeSpecial, Multiplier: 35000, HP: 35000, SpawnWeight: 1, Speed: 1, Lifetime: 126, LaborGain: 7000, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-327 新增特殊目標（38000x-50000x）────────────────────────
+	// T224 幸運黃金鍋魚：Gold Blitz™ Cash Collection，12格黃金鍋，Copper×5/Silver×20/Gold×60/Platinum×150/Diamond×200
+	// 填滿鍋子 → 額外 ×300，全服 ×43.0 加成 88 秒（新史上最高，超越 T223 的 ×42.5）
+	// 業界依據：Games Global「Fishin' Pots of Gold Gold Blitz Ultimate」（2026-05-28）
+	{ID: "T224", Name: "幸運黃金鍋魚", Type: TypeSpecial, Multiplier: 38000, HP: 38000, SpawnWeight: 1, Speed: 1, Lifetime: 128, LaborGain: 7600, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T225 幸運瀑布鎖定魚：Cascading Wins + 鎖定倍率，8 波連鎖，Pearl 符號 ×2-×10 加成
+	// 完美 8 波 → 額外 ×50，全服 ×43.5 加成 87 秒（超越 T224 的 ×43.0）
+	// 業界依據：BGaming「Shark & Spark Hold & Win」Cascading Wins + Pearl Multipliers（2026-05-28）
+	{ID: "T225", Name: "幸運瀑布鎖定魚", Type: TypeSpecial, Multiplier: 40000, HP: 40000, SpawnWeight: 1, Speed: 1, Lifetime: 130, LaborGain: 8000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T226 幸運傳說覺醒魚：Legend Dragon 覺醒升級，8 次連續獎勵（Humpback 90-150x / Legend Dragon 120-200x）
+	// 全部 8 次完成 → 全服 ×44.0 加成 88 秒（超越 T225 的 ×43.5）
+	// 業界依據：Royal Fishing Jili「Legend Dragon 120-200x, Humpback Whale 90-150x」（2026）
+	{ID: "T226", Name: "幸運傳說覺醒魚", Type: TypeSpecial, Multiplier: 43000, HP: 43000, SpawnWeight: 1, Speed: 1, Lifetime: 132, LaborGain: 8600, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T227 幸運崩潰收割魚：Crash Harvest 機制，倍率持續上升，玩家選擇收割時機
+	// 完美收割（≥50x 未崩潰）→ 全服 ×44.5 加成 89 秒（超越 T226 的 ×44.0）
+	// 業界依據：Lucky Fish AbraCadabra「Crash mechanic」（2026-05）
+	{ID: "T227", Name: "幸運崩潰收割魚", Type: TypeSpecial, Multiplier: 46000, HP: 46000, SpawnWeight: 1, Speed: 1, Lifetime: 134, LaborGain: 9200, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T228 幸運宇宙大融合魚：終極融合機制，4 Phase（Coin Respin + Cascade Lock + Legend Awaken + 全場清空）
+	// 全部完成 → 全服 ×45.0 加成 90 秒（新史上最高，超越 T227 的 ×44.5）
+	// 業界依據：終極融合設計，整合 2026 年最新業界機制
+	{ID: "T228", Name: "幸運宇宙大融合魚", Type: TypeSpecial, Multiplier: 50000, HP: 50000, SpawnWeight: 1, Speed: 1, Lifetime: 136, LaborGain: 10000, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

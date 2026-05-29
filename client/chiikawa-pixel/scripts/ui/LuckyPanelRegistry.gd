@@ -168,6 +168,12 @@ const SIGNAL_TO_PANEL: Dictionary = {
 	"lucky_dice_bonus":       "LuckyDiceBonusPanel",
 	"lucky_dual_bonus":       "LuckyDualBonusPanel",
 	"lucky_coin_respin":      "LuckyCoinRespinPanel",
+	# DAY-327 新增
+	"lucky_golden_pot":       "LuckyGoldenPotPanel",
+	"lucky_cascade_lock":     "LuckyCascadeLockPanel",
+	"lucky_legend_awaken":    "LuckyLegendAwakenPanel",
+	"lucky_crash_harvest":    "LuckyCrashHarvestPanel",
+	"lucky_cosmic_fusion":    "LuckyCosmicFusionPanel",
 }
 
 func _ready() -> void:

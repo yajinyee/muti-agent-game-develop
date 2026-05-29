@@ -210,6 +210,13 @@ type Game struct {
 	luckyDualBonus  *luckyDualBonusManager
 	luckyCoinRespin *luckyCoinRespinManager
 
+	// DAY-327 新增
+	luckyGoldenPot    *luckyGoldenPotManager
+	luckyCascadeLock  *luckyCascadeLockManager
+	luckyLegendAwaken *luckyLegendAwakenManager
+	luckyCrashHarvest *luckyCrashHarvestManager
+	luckyCosmicFusion *luckyCosmicFusionManager
+
 	lastTick time.Time
 }
 
@@ -386,6 +393,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyDiceBonus:  newLuckyDiceBonusManager(),
 		luckyDualBonus:  newLuckyDualBonusManager(),
 		luckyCoinRespin: newLuckyCoinRespinManager(),
+
+		// DAY-327 新增
+		luckyGoldenPot:    newLuckyGoldenPotManager(),
+		luckyCascadeLock:  newLuckyCascadeLockManager(),
+		luckyLegendAwaken: newLuckyLegendAwakenManager(),
+		luckyCrashHarvest: newLuckyCrashHarvestManager(),
+		luckyCosmicFusion: newLuckyCosmicFusionManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -1384,6 +1398,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyDualBonus.tryLuckyDualBonusFish(g, p)
 			case isLuckyCoinRespinFish(t.Def.ID):
 				g.luckyCoinRespin.tryLuckyCoinRespinFish(g, p)
+			// DAY-327 新增
+			case isLuckyGoldenPotFish(t.Def.ID):
+				g.luckyGoldenPot.tryLuckyGoldenPotFish(g, p)
+			case isLuckyCascadeLockFish(t.Def.ID):
+				g.luckyCascadeLock.tryLuckyCascadeLockFish(g, p)
+			case isLuckyLegendAwakenFish(t.Def.ID):
+				g.luckyLegendAwaken.tryLuckyLegendAwakenFish(g, p)
+			case isLuckyCrashHarvestFish(t.Def.ID):
+				g.luckyCrashHarvest.tryLuckyCrashHarvestFish(g, p)
+			case isLuckyCosmicFusionFish(t.Def.ID):
+				g.luckyCosmicFusion.tryLuckyCosmicFusionFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
