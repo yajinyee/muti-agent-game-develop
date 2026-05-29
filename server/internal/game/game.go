@@ -238,6 +238,13 @@ type Game struct {
 	luckyFishingTimeWheel *luckyFishingTimeWheelManager
 	luckyUltimateShark    *luckyUltimateSharkManager
 
+	// DAY-332 新增
+	luckyWildCollector     *luckyWildCollectorManager
+	luckyLightningEelUltra *luckyLightningEelUltraManager
+	luckyDominoChain       *luckyDominoChainManager
+	luckyImmortalBossUltra *luckyImmortalBossUltraManager
+	luckyQuadFusion        *luckyQuadFusionManager
+
 	lastTick time.Time
 }
 
@@ -442,6 +449,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyAtlantisFrenzy:   newLuckyAtlantisFrenzyManager(),
 		luckyFishingTimeWheel: newLuckyFishingTimeWheelManager(),
 		luckyUltimateShark:    newLuckyUltimateSharkManager(),
+
+		// DAY-332 新增
+		luckyWildCollector:     newLuckyWildCollectorManager(),
+		luckyLightningEelUltra: newLuckyLightningEelUltraManager(),
+		luckyDominoChain:       newLuckyDominoChainManager(),
+		luckyImmortalBossUltra: newLuckyImmortalBossUltraManager(),
+		luckyQuadFusion:        newLuckyQuadFusionManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -1198,6 +1212,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if ultimateSharkMult > 1.0 {
 			effectiveMult *= ultimateSharkMult
 		}
+		// DAY-332 新增倍率加成
+		wildCollectorMult := g.luckyWildCollector.getWildCollectorMult()
+		if wildCollectorMult > 1.0 {
+			effectiveMult *= wildCollectorMult
+		}
+		lightningEelUltraMult := g.luckyLightningEelUltra.getLightningEelUltraMult()
+		if lightningEelUltraMult > 1.0 {
+			effectiveMult *= lightningEelUltraMult
+		}
+		dominoChainMult := g.luckyDominoChain.getDominoChainMult()
+		if dominoChainMult > 1.0 {
+			effectiveMult *= dominoChainMult
+		}
+		immortalBossUltraMult := g.luckyImmortalBossUltra.getImmortalBossUltraMult()
+		if immortalBossUltraMult > 1.0 {
+			effectiveMult *= immortalBossUltraMult
+		}
+		quadFusionMult := g.luckyQuadFusion.getQuadFusionMult()
+		if quadFusionMult > 1.0 {
+			effectiveMult *= quadFusionMult
+		}
 		// 公會戰：擊破計數
 		g.luckyGuildBattle.onKillDuringBattle(playerID)
 		if g.luckyTornado.isTornadoActive() {
@@ -1547,6 +1582,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyFishingTimeWheel.tryLuckyFishingTimeWheelFish(g, p)
 			case isLuckyUltimateSharkFish(t.Def.ID):
 				g.luckyUltimateShark.tryLuckyUltimateSharkFish(g, p)
+			// DAY-332 新增
+			case isLuckyWildCollectorFish(t.Def.ID):
+				g.luckyWildCollector.tryLuckyWildCollectorFish(g, p)
+			case isLuckyLightningEelUltraFish(t.Def.ID):
+				g.luckyLightningEelUltra.tryLuckyLightningEelUltraFish(g, p)
+			case isLuckyDominoChainFish(t.Def.ID):
+				g.luckyDominoChain.tryLuckyDominoChainFish(g, p)
+			case isLuckyImmortalBossUltraFish(t.Def.ID):
+				g.luckyImmortalBossUltra.tryLuckyImmortalBossUltraFish(g, p)
+			case isLuckyQuadFusionFish(t.Def.ID):
+				g.luckyQuadFusion.tryLuckyQuadFusionFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

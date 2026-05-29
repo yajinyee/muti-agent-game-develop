@@ -1,8 +1,51 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-30（DAY-331 T239-T243 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+## 最後更新：2026-05-30（DAY-332 T244-T248 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
 
-## DAY-331 更新（2026-05-30）：T239-T243 五個新 Lucky 魚系統 + 業界研究 ✅
+## DAY-332 更新（2026-05-30）：T244-T248 五個新 Lucky 魚系統 + 業界研究 ✅
+- **業界研究：** BGaming「Big Boat Big Catch」Wild Collector 機制（×2→×3→×10，2026-03）、Royal Fishing Jili「Lightning Eel 60x Chain Reaction」升級版（2026）、Domino Chain Reaction 骨牌連鎖機制（2026 新趨勢）、Royal Fishing「Immortal Boss 50-150x consecutive wins」升級版（2026）
+- **T244 幸運野生收集魚（198888x）：** Wild Collector 機制，Wild 收集：每 4 個 Wild → 額外旋轉（×2→×3→×10），10 次旋轉，全服 ×54.0 加成 108 秒（超越 T243 的 ×53.0）
+- **T245 幸運閃電鰻升級魚（208888x）：** Lightning Eel Ultra 機制，8 條鰻魚依序觸發（每條 ×90.0），連鎖跳躍 3 次，完美連鎖 → 全服 ×54.5 加成 109 秒
+- **T246 幸運骨牌連鎖魚（218888x）：** Domino Chain Reaction 機制（全新），最多 20 個骨牌依序倒下（每個 ×50.0），完美連鎖（≥15）→ 全服 ×55.0 加成 110 秒（里程碑）
+- **T247 幸運不死BOSS升級魚（228888x）：** Immortal Boss Ultra 機制，不死 BOSS 連續獎勵：5 次復活（×100→×150→×200→×250→×300），全服 ×55.5 加成 111 秒
+- **T248 幸運四重終極融合魚（248888x）：** Quad Fusion Ultimate 機制（里程碑），四重機制融合：Wild Collector + Lightning Eel + Domino Chain + Immortal Boss，全服 ×56.0 加成 112 秒（新史上最高，超越 T246 的 ×55.0）
+- **Server：** 5 個 handler 檔案 + tables.go + messages.go + game.go 整合（struct + NewGame + handleKill + effectiveMult）
+- **Client：** 5 個 Lucky Panel + GameManager 5 個訊號 + TargetManager T244-T248 + LuckyPanelRegistry 更新
+- **美術：** T244-T248 精靈圖生成完成（`tools/generate_targets_day332.py`）
+  - T244（野生收集）：黃金色魚身 + W 符號 + 16 道金色光芒 + 三層光環
+  - T245（閃電鰻升級）：青色細長魚身 + 8 條閃電 + 電弧紋路 + 跳躍點
+  - T246（骨牌連鎖）：橙色魚身 + 骨牌符號 + 連鎖箭頭 + 12 道光芒
+  - T247（不死BOSS升級）：深紅色大型魚身 + 骷髏符號 + 5 層復活光環
+  - T248（四重終極融合）：洋紅色超大型魚身 + 四象限符號 + 24 道光芒 + 六層光環（里程碑）
+- **Main.tscn：** load_steps 148→153，加入 5 個新 Panel 節點
+- **知識庫更新：** knowhow-log 條目 171/172/173（DAY-332 三個新知識點）
+- **QA 腳本：** `tools/qa_check_day332.py`（91 項驗證，91/91 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-332）
+- **Server 目標物數量：** 155 種（T001-T006 + T101-T248 + B001）
+- **Lucky 系統數量：** 143 個（T106-T248）
+- **Client Lucky Panel 數量：** 154 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry + 151 個 Panel）
+- **Main.tscn load_steps：** 153（更新完成）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **最高全服倍率：** T248 四重終極融合 ×56.0（新史上最高，超越 T246 的 ×55.0）
+- **最高個人倍率：** T184 風險等級 ×3000
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最高 Wild 倍率：** T244 野生收集魚 ×10.0 × 4 次（Wild Collector 機制）
+- **最高鰻魚倍率：** T245 閃電鰻升級魚 ×90.0 × 8 條 × 3 跳（Lightning Eel Ultra 機制）
+- **最高骨牌倍率：** T246 骨牌連鎖魚 ×50.0 × 20 個（Domino Chain 機制）
+- **最高 BOSS 倍率：** T247 不死BOSS升級魚 ×300.0 × 5 次（Immortal Boss Ultra 機制）
+- **里程碑：** T248 是第一個達到全服 ×56.0 的機制，也是第一個四重機制融合
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
+- **已知技術債：** HUD.gd 超過 2330 行、150+ UI 腳本需重構、端對端整合測試缺失
+
+
+
+
 - **業界研究：** BGaming「Shark & Spark Hold & Win」Pearl Multiplier + Cascading Wins + Coin Respin（2026-05-30 最新發布）、BGaming「Fishing Time」Wheel of Fortune + 倍率疊加（2026-04）、BGaming「Big Atlantis Frenzy」Fish 符號隨機獎勵 + Buy Chance（2025-2026）、Evolution Gaming「Ice Fishing Live」53格輪盤（2025-2026）
 - **T239 幸運鯊魚閃電魚（138888x）：** Shark & Spark 機制，鯊魚閃電 + 珍珠倍率組合，閃電連鎖 6 條（每條 ×80.0），全服 ×51.0 加成 102 秒（里程碑：超越 T238 的 ×50.0）
 - **T240 幸運冬季冰釣魚（148888x）：** Winter Ice Fishing 機制，冰下魚群 + 53格輪盤，3 次旋轉（最高 ×500），全服 ×51.5 加成 103 秒

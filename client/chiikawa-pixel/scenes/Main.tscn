@@ -1,4 +1,4 @@
-[gd_scene load_steps=148 format=3 uid="uid://main"]
+[gd_scene load_steps=153 format=3 uid="uid://main"]
 
 [ext_resource type="Script" path="res://scripts/game/TargetManager.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/game/Cannon.gd" id="2"]
@@ -148,6 +148,11 @@
 [ext_resource type="Script" path="res://scripts/ui/LuckyAtlantisFrenzyPanel.gd" id="145"]
 [ext_resource type="Script" path="res://scripts/ui/LuckyFishingTimeWheelPanel.gd" id="146"]
 [ext_resource type="Script" path="res://scripts/ui/LuckyUltimateSharkPanel.gd" id="147"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyWildCollectorPanel.gd" id="148"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyLightningEelUltraPanel.gd" id="149"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDominoChainPanel.gd" id="150"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyImmortalBossUltraPanel.gd" id="151"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyQuadFusionPanel.gd" id="152"]
 
 [node name="Main" type="Node2D"]
 
@@ -715,3 +720,18 @@ script = ExtResource("146")
 
 [node name="LuckyUltimateSharkPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
 script = ExtResource("147")
+
+[node name="LuckyWildCollectorPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("148")
+
+[node name="LuckyLightningEelUltraPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("149")
+
+[node name="LuckyDominoChainPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("150")
+
+[node name="LuckyImmortalBossUltraPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("151")
+
+[node name="LuckyQuadFusionPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("152")

@@ -192,6 +192,12 @@ const SIGNAL_TO_PANEL: Dictionary = {
 	"lucky_atlantis_frenzy":       "LuckyAtlantisFrenzyPanel",
 	"lucky_fishing_time_wheel":    "LuckyFishingTimeWheelPanel",
 	"lucky_ultimate_shark":        "LuckyUltimateSharkPanel",
+	# DAY-332 新增
+	"lucky_wild_collector":        "LuckyWildCollectorPanel",
+	"lucky_lightning_eel_ultra":   "LuckyLightningEelUltraPanel",
+	"lucky_domino_chain":          "LuckyDominoChainPanel",
+	"lucky_immortal_boss_ultra":   "LuckyImmortalBossUltraPanel",
+	"lucky_quad_fusion":           "LuckyQuadFusionPanel",
 }
 
 func _ready() -> void:

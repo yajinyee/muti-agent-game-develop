@@ -530,6 +530,29 @@ var Targets = []TargetDef{
 	// 業界依據：Shark & Spark Hold & Win 終極版（2026-05-30）
 	{ID: "T243", Name: "幸運終極鯊魚魚", Type: TypeSpecial, Multiplier: 188888, HP: 188888, SpawnWeight: 1, Speed: 1, Lifetime: 166, LaborGain: 37777, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// DAY-332 新增：T244-T248（業界研究：BGaming Big Boat Big Catch Wild Collector + Royal Fishing Lightning Eel Ultra + Domino Chain + Immortal Boss Ultra + Quad Fusion 2026）
+	// T244 幸運野生收集魚：Wild Collector 機制（全服 ×54.0）
+	// Wild 符號收集：每 4 個 Wild → 額外旋轉（×2→×3→×10），最高 10 次，全服 ×54.0 加成 108 秒
+	// 業界依據：BGaming Big Boat Big Catch（2026-03）Wild Collector 機制
+	{ID: "T244", Name: "幸運野生收集魚", Type: TypeSpecial, Multiplier: 198888, HP: 198888, SpawnWeight: 1, Speed: 1, Lifetime: 168, LaborGain: 39777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T245 幸運閃電鰻升級魚：Lightning Eel Ultra 機制（全服 ×54.5）
+	// 8 條鰻魚依序觸發（每條 ×90.0），連鎖跳躍 3 次，完美連鎖 → 全服 ×54.5 加成 109 秒
+	// 業界依據：Royal Fishing Jili「60x Lightning Eel Chain Reaction」升級版（2026）
+	{ID: "T245", Name: "幸運閃電鰻升級魚", Type: TypeSpecial, Multiplier: 208888, HP: 208888, SpawnWeight: 1, Speed: 1, Lifetime: 170, LaborGain: 41777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T246 幸運骨牌連鎖魚：Domino Chain Reaction 機制（里程碑：全服 ×55.0）
+	// 骨牌效應：最多 20 個骨牌依序倒下（每個 ×50.0），完美連鎖（≥15）→ 全服 ×55.0 加成 110 秒
+	// 業界依據：Domino Chain Reaction 機制（2026 新趨勢）
+	{ID: "T246", Name: "幸運骨牌連鎖魚", Type: TypeSpecial, Multiplier: 218888, HP: 218888, SpawnWeight: 1, Speed: 1, Lifetime: 172, LaborGain: 43777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T247 幸運不死BOSS升級魚：Immortal Boss Ultra 機制（全服 ×55.5）
+	// 不死 BOSS 連續獎勵：5 次復活（×100→×150→×200→×250→×300），全服 ×55.5 加成 111 秒
+	// 業界依據：Royal Fishing Jili「Immortal Boss 50-150x consecutive wins」升級版（2026）
+	{ID: "T247", Name: "幸運不死BOSS升級魚", Type: TypeSpecial, Multiplier: 228888, HP: 228888, SpawnWeight: 1, Speed: 1, Lifetime: 174, LaborGain: 45777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T248 幸運四重終極融合魚：Quad Fusion Ultimate 機制（里程碑：全服 ×56.0）
+	// 四重機制融合：Wild Collector + Lightning Eel + Domino Chain + Immortal Boss
+	// 全服 ×56.0 加成 112 秒（新史上最高，超越 T246 的 ×55.0）
+	// 業界依據：四機制終極融合（2026 里程碑）
+	{ID: "T248", Name: "幸運四重終極融合魚", Type: TypeSpecial, Multiplier: 248888, HP: 248888, SpawnWeight: 1, Speed: 1, Lifetime: 176, LaborGain: 49777, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

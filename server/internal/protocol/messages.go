@@ -1083,17 +1083,83 @@ type LuckyFishingTimeWheelPayload struct {
 	GlobalSeconds int     `json:"global_seconds,omitempty"`
 }
 
-// LuckyUltimateSharkPayload T243 幸運終極鯊魚魚（里程碑：全服 ×53.0）
-type LuckyUltimateSharkPayload struct {
+// DAY-332 新增幸運特殊魚事件
+const (
+	MsgLuckyWildCollector      = "lucky_wild_collector"       // T244 幸運野生收集魚（Wild Collector，全服 ×54.0）
+	MsgLuckyLightningEelUltra  = "lucky_lightning_eel_ultra"  // T245 幸運閃電鰻升級魚（Lightning Eel Ultra，全服 ×54.5）
+	MsgLuckyDominoChain        = "lucky_domino_chain"         // T246 幸運骨牌連鎖魚（Domino Chain，全服 ×55.0 里程碑）
+	MsgLuckyImmortalBossUltra  = "lucky_immortal_boss_ultra"  // T247 幸運不死BOSS升級魚（Immortal Boss Ultra，全服 ×55.5）
+	MsgLuckyQuadFusion         = "lucky_quad_fusion"          // T248 幸運四重終極融合魚（Quad Fusion，全服 ×56.0 里程碑）
+)
+
+// LuckyWildCollectorPayload T244 幸運野生收集魚
+type LuckyWildCollectorPayload struct {
 	Event         string  `json:"event"`
 	TriggerID     string  `json:"trigger_id"`
 	TriggerName   string  `json:"trigger_name"`
-	PerMult       float64 `json:"per_mult,omitempty"`
-	BiteCount     int     `json:"bite_count,omitempty"`
-	BiteNo        int     `json:"bite_no,omitempty"`
-	TargetCount   int     `json:"target_count,omitempty"`
+	Stage         int     `json:"stage,omitempty"`
+	WildCount     int     `json:"wild_count,omitempty"`
+	SpinMult      float64 `json:"spin_mult,omitempty"`
+	BonusSpins    int     `json:"bonus_spins,omitempty"`
 	TotalMult     float64 `json:"total_mult,omitempty"`
-	Reward        int     `json:"reward,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyLightningEelUltraPayload T245 幸運閃電鰻升級魚
+type LuckyLightningEelUltraPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	EelNo         int     `json:"eel_no,omitempty"`
+	JumpNo        int     `json:"jump_no,omitempty"`
+	JumpMult      float64 `json:"jump_mult,omitempty"`
+	PerfectBonus  float64 `json:"perfect_bonus,omitempty"`
+	TotalMult     float64 `json:"total_mult,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyDominoChainPayload T246 幸運骨牌連鎖魚
+type LuckyDominoChainPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	DominoNo      int     `json:"domino_no,omitempty"`
+	ChainMult     float64 `json:"chain_mult,omitempty"`
+	IsPerfect     bool    `json:"is_perfect,omitempty"`
+	PerfectBonus  float64 `json:"perfect_bonus,omitempty"`
+	TotalMult     float64 `json:"total_mult,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+	Milestone     string  `json:"milestone,omitempty"`
+}
+
+// LuckyImmortalBossUltraPayload T247 幸運不死BOSS升級魚
+type LuckyImmortalBossUltraPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	ReviveNo      int     `json:"revive_no,omitempty"`
+	ReviveMult    float64 `json:"revive_mult,omitempty"`
+	ReviveReward  int     `json:"revive_reward,omitempty"`
+	TotalMult     float64 `json:"total_mult,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyQuadFusionPayload T248 幸運四重終極融合魚（里程碑：全服 ×56.0）
+type LuckyQuadFusionPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	Phase         int     `json:"phase,omitempty"`
+	TotalMult     float64 `json:"total_mult,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
 	GlobalBonus   float64 `json:"global_bonus,omitempty"`
 	GlobalSeconds int     `json:"global_seconds,omitempty"`
 	Milestone     string  `json:"milestone,omitempty"`

@@ -181,6 +181,13 @@ signal lucky_atlantis_frenzy(data: Dictionary)
 signal lucky_fishing_time_wheel(data: Dictionary)
 signal lucky_ultimate_shark(data: Dictionary)
 
+# DAY-332 新增訊號
+signal lucky_wild_collector(data: Dictionary)
+signal lucky_lightning_eel_ultra(data: Dictionary)
+signal lucky_domino_chain(data: Dictionary)
+signal lucky_immortal_boss_ultra(data: Dictionary)
+signal lucky_quad_fusion(data: Dictionary)
+
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
 var current_state: String = "normal_play"
@@ -519,6 +526,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_fishing_time_wheel", payload)
 		"lucky_ultimate_shark":
 			emit_signal("lucky_ultimate_shark", payload)
+		# DAY-332 新增
+		"lucky_wild_collector":
+			emit_signal("lucky_wild_collector", payload)
+		"lucky_lightning_eel_ultra":
+			emit_signal("lucky_lightning_eel_ultra", payload)
+		"lucky_domino_chain":
+			emit_signal("lucky_domino_chain", payload)
+		"lucky_immortal_boss_ultra":
+			emit_signal("lucky_immortal_boss_ultra", payload)
+		"lucky_quad_fusion":
+			emit_signal("lucky_quad_fusion", payload)
 		"pong":
 			pass
 		"error":

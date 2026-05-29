@@ -217,6 +217,12 @@ const TARGET_SPRITES = {
 	"T241": "res://assets/sprites/targets/T241_atlantis_frenzy.png",
 	"T242": "res://assets/sprites/targets/T242_fishing_time_wheel.png",
 	"T243": "res://assets/sprites/targets/T243_ultimate_shark.png",
+	# DAY-332 新增
+	"T244": "res://assets/sprites/targets/T244_wild_collector.png",
+	"T245": "res://assets/sprites/targets/T245_lightning_eel_ultra.png",
+	"T246": "res://assets/sprites/targets/T246_domino_chain.png",
+	"T247": "res://assets/sprites/targets/T247_immortal_boss_ultra.png",
+	"T248": "res://assets/sprites/targets/T248_quad_fusion.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -402,6 +408,12 @@ const TARGET_COLORS = {
 	"T241": Color(0.12, 0.56, 1.0),   # 亞特蘭提斯藍（大西洋狂潮魚，全服 ×52.0）
 	"T242": Color(1.0, 0.75, 0.0),    # 金橙（釣魚時間魚，Fishing Time Wheel 全服 ×52.5）
 	"T243": Color(1.0, 0.27, 0.0),    # 鯊魚橙紅（終極鯊魚魚，全服 ×53.0 新史上最高）
+	# DAY-332 新增
+	"T244": Color(1.0, 0.85, 0.0),    # 黃金色（野生收集魚，Wild Collector 全服 ×54.0）
+	"T245": Color(0.0, 1.0, 1.0),     # 青色（閃電鰻升級魚，Lightning Eel Ultra 全服 ×54.5）
+	"T246": Color(1.0, 0.55, 0.0),    # 骨牌橙（骨牌連鎖魚，Domino Chain 全服 ×55.0 里程碑）
+	"T247": Color(0.55, 0.0, 0.0),    # 深紅（不死BOSS升級魚，Immortal Boss Ultra 全服 ×55.5）
+	"T248": Color(1.0, 0.0, 1.0),     # 洋紅（四重終極融合魚，Quad Fusion 全服 ×56.0 里程碑）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
