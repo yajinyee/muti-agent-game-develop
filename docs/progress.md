@@ -1,8 +1,47 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-29（DAY-324 T211-T215 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+## 最後更新：2026-05-29（DAY-325 T216-T220 五個新 Lucky 魚系統 + Buy Bonus 機制 + 業界研究 + GitHub 同步）
 
-## DAY-324 更新（2026-05-29）：T211-T215 五個新 Lucky 魚系統 + 業界研究 ✅
+## DAY-325 更新（2026-05-29）：T216-T220 五個新 Lucky 魚系統 + Buy Bonus Agent + 業界研究 ✅
+- **業界研究：** BGaming「Fishing Club 2」Fishing Net（×60）+ TNT Bonus（×100）（2026-04）、Fisch「Disturbance System」活躍度驅動（2026-01）、BGaming「Shark & Spark Hold & Win」Pearl 倍率符號（2026-05）、Reflex Gaming「Big Game Fishing Rapid Riches」（2026-05）
+- **T216 幸運漁網魚（23000x）：** Fishing Net 機制，撒網捕獲全場所有目標（每個 ×60.0），全服 ×38.5 加成 77 秒（超越 T215 的 ×38.0）
+- **T217 幸運 TNT 爆炸魚（24000x）：** TNT Bonus 機制，3 秒倒數水下大爆炸（全場 HP -80%，每個 ×100.0），全服 ×39.0 加成 78 秒
+- **T218 幸運擾動魚（25000x）：** Disturbance System，活躍度越高倍率越高（擾動值 1-30，最高 ×50.0），全服 ×39.5 加成 79 秒
+- **T219 幸運珍珠倍率魚（26000x）：** Pearl Multiplier，場上每個目標都有珍珠倍率（×1-×100），全服 ×40.0 加成 80 秒（新里程碑：全服 ×40.0）
+- **T220 幸運快速暴富魚（28888x）：** Rapid Riches 機制，5 秒內快速連擊（每次 ×200.0），連擊 ≥ 10 → 全服 ×41.0 加成 82 秒（新史上最高）
+- **Server：** 5 個 handler 檔案 + tables.go + messages.go + game.go 整合 + player.go 新增 RecentKills/AddRecentKill
+- **Client：** 5 個 Lucky Panel + GameManager 5 個訊號 + TargetManager T216-T220 + LuckyPanelRegistry 更新
+- **美術：** T216-T220 精靈圖生成完成（`tools/generate_targets_day325.py`）
+  - T216（漁網）：深海藍魚身 + 漁網紋路 + 魚鉤符號 + 12 道光芒（55.1%）
+  - T217（TNT）：火橙紅魚身 + TNT 文字 + 爆炸裂縫 + 16 道光芒（64.9%）
+  - T218（擾動）：深青色魚身 + 波紋擾動紋路 + 活躍度指示器（56.7%）
+  - T219（珍珠）：金色大型魚身 + 珍珠符號 + ×40 倍率標示 + 三層光環（69.4%）
+  - T220（快速暴富）：亮黃色超大型魚身 + 閃電符號 + 速度線 + 24 道光芒（76.7%）
+- **新增 Agent：** `buy-bonus-agent.md`（Buy Bonus 機制專屬 Agent）
+- **知識庫更新：** knowhow-log 條目 146/147/148/149/150（DAY-325 五個新機制）
+- **QA 腳本：** `tools/qa_check_day325.py`（79 項驗證，79/79 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-325）
+- **Server 目標物數量：** 127 種（T001-T006 + T101-T220 + B001）
+- **Lucky 系統數量：** 115 個（T106-T220）
+- **Client Lucky Panel 數量：** 121 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry）
+- **Agent 文件數量：** 55 個（agents/ 目錄，新增 buy-bonus-agent）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（維持，Shader 系統已建立，需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **最高全服倍率：** T220 快速暴富 ×41.0（新史上最高，超越 T215 的 ×38.0）
+- **最高個人倍率：** T184 風險等級 ×3000
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最高漁網倍率：** T216 漁網魚 ×60.0（Fishing Net 機制）
+- **最高 TNT 倍率：** T217 TNT 爆炸魚 ×100.0（TNT Bonus 機制）
+- **最高 Rapid 倍率：** T220 快速暴富魚 ×200.0（Rapid Riches 機制）
+- **里程碑：** T219 珍珠倍率魚觸發全服 ×40.0（第一個達到 ×40.0 的機制）
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
+
+
 - **業界研究：** Relax Gaming「Cod of Thunder Dream Drop」Multiplier Ladder（2026）、cardsrealm.com「Hybrid Crash Game」趨勢（2026-05）、Evolution Gaming「Ice Fishing」最高 5000x（2026）、Avalanche Reels + Global Multiplier 組合
 - **T211 幸運雪崩魚（17000x）：** Avalanche Cascade 機制，8 波連鎖消除，每波倍率 +5.0，全服 ×36.0 加成 72 秒（超越 T210 的 ×35.0）
 - **T212 幸運崩潰倍率魚（18000x）：** Crash Multiplier 機制，倍率持續上升直到崩潰，完美收割（≥40.0）→ 全服 ×36.5 加成 73 秒

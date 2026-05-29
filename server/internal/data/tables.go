@@ -413,6 +413,23 @@ var Targets = []TargetDef{
 	// 業界依據：Avalanche Reels + Global Multiplier 組合（2026 最新趨勢）
 	{ID: "T215", Name: "幸運全服雪崩魚", Type: TypeSpecial, Multiplier: 22000, HP: 22000, SpawnWeight: 1, Speed: 1, Lifetime: 110, LaborGain: 4400, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-325 新增特殊目標（23000x-28888x）────────────────────────
+	// T216 幸運漁網魚：Fishing Net 機制，撒網捕獲全場所有目標，每個獎勵 ×60.0，全服 ×38.5 加成 77 秒
+	// 業界依據：BGaming「Fishing Club 2」Fishing Net Bonus（×60 stake，2026-04）
+	{ID: "T216", Name: "幸運漁網魚", Type: TypeSpecial, Multiplier: 23000, HP: 23000, SpawnWeight: 1, Speed: 1, Lifetime: 112, LaborGain: 4600, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T217 幸運 TNT 爆炸魚：TNT Bonus 機制，水下大爆炸（全場 HP -80%，每個 ×100.0），全服 ×39.0 加成 78 秒
+	// 業界依據：BGaming「Fishing Club 2」TNT Bonus（×100 stake，2026-04）
+	{ID: "T217", Name: "幸運TNT爆炸魚", Type: TypeSpecial, Multiplier: 24000, HP: 24000, SpawnWeight: 1, Speed: 1, Lifetime: 114, LaborGain: 4800, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T218 幸運擾動魚：Disturbance System，活躍度越高倍率越高（最高 ×50.0），全服 ×39.5 加成 79 秒
+	// 業界依據：Fisch「Disturbance System」活躍度驅動稀有魚生成（2026-01）
+	{ID: "T218", Name: "幸運擾動魚", Type: TypeSpecial, Multiplier: 25000, HP: 25000, SpawnWeight: 1, Speed: 1, Lifetime: 116, LaborGain: 5000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T219 幸運珍珠倍率魚：Pearl Multiplier，場上每個目標都有珍珠倍率（×1-×100），全服 ×40.0 加成 80 秒（新里程碑）
+	// 業界依據：BGaming「Shark & Spark Hold & Win」Pearl 倍率符號（2026-05）
+	{ID: "T219", Name: "幸運珍珠倍率魚", Type: TypeSpecial, Multiplier: 26000, HP: 26000, SpawnWeight: 1, Speed: 1, Lifetime: 118, LaborGain: 5200, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T220 幸運快速暴富魚：Rapid Riches 機制，5 秒內快速連擊（每次 ×200.0），全服 ×41.0 加成 82 秒（新史上最高）
+	// 業界依據：Reflex Gaming「Big Game Fishing Rapid Riches」快速獎勵機制（2026-05）
+	{ID: "T220", Name: "幸運快速暴富魚", Type: TypeSpecial, Multiplier: 28888, HP: 28888, SpawnWeight: 1, Speed: 1, Lifetime: 120, LaborGain: 5776, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

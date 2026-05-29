@@ -182,6 +182,13 @@ const (
 	MsgLuckyMultiplierLadder  = "lucky_multiplier_ladder"  // T213 倍率梯魚（Lv.1-10，Lv.10 → 全服 ×37.0）
 	MsgLuckyIceFishingWheel   = "lucky_ice_fishing_wheel"  // T214 冰釣輪盤魚（3 次旋轉最高 ×5000，全服 ×37.5）
 	MsgLuckyGlobalAvalanche   = "lucky_global_avalanche"   // T215 全服雪崩魚（5 波全服消除，全服 ×38.0 新史上最高）
+
+	// DAY-325 新增幸運特殊魚事件
+	MsgLuckyFishingNet      = "lucky_fishing_net"      // T216 漁網魚（撒網捕獲全場 ×60.0，全服 ×38.5）
+	MsgLuckyTNTBonus        = "lucky_tnt_bonus"        // T217 TNT 爆炸魚（水下大爆炸 ×100.0，全服 ×39.0）
+	MsgLuckyDisturbance     = "lucky_disturbance"      // T218 擾動魚（活躍度驅動，最高 ×50.0，全服 ×39.5）
+	MsgLuckyPearlMultiplier = "lucky_pearl_multiplier" // T219 珍珠倍率魚（珍珠 ×1-×100，全服 ×40.0 新里程碑）
+	MsgLuckyRapidRiches     = "lucky_rapid_riches"     // T220 快速暴富魚（5 秒連擊 ×200.0，全服 ×41.0 新史上最高）
 )
 // ── Envelope ─────────────────────────────────────────────────
 

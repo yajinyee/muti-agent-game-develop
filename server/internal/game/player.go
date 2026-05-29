@@ -38,6 +38,9 @@ type Player struct {
 	ComboCount     int
 	LastHitTime    time.Time
 	ComboMultBonus float64
+	// Disturbance 系統（T218 擾動魚）
+	RecentKills    int       // 最近 30 秒內的擊破數
+	LastKillTime   time.Time // 最後一次擊破時間
 }
 
 func NewPlayer(id string) *Player {
@@ -151,4 +154,20 @@ func (p *Player) GetComboMultBonus() float64 {
 		p.ComboMultBonus = 0
 	}
 	return p.ComboMultBonus
+}
+
+// AddRecentKill 記錄最近擊破（用於 T218 擾動魚的擾動值計算）
+func (p *Player) AddRecentKill() {
+	const recentWindow = 30.0 // 30 秒視窗
+	now := time.Now()
+	// 超過 30 秒沒有擊破則重置
+	if !p.LastKillTime.IsZero() && now.Sub(p.LastKillTime).Seconds() > recentWindow {
+		p.RecentKills = 0
+	}
+	p.RecentKills++
+	p.LastKillTime = now
+	// 最高 30
+	if p.RecentKills > 30 {
+		p.RecentKills = 30
+	}
 }

@@ -198,6 +198,13 @@ type Game struct {
 	luckyIceFishingWheel  *luckyIceFishingWheelManager
 	luckyGlobalAvalanche  *luckyGlobalAvalancheManager
 
+	// DAY-325 新增
+	luckyFishingNet      *luckyFishingNetManager
+	luckyTNTBonus        *luckyTNTBonusManager
+	luckyDisturbance     *luckyDisturbanceManager
+	luckyPearlMultiplier *luckyPearlMultiplierManager
+	luckyRapidRiches     *luckyRapidRichesManager
+
 	lastTick time.Time
 }
 
@@ -362,6 +369,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyMultiplierLadder: newLuckyMultiplierLadderManager(),
 		luckyIceFishingWheel:  newLuckyIceFishingWheelManager(),
 		luckyGlobalAvalanche:  newLuckyGlobalAvalancheManager(),
+
+		// DAY-325 新增
+		luckyFishingNet:      newLuckyFishingNetManager(),
+		luckyTNTBonus:        newLuckyTNTBonusManager(),
+		luckyDisturbance:     newLuckyDisturbanceManager(),
+		luckyPearlMultiplier: newLuckyPearlMultiplierManager(),
+		luckyRapidRiches:     newLuckyRapidRichesManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -654,6 +668,8 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 	if isKill {
 		// Combo 系統：命中時增加 Combo
 		_, _, comboBonus := p.AddCombo()
+		// Disturbance 系統：記錄最近擊破（T218 擾動魚）
+		p.AddRecentKill()
 		effectiveMult := t.Multiplier * (1.0 + comboBonus)
 
 		// DAY-301 全服加成倍率疊加
@@ -1340,6 +1356,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyIceFishingWheel.tryLuckyIceFishingWheelFish(g, p)
 			case isLuckyGlobalAvalancheFish(t.Def.ID):
 				g.luckyGlobalAvalanche.tryLuckyGlobalAvalancheFish(g, p)
+			// DAY-325 新增
+			case isLuckyFishingNetFish(t.Def.ID):
+				g.luckyFishingNet.tryLuckyFishingNetFish(g, p)
+			case isLuckyTNTBonusFish(t.Def.ID):
+				g.luckyTNTBonus.tryLuckyTNTBonusFish(g, p)
+			case isLuckyDisturbanceFish(t.Def.ID):
+				g.luckyDisturbance.tryLuckyDisturbanceFish(g, p)
+			case isLuckyPearlMultiplierFish(t.Def.ID):
+				g.luckyPearlMultiplier.tryLuckyPearlMultiplierFish(g, p)
+			case isLuckyRapidRichesFish(t.Def.ID):
+				g.luckyRapidRiches.tryLuckyRapidRichesFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

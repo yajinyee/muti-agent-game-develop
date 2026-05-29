@@ -183,6 +183,12 @@ const TARGET_SPRITES = {
 	"T213": "res://assets/sprites/targets/T213_multiplier_ladder.png",
 	"T214": "res://assets/sprites/targets/T214_ice_fishing_wheel.png",
 	"T215": "res://assets/sprites/targets/T215_global_avalanche.png",
+	# DAY-325 新增
+	"T216": "res://assets/sprites/targets/T216_fishing_net.png",
+	"T217": "res://assets/sprites/targets/T217_tnt_bonus.png",
+	"T218": "res://assets/sprites/targets/T218_disturbance.png",
+	"T219": "res://assets/sprites/targets/T219_pearl_multiplier.png",
+	"T220": "res://assets/sprites/targets/T220_rapid_riches.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -334,6 +340,12 @@ const TARGET_COLORS = {
 	"T213": Color(1.0, 0.84, 0.0),   # 金色（倍率梯魚，Multiplier Ladder）
 	"T214": Color(0.0, 0.81, 0.82),  # 冰青（冰釣輪盤魚，Ice Fishing Wheel）
 	"T215": Color(0.53, 0.81, 0.98), # 天藍（全服雪崩魚，Global Avalanche 新史上最高）
+	# DAY-325 新增
+	"T216": Color(0.118, 0.565, 1.0), # 深海藍（漁網魚，Fishing Net ×60.0）
+	"T217": Color(1.0, 0.271, 0.0),   # 火橙紅（TNT 爆炸魚，TNT Bonus ×100.0）
+	"T218": Color(0.0, 0.808, 0.820), # 深青（擾動魚，Disturbance System 最高 ×50.0）
+	"T219": Color(1.0, 0.843, 0.0),   # 金色（珍珠倍率魚，Pearl Multiplier 全服 ×40.0 里程碑）
+	"T220": Color(1.0, 1.0, 0.0),     # 亮黃（快速暴富魚，Rapid Riches 全服 ×41.0 新史上最高）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
