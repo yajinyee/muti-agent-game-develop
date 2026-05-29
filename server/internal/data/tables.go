@@ -430,6 +430,18 @@ var Targets = []TargetDef{
 	// 業界依據：Reflex Gaming「Big Game Fishing Rapid Riches」快速獎勵機制（2026-05）
 	{ID: "T220", Name: "幸運快速暴富魚", Type: TypeSpecial, Multiplier: 28888, HP: 28888, SpawnWeight: 1, Speed: 1, Lifetime: 120, LaborGain: 5776, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-326 新增特殊目標（30000x-35000x）────────────────────────
+	// T221 幸運骰子獎勵魚：Dice Bonus 機制，擲骰3次（1-3點×50/4-5點×150/6點×300），全服×41.5加成83秒
+	// 業界依據：BGaming「Shark & Spark Hold & Win」Dice Bonus（2026-05-25）
+	{ID: "T221", Name: "幸運骰子獎勵魚", Type: TypeSpecial, Multiplier: 30000, HP: 30000, SpawnWeight: 1, Speed: 1, Lifetime: 122, LaborGain: 6000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T222 幸運雙Bonus魚：Dual Bonus 機制，選擇金幣收集（5個×80，全服×41.8加成84秒）或風險輪盤（最高×500，全服×42.0加成85秒）
+	// 業界依據：BGaming「Fishing Club 2」雙 Bonus 遊戲（2026-04）
+	{ID: "T222", Name: "幸運雙Bonus魚", Type: TypeSpecial, Multiplier: 32000, HP: 32000, SpawnWeight: 1, Speed: 1, Lifetime: 124, LaborGain: 6400, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T223 幸運Coin Respin魚：Hold & Win 風格，9格盤面，Bronze×10/Silver×30/Gold×80/Diamond×200，填滿+×500
+	// 全服×42.5加成86秒（新史上最高，超越T222的×42.0）
+	// 業界依據：BGaming「Shark & Spark Hold & Win」Coin Respin（2026-05-28）
+	{ID: "T223", Name: "幸運CoinRespin魚", Type: TypeSpecial, Multiplier: 35000, HP: 35000, SpawnWeight: 1, Speed: 1, Lifetime: 126, LaborGain: 7000, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

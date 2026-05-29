@@ -205,6 +205,11 @@ type Game struct {
 	luckyPearlMultiplier *luckyPearlMultiplierManager
 	luckyRapidRiches     *luckyRapidRichesManager
 
+	// DAY-326 新增
+	luckyDiceBonus  *luckyDiceBonusManager
+	luckyDualBonus  *luckyDualBonusManager
+	luckyCoinRespin *luckyCoinRespinManager
+
 	lastTick time.Time
 }
 
@@ -376,6 +381,11 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyDisturbance:     newLuckyDisturbanceManager(),
 		luckyPearlMultiplier: newLuckyPearlMultiplierManager(),
 		luckyRapidRiches:     newLuckyRapidRichesManager(),
+
+		// DAY-326 新增
+		luckyDiceBonus:  newLuckyDiceBonusManager(),
+		luckyDualBonus:  newLuckyDualBonusManager(),
+		luckyCoinRespin: newLuckyCoinRespinManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -1367,6 +1377,13 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyPearlMultiplier.tryLuckyPearlMultiplierFish(g, p)
 			case isLuckyRapidRichesFish(t.Def.ID):
 				g.luckyRapidRiches.tryLuckyRapidRichesFish(g, p)
+			// DAY-326 新增
+			case isLuckyDiceBonusFish(t.Def.ID):
+				g.luckyDiceBonus.tryLuckyDiceBonusFish(g, p)
+			case isLuckyDualBonusFish(t.Def.ID):
+				g.luckyDualBonus.tryLuckyDualBonusFish(g, p)
+			case isLuckyCoinRespinFish(t.Def.ID):
+				g.luckyCoinRespin.tryLuckyCoinRespinFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

@@ -150,6 +150,10 @@ signal lucky_tnt_bonus(data: Dictionary)
 signal lucky_disturbance(data: Dictionary)
 signal lucky_pearl_multiplier(data: Dictionary)
 signal lucky_rapid_riches(data: Dictionary)
+# DAY-326 新增
+signal lucky_dice_bonus(data: Dictionary)
+signal lucky_dual_bonus(data: Dictionary)
+signal lucky_coin_respin(data: Dictionary)
 
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
@@ -438,6 +442,13 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_pearl_multiplier", payload)
 		"lucky_rapid_riches":
 			emit_signal("lucky_rapid_riches", payload)
+		# DAY-326 新增
+		"lucky_dice_bonus":
+			emit_signal("lucky_dice_bonus", payload)
+		"lucky_dual_bonus":
+			emit_signal("lucky_dual_bonus", payload)
+		"lucky_coin_respin":
+			emit_signal("lucky_coin_respin", payload)
 		"pong":
 			pass
 		"error":

@@ -4866,3 +4866,46 @@ T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 
 - **最終解法：** 不用 `git add -A`，改用明確列出每個檔案的 `git add` 指令
 - **教訓：** Norton 防毒軟體會干擾 git 的 objects 目錄，遇到 `unable to create temporary file` 要先檢查 `.git/objects/tmp/` 目錄
 - **預防：** 在 Norton 設定中排除 `.git/objects/` 目錄的掃描
+
+## 152. Main.tscn 缺少 Lucky Panel 節點的系統性問題（DAY-326）
+
+- **問題：** DAY-323/324/325 新增了 15 個 Lucky Panel GDScript 檔案，但 Main.tscn 沒有同步更新，導致 LuckyPanelRegistry 掃描不到這些 Panel
+- **根本原因：** 每次新增 Lucky Panel 時，需要同時更新三個地方：
+  1. `scripts/ui/LuckyXxxPanel.gd`（Panel 腳本）
+  2. `scenes/Main.tscn`（ext_resource + node 節點）
+  3. `scripts/ui/LuckyPanelRegistry.gd`（SIGNAL_TO_PANEL 映射）
+- **偵測方法：** PowerShell 腳本比對 `scripts/ui/Lucky*.gd` 和 Main.tscn 中的 Panel 名稱
+  ```powershell
+  $tscn = Get-Content "Main.tscn" -Raw
+  $scripts = Get-ChildItem "scripts/ui/Lucky*.gd" | Select-Object -ExpandProperty Name | ForEach-Object { $_ -replace '\.gd$', '' }
+  $scripts | Where-Object { $tscn -notmatch [regex]::Escape($_) }
+  ```
+- **修復：** 補齊 15 個缺失 Panel（DAY-323: 5個，DAY-324: 5個，DAY-325: 5個）
+- **教訓：** 每次新增 Lucky Panel 後，立即執行上述 PowerShell 腳本驗證 Main.tscn 完整性
+
+## 153. PowerShell -replace 中文字符破壞問題（DAY-326）
+
+- **問題：** 使用 PowerShell `-replace` 替換含中文字符的 Go 檔案時，中文被破壞成亂碼
+- **原因：** PowerShell 的 `Get-Content` + `-replace` + `Set-Content` 在處理 UTF-8 中文時可能破壞編碼
+- **解決：** 對含中文的 Go 檔案，直接用 `fs_write` 工具重新寫入，不用 PowerShell 替換
+- **教訓：** 含中文的 Go 檔案不要用 PowerShell 字串替換，改用 str_replace 工具或直接重寫
+
+## 154. Go handler 中 p.GetBetCost() 不存在（DAY-326）
+
+- **問題：** 新 handler 呼叫 `p.GetBetCost()` 導致編譯錯誤
+- **原因：** Player 沒有 `GetBetCost()` 方法，BetCost 在 BetLevel 定義中
+- **正確用法：** `p.GetBetDef().BetCost`
+- **教訓：** 新增 handler 時，BetCost 一律用 `p.GetBetDef().BetCost`
+
+## 155. DAY-326 三個新 Lucky 機制（BGaming 2026-05 最新）
+
+- **T221 骰子獎勵魚（30000x）：** BGaming「Shark & Spark Hold & Win」Dice Bonus（2026-05-25）
+  - 擲骰 3 次：1-3點×50.0，4-5點×150.0，6點×300.0
+  - 全服 ×41.5 加成 83 秒
+- **T222 雙Bonus魚（32000x）：** BGaming「Fishing Club 2」雙 Bonus 遊戲（2026-04）
+  - Bonus A：金幣收集（5個×80.0），全服 ×41.8 加成 84 秒
+  - Bonus B：風險輪盤（最高×500.0），全服 ×42.0 加成 85 秒
+- **T223 Coin Respin魚（35000x）：** BGaming「Shark & Spark Hold & Win」Coin Respin（2026-05-28）
+  - Hold & Win 風格，9格盤面，Bronze×10/Silver×30/Gold×80/Diamond×200
+  - 填滿全盤 +×500.0，全服 ×42.5 加成 86 秒（新史上最高）
+- **業界趨勢：** 2026 年 BGaming 主打 Hold & Win + Coin Respin + Dice Bonus 三大機制

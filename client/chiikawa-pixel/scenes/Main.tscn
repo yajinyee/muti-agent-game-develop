@@ -1,4 +1,4 @@
-[gd_scene load_steps=109 format=3 uid="uid://main"]
+[gd_scene load_steps=127 format=3 uid="uid://main"]
 
 [ext_resource type="Script" path="res://scripts/game/TargetManager.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/game/Cannon.gd" id="2"]
@@ -110,6 +110,24 @@
 [ext_resource type="Script" path="res://scripts/ui/LuckyFateJudgmentPanel.gd" id="107"]
 [ext_resource type="Script" path="res://scripts/ui/LuckyTimeReversalPanel.gd" id="108"]
 [ext_resource type="Script" path="res://scripts/ui/LuckyCosmicSingularityPanel.gd" id="109"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyFeverBoostPanel.gd" id="110"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGuildBattlePanel.gd" id="111"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyPathFishPanel.gd" id="112"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyChainEelPanel.gd" id="113"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyUltimateMiraclePanel.gd" id="114"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyAvalanchePanel.gd" id="115"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCrashMultiplierPanel.gd" id="116"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyMultiplierLadderPanel.gd" id="117"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyIceFishingWheelPanel.gd" id="118"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGlobalAvalanchePanel.gd" id="119"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyFishingNetPanel.gd" id="120"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTNTBonusPanel.gd" id="121"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDisturbancePanel.gd" id="122"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyPearlMultiplierPanel.gd" id="123"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyRapidRichesPanel.gd" id="124"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDiceBonusPanel.gd" id="125"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyDualBonusPanel.gd" id="126"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCoinRespinPanel.gd" id="127"]
 
 [node name="Main" type="Node2D"]
 
@@ -563,3 +581,57 @@ script = ExtResource("108")
 
 [node name="LuckyCosmicSingularityPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
 script = ExtResource("109")
+
+[node name="LuckyFeverBoostPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("110")
+
+[node name="LuckyGuildBattlePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("111")
+
+[node name="LuckyPathFishPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("112")
+
+[node name="LuckyChainEelPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("113")
+
+[node name="LuckyUltimateMiraclePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("114")
+
+[node name="LuckyAvalanchePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("115")
+
+[node name="LuckyCrashMultiplierPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("116")
+
+[node name="LuckyMultiplierLadderPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("117")
+
+[node name="LuckyIceFishingWheelPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("118")
+
+[node name="LuckyGlobalAvalanchePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("119")
+
+[node name="LuckyFishingNetPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("120")
+
+[node name="LuckyTNTBonusPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("121")
+
+[node name="LuckyDisturbancePanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("122")
+
+[node name="LuckyPearlMultiplierPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("123")
+
+[node name="LuckyRapidRichesPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("124")
+
+[node name="LuckyDiceBonusPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("125")
+
+[node name="LuckyDualBonusPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("126")
+
+[node name="LuckyCoinRespinPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("127")

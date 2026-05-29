@@ -189,6 +189,10 @@ const TARGET_SPRITES = {
 	"T218": "res://assets/sprites/targets/T218_disturbance.png",
 	"T219": "res://assets/sprites/targets/T219_pearl_multiplier.png",
 	"T220": "res://assets/sprites/targets/T220_rapid_riches.png",
+	# DAY-326 新增
+	"T221": "res://assets/sprites/targets/T221_dice_bonus.png",
+	"T222": "res://assets/sprites/targets/T222_dual_bonus.png",
+	"T223": "res://assets/sprites/targets/T223_coin_respin.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）

@@ -1,6 +1,36 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-29（DAY-325 T216-T220 五個新 Lucky 魚系統 + Buy Bonus 機制 + 業界研究 + GitHub 同步）
+## 最後更新：2026-05-29（DAY-326 T221-T223 三個新 Lucky 魚系統 + Main.tscn 修復 + 業界研究 + GitHub 同步）
+
+## DAY-326 更新（2026-05-29）：T221-T223 三個新 Lucky 魚系統 + Main.tscn 缺口修復 ✅
+- **Main.tscn 修復：** 補齊 DAY-323/324/325 缺失的 15 個 Lucky Panel 節點（T206-T220 對應 Panel）
+- **業界研究：** BGaming「Shark & Spark Hold & Win」Dice Bonus + Coin Respin（2026-05-28）、BGaming「Fishing Club 2」雙 Bonus 遊戲（2026-04）、Jili「Royal Fishing」Immortal Boss 連續獎勵（50-150x）
+- **T221 幸運骰子獎勵魚（30000x）：** Dice Bonus 機制，擲骰 3 次（1-3點×50/4-5點×150/6點×300），全服 ×41.5 加成 83 秒
+- **T222 幸運雙Bonus魚（32000x）：** Dual Bonus 機制，選擇金幣收集（5個×80，全服×41.8加成84秒）或風險輪盤（最高×500，全服×42.0加成85秒）
+- **T223 幸運Coin Respin魚（35000x）：** Coin Respin 機制，Hold & Win 風格，9格盤面，Bronze×10/Silver×30/Gold×80/Diamond×200，填滿+×500，全服×42.5加成86秒（新史上最高）
+- **Server：** 3 個 handler 檔案 + tables.go + game.go 整合（struct + NewGame + handleAttack）
+- **Client：** 3 個 Lucky Panel + GameManager 3 個訊號 + TargetManager T221-T223 + LuckyPanelRegistry 更新
+- **美術：** T221-T223 精靈圖生成完成（`tools/generate_targets_day326.py`）
+- **知識庫更新：** knowhow-log 條目 152/153/154/155（DAY-326 四個新知識點）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-326）
+- **Server 目標物數量：** 130 種（T001-T006 + T101-T223 + B001）
+- **Lucky 系統數量：** 118 個（T106-T223）
+- **Client Lucky Panel 數量：** 124 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（維持，Shader 系統已建立，需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **最高全服倍率：** T223 Coin Respin ×42.5（新史上最高，超越 T222 的 ×42.0）
+- **最高個人倍率：** T184 風險等級 ×3000
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最高骰子倍率：** T221 骰子獎勵魚 ×300.0（Dice Bonus 機制）
+- **最高輪盤倍率：** T222 雙Bonus魚 ×500.0（Risk Wheel 機制）
+- **最高 Coin Respin 倍率：** T223 Coin Respin 魚 ×200.0（Diamond 金幣）+ 填滿 +×500.0
+- **里程碑：** T223 Coin Respin 魚觸發全服 ×42.5（新史上最高）
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
 
 ## DAY-325 更新（2026-05-29）：T216-T220 五個新 Lucky 魚系統 + Buy Bonus Agent + 業界研究 ✅
 - **業界研究：** BGaming「Fishing Club 2」Fishing Net（×60）+ TNT Bonus（×100）（2026-04）、Fisch「Disturbance System」活躍度驅動（2026-01）、BGaming「Shark & Spark Hold & Win」Pearl 倍率符號（2026-05）、Reflex Gaming「Big Game Fishing Rapid Riches」（2026-05）
