@@ -1,4 +1,4 @@
-[gd_scene load_steps=127 format=3 uid="uid://main"]
+[gd_scene load_steps=138 format=3 uid="uid://main"]
 
 [ext_resource type="Script" path="res://scripts/game/TargetManager.gd" id="1"]
 [ext_resource type="Script" path="res://scripts/game/Cannon.gd" id="2"]
@@ -128,6 +128,16 @@
 [ext_resource type="Script" path="res://scripts/ui/LuckyDiceBonusPanel.gd" id="125"]
 [ext_resource type="Script" path="res://scripts/ui/LuckyDualBonusPanel.gd" id="126"]
 [ext_resource type="Script" path="res://scripts/ui/LuckyCoinRespinPanel.gd" id="127"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyGoldenPotPanel.gd" id="128"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCascadeLockPanel.gd" id="129"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyLegendAwakenPanel.gd" id="130"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCrashHarvestPanel.gd" id="131"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCosmicFusionPanel.gd" id="132"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyMagneticAttractionPanel.gd" id="133"]
+[ext_resource type="Script" path="res://scripts/ui/LuckySuperChainPanel.gd" id="134"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyHolyPillarPanel.gd" id="135"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyTimeStopPanel.gd" id="136"]
+[ext_resource type="Script" path="res://scripts/ui/LuckyCosmicRestartPanel.gd" id="137"]
 
 [node name="Main" type="Node2D"]
 
@@ -635,3 +645,33 @@ script = ExtResource("126")
 
 [node name="LuckyCoinRespinPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
 script = ExtResource("127")
+
+[node name="LuckyGoldenPotPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("128")
+
+[node name="LuckyCascadeLockPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("129")
+
+[node name="LuckyLegendAwakenPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("130")
+
+[node name="LuckyCrashHarvestPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("131")
+
+[node name="LuckyCosmicFusionPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("132")
+
+[node name="LuckyMagneticAttractionPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("133")
+
+[node name="LuckySuperChainPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("134")
+
+[node name="LuckyHolyPillarPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("135")
+
+[node name="LuckyTimeStopPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("136")
+
+[node name="LuckyCosmicRestartPanel" type="CanvasLayer" parent="LuckyPanelRegistry"]
+script = ExtResource("137")

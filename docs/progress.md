@@ -1,6 +1,48 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-29（DAY-327 T224-T228 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+## 最後更新：2026-05-29（DAY-328 T229-T233 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+
+## DAY-328 更新（2026-05-29）：T229-T233 五個新 Lucky 魚系統 + 業界研究 ✅
+- **業界研究：** Black Hole Fishing 引力機制升級版（2026）、Royal Fishing 連鎖電擊升級版（2026）、神聖審判機制升級版（2026）、時間凍結機制終極升級版（2026）、終極清場機制升級版（2026）
+- **T229 幸運磁力吸引魚（55000x）：** Magnetic Attraction，磁力吸引全場目標到中心，每個 ×70.0，命中 ≥10 → 全服 ×45.5 加成 91 秒（超越 T228 的 ×45.0）
+- **T230 幸運超級連鎖魚（60000x）：** Super Chain，5 條連鎖依序觸發（每條 ×80.0），連鎖 ≥5 → 全服 ×46.0 加成 92 秒
+- **T231 幸運神聖光柱魚（65000x）：** Holy Pillar，12 道神聖光柱降下（每道 HP -50%），命中 ≥8 → 全服 ×46.5 加成 93 秒
+- **T232 幸運時間停止魚（70000x）：** Time Stop，全場凍結 15 秒（傷害 ×5.0），凍結結束 HP -70%，凍結期間擊破 ≥15 → 全服 ×47.0 加成 94 秒
+- **T233 幸運宇宙重啟魚（88888x）：** Cosmic Restart，全場 HP 歸零（每個 ×100.0），全服 ×47.5 加成 95 秒（新史上最高，超越 T228 的 ×45.0）
+- **Server：** 5 個 handler 檔案 + tables.go + messages.go + game.go 整合（struct + NewGame + handleKill + effectiveMult）
+- **Client：** 5 個 Lucky Panel + GameManager 5 個訊號 + TargetManager T229-T233 + LuckyPanelRegistry 更新
+- **美術：** T229-T233 精靈圖生成完成（`tools/generate_targets_day328.py`）
+  - T229（磁力吸引）：橙色魚身 + 磁力弧線 + 吸引符號（29.6%）
+  - T230（超級連鎖）：青色魚身 + 連鎖環 + 12 道光芒（31.7%）
+  - T231（神聖光柱）：金黃色魚身 + 12 道光柱指示（28.5%）
+  - T232（時間停止）：冰藍色魚身 + 雪花符號 + 凍結光環（36.9%）
+  - T233（宇宙重啟）：洋紅色大型魚身 + 重啟箭頭 + 多層光環（42.2%）
+- **Main.tscn 補齊：** 補齊 DAY-327 缺失的 T224-T228 Panel 節點 + 新增 T229-T233 Panel 節點（load_steps=138）
+- **知識庫更新：** knowhow-log 條目 159/160/161（DAY-328 三個新知識點）
+- **QA 腳本：** `tools/qa_check_day328.py`（95 項驗證，95/95 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-328）
+- **Server 目標物數量：** 140 種（T001-T006 + T101-T233 + B001）
+- **Lucky 系統數量：** 128 個（T106-T233）
+- **Client Lucky Panel 數量：** 134 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（維持，Shader 系統已建立，需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **最高全服倍率：** T233 宇宙重啟 ×47.5（新史上最高，超越 T228 的 ×45.0）
+- **最高個人倍率：** T184 風險等級 ×3000
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最高磁力倍率：** T229 磁力吸引魚 ×70.0 × 目標數（Magnetic Attraction 機制）
+- **最高連鎖倍率：** T230 超級連鎖魚 ×80.0 × 5 條（Super Chain 機制）
+- **最高光柱倍率：** T231 神聖光柱魚 ×25.0 × 12 道（Holy Pillar 機制）
+- **最高凍結倍率：** T232 時間停止魚 ×5.0 傷害 + HP -70%（Time Stop 機制）
+- **最高清場倍率：** T233 宇宙重啟魚 ×100.0 × 目標數（Cosmic Restart 機制）
+- **里程碑：** T233 是第一個達到全服 ×47.5 的機制，也是第一個單目標 ×100.0 的機制
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
+
+
 
 ## DAY-327 更新（2026-05-29）：T224-T228 五個新 Lucky 魚系統 + 業界最新機制研究 ✅
 - **業界研究：** Games Global「Fishin' Pots of Gold Gold Blitz Ultimate」Gold Blitz™ Cash Collection（2026-05-28 最新）、BGaming「Shark & Spark Hold & Win」Cascading Wins + Pearl Multipliers（2026-05-28）、Royal Fishing Jili「Legend Dragon 120-200x, Humpback Whale 90-150x」（2026）、Lucky Fish AbraCadabra「Crash mechanic」（2026-05）

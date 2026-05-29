@@ -464,6 +464,28 @@ var Targets = []TargetDef{
 	// 業界依據：終極融合設計，整合 2026 年最新業界機制
 	{ID: "T228", Name: "幸運宇宙大融合魚", Type: TypeSpecial, Multiplier: 50000, HP: 50000, SpawnWeight: 1, Speed: 1, Lifetime: 136, LaborGain: 10000, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// ── DAY-328 新增特殊目標（55000x-88888x）────────────────────────
+	// T229 幸運磁力吸引魚：Magnetic Attraction 機制，磁力吸引全場目標到中心，每個 ×70.0
+	// 命中 ≥10 個 → 完美磁力，全服 ×45.5 加成 91 秒（超越 T228 的 ×45.0）
+	// 業界依據：Black Hole Fishing 引力機制升級版 + Magnetic Attraction 概念（2026）
+	{ID: "T229", Name: "幸運磁力吸引魚", Type: TypeSpecial, Multiplier: 55000, HP: 55000, SpawnWeight: 1, Speed: 1, Lifetime: 138, LaborGain: 11000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T230 幸運超級連鎖魚：Super Chain 機制，每次擊破觸發 3 條連鎖（每條 ×80.0），連鎖 ≥5 次 → 超級連鎖爆發
+	// 全服 ×46.0 加成 92 秒（超越 T229 的 ×45.5）
+	// 業界依據：Royal Fishing 連鎖電擊升級版 + Super Chain 概念（2026）
+	{ID: "T230", Name: "幸運超級連鎖魚", Type: TypeSpecial, Multiplier: 60000, HP: 60000, SpawnWeight: 1, Speed: 1, Lifetime: 140, LaborGain: 12000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T231 幸運神聖光柱魚：Holy Pillar 機制，12 道神聖光柱同時降下（每道 HP -50%），命中 ≥8 道 → 完美神聖
+	// 全服 ×46.5 加成 93 秒（超越 T230 的 ×46.0）
+	// 業界依據：神聖審判機制升級版 + Holy Pillar 概念（2026）
+	{ID: "T231", Name: "幸運神聖光柱魚", Type: TypeSpecial, Multiplier: 65000, HP: 65000, SpawnWeight: 1, Speed: 1, Lifetime: 142, LaborGain: 13000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T232 幸運時間停止魚：Time Stop 機制，全場凍結 15 秒（傷害 ×5.0），凍結結束全場 HP -70%
+	// 凍結期間擊破 ≥15 個 → 完美時間停止，全服 ×47.0 加成 94 秒（超越 T231 的 ×46.5）
+	// 業界依據：時間凍結機制終極升級版 + Time Stop 概念（2026）
+	{ID: "T232", Name: "幸運時間停止魚", Type: TypeSpecial, Multiplier: 70000, HP: 70000, SpawnWeight: 1, Speed: 1, Lifetime: 144, LaborGain: 14000, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T233 幸運宇宙重啟魚：Cosmic Restart 機制，全場 HP 歸零（每個目標獎勵 ×100.0）
+	// 觸發全服 ×47.5 加成 95 秒（新史上最高，超越 T228 的 ×45.0）
+	// 業界依據：終極清場機制升級版 + Cosmic Restart 概念（2026）
+	{ID: "T233", Name: "幸運宇宙重啟魚", Type: TypeSpecial, Multiplier: 88888, HP: 88888, SpawnWeight: 1, Speed: 1, Lifetime: 146, LaborGain: 17777, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

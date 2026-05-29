@@ -4970,3 +4970,87 @@ T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 
   - 總時間：約 8-10 秒，不超過 15 秒
 - **Phase 間隔：** 0.8 秒，讓玩家有時間看清楚每個 Phase 的結果
 - **教訓：** 多 Phase 機制要控制總時間，太長會讓玩家失去耐心
+
+## 159. DAY-328 五個新 Lucky 機制（業界最新 2026-05-29）
+
+### Magnetic Attraction（T229 磁力吸引魚）
+- **業界依據：** Black Hole Fishing 引力機制升級版（2026）
+- **機制：** 磁力吸引全場所有目標到中心，每個目標獎勵 ×70.0
+- **完美條件：** 命中 ≥10 個目標 → 全服 ×45.5 加成 91 秒（超越 T228 的 ×45.0）
+- **設計要點：** 磁力吸引讓玩家感受到「全場被我控制」的爽感
+
+### Super Chain（T230 超級連鎖魚）
+- **業界依據：** Royal Fishing 連鎖電擊升級版（2026）
+- **機制：** 5 條連鎖依序觸發（每條 ×80.0），前 3 條間隔 1.5 秒，後 2 條間隔 0.8 秒（加速感）
+- **完美條件：** 連鎖 ≥5 次 → 全服 ×46.0 加成 92 秒
+- **設計要點：** 加速的連鎖節奏讓玩家感受到「越來越爽」的遞進感
+
+### Holy Pillar（T231 神聖光柱魚）
+- **業界依據：** 神聖審判機制升級版（2026）
+- **機制：** 12 道神聖光柱依序降下（每道 HP -50%，命中機率 85%），每道間隔 0.6 秒
+- **完美條件：** 命中 ≥8 道 → 全服 ×46.5 加成 93 秒
+- **設計要點：** 12 道光柱的視覺衝擊力強，每道命中都有即時反饋
+
+### Time Stop（T232 時間停止魚）
+- **業界依據：** 時間凍結機制終極升級版（2026）
+- **機制：** 全場凍結 15 秒（傷害 ×5.0），凍結結束全場 HP -70%
+- **完美條件：** 凍結期間擊破 ≥15 個 → 全服 ×47.0 加成 94 秒
+- **技術要點：** `freezeActive` 欄位追蹤凍結狀態，`notifyFreezeKill` 計數凍結期間擊破
+
+### Cosmic Restart（T233 宇宙重啟魚）
+- **業界依據：** 終極清場機制升級版（2026）
+- **機制：** 全場 HP 歸零（每個目標獎勵 ×100.0），觸發全服 ×47.5 加成 95 秒（新史上最高）
+- **設計要點：** ×100.0 是目前遊戲中最高的單目標倍率，88888x 是吉祥數字
+
+## 160. Go Handler 全服加成的正確實作模式（DAY-328 總結）
+
+每個 Lucky Handler 的全服加成必須遵循以下模式：
+
+```go
+// 1. 定義 boost struct
+type xxxBoost struct {
+    mult      float64
+    expiresAt time.Time
+}
+
+// 2. 在 manager 中加入 boost 欄位
+type luckyXxxManager struct {
+    ...
+    boost *xxxBoost
+}
+
+// 3. 實作 getXxxMult() 方法
+func (m *luckyXxxManager) getXxxMult() float64 {
+    m.mu.Lock()
+    defer m.mu.Unlock()
+    if m.boost != nil && time.Now().Before(m.boost.expiresAt) {
+        return m.boost.mult
+    }
+    return 1.0
+}
+
+// 4. 在 handler 中設置 boost（不是調用 applyGlobalMultiplier）
+m.mu.Lock()
+m.boost = &xxxBoost{
+    mult:      globalBonus,
+    expiresAt: time.Now().Add(time.Duration(globalDuration) * time.Second),
+}
+m.mu.Unlock()
+
+// 5. 在 game.go 的 effectiveMult 計算中加入調用
+xxxMult := g.luckyXxx.getXxxMult()
+if xxxMult > 1.0 {
+    effectiveMult *= xxxMult
+}
+```
+
+**教訓：** 不存在 `applyGlobalMultiplier` 方法，全服加成是通過 boost struct + getMult() 模式實現的。
+
+## 161. Main.tscn 節點補齊策略（DAY-328）
+
+每次新增 Lucky Panel 後，Main.tscn 需要同步更新：
+1. 在 `[ext_resource]` 區塊加入新 Panel 的 Script 引用（id 遞增）
+2. 在 `[node]` 區塊加入新 Panel 節點（parent="LuckyPanelRegistry"）
+3. 更新 `load_steps` 數值（= 原值 + 新增 ext_resource 數量）
+
+**DAY-328 狀態：** Main.tscn load_steps=138，包含 T224-T233 共 10 個新 Panel 節點

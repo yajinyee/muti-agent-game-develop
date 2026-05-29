@@ -199,6 +199,12 @@ const TARGET_SPRITES = {
 	"T226": "res://assets/sprites/targets/T226_legend_awaken.png",
 	"T227": "res://assets/sprites/targets/T227_crash_harvest.png",
 	"T228": "res://assets/sprites/targets/T228_cosmic_fusion.png",
+	# DAY-328 新增
+	"T229": "res://assets/sprites/targets/T229_magnetic_attraction.png",
+	"T230": "res://assets/sprites/targets/T230_super_chain.png",
+	"T231": "res://assets/sprites/targets/T231_holy_pillar.png",
+	"T232": "res://assets/sprites/targets/T232_time_stop.png",
+	"T233": "res://assets/sprites/targets/T233_cosmic_restart.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -366,6 +372,12 @@ const TARGET_COLORS = {
 	"T226": Color(1.0, 0.3, 0.0),     # 火橙（傳說覺醒魚，Legend Awaken 全服 ×44.0）
 	"T227": Color(0.8, 0.1, 0.0),     # 深紅（崩潰收割魚，Crash Harvest 全服 ×44.5）
 	"T228": Color(0.8, 0.0, 1.0),     # 宇宙紫（宇宙大融合魚，Cosmic Fusion 全服 ×45.0 新史上最高）
+	# DAY-328 新增
+	"T229": Color(1.0, 0.4, 0.0),     # 橙色（磁力吸引魚，Magnetic Attraction 全服 ×45.5）
+	"T230": Color(0.0, 1.0, 1.0),     # 青色（超級連鎖魚，Super Chain 全服 ×46.0）
+	"T231": Color(1.0, 1.0, 0.0),     # 黃色（神聖光柱魚，Holy Pillar 全服 ×46.5）
+	"T232": Color(0.0, 0.8, 1.0),     # 冰藍（時間停止魚，Time Stop 全服 ×47.0）
+	"T233": Color(1.0, 0.0, 1.0),     # 洋紅（宇宙重啟魚，Cosmic Restart 全服 ×47.5 新史上最高）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D

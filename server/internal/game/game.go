@@ -217,6 +217,13 @@ type Game struct {
 	luckyCrashHarvest *luckyCrashHarvestManager
 	luckyCosmicFusion *luckyCosmicFusionManager
 
+	// DAY-328 新增
+	luckyMagneticAttraction *luckyMagneticAttractionManager
+	luckySuperChain         *luckySuperChainManager
+	luckyHolyPillar         *luckyHolyPillarManager
+	luckyTimeStop           *luckyTimeStopManager
+	luckyCosmicRestart      *luckyCosmicRestartManager
+
 	lastTick time.Time
 }
 
@@ -400,6 +407,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyLegendAwaken: newLuckyLegendAwakenManager(),
 		luckyCrashHarvest: newLuckyCrashHarvestManager(),
 		luckyCosmicFusion: newLuckyCosmicFusionManager(),
+
+		// DAY-328 新增
+		luckyMagneticAttraction: newLuckyMagneticAttractionManager(),
+		luckySuperChain:         newLuckySuperChainManager(),
+		luckyHolyPillar:         newLuckyHolyPillarManager(),
+		luckyTimeStop:           newLuckyTimeStopManager(),
+		luckyCosmicRestart:      newLuckyCosmicRestartManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -1093,6 +1107,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if ultimateMiracleMult > 1.0 {
 			effectiveMult *= ultimateMiracleMult
 		}
+		// DAY-328 新增全服加成
+		magneticAttractionMult := g.luckyMagneticAttraction.getMagneticAttractionMult()
+		if magneticAttractionMult > 1.0 {
+			effectiveMult *= magneticAttractionMult
+		}
+		superChainMult := g.luckySuperChain.getSuperChainMult()
+		if superChainMult > 1.0 {
+			effectiveMult *= superChainMult
+		}
+		holyPillarMult := g.luckyHolyPillar.getHolyPillarMult()
+		if holyPillarMult > 1.0 {
+			effectiveMult *= holyPillarMult
+		}
+		timeStopMult := g.luckyTimeStop.getTimeStopMult()
+		if timeStopMult > 1.0 {
+			effectiveMult *= timeStopMult
+		}
+		cosmicRestartMult := g.luckyCosmicRestart.getCosmicRestartMult()
+		if cosmicRestartMult > 1.0 {
+			effectiveMult *= cosmicRestartMult
+		}
 		// 公會戰：擊破計數
 		g.luckyGuildBattle.onKillDuringBattle(playerID)
 		if g.luckyTornado.isTornadoActive() {
@@ -1409,6 +1444,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyCrashHarvest.tryLuckyCrashHarvestFish(g, p)
 			case isLuckyCosmicFusionFish(t.Def.ID):
 				g.luckyCosmicFusion.tryLuckyCosmicFusionFish(g, p)
+			// DAY-328 新增
+			case isLuckyMagneticAttractionFish(t.Def.ID):
+				g.luckyMagneticAttraction.tryLuckyMagneticAttractionFish(g, p)
+			case isLuckySuperChainFish(t.Def.ID):
+				g.luckySuperChain.tryLuckySuperChainFish(g, p)
+			case isLuckyHolyPillarFish(t.Def.ID):
+				g.luckyHolyPillar.tryLuckyHolyPillarFish(g, p)
+			case isLuckyTimeStopFish(t.Def.ID):
+				g.luckyTimeStop.tryLuckyTimeStopFish(g, p)
+			case isLuckyCosmicRestartFish(t.Def.ID):
+				g.luckyCosmicRestart.tryLuckyCosmicRestartFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)
@@ -1416,6 +1462,10 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 			// 凍結期間擊破計數
 			if g.luckyTimeFreeze.isTimeFreezeActive() {
 				g.luckyTimeFreeze.notifyFreezeKill(playerID)
+			}
+			// T232 時間停止凍結期間擊破計數
+			if g.luckyTimeStop.freezeActive {
+				g.luckyTimeStop.notifyFreezeKill(playerID)
 			}
 			// 吸血鬼模式：每次擊破吸收倍率
 			if g.luckyVampireMult.isVampireActive(playerID) {

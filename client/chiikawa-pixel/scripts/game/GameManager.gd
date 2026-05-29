@@ -161,6 +161,13 @@ signal lucky_legend_awaken(data: Dictionary)
 signal lucky_crash_harvest(data: Dictionary)
 signal lucky_cosmic_fusion(data: Dictionary)
 
+# DAY-328 新增訊號
+signal lucky_magnetic_attraction(data: Dictionary)
+signal lucky_super_chain(data: Dictionary)
+signal lucky_holy_pillar(data: Dictionary)
+signal lucky_time_stop(data: Dictionary)
+signal lucky_cosmic_restart(data: Dictionary)
+
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
 var current_state: String = "normal_play"
@@ -466,6 +473,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_crash_harvest", payload)
 		"lucky_cosmic_fusion":
 			emit_signal("lucky_cosmic_fusion", payload)
+		# DAY-328 新增
+		"lucky_magnetic_attraction":
+			emit_signal("lucky_magnetic_attraction", payload)
+		"lucky_super_chain":
+			emit_signal("lucky_super_chain", payload)
+		"lucky_holy_pillar":
+			emit_signal("lucky_holy_pillar", payload)
+		"lucky_time_stop":
+			emit_signal("lucky_time_stop", payload)
+		"lucky_cosmic_restart":
+			emit_signal("lucky_cosmic_restart", payload)
 		"pong":
 			pass
 		"error":

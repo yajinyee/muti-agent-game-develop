@@ -201,6 +201,13 @@ const (
 	MsgLuckyLegendAwaken = "lucky_legend_awaken" // T226 傳說覺醒魚（Legend Dragon 8次連續獎勵，全服 ×44.0）
 	MsgLuckyCrashHarvest = "lucky_crash_harvest" // T227 崩潰收割魚（Crash 機制，完美收割 ≥50x，全服 ×44.5）
 	MsgLuckyCosmicFusion = "lucky_cosmic_fusion" // T228 宇宙大融合魚（4 Phase 終極融合，全服 ×45.0 新史上最高）
+
+	// DAY-328 新增幸運特殊魚事件
+	MsgLuckyMagneticAttraction = "lucky_magnetic_attraction" // T229 磁力吸引魚（全場磁力 ×70.0，全服 ×45.5）
+	MsgLuckySuperChain         = "lucky_super_chain"         // T230 超級連鎖魚（3+2 連鎖 ×80.0，全服 ×46.0）
+	MsgLuckyHolyPillar         = "lucky_holy_pillar"         // T231 神聖光柱魚（12 道光柱 HP -50%，全服 ×46.5）
+	MsgLuckyTimeStop           = "lucky_time_stop"           // T232 時間停止魚（凍結 15 秒 ×5.0，全服 ×47.0）
+	MsgLuckyCosmicRestart      = "lucky_cosmic_restart"      // T233 宇宙重啟魚（全場 ×100.0，全服 ×47.5 新史上最高）
 )
 // ── Envelope ─────────────────────────────────────────────────
 
