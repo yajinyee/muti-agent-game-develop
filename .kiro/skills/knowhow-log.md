@@ -4855,3 +4855,14 @@ T184 風險等級最高 ×3000 個人倍率（非全服），T185 全服 ×16.0 
 - **核心機制：** 5 秒內快速連擊，每次擊破 ×200.0，連擊 ≥ 10 次觸發全服 ×41.0（新史上最高）
 - **Session 管理：** 用 `rapidRichesSession` 結構追蹤每個玩家的連擊狀態，避免多玩家衝突
 - **教訓：** 快速連擊機制要有 Session 管理，確保 5 秒計時從觸發時開始，不是從第一次連擊開始
+
+## 151. git objects 目錄 Norton 防毒干擾問題（DAY-325）
+
+- **問題：** `git add -A` 報 `error: unable to create temporary file: No such file or directory`
+- **根本原因：** Norton 防毒軟體在 `.git/objects/tmp/` 目錄建立了 `_norton_` 子目錄，導致 git 無法在 tmp 目錄建立臨時檔案
+- **診斷方式：** `dir .git\objects\tmp` 看到 `_norton_` 目錄
+- **解決方案：** `Remove-Item -Recurse -Force ".git\objects\tmp\_norton_"` 刪除 Norton 目錄
+- **但問題持續：** 刪除後仍然失敗，改用逐個 `git add "filename"` 方式繞過
+- **最終解法：** 不用 `git add -A`，改用明確列出每個檔案的 `git add` 指令
+- **教訓：** Norton 防毒軟體會干擾 git 的 objects 目錄，遇到 `unable to create temporary file` 要先檢查 `.git/objects/tmp/` 目錄
+- **預防：** 在 Norton 設定中排除 `.git/objects/` 目錄的掃描
