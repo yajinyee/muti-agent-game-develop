@@ -215,6 +215,9 @@ const (
 	MsgLuckyIceFishingMaster      = "lucky_ice_fishing_master"      // T236 冰釣大師魚（5次旋轉最高 ×8000，全服 ×49.0）
 	MsgLuckyCosmicMiracle         = "lucky_cosmic_miracle"          // T237 宇宙奇蹟魚（全場 ×120.0 + 8道光柱，全服 ×49.5）
 	MsgLuckyGenesisUltimate       = "lucky_genesis_ultimate"        // T238 創世終極魚（全場 ×150.0，全服 ×50.0 里程碑）
+
+	// DAY-339 多人投射物顯示
+	MsgOtherPlayerAttack = "other_player_attack" // 廣播其他玩家的攻擊（供 Client 顯示投射物）
 )
 // ── Envelope ─────────────────────────────────────────────────
 
@@ -602,6 +605,16 @@ type CollectGoldenCoinRequest struct {
 // SetDisplayNameRequest 設定玩家顯示名稱請求
 type SetDisplayNameRequest struct {
 	Name string `json:"name"`
+}
+
+// OtherPlayerAttackPayload DAY-339 多人投射物顯示
+// Server 廣播給所有其他玩家，讓 Client 顯示其他玩家的投射物
+type OtherPlayerAttackPayload struct {
+	PlayerID    string  `json:"player_id"`    // 攻擊者 ID
+	CharacterID string  `json:"character_id"` // 角色 ID（chiikawa/hachiware/usagi）
+	TargetX     float64 `json:"target_x"`     // 目標 X 座標
+	TargetY     float64 `json:"target_y"`     // 目標 Y 座標
+	IsHit       bool    `json:"is_hit"`       // 是否命中目標
 }
 
 // ── DAY-301 新增 Lucky 特殊魚 Payloads ───────────────────────

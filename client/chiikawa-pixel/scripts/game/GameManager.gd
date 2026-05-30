@@ -195,6 +195,9 @@ signal lucky_fisherman_trail(data: Dictionary)
 signal lucky_golden_gills(data: Dictionary)
 signal lucky_penta_fusion(data: Dictionary)
 
+# DAY-339 多人投射物顯示
+signal other_player_attack(data: Dictionary)
+
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
 var current_state: String = "normal_play"
@@ -555,6 +558,9 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_golden_gills", payload)
 		"lucky_penta_fusion":
 			emit_signal("lucky_penta_fusion", payload)
+		# DAY-339 多人投射物顯示
+		"other_player_attack":
+			emit_signal("other_player_attack", payload)
 		"pong":
 			pass
 		"error":

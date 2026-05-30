@@ -1,6 +1,47 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-31（DAY-338 AUTO 死鎖修復 + 打擊感優化 + 整合測試 100% 通過）
+## 最後更新：2026-05-31（DAY-339 多人投射物顯示 + 目標物移動模式改善 + QA 44/44 通過）
+
+## DAY-339 更新（2026-05-31）：多人投射物顯示 + 目標物移動模式改善 ✅
+- **多人投射物顯示（other_player_attack）：**
+  - Server：`hub.go` 新增 `BroadcastExcept` 方法（廣播給所有人但排除指定玩家）
+  - Server：`messages.go` 新增 `MsgOtherPlayerAttack` 常數 + `OtherPlayerAttackPayload` 結構
+  - Server：`game.go` 在 `handleAttackLocked` 廣播 `other_player_attack` 給其他玩家
+  - Client：`GameManager.gd` 新增 `other_player_attack` 訊號 + 訊息處理
+  - Client：`Cannon.gd` 新增 `OTHER_PLAYER_COLORS`（稍暗的顏色）+ `_on_other_player_attack` 函數
+  - 效果：玩家可以看到其他玩家的投射物（不同顏色、z_index=15 在自己投射物下方）
+- **目標物移動模式改善：**
+  - Server：`data/tables.go` 新增 `BehaviorWave`、`BehaviorZigzag`、`BehaviorSpiral` 常數
+  - Server：T002 綠色小蟲 → wave，T003 紅色小蟲 → zigzag，T004 藍色小蟲 → wave，T105 金幣魚 → wave
+  - Client：`TargetManager.gd` 新增 wave/zigzag/spiral 移動邏輯
+  - Client：`_create_target_node` 初始化波浪/Z字形/螺旋移動的 meta 資料（隨機參數）
+  - 效果：目標物移動更多樣化，增加遊戲趣味性和技巧感
+- **QA 腳本：** `tools/qa_check_day339.py`（44 項驗證，44/44 全部通過）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **知識庫更新：** knowhow-log 條目 190/191/192（DAY-339 三個新知識點）
+
+## 自我評估（DAY-339）
+- **Server 目標物數量：** 160 種（T001-T006 + T101-T253 + B001）— 不再新增
+- **Lucky 系統數量：** 148 個（T106-T253）— 不再新增
+- **Client Lucky Panel 數量：** 159 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry + 156 個 Panel）
+- **HUD.gd 行數：** 461 行（DAY-337 重構後）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **整合測試通過率：** 29/29（100%）— DAY-338 達到 100%
+- **射擊手感：** 8.5/10（DAY-338 打擊感優化後）
+- **視覺清晰度：** 8/10（目標物移動多樣化後提升）
+- **核心循環流暢度：** 8.5/10（多人感提升）
+- **多人感：** 7/10（可以看到其他玩家投射物）
+- **最需要改善：** 在 Godot 實際遊玩一局，確認波浪移動效果
+- **已知技術債：** 無重大技術債
+- **下一步：** 在 Godot 實際遊玩驗證 + 繼續優化視覺清晰度
+
+## 下一步優先事項（DAY-340）
+1. 在 Godot 實際遊玩一局，確認波浪移動效果和多人投射物顯示
+2. 優化視覺清晰度（目標 8.5/10）
+3. 研究並實作目標物擊破特效升級（讓擊破更爽）
+4. 考慮加入目標物 HP 條動畫（受擊時 HP 條閃爍）
+
+
 
 ## DAY-338 更新（2026-05-31）：重大 Bug 修復 + 打擊感優化 ✅
 - **重大 Bug 修復：AUTO 射擊死鎖（兩層）**

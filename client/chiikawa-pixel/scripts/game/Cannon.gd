@@ -10,6 +10,13 @@ const CHAR_COLORS = {
 	"usagi": Color(1.0, 0.9, 0.2),
 }
 
+# DAY-339 其他玩家的投射物顏色（稍微暗一點，區分自己的）
+const OTHER_PLAYER_COLORS = {
+	"chiikawa": Color(0.8, 0.4, 0.6, 0.7),
+	"hachiware": Color(0.2, 0.4, 0.8, 0.7),
+	"usagi": Color(0.8, 0.7, 0.1, 0.7),
+}
+
 const VOICE_TEXTS = {
 	"chiikawa": "YaDa!",
 	"hachiware": "尖尖哇嘎乃！",
@@ -27,6 +34,8 @@ func _ready() -> void:
 	GameManager.attack_result.connect(_on_attack_result)
 	GameManager.reward_received.connect(_on_reward_received)
 	GameManager.player_updated.connect(_on_player_updated)
+	# DAY-339 多人投射物顯示
+	GameManager.other_player_attack.connect(_on_other_player_attack)
 
 func _process(delta: float) -> void:
 	# AUTO 自動射擊
@@ -316,3 +325,55 @@ func _spawn_impact_burst(hit_x: float, hit_y: float) -> void:
 		tween.parallel().tween_property(dot, "scale", Vector2(0.1, 0.1), 0.15)
 		tween.parallel().tween_property(dot, "modulate:a", 0.0, 0.15)
 		tween.tween_callback(func(): if is_instance_valid(dot): dot.queue_free())
+
+## DAY-339 多人投射物顯示：顯示其他玩家的投射物
+func _on_other_player_attack(data: Dictionary) -> void:
+	var char_id = data.get("character_id", "chiikawa")
+	var target_x = data.get("target_x", 640.0)
+	var target_y = data.get("target_y", 300.0)
+	var target_pos = Vector2(target_x, target_y)
+	var color = OTHER_PLAYER_COLORS.get(char_id, Color(0.7, 0.7, 0.7, 0.6))
+
+	var parent = get_parent()
+	if not is_instance_valid(parent):
+		return
+
+	var speed = 700.0
+	var dist = CANNON_POS.distance_to(target_pos)
+	var flight_time = clamp(dist / speed, 0.05, 0.3)
+
+	# 其他玩家的投射物（比自己的小一點，透明度低一點）
+	var proj_root = Node2D.new()
+	proj_root.position = CANNON_POS
+	proj_root.z_index = 15  # 比自己的投射物低一層
+	parent.add_child(proj_root)
+
+	# 外層光暈（較小）
+	var glow = ColorRect.new()
+	glow.size = Vector2(14, 14)
+	glow.position = -Vector2(7, 7)
+	glow.color = Color(color.r, color.g, color.b, 0.3)
+	proj_root.add_child(glow)
+
+	# 核心（較小）
+	var core = ColorRect.new()
+	core.size = Vector2(8, 8)
+	core.position = -Vector2(4, 4)
+	core.color = color
+	proj_root.add_child(core)
+
+	# 方向旋轉
+	var diff = target_pos - CANNON_POS
+	if diff.length() > 1.0:
+		proj_root.rotation = diff.angle()
+
+	# 飛行動畫
+	var tween = proj_root.create_tween()
+	tween.tween_property(proj_root, "position", target_pos, flight_time).set_ease(Tween.EASE_IN).set_trans(Tween.TRANS_QUAD)
+	# 烏薩奇旋轉
+	if char_id == "usagi":
+		tween.parallel().tween_property(proj_root, "rotation_degrees", proj_root.rotation_degrees + 720.0, flight_time)
+	tween.tween_callback(func():
+		if is_instance_valid(proj_root):
+			proj_root.queue_free()
+	)

@@ -102,6 +102,25 @@ func (h *Hub) Broadcast(msgType string, payload interface{}) {
 	}
 }
 
+// BroadcastExcept 廣播給所有玩家，但排除指定玩家（DAY-339 多人投射物顯示）
+func (h *Hub) BroadcastExcept(excludeID string, msgType string, payload interface{}) {
+	data, err := json.Marshal(map[string]interface{}{"type": msgType, "payload": payload})
+	if err != nil {
+		return
+	}
+	h.mu.RLock()
+	defer h.mu.RUnlock()
+	for id, c := range h.clients {
+		if id == excludeID {
+			continue
+		}
+		select {
+		case c.send <- data:
+		default:
+		}
+	}
+}
+
 // PlayerCount 回傳目前連線數
 func (h *Hub) PlayerCount() int {
 	h.mu.RLock()

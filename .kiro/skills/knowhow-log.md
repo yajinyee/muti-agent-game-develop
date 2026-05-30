@@ -5371,3 +5371,44 @@ if xxxMult > 1.0 {
   - 被呼叫的函數不嘗試 `g.mu.Lock()`
   - 被呼叫的函數不嘗試 `g.mu.RLock()`
   - 被呼叫的函數不呼叫任何嘗試加鎖的函數
+
+## 190. 多人投射物顯示的正確架構（DAY-339）
+- **需求：** 捕魚機多人遊戲中，玩家應該能看到其他玩家的投射物（增加多人感）
+- **架構：**
+  1. Server 在 `handleAttackLocked` 廣播 `other_player_attack` 給所有其他玩家（排除攻擊者自己）
+  2. Client `GameManager.gd` 接收並 emit `other_player_attack` 訊號
+  3. Client `Cannon.gd` 連接訊號，顯示其他玩家的投射物（不同顏色、稍小、z_index 較低）
+- **關鍵設計：**
+  - 其他玩家的投射物顏色比自己的暗（alpha 0.7），避免干擾自己的視線
+  - z_index=15（自己的是 20），確保自己的投射物在上層
+  - 不播放音效（避免音效混亂）
+  - 不觸發命中特效（只顯示飛行軌跡）
+- **BroadcastExcept 方法：** 在 Hub 加入 `BroadcastExcept(excludeID, msgType, payload)` 方法，廣播給所有人但排除指定玩家
+- **教訓：** 多人遊戲的投射物顯示要區分「自己的」和「別人的」，視覺上要有明顯差異但不干擾遊戲
+
+## 191. Godot 4 目標物波浪/Z字形移動實作（DAY-339）
+- **需求：** 讓目標物有更多樣化的移動模式，增加遊戲趣味性
+- **三種新移動模式：**
+  1. **wave（波浪）：** X 方向前進 + Y 方向正弦波（`sin(elapsed * freq + phase) * amp`）
+  2. **zigzag（Z字形）：** X 方向前進 + Y 方向鋸齒波（`abs(2 * t_mod - 1) * amp`）
+  3. **spiral（螺旋）：** X 方向慢速前進 + Y 方向快速正弦波（振幅隨時間衰減）
+- **關鍵技術：**
+  - 用 `node.set_meta("wave_elapsed", elapsed)` 追蹤每個目標物的動畫時間
+  - 用 `node.set_meta("base_y", spawn_y)` 記錄基準 Y 座標，波浪相對於基準計算
+  - 用 `clamp(y, 80.0, 640.0)` 防止目標物超出畫面邊界
+  - 用 `randf_range()` 讓每個目標物的波浪參數不同（避免所有目標物同步移動）
+- **Server 端：** 在 `data/tables.go` 加入 `BehaviorWave`、`BehaviorZigzag`、`BehaviorSpiral` 常數
+- **應用：** T002 綠色小蟲（wave）、T003 紅色小蟲（zigzag）、T004 藍色小蟲（wave）、T105 金幣魚（wave）
+- **教訓：** 移動模式的多樣化是捕魚機「技巧感」的核心，玩家需要預判目標物位置才能精準射擊
+
+## 192. 捕魚機多人感設計原則（DAY-339）
+- **問題：** 單人遊戲感覺孤獨，多人感不足
+- **解決方案（不需要複雜的多人同步）：**
+  1. 顯示其他玩家的投射物（視覺上感受到其他人在射擊）
+  2. 廣播其他玩家的擊破（announce 系統已有）
+  3. 全服加成系統（Lucky 魚觸發時全服受益）
+- **投射物顯示的效能考量：**
+  - 每次攻擊廣播一個輕量訊息（只有 player_id、character_id、target_x、target_y、is_hit）
+  - Client 端只顯示飛行動畫，不做碰撞檢測
+  - 投射物到達後直接 queue_free，不觸發任何遊戲邏輯
+- **教訓：** 多人感不需要完整的多人同步，只需要讓玩家「感受到」其他人的存在。輕量廣播 + 純視覺效果是最佳平衡

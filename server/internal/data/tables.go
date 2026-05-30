@@ -80,6 +80,10 @@ const (
 	BehaviorSink   Behavior = "sink"
 	BehaviorFlee   Behavior = "flee"
 	BehaviorFast   Behavior = "fast"
+	// DAY-339 新增移動模式
+	BehaviorWave   Behavior = "wave"   // 波浪移動（正弦波 Y 軸）
+	BehaviorZigzag Behavior = "zigzag" // Z字形移動（鋸齒波 Y 軸）
+	BehaviorSpiral Behavior = "spiral" // 螺旋移動（快速正弦波 Y 軸）
 )
 
 type TargetDef struct {
@@ -101,9 +105,9 @@ type TargetDef struct {
 var Targets = []TargetDef{
 	// ── 基礎目標（2x-10x）────────────────────────────────────
 	{ID: "T001", Name: "像素雜草", Type: TypeBasic, Multiplier: 2, HP: 3, SpawnWeight: 180, Speed: 0, Lifetime: 20, LaborGain: 1, Behavior: BehaviorSink, DiffFactor: 0.4},
-	{ID: "T002", Name: "綠色小蟲", Type: TypeBasic, Multiplier: 3, HP: 5, SpawnWeight: 160, Speed: 40, Lifetime: 18, LaborGain: 1, Behavior: BehaviorLinear, DiffFactor: 0.4},
-	{ID: "T003", Name: "紅色小蟲", Type: TypeBasic, Multiplier: 5, HP: 8, SpawnWeight: 130, Speed: 55, Lifetime: 16, LaborGain: 1, Behavior: BehaviorLinear, DiffFactor: 0.4},
-	{ID: "T004", Name: "藍色小蟲", Type: TypeBasic, Multiplier: 6, HP: 10, SpawnWeight: 110, Speed: 65, Lifetime: 15, LaborGain: 2, Behavior: BehaviorLinear, DiffFactor: 0.4},
+	{ID: "T002", Name: "綠色小蟲", Type: TypeBasic, Multiplier: 3, HP: 5, SpawnWeight: 160, Speed: 40, Lifetime: 18, LaborGain: 1, Behavior: BehaviorWave, DiffFactor: 0.4},
+	{ID: "T003", Name: "紅色小蟲", Type: TypeBasic, Multiplier: 5, HP: 8, SpawnWeight: 130, Speed: 55, Lifetime: 16, LaborGain: 1, Behavior: BehaviorZigzag, DiffFactor: 0.4},
+	{ID: "T004", Name: "藍色小蟲", Type: TypeBasic, Multiplier: 6, HP: 10, SpawnWeight: 110, Speed: 65, Lifetime: 15, LaborGain: 2, Behavior: BehaviorWave, DiffFactor: 0.4},
 	{ID: "T005", Name: "會走路的布丁", Type: TypeBasic, Multiplier: 8, HP: 16, SpawnWeight: 90, Speed: 35, Lifetime: 20, LaborGain: 2, Behavior: BehaviorLinear, DiffFactor: 0.4},
 	{ID: "T006", Name: "巨大蘑菇", Type: TypeBasic, Multiplier: 10, HP: 22, SpawnWeight: 70, Speed: 25, Lifetime: 22, LaborGain: 3, Behavior: BehaviorLinear, DiffFactor: 0.4},
 
@@ -112,7 +116,7 @@ var Targets = []TargetDef{
 	{ID: "T102", Name: "寶箱怪", Type: TypeSpecial, Multiplier: 25, HP: 55, SpawnWeight: 22, Speed: 70, Lifetime: 10, LaborGain: 6, Behavior: BehaviorFlee, DiffFactor: 0.7},
 	{ID: "T103", Name: "流星", Type: TypeSpecial, MinMult: 20, MaxMult: 50, HP: 20, SpawnWeight: 18, Speed: 220, Lifetime: 4, LaborGain: 5, Behavior: BehaviorFast, DiffFactor: 0.8},
 	{ID: "T104", Name: "金色雜草", Type: TypeSpecial, Multiplier: 30, HP: 45, SpawnWeight: 12, Speed: 0, Lifetime: 8, LaborGain: 15, Behavior: BehaviorSink, DiffFactor: 0.7},
-	{ID: "T105", Name: "巨大金幣魚", Type: TypeSpecial, Multiplier: 50, HP: 90, SpawnWeight: 8, Speed: 80, Lifetime: 8, LaborGain: 10, Behavior: BehaviorLinear, DiffFactor: 0.8},
+	{ID: "T105", Name: "巨大金幣魚", Type: TypeSpecial, Multiplier: 50, HP: 90, SpawnWeight: 8, Speed: 80, Lifetime: 8, LaborGain: 10, Behavior: BehaviorWave, DiffFactor: 0.8},
 
 	// ── 進階特殊目標（60x-120x）─────────────────────────────
 	// T106 幸運連鎖閃電魚：擊破後觸發連鎖閃電，攻擊附近 3 條魚 HP -50%

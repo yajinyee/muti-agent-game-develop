@@ -1789,6 +1789,20 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 	}
 
 	g.hub.Send(playerID, protocol.MsgAttackResult, result)
+	// DAY-339 多人投射物顯示：廣播攻擊給其他玩家（不包含自己）
+	targetX := req.ClickX
+	targetY := req.ClickY
+	if t != nil {
+		targetX = t.X
+		targetY = t.Y
+	}
+	g.hub.BroadcastExcept(playerID, protocol.MsgOtherPlayerAttack, protocol.OtherPlayerAttackPayload{
+		PlayerID:    playerID,
+		CharacterID: p.GetCharacterID(),
+		TargetX:     targetX,
+		TargetY:     targetY,
+		IsHit:       t != nil,
+	})
 	// DAY-338 修復死鎖：在 tick 的鎖保護下，使用不加鎖版本
 	g.sendPlayerUpdateLocked(playerID)
 }

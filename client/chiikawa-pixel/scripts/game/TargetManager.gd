@@ -458,6 +458,37 @@ func _update_positions(delta: float) -> void:
 			"sink":
 				node.position.y += speed * 0.3 * delta
 				node.position.x -= 10 * delta
+			# DAY-339 新增移動模式
+			"wave":
+				# 波浪移動：X 方向前進 + Y 方向正弦波
+				node.position.x -= speed * delta
+				var wave_amp = node.get_meta("wave_amp", 40.0)
+				var wave_freq = node.get_meta("wave_freq", 2.0)
+				var wave_phase = node.get_meta("wave_phase", 0.0)
+				var base_y = node.get_meta("base_y", node.position.y)
+				var elapsed = node.get_meta("wave_elapsed", 0.0) + delta
+				node.set_meta("wave_elapsed", elapsed)
+				node.position.y = base_y + sin(elapsed * wave_freq + wave_phase) * wave_amp
+			"zigzag":
+				# Z字形移動：X 方向前進 + Y 方向鋸齒波
+				node.position.x -= speed * delta
+				var zz_amp = node.get_meta("zz_amp", 60.0)
+				var zz_period = node.get_meta("zz_period", 1.5)
+				var base_y = node.get_meta("base_y", node.position.y)
+				var elapsed = node.get_meta("zz_elapsed", 0.0) + delta
+				node.set_meta("zz_elapsed", elapsed)
+				var t_mod = fmod(elapsed, zz_period) / zz_period
+				var zz_offset = (2.0 * abs(2.0 * t_mod - 1.0) - 1.0) * zz_amp
+				node.position.y = clamp(base_y + zz_offset, 80.0, 640.0)
+			"spiral":
+				# 螺旋移動：X 方向前進 + Y 方向快速正弦波（模擬螺旋感）
+				node.position.x -= speed * 0.7 * delta
+				var sp_amp = node.get_meta("sp_amp", 80.0)
+				var sp_freq = node.get_meta("sp_freq", 4.0)
+				var base_y = node.get_meta("base_y", node.position.y)
+				var elapsed = node.get_meta("sp_elapsed", 0.0) + delta
+				node.set_meta("sp_elapsed", elapsed)
+				node.position.y = base_y + sin(elapsed * sp_freq) * sp_amp * (1.0 - elapsed * 0.05)
 
 		# 離開畫面則移除
 		if node.position.x < -100:
@@ -566,10 +597,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
-	# Lucky 特殊魚標記（T106-T195）— DAY-317 擴展到 T195
-	if def_id.begins_with("T1") and def_id.length() == 4:
+	# Lucky 特殊魚標記（T106-T253）— DAY-338 擴展到 T253
+	if def_id.begins_with("T") and def_id.length() >= 4:
 		var tid_num = int(def_id.substr(1))
-		if tid_num >= 106 and tid_num <= 200:
+		if tid_num >= 106 and tid_num <= 253:
 			_add_lucky_badge(container, def_id)
 	if def_id in ["T103", "T104"]:
 		var wobble = container.create_tween().set_loops()
@@ -586,6 +617,25 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	container.set_meta("target_type", target_type)
 	container.set_meta("multiplier", multiplier)
 	container.set_meta("is_fleeing", false)
+
+	# DAY-339 波浪/Z字形/螺旋移動 meta 初始化
+	var behavior = data.get("behavior", "linear")
+	var spawn_y = data.get("y", 300.0)
+	container.set_meta("base_y", spawn_y)
+	match behavior:
+		"wave":
+			container.set_meta("wave_amp", randf_range(25.0, 55.0))
+			container.set_meta("wave_freq", randf_range(1.5, 3.0))
+			container.set_meta("wave_phase", randf_range(0.0, TAU))
+			container.set_meta("wave_elapsed", 0.0)
+		"zigzag":
+			container.set_meta("zz_amp", randf_range(40.0, 80.0))
+			container.set_meta("zz_period", randf_range(1.0, 2.0))
+			container.set_meta("zz_elapsed", 0.0)
+		"spiral":
+			container.set_meta("sp_amp", randf_range(50.0, 90.0))
+			container.set_meta("sp_freq", randf_range(3.0, 5.0))
+			container.set_meta("sp_elapsed", 0.0)
 
 	return container
 
@@ -625,7 +675,27 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 	# 依倍率範圍選顏色
 	var tid_num = int(def_id.substr(1))
 	var ring_color: Color
-	if tid_num >= 196:
+	if tid_num >= 246:
+		ring_color = Color(1.0, 0.41, 0.71, 1.0)   # 熱粉紅（T246+，里程碑最高階）
+	elif tid_num >= 241:
+		ring_color = Color(1.0, 0.0, 1.0, 1.0)     # 洋紅（T241+）
+	elif tid_num >= 236:
+		ring_color = Color(0.0, 1.0, 1.0, 1.0)     # 青色（T236+）
+	elif tid_num >= 231:
+		ring_color = Color(1.0, 0.84, 0.0, 1.0)    # 純金（T231+）
+	elif tid_num >= 226:
+		ring_color = Color(1.0, 0.4, 0.0, 1.0)     # 橙紅（T226+）
+	elif tid_num >= 221:
+		ring_color = Color(0.8, 0.0, 0.8, 1.0)     # 紫色（T221+）
+	elif tid_num >= 216:
+		ring_color = Color(1.0, 0.85, 0.0, 1.0)    # 金色（T216+）
+	elif tid_num >= 211:
+		ring_color = Color(0.0, 0.75, 1.0, 1.0)    # 冰藍（T211+）
+	elif tid_num >= 206:
+		ring_color = Color(1.0, 0.4, 0.0, 1.0)     # 火橙（T206+）
+	elif tid_num >= 201:
+		ring_color = Color(0.8, 0.0, 0.8, 1.0)     # 洋紅（T201+）
+	elif tid_num >= 196:
 		ring_color = Color(1.0, 1.0, 1.0, 1.0)     # 純白（T196+，DAY-318 里程碑最高階）
 	elif tid_num >= 191:
 		ring_color = Color(1.0, 0.85, 0.0, 1.0)    # 最亮金（T191+，DAY-317 最高階）
@@ -661,8 +731,28 @@ func _add_lucky_badge(node: Node2D, def_id: String) -> void:
 
 	# LUCKY 徽章（左上角小標籤）
 	var badge = Label.new()
-	# Progressive Jackpot 系列用特殊圖示
-	if tid_num >= 196:
+	# DAY-338 擴展到 T253
+	if tid_num >= 246:
+		badge.text = "🌸"  # 五重終極（T246+，里程碑最高階）
+	elif tid_num >= 241:
+		badge.text = "🔮"  # 宇宙（T241+）
+	elif tid_num >= 236:
+		badge.text = "⚡"  # 閃電（T236+）
+	elif tid_num >= 231:
+		badge.text = "🌟"  # 星光（T231+）
+	elif tid_num >= 226:
+		badge.text = "🔥"  # 火焰（T226+）
+	elif tid_num >= 221:
+		badge.text = "💎"  # 鑽石（T221+）
+	elif tid_num >= 216:
+		badge.text = "🌊"  # 海浪（T216+）
+	elif tid_num >= 211:
+		badge.text = "❄️"  # 冰（T211+）
+	elif tid_num >= 206:
+		badge.text = "🎯"  # 目標（T206+）
+	elif tid_num >= 201:
+		badge.text = "🌌"  # 宇宙（T201+）
+	elif tid_num >= 196:
 		badge.text = "🌌"  # 宇宙（T196+，DAY-318 里程碑最高階）
 	elif tid_num >= 191:
 		badge.text = "💀"  # 終焉（T191+，DAY-317 最高階）
