@@ -1,6 +1,46 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-30（DAY-333 T249-T253 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+## 最後更新：2026-05-30（DAY-334 端對端整合測試工具 + 業界研究 + 深度優先策略轉向 + GitHub 同步）
+
+## DAY-334 更新（2026-05-30）：端對端整合測試工具 + 品質優先策略轉向 ✅
+- **策略轉向：** 停止新增目標物（已有 160 個，遠超業界標準 20-40 個），轉向深度優化
+- **端對端整合測試工具：** `tools/integration_test_day334.py`（11 個測試案例）
+  - 基礎連線、game_state、player_update、target_spawn 格式驗證
+  - 攻擊流程（attack → attack_result）、Ping/Pong 心跳
+  - bet_change 流程、多客戶端同時連線（3個）
+  - 無效訊息容忍、斷線重連、30 秒協定完整性觀察
+  - 使用方式：`python tools/integration_test_day334.py --quick`（快速）或不加參數（完整）
+- **業界研究（2026 趨勢）：**
+  - Real-time Multiplayer PvP（已實作 T191）
+  - Mobile-first 觸控優化（待優化）
+  - RNG + Skill 混合（已實作 AUTO 智慧評分）
+  - Progressive Jackpot（已實作 T171-T175）
+  - Sweepstakes 合規模式（北美市場，未實作）
+- **Agent 更新：** target-design-agent.md 更新至 DAY-334 狀態（160 種目標物）
+- **Agent 更新：** integration-test-agent.md 加入新工具引用
+- **知識庫更新：** knowhow-log 條目 177/178/179（DAY-334 三個新知識點）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-334）
+- **Server 目標物數量：** 160 種（T001-T006 + T101-T253 + B001）— 不再新增
+- **Lucky 系統數量：** 148 個（T106-T253）— 不再新增
+- **Client Lucky Panel 數量：** 159 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry + 156 個 Panel）
+- **Main.tscn load_steps：** 158（維持）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **端對端整合測試：** ✅ 工具已建立（需 Server 啟動後執行驗證）
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8.5/10）、端對端整合測試實際執行
+- **已知技術債：** HUD.gd 超過 2330 行、159 個 UI 腳本需重構（超過警戒線 50 個）
+- **策略方向：** 深度優先——讓現有 20 個最常出現的目標物有完整視覺特效和手感
+
+## 下一步優先事項（DAY-335）
+1. 啟動 Server + 執行 `python tools/integration_test_day334.py` 確認端對端整合
+2. 優化 T001-T006 基礎目標物的視覺特效（擊破動畫、粒子效果）
+3. 優化射擊手感（投射物速度、命中特效時機精確度）
+4. HUD.gd 重構（超過 2330 行，需要拆分）
 
 ## DAY-333 更新（2026-05-30）：T249-T253 五個新 Lucky 魚系統 + 業界研究 ✅
 - **業界研究：** Nolimit City「Catfish Hunters」電擊框架機制（×1→×1024，2026-03）、Atomic Slot Lab「Golden Gills」磁力連鎖 Respin + 75x 旋轉倍率（2026-02）、Reflex Gaming「Big Game Fishing Bigger Bites」進階路徑機制（2026-02）

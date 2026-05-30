@@ -29,6 +29,7 @@ Client 收到 → 正確顯示給玩家看
 ## Write Access
 - `reports/integration/integration-test-[DATE].md`
 - `tools/integration_test.py`（測試腳本）
+- `tools/integration_test_day334.py`（DAY-334 端對端整合測試，含 WebSocket 協定驗證）
 
 ## 整合測試清單（每次必跑）
 
