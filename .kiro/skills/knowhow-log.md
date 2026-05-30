@@ -5271,3 +5271,33 @@ if xxxMult > 1.0 {
   - `_show_reward(amount, mult)` → HUD._show_reward_popup
 - **備用橫幅模式：** DAY-318~319 的 Panel 自行處理，HUDLuckySignals 只做 fallback
 - **教訓：** 委派架構要有明確的備用路徑（fallback），避免 LuckyEventSystem 不存在時崩潰
+
+## 186. HUD.gd 深度重構策略（DAY-337）
+- **問題：** HUD.gd 有 2469 行，包含 96 個 Lucky 函數（重複存在於 HUDLuckySignals.gd）
+- **根本原因：** DAY-335/336 只把函數「複製」到 HUDLuckySignals.gd，沒有從 HUD.gd 刪除
+- **解決方式：** 用 Python 腳本精確定位並移除重複內容
+  1. 找到 `# DAY-292~303 幸運特殊魚訊號連接` 的行（重複訊號連接開始）
+  2. 找到 `# DAY-304~319 訊號已移入 HUDLuckySignals.gd` 的行（重複訊號連接結束）
+  3. 找到 `func _on_lucky_chain_lightning` 的行（Lucky 函數開始）
+  4. 移除這兩個範圍，保留中間的核心 HUD 函數
+- **結果：** 2469 行 → 461 行（減少 81%），所有核心函數保留
+- **教訓：** 重構時要「移動」不是「複製」，否則會有重複代碼。用 Python 腳本比手動刪除更精確
+
+## 187. Windows 多 Python 版本的 PIL 問題（DAY-337）
+- **問題：** `py tools/script.py` 報 `ModuleNotFoundError: No module named 'PIL'`
+- **根本原因：** Windows 有多個 Python 版本（msys64/mingw64 的 python.exe 沒有 PIL）
+  - `python` → C:\msys64\mingw64\bin\python.exe（沒有 PIL）
+  - `py` → C:\Windows\py.exe（啟動器，可能選到錯誤版本）
+  - 正確版本：`C:\Users\yajinyee0306\AppData\Local\Programs\Python\Python312\python.exe`
+- **解決：** 使用完整路徑 `C:\Users\yajinyee0306\AppData\Local\Programs\Python\Python312\python.exe`
+- **教訓：** Windows 多 Python 環境下，`py` 和 `python` 可能指向不同版本。遇到模組找不到時，先用 `where.exe python` 確認路徑
+
+## 188. T101-T105 特殊目標物視覺設計原則（DAY-337）
+- **T101 擬態怪物：** 外觀偽裝成普通草，但加入詭異紅眼和鋸齒嘴，金色輪廓標記為特殊目標
+  - 密度 13% 是正常的（草形狀本來就細長）
+- **T102 寶箱怪：** 完整寶箱外觀（上蓋+下箱+金色邊框），黃眼和牙齒增加「怪物感」
+  - 密度 47% 是好的（寶箱是方形，填充率高）
+- **T103 流星：** 火焰尾跡（從右上到左下）+ 岩石主體 + 速度線，視覺上有強烈的移動感
+- **T104 金草：** 金色草莖 + 光澤效果 + 閃光星點，比普通草更有「稀有感」
+- **T105 金幣魚：** 完整魚形（魚身+魚鱗+魚尾+魚鰭）+ 金幣符號，清楚傳達「高價值」
+- **教訓：** 特殊目標物的視覺設計要傳達「這個值得打」的感覺，通過顏色（金色）、形狀（特殊）、細節（眼睛/符號）來區分
