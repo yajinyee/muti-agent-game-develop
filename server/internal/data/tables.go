@@ -553,6 +553,29 @@ var Targets = []TargetDef{
 	// 業界依據：四機制終極融合（2026 里程碑）
 	{ID: "T248", Name: "幸運四重終極融合魚", Type: TypeSpecial, Multiplier: 248888, HP: 248888, SpawnWeight: 1, Speed: 1, Lifetime: 176, LaborGain: 49777, Behavior: BehaviorSink, DiffFactor: 1.0},
 
+	// DAY-333 新增：T249-T253（業界研究：Nolimit City Catfish Hunters 電擊框架 + Atomic Slot Lab Golden Gills 磁力連鎖 + Reflex Gaming Bigger Bites 漁夫路徑 + Penta Fusion 2026）
+	// T249 幸運電擊框架魚：Catfish Hunters 電擊框架機制（全服 ×56.5）
+	// 每次命中全局倍率翻倍（×1→×1024），最多 10 次，完美連鎖（≥8次）→ 全服 ×56.5 加成 113 秒
+	// 業界依據：Nolimit City「Catfish Hunters」電擊框架 + 全局倍率翻倍（2026-03）
+	{ID: "T249", Name: "幸運電擊框架魚", Type: TypeSpecial, Multiplier: 258888, HP: 258888, SpawnWeight: 1, Speed: 1, Lifetime: 178, LaborGain: 51777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T250 幸運磁力連鎖魚：Golden Gills 磁力連鎖 Respin 機制（全服 ×57.0）
+	// 磁力連鎖 Respin：8 次，每次 ×75.0，完美連鎖（≥6次）→ 全服 ×57.0 加成 114 秒
+	// 業界依據：Atomic Slot Lab「Golden Gills」磁力連鎖 Respin + 75x 旋轉倍率（2026-02）
+	{ID: "T250", Name: "幸運磁力連鎖魚", Type: TypeSpecial, Multiplier: 268888, HP: 268888, SpawnWeight: 1, Speed: 1, Lifetime: 180, LaborGain: 53777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T251 幸運漁夫路徑魚：Bigger Bites 進階路徑機制（全服 ×57.5）
+	// Fishermen 符號收集 + 路徑升級（10 個節點，最高 ×500），路徑完成（≥8節點）→ 全服 ×57.5 加成 115 秒
+	// 業界依據：Reflex Gaming「Big Game Fishing Bigger Bites」進階路徑機制（2026-02）
+	{ID: "T251", Name: "幸運漁夫路徑魚", Type: TypeSpecial, Multiplier: 278888, HP: 278888, SpawnWeight: 1, Speed: 1, Lifetime: 182, LaborGain: 55777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T252 幸運黃金鰓魚：Golden Gills Jackpot Respin 機制（全服 ×58.0）
+	// 磁力連鎖 + 4 層 Jackpot（Mini/Minor/Major/Grand），Grand Jackpot → 全服 ×58.0 加成 116 秒
+	// 業界依據：Atomic Slot Lab「Golden Gills」Jackpot Respin + 磁力連鎖（2026-02）
+	{ID: "T252", Name: "幸運黃金鰓魚", Type: TypeSpecial, Multiplier: 288888, HP: 288888, SpawnWeight: 1, Speed: 1, Lifetime: 184, LaborGain: 57777, Behavior: BehaviorSink, DiffFactor: 1.0},
+	// T253 幸運五重終極魚：Penta Fusion Ultimate 機制（里程碑：全服 ×58.5）
+	// 五重機制融合：電擊框架 + 磁力連鎖 + 漁夫路徑 + 黃金鰓 Jackpot + Quad Fusion
+	// 全服 ×58.5 加成 117 秒（新史上最高，超越 T248 的 ×56.0）
+	// 業界依據：五機制終極融合（2026 里程碑）
+	{ID: "T253", Name: "幸運五重終極魚", Type: TypeSpecial, Multiplier: 308888, HP: 308888, SpawnWeight: 1, Speed: 1, Lifetime: 186, LaborGain: 61777, Behavior: BehaviorSink, DiffFactor: 1.0},
+
 	// ── BOSS ─────────────────────────────────────────────────
 	{ID: "B001", Name: "那個孩子", Type: TypeBoss, MinMult: 100, MaxMult: 500, HP: 3000, SpawnWeight: 0, Speed: 0, Lifetime: 60, LaborGain: 30, Behavior: BehaviorLinear, DiffFactor: 1.5},
 }

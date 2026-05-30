@@ -1164,3 +1164,83 @@ type LuckyQuadFusionPayload struct {
 	GlobalSeconds int     `json:"global_seconds,omitempty"`
 	Milestone     string  `json:"milestone,omitempty"`
 }
+
+// DAY-333 新增幸運特殊魚事件
+const (
+	MsgLuckyElectricalFrame = "lucky_electrical_frame" // T249 幸運電擊框架魚（Catfish Hunters，全服 ×56.5）
+	MsgLuckyMagneticRespin  = "lucky_magnetic_respin"  // T250 幸運磁力連鎖魚（Golden Gills，全服 ×57.0）
+	MsgLuckyFishermanTrail  = "lucky_fisherman_trail"  // T251 幸運漁夫路徑魚（Bigger Bites，全服 ×57.5）
+	MsgLuckyGoldenGills     = "lucky_golden_gills"     // T252 幸運黃金鰓魚（Golden Gills Jackpot，全服 ×58.0）
+	MsgLuckyPentaFusion     = "lucky_penta_fusion"     // T253 幸運五重終極魚（Penta Fusion，全服 ×58.5 里程碑）
+)
+
+// LuckyElectricalFramePayload T249 幸運電擊框架魚
+type LuckyElectricalFramePayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	HitNo         int     `json:"hit_no,omitempty"`
+	FishValue     float64 `json:"fish_value,omitempty"`
+	GlobalMult    float64 `json:"global_mult,omitempty"`
+	HitCount      int     `json:"hit_count,omitempty"`
+	FinalMult     float64 `json:"final_mult,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyMagneticRespinPayload T250 幸運磁力連鎖魚
+type LuckyMagneticRespinPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	RespinNo      int     `json:"respin_no,omitempty"`
+	Attracted     int     `json:"attracted,omitempty"`
+	SpinMult      float64 `json:"spin_mult,omitempty"`
+	RespinCount   int     `json:"respin_count,omitempty"`
+	TotalTargets  int     `json:"total_targets,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyFishermanTrailPayload T251 幸運漁夫路徑魚
+type LuckyFishermanTrailPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	NodeNo        int     `json:"node_no,omitempty"`
+	Mult          float64 `json:"mult,omitempty"`
+	Upgrade       string  `json:"upgrade,omitempty"`
+	NodesReached  int     `json:"nodes_reached,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+}
+
+// LuckyGoldenGillsPayload T252 幸運黃金鰓魚
+type LuckyGoldenGillsPayload struct {
+	Event              string   `json:"event"`
+	TriggerID          string   `json:"trigger_id"`
+	TriggerName        string   `json:"trigger_name"`
+	RespinNo           int      `json:"respin_no,omitempty"`
+	JackpotTier        string   `json:"jackpot_tier,omitempty"`
+	JackpotReward      int      `json:"jackpot_reward,omitempty"`
+	TriggeredJackpots  []string `json:"triggered_jackpots,omitempty"`
+	TotalReward        int      `json:"total_reward,omitempty"`
+	GlobalBonus        float64  `json:"global_bonus,omitempty"`
+	GlobalSeconds      int      `json:"global_seconds,omitempty"`
+}
+
+// LuckyPentaFusionPayload T253 幸運五重終極魚（里程碑：全服 ×58.5）
+type LuckyPentaFusionPayload struct {
+	Event         string  `json:"event"`
+	TriggerID     string  `json:"trigger_id"`
+	TriggerName   string  `json:"trigger_name"`
+	Phase         int     `json:"phase,omitempty"`
+	TotalMult     float64 `json:"total_mult,omitempty"`
+	TotalReward   int     `json:"total_reward,omitempty"`
+	GlobalBonus   float64 `json:"global_bonus,omitempty"`
+	GlobalSeconds int     `json:"global_seconds,omitempty"`
+	Milestone     string  `json:"milestone,omitempty"`
+}

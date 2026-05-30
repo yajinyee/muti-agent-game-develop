@@ -1,6 +1,49 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-30（DAY-332 T244-T248 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+## 最後更新：2026-05-30（DAY-333 T249-T253 五個新 Lucky 魚系統 + 業界研究 + GitHub 同步）
+
+## DAY-333 更新（2026-05-30）：T249-T253 五個新 Lucky 魚系統 + 業界研究 ✅
+- **業界研究：** Nolimit City「Catfish Hunters」電擊框架機制（×1→×1024，2026-03）、Atomic Slot Lab「Golden Gills」磁力連鎖 Respin + 75x 旋轉倍率（2026-02）、Reflex Gaming「Big Game Fishing Bigger Bites」進階路徑機制（2026-02）
+- **T249 幸運電擊框架魚（258888x）：** Catfish Hunters 電擊框架機制，每次命中全局倍率翻倍（×1→×1024），10 次命中，完美連鎖（≥8次）→ 全服 ×56.5 加成 113 秒
+- **T250 幸運磁力連鎖魚（268888x）：** Golden Gills 磁力連鎖 Respin 機制，8 次 Respin（每次 ×75.0），完美連鎖（≥6次）→ 全服 ×57.0 加成 114 秒
+- **T251 幸運漁夫路徑魚（278888x）：** Bigger Bites 進階路徑機制，10 個節點（最高 ×500），路徑完成（≥8節點）→ 全服 ×57.5 加成 115 秒
+- **T252 幸運黃金鰓魚（288888x）：** Golden Gills Jackpot Respin 機制，磁力連鎖 + 4 層 Jackpot（Mini/Minor/Major/Grand），Grand Jackpot → 全服 ×58.0 加成 116 秒
+- **T253 幸運五重終極魚（308888x）：** Penta Fusion Ultimate 機制（里程碑），五重機制融合：電擊框架 + 磁力連鎖 + 漁夫路徑 + 黃金鰓 Jackpot + Quad Fusion，全服 ×58.5 加成 117 秒（新史上最高，超越 T248 的 ×56.0）
+- **Server：** 5 個 handler 檔案 + tables.go + messages.go + game.go 整合（struct + NewGame + handleKill + effectiveMult）
+- **Client：** 5 個 Lucky Panel + GameManager 5 個訊號 + TargetManager T249-T253 + LuckyPanelRegistry 更新
+- **美術：** T249-T253 精靈圖生成完成（`tools/generate_targets_day333.py`）
+  - T249（電擊框架）：青色魚身 + 電擊框架矩形 + 閃電符號 + ×2 翻倍標示 + 10 道光芒
+  - T250（磁力連鎖）：黃金色魚身 + U形磁鐵符號 + 磁極（紅/藍）+ 8 道光芒
+  - T251（漁夫路徑）：橙色魚身 + S形路徑節點 + 釣竿符號 + 12 道光芒
+  - T252（黃金鰓）：黃金色大型魚身 + 鰓紋 + 4層 Jackpot 光環 + 16 道光芒
+  - T253（五重終極）：熱粉紅超大型魚身 + 五角星符號 + 五相位符號 + 30 道光芒 + 七層光環（里程碑）
+- **Main.tscn：** load_steps 153→158，加入 5 個新 Panel 節點
+- **知識庫更新：** knowhow-log 條目 174/175/176（DAY-333 三個新知識點）
+- **QA 腳本：** `tools/qa_check_day333.py`（101 項驗證，101/101 全部通過）
+- **build/vet 全部通過（零錯誤零警告）**
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-333）
+- **Server 目標物數量：** 160 種（T001-T006 + T101-T253 + B001）
+- **Lucky 系統數量：** 148 個（T106-T253）
+- **Client Lucky Panel 數量：** 159 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry + 156 個 Panel）
+- **Main.tscn load_steps：** 158（更新完成）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **最高全服倍率：** T253 五重終極 ×58.5（新史上最高，超越 T248 的 ×56.0）
+- **最高個人倍率：** T184 風險等級 ×3000
+- **最高 Jackpot：** T174 Grand Jackpot 5000x 起跳累積獎池
+- **最高電擊框架倍率：** T249 電擊框架魚 ×1024（Catfish Hunters 機制）
+- **最高磁力倍率：** T250 磁力連鎖魚 ×75.0 × 8 次（Golden Gills 機制）
+- **最高路徑倍率：** T251 漁夫路徑魚 ×500（Bigger Bites 機制）
+- **最高 Jackpot 倍率：** T252 黃金鰓魚 Grand ×2000（Golden Gills Jackpot 機制）
+- **里程碑：** T253 是第一個達到全服 ×58.5 的機制，也是第一個五重機制融合
+- **最需要改善：** 視覺清晰度（7.5/10 → 目標 8/10，需要 Godot 實際遊玩驗證）
+- **已知技術債：** HUD.gd 超過 2330 行、150+ UI 腳本需重構、端對端整合測試缺失
+
+
 
 ## DAY-332 更新（2026-05-30）：T244-T248 五個新 Lucky 魚系統 + 業界研究 ✅
 - **業界研究：** BGaming「Big Boat Big Catch」Wild Collector 機制（×2→×3→×10，2026-03）、Royal Fishing Jili「Lightning Eel 60x Chain Reaction」升級版（2026）、Domino Chain Reaction 骨牌連鎖機制（2026 新趨勢）、Royal Fishing「Immortal Boss 50-150x consecutive wins」升級版（2026）

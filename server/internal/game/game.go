@@ -245,6 +245,13 @@ type Game struct {
 	luckyImmortalBossUltra *luckyImmortalBossUltraManager
 	luckyQuadFusion        *luckyQuadFusionManager
 
+	// DAY-333 新增
+	luckyElectricalFrame *luckyElectricalFrameManager
+	luckyMagneticRespin  *luckyMagneticRespinManager
+	luckyFishermanTrail  *luckyFishermanTrailManager
+	luckyGoldenGills     *luckyGoldenGillsManager
+	luckyPentaFusion     *luckyPentaFusionManager
+
 	lastTick time.Time
 }
 
@@ -456,6 +463,13 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyDominoChain:       newLuckyDominoChainManager(),
 		luckyImmortalBossUltra: newLuckyImmortalBossUltraManager(),
 		luckyQuadFusion:        newLuckyQuadFusionManager(),
+
+		// DAY-333 新增
+		luckyElectricalFrame: newLuckyElectricalFrameManager(),
+		luckyMagneticRespin:  newLuckyMagneticRespinManager(),
+		luckyFishermanTrail:  newLuckyFishermanTrailManager(),
+		luckyGoldenGills:     newLuckyGoldenGillsManager(),
+		luckyPentaFusion:     newLuckyPentaFusionManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -1233,6 +1247,27 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 		if quadFusionMult > 1.0 {
 			effectiveMult *= quadFusionMult
 		}
+		// DAY-333 新增倍率加成
+		electricalFrameMult := g.luckyElectricalFrame.getElectricalFrameMult()
+		if electricalFrameMult > 1.0 {
+			effectiveMult *= electricalFrameMult
+		}
+		magneticRespinMult := g.luckyMagneticRespin.getMagneticRespinMult()
+		if magneticRespinMult > 1.0 {
+			effectiveMult *= magneticRespinMult
+		}
+		fishermanTrailMult := g.luckyFishermanTrail.getFishermanTrailMult()
+		if fishermanTrailMult > 1.0 {
+			effectiveMult *= fishermanTrailMult
+		}
+		goldenGillsMult := g.luckyGoldenGills.getGoldenGillsMult()
+		if goldenGillsMult > 1.0 {
+			effectiveMult *= goldenGillsMult
+		}
+		pentaFusionMult := g.luckyPentaFusion.getPentaFusionMult()
+		if pentaFusionMult > 1.0 {
+			effectiveMult *= pentaFusionMult
+		}
 		// 公會戰：擊破計數
 		g.luckyGuildBattle.onKillDuringBattle(playerID)
 		if g.luckyTornado.isTornadoActive() {
@@ -1593,6 +1628,17 @@ func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 				g.luckyImmortalBossUltra.tryLuckyImmortalBossUltraFish(g, p)
 			case isLuckyQuadFusionFish(t.Def.ID):
 				g.luckyQuadFusion.tryLuckyQuadFusionFish(g, p)
+			// DAY-333 新增
+			case isLuckyElectricalFrameFish(t.Def.ID):
+				g.luckyElectricalFrame.tryLuckyElectricalFrameFish(g, p)
+			case isLuckyMagneticRespinFish(t.Def.ID):
+				g.luckyMagneticRespin.tryLuckyMagneticRespinFish(g, p)
+			case isLuckyFishermanTrailFish(t.Def.ID):
+				g.luckyFishermanTrail.tryLuckyFishermanTrailFish(g, p)
+			case isLuckyGoldenGillsFish(t.Def.ID):
+				g.luckyGoldenGills.tryLuckyGoldenGillsFish(g, p)
+			case isLuckyPentaFusionFish(t.Def.ID):
+				g.luckyPentaFusion.tryLuckyPentaFusionFish(g, p)
 			}
 			if g.luckyChainExplosion.isChainExplosionActive(playerID) {
 				g.notifyChainExplosionKill(playerID, killerName, t.X, t.Y)

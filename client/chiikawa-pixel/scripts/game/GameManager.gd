@@ -188,6 +188,13 @@ signal lucky_domino_chain(data: Dictionary)
 signal lucky_immortal_boss_ultra(data: Dictionary)
 signal lucky_quad_fusion(data: Dictionary)
 
+# DAY-333 新增訊號
+signal lucky_electrical_frame(data: Dictionary)
+signal lucky_magnetic_respin(data: Dictionary)
+signal lucky_fisherman_trail(data: Dictionary)
+signal lucky_golden_gills(data: Dictionary)
+signal lucky_penta_fusion(data: Dictionary)
+
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
 var current_state: String = "normal_play"
@@ -537,6 +544,17 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("lucky_immortal_boss_ultra", payload)
 		"lucky_quad_fusion":
 			emit_signal("lucky_quad_fusion", payload)
+		# DAY-333 新增
+		"lucky_electrical_frame":
+			emit_signal("lucky_electrical_frame", payload)
+		"lucky_magnetic_respin":
+			emit_signal("lucky_magnetic_respin", payload)
+		"lucky_fisherman_trail":
+			emit_signal("lucky_fisherman_trail", payload)
+		"lucky_golden_gills":
+			emit_signal("lucky_golden_gills", payload)
+		"lucky_penta_fusion":
+			emit_signal("lucky_penta_fusion", payload)
 		"pong":
 			pass
 		"error":

@@ -223,6 +223,11 @@ const TARGET_SPRITES = {
 	"T246": "res://assets/sprites/targets/T246_domino_chain.png",
 	"T247": "res://assets/sprites/targets/T247_immortal_boss_ultra.png",
 	"T248": "res://assets/sprites/targets/T248_quad_fusion.png",
+	"T249": "res://assets/sprites/targets/T249_electrical_frame.png",
+	"T250": "res://assets/sprites/targets/T250_magnetic_respin.png",
+	"T251": "res://assets/sprites/targets/T251_fisherman_trail.png",
+	"T252": "res://assets/sprites/targets/T252_golden_gills.png",
+	"T253": "res://assets/sprites/targets/T253_penta_fusion.png",
 }
 
 # 目標物顏色（無 Sprite 時的備用顏色）
@@ -414,6 +419,12 @@ const TARGET_COLORS = {
 	"T246": Color(1.0, 0.55, 0.0),    # 骨牌橙（骨牌連鎖魚，Domino Chain 全服 ×55.0 里程碑）
 	"T247": Color(0.55, 0.0, 0.0),    # 深紅（不死BOSS升級魚，Immortal Boss Ultra 全服 ×55.5）
 	"T248": Color(1.0, 0.0, 1.0),     # 洋紅（四重終極融合魚，Quad Fusion 全服 ×56.0 里程碑）
+	# DAY-333 新增
+	"T249": Color(0.0, 1.0, 1.0),     # 青色（電擊框架魚，Catfish Hunters 全服 ×56.5）
+	"T250": Color(1.0, 0.84, 0.0),    # 黃金色（磁力連鎖魚，Golden Gills 全服 ×57.0）
+	"T251": Color(1.0, 0.55, 0.0),    # 橙色（漁夫路徑魚，Bigger Bites 全服 ×57.5）
+	"T252": Color(1.0, 0.84, 0.0),    # 黃金色（黃金鰓魚，Golden Gills Jackpot 全服 ×58.0）
+	"T253": Color(1.0, 0.41, 0.71),   # 熱粉紅（五重終極魚，Penta Fusion 全服 ×58.5 里程碑）
 }
 
 var _target_nodes: Dictionary = {}  # instance_id -> Node2D
