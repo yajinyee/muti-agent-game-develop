@@ -5301,3 +5301,54 @@ if xxxMult > 1.0 {
 - **T104 金草：** 金色草莖 + 光澤效果 + 閃光星點，比普通草更有「稀有感」
 - **T105 金幣魚：** 完整魚形（魚身+魚鱗+魚尾+魚鰭）+ 金幣符號，清楚傳達「高價值」
 - **教訓：** 特殊目標物的視覺設計要傳達「這個值得打」的感覺，通過顏色（金色）、形狀（特殊）、細節（眼睛/符號）來區分
+
+## 186. AUTO 射擊死鎖 bug（DAY-338）
+- **問題：** Server 在有玩家開啟 AUTO 射擊後，所有新連線的玩家都無法收到任何訊息（game_state、player_update 等）
+- **症狀：** WebSocket 連線成功，但 Server log 顯示 `[WS] Connected` 後沒有 `[Game] Player joined`
+- **根本原因：** `tick()` 持有 `g.mu.Lock()`，然後呼叫 `autoFire()`，`autoFire()` 呼叫 `handleAttack()`，`handleAttack()` 嘗試 `g.mu.Lock()`，造成死鎖
+  ```go
+  // 死鎖路徑：
+  tick() → g.mu.Lock() → tickNormal() → autoFire() → handleAttack() → g.mu.Lock() ← 死鎖！
+  ```
+- **解決：** 建立 `handleAttackLocked()` 函數（不加鎖版本），`autoFire()` 改呼叫 `handleAttackLocked()`
+  ```go
+  func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
+      g.mu.Lock()
+      defer g.mu.Unlock()
+      g.handleAttackLocked(playerID, req)  // 委派給不加鎖版本
+  }
+  func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
+      // 實際邏輯（不加鎖）
+  }
+  ```
+- **教訓：** 在持有鎖的函數內部，不能呼叫任何會嘗試獲取同一把鎖的函數。Go 的 `sync.RWMutex` 不支援重入（reentrant）。每次在 `tick()` 內部新增函數呼叫時，必須確認被呼叫的函數不會嘗試加鎖。
+
+## 187. 整合測試 recv_until 需要跳過非目標訊息（DAY-338）
+- **問題：** `recv_until(ws, "game_state")` 在等待 `game_state` 時，如果先收到 `target_spawn` 等其他訊息，就會返回 None（超時）
+- **原因：** 原始實作在收到非目標訊息時直接返回 None，而不是繼續等待
+- **解決：** 修改 `recv_until` 讓它跳過非目標訊息，繼續等待直到超時
+  ```python
+  async def recv_until(ws, msg_type: str, timeout: float = TIMEOUT_SECONDS):
+      deadline = time.time() + timeout
+      while time.time() < deadline:
+          remaining = deadline - time.time()
+          try:
+              raw = await asyncio.wait_for(ws.recv(), timeout=min(remaining, 1.0))
+              msg = json.loads(raw)
+              if msg.get("type") == msg_type:
+                  return msg
+              # 跳過其他類型的訊息，繼續等待
+          except asyncio.TimeoutError:
+              continue
+          except Exception:
+              return None
+      return None
+  ```
+- **教訓：** WebSocket 整合測試中，Server 可能在目標訊息之前發送其他訊息（如 target_spawn），測試工具必須能過濾非目標訊息。
+
+## 188. 打擊感優化：本地預測 vs Server 確認（DAY-338）
+- **問題：** 原始實作在 `_fire()` 時播放攻擊音效，在 `_on_attack_result` 時播放命中音效，但 `attack_result` 有網路延遲，導致音效和視覺不同步
+- **解決：** 分離本地預測和 Server 確認的反饋
+  - **本地預測（即時）：** 投射物到達目標時播放命中音效 + 輕微震動（不等 Server 回應）
+  - **Server 確認（延遲）：** 收到 `attack_result` 時，如果是擊破則加強震動，不重複播放音效
+- **教訓：** 捕魚機的打擊感核心是「即時反饋」，不能等 Server 回應才播放音效。本地預測 + Server 確認的分離架構是正確的做法。

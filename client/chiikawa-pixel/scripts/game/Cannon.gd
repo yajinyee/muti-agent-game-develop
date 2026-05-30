@@ -109,15 +109,21 @@ func _handle_click(click_pos: Vector2) -> void:
 func _fire(target_id: String, target_pos: Vector2) -> void:
 	_last_fire_pos = target_pos  # DAY-311 記錄射擊位置
 	NetworkManager.send_attack(target_id, target_pos.x, target_pos.y)
-	_spawn_projectile(target_pos)
 	var char_id = GameManager.get_character_id()
+	# DAY-338 打擊感優化：攻擊音效在射擊時播放（即時反饋）
 	AudioManager.play_attack_by_character(char_id)
 	# 觸發角色攻擊動畫
 	var animator = get_node_or_null("CharacterAnimator")
 	if is_instance_valid(animator):
 		animator.play_attack()
+	# DAY-338：投射物到達時觸發命中特效（本地預測，不等 Server 回應）
+	_spawn_projectile_with_impact(target_pos, target_id, char_id)
 
 func _spawn_projectile(target_pos: Vector2) -> void:
+	_spawn_projectile_with_impact(target_pos, "", GameManager.get_character_id())
+
+## DAY-338 打擊感優化：投射物到達時觸發命中特效（本地預測）
+func _spawn_projectile_with_impact(target_pos: Vector2, target_id: String, char_id: String) -> void:
 	var parent = get_parent()
 	if not is_instance_valid(parent):
 		return
@@ -174,6 +180,11 @@ func _spawn_projectile(target_pos: Vector2) -> void:
 	tween.tween_callback(func():
 		if is_instance_valid(proj_root):
 			HitEffect.spawn_hit(target_pos, char_id)
+			# DAY-338 打擊感優化：投射物到達時播放命中音效 + Hit Stop（本地預測）
+			if target_id != "":
+				AudioManager.play_sfx(AudioManager.SFX.HIT)
+				ScreenShake.add_trauma(0.2)
+				HitEffect.hit_stop(0.05)
 			proj_root.queue_free()
 	)
 
@@ -207,10 +218,14 @@ func _spawn_trail(parent: Node, from: Vector2, to: Vector2, duration: float, col
 func _on_attack_result(result: Dictionary) -> void:
 	if result.get("is_hit", false):
 		_show_hit_flash()
-		AudioManager.play_sfx(AudioManager.SFX.HIT)
-		# DAY-311 手感強化：Hit Stop 加長 + 震動加強
-		ScreenShake.add_trauma(0.25)
-		HitEffect.hit_stop(0.06)
+		# DAY-338 打擊感優化：Server 確認命中時，加強震動（本地預測已播放基礎音效）
+		# 只在 is_kill 時加強，避免重複音效
+		if result.get("is_kill", false):
+			ScreenShake.add_trauma(0.35)
+			HitEffect.hit_stop(0.07)
+		else:
+			# 命中但未擊破：輕微額外震動（疊加在本地預測的震動上）
+			ScreenShake.add_trauma(0.1)
 		# 命中時投射物縮放彈跳（視覺衝擊）
 		_spawn_impact_burst(result.get("pos_x", _last_fire_pos.x), result.get("pos_y", _last_fire_pos.y))
 

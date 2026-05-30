@@ -65,7 +65,7 @@ def skip(name: str, reason: str = ""):
 
 # ── WebSocket 輔助 ────────────────────────────────────────────
 async def recv_until(ws, msg_type: str, timeout: float = TIMEOUT_SECONDS):
-    """等待特定類型的訊息，超時返回 None"""
+    """等待特定類型的訊息，超時返回 None（會跳過其他類型的訊息）"""
     deadline = time.time() + timeout
     while time.time() < deadline:
         remaining = deadline - time.time()
@@ -74,6 +74,7 @@ async def recv_until(ws, msg_type: str, timeout: float = TIMEOUT_SECONDS):
             msg = json.loads(raw)
             if msg.get("type") == msg_type:
                 return msg
+            # 跳過其他類型的訊息，繼續等待
         except asyncio.TimeoutError:
             continue
         except Exception as e:

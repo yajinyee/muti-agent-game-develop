@@ -705,7 +705,12 @@ func (g *Game) targetSpawnPayload(t *Target) protocol.TargetSpawnPayload {
 func (g *Game) handleAttack(playerID string, req protocol.AttackRequest) {
 	g.mu.Lock()
 	defer g.mu.Unlock()
+	g.handleAttackLocked(playerID, req)
+}
 
+// handleAttackLocked — 攻擊處理（不加鎖版本，供 tick 內部呼叫）
+// DAY-338 修復死鎖：autoFire 在 tick 的 g.mu.Lock() 保護下執行，不能再次加鎖
+func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 	p, ok := g.players[playerID]
 	if !ok {
 		return
@@ -2007,8 +2012,8 @@ func (g *Game) autoFire(p *Player) {
 	if best == nil {
 		return
 	}
-	// 模擬攻擊
-	g.handleAttack(p.ID, protocol.AttackRequest{
+	// DAY-338 修復死鎖：autoFire 在 tick 的鎖保護下執行，直接呼叫 handleAttackLocked
+	g.handleAttackLocked(p.ID, protocol.AttackRequest{
 		TargetID: best.InstanceID,
 		ClickX:   best.X,
 		ClickY:   best.Y,
