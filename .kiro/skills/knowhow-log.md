@@ -5352,3 +5352,22 @@ if xxxMult > 1.0 {
   - **本地預測（即時）：** 投射物到達目標時播放命中音效 + 輕微震動（不等 Server 回應）
   - **Server 確認（延遲）：** 收到 `attack_result` 時，如果是擊破則加強震動，不重複播放音效
 - **教訓：** 捕魚機的打擊感核心是「即時反饋」，不能等 Server 回應才播放音效。本地預測 + Server 確認的分離架構是正確的做法。
+
+## 189. Go RWMutex 不支援重入（DAY-338 深層死鎖）
+- **問題：** 修復 `autoFire` 死鎖後，仍然發現 AUTO 射擊後新玩家無法連線
+- **根本原因：** `handleAttackLocked` 在 `tick` 的 `g.mu.Lock()` 保護下執行，但它呼叫了：
+  1. `g.sendPlayerUpdate(playerID)` → 嘗試 `g.mu.RLock()` → 死鎖
+  2. `g.triggerBonus(playerID)` → 嘗試 `g.mu.Lock()` → 死鎖
+- **Go 的 RWMutex 特性：** Go 的 `sync.RWMutex` 不支援重入（reentrant）。如果一個 goroutine 已經持有 `Lock()`，再次嘗試 `RLock()` 或 `Lock()` 都會死鎖
+- **解決：** 建立不加鎖版本的函數：
+  - `sendPlayerUpdateLocked()` — 不加鎖版本，供 tick 內部呼叫
+  - `sendPlayerUpdateWithPlayer()` — 實際發送邏輯（不加鎖）
+  - `triggerBonusLocked()` — 不加鎖版本，供 tick 內部呼叫
+- **教訓：** 在 Go 中，任何在持有鎖的函數內部呼叫的函數，都不能嘗試獲取同一把鎖（包括 RLock）。設計原則：
+  1. 持有鎖的函數只能呼叫「不加鎖版本」的函數
+  2. 每個需要在鎖保護下執行的函數，都應該有一個 `Locked` 後綴的版本
+  3. 公開 API 加鎖，內部實作不加鎖
+- **檢查清單：** 每次在 `tick()` 內部新增函數呼叫時，必須確認：
+  - 被呼叫的函數不嘗試 `g.mu.Lock()`
+  - 被呼叫的函數不嘗試 `g.mu.RLock()`
+  - 被呼叫的函數不呼叫任何嘗試加鎖的函數

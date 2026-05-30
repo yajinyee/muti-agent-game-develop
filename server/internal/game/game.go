@@ -1749,7 +1749,8 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 
 		// 勞動值滿 → 觸發 Bonus
 		if laborFull && g.state == StateNormalPlay {
-			g.triggerBonus(playerID)
+			// DAY-338 修復死鎖：在 tick 的鎖保護下，使用不加鎖版本
+			g.triggerBonusLocked(playerID)
 		}
 	} else {
 		// 未擊破，更新 HP（視覺反饋）
@@ -1788,7 +1789,8 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 	}
 
 	g.hub.Send(playerID, protocol.MsgAttackResult, result)
-	g.sendPlayerUpdate(playerID)
+	// DAY-338 修復死鎖：在 tick 的鎖保護下，使用不加鎖版本
+	g.sendPlayerUpdateLocked(playerID)
 }
 
 // ── BOSS 系統 ─────────────────────────────────────────────────
@@ -1900,6 +1902,32 @@ func (g *Game) triggerBonus(playerID string) {
 	})
 	g.sendPlayerUpdate(playerID)
 	log.Printf("[Game] Bonus triggered by %s", playerID)
+}
+
+// triggerBonusLocked — 不加鎖版本，供 tick 內部呼叫（已持有 g.mu.Lock()）
+// DAY-338 修復死鎖：handleAttackLocked 在 tick 的鎖保護下，不能再次加鎖
+func (g *Game) triggerBonusLocked(playerID string) {
+	if g.state != StateNormalPlay {
+		return
+	}
+	p, ok := g.players[playerID]
+	if !ok {
+		return
+	}
+	p.EntryBetCost = p.GetBetDef().BetCost
+	p.ResetLabor()
+	g.bonusPlayer = playerID
+	g.bonusTimer = 15.0
+	g.bonusScore = make(map[string]int)
+	g.bonusWeedHP = make(map[string]int)
+	g.setState(StateBonusGame)
+
+	g.hub.Broadcast(protocol.MsgBonusEvent, protocol.BonusEventPayload{
+		Event:    "start",
+		TimeLeft: 15.0,
+	})
+	g.sendPlayerUpdateLocked(playerID)
+	log.Printf("[Game] Bonus triggered by %s (locked)", playerID)
 }
 
 func (g *Game) handleBonusClick(playerID string, req protocol.BonusClickRequest) {
@@ -2079,6 +2107,21 @@ func (g *Game) sendPlayerUpdate(playerID string) {
 	if !ok {
 		return
 	}
+	g.sendPlayerUpdateWithPlayer(playerID, p)
+}
+
+// sendPlayerUpdateLocked — 不加鎖版本，供 tick 內部呼叫（已持有 g.mu.Lock()）
+// DAY-338 修復死鎖：handleAttackLocked 在 tick 的鎖保護下，不能再次加鎖
+func (g *Game) sendPlayerUpdateLocked(playerID string) {
+	p, ok := g.players[playerID]
+	if !ok {
+		return
+	}
+	g.sendPlayerUpdateWithPlayer(playerID, p)
+}
+
+// sendPlayerUpdateWithPlayer — 實際發送邏輯（不加鎖）
+func (g *Game) sendPlayerUpdateWithPlayer(playerID string, p *Player) {
 	bet := p.GetBetDef()
 	g.hub.Send(playerID, protocol.MsgPlayerUpdate, protocol.PlayerUpdatePayload{
 		ID:              p.ID,
