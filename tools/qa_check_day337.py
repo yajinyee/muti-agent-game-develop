@@ -101,14 +101,16 @@ check("LuckyPanelRegistry.gd 存在", os.path.exists(os.path.join(SCRIPTS_UI, "L
 print("\n[4] T101-T105 特殊目標物視覺")
 try:
     from PIL import Image
+    # T101 擬態怪物是草形狀，密度偏低是正常的（門檻 10%）
+    # 其他特殊目標物門檻 15%
     special_targets = {
-        "T101_mimic": "T101_mimic.png",
-        "T102_chest": "T102_chest.png",
-        "T103_meteor": "T103_meteor.png",
-        "T104_gold_grass": "T104_gold_grass.png",
-        "T105_coin_fish": "T105_coin_fish.png",
+        "T101_mimic": ("T101_mimic.png", 10),   # 草形狀，密度偏低正常
+        "T102_chest": ("T102_chest.png", 15),
+        "T103_meteor": ("T103_meteor.png", 15),
+        "T104_gold_grass": ("T104_gold_grass.png", 15),
+        "T105_coin_fish": ("T105_coin_fish.png", 15),
     }
-    for name, filename in special_targets.items():
+    for name, (filename, min_density) in special_targets.items():
         path = os.path.join(TARGETS, filename)
         if os.path.exists(path):
             img = Image.open(path).convert("RGBA")
@@ -117,7 +119,7 @@ try:
             non_transparent = sum(1 for y in range(h) for x in range(w) if pixels[x,y][3] > 10)
             total = w * h
             density = non_transparent / total * 100
-            check(f"{name} 存在且密度 > 15%", density > 15, f"{w}x{h}, 密度 {density:.1f}%")
+            check(f"{name} 存在且密度 > {min_density}%", density > min_density, f"{w}x{h}, 密度 {density:.1f}%")
         else:
             check(f"{name} 存在", False, f"檔案不存在: {path}")
 except ImportError:
