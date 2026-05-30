@@ -45,9 +45,9 @@
 - [x] qa_check_day339.py（44 項驗證，44/44 全部通過）
 - [x] go build + vet 最終確認（零錯誤零警告）
 
-### ⬜ DAY-339 GitHub 同步
+### ✅ DAY-339 GitHub 同步
 
-- [ ] git add + commit + push
+- [x] git add + commit + push
 
 ---
 
