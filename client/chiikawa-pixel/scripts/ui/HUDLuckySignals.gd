@@ -46,12 +46,92 @@ func connect_all_lucky_signals(hud_node: Node) -> void:
 	# DAY-303
 	GameManager.lucky_crash_fish.connect(_on_lucky_crash_fish)
 	# DAY-304（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_electric_eel.connect(_on_lucky_fallback.bind("electric_eel", "⚡ 電鰻觸發！"))
-	GameManager.lucky_angler_fish.connect(_on_lucky_fallback.bind("angler_fish", "🐟 安康魚觸發！"))
-	GameManager.lucky_black_hole.connect(_on_lucky_fallback.bind("black_hole", "🌑 黑洞觸發！"))
-	GameManager.lucky_bounty_hunter.connect(_on_lucky_fallback.bind("bounty_hunter", "🎯 賞金獵人觸發！"))
-	GameManager.lucky_tsunami.connect(_on_lucky_fallback.bind("tsunami", "🌊 海嘯觸發！"))
-	print("[HUDLuckySignals] DAY-292~304 訊號連接完成")
+	GameManager.lucky_electric_eel.connect(_on_lucky_electric_eel)
+	GameManager.lucky_angler_fish.connect(_on_lucky_angler_fish)
+	GameManager.lucky_black_hole.connect(_on_lucky_black_hole)
+	GameManager.lucky_bounty_hunter.connect(_on_lucky_bounty_hunter)
+	GameManager.lucky_tsunami.connect(_on_lucky_tsunami)
+	# DAY-305
+	GameManager.lucky_dragon_wrath_v2.connect(_on_lucky_dragon_wrath_v2)
+	GameManager.lucky_humpback_whale.connect(_on_lucky_humpback_whale)
+	GameManager.lucky_legend_dragon.connect(_on_lucky_legend_dragon)
+	GameManager.lucky_guild_war.connect(_on_lucky_guild_war)
+	GameManager.lucky_quality_fish.connect(_on_lucky_quality_fish)
+	# DAY-306
+	GameManager.lucky_tornado.connect(_on_lucky_tornado)
+	GameManager.lucky_earthquake.connect(_on_lucky_earthquake)
+	GameManager.lucky_volcano.connect(_on_lucky_volcano)
+	GameManager.lucky_cosmic_ray.connect(_on_lucky_cosmic_ray)
+	GameManager.lucky_divine_dragon.connect(_on_lucky_divine_dragon)
+	# DAY-307
+	GameManager.lucky_quantum.connect(_on_lucky_quantum)
+	GameManager.lucky_supernova.connect(_on_lucky_supernova)
+	GameManager.lucky_infinite.connect(_on_lucky_infinite)
+	GameManager.lucky_genesis.connect(_on_lucky_genesis)
+	GameManager.lucky_rebirth.connect(_on_lucky_rebirth)
+	# DAY-308
+	GameManager.lucky_awakened_croc.connect(_on_lucky_awakened_croc)
+	GameManager.lucky_vampire_v2.connect(_on_lucky_vampire_v2)
+	GameManager.lucky_super_awaken.connect(_on_lucky_super_awaken)
+	GameManager.lucky_giant_prize.connect(_on_lucky_giant_prize)
+	GameManager.lucky_immortal_boss.connect(_on_lucky_immortal_boss)
+	# DAY-309
+	GameManager.lucky_ice_phoenix.connect(_on_lucky_ice_phoenix)
+	GameManager.lucky_dragon_fury.connect(_on_lucky_dragon_fury)
+	GameManager.lucky_mult_cascade.connect(_on_lucky_mult_cascade)
+	GameManager.lucky_awaken_boss_v2.connect(_on_lucky_awaken_boss_v2)
+	GameManager.lucky_ultimate_judgment.connect(_on_lucky_ultimate_judgment)
+	# DAY-310
+	GameManager.lucky_combo_burst.connect(_on_lucky_combo_burst)
+	GameManager.lucky_time_bomb.connect(_on_lucky_time_bomb)
+	GameManager.lucky_elemental_fusion.connect(_on_lucky_elemental_fusion)
+	GameManager.lucky_treasure_hunter.connect(_on_lucky_treasure_hunter)
+	GameManager.lucky_myth_awaken.connect(_on_lucky_myth_awaken)
+	# DAY-312
+	GameManager.lucky_star_portal.connect(_on_lucky_star_portal)
+	GameManager.lucky_dragon_soul.connect(_on_lucky_dragon_soul)
+	GameManager.lucky_spacetime_rift.connect(_on_lucky_spacetime_rift)
+	GameManager.lucky_holy_judgment.connect(_on_lucky_holy_judgment)
+	GameManager.lucky_big_bang.connect(_on_lucky_big_bang)
+	# DAY-313
+	GameManager.lucky_jackpot_pool.connect(_on_lucky_jackpot_pool)
+	# DAY-314
+	GameManager.lucky_multiverse.connect(_on_lucky_multiverse)
+	GameManager.lucky_time_loop.connect(_on_lucky_time_loop)
+	GameManager.lucky_fate_wheel.connect(_on_lucky_fate_wheel)
+	GameManager.lucky_divine_realm.connect(_on_lucky_divine_realm)
+	GameManager.lucky_final_power.connect(_on_lucky_final_power)
+	# DAY-315
+	GameManager.lucky_mutation.connect(_on_lucky_mutation)
+	GameManager.lucky_arctic_storm.connect(_on_lucky_arctic_storm)
+	GameManager.lucky_fisher_wild.connect(_on_lucky_fisher_wild)
+	GameManager.lucky_risk_level.connect(_on_lucky_risk_level)
+	GameManager.lucky_cosmic_pulse.connect(_on_lucky_cosmic_pulse)
+	# DAY-316
+	GameManager.lucky_mirror_universe.connect(_on_lucky_mirror_universe)
+	GameManager.lucky_gravity_field.connect(_on_lucky_gravity_field)
+	GameManager.lucky_time_acceleration.connect(_on_lucky_time_acceleration)
+	GameManager.lucky_nebula_vortex.connect(_on_lucky_nebula_vortex)
+	GameManager.lucky_cosmic_judgment.connect(_on_lucky_cosmic_judgment)
+	# DAY-317
+	GameManager.lucky_pvp_battle.connect(_on_lucky_pvp_battle)
+	GameManager.lucky_skill_chain.connect(_on_lucky_skill_chain)
+	GameManager.lucky_global_explosion.connect(_on_lucky_global_explosion)
+	GameManager.lucky_spacetime_fold.connect(_on_lucky_spacetime_fold)
+	GameManager.lucky_cosmic_end.connect(_on_lucky_cosmic_end)
+	# DAY-318
+	GameManager.lucky_dragon_king.connect(_on_lucky_fallback.bind("dragon_king", "🐉 龍王觸發！"))
+	GameManager.lucky_eternal_cycle.connect(_on_lucky_fallback.bind("eternal_cycle", "♾️ 永恆循環觸發！"))
+	GameManager.lucky_chaos_explosion.connect(_on_lucky_fallback.bind("chaos_explosion", "💥 混沌爆炸觸發！"))
+	GameManager.lucky_divine_revival.connect(_on_lucky_fallback.bind("divine_revival", "✨ 神聖復活觸發！"))
+	GameManager.lucky_genesis_epoch.connect(_on_lucky_fallback.bind("genesis_epoch", "🌟 創世紀元觸發！"))
+	# DAY-319
+	GameManager.lucky_energy_storm.connect(_on_lucky_fallback.bind("energy_storm", "⚡ 能量風暴觸發！"))
+	GameManager.lucky_crystal_resonance.connect(_on_lucky_fallback.bind("crystal_resonance", "💎 水晶共鳴觸發！"))
+	GameManager.lucky_fate_judgment.connect(_on_lucky_fallback.bind("fate_judgment", "⚖️ 命運審判觸發！"))
+	GameManager.lucky_time_reversal.connect(_on_lucky_fallback.bind("time_reversal", "⏰ 時間逆轉觸發！"))
+	GameManager.lucky_cosmic_singularity.connect(_on_lucky_fallback.bind("cosmic_singularity", "🌌 宇宙奇點觸發！"))
+	print("[HUDLuckySignals] DAY-292~319 全部 148 個訊號連接完成")
 
 ## 委派給 LuckyEventSystem 的輔助函數
 func _show_banner(text: String, color: Color, duration: float = 2.5) -> void:
@@ -651,3 +731,1042 @@ func _on_lucky_crash_fish(data: Dictionary) -> void:
 			_show_banner("💥 崩潰！最終 ×%.1f，獎勵 %d！" % [mult, reward], Color(1.0, 0.4, 0.1))
 			if reward > 0:
 				_show_reward(reward, mult)
+
+# ── DAY-304 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_electric_eel(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"eel_start":
+			_show_event("electric_eel", "⚡ %s 觸發電鰻放電！持續 12 秒連鎖電擊！" % name)
+			ScreenShake.add_trauma(0.3)
+		"eel_super":
+			var shock_count = data.get("shock_count", 0)
+			_show_banner("⚡ 超級放電！%s 電擊 %d 次！全服 ×2.5 加成 7 秒！" % [name, shock_count], Color(1.0, 0.95, 0.0), 3.5)
+			ScreenShake.add_trauma(0.7)
+
+func _on_lucky_angler_fish(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"lure_start":
+			_show_event("angler_fish", "🎣 %s 觸發深海誘餌！傷害 ×1.8！5 秒後電擊爆炸！" % name)
+			ScreenShake.add_trauma(0.3)
+		"explosion":
+			var hit_count = data.get("hit_count", 0)
+			_show_banner("⚡ 電擊爆炸！命中 %d 條魚！HP -30%%！" % hit_count, Color(0.0, 0.9, 1.0), 2.5)
+			ScreenShake.add_trauma(0.6)
+		"perfect":
+			var hit_count = data.get("hit_count", 0)
+			_show_banner("🎣✨ 完美誘捕！%s 命中 %d 條！全服 ×2.8 加成 7 秒！" % [name, hit_count], Color(0.0, 1.0, 0.5), 3.5)
+			ScreenShake.add_trauma(0.7)
+
+func _on_lucky_black_hole(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"black_hole_start":
+			_show_event("black_hole", "🌑 %s 觸發黑洞！目標速度 ×0.2！8 秒後坍縮！" % name)
+			ScreenShake.add_trauma(0.4)
+		"collapse":
+			var hit_count = data.get("hit_count", 0)
+			_show_banner("💥 黑洞坍縮！命中 %d 條魚！HP -50%%！" % hit_count, Color(0.6, 0.0, 1.0), 2.5)
+			ScreenShake.add_trauma(0.8)
+		"singularity":
+			var hit_count = data.get("hit_count", 0)
+			_show_banner("🌑✨ 奇點爆發！%s 吸入 %d 條！全服 ×3.0 加成 8 秒！" % [name, hit_count], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_bounty_hunter(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"bounty_start":
+			var total = data.get("total_bounty", 3)
+			_show_event("bounty_hunter", "🎯 %s 觸發賞金任務！標記 %d 個賞金目標！" % [name, total])
+			ScreenShake.add_trauma(0.3)
+		"bounty_kill":
+			var kill_count = data.get("kill_count", 0)
+			var total = data.get("total_bounty", 3)
+			_update_indicator("🎯 賞金任務", "%d/%d 已獵殺" % [kill_count, total], float(kill_count) / float(total), Color(1.0, 0.5, 0.0))
+		"bounty_perfect":
+			_hide_indicator()
+			var kill_count = data.get("kill_count", 0)
+			_show_banner("🎯✨ 完美賞金！%s 獵殺全部 %d 個！全服 ×3.5 加成 8 秒！" % [name, kill_count], Color(1.0, 0.3, 0.1), 3.5)
+			ScreenShake.add_trauma(0.8)
+
+func _on_lucky_tsunami(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"tsunami_warning":
+			_show_event("tsunami", "🌊 %s 觸發海嘯！三波衝擊即將來臨！" % name)
+			ScreenShake.add_trauma(0.4)
+		"wave_hit":
+			var wave_num = data.get("wave_num", 1)
+			var hit_count = data.get("hit_count", 0)
+			var dmg_pct = data.get("damage_pct", 0.2)
+			_show_banner("🌊 第 %d 波！命中 %d 條！HP -%d%%！" % [wave_num, hit_count, int(dmg_pct * 100)], Color(0.0, 0.5 + wave_num * 0.15, 1.0), 1.5)
+			ScreenShake.add_trauma(0.3 + wave_num * 0.1)
+		"tsunami_perfect":
+			var total = data.get("total_hit_count", 0)
+			_show_banner("🌊✨ 完美海嘯！%s 三波命中 %d 條！全服 ×3.2 加成 8 秒！" % [name, total], Color(0.0, 0.85, 1.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+
+# ── DAY-305 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_dragon_wrath_v2(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"wrath_start":
+			_show_event("dragon_wrath_v2", "🐉 %s 觸發龍怒蓄積！30 秒內射擊蓄積怒氣！" % name)
+			ScreenShake.add_trauma(0.4)
+		"wrath_explode":
+			var wrath = data.get("wrath_value", 0)
+			var meteors = data.get("meteor_count", 0)
+			_show_banner("🐉 龍怒爆發！%s 怒氣 %d！%d 顆隕石！" % [name, wrath, meteors], Color(1.0, 0.27, 0.0), 2.5)
+			ScreenShake.add_trauma(0.7)
+		"wrath_perfect":
+			var wrath = data.get("wrath_value", 0)
+			_show_banner("🐉✨ 完美龍怒！%s 怒氣 %d！全服 ×3.5 加成 8 秒！" % [name, wrath], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.9)
+
+func _on_lucky_humpback_whale(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"song_start":
+			_show_event("humpback_whale", "🐋 %s 觸發鯨歌共鳴！四波聲波即將衝擊！" % name)
+			ScreenShake.add_trauma(0.3)
+		"song_wave":
+			var wave_num = data.get("wave_num", 1)
+			var hit_count = data.get("hit_count", 0)
+			_show_banner("🐋 第 %d 波！命中 %d 條！" % [wave_num, hit_count], Color(0.0, 0.7, 1.0), 1.5)
+			ScreenShake.add_trauma(0.3)
+		"song_perfect":
+			var total = data.get("total_hit_count", 0)
+			_show_banner("🐋✨ 完美鯨歌！%s 四波命中 %d 條！全服 ×3.0 加成 8 秒！" % [name, total], Color(0.0, 0.9, 1.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+
+func _on_lucky_legend_dragon(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"dragon_appear":
+			_show_event("legend_dragon", "🐲 %s 觸發傳說龍降臨！15 秒內 4 次噴火！" % name)
+			ScreenShake.add_trauma(0.5)
+		"dragon_breath":
+			var breath_num = data.get("breath_num", 1)
+			var hit_count = data.get("hit_count", 0)
+			_show_banner("🔥 第 %d 次噴火！命中 %d 條！HP -35%%！" % [breath_num, hit_count], Color(1.0, 0.2, 0.0), 1.5)
+			ScreenShake.add_trauma(0.4)
+		"dragon_rage":
+			_show_banner("🐲✨ 傳說龍怒！%s 完美噴火！全服 ×4.0 加成 10 秒！" % name, Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_guild_war(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"war_start":
+			var target = data.get("target_points", 15)
+			_show_event("guild_war", "⚔️ %s 觸發公會戰！30 秒內達成 %d 積分！" % [name, target])
+			ScreenShake.add_trauma(0.3)
+		"war_progress":
+			var current = data.get("current_points", 0)
+			var target = data.get("target_points", 15)
+			_update_indicator("⚔️ 公會戰", "%d/%d 積分" % [current, target], float(current) / float(target), Color(1.0, 0.85, 0.0))
+		"war_victory":
+			_hide_indicator()
+			var points = data.get("current_points", 0)
+			_show_banner("⚔️✨ 公會勝利！達成 %d 積分！全服 ×4.5 加成 10 秒！" % points, Color(1.0, 0.5, 0.0), 3.5)
+			ScreenShake.add_trauma(0.9)
+		"war_timeout":
+			_hide_indicator()
+
+func _on_lucky_quality_fish(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"quality_result":
+			var tier_name = data.get("tier_name", "Common")
+			var tier_mult = data.get("tier_mult", 2.0)
+			var reward = data.get("reward", 0)
+			var tier_colors = {"Common": Color(0.7,0.7,0.7), "Rare": Color(0.0,0.5,1.0), "Epic": Color(0.6,0.0,1.0), "Legendary": Color(1.0,0.85,0.0)}
+			var color = tier_colors.get(tier_name, Color(0.7,0.7,0.7))
+			_show_banner("✨ %s 品質鑑定！%s！×%.0f！獎勵 %d！" % [name, tier_name, tier_mult, reward], color, 2.5)
+			if tier_name == "Legendary":
+				ScreenShake.add_trauma(0.8)
+		"legendary_boost":
+			_show_banner("✨ 傳說品質！%s 抽到 LEGENDARY！全服 ×5.0 加成 12 秒！" % name, Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+
+# ── DAY-306 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_tornado(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"tornado_start":
+			_show_banner("🌪️ %s 觸發龍捲風橫掃！10 秒全場 HP -40%%！" % name, Color(0.0, 0.9, 0.7), 2.5)
+			ScreenShake.add_trauma(0.7)
+		"tornado_perfect":
+			var mult = data.get("boost_mult", 3.8)
+			_show_banner("🌪️ 完美龍捲風！%s 全服 ×%.1f 加成 9 秒！" % [name, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.9)
+
+func _on_lucky_earthquake(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"quake_warning":
+			_show_banner("🌍 %s 觸發地震波！三波衝擊！" % name, Color(0.8, 0.4, 0.1), 2.5)
+			ScreenShake.add_trauma(0.8)
+		"quake_wave":
+			var wave = data.get("wave_num", 1)
+			var pct = int(data.get("damage_pct", 0.25) * 100)
+			_show_banner("🌍 第 %d 波地震！HP -%d%%！" % [wave, pct], Color(0.8, 0.4, 0.1), 1.5)
+		"quake_perfect":
+			var mult = data.get("boost_mult", 4.0)
+			_show_banner("🌍 完美地震！%s 全服 ×%.1f 加成 9 秒！" % [name, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_volcano(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"volcano_erupt":
+			_show_banner("🌋 %s 觸發火山爆發！10 顆熔岩彈！" % name, Color(1.0, 0.27, 0.0), 2.5)
+			ScreenShake.add_trauma(0.8)
+		"volcano_perfect":
+			var mult = data.get("boost_mult", 4.2)
+			_show_banner("🌋 完美火山！%s 全服 ×%.1f 加成 10 秒！" % [name, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_cosmic_ray(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"cosmic_start":
+			_show_banner("✨ %s 觸發星際射線！8 方向光束！" % name, Color(0.6, 0.2, 1.0), 2.5)
+			ScreenShake.add_trauma(0.7)
+		"cosmic_perfect":
+			var mult = data.get("boost_mult", 4.5)
+			_show_banner("✨ 完美星際！%s 全服 ×%.1f 加成 10 秒！" % [name, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.9)
+
+func _on_lucky_divine_dragon(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"dragon_descend":
+			_show_banner("🐉 %s 召喚神龍降臨！20 秒 5 次爪擊！" % name, Color(1.0, 0.85, 0.0), 3.0)
+			ScreenShake.add_trauma(0.9)
+		"dragon_claw":
+			var claw = data.get("claw_num", 1)
+			var hit = data.get("hit_count", 0)
+			_show_banner("🐉 神龍第 %d 爪！命中 %d 個目標！" % [claw, hit], Color(1.0, 0.85, 0.0), 1.5)
+			ScreenShake.add_trauma(0.6)
+		"dragon_perfect":
+			var mult = data.get("boost_mult", 5.0)
+			_show_banner("🐉 神龍完美！%s 全服 ×%.1f 加成 12 秒！" % [name, mult], Color(1.0, 0.85, 0.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+
+# ── DAY-307 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_quantum(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"quantum_observe":
+			_show_banner("⚛️ %s 觸發量子觀測！50%% 機率 HP -60%%！" % name, Color(0.0, 0.9, 1.0), 2.5)
+			ScreenShake.add_trauma(0.5)
+		"quantum_collapse":
+			var observed = data.get("observed_count", 0)
+			var mult = data.get("boost_mult", 5.5)
+			_show_banner("⚛️✨ 量子坍縮！%s 觀測 %d 個！全服 ×%.1f 加成 12 秒！" % [name, observed, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_supernova(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"supernova_explode":
+			_show_banner("💥 %s 觸發超新星爆炸！全場 HP -70%%！" % name, Color(1.0, 0.4, 0.1), 2.5)
+			ScreenShake.add_trauma(1.0)
+		"supernova_perfect":
+			var hits = data.get("hit_count", 0)
+			var mult = data.get("boost_mult", 5.5)
+			_show_banner("💥✨ 超新星完美！%s 命中 %d 個！全服 ×%.1f 加成 12 秒！" % [name, hits, mult], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_infinite(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"infinite_start":
+			_show_banner("♾️ %s 觸發無限模式！20 秒無限累積倍率！" % name, Color(0.6, 0.2, 1.0), 2.5)
+			ScreenShake.add_trauma(0.4)
+		"infinite_kill":
+			var mult = data.get("accum_mult", 1.0)
+			var kills = data.get("kill_count", 0)
+			_update_indicator("♾️ 無限模式", "×%.1f | %d 次" % [mult, kills], -1.0, Color(0.6, 0.2, 1.0))
+		"infinite_perfect":
+			_hide_indicator()
+			var mult = data.get("accum_mult", 1.0)
+			var boost = data.get("boost_mult", 6.0)
+			_show_banner("♾️✨ 無限完美！%s 累積 ×%.1f！全服 ×%.0f 加成 15 秒！" % [name, mult, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"infinite_end":
+			_hide_indicator()
+
+func _on_lucky_genesis(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"genesis_descend":
+			_show_banner("🌟 %s 召喚創世神降臨！" % name, Color(1.0, 0.85, 0.0), 2.5)
+			ScreenShake.add_trauma(0.8)
+		"genesis_blessing":
+			var kills = data.get("kill_count", 0)
+			var boost = data.get("boost_mult", 6.0)
+			_show_banner("🌟✨ 創世祝福！%s 審判 %d 個！全服 ×%.0f 加成 15 秒！" % [name, kills, boost], Color(1.0, 0.85, 0.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_rebirth(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("player_name", "玩家")
+	match event:
+		"rebirth_start":
+			_show_banner("🔥 %s 觸發重生之力！15 秒死亡目標復活！擊破獎勵 ×3.0！" % name, Color(1.0, 0.4, 0.1), 2.5)
+			ScreenShake.add_trauma(0.5)
+		"rebirth_kill":
+			var kills = data.get("rebirth_kills", 0)
+			_update_indicator("🔥 重生之力", "重生擊破 %d 個" % kills, -1.0, Color(1.0, 0.4, 0.1))
+		"rebirth_perfect":
+			_hide_indicator()
+			var kills = data.get("rebirth_kills", 0)
+			var boost = data.get("boost_mult", 6.5)
+			_show_banner("🔥✨ 完美重生！%s 重生擊破 %d 個！全服 ×%.1f 加成 15 秒！" % [name, kills, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+		"rebirth_end":
+			_hide_indicator()
+
+# ── DAY-308 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_awakened_croc(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"croc_awaken":
+			_show_event("awakened_croc", "🐊 %s 觸發覺醒鱷魚！鱷魚開始獵魚 20 秒！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"croc_hunt":
+			var cnt = data.get("hunt_count", 0)
+			var reward = data.get("reward", 0)
+			_show_banner("🐊 獵魚 %d 條！+%d！" % [cnt, reward], Color(0.0, 0.8, 0.3), 0.8)
+		"croc_perfect":
+			var cnt = data.get("hunt_count", 0)
+			var boost = data.get("boost_mult", 3.5)
+			_show_banner("🐊✨ 完美覺醒！%s 獵魚 %d 條！全服 ×%.1f 加成 9 秒！" % [name, cnt, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.6)
+
+func _on_lucky_vampire_v2(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"vampire_v2_start":
+			_show_event("vampire_v2", "🧛 %s 觸發吸血鬼升級！25 秒吸血模式！最高 ×10.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"absorb_v2":
+			var cnt = data.get("absorb_count", 0)
+			var mult = data.get("current_mult", 1.0)
+			_update_indicator("🧛 吸血鬼升級", "吸收 %d 次 | ×%.1f" % [cnt, mult], float(cnt) / 10.0, Color(0.6, 0.0, 0.8))
+		"vampire_v2_perfect":
+			_hide_indicator()
+			var cnt = data.get("absorb_count", 0)
+			var boost = data.get("boost_mult", 4.0)
+			_show_banner("🧛✨ 完美吸血！%s 吸收 %d 次！全服 ×%.1f 加成 10 秒！" % [name, cnt, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.6)
+
+func _on_lucky_super_awaken(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"super_awaken_start":
+			_show_event("super_awaken", "⚡ %s 觸發超級覺醒！全場 HP 歸零！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.7)
+		"super_awaken_boost":
+			var boost = data.get("boost_mult", 7.0)
+			_show_banner("⚡✨ 超級覺醒！%s 全服 ×%.0f 加成 15 秒！" % [name, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+
+func _on_lucky_giant_prize(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"giant_prize_start":
+			_show_event("giant_prize", "🎁 %s 觸發巨型獎勵魚！5 次隨機大獎！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"prize_drop":
+			var no = data.get("prize_no", 1)
+			var mult = data.get("prize_mult", 1.0)
+			var reward = data.get("reward", 0)
+			_show_banner("🎁 第 %d 次！×%.0f  +%d！" % [no, mult, reward], Color(1.0, 0.85, 0.0), 0.8)
+		"giant_prize_perfect":
+			var total = data.get("total_reward", 0)
+			var boost = data.get("boost_mult", 4.5)
+			_show_banner("🎁✨ 完美大獎！%s 獲得 %d！全服 ×%.1f 加成 10 秒！" % [name, total, boost], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.6)
+
+func _on_lucky_immortal_boss(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"immortal_spawn":
+			_show_event("immortal_boss", "💀 %s 召喚不死 BOSS！5 條命，倍率遞增！18 秒！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BOSS_ENTER)
+			ScreenShake.add_trauma(0.6)
+		"immortal_kill":
+			var lives = data.get("lives_left", 0)
+			var mult = data.get("current_mult", 2.0)
+			var reward = data.get("reward", 0)
+			_show_banner("💀 擊破！剩 %d 條命！×%.1f  +%d！" % [lives, mult, reward], Color(0.9, 0.1, 0.1), 0.8)
+			ScreenShake.add_trauma(0.3)
+		"immortal_perfect":
+			var total = data.get("total_reward", 0)
+			var boost = data.get("boost_mult", 5.0)
+			_show_banner("💀✨ 完美不死！%s 耗盡 5 條命！獲得 %d！全服 ×%.1f 加成 12 秒！" % [name, total, boost], Color(1.0, 0.85, 0.0), 4.0)
+			ScreenShake.add_trauma(0.8)
+
+# ── DAY-309 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_ice_phoenix(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"freeze_start":
+			_show_event("ice_phoenix", "🧊🔥 %s 召喚冰鳳凰！全場凍結 10 秒！傷害 ×1.5！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"phoenix_rebirth":
+			var hit = data.get("hit_count", 0)
+			_show_banner("🔥 鳳凰重生爆炸！命中 %d 個！" % hit, Color(1.0, 0.5, 0.0))
+			ScreenShake.add_trauma(0.6)
+		"phoenix_perfect":
+			var boost = data.get("boost_mult", 5.5)
+			var secs = data.get("boost_secs", 12)
+			_show_banner("🔥✨ 完美鳳凰！%s 全服 ×%.1f 加成 %d 秒！" % [name, boost, secs], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+
+func _on_lucky_dragon_fury(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"energy_start":
+			_show_event("dragon_fury", "🐉 %s 啟動龍怒蓄能！15 秒累積 100 能量！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"energy_gain":
+			var energy = data.get("energy", 0)
+			_update_indicator("🐉 龍怒蓄能", "能量: %d/100" % energy, float(energy) / 100.0, Color(1.0, 0.3, 0.0))
+		"fury_unleash":
+			_hide_indicator()
+			_show_banner("🐉💥 龍怒爆發！%s 全場 HP -80%%！" % name, Color(1.0, 0.1, 0.0))
+			ScreenShake.add_trauma(0.9)
+		"fury_perfect":
+			var boost = data.get("boost_mult", 6.0)
+			var secs = data.get("boost_secs", 13)
+			_show_banner("🐉✨ 完美龍怒！%s 全服 ×%.1f 加成 %d 秒！" % [name, boost, secs], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_mult_cascade(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"cascade_start":
+			_show_event("mult_cascade", "🌊 %s 啟動倍率瀑布！30 秒每次擊破 +0.5x！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.3)
+		"cascade_rise":
+			var mult = data.get("current_mult", 1.0)
+			var kills = data.get("kill_count", 0)
+			_update_indicator("🌊 倍率瀑布", "×%.1f | %d 次" % [mult, kills], mult / 20.0, Color(0.1, 0.4, 1.0))
+		"cascade_perfect":
+			_hide_indicator()
+			var peak = data.get("peak_mult", 15.0)
+			var boost = data.get("boost_mult", 6.5)
+			var secs = data.get("boost_secs", 14)
+			_show_banner("🌊✨ 完美瀑布！倍率達 ×%.1f！%s 全服 ×%.1f 加成 %d 秒！" % [peak, name, boost, secs], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+		"cascade_end":
+			_hide_indicator()
+
+func _on_lucky_awaken_boss_v2(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"awaken_start":
+			_show_event("awaken_boss_v2", "⚡ %s 覺醒 BOSS！8 次 Power Up（8x-15x）！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"power_up":
+			var mult = data.get("power_up_mult", 8.0)
+			var hits = data.get("hit_count", 0)
+			_update_indicator("⚡ 覺醒 BOSS v2", "×%.1f | %d/8" % [mult, hits], float(hits) / 8.0, Color(1.0, 0.6, 0.0))
+		"awaken_perfect":
+			_hide_indicator()
+			var boost = data.get("boost_mult", 7.0)
+			var secs = data.get("boost_secs", 15)
+			_show_banner("⚡✨ 完美覺醒！%s 8 次全命中！全服 ×%.1f 加成 %d 秒！" % [name, boost, secs], Color(1.0, 0.85, 0.0), 3.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_ultimate_judgment(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"judgment_start":
+			_show_event("ultimate_judgment", "⚖️💥 %s 降下終極審判！全場 HP 歸零！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.8)
+		"judgment_boost":
+			var boost = data.get("boost_mult", 10.0)
+			var secs = data.get("boost_secs", 20)
+			var hit = data.get("hit_count", 0)
+			_show_banner("⚖️✨ 終極審判完成！清場 %d 個！全服 ×%.1f 加成 %d 秒！" % [hit, boost, secs], Color(1.0, 0.85, 0.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+		"judgment_boost_end":
+			_hide_indicator()
+
+# ── DAY-310 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_combo_burst(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"start":
+			_show_event("lucky_combo_burst", "🔥 連擊爆發模式！20 秒連擊累積倍率！")
+		"combo_update":
+			var combo = data.get("combo", 0)
+			var mult = data.get("mult", 1.0)
+			_update_indicator("🔥 連擊爆發", "Combo %d ×%.1f" % [combo, mult], 1.0, Color(1.0, 0.4, 0.1))
+		"end":
+			if data.get("perfect", false):
+				_show_banner("🔥 完美連擊！全服 ×5.5 加成 12 秒！", Color(1.0, 0.4, 0.1), 3.0)
+				ScreenShake.add_trauma(0.7)
+			_hide_indicator()
+
+func _on_lucky_time_bomb(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"start":
+			_show_event("lucky_time_bomb", "💣 時間炸彈啟動！30 秒倒數！")
+		"energy_update":
+			var energy = data.get("energy", 0)
+			_update_indicator("💣 時間炸彈", "能量 %d/30" % energy, 1.0, Color(0.9, 0.2, 0.1))
+		"explode":
+			if data.get("perfect", false):
+				_show_banner("💣 完美爆炸！全服 ×6.0 加成 13 秒！", Color(0.9, 0.2, 0.1), 3.0)
+				ScreenShake.add_trauma(1.0)
+			else:
+				_show_banner("💣 炸彈爆炸！", Color(0.9, 0.2, 0.1), 2.0)
+			_hide_indicator()
+
+func _on_lucky_elemental_fusion(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"start":
+			_show_event("lucky_elemental_fusion", "⚡ 元素融合開始！火/冰/雷三元素！")
+		"element_trigger":
+			var elem = data.get("element", "")
+			var elem_names = {"fire": "🔥 火元素", "ice": "❄️ 冰元素", "thunder": "⚡ 雷元素"}
+			_show_banner(elem_names.get(elem, "元素") + " 觸發！全場 HP -25%%！", Color(0.6, 0.2, 0.9), 2.0)
+			ScreenShake.add_trauma(0.5)
+		"end":
+			if data.get("perfect", false):
+				_show_banner("⚡🔥❄️ 元素爆發！全服 ×6.5 加成 14 秒！", Color(0.6, 0.2, 0.9), 3.5)
+				ScreenShake.add_trauma(0.8)
+			_hide_indicator()
+
+func _on_lucky_treasure_hunter(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"start":
+			_show_event("lucky_treasure_hunter", "💎 寶藏獵人！找到 5 個寶藏！")
+		"treasure_found":
+			var found = data.get("found", 0)
+			_update_indicator("💎 寶藏獵人", "找到 %d/5 個" % found, 1.0, Color(1.0, 0.75, 0.1))
+			if data.get("perfect", false):
+				_show_banner("💎 完美寶藏！全服 ×7.0 加成 15 秒！", Color(1.0, 0.75, 0.1), 3.5)
+				ScreenShake.add_trauma(0.8)
+				_hide_indicator()
+
+func _on_lucky_myth_awaken(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"start":
+			_show_event("lucky_myth_awaken", "🌟 神話覺醒！全場倍率 ×3.0！25 秒！")
+			ScreenShake.add_trauma(0.6)
+		"end":
+			if data.get("perfect", false):
+				_show_banner("🌟 神話完美！全服 ×8.0 加成 20 秒！", Color(0.9, 0.8, 0.1), 4.0)
+				ScreenShake.add_trauma(1.0)
+			else:
+				_show_banner("🌟 神話覺醒結束", Color(0.7, 0.7, 0.7), 1.5)
+			_hide_indicator()
+
+# ── DAY-312 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_star_portal(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"portal_open":
+			_show_event("lucky_star_portal", "🌌 星際門戶開啟！傳送 5 個目標！")
+			ScreenShake.add_trauma(0.5)
+		"portal_teleport":
+			var count = data.get("teleport_count", 0)
+			_update_indicator("🌌 星際門戶", "傳送 %d/5 個" % count, 1.0, Color(0.49, 0.11, 0.64))
+		"portal_perfect":
+			var boost = data.get("boost_mult", 5.5)
+			var secs = data.get("boost_secs", 12)
+			_show_banner("🌌 完美門戶！全服 ×%.1f 加成 %d 秒！" % [boost, secs], Color(0.8, 0.4, 1.0), 3.5)
+			ScreenShake.add_trauma(0.7)
+			_hide_indicator()
+		"portal_end":
+			_hide_indicator()
+
+func _on_lucky_dragon_soul(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"soul_fusion_start":
+			_show_event("lucky_dragon_soul", "🐉 龍魂融合！30 秒吸收龍魂！")
+			ScreenShake.add_trauma(0.6)
+		"soul_burst":
+			var souls = data.get("soul_count", 0)
+			_update_indicator("🐉 龍魂融合", "龍魂 %d/50" % souls, 1.0, Color(0.83, 0.18, 0.18))
+		"soul_perfect":
+			var boost = data.get("boost_mult", 9.0)
+			var secs = data.get("boost_secs", 18)
+			_show_banner("🐉 龍魂完美！全場 HP -90%%！全服 ×%.1f 加成 %d 秒！" % [boost, secs], Color(1.0, 0.44, 0.07), 4.0)
+			ScreenShake.add_trauma(1.0)
+			_hide_indicator()
+
+func _on_lucky_spacetime_rift(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"rift_open":
+			_show_event("lucky_spacetime_rift", "⏳ 時空裂縫！每 4 秒瞬間擊破 3 個！")
+			ScreenShake.add_trauma(0.5)
+		"rift_wave":
+			var wave = data.get("wave", 0)
+			var kills = data.get("kill_count", 0)
+			_update_indicator("⏳ 時空裂縫", "第 %d 波 擊破 %d 個" % [wave, kills], 1.0, Color(0.08, 0.27, 0.75))
+		"rift_perfect":
+			var boost = data.get("boost_mult", 7.5)
+			var secs = data.get("boost_secs", 16)
+			_show_banner("⏳ 時空完美！全服 ×%.1f 加成 %d 秒！" % [boost, secs], Color(0.4, 0.7, 1.0), 3.5)
+			ScreenShake.add_trauma(0.8)
+			_hide_indicator()
+		"rift_end":
+			_hide_indicator()
+
+func _on_lucky_holy_judgment(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"judgment_start":
+			_show_event("lucky_holy_judgment", "✨ 神聖審判！5 波神聖光柱降臨！")
+			ScreenShake.add_trauma(0.6)
+		"judgment_wave":
+			var wave = data.get("wave", 0)
+			var hits = data.get("hit_count", 0)
+			_update_indicator("✨ 神聖審判", "第 %d 波 命中 %d 個" % [wave, hits], 1.0, Color(0.96, 0.50, 0.09))
+		"judgment_perfect":
+			var boost = data.get("boost_mult", 8.5)
+			var secs = data.get("boost_secs", 18)
+			_show_banner("✨ 神聖完美！5 波全部命中！全服 ×%.1f 加成 %d 秒！" % [boost, secs], Color(1.0, 0.9, 0.4), 4.0)
+			ScreenShake.add_trauma(1.0)
+			_hide_indicator()
+		"judgment_end":
+			_hide_indicator()
+
+func _on_lucky_big_bang(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"big_bang_start":
+			_show_event("lucky_big_bang", "💥 宇宙大爆炸！全場 HP 歸零！")
+			ScreenShake.add_trauma(1.0)
+		"big_bang_complete":
+			var hit = data.get("hit_count", 0)
+			var boost = data.get("boost_mult", 12.0)
+			var secs = data.get("boost_secs", 25)
+			_show_banner("💥 宇宙大爆炸！清場 %d 個！全服 ×%.1f 加成 %d 秒！" % [hit, boost, secs], Color(1.0, 0.3, 0.0), 5.0)
+			ScreenShake.add_trauma(1.0)
+			_hide_indicator()
+
+# ── DAY-313 Progressive Jackpot Pool ────────────────────────
+
+func _on_lucky_jackpot_pool(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	match event:
+		"jackpot_win":
+			var tier = data.get("tier", "")
+			var tier_name = data.get("tier_name", "Jackpot")
+			var reward = data.get("reward", 0)
+			var player_name = data.get("player_name", "玩家")
+			var color: Color
+			match tier:
+				"mini":  color = Color(0.2, 0.8, 0.2)
+				"minor": color = Color(0.13, 0.59, 0.95)
+				"major": color = Color(1.0, 0.6, 0.0)
+				"grand": color = Color(1.0, 0.85, 0.0)
+				_:       color = Color(1.0, 0.85, 0.0)
+			_show_banner("🎰 %s！%s 獲得 %d 金幣！" % [tier_name, player_name, reward], color, 4.0)
+			if tier == "grand":
+				ScreenShake.add_trauma(1.0)
+			elif tier == "major":
+				ScreenShake.add_trauma(0.6)
+		"pool_update":
+			pass
+
+# ── DAY-314 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_multiverse(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"multiverse_start":
+			_show_event("multiverse", "🌌 %s 開啟多重宇宙！3 個平行宇宙！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"multiverse_perfect":
+			var boost_mult = data.get("boost_mult", 13.0)
+			_show_banner("🌌✨ 多重宇宙完美！%s 全服 ×%.0f 加成 28 秒！" % [name, boost_mult], Color(0.8, 0.3, 1.0), 4.0)
+			ScreenShake.add_trauma(0.8)
+
+func _on_lucky_time_loop(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"time_loop_start":
+			_show_event("time_loop", "⏰ %s 開啟時間迴圈！3 次迴圈！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"loop_reset":
+			var loop_no = data.get("loop_no", 1)
+			var loop_mult = data.get("loop_mult", 1.5)
+			_show_banner("⏰ 第 %d 次迴圈！獎勵 ×%.1f！" % [loop_no, loop_mult], Color(0.2, 0.6, 1.0), 1.5)
+		"time_loop_perfect":
+			var boost_mult = data.get("boost_mult", 10.0)
+			_show_banner("⏰✨ 時間迴圈完美！%s 全服 ×%.0f 加成 22 秒！" % [name, boost_mult], Color(0.0, 0.7, 1.0), 4.0)
+			ScreenShake.add_trauma(0.7)
+
+func _on_lucky_fate_wheel(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"fate_wheel_start":
+			_show_event("fate_wheel", "🎡 %s 旋轉命運之輪！最高 ×50！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"wheel_spin":
+			var spin_no = data.get("spin_no", 1)
+			var mult = data.get("mult", 1.0)
+			_show_banner("🎡 第 %d 轉 ×%.0f！" % [spin_no, mult], Color(1.0, 0.6, 0.0), 1.2)
+		"fate_wheel_perfect":
+			var boost_mult = data.get("boost_mult", 11.0)
+			_show_banner("🎡✨ 命運完美！%s 全服 ×%.0f 加成 24 秒！" % [name, boost_mult], Color(1.0, 0.7, 0.0), 4.0)
+			ScreenShake.add_trauma(0.7)
+
+func _on_lucky_divine_realm(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"divine_realm_start":
+			_show_event("divine_realm", "✨ %s 召喚神域！5 波神域光柱！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"divine_wave":
+			var wave_no = data.get("wave_no", 1)
+			var hits = data.get("hits", 0)
+			_show_banner("✨ 第 %d 波！命中 %d 個！" % [wave_no, hits], Color(1.0, 0.85, 0.0), 1.0)
+			ScreenShake.add_trauma(0.3)
+		"divine_realm_perfect":
+			var boost_mult = data.get("boost_mult", 14.0)
+			_show_banner("✨🏆 神域完美！%s 全服 ×%.0f 加成 30 秒！" % [name, boost_mult], Color(1.0, 0.9, 0.0), 4.0)
+			ScreenShake.add_trauma(0.9)
+
+func _on_lucky_final_power(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"final_power_start":
+			_show_event("final_power", "💀 %s 引動終焉之力！全場 HP 歸零！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(1.0)
+		"final_power_complete":
+			var hit_count = data.get("hit_count", 0)
+			var boost_mult = data.get("boost_mult", 15.0)
+			_show_banner("💀🏆 終焉之力！%s 清場 %d 個！全服 ×%.0f 加成 30 秒！" % [name, hit_count, boost_mult], Color(1.0, 0.1, 0.1), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+# ── DAY-315 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_mutation(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"mutation_start":
+			var mut_name = data.get("mutation_name", "突變")
+			var mut_mult = data.get("mutation_mult", 1.0)
+			_show_event("lucky_mutation", "🧬 %s 觸發突變！【%s】×%.1f！" % [name, mut_name, mut_mult])
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.5)
+		"mutation_perfect":
+			var mut_name = data.get("mutation_name", "傳說突變")
+			var mut_mult = data.get("mutation_mult", 17.0)
+			var boost_mult = data.get("boost_mult", 16.0)
+			var boost_secs = data.get("boost_secs", 32)
+			_show_banner("🧬✨ 傳說突變！%s【%s】×%.1f！全服 ×%.1f 加成 %d 秒！" % [name, mut_name, mut_mult, boost_mult, boost_secs], Color(0.6, 0.0, 1.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_arctic_storm(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"arctic_storm_start":
+			_show_event("lucky_arctic_storm", "❄️ %s 觸發北極風暴！8 波冰雪攻擊！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"arctic_wave":
+			var wave = data.get("wave", 0)
+			var total_hit = data.get("total_hit", 0)
+			_update_indicator("❄️ 北極風暴", "第 %d/8 波 命中 %d 個" % [wave, total_hit], float(wave) / 8.0, Color(0.0, 0.7, 1.0))
+		"arctic_storm_perfect":
+			var total_hit = data.get("total_hit", 0)
+			var boost_mult = data.get("boost_mult", 16.5)
+			var boost_secs = data.get("boost_secs", 33)
+			_show_banner("❄️🏆 完美北極風暴！%s 8 波全中！命中 %d 個！全服 ×%.1f 加成 %d 秒！" % [name, total_hit, boost_mult, boost_secs], Color(0.0, 0.8, 1.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+			_hide_indicator()
+		"arctic_storm_complete":
+			_hide_indicator()
+
+func _on_lucky_fisher_wild(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"fisher_wild_start":
+			var wild_count = data.get("wild_count", 3)
+			_show_event("lucky_fisher_wild", "🎣 %s 觸發漁夫野生！標記 %d 個 Wild 目標！" % [name, wild_count])
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"wild_killed":
+			var killed = data.get("killed", 0)
+			var total = data.get("total", 3)
+			_update_indicator("🎣 漁夫野生", "Wild %d/%d 已擊破" % [killed, total], float(killed) / float(total), Color(0.2, 0.6, 1.0))
+		"fisher_wild_perfect":
+			_hide_indicator()
+			var killed = data.get("killed", 3)
+			var boost_mult = data.get("boost_mult", 17.0)
+			var boost_secs = data.get("boost_secs", 35)
+			_show_banner("🎣🏆 完美漁夫！%s 擊破 %d 個 Wild！全服 ×%.1f 加成 %d 秒！" % [name, killed, boost_mult, boost_secs], Color(0.1, 0.5, 1.0), 4.0)
+			ScreenShake.add_trauma(1.0)
+		"fisher_wild_timeout":
+			_hide_indicator()
+
+func _on_lucky_risk_level(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"risk_level_start":
+			_show_event("lucky_risk_level", "🎰 %s 觸發風險等級！最高 ×3000！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.4)
+		"risk_level_jackpot":
+			var risk_mult = data.get("risk_mult", 3000.0)
+			var boost_mult = data.get("boost_mult", 17.5)
+			var boost_secs = data.get("boost_secs", 36)
+			_show_banner("🎰🏆 最高風險！%s 抽中 ×%.0f！全服 ×%.1f 加成 %d 秒！" % [name, risk_mult, boost_mult, boost_secs], Color(1.0, 0.85, 0.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+		"risk_level_result":
+			var risk_name = data.get("risk_name", "低風險")
+			var risk_mult = data.get("risk_mult", 5.0)
+			_show_banner("🎰 風險結果！%s 抽中【%s】×%.1f！" % [name, risk_name, risk_mult], Color(0.9, 0.3, 0.0), 2.5)
+
+func _on_lucky_cosmic_pulse(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"cosmic_pulse_start":
+			_show_event("lucky_cosmic_pulse", "🌌 %s 引動宇宙脈衝！全場 HP -45%%！全服 ×16.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(1.0)
+		"cosmic_pulse_complete":
+			var hit_count = data.get("hit_count", 0)
+			var boost_mult = data.get("boost_mult", 16.0)
+			var boost_secs = data.get("boost_secs", 35)
+			_show_banner("🌌🏆 宇宙脈衝完成！%s 清場 %d 個！全服 ×%.1f 加成 %d 秒！" % [name, hit_count, boost_mult, boost_secs], Color(0.4, 0.0, 1.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+# ── DAY-316 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_mirror_universe(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"mirror_universe_start":
+			_show_event("lucky_mirror_universe", "🪞 %s 開啟鏡像宇宙！複製最強 3 個目標！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.8)
+		"mirror_perfect":
+			var boost_mult = data.get("boost_mult", 17.0)
+			var boost_secs = data.get("boost_secs", 36)
+			_show_banner("🪞🏆 鏡像完美！%s 全部擊破！全服 ×%.1f 加成 %d 秒！" % [name, boost_mult, boost_secs], Color(0.2, 0.4, 1.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_gravity_field(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"gravity_field_start":
+			_show_event("lucky_gravity_field", "🌀 %s 啟動引力場！目標速度 ×0.1！15 秒後爆炸！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.7)
+		"gravity_perfect":
+			var boost_mult = data.get("boost_mult", 17.5)
+			var boost_secs = data.get("boost_secs", 37)
+			_show_banner("🌀🏆 引力完美！%s 命中 %d 個！全服 ×%.1f 加成 %d 秒！" % [name, data.get("hit_count", 0), boost_mult, boost_secs], Color(0.4, 0.2, 1.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_time_acceleration(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"time_acceleration_start":
+			_show_event("lucky_time_acceleration", "⚡ %s 啟動時間加速！射擊速度 ×3.0！30 秒！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.9)
+		"time_acceleration_perfect":
+			var boost_mult = data.get("boost_mult", 18.0)
+			var boost_secs = data.get("boost_secs", 38)
+			_show_banner("⚡🏆 時間完美！%s 擊破 %d 個！全服 ×%.1f 加成 %d 秒！" % [name, data.get("kill_count", 0), boost_mult, boost_secs], Color(1.0, 0.7, 0.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_nebula_vortex(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"nebula_vortex_start":
+			_show_event("lucky_nebula_vortex", "🌌 %s 召喚星雲漩渦！每秒全場 HP -8%%！持續 20 秒！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.8)
+		"nebula_perfect":
+			var boost_mult = data.get("boost_mult", 18.5)
+			var boost_secs = data.get("boost_secs", 39)
+			_show_banner("🌌🏆 星雲完美！%s 累積命中 %d 次！全服 ×%.1f 加成 %d 秒！" % [name, data.get("total_hits", 0), boost_mult, boost_secs], Color(0.5, 0.1, 1.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_cosmic_judgment(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"cosmic_judgment_start":
+			_show_event("lucky_cosmic_judgment", "⚖️ %s 召喚宇宙審判！全場 HP 歸零！全服 ×19.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(1.0)
+		"cosmic_judgment_complete":
+			var hit_count = data.get("hit_count", 0)
+			var boost_mult = data.get("boost_mult", 19.0)
+			var boost_secs = data.get("boost_secs", 40)
+			_show_banner("⚖️🏆 宇宙審判完成！%s 清場 %d 個！全服 ×%.1f 加成 %d 秒！" % [name, hit_count, boost_mult, boost_secs], Color(1.0, 0.1, 0.1), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+# ── DAY-317 Lucky 事件處理 ────────────────────────────────────
+
+func _on_lucky_pvp_battle(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"pvp_battle_start":
+			_show_event("lucky_pvp_battle", "⚔️ %s 發起全服 PvP 競技！30 秒內擊破最多目標者獲得 ×20.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.8)
+		"pvp_battle_complete":
+			var winner_name = data.get("winner_name", "玩家")
+			var global_boost_mult = data.get("global_boost_mult", 19.5)
+			var global_boost_secs = data.get("global_boost_secs", 40)
+			_show_banner("⚔️🏆 PvP 競技結束！%s 獲勝！全服 ×%.1f 加成 %d 秒！" % [winner_name, global_boost_mult, global_boost_secs], Color(0.8, 0.1, 0.1), 4.5)
+			ScreenShake.add_trauma(0.9)
+
+func _on_lucky_skill_chain(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"skill_chain_start":
+			_show_event("lucky_skill_chain", "🔗 %s 啟動技能連鎖！25 秒！Lv.10 → 全服 ×20.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.7)
+		"skill_chain_level_up":
+			var level = data.get("level", 1)
+			var level_mult = data.get("level_mult", 2.0)
+			_show_banner("🔗 技能等級 Lv.%d！×%.1f！" % [level, level_mult], Color(0.2, 0.5, 1.0), 1.0)
+		"skill_chain_complete":
+			var final_level = data.get("final_level", 1)
+			var global_boost_mult = data.get("global_boost_mult", 19.5)
+			var global_boost_secs = data.get("global_boost_secs", 35)
+			var is_perfect = data.get("is_perfect", false)
+			if is_perfect:
+				_show_banner("🔗🏆 完美連鎖！%s 達到 Lv.10！全服 ×%.1f 加成 %d 秒！" % [name, global_boost_mult, global_boost_secs], Color(1.0, 0.85, 0.0), 4.5)
+				ScreenShake.add_trauma(1.0)
+			else:
+				_show_banner("🔗 技能連鎖結束！%s Lv.%d！全服 ×%.1f 加成 %d 秒！" % [name, final_level, global_boost_mult, global_boost_secs], Color(0.3, 0.6, 1.0), 3.5)
+				ScreenShake.add_trauma(0.6)
+
+func _on_lucky_global_explosion(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"global_explosion_start":
+			_show_event("lucky_global_explosion", "💥 %s 引爆全服大爆炸！全場 HP 歸零！全服 ×20.5！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(1.0)
+		"global_explosion_complete":
+			var hit_count = data.get("hit_count", 0)
+			var boost_mult = data.get("boost_mult", 20.5)
+			var boost_secs = data.get("boost_secs", 40)
+			_show_banner("💥🏆 全服大爆炸完成！%s 清場 %d 個！全服 ×%.1f 加成 %d 秒！" % [name, hit_count, boost_mult, boost_secs], Color(1.0, 0.2, 0.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_spacetime_fold(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"spacetime_fold_start":
+			_show_event("lucky_spacetime_fold", "🌀 %s 折疊時空！20 秒！目標倍率 ×3.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(0.9)
+		"spacetime_fold_complete":
+			var boost_mult = data.get("boost_mult", 21.0)
+			var boost_secs = data.get("boost_secs", 42)
+			_show_banner("🌀🏆 時空折疊結束！%s 全服 ×%.1f 加成 %d 秒！" % [name, boost_mult, boost_secs], Color(0.6, 0.2, 1.0), 4.5)
+			ScreenShake.add_trauma(1.0)
+
+func _on_lucky_cosmic_end(data: Dictionary) -> void:
+	var event = data.get("event", "")
+	var name = data.get("trigger_name", "玩家")
+	match event:
+		"cosmic_end_start":
+			_show_event("lucky_cosmic_end", "☄️ %s 召喚宇宙終焉！全場 HP 歸零！全服 ×22.0！" % name)
+			AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
+			ScreenShake.add_trauma(1.0)
+		"cosmic_end_complete":
+			var hit_count = data.get("hit_count", 0)
+			var boost_mult = data.get("boost_mult", 22.0)
+			var boost_secs = data.get("boost_secs", 45)
+			_show_banner("☄️👑 宇宙終焉完成！%s 清場 %d 個！全服 ×%.1f 加成 %d 秒！" % [name, hit_count, boost_mult, boost_secs], Color(1.0, 0.85, 0.0), 5.0)
+			ScreenShake.add_trauma(1.0)

@@ -1,6 +1,53 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-30（DAY-335 T001-T006 視覺升級 + HUD.gd 重構 + GitHub 同步）
+## 最後更新：2026-05-30（DAY-336 HUDLuckySignals.gd 擴充 DAY-304~319 + GitHub 同步）
+
+## DAY-336 更新（2026-05-30）：HUDLuckySignals.gd 擴充 DAY-304~319 ✅
+- **策略執行：** 繼續拆分 HUD.gd 技術債——把 DAY-304~319 的 75 個 Lucky 訊號移入 HUDLuckySignals.gd
+- **HUDLuckySignals.gd 擴充：**
+  - DAY-304：electric_eel / angler_fish / black_hole / bounty_hunter / tsunami（5個完整處理函數）
+  - DAY-305：dragon_wrath_v2 / humpback_whale / legend_dragon / guild_war / quality_fish（5個）
+  - DAY-306：tornado / earthquake / volcano / cosmic_ray / divine_dragon（5個）
+  - DAY-307：quantum / supernova / infinite / genesis / rebirth（5個）
+  - DAY-308：awakened_croc / vampire_v2 / super_awaken / giant_prize / immortal_boss（5個）
+  - DAY-309：ice_phoenix / dragon_fury / mult_cascade / awaken_boss_v2 / ultimate_judgment（5個）
+  - DAY-310：combo_burst / time_bomb / elemental_fusion / treasure_hunter / myth_awaken（5個）
+  - DAY-312：star_portal / dragon_soul / spacetime_rift / holy_judgment / big_bang（5個）
+  - DAY-313：jackpot_pool（1個）
+  - DAY-314：multiverse / time_loop / fate_wheel / divine_realm / final_power（5個）
+  - DAY-315：mutation / arctic_storm / fisher_wild / risk_level / cosmic_pulse（5個）
+  - DAY-316：mirror_universe / gravity_field / time_acceleration / nebula_vortex / cosmic_judgment（5個）
+  - DAY-317：pvp_battle / skill_chain / global_explosion / spacetime_fold / cosmic_end（5個）
+  - DAY-318~319：10個 fallback 連接（Panel 自行處理）
+- **HUD.gd 重構進度：** 2369 行 → 2293 行（減少 76 行）
+- **HUDLuckySignals.gd：** 610 行 → 1655 行（接管 DAY-292~319 全部 148 個訊號）
+- **架構改善：** HUD._ready() 中加入 `_init_lucky_signals()` 延遲初始化 HUDLuckySignals 模組
+- **知識庫更新：** knowhow-log 條目 183/184/185（DAY-336 三個新知識點）
+- **QA 腳本：** `tools/qa_check_day336.py`（121 項驗證，121/121 全部通過）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-336）
+- **Server 目標物數量：** 160 種（T001-T006 + T101-T253 + B001）— 不再新增
+- **Lucky 系統數量：** 148 個（T106-T253）— 不再新增
+- **Client Lucky Panel 數量：** 159 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry + 156 個 Panel）
+- **HUD.gd 行數：** 2293 行（從 2369 行降低）
+- **HUDLuckySignals.gd：** ✅ 接管 DAY-292~319 全部 148 個訊號
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10（T001-T006 升級後，需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **最需要改善：** 在 Godot 實際遊玩一局，確認 T001-T006 視覺效果
+- **已知技術債：** HUD.gd 仍有 2293 行（需繼續拆分 DAY-292~303 的函數）
+- **下一步：** 繼續拆分 HUD.gd（把 DAY-292~303 的 Lucky 函數也移入 HUDLuckySignals）
+
+## 下一步優先事項（DAY-337）
+1. 繼續拆分 HUD.gd（把 DAY-292~303 的 Lucky 函數也移入 HUDLuckySignals，並從 HUD.gd 移除）
+2. 在 Godot 實際遊玩一局，確認 T001-T006 視覺效果
+3. 優化 T101-T105 特殊目標物視覺（擬態箱、寶箱、隕石、金草、金幣魚）
+4. 執行端對端整合測試（`python tools/integration_test_day334.py --quick`）
+
+
 
 ## DAY-335 更新（2026-05-30）：深度優先策略——T001-T006 視覺升級 + HUD.gd 重構 ✅
 - **策略執行：** 深度優先——讓最常出現的 6 個目標物有完整個性化視覺設計

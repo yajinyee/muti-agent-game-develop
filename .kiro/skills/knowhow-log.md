@@ -5241,3 +5241,33 @@ if xxxMult > 1.0 {
   - T005 布丁：奶油頂 + 草莓 + 光澤 + 微笑
   - T006 蘑菇：白色斑點 + 莖陰影 + 可愛眼睛
 - **教訓：** 160 個目標物不如 6 個精心設計的目標物。深度 > 廣度
+
+## 183. GDScript 模組化拆分的正確方式（DAY-336）
+- **問題：** HUD.gd 有 2369 行，148 個 Lucky 訊號連接全部塞在同一個檔案
+- **解決：** 建立 HUDLuckySignals.gd（extends Node），用依賴注入傳入 hud 和 lucky_event_system
+- **關鍵技術：**
+  1. `Node.new()` + `set_script(load("res://scripts/ui/HUDLuckySignals.gd"))` 動態建立模組
+  2. `add_child(_lucky_signals)` 加入場景樹，確保 `_process` 等生命週期正常
+  3. `call_deferred("_init_lucky_signals")` 延遲初始化，確保 LuckyEventSystem 已找到
+  4. 委派模式：`_show_banner` / `_show_event` / `_update_indicator` 統一委派給 LuckyEventSystem
+- **結果：** HUD.gd 從 2369 行降到 2293 行，HUDLuckySignals.gd 接管 DAY-304~319 的 75 個訊號
+- **教訓：** GDScript 的模組化要用 `Node.new() + set_script()` 動態載入，不是 `preload` 靜態引用
+
+## 184. PowerShell 行數計算與 Python splitlines() 的差異（DAY-336）
+- **問題：** PowerShell `Measure-Object -Line` 顯示 2293 行，Python `splitlines()` 顯示 2468 行
+- **原因：** PowerShell 計算的是「換行符數量」，Python `splitlines()` 計算的是「非空行 + 空行」
+  - 如果檔案末尾有多個空行，Python 會多計算
+  - Windows CRLF 換行符也可能造成差異
+- **解決：** QA 腳本的行數門檻要留有餘裕（+200 行），不要用精確數字
+- **教訓：** 跨工具比較行數時，要考慮換行符格式和末尾空行的差異
+
+## 185. HUDLuckySignals 委派架構的設計原則（DAY-336）
+- **架構：** HUD.gd → HUDLuckySignals.gd → LuckyEventSystem（顯示）/ AudioManager（音效）/ ScreenShake（震動）
+- **委派函數：**
+  - `_show_banner(text, color, duration)` → LuckyEventSystem.show_banner
+  - `_show_event(key, msg, duration)` → LuckyEventSystem.show_lucky_banner
+  - `_update_indicator(title, value, bar_pct, color)` → LuckyEventSystem.update_indicator
+  - `_hide_indicator()` → LuckyEventSystem.hide_indicator
+  - `_show_reward(amount, mult)` → HUD._show_reward_popup
+- **備用橫幅模式：** DAY-318~319 的 Panel 自行處理，HUDLuckySignals 只做 fallback
+- **教訓：** 委派架構要有明確的備用路徑（fallback），避免 LuckyEventSystem 不存在時崩潰

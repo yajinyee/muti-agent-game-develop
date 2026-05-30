@@ -1,6 +1,7 @@
 ## HUD.gd — 核心 HUD
 ## hud-core-agent 負責維護
 ## DAY-298：Lucky 事件視覺系統改由 LuckyEventSystem 處理
+## DAY-336：Lucky 訊號連接全部移入 HUDLuckySignals.gd
 extends CanvasLayer
 
 @onready var coins_label: Label = $TopBar/CoinsLabel
@@ -27,6 +28,8 @@ var lucky_event_system: Node = null
 # DAY-297 Combo UI
 var _combo_label: Label = null
 var _last_combo: int = 0
+# DAY-336：HUDLuckySignals 模組（管理所有 148 個 Lucky 訊號）
+var _lucky_signals: Node = null
 
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
@@ -51,131 +54,54 @@ func _ready() -> void:
 	# 嘗試自動找 LuckyEventSystem（如果在同一場景樹中）
 	call_deferred("_find_lucky_event_system")
 
-	# DAY-292 幸運特殊魚訊號連接
+	# DAY-336：初始化 HUDLuckySignals 模組（管理所有 148 個 Lucky 訊號）
+	_lucky_signals = Node.new()
+	_lucky_signals.set_script(load("res://scripts/ui/HUDLuckySignals.gd"))
+	add_child(_lucky_signals)
+	call_deferred("_init_lucky_signals")
+
+	# DAY-292~303 幸運特殊魚訊號連接（保留在 HUD 作為備份，HUDLuckySignals 也會連接）
+	# 注意：DAY-304~319 已完全移入 HUDLuckySignals.gd
 	GameManager.lucky_chain_lightning.connect(_on_lucky_chain_lightning)
 	GameManager.lucky_crab_torpedo.connect(_on_lucky_crab_torpedo)
 	GameManager.lucky_vortex.connect(_on_lucky_vortex)
 	GameManager.lucky_golden_dragon.connect(_on_lucky_golden_dragon)
 	GameManager.lucky_thunder_lobster.connect(_on_lucky_thunder_lobster)
 	GameManager.announce.connect(_on_announce)
-	# DAY-293 新增幸運特殊魚訊號連接
 	GameManager.lucky_awakened_phoenix.connect(_on_lucky_awakened_phoenix)
 	GameManager.lucky_shockwave_bomb.connect(_on_lucky_shockwave_bomb)
-	# DAY-294 新增幸運特殊魚訊號連接
 	GameManager.lucky_drill_torpedo.connect(_on_lucky_drill_torpedo)
 	GameManager.lucky_time_freeze.connect(_on_lucky_time_freeze)
 	GameManager.lucky_chain_explosion.connect(_on_lucky_chain_explosion)
-	# DAY-295 新增幸運特殊魚訊號連接
 	GameManager.lucky_chain_long_king.connect(_on_lucky_chain_long_king)
 	GameManager.lucky_dragon_shotgun.connect(_on_lucky_dragon_shotgun)
 	GameManager.lucky_rocket_cannon.connect(_on_lucky_rocket_cannon)
 	GameManager.lucky_deep_whirlpool.connect(_on_lucky_deep_whirlpool)
 	GameManager.lucky_vampire_mult.connect(_on_lucky_vampire_mult)
-	# DAY-296 新增幸運特殊魚訊號連接
 	GameManager.lucky_mirror_fish.connect(_on_lucky_mirror_fish)
 	GameManager.lucky_golden_rain.connect(_on_lucky_golden_rain)
 	GameManager.lucky_freeze_bomb.connect(_on_lucky_freeze_bomb)
 	GameManager.lucky_thunder_storm.connect(_on_lucky_thunder_storm)
 	GameManager.lucky_lucky_wheel.connect(_on_lucky_lucky_wheel)
-	# DAY-301 新增幸運特殊魚訊號連接
 	GameManager.lucky_jackpot_fish.connect(_on_lucky_jackpot_fish)
 	GameManager.lucky_coop_fish.connect(_on_lucky_coop_fish)
 	GameManager.lucky_time_warp.connect(_on_lucky_time_warp)
-	# DAY-302 新增幸運特殊魚訊號連接
 	GameManager.lucky_chain_meteor.connect(_on_lucky_chain_meteor)
-	# DAY-303 新增幸運特殊魚訊號連接
 	GameManager.lucky_crash_fish.connect(_on_lucky_crash_fish)
-	# DAY-304 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_electric_eel.connect(_on_lucky_electric_eel)
-	GameManager.lucky_angler_fish.connect(_on_lucky_angler_fish)
-	GameManager.lucky_black_hole.connect(_on_lucky_black_hole)
-	GameManager.lucky_bounty_hunter.connect(_on_lucky_bounty_hunter)
-	GameManager.lucky_tsunami.connect(_on_lucky_tsunami)
-	# DAY-305 新增幸運特殊魚訊號連接
-	GameManager.lucky_dragon_wrath_v2.connect(_on_lucky_dragon_wrath_v2)
-	GameManager.lucky_humpback_whale.connect(_on_lucky_humpback_whale)
-	GameManager.lucky_legend_dragon.connect(_on_lucky_legend_dragon)
-	GameManager.lucky_guild_war.connect(_on_lucky_guild_war)
-	GameManager.lucky_quality_fish.connect(_on_lucky_quality_fish)
-	# DAY-306 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_tornado.connect(_on_lucky_tornado)
-	GameManager.lucky_earthquake.connect(_on_lucky_earthquake)
-	GameManager.lucky_volcano.connect(_on_lucky_volcano)
-	GameManager.lucky_cosmic_ray.connect(_on_lucky_cosmic_ray)
-	GameManager.lucky_divine_dragon.connect(_on_lucky_divine_dragon)
-	# DAY-307 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_quantum.connect(_on_lucky_quantum)
-	GameManager.lucky_supernova.connect(_on_lucky_supernova)
-	GameManager.lucky_infinite.connect(_on_lucky_infinite)
-	GameManager.lucky_genesis.connect(_on_lucky_genesis)
-	GameManager.lucky_rebirth.connect(_on_lucky_rebirth)
-	# DAY-308 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_awakened_croc.connect(_on_lucky_awakened_croc)
-	GameManager.lucky_vampire_v2.connect(_on_lucky_vampire_v2)
-	GameManager.lucky_super_awaken.connect(_on_lucky_super_awaken)
-	GameManager.lucky_giant_prize.connect(_on_lucky_giant_prize)
-	GameManager.lucky_immortal_boss.connect(_on_lucky_immortal_boss)
-	# DAY-309 新增幸運特殊魚訊號連接
-	GameManager.lucky_ice_phoenix.connect(_on_lucky_ice_phoenix)
-	GameManager.lucky_dragon_fury.connect(_on_lucky_dragon_fury)
-	GameManager.lucky_mult_cascade.connect(_on_lucky_mult_cascade)
-	GameManager.lucky_awaken_boss_v2.connect(_on_lucky_awaken_boss_v2)
-	GameManager.lucky_ultimate_judgment.connect(_on_lucky_ultimate_judgment)
-	# DAY-310 新增幸運特殊魚訊號連接
-	GameManager.lucky_combo_burst.connect(_on_lucky_combo_burst)
-	GameManager.lucky_time_bomb.connect(_on_lucky_time_bomb)
-	GameManager.lucky_elemental_fusion.connect(_on_lucky_elemental_fusion)
-	GameManager.lucky_treasure_hunter.connect(_on_lucky_treasure_hunter)
-	GameManager.lucky_myth_awaken.connect(_on_lucky_myth_awaken)
-	# DAY-312 新增幸運特殊魚訊號連接
-	GameManager.lucky_star_portal.connect(_on_lucky_star_portal)
-	GameManager.lucky_dragon_soul.connect(_on_lucky_dragon_soul)
-	GameManager.lucky_spacetime_rift.connect(_on_lucky_spacetime_rift)
-	GameManager.lucky_holy_judgment.connect(_on_lucky_holy_judgment)
-	GameManager.lucky_big_bang.connect(_on_lucky_big_bang)
-	# DAY-313 新增幸運特殊魚訊號連接（Progressive Jackpot 系列）
-	GameManager.lucky_jackpot_pool.connect(_on_lucky_jackpot_pool)
-	# DAY-314 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_multiverse.connect(_on_lucky_multiverse)
-	GameManager.lucky_time_loop.connect(_on_lucky_time_loop)
-	GameManager.lucky_fate_wheel.connect(_on_lucky_fate_wheel)
-	GameManager.lucky_divine_realm.connect(_on_lucky_divine_realm)
-	GameManager.lucky_final_power.connect(_on_lucky_final_power)
-	# DAY-315 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_mutation.connect(_on_lucky_mutation)
-	GameManager.lucky_arctic_storm.connect(_on_lucky_arctic_storm)
-	GameManager.lucky_fisher_wild.connect(_on_lucky_fisher_wild)
-	GameManager.lucky_risk_level.connect(_on_lucky_risk_level)
-	GameManager.lucky_cosmic_pulse.connect(_on_lucky_cosmic_pulse)
-	# DAY-316 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_mirror_universe.connect(_on_lucky_mirror_universe)
-	GameManager.lucky_gravity_field.connect(_on_lucky_gravity_field)
-	GameManager.lucky_time_acceleration.connect(_on_lucky_time_acceleration)
-	GameManager.lucky_nebula_vortex.connect(_on_lucky_nebula_vortex)
-	GameManager.lucky_cosmic_judgment.connect(_on_lucky_cosmic_judgment)
-	# DAY-317 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_pvp_battle.connect(_on_lucky_pvp_battle)
-	GameManager.lucky_skill_chain.connect(_on_lucky_skill_chain)
-	GameManager.lucky_global_explosion.connect(_on_lucky_global_explosion)
-	GameManager.lucky_spacetime_fold.connect(_on_lucky_spacetime_fold)
-	GameManager.lucky_cosmic_end.connect(_on_lucky_cosmic_end)
-	# DAY-318 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_dragon_king.connect(_on_lucky_dragon_king)
-	GameManager.lucky_eternal_cycle.connect(_on_lucky_eternal_cycle)
-	GameManager.lucky_chaos_explosion.connect(_on_lucky_chaos_explosion)
-	GameManager.lucky_divine_revival.connect(_on_lucky_divine_revival)
-	GameManager.lucky_genesis_epoch.connect(_on_lucky_genesis_epoch)
-	# DAY-319 新增幸運特殊魚訊號連接（Panel 自行連接，HUD 只做備用橫幅）
-	GameManager.lucky_energy_storm.connect(_on_lucky_energy_storm)
-	GameManager.lucky_crystal_resonance.connect(_on_lucky_crystal_resonance)
-	GameManager.lucky_fate_judgment.connect(_on_lucky_fate_judgment)
-	GameManager.lucky_time_reversal.connect(_on_lucky_time_reversal)
-	GameManager.lucky_cosmic_singularity.connect(_on_lucky_cosmic_singularity)
+	# DAY-304~319 訊號已移入 HUDLuckySignals.gd（DAY-336 重構）
+	# 由 HUDLuckySignals.connect_all_lucky_signals() 統一管理
 
 func _process(delta: float) -> void:
 	if _boss_active and _boss_time_left > 0:
 		_boss_time_left -= delta
 		_update_boss_timer()
+
+func _init_lucky_signals() -> void:
+	# DAY-336：初始化 HUDLuckySignals 模組
+	if is_instance_valid(_lucky_signals):
+		_lucky_signals.lucky_event_system = lucky_event_system
+		_lucky_signals.connect_all_lucky_signals(self)
+		print("[HUD] HUDLuckySignals 初始化完成（DAY-304~319 訊號已接管）")
 
 func _find_lucky_event_system() -> void:
 	# 在場景樹中尋找 LuckyEventSystem 節點
