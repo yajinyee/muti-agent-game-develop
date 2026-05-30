@@ -1,6 +1,45 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-30（DAY-334 端對端整合測試工具 + 業界研究 + 深度優先策略轉向 + GitHub 同步）
+## 最後更新：2026-05-30（DAY-335 T001-T006 視覺升級 + HUD.gd 重構 + GitHub 同步）
+
+## DAY-335 更新（2026-05-30）：深度優先策略——T001-T006 視覺升級 + HUD.gd 重構 ✅
+- **策略執行：** 深度優先——讓最常出現的 6 個目標物有完整個性化視覺設計
+- **T001-T006 視覺升級：** 6 個基礎目標物全部升級為 64x64 像素圖
+  - T001 草：多根草莖（5根不同高度）+ 露珠光點 + 光澤高光
+  - T002 綠蟲：觸角 + 6隻腳 + 可愛眼睛 + 高光
+  - T003 紅蟲：速度線尾跡 + 流線型身體 + 兇眼（速度感）
+  - T004 藍蟲：電光尾跡 + 發光藍眼 + 電光觸角（電光感）
+  - T005 布丁：奶油頂 + 草莓 + 光澤 + 微笑（可愛感）
+  - T006 蘑菇：白色斑點 + 莖陰影 + 可愛眼睛（蘑菇特徵）
+- **工具：** `tools/upgrade_basic_targets_day335.py`
+- **HUD.gd 重構：** 建立 `HUDLuckySignals.gd`（拆分 148 個 Lucky 訊號連接）
+  - 委派模式：_show_banner / _show_event / _show_reward 統一委派給 LuckyEventSystem
+  - DAY-292~303 所有 Lucky 訊號處理函數移入（T106-T130）
+  - HUD.gd 技術債從 2369 行開始逐步縮減
+- **Agent 更新：** target-design-agent.md + visual-clarity-agent.md 更新至 DAY-335
+- **知識庫更新：** knowhow-log 條目 180/181/182（DAY-335 三個新知識點）
+- **QA 腳本：** `tools/qa_check_day335.py`（58 項驗證，58/58 全部通過）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **GitHub 同步：** 推送到 main 分支
+
+## 自我評估（DAY-335）
+- **Server 目標物數量：** 160 種（T001-T006 + T101-T253 + B001）— 不再新增
+- **Lucky 系統數量：** 148 個（T106-T253）— 不再新增
+- **Client Lucky Panel 數量：** 159 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry + 156 個 Panel）
+- **HUDLuckySignals.gd：** ✅ 新建立（DAY-292~303 訊號拆分完成）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8/10（維持）
+- **視覺清晰度：** 7.5/10 → 預計 8.0/10（T001-T006 升級後，需 Godot 實際驗證）
+- **核心循環流暢度：** 8/10
+- **最需要改善：** 在 Godot 實際遊玩一局，確認 T001-T006 視覺效果
+- **已知技術債：** HUD.gd 仍有 2369 行（HUDLuckySignals.gd 已開始拆分）
+- **下一步：** 繼續拆分 HUD.gd（DAY-304~333 的 Lucky 訊號移入 HUDLuckySignals.gd）
+
+## 下一步優先事項（DAY-336）
+1. 繼續拆分 HUD.gd（DAY-304~333 的 Lucky 訊號移入 HUDLuckySignals.gd）
+2. 在 Godot 實際遊玩一局，確認 T001-T006 視覺效果
+3. 優化 T101-T105 特殊目標物視覺（擬態箱、寶箱、隕石、金草、金幣魚）
+4. 執行端對端整合測試（`python tools/integration_test_day334.py --quick`）
 
 ## DAY-334 更新（2026-05-30）：端對端整合測試工具 + 品質優先策略轉向 ✅
 - **策略轉向：** 停止新增目標物（已有 160 個，遠超業界標準 20-40 個），轉向深度優化

@@ -5215,3 +5215,29 @@ if xxxMult > 1.0 {
   3. 確保每個 Lucky 系統的 Panel 動畫流暢且有爽感
   4. 優化射擊手感（投射物速度、命中特效時機）
 - **教訓：** 「加第 161 個目標物」的邊際效益遠低於「讓第 1 個目標物的體驗提升 10%」
+
+## 180. HUD.gd 超過 2330 行的技術債解法（DAY-335）
+- **問題：** HUD.gd 有 2369 行，148 個 Lucky 訊號連接全部塞在同一個檔案
+- **原因：** 每次新增 Lucky 魚系統都直接在 HUD.gd 追加，沒有拆分
+- **解決：** 建立 `HUDLuckySignals.gd`，把所有 Lucky 訊號連接和處理函數移出
+  - HUD._ready() 只需呼叫 `lucky_signals.connect_all_lucky_signals(self)`
+  - HUDLuckySignals 透過依賴注入取得 hud 和 lucky_event_system 引用
+  - 委派模式：_show_banner / _show_event / _show_reward 統一委派給 LuckyEventSystem
+- **教訓：** 超過 50 個同類型函數就要建立基礎類別或拆分模組，不要等到 2000+ 行才重構
+
+## 181. Windows 多個 Python 版本衝突（DAY-335）
+- **問題：** `python` 指令指向 `C:\msys64\mingw64\bin\python.exe`（沒有 pip）
+- **原因：** msys64 的 Python 被加入 PATH 且優先級更高
+- **解決：** 使用完整路徑 `C:\Users\yajinyee0306\AppData\Local\Programs\Python\Python312\python.exe`
+- **教訓：** Windows 上有多個 Python 時，用 `python -c "import sys; print(sys.executable)"` 確認實際路徑
+
+## 182. T001-T006 基礎目標物視覺升級策略（DAY-335）
+- **問題：** 視覺清晰度停在 7.5/10，根本原因是最常出現的基礎目標物視覺太簡單
+- **解決：** 深度優先策略——先讓 T001-T006 有完整的個性化設計
+  - T001 草：多根草莖 + 露珠 + 光澤高光
+  - T002 綠蟲：觸角 + 6隻腳 + 眼睛 + 高光
+  - T003 紅蟲：速度線尾跡 + 流線型身體 + 兇眼
+  - T004 藍蟲：電光尾跡 + 發光藍眼 + 電光觸角
+  - T005 布丁：奶油頂 + 草莓 + 光澤 + 微笑
+  - T006 蘑菇：白色斑點 + 莖陰影 + 可愛眼睛
+- **教訓：** 160 個目標物不如 6 個精心設計的目標物。深度 > 廣度
