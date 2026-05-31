@@ -102,8 +102,43 @@ func _find_node_by_class(node: Node, class_name_str: String) -> Node:
 func _on_player_updated(_data: Dictionary) -> void:
 	_update_ui()
 
+# DAY-340 金幣計數動畫：數字跳動效果
+var _displayed_coins: int = 0
+var _target_coins: int = 0
+var _coin_tween: Tween = null
+
+func _animate_coins_to(new_coins: int) -> void:
+	if new_coins == _displayed_coins:
+		return
+	_target_coins = new_coins
+	if is_instance_valid(_coin_tween):
+		_coin_tween.kill()
+	_coin_tween = create_tween()
+	var diff = abs(new_coins - _displayed_coins)
+	# 差距越大，動畫越快（最快 0.3s，最慢 0.8s）
+	var duration = clamp(0.05 + diff * 0.002, 0.15, 0.8)
+	_coin_tween.tween_method(
+		func(v: int):
+			_displayed_coins = v
+			if is_instance_valid(coins_label):
+				coins_label.text = "💰 %d" % v
+		,
+		_displayed_coins,
+		new_coins,
+		duration
+	)
+	# 大獎時金幣標籤彈跳
+	if new_coins > _displayed_coins + 50:
+		_coin_tween.parallel().tween_property(coins_label, "scale", Vector2(1.3, 1.3), 0.1)
+		_coin_tween.tween_property(coins_label, "scale", Vector2(1.0, 1.0), 0.1)
+
 func _update_ui() -> void:
-	coins_label.text = "💰 %d" % GameManager.get_coins()
+	# 金幣：使用動畫計數
+	var new_coins = GameManager.get_coins()
+	if new_coins != _target_coins:
+		_animate_coins_to(new_coins)
+	else:
+		coins_label.text = "💰 %d" % new_coins
 	var lv = GameManager.get_bet_level()
 	var cost = GameManager.get_bet_cost()
 	bet_label.text = "BET LV%d (%d)" % [lv, cost]
