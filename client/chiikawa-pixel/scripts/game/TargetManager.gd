@@ -856,7 +856,10 @@ func update_target_hp(instance_id: String, hp: int, max_hp: int) -> void:
 	if not is_instance_valid(hp_bar) or not is_instance_valid(hp_bg):
 		return
 	var pct = float(hp) / float(max_hp) if max_hp > 0 else 0.0
-	hp_bar.size.x = hp_bg.size.x * pct
+	# DAY-340 HP 條動畫：平滑縮短
+	var target_width = hp_bg.size.x * pct
+	var tween = hp_bar.create_tween()
+	tween.tween_property(hp_bar, "size:x", target_width, 0.1).set_ease(Tween.EASE_OUT)
 	if pct > 0.6:
 		hp_bar.color = Color(0.2, 0.9, 0.2)
 	elif pct > 0.3:
@@ -872,6 +875,8 @@ func _flash_hit(node: Node2D) -> void:
 		var tween = node.create_tween()
 		tween.tween_method(func(v: float): mat.set_shader_parameter("flash_intensity", v), 0.0, 1.0, 0.04)
 		tween.tween_method(func(v: float): mat.set_shader_parameter("flash_intensity", v), 1.0, 0.0, 0.08)
+		# DAY-340 HP 條受擊閃爍
+		_flash_hp_bar(node)
 		return
 	# 備用：舊的 modulate 方式
 	for child in node.get_children():
@@ -880,6 +885,16 @@ func _flash_hit(node: Node2D) -> void:
 			tween.tween_property(child, "modulate", Color(3.0, 3.0, 3.0), 0.04)
 			tween.tween_property(child, "modulate", Color.WHITE, 0.08)
 			break
+	_flash_hp_bar(node)
+
+## DAY-340 HP 條受擊閃爍（讓玩家清楚看到傷害）
+func _flash_hp_bar(node: Node2D) -> void:
+	var hp_bar = node.get_node_or_null("HPBar")
+	if not is_instance_valid(hp_bar):
+		return
+	var tween = hp_bar.create_tween()
+	tween.tween_property(hp_bar, "modulate", Color(3.0, 3.0, 3.0), 0.04)
+	tween.tween_property(hp_bar, "modulate", Color.WHITE, 0.1)
 
 # ── 目標物擊破 ────────────────────────────────────────────────
 
