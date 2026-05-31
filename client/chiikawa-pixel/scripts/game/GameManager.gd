@@ -202,6 +202,10 @@ signal other_player_attack(data: Dictionary)
 signal daily_quest_update(data: Dictionary)
 signal daily_quest_complete(data: Dictionary)
 
+# DAY-346 每週挑戰系統
+signal weekly_challenge_update(data: Dictionary)
+signal weekly_challenge_complete(data: Dictionary)
+
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
 var current_state: String = "normal_play"
@@ -570,6 +574,11 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("daily_quest_update", payload)
 		"daily_quest_complete":
 			emit_signal("daily_quest_complete", payload)
+		# DAY-346 每週挑戰系統
+		"weekly_challenge_update":
+			emit_signal("weekly_challenge_update", payload)
+		"weekly_challenge_complete":
+			emit_signal("weekly_challenge_complete", payload)
 		"pong":
 			pass
 		"error":
@@ -637,3 +646,10 @@ func request_daily_quests() -> void:
 
 func claim_daily_quest(quest_id: String) -> void:
 	NetworkManager.send("daily_quest_claim", {"quest_id": quest_id})
+
+# DAY-346 每週挑戰系統
+func request_weekly_challenges() -> void:
+	NetworkManager.send("weekly_challenge_request", {})
+
+func claim_weekly_challenge(challenge_id: String) -> void:
+	NetworkManager.send("weekly_challenge_claim", {"challenge_id": challenge_id})

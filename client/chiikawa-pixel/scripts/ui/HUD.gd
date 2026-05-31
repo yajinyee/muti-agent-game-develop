@@ -35,6 +35,9 @@ var _online_label: Label = null
 # DAY-345 每日任務按鈕
 var _quest_btn: Button = null
 var _daily_quest_panel: Node = null
+# DAY-346 每週挑戰按鈕
+var _weekly_btn: Button = null
+var _weekly_challenge_panel: Node = null
 
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
@@ -57,6 +60,7 @@ func _ready() -> void:
 	_create_combo_label()
 	_create_online_label()
 	_create_quest_button()
+	_create_weekly_button()
 	_update_ui()
 	# 嘗試自動找 LuckyEventSystem（如果在同一場景樹中）
 	call_deferred("_find_lucky_event_system")
@@ -654,4 +658,28 @@ func _create_quest_button() -> void:
 	_quest_btn.pressed.connect(func():
 		if is_instance_valid(_daily_quest_panel) and _daily_quest_panel.has_method("_toggle_panel"):
 			_daily_quest_panel._toggle_panel()
+	)
+
+# ── DAY-346 每週挑戰按鈕 ──────────────────────────────────────
+
+func _create_weekly_button() -> void:
+	_weekly_btn = Button.new()
+	_weekly_btn.name = "WeeklyBtn"
+	_weekly_btn.text = "🏆"
+	_weekly_btn.position = Vector2(1000, 40)
+	_weekly_btn.size = Vector2(40, 30)
+	_weekly_btn.add_theme_font_size_override("font_size", 16)
+	_weekly_btn.z_index = 55
+	_weekly_btn.tooltip_text = "每週挑戰"
+	add_child(_weekly_btn)
+
+	# 建立每週挑戰面板
+	_weekly_challenge_panel = load("res://scripts/ui/WeeklyChallengePanel.gd").new()
+	_weekly_challenge_panel.name = "WeeklyChallengePanel"
+	add_child(_weekly_challenge_panel)
+
+	# 連接按鈕
+	_weekly_btn.pressed.connect(func():
+		if is_instance_valid(_weekly_challenge_panel) and _weekly_challenge_panel.has_method("_toggle_panel"):
+			_weekly_challenge_panel._toggle_panel()
 	)

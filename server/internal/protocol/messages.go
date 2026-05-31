@@ -1307,3 +1307,47 @@ type DailyQuestCompletePayload struct {
 type DailyQuestClaimRequest struct {
 	QuestID string `json:"quest_id"`
 }
+
+// ── DAY-346 每週挑戰系統 ──────────────────────────────────────
+
+const (
+	MsgWeeklyChallengeUpdate   = "weekly_challenge_update"   // Server → Client：挑戰狀態更新
+	MsgWeeklyChallengeComplete = "weekly_challenge_complete" // Server → Client：挑戰完成通知
+	MsgWeeklyChallengeClaim    = "weekly_challenge_claim"    // Client → Server：領取獎勵
+	MsgWeeklyChallengeRequest  = "weekly_challenge_request"  // Client → Server：請求挑戰狀態
+)
+
+// WeeklyChallengeUpdatePayload 每週挑戰狀態更新
+type WeeklyChallengeUpdatePayload struct {
+	Challenges  []ChallengeStatusPayload `json:"challenges"`
+	WeeklyCoins int                      `json:"weekly_coins"`
+	WeekKey     string                   `json:"week_key"`
+	ResetAt     int64                    `json:"reset_at"` // UTC 毫秒時間戳
+}
+
+// ChallengeStatusPayload 單個挑戰狀態
+type ChallengeStatusPayload struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Target      int    `json:"target"`
+	Progress    int    `json:"progress"`
+	Completed   bool   `json:"completed"`
+	Claimed     bool   `json:"claimed"`
+	Reward      int    `json:"reward"`
+	Tier        int    `json:"tier"`
+}
+
+// WeeklyChallengeCompletePayload 挑戰完成通知
+type WeeklyChallengeCompletePayload struct {
+	ChallengeID   string `json:"challenge_id"`
+	ChallengeName string `json:"challenge_name"`
+	Reward        int    `json:"reward"`
+	Tier          int    `json:"tier"`
+	Message       string `json:"message"`
+}
+
+// WeeklyChallengeClaim 領取挑戰獎勵請求
+type WeeklyChallengeClaim struct {
+	ChallengeID string `json:"challenge_id"`
+}

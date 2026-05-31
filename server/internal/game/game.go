@@ -257,6 +257,9 @@ type Game struct {
 
 	// DAY-345 每日任務系統
 	dailyQuest *DailyQuestSystem
+
+	// DAY-346 每週挑戰系統
+	weeklyChallenge *WeeklyChallengeSystem
 }
 
 func NewGame(hub *ws.Hub) *Game {
@@ -477,6 +480,9 @@ func NewGame(hub *ws.Hub) *Game {
 
 		// DAY-345 每日任務系統
 		dailyQuest: newDailyQuestSystem(),
+
+		// DAY-346 每週挑戰系統
+		weeklyChallenge: newWeeklyChallengeSystem(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -578,6 +584,15 @@ func (g *Game) HandleMessage(clientID string, msgType string, payload json.RawMe
 			return
 		}
 		g.handleDailyQuestClaim(clientID, req.QuestID)
+	// DAY-346 每週挑戰系統
+	case protocol.MsgWeeklyChallengeRequest:
+		g.handleWeeklyChallengeRequest(clientID)
+	case protocol.MsgWeeklyChallengeClaim:
+		var req protocol.WeeklyChallengeClaim
+		if err := json.Unmarshal(payload, &req); err != nil {
+			return
+		}
+		g.handleWeeklyChallengeClaim(clientID, req.ChallengeID)
 	}
 }
 
@@ -789,6 +804,10 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 
 		// DAY-345 每日任務：連擊達成計數（goroutine 避免死鎖）
 		go g.notifyQuestProgress(playerID, "combo", p.ComboCount)
+
+		// DAY-346 每週挑戰：連擊達成計數（goroutine 避免死鎖）
+		comboVal := p.ComboCount
+		go g.notifyWeeklyChallengeProgress(playerID, "combo", false, 0.0, comboVal)
 
 		// DAY-301 全服加成倍率疊加
 		jackpotBoost := g.luckyJackpotFish.getGrandBoostMult()
@@ -1796,6 +1815,11 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 
 		// DAY-345 每日任務：擊破目標計數（在鎖外呼叫，避免死鎖）
 		go g.notifyQuestProgress(playerID, "kill", 1)
+
+		// DAY-346 每週挑戰：擊破目標計數（goroutine 避免死鎖）
+		isLucky := len(t.Def.ID) >= 4 && t.Def.ID[:1] == "T" && t.Def.ID[1:] >= "106" // T106+ 為 Lucky 目標物
+		killMult := t.Multiplier
+		go g.notifyWeeklyChallengeProgress(playerID, "kill", isLucky, killMult, 1)
 	} else {
 		// 未擊破，更新 HP（視覺反饋）
 		t.HP = max(1, t.HP-bet.AttackPower/5)
@@ -1989,6 +2013,9 @@ func (g *Game) triggerBonusLocked(playerID string) {
 
 	// DAY-345 每日任務：Bonus 觸發計數（goroutine 避免死鎖）
 	go g.notifyQuestProgress(playerID, "bonus", 1)
+
+	// DAY-346 每週挑戰：Bonus 觸發計數（goroutine 避免死鎖）
+	go g.notifyWeeklyChallengeProgress(playerID, "bonus", false, 0.0, 1)
 }
 
 func (g *Game) handleBonusClick(playerID string, req protocol.BonusClickRequest) {
@@ -2395,5 +2422,85 @@ func (g *Game) notifyQuestProgress(playerID string, eventType string, value int)
 		log.Printf("[DailyQuest] Player %s completed quest: %s (reward: %d)", playerID, questName, reward)
 		// 同步更新任務狀態
 		g.handleDailyQuestRequest(playerID)
+	}
+}
+
+// ── DAY-346 每週挑戰系統 Handler ─────────────────────────────
+
+// handleWeeklyChallengeRequest 處理玩家請求每週挑戰狀態
+func (g *Game) handleWeeklyChallengeRequest(playerID string) {
+	status := g.weeklyChallenge.GetPlayerStatus(playerID)
+	payload := protocol.WeeklyChallengeUpdatePayload{
+		WeeklyCoins: status.WeeklyCoins,
+		WeekKey:     status.WeekKey,
+		ResetAt:     status.ResetAt,
+	}
+	for _, c := range status.Challenges {
+		payload.Challenges = append(payload.Challenges, protocol.ChallengeStatusPayload{
+			ID:          c.ID,
+			Name:        c.Name,
+			Description: c.Description,
+			Target:      c.Target,
+			Progress:    c.Progress,
+			Completed:   c.Completed,
+			Claimed:     c.Claimed,
+			Reward:      c.Reward,
+			Tier:        c.Tier,
+		})
+	}
+	g.hub.Send(playerID, protocol.MsgWeeklyChallengeUpdate, payload)
+}
+
+// handleWeeklyChallengeClaim 處理玩家領取每週挑戰獎勵
+func (g *Game) handleWeeklyChallengeClaim(playerID string, challengeID string) {
+	coins := g.weeklyChallenge.ClaimReward(playerID, challengeID)
+	if coins < 0 {
+		g.hub.Send(playerID, protocol.MsgError, map[string]string{
+			"message": "挑戰未完成或已領取",
+		})
+		return
+	}
+	log.Printf("[WeeklyChallenge] Player %s claimed challenge %s, earned %d coins", playerID, challengeID, coins)
+	// 發送更新後的挑戰狀態
+	g.handleWeeklyChallengeRequest(playerID)
+	// 公告
+	g.hub.Send(playerID, protocol.MsgAnnounce, protocol.AnnouncePayload{
+		Message:  fmt.Sprintf("🏆 週間挑戰完成！獲得 %d 任務幣", coins),
+		Priority: "high",
+		Color:    "#FF8C00",
+	})
+}
+
+// notifyWeeklyChallengeProgress 通知每週挑戰進度
+// eventType: "kill"（isLucky, mult）/ "combo"（value）/ "bonus"
+func (g *Game) notifyWeeklyChallengeProgress(playerID string, eventType string, isLucky bool, mult float64, value int) {
+	var completedList []WeeklyChallengeComplete
+
+	switch eventType {
+	case "kill":
+		completedList = g.weeklyChallenge.OnKillTarget(playerID, isLucky, mult)
+	case "combo":
+		completedList = g.weeklyChallenge.OnComboReach(playerID, value)
+	case "bonus":
+		completedList = g.weeklyChallenge.OnTriggerBonus(playerID)
+	}
+
+	for _, c := range completedList {
+		tierEmoji := "🥉"
+		if c.Tier == 2 {
+			tierEmoji = "🥈"
+		} else if c.Tier == 3 {
+			tierEmoji = "🥇"
+		}
+		g.hub.Send(playerID, protocol.MsgWeeklyChallengeComplete, protocol.WeeklyChallengeCompletePayload{
+			ChallengeID:   c.ChallengeID,
+			ChallengeName: c.ChallengeName,
+			Reward:        c.Reward,
+			Tier:          c.Tier,
+			Message:       fmt.Sprintf("%s 週間挑戰完成：%s！點擊領取 %d 任務幣", tierEmoji, c.ChallengeName, c.Reward),
+		})
+		log.Printf("[WeeklyChallenge] Player %s completed challenge: %s (tier: %d, reward: %d)", playerID, c.ChallengeName, c.Tier, c.Reward)
+		// 同步更新挑戰狀態
+		g.handleWeeklyChallengeRequest(playerID)
 	}
 }
