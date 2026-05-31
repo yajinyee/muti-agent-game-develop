@@ -1261,3 +1261,49 @@ type LuckyPentaFusionPayload struct {
 	GlobalSeconds int     `json:"global_seconds,omitempty"`
 	Milestone     string  `json:"milestone,omitempty"`
 }
+
+// ── DAY-345 每日任務系統 ──────────────────────────────────────
+
+// MsgDailyQuestUpdate 每日任務狀態更新（Server → Client）
+// MsgDailyQuestComplete 任務完成通知（Server → Client）
+// MsgDailyQuestClaim 領取任務獎勵（Client → Server）
+// MsgDailyQuestRequest 請求任務狀態（Client → Server）
+
+const (
+	MsgDailyQuestUpdate   = "daily_quest_update"   // Server → Client：任務狀態更新
+	MsgDailyQuestComplete = "daily_quest_complete"  // Server → Client：任務完成通知
+	MsgDailyQuestClaim    = "daily_quest_claim"     // Client → Server：領取獎勵
+	MsgDailyQuestRequest  = "daily_quest_request"   // Client → Server：請求任務狀態
+)
+
+// DailyQuestUpdatePayload 每日任務狀態更新
+type DailyQuestUpdatePayload struct {
+	Quests     []QuestStatusPayload `json:"quests"`
+	QuestCoins int                  `json:"quest_coins"`
+	ResetAt    int64                `json:"reset_at"` // UTC 毫秒時間戳
+}
+
+// QuestStatusPayload 單個任務狀態
+type QuestStatusPayload struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Target      int    `json:"target"`
+	Progress    int    `json:"progress"`
+	Completed   bool   `json:"completed"`
+	Claimed     bool   `json:"claimed"`
+	Reward      int    `json:"reward"`
+}
+
+// DailyQuestCompletePayload 任務完成通知
+type DailyQuestCompletePayload struct {
+	QuestID   string `json:"quest_id"`
+	QuestName string `json:"quest_name"`
+	Reward    int    `json:"reward"`
+	Message   string `json:"message"`
+}
+
+// DailyQuestClaimRequest 領取任務獎勵請求
+type DailyQuestClaimRequest struct {
+	QuestID string `json:"quest_id"`
+}

@@ -254,6 +254,9 @@ type Game struct {
 	luckyPentaFusion     *luckyPentaFusionManager
 
 	lastTick time.Time
+
+	// DAY-345 每日任務系統
+	dailyQuest *DailyQuestSystem
 }
 
 func NewGame(hub *ws.Hub) *Game {
@@ -471,6 +474,9 @@ func NewGame(hub *ws.Hub) *Game {
 		luckyFishermanTrail:  newLuckyFishermanTrailManager(),
 		luckyGoldenGills:     newLuckyGoldenGillsManager(),
 		luckyPentaFusion:     newLuckyPentaFusionManager(),
+
+		// DAY-345 每日任務系統
+		dailyQuest: newDailyQuestSystem(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -563,6 +569,15 @@ func (g *Game) HandleMessage(clientID string, msgType string, payload json.RawMe
 	case "crash_harvest":
 		// T130 崩潰魚：玩家點擊收割
 		g.handleCrashHarvest(clientID)
+	// DAY-345 每日任務系統
+	case protocol.MsgDailyQuestRequest:
+		g.handleDailyQuestRequest(clientID)
+	case protocol.MsgDailyQuestClaim:
+		var req protocol.DailyQuestClaimRequest
+		if err := json.Unmarshal(payload, &req); err != nil {
+			return
+		}
+		g.handleDailyQuestClaim(clientID, req.QuestID)
 	}
 }
 
@@ -771,6 +786,9 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 		// Disturbance 系統：記錄最近擊破（T218 擾動魚）
 		p.AddRecentKill()
 		effectiveMult := t.Multiplier * (1.0 + comboBonus)
+
+		// DAY-345 每日任務：連擊達成計數（goroutine 避免死鎖）
+		go g.notifyQuestProgress(playerID, "combo", p.ComboCount)
 
 		// DAY-301 全服加成倍率疊加
 		jackpotBoost := g.luckyJackpotFish.getGrandBoostMult()
@@ -1775,6 +1793,9 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 			// DAY-338 修復死鎖：在 tick 的鎖保護下，使用不加鎖版本
 			g.triggerBonusLocked(playerID)
 		}
+
+		// DAY-345 每日任務：擊破目標計數（在鎖外呼叫，避免死鎖）
+		go g.notifyQuestProgress(playerID, "kill", 1)
 	} else {
 		// 未擊破，更新 HP（視覺反饋）
 		t.HP = max(1, t.HP-bet.AttackPower/5)
@@ -1965,6 +1986,9 @@ func (g *Game) triggerBonusLocked(playerID string) {
 	})
 	g.sendPlayerUpdateLocked(playerID)
 	log.Printf("[Game] Bonus triggered by %s (locked)", playerID)
+
+	// DAY-345 每日任務：Bonus 觸發計數（goroutine 避免死鎖）
+	go g.notifyQuestProgress(playerID, "bonus", 1)
 }
 
 func (g *Game) handleBonusClick(playerID string, req protocol.BonusClickRequest) {
@@ -2299,4 +2323,77 @@ func (g *Game) applyUltimateJudgment(p *Player, rewardMult float64) int {
 		delete(g.targets, id)
 	}
 	return hitCount
+}
+
+// ── DAY-345 每日任務系統 Handler ─────────────────────────────
+
+// handleDailyQuestRequest 處理玩家請求任務狀態
+func (g *Game) handleDailyQuestRequest(playerID string) {
+	status := g.dailyQuest.GetPlayerStatus(playerID)
+	payload := protocol.DailyQuestUpdatePayload{
+		QuestCoins: status.QuestCoins,
+		ResetAt:    status.ResetAt,
+	}
+	for _, q := range status.Quests {
+		payload.Quests = append(payload.Quests, protocol.QuestStatusPayload{
+			ID:          q.ID,
+			Name:        q.Name,
+			Description: q.Description,
+			Target:      q.Target,
+			Progress:    q.Progress,
+			Completed:   q.Completed,
+			Claimed:     q.Claimed,
+			Reward:      q.Reward,
+		})
+	}
+	g.hub.Send(playerID, protocol.MsgDailyQuestUpdate, payload)
+}
+
+// handleDailyQuestClaim 處理玩家領取任務獎勵
+func (g *Game) handleDailyQuestClaim(playerID string, questID string) {
+	coins := g.dailyQuest.ClaimReward(playerID, questID)
+	if coins < 0 {
+		g.hub.Send(playerID, protocol.MsgError, map[string]string{
+			"message": "任務未完成或已領取",
+		})
+		return
+	}
+	log.Printf("[DailyQuest] Player %s claimed quest %s, earned %d coins", playerID, questID, coins)
+	// 發送更新後的任務狀態
+	g.handleDailyQuestRequest(playerID)
+	// 公告
+	g.hub.Send(playerID, protocol.MsgAnnounce, protocol.AnnouncePayload{
+		Message:  fmt.Sprintf("🎯 任務完成！獲得 %d 任務幣", coins),
+		Priority: "normal",
+		Color:    "#FFD700",
+	})
+}
+
+// notifyQuestProgress 通知任務進度（擊破目標時呼叫）
+func (g *Game) notifyQuestProgress(playerID string, eventType string, value int) {
+	var completed bool
+	var questName string
+	var reward int
+
+	switch eventType {
+	case "kill":
+		completed, questName, reward = g.dailyQuest.OnKillTarget(playerID)
+	case "combo":
+		completed, questName, reward = g.dailyQuest.OnComboReach(playerID, value)
+	case "bonus":
+		completed, questName, reward = g.dailyQuest.OnTriggerBonus(playerID)
+	}
+
+	if completed {
+		// 通知任務完成
+		g.hub.Send(playerID, protocol.MsgDailyQuestComplete, protocol.DailyQuestCompletePayload{
+			QuestID:   questName,
+			QuestName: questName,
+			Reward:    reward,
+			Message:   fmt.Sprintf("🎯 任務完成：%s！點擊領取 %d 任務幣", questName, reward),
+		})
+		log.Printf("[DailyQuest] Player %s completed quest: %s (reward: %d)", playerID, questName, reward)
+		// 同步更新任務狀態
+		g.handleDailyQuestRequest(playerID)
+	}
 }

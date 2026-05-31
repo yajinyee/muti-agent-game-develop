@@ -5552,3 +5552,34 @@ if xxxMult > 1.0 {
   - `Cannon.gd`：`_on_player_updated` 顯示「名稱 [角色]」格式
 - **顯示邏輯：** 若 DisplayName 為空或等於 ID，只顯示角色名；否則顯示「名稱 [角色]」
 - **教訓：** 玩家名稱顯示要有 fallback（ID 前 8 碼），不能假設 DisplayName 一定有值
+
+## 208. PNG IDAT 資料損壞的診斷方法（DAY-345）
+- **問題：** PIL 無法讀取某些 PNG（`unrecognized data stream contents`）
+- **診斷步驟：**
+  1. 確認 PNG 頭部：`header.hex()` 應為 `89504e47...`（正確）
+  2. 解析 chunk：找 IHDR、IDAT、IEND
+  3. 嘗試 `zlib.decompress(idat_data)` — 若報 `unknown compression method` 則 IDAT 損壞
+- **根本原因：** 舊版生成腳本使用了不相容的壓縮方式，或檔案在傳輸中損壞
+- **解決：** 重新用 PIL 生成正確的 PNG（`img.save(path)` 會自動使用正確的 zlib 壓縮）
+- **教訓：** 批次升級前先用 `Image.open(f).load()` 驗證所有 PNG 可讀取，損壞的先修復再升級
+
+## 209. 每日任務系統設計原則（DAY-345，BGaming Quests 啟發）
+- **來源：** BGaming Quests（2026-05-27 發布）
+- **核心設計：**
+  1. 3個每日任務（擊破目標、連擊達成、Bonus 觸發）
+  2. 完成獲得「任務幣」（不是直接金幣，避免影響 RTP）
+  3. 每日 UTC 00:00 重置（任務幣累積不重置）
+  4. 任務難度依星期幾調整（週一輕鬆，週末較難）
+- **技術實作：**
+  - Server：`daily_quest.go` 純記憶體實作（不需要資料庫）
+  - 任務觸發：在 `handleAttackLocked` 擊破後用 `go goroutine` 呼叫（避免死鎖）
+  - Client：`DailyQuestPanel.gd` 獨立 CanvasLayer（layer=20）
+- **教訓：** 任務觸發要用 goroutine，不能在持有 mutex 的情況下呼叫 hub.Send
+
+## 210. 中高階 Lucky 目標物分層光暈策略（DAY-345）
+- **T131-T140（神秘感）：** 深藍/紫色光暈（B+12%, R+6%, G-5%）
+- **T141-T150（火焰感）：** 橙紅色光暈（R+12%, G+3%, B-10%）
+- **T151-T160（電光感）：** 青綠色光暈（G+10%, B+8%, R-5%）
+- **增強參數：** 飽和度+40%、對比度+30%、亮度+8%、雙重銳化
+- **效果：** 玩家可以直覺感受到目標物的「屬性」（神秘/火焰/電光）
+- **教訓：** 不同等級的目標物用不同色調光暈，比統一金色更有辨識度

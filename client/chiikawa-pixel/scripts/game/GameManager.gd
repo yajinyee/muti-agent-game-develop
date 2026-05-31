@@ -198,6 +198,10 @@ signal lucky_penta_fusion(data: Dictionary)
 # DAY-339 多人投射物顯示
 signal other_player_attack(data: Dictionary)
 
+# DAY-345 每日任務系統
+signal daily_quest_update(data: Dictionary)
+signal daily_quest_complete(data: Dictionary)
+
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
 var current_state: String = "normal_play"
@@ -561,6 +565,11 @@ func _on_message(type: String, payload: Dictionary) -> void:
 		# DAY-339 多人投射物顯示
 		"other_player_attack":
 			emit_signal("other_player_attack", payload)
+		# DAY-345 每日任務系統
+		"daily_quest_update":
+			emit_signal("daily_quest_update", payload)
+		"daily_quest_complete":
+			emit_signal("daily_quest_complete", payload)
 		"pong":
 			pass
 		"error":
@@ -621,3 +630,10 @@ func get_display_name() -> String:
 	return player_data.get("display_name", get_player_id().substr(0, 8))
 func get_online_count() -> int:
 	return player_data.get("online_count", 1)
+
+# DAY-345 每日任務系統
+func request_daily_quests() -> void:
+	NetworkManager.send("daily_quest_request", {})
+
+func claim_daily_quest(quest_id: String) -> void:
+	NetworkManager.send("daily_quest_claim", {"quest_id": quest_id})

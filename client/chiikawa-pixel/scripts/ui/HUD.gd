@@ -32,6 +32,9 @@ var _last_combo: int = 0
 var _lucky_signals: Node = null
 # DAY-342 在線玩家數顯示
 var _online_label: Label = null
+# DAY-345 每日任務按鈕
+var _quest_btn: Button = null
+var _daily_quest_panel: Node = null
 
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
@@ -53,6 +56,7 @@ func _ready() -> void:
 	_create_disconnect_overlay()
 	_create_combo_label()
 	_create_online_label()
+	_create_quest_button()
 	_update_ui()
 	# 嘗試自動找 LuckyEventSystem（如果在同一場景樹中）
 	call_deferred("_find_lucky_event_system")
@@ -627,3 +631,27 @@ func _update_online_display() -> void:
 	else:
 		_online_label.text = "👥 %d 在線 🔥" % count
 		_online_label.modulate = Color(1.0, 0.85, 0.0)
+
+# ── DAY-345 每日任務按鈕 ──────────────────────────────────────
+
+func _create_quest_button() -> void:
+	_quest_btn = Button.new()
+	_quest_btn.name = "QuestBtn"
+	_quest_btn.text = "🎯"
+	_quest_btn.position = Vector2(1050, 40)
+	_quest_btn.size = Vector2(40, 30)
+	_quest_btn.add_theme_font_size_override("font_size", 16)
+	_quest_btn.z_index = 55
+	_quest_btn.tooltip_text = "每日任務"
+	add_child(_quest_btn)
+
+	# 建立每日任務面板
+	_daily_quest_panel = load("res://scripts/ui/DailyQuestPanel.gd").new()
+	_daily_quest_panel.name = "DailyQuestPanel"
+	add_child(_daily_quest_panel)
+
+	# 連接按鈕
+	_quest_btn.pressed.connect(func():
+		if is_instance_valid(_daily_quest_panel) and _daily_quest_panel.has_method("_toggle_panel"):
+			_daily_quest_panel._toggle_panel()
+	)
