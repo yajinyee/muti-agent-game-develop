@@ -263,6 +263,10 @@ type Game struct {
 
 	// DAY-347 賽季通行證系統
 	seasonPass *SeasonPassManager
+
+	// DAY-348 任務幣兌換商店 + 賽季排行榜
+	questShop         *QuestShop
+	seasonLeaderboard *SeasonLeaderboard
 }
 
 func NewGame(hub *ws.Hub) *Game {
@@ -489,6 +493,10 @@ func NewGame(hub *ws.Hub) *Game {
 
 		// DAY-347 賽季通行證系統
 		seasonPass: NewSeasonPassManager(),
+
+		// DAY-348 任務幣兌換商店 + 賽季排行榜
+		questShop:         NewQuestShop(),
+		seasonLeaderboard: NewSeasonLeaderboard(time.Now().In(time.FixedZone("UTC+8", 8*60*60)).Format("2006-01")),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -599,6 +607,17 @@ func (g *Game) HandleMessage(clientID string, msgType string, payload json.RawMe
 			return
 		}
 		g.handleWeeklyChallengeClaim(clientID, req.ChallengeID)
+	// DAY-348 任務幣兌換商店 + 賽季排行榜
+	case protocol.MsgShopRequest:
+		g.handleShopRequest(clientID)
+	case protocol.MsgShopPurchase:
+		var req protocol.ShopPurchaseRequest
+		if err := json.Unmarshal(payload, &req); err != nil {
+			return
+		}
+		g.handleShopPurchase(clientID, req.ItemID)
+	case protocol.MsgSeasonLeaderboardRequest:
+		g.handleSeasonLeaderboardRequest(clientID)
 	}
 }
 
@@ -2570,4 +2589,167 @@ func (g *Game) addSeasonXP(playerID string, xp int, source string) {
 		})
 		log.Printf("[SeasonPass] Player %s leveled up to %d (%s)", playerID, newLevel, tier.Name)
 	}
+}
+
+// ── DAY-348 任務幣兌換商店 + 賽季排行榜 Handler ──────────────
+
+// handleShopRequest 處理玩家請求商店資訊
+func (g *Game) handleShopRequest(playerID string) {
+	// 取得玩家任務幣（每日 + 每週）
+	questCoins := g.dailyQuest.GetQuestCoins(playerID) + g.weeklyChallenge.GetWeeklyCoins(playerID)
+
+	// 轉換商品列表
+	items := g.questShop.GetItems()
+	itemPayloads := make([]protocol.ShopItemPayload, len(items))
+	for i, item := range items {
+		itemPayloads[i] = protocol.ShopItemPayload{
+			ID:          item.ID,
+			Type:        string(item.Type),
+			Name:        item.Name,
+			Description: item.Description,
+			Cost:        item.Cost,
+			Value:       item.Value,
+			Icon:        item.Icon,
+		}
+	}
+
+	// 取得有效效果
+	effects := g.questShop.GetActiveEffectsSummary(playerID)
+
+	g.hub.Send(playerID, protocol.MsgShopItems, protocol.ShopItemsPayload{
+		Items:      itemPayloads,
+		QuestCoins: questCoins,
+		Effects:    effects,
+	})
+}
+
+// handleShopPurchase 處理玩家購買道具
+func (g *Game) handleShopPurchase(playerID string, itemID string) {
+	// 取得玩家任務幣（每日 + 每週合計）
+	dailyCoins := g.dailyQuest.GetQuestCoins(playerID)
+	weeklyCoins := g.weeklyChallenge.GetWeeklyCoins(playerID)
+	totalCoins := dailyCoins + weeklyCoins
+
+	// 嘗試購買
+	success, errMsg, item := g.questShop.Purchase(playerID, itemID, totalCoins)
+	if !success {
+		g.hub.Send(playerID, protocol.MsgShopPurchaseResult, protocol.ShopPurchaseResultPayload{
+			Success: false,
+			ItemID:  itemID,
+			Message: errMsg,
+			QuestCoins: totalCoins,
+		})
+		return
+	}
+
+	// 扣除任務幣（優先扣每日，不足再扣每週）
+	cost := item.Cost
+	if dailyCoins >= cost {
+		g.dailyQuest.SpendQuestCoins(playerID, cost)
+	} else {
+		g.dailyQuest.SpendQuestCoins(playerID, dailyCoins)
+		g.weeklyChallenge.SpendQuestCoins(playerID, cost-dailyCoins)
+	}
+
+	// 計算剩餘任務幣
+	remainingCoins := g.dailyQuest.GetQuestCoins(playerID) + g.weeklyChallenge.GetWeeklyCoins(playerID)
+
+	// 立即生效的獎勵（CoinBonus 類型）
+	coinReward := 0
+	if item.Type == ShopItemCoinBonus {
+		// 立即給予金幣
+		g.mu.Lock()
+		p, ok := g.players[playerID]
+		if ok {
+			p.AddCoins(item.Value)
+			coinReward = item.Value
+			g.sendPlayerUpdateWithPlayer(playerID, p)
+		}
+		g.mu.Unlock()
+		// 標記為已使用
+		g.questShop.ConsumeEffect(playerID, ShopItemCoinBonus)
+	}
+
+	g.hub.Send(playerID, protocol.MsgShopPurchaseResult, protocol.ShopPurchaseResultPayload{
+		Success:    true,
+		ItemID:     item.ID,
+		ItemName:   item.Name,
+		Cost:       item.Cost,
+		Message:    fmt.Sprintf("成功購買「%s」！", item.Name),
+		QuestCoins: remainingCoins,
+		CoinReward: coinReward,
+	})
+
+	// 發送效果更新
+	effects := g.questShop.GetActiveEffectsSummary(playerID)
+	g.hub.Send(playerID, protocol.MsgShopEffectUpdate, protocol.ShopEffectUpdatePayload{
+		Effects: effects,
+	})
+
+	log.Printf("[Shop] Player %s purchased %s (cost: %d, remaining coins: %d)", playerID, item.Name, item.Cost, remainingCoins)
+}
+
+// handleSeasonLeaderboardRequest 處理玩家請求賽季排行榜
+func (g *Game) handleSeasonLeaderboardRequest(playerID string) {
+	// 先更新當前玩家的排行榜資料
+	g.mu.RLock()
+	p, ok := g.players[playerID]
+	if ok {
+		state := g.seasonPass.GetSnapshot(playerID)
+		xp, _ := state["current_xp"].(int)
+		level, _ := state["current_level"].(int)
+		levelName := ""
+		badge := ""
+		if level >= 1 && level <= len(g.seasonPass.tiers) {
+			tier := g.seasonPass.tiers[level-1]
+			levelName = tier.Name
+			badge = tier.BadgeName
+		}
+		displayName := p.GetDisplayName()
+		g.mu.RUnlock()
+		g.seasonLeaderboard.UpdatePlayer(playerID, displayName, xp, level, levelName, badge)
+	} else {
+		g.mu.RUnlock()
+	}
+
+	// 取得排行榜快照
+	snapshot := g.seasonLeaderboard.GetSnapshot(playerID)
+
+	// 轉換為 Payload
+	top20Raw, _ := snapshot["top20"].([]LeaderboardEntry)
+	top20 := make([]protocol.LeaderboardEntryPayload, len(top20Raw))
+	for i, e := range top20Raw {
+		top20[i] = protocol.LeaderboardEntryPayload{
+			Rank:        e.Rank,
+			PlayerID:    e.PlayerID,
+			DisplayName: e.DisplayName,
+			SeasonXP:    e.SeasonXP,
+			Level:       e.Level,
+			LevelName:   e.LevelName,
+			Badge:       e.Badge,
+		}
+	}
+
+	myRank, _ := snapshot["my_rank"].(int)
+	payload := protocol.SeasonLeaderboardPayload{
+		SeasonID:    g.seasonLeaderboard.seasonID,
+		Top20:       top20,
+		MyRank:      myRank,
+		LastUpdated: time.Now().UnixMilli(),
+	}
+
+	if myEntry, ok := snapshot["my_entry"].(*LeaderboardEntry); ok && myEntry != nil {
+		e := protocol.LeaderboardEntryPayload{
+			Rank:        myEntry.Rank,
+			PlayerID:    myEntry.PlayerID,
+			DisplayName: myEntry.DisplayName,
+			SeasonXP:    myEntry.SeasonXP,
+			Level:       myEntry.Level,
+			LevelName:   myEntry.LevelName,
+			Badge:       myEntry.Badge,
+		}
+		payload.MyEntry = &e
+	}
+
+	g.hub.Send(playerID, protocol.MsgSeasonLeaderboard, payload)
 }

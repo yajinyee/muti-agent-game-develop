@@ -379,3 +379,14 @@ type WeeklyChallengeStatus struct {
 	WeekKey     string            `json:"week_key"`
 	ResetAt     int64             `json:"reset_at"` // UTC 毫秒時間戳
 }
+
+// SpendQuestCoins 消耗任務幣（購買商店道具時呼叫）
+// 回傳：實際消耗的任務幣數量
+func (wcs *WeeklyChallengeSystem) SpendQuestCoins(playerID string, amount int) int {
+	current := wcs.weeklyCoins[playerID]
+	if amount > current {
+		amount = current
+	}
+	wcs.weeklyCoins[playerID] -= amount
+	return amount
+}

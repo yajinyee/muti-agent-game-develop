@@ -65,6 +65,8 @@ func _ready() -> void:
 	_create_quest_button()
 	_create_weekly_button()
 	_create_season_button()
+	_create_shop_button()
+	_create_leaderboard_button()
 	_update_ui()
 	# 嘗試自動找 LuckyEventSystem（如果在同一場景樹中）
 	call_deferred("_find_lucky_event_system")
@@ -713,4 +715,59 @@ func _create_season_button() -> void:
 	_season_btn.pressed.connect(func():
 		if is_instance_valid(_season_pass_panel):
 			_season_pass_panel.visible = not _season_pass_panel.visible
+	)
+
+# ── DAY-348 任務幣兌換商店 + 賽季排行榜按鈕 ──────────────────
+
+var _shop_btn: Button = null
+var _shop_panel: Node = null
+var _leaderboard_btn: Button = null
+var _leaderboard_panel: Node = null
+
+func _create_shop_button() -> void:
+	_shop_btn = Button.new()
+	_shop_btn.name = "ShopBtn"
+	_shop_btn.text = "🛒"
+	_shop_btn.position = Vector2(900, 40)
+	_shop_btn.size = Vector2(40, 30)
+	_shop_btn.add_theme_font_size_override("font_size", 16)
+	_shop_btn.z_index = 55
+	_shop_btn.tooltip_text = "任務幣商店"
+	add_child(_shop_btn)
+
+	# 建立商店面板
+	_shop_panel = load("res://scripts/ui/QuestShopPanel.gd").new()
+	_shop_panel.name = "QuestShopPanel"
+	add_child(_shop_panel)
+
+	_shop_btn.pressed.connect(func():
+		if is_instance_valid(_shop_panel):
+			if _shop_panel.visible:
+				_shop_panel.visible = false
+			else:
+				_shop_panel.show_panel()
+	)
+
+func _create_leaderboard_button() -> void:
+	_leaderboard_btn = Button.new()
+	_leaderboard_btn.name = "LeaderboardBtn"
+	_leaderboard_btn.text = "📊"
+	_leaderboard_btn.position = Vector2(855, 40)
+	_leaderboard_btn.size = Vector2(40, 30)
+	_leaderboard_btn.add_theme_font_size_override("font_size", 16)
+	_leaderboard_btn.z_index = 55
+	_leaderboard_btn.tooltip_text = "賽季排行榜"
+	add_child(_leaderboard_btn)
+
+	# 建立排行榜面板
+	_leaderboard_panel = load("res://scripts/ui/SeasonLeaderboardPanel.gd").new()
+	_leaderboard_panel.name = "SeasonLeaderboardPanel"
+	add_child(_leaderboard_panel)
+
+	_leaderboard_btn.pressed.connect(func():
+		if is_instance_valid(_leaderboard_panel):
+			if _leaderboard_panel.visible:
+				_leaderboard_panel.visible = false
+			else:
+				_leaderboard_panel.show_panel()
 	)

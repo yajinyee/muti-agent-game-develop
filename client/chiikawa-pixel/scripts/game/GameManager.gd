@@ -210,6 +210,12 @@ signal weekly_challenge_complete(data: Dictionary)
 signal season_pass_updated(data: Dictionary)
 signal season_pass_level_up(data: Dictionary)
 
+# DAY-348 任務幣兌換商店 + 賽季排行榜
+signal shop_items_received(data: Dictionary)
+signal shop_purchase_result(data: Dictionary)
+signal shop_effect_update(data: Dictionary)
+signal season_leaderboard_received(data: Dictionary)
+
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
 var current_state: String = "normal_play"
@@ -588,6 +594,15 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("season_pass_updated", payload)
 		"season_pass_level_up":
 			emit_signal("season_pass_level_up", payload)
+		# DAY-348 任務幣兌換商店 + 賽季排行榜
+		"shop_items":
+			emit_signal("shop_items_received", payload)
+		"shop_purchase_result":
+			emit_signal("shop_purchase_result", payload)
+		"shop_effect_update":
+			emit_signal("shop_effect_update", payload)
+		"season_leaderboard":
+			emit_signal("season_leaderboard_received", payload)
 		"pong":
 			pass
 		"error":

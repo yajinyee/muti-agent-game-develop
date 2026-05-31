@@ -277,3 +277,14 @@ type DailyQuestStatus struct {
 	QuestCoins int           `json:"quest_coins"`
 	ResetAt    int64         `json:"reset_at"` // UTC 毫秒時間戳
 }
+
+// SpendQuestCoins 消耗任務幣（購買商店道具時呼叫）
+// 回傳：實際消耗的任務幣數量
+func (dqs *DailyQuestSystem) SpendQuestCoins(playerID string, amount int) int {
+	current := dqs.questCoins[playerID]
+	if amount > current {
+		amount = current
+	}
+	dqs.questCoins[playerID] -= amount
+	return amount
+}

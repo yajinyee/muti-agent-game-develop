@@ -222,6 +222,12 @@ const (
 	// DAY-347 賽季通行證系統
 	MsgSeasonPassUpdate  = "season_pass_update"  // 賽季通行證狀態更新
 	MsgSeasonPassLevelUp = "season_pass_level_up" // 賽季通行證升級通知
+
+	// DAY-348 任務幣兌換商店 + 賽季排行榜
+	MsgShopItems         = "shop_items"          // 商店道具列表
+	MsgShopPurchaseResult = "shop_purchase_result" // 購買結果
+	MsgShopEffectUpdate  = "shop_effect_update"  // 道具效果更新
+	MsgSeasonLeaderboard = "season_leaderboard"  // 賽季排行榜
 )
 // ── Envelope ─────────────────────────────────────────────────
 
@@ -1379,3 +1385,74 @@ type SeasonPassLevelUpPayload struct {
 	PremiumReward int    `json:"premium_reward"`
 	IsPremium     bool   `json:"is_premium"`
 }
+
+// ── DAY-348 任務幣兌換商店 + 賽季排行榜 Payloads ─────────────
+
+// ShopItemPayload 商店道具（發送給 Client）
+type ShopItemPayload struct {
+	ID          string `json:"id"`
+	Type        string `json:"type"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Cost        int    `json:"cost"`
+	Value       int    `json:"value"`
+	Icon        string `json:"icon"`
+}
+
+// ShopItemsPayload 商店道具列表
+type ShopItemsPayload struct {
+	Items      []ShopItemPayload        `json:"items"`
+	QuestCoins int                      `json:"quest_coins"`  // 玩家當前任務幣
+	Effects    []map[string]interface{} `json:"active_effects"` // 當前有效效果
+}
+
+// ShopPurchaseResultPayload 購買結果
+type ShopPurchaseResultPayload struct {
+	Success    bool   `json:"success"`
+	ItemID     string `json:"item_id"`
+	ItemName   string `json:"item_name"`
+	Cost       int    `json:"cost"`
+	Message    string `json:"message"`
+	QuestCoins int    `json:"quest_coins"` // 購買後剩餘任務幣
+	// 立即生效的獎勵（CoinBonus 類型）
+	CoinReward int    `json:"coin_reward,omitempty"`
+}
+
+// ShopEffectUpdatePayload 道具效果更新
+type ShopEffectUpdatePayload struct {
+	Effects []map[string]interface{} `json:"active_effects"`
+}
+
+// ShopPurchaseRequest 購買請求（Client → Server）
+type ShopPurchaseRequest struct {
+	ItemID string `json:"item_id"`
+}
+
+// SeasonLeaderboardPayload 賽季排行榜
+type SeasonLeaderboardPayload struct {
+	SeasonID    string                   `json:"season_id"`
+	Top20       []LeaderboardEntryPayload `json:"top20"`
+	MyRank      int                      `json:"my_rank"`
+	MyEntry     *LeaderboardEntryPayload  `json:"my_entry,omitempty"`
+	LastUpdated int64                    `json:"last_updated"`
+}
+
+// LeaderboardEntryPayload 排行榜條目
+type LeaderboardEntryPayload struct {
+	Rank        int    `json:"rank"`
+	PlayerID    string `json:"player_id"`
+	DisplayName string `json:"display_name"`
+	SeasonXP    int    `json:"season_xp"`
+	Level       int    `json:"level"`
+	LevelName   string `json:"level_name"`
+	Badge       string `json:"badge"`
+}
+
+// SeasonLeaderboardRequest 請求排行榜（Client → Server）
+type SeasonLeaderboardRequest struct{}
+
+const (
+	MsgShopRequest           = "shop_request"            // Client → Server：請求商店資訊
+	MsgShopPurchase          = "shop_purchase"           // Client → Server：購買道具
+	MsgSeasonLeaderboardRequest = "season_leaderboard_request" // Client → Server：請求排行榜
+)

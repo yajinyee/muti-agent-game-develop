@@ -1,6 +1,63 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-31（DAY-347 T221-T253 美術升級 + 賽季通行證系統 + QA 100/100 通過）
+## 最後更新：2026-06-01（DAY-348 任務幣兌換商店 + 賽季排行榜 + QA 74/74 通過）
+
+## DAY-348 更新（2026-06-01）：任務幣兌換商店 + 賽季排行榜 ✅
+- **任務幣兌換商店（BGaming Quests 核心機制）：**
+  - Server：`server/internal/game/quest_shop.go`（純記憶體，商品固定）
+    - 9個商品：BET ×2/×3/×5 加成、500/2000/5000 金幣包、XP 加速（30分鐘）、幸運符（5分鐘）、AUTO 彈藥（30秒）
+    - 任務幣來源：每日任務 + 每週挑戰（優先扣每日幣）
+    - 效果疊加：同類型效果時間疊加，不覆蓋
+    - 立即生效：CoinBonus 類型購買後立即給予金幣
+  - Protocol：`messages.go` 新增 7 個訊息常數 + 5 個 Payload 結構
+  - game.go：整合商店請求/購買/效果更新（3個 handler 函數）
+  - daily_quest.go：新增 `SpendQuestCoins` 方法
+  - weekly_challenge.go：新增 `SpendQuestCoins` 方法
+  - Client：`QuestShopPanel.gd`（新建，CanvasLayer layer=22）
+    - 按類型分組顯示商品（5個分類）
+    - 任務幣不足時按鈕禁用
+    - 購買後即時更新顯示
+    - 有效效果列表顯示
+  - Client：`GameManager.gd` 新增 4 個訊號 + 4 個訊息處理
+  - Client：`HUD.gd` 新增 🛒 商店按鈕（x=900）
+- **賽季排行榜：**
+  - Server：`server/internal/game/season_leaderboard.go`（純記憶體，每月重置）
+    - 依賽季 XP 降序排名，XP 相同時依 PlayerID 排序（穩定排序）
+    - GetTop(20) 取前 20 名
+    - GetPlayerRank 取玩家自己的排名
+  - Protocol：`messages.go` 新增 `SeasonLeaderboardPayload` + `LeaderboardEntryPayload`
+  - game.go：整合排行榜請求（1個 handler 函數）
+  - Client：`SeasonLeaderboardPanel.gd`（新建，CanvasLayer layer=23）
+    - 前 3 名金銀銅獎牌顯示
+    - 自己的行高亮（紫色邊框）
+    - 我的排名顯示（底部固定）
+    - 未上榜時顯示鼓勵訊息
+  - Client：`HUD.gd` 新增 📊 排行榜按鈕（x=855）
+- **業界研究：** BGaming Quests 2026-05-27 發布，核心是「任務→里程碑→任務幣→兌換獎勵」循環
+- **QA 腳本：** `tools/qa_check_day348.py`（74 項驗證，74/74 全部通過）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **知識庫更新：** knowhow-log 條目 218/219/220（DAY-348 三個新知識點）
+
+## 自我評估（DAY-348）
+- **Server 目標物數量：** 160 種（T001-T006 + T101-T253 + B001）— 不再新增
+- **Lucky 系統數量：** 148 個（T106-T253）— 不再新增
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **射擊手感：** 8.5/10（維持）
+- **視覺清晰度：** 9.0/10（維持）
+- **核心循環流暢度：** 9/10（維持）
+- **多人感：** 8.5/10（維持）
+- **美術質量：** 83/100（維持）
+- **玩家留存機制：** 9.8/10（每日任務 + 每週挑戰 + 賽季通行證 + 任務幣商店 + 賽季排行榜 五重留存機制）
+- **最需要改善：** 在 Godot 實際遊玩一局，確認商店和排行榜 UI 顯示效果
+- **下一步：** 在 Godot 實際遊玩驗證 + 考慮成就系統 UI 完善
+
+## 下一步優先事項（DAY-349）
+1. 在 Godot 實際遊玩一局，確認商店和排行榜 UI 顯示效果
+2. 研究並實作「成就系統 UI 完善」（Server 端已有，Client 端需要確認）
+3. 考慮加入「好友系統」（查看好友排名）
+4. 考慮加入「賽季結算動畫」（賽季結束時的慶祝特效）
+
+
 
 ## DAY-347 更新（2026-05-31）：T221-T253 美術升級 + 賽季通行證系統 ✅
 - **T221-T253 目標物美術升級（33個）：**
