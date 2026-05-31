@@ -260,6 +260,9 @@ type Game struct {
 
 	// DAY-346 每週挑戰系統
 	weeklyChallenge *WeeklyChallengeSystem
+
+	// DAY-347 賽季通行證系統
+	seasonPass *SeasonPassManager
 }
 
 func NewGame(hub *ws.Hub) *Game {
@@ -483,6 +486,9 @@ func NewGame(hub *ws.Hub) *Game {
 
 		// DAY-346 每週挑戰系統
 		weeklyChallenge: newWeeklyChallengeSystem(),
+
+		// DAY-347 賽季通行證系統
+		seasonPass: NewSeasonPassManager(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -808,6 +814,13 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 		// DAY-346 每週挑戰：連擊達成計數（goroutine 避免死鎖）
 		comboVal := p.ComboCount
 		go g.notifyWeeklyChallengeProgress(playerID, "combo", false, 0.0, comboVal)
+
+		// DAY-347 賽季通行證：連擊里程碑 XP
+		if comboVal == 5 {
+			go g.addSeasonXP(playerID, XPPerCombo5, "combo")
+		} else if comboVal == 10 {
+			go g.addSeasonXP(playerID, XPPerCombo10, "combo")
+		}
 
 		// DAY-301 全服加成倍率疊加
 		jackpotBoost := g.luckyJackpotFish.getGrandBoostMult()
@@ -1820,6 +1833,15 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 		isLucky := len(t.Def.ID) >= 4 && t.Def.ID[:1] == "T" && t.Def.ID[1:] >= "106" // T106+ 為 Lucky 目標物
 		killMult := t.Multiplier
 		go g.notifyWeeklyChallengeProgress(playerID, "kill", isLucky, killMult, 1)
+
+		// DAY-347 賽季通行證：擊破目標 XP
+		xpSource := "kill"
+		xpGain := XPPerKill
+		if t.Def.Type == data.TypeBoss {
+			xpGain = XPPerBossKill
+			xpSource = "boss"
+		}
+		go g.addSeasonXP(playerID, xpGain, xpSource)
 	} else {
 		// 未擊破，更新 HP（視覺反饋）
 		t.HP = max(1, t.HP-bet.AttackPower/5)
@@ -2016,6 +2038,9 @@ func (g *Game) triggerBonusLocked(playerID string) {
 
 	// DAY-346 每週挑戰：Bonus 觸發計數（goroutine 避免死鎖）
 	go g.notifyWeeklyChallengeProgress(playerID, "bonus", false, 0.0, 1)
+
+	// DAY-347 賽季通行證：完成 Bonus XP
+	go g.addSeasonXP(playerID, XPPerBonus, "bonus")
 }
 
 func (g *Game) handleBonusClick(playerID string, req protocol.BonusClickRequest) {
@@ -2502,5 +2527,47 @@ func (g *Game) notifyWeeklyChallengeProgress(playerID string, eventType string, 
 		log.Printf("[WeeklyChallenge] Player %s completed challenge: %s (tier: %d, reward: %d)", playerID, c.ChallengeName, c.Tier, c.Reward)
 		// 同步更新挑戰狀態
 		g.handleWeeklyChallengeRequest(playerID)
+	}
+}
+
+// ── DAY-347 賽季通行證系統 Handler ───────────────────────────
+
+// addSeasonXP 增加賽季 XP 並通知玩家
+func (g *Game) addSeasonXP(playerID string, xp int, source string) {
+	levelUp, newLevel, newXP := g.seasonPass.AddXP(playerID, xp)
+
+	// 計算下一等級所需 XP
+	nextLevelXP := -1
+	if newLevel < len(g.seasonPass.tiers) {
+		nextLevelXP = g.seasonPass.tiers[newLevel].RequiredXP
+	}
+
+	// 計算剩餘天數
+	daysLeft := int(time.Until(g.seasonPass.GetSeasonEnd()).Hours() / 24)
+
+	// 發送賽季狀態更新
+	g.hub.Send(playerID, protocol.MsgSeasonPassUpdate, protocol.SeasonPassUpdatePayload{
+		CurrentXP:    newXP,
+		CurrentLevel: newLevel,
+		NextLevelXP:  nextLevelXP,
+		IsPremium:    false,
+		SeasonID:     g.seasonPass.GetSeasonID(),
+		DaysLeft:     daysLeft,
+		XPGained:     xp,
+		XPSource:     source,
+	})
+
+	// 升級通知
+	if levelUp && newLevel >= 1 && newLevel <= len(g.seasonPass.tiers) {
+		tier := g.seasonPass.tiers[newLevel-1]
+		g.hub.Send(playerID, protocol.MsgSeasonPassLevelUp, protocol.SeasonPassLevelUpPayload{
+			NewLevel:      newLevel,
+			LevelName:     tier.Name,
+			BadgeName:     tier.BadgeName,
+			FreeReward:    tier.FreeReward,
+			PremiumReward: tier.PremiumReward,
+			IsPremium:     false,
+		})
+		log.Printf("[SeasonPass] Player %s leveled up to %d (%s)", playerID, newLevel, tier.Name)
 	}
 }

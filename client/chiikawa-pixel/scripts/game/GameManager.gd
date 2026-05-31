@@ -206,6 +206,10 @@ signal daily_quest_complete(data: Dictionary)
 signal weekly_challenge_update(data: Dictionary)
 signal weekly_challenge_complete(data: Dictionary)
 
+# DAY-347 賽季通行證系統
+signal season_pass_updated(data: Dictionary)
+signal season_pass_level_up(data: Dictionary)
+
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
 var current_state: String = "normal_play"
@@ -579,6 +583,11 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("weekly_challenge_update", payload)
 		"weekly_challenge_complete":
 			emit_signal("weekly_challenge_complete", payload)
+		# DAY-347 賽季通行證系統
+		"season_pass_update":
+			emit_signal("season_pass_updated", payload)
+		"season_pass_level_up":
+			emit_signal("season_pass_level_up", payload)
 		"pong":
 			pass
 		"error":

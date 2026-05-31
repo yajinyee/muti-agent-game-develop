@@ -218,6 +218,10 @@ const (
 
 	// DAY-339 多人投射物顯示
 	MsgOtherPlayerAttack = "other_player_attack" // 廣播其他玩家的攻擊（供 Client 顯示投射物）
+
+	// DAY-347 賽季通行證系統
+	MsgSeasonPassUpdate  = "season_pass_update"  // 賽季通行證狀態更新
+	MsgSeasonPassLevelUp = "season_pass_level_up" // 賽季通行證升級通知
 )
 // ── Envelope ─────────────────────────────────────────────────
 
@@ -1350,4 +1354,28 @@ type WeeklyChallengeCompletePayload struct {
 // WeeklyChallengeClaim 領取挑戰獎勵請求
 type WeeklyChallengeClaim struct {
 	ChallengeID string `json:"challenge_id"`
+}
+
+// ── DAY-347 賽季通行證 Payloads ───────────────────────────────
+
+// SeasonPassUpdatePayload 賽季通行證狀態更新
+type SeasonPassUpdatePayload struct {
+	CurrentXP    int     `json:"current_xp"`
+	CurrentLevel int     `json:"current_level"`
+	NextLevelXP  int     `json:"next_level_xp"`
+	IsPremium    bool    `json:"is_premium"`
+	SeasonID     string  `json:"season_id"`
+	DaysLeft     int     `json:"days_left"`
+	XPGained     int     `json:"xp_gained"`     // 本次獲得的 XP
+	XPSource     string  `json:"xp_source"`     // "kill" | "boss" | "bonus" | "combo" | "daily_quest" | "weekly_challenge"
+}
+
+// SeasonPassLevelUpPayload 賽季通行證升級通知
+type SeasonPassLevelUpPayload struct {
+	NewLevel      int    `json:"new_level"`
+	LevelName     string `json:"level_name"`
+	BadgeName     string `json:"badge_name"`
+	FreeReward    int    `json:"free_reward"`
+	PremiumReward int    `json:"premium_reward"`
+	IsPremium     bool   `json:"is_premium"`
 }

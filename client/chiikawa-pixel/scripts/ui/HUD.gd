@@ -38,6 +38,9 @@ var _daily_quest_panel: Node = null
 # DAY-346 每週挑戰按鈕
 var _weekly_btn: Button = null
 var _weekly_challenge_panel: Node = null
+# DAY-347 賽季通行證按鈕
+var _season_btn: Button = null
+var _season_pass_panel: Node = null
 
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
@@ -61,6 +64,7 @@ func _ready() -> void:
 	_create_online_label()
 	_create_quest_button()
 	_create_weekly_button()
+	_create_season_button()
 	_update_ui()
 	# 嘗試自動找 LuckyEventSystem（如果在同一場景樹中）
 	call_deferred("_find_lucky_event_system")
@@ -682,4 +686,31 @@ func _create_weekly_button() -> void:
 	_weekly_btn.pressed.connect(func():
 		if is_instance_valid(_weekly_challenge_panel) and _weekly_challenge_panel.has_method("_toggle_panel"):
 			_weekly_challenge_panel._toggle_panel()
+	)
+
+# ── DAY-347 賽季通行證按鈕 ────────────────────────────────────
+
+func _create_season_button() -> void:
+	_season_btn = Button.new()
+	_season_btn.name = "SeasonBtn"
+	_season_btn.text = "🌟"
+	_season_btn.position = Vector2(950, 40)
+	_season_btn.size = Vector2(40, 30)
+	_season_btn.add_theme_font_size_override("font_size", 16)
+	_season_btn.z_index = 55
+	_season_btn.tooltip_text = "賽季通行證"
+	add_child(_season_btn)
+
+	# 建立賽季通行證面板
+	_season_pass_panel = load("res://scripts/ui/SeasonPassPanel.gd").new()
+	_season_pass_panel.name = "SeasonPassPanel"
+	_season_pass_panel.visible = false
+	add_child(_season_pass_panel)
+	if _season_pass_panel.has_method("setup"):
+		_season_pass_panel.setup(null)
+
+	# 連接按鈕
+	_season_btn.pressed.connect(func():
+		if is_instance_valid(_season_pass_panel):
+			_season_pass_panel.visible = not _season_pass_panel.visible
 	)
