@@ -2176,6 +2176,8 @@ func (g *Game) sendPlayerUpdateWithPlayer(playerID string, p *Player) {
 		ComboMultBonus:  p.GetComboMultBonus(),
 		// DAY-342 在線玩家數
 		OnlineCount:     len(g.players),
+		// DAY-344 玩家顯示名稱
+		DisplayName:     p.GetDisplayName(),
 	})
 }
 

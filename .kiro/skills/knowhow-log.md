@@ -5530,3 +5530,25 @@ if xxxMult > 1.0 {
 - **否則：** 直接對 RGBA 做增強會讓透明背景變成半透明，破壞透明效果
 - **工具：** `tools/enhance_targets_pil_day343.py`
 
+
+## 206. Lucky 目標物 PIL 增強最佳參數（DAY-344）
+- **目標：** T106-T130（Lucky 系統目標物）視覺升級
+- **最佳參數：** 飽和度 ×1.35、對比度 ×1.25、亮度 ×1.05、銳化
+- **分層策略：**
+  - T106-T120（基礎 Lucky）：標準增強
+  - T121-T125（中階 Lucky）：標準增強 + 金色光暈（R+8%, G+5%, B-8%）
+  - T126-T130（高階 Lucky）：標準增強 + 彩虹光暈（HSV 旋轉 8% 混合）
+- **效果：** 飽和度平均提升 35%，Lucky 目標物更有辨識度
+- **工具：** `tools/enhance_targets_pil_day344.py`
+- **教訓：** Lucky 目標物要比基礎目標更鮮豔，讓玩家一眼看出「這個值得打」
+
+## 207. PlayerUpdatePayload 加入 DisplayName（DAY-344）
+- **需求：** 砲台上方顯示玩家名稱，增加多人感
+- **Server 修改：**
+  - `protocol/messages.go`：`PlayerUpdatePayload` 新增 `DisplayName string`
+  - `game.go`：`sendPlayerUpdateWithPlayer` 填入 `DisplayName: p.GetDisplayName()`
+- **Client 修改：**
+  - `GameManager.gd`：新增 `get_display_name()` 方法
+  - `Cannon.gd`：`_on_player_updated` 顯示「名稱 [角色]」格式
+- **顯示邏輯：** 若 DisplayName 為空或等於 ID，只顯示角色名；否則顯示「名稱 [角色]」
+- **教訓：** 玩家名稱顯示要有 fallback（ID 前 8 碼），不能假設 DisplayName 一定有值

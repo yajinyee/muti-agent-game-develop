@@ -289,7 +289,12 @@ func _on_player_updated(data: Dictionary) -> void:
 	var char_name = GameManager.get_character_name()
 	var color = CHAR_COLORS.get(data.get("character_id", "chiikawa"), Color.WHITE)
 	if is_instance_valid(char_label):
-		char_label.text = char_name
+		# DAY-344 顯示玩家名稱（格式：名稱 [角色]）
+		var display_name = data.get("display_name", "")
+		if display_name == "" or display_name == data.get("id", ""):
+			char_label.text = char_name
+		else:
+			char_label.text = display_name + " [" + char_name + "]"
 		char_label.modulate = color
 
 func _show_hit_flash() -> void:

@@ -615,3 +615,9 @@ func get_player_id() -> String:
 ## DAY-342 在線玩家數
 func get_online_count() -> int:
 	return player_data.get("online_count", 1)
+
+## DAY-344 玩家顯示名稱
+func get_display_name() -> String:
+	return player_data.get("display_name", get_player_id().substr(0, 8))
+func get_online_count() -> int:
+	return player_data.get("online_count", 1)
