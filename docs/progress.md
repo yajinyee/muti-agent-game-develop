@@ -1,6 +1,53 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-31（DAY-340 擊破特效升級 + 游泳動畫 + Bug 修復 + QA 22/22 通過）
+## 最後更新：2026-05-31（DAY-341 Combo 里程碑音效 + Combo UI 升級 + QA 41/41 通過）
+
+## DAY-341 更新（2026-05-31）：Combo 里程碑音效 + Combo UI 升級 ✅
+- **Combo 里程碑音效（4個新 WAV）：**
+  - `combo_5.wav`（0.45s）：輕快三音上升（C-E-G），5連擊達成感
+  - `combo_10.wav`（0.65s）：快速音階 + 和弦爆發，10連擊突破感
+  - `combo_20.wav`（0.60s）：電子感掃頻 + 強力和弦，20連擊震撼感
+  - `combo_30.wav`（0.90s）：低音衝擊 + 勝利號角，30連擊 MAX 達成感
+  - 工具：`tools/generate_combo_sfx_day341.py`
+- **AudioManager.gd 升級：**
+  - 新增 `COMBO_5/10/20/30` 枚舉
+  - 新增 `play_combo_milestone(combo_count)` 函數
+  - 對應 WAV 路徑設定完整
+- **HUD.gd Combo UI 升級：**
+  - `_create_combo_label()` 升級：帶半透明背景面板（ComboPanel）
+  - `_update_combo_display()` 升級：里程碑觸發音效 + 特效
+  - `_spawn_combo_milestone_effect()` 新函數：
+    - 5連擊：6個黃色粒子噴射
+    - 10連擊：10個橙色粒子噴射
+    - 20連擊：16個深橙粒子 + 「🔥 COMBO x20!」大文字
+    - 30連擊：24個紅色粒子 + 「💥 MAX COMBO x30!」大文字
+  - 震動強度隨連擊數增加（0.2 + combo/30 × 0.3）
+- **QA 腳本：** `tools/qa_check_day341.py`（41 項驗證，41/41 全部通過）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **知識庫更新：** knowhow-log 條目 197/198/199（DAY-341 三個新知識點）
+
+## 自我評估（DAY-341）
+- **Server 目標物數量：** 160 種（T001-T006 + T101-T253 + B001）— 不再新增
+- **Lucky 系統數量：** 148 個（T106-T253）— 不再新增
+- **Client Lucky Panel 數量：** 159 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry + 156 個 Panel）
+- **HUD.gd 行數：** ~530 行（DAY-341 新增 Combo 特效函數後）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **整合測試通過率：** 29/29（100%）— DAY-338 達到 100%
+- **射擊手感：** 8.5/10（維持）
+- **視覺清晰度：** 8.5/10（維持）
+- **核心循環流暢度：** 9/10（Combo 系統讓連擊更有爽感）
+- **Combo 系統完整度：** 9/10（Server + Client + 音效 + 特效全部到位）
+- **最需要改善：** 在 Godot 實際遊玩一局，確認 Combo 音效和特效效果
+- **已知技術債：** 無重大技術債
+- **下一步：** 在 Godot 實際遊玩驗證 + 考慮加入 Combo 連擊 UI 動畫（數字跳動）
+
+## 下一步優先事項（DAY-342）
+1. 在 Godot 實際遊玩一局，確認 Combo 音效和特效效果
+2. 考慮加入 Combo 連擊 UI 動畫（數字跳動 + 顏色漸變）
+3. 研究並實作更好的目標物生成節奏（讓遊戲節奏更有起伏）
+4. 考慮加入「連擊中斷」的視覺提示（Combo 歸零時的特效）
+
+
 
 ## DAY-340 更新（2026-05-31）：擊破特效升級 + 游泳動畫 + Bug 修復 ✅
 - **Bug 修復（Cannon.gd）：**

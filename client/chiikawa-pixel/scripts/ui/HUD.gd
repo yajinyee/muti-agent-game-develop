@@ -413,14 +413,32 @@ func _show_fallback_banner(text: String, color: Color, duration: float = 2.5) ->
 # ── DAY-297/322 Combo UI ──────────────────────────────────────
 
 func _create_combo_label() -> void:
+	# DAY-341 升級：更醒目的 Combo 顯示（帶背景面板）
+	var combo_panel = Control.new()
+	combo_panel.name = "ComboPanel"
+	combo_panel.position = Vector2(800, 2)
+	combo_panel.size = Vector2(240, 40)
+	combo_panel.z_index = 55
+	add_child(combo_panel)
+	
+	# 半透明背景
+	var bg = ColorRect.new()
+	bg.size = combo_panel.size
+	bg.color = Color(0.0, 0.0, 0.0, 0.6)
+	combo_panel.add_child(bg)
+	
 	_combo_label = Label.new()
 	_combo_label.name = "ComboLabel"
-	_combo_label.position = Vector2(820, 6)
-	_combo_label.size = Vector2(200, 36)
+	_combo_label.position = Vector2(4, 4)
+	_combo_label.size = Vector2(232, 32)
 	_combo_label.add_theme_font_size_override("font_size", 18)
 	_combo_label.modulate = Color(1.0, 0.85, 0.0)
-	_combo_label.visible = false
-	add_child(_combo_label)
+	combo_panel.add_child(_combo_label)
+	combo_panel.visible = false
+	# 讓 _combo_label 的 visible 控制整個 panel
+	# 用 meta 記錄 panel 引用
+	_combo_label.set_meta("panel", combo_panel)
+	
 	# DAY-322：連接 ComboSystem 訊號（如果存在）
 	call_deferred("_connect_combo_system")
 
@@ -438,10 +456,15 @@ func _connect_combo_system() -> void:
 func _on_combo_updated(count: int) -> void:
 	if not is_instance_valid(_combo_label):
 		return
+	var panel: Control = null
+	if _combo_label.has_meta("panel"):
+		panel = _combo_label.get_meta("panel")
 	if count < 5:
-		_combo_label.visible = false
+		if is_instance_valid(panel):
+			panel.visible = false
 		return
-	_combo_label.visible = true
+	if is_instance_valid(panel):
+		panel.visible = true
 	_combo_label.text = "🔥 COMBO x%d" % count
 	if count >= 50:
 		_combo_label.modulate = Color(1.0, 0.0, 0.5)
@@ -467,10 +490,21 @@ func _update_combo_display() -> void:
 	var combo = 0
 	if GameManager.has_method("get_combo_count"):
 		combo = GameManager.get_combo_count()
+	
+	# 取得 panel 引用
+	var panel: Control = null
+	if _combo_label.has_meta("panel"):
+		panel = _combo_label.get_meta("panel")
+	
 	if combo < 5:
-		_combo_label.visible = false
+		if is_instance_valid(panel):
+			panel.visible = false
+		_last_combo = combo
 		return
-	_combo_label.visible = true
+	
+	if is_instance_valid(panel):
+		panel.visible = true
+	
 	var bonus = 0.0
 	if GameManager.has_method("get_combo_mult_bonus"):
 		bonus = GameManager.get_combo_mult_bonus()
@@ -483,12 +517,77 @@ func _update_combo_display() -> void:
 		_combo_label.modulate = Color(1.0, 0.85, 0.0)
 	else:
 		_combo_label.modulate = Color(1.0, 1.0, 0.5)
+	# DAY-341 里程碑觸發：音效 + 特效
 	if combo != _last_combo and combo in [5, 10, 20, 30]:
 		var tween = _combo_label.create_tween()
-		tween.tween_property(_combo_label, "scale", Vector2(1.4, 1.4), 0.1)
-		tween.tween_property(_combo_label, "scale", Vector2(1.0, 1.0), 0.1)
-		ScreenShake.add_trauma(0.2)
+		tween.tween_property(_combo_label, "scale", Vector2(1.6, 1.6), 0.08)
+		tween.tween_property(_combo_label, "scale", Vector2(1.0, 1.0), 0.12)
+		ScreenShake.add_trauma(0.2 + (combo / 30.0) * 0.3)
+		# 播放對應里程碑音效
+		AudioManager.play_combo_milestone(combo)
+		# 里程碑特效（在 Combo 標籤位置生成爆炸）
+		_spawn_combo_milestone_effect(combo)
 	_last_combo = combo
+
+## DAY-341 Combo 里程碑視覺特效
+func _spawn_combo_milestone_effect(combo: int) -> void:
+	# 在 Combo 標籤位置生成爆炸粒子
+	var pos = Vector2(920, 24)  # Combo 標籤中心位置
+	var color: Color
+	var particle_count: int
+	match combo:
+		5:
+			color = Color(1.0, 1.0, 0.5)
+			particle_count = 6
+		10:
+			color = Color(1.0, 0.85, 0.0)
+			particle_count = 10
+		20:
+			color = Color(1.0, 0.5, 0.0)
+			particle_count = 16
+		30:
+			color = Color(1.0, 0.2, 0.1)
+			particle_count = 24
+		_:
+			return
+	
+	# 生成粒子
+	for i in particle_count:
+		var dot = ColorRect.new()
+		var size = randf_range(4.0, 8.0)
+		dot.size = Vector2(size, size)
+		dot.color = color
+		dot.position = pos - dot.size / 2
+		dot.z_index = 65
+		add_child(dot)
+		var angle = (float(i) / float(particle_count)) * TAU + randf_range(-0.3, 0.3)
+		var dist = randf_range(30.0, 80.0)
+		var target = pos + Vector2(cos(angle), sin(angle)) * dist
+		var tween = dot.create_tween()
+		tween.tween_property(dot, "position", target - dot.size / 2, 0.4).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(dot, "modulate:a", 0.0, 0.4)
+		tween.tween_callback(func(): if is_instance_valid(dot): dot.queue_free())
+	
+	# 里程碑文字（30連擊才顯示大文字）
+	if combo >= 20:
+		var milestone_label = Label.new()
+		milestone_label.z_index = 70
+		match combo:
+			20:
+				milestone_label.text = "🔥 COMBO x20!"
+				milestone_label.modulate = Color(1.0, 0.5, 0.0)
+			30:
+				milestone_label.text = "💥 MAX COMBO x30!"
+				milestone_label.modulate = Color(1.0, 0.2, 0.1)
+		milestone_label.add_theme_font_size_override("font_size", 28)
+		milestone_label.position = Vector2(480, 200)
+		add_child(milestone_label)
+		var tween2 = milestone_label.create_tween()
+		tween2.tween_property(milestone_label, "scale", Vector2(1.5, 1.5), 0.1)
+		tween2.tween_property(milestone_label, "scale", Vector2(1.0, 1.0), 0.1)
+		tween2.tween_interval(0.8)
+		tween2.tween_property(milestone_label, "modulate:a", 0.0, 0.4)
+		tween2.tween_callback(func(): if is_instance_valid(milestone_label): milestone_label.queue_free())
 
 
 # ── DAY-337 重構完成 ────────────────────────────────────────

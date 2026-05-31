@@ -15,6 +15,11 @@ enum SFX {
 	BONUS_READY,
 	BONUS_GAME,
 	WEED_PULL,
+	# DAY-341 Combo 里程碑音效
+	COMBO_5,
+	COMBO_10,
+	COMBO_20,
+	COMBO_30,
 }
 
 enum BGM {
@@ -41,6 +46,11 @@ const SFX_PATHS = {
 	SFX.BONUS_READY: "res://assets/audio/sfx/bonus_ready.wav",
 	SFX.BONUS_GAME: "res://assets/audio/sfx/bonus_game.wav",
 	SFX.WEED_PULL: "res://assets/audio/sfx/weed_pull.wav",
+	# DAY-341 Combo 里程碑音效
+	SFX.COMBO_5: "res://assets/audio/sfx/combo_5.wav",
+	SFX.COMBO_10: "res://assets/audio/sfx/combo_10.wav",
+	SFX.COMBO_20: "res://assets/audio/sfx/combo_20.wav",
+	SFX.COMBO_30: "res://assets/audio/sfx/combo_30.wav",
 }
 
 const BGM_PATHS = {
@@ -99,3 +109,11 @@ func stop_bgm() -> void:
 	var tween = create_tween()
 	tween.tween_property(_bgm_player, "volume_db", -40.0, 0.3)
 	tween.tween_callback(func(): _bgm_player.stop())
+
+## DAY-341 Combo 里程碑音效
+func play_combo_milestone(combo_count: int) -> void:
+	match combo_count:
+		5:  play_sfx(SFX.COMBO_5)
+		10: play_sfx(SFX.COMBO_10)
+		20: play_sfx(SFX.COMBO_20)
+		30: play_sfx(SFX.COMBO_30)
