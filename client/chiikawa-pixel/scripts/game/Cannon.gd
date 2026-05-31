@@ -137,7 +137,7 @@ func _spawn_projectile_with_impact(target_pos: Vector2, target_id: String, char_
 	if not is_instance_valid(parent):
 		return
 
-	var char_id = GameManager.get_character_id()
+	# char_id 由參數傳入，不重複宣告
 	var color = CHAR_COLORS.get(char_id, Color.WHITE)
 	var speed = GameManager.get_projectile_speed()
 	if speed <= 0:

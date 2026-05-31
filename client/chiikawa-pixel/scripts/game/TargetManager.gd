@@ -597,6 +597,10 @@ func _create_target_node(data: Dictionary) -> Node2D:
 	if multiplier >= 30.0:
 		_add_glow(container, multiplier)
 
+	# DAY-340 游泳動畫：讓目標物有生命感（左右搖擺 + 輕微縮放）
+	if target_type != "boss":
+		_add_swim_animation(container, def_id, multiplier)
+
 	# Lucky 特殊魚標記（T106-T253）— DAY-338 擴展到 T253
 	if def_id.begins_with("T") and def_id.length() >= 4:
 		var tid_num = int(def_id.substr(1))
@@ -638,6 +642,47 @@ func _create_target_node(data: Dictionary) -> Node2D:
 			container.set_meta("sp_elapsed", 0.0)
 
 	return container
+
+## DAY-340 游泳動畫：讓目標物有生命感
+## 基礎目標：左右搖擺（rotation）
+## 特殊目標：搖擺 + 輕微縮放脈動
+## 高倍率目標：更快更明顯的動畫
+func _add_swim_animation(node: Node2D, def_id: String, multiplier: float) -> void:
+	var sprite = node.get_node_or_null("Sprite")
+	if not is_instance_valid(sprite):
+		return
+
+	# 隨機化動畫參數，讓每個目標物看起來不一樣
+	var base_duration = randf_range(0.6, 1.2)
+	var rot_deg = 5.0  # 搖擺角度
+
+	# 依倍率調整動畫強度
+	if multiplier >= 100:
+		rot_deg = 8.0
+		base_duration = randf_range(0.3, 0.6)  # 高倍率更活躍
+	elif multiplier >= 30:
+		rot_deg = 6.0
+		base_duration = randf_range(0.5, 0.9)
+	elif multiplier >= 10:
+		rot_deg = 5.0
+
+	# 隨機起始方向
+	var start_rot = randf_range(-rot_deg * 0.5, rot_deg * 0.5)
+	sprite.rotation_degrees = start_rot
+
+	# 搖擺動畫（循環）
+	var swim_tween = sprite.create_tween().set_loops()
+	swim_tween.tween_property(sprite, "rotation_degrees", rot_deg, base_duration).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+	swim_tween.tween_property(sprite, "rotation_degrees", -rot_deg, base_duration).set_ease(Tween.EASE_IN_OUT).set_trans(Tween.TRANS_SINE)
+
+	# 特殊目標（T101+）加入縮放脈動
+	if def_id.begins_with("T"):
+		var tid_num = int(def_id.substr(1))
+		if tid_num >= 101:
+			var scale_tween = sprite.create_tween().set_loops()
+			var scale_dur = base_duration * 0.8
+			scale_tween.tween_property(sprite, "scale", sprite.scale * 1.05, scale_dur).set_ease(Tween.EASE_IN_OUT)
+			scale_tween.tween_property(sprite, "scale", sprite.scale * 0.97, scale_dur).set_ease(Tween.EASE_IN_OUT)
 
 func _add_glow(node: Node2D, multiplier: float) -> void:
 	var glow = ColorRect.new()
@@ -862,15 +907,30 @@ func _on_target_killed(data: Dictionary) -> void:
 		AudioManager.play_sfx(AudioManager.SFX.BIG_WIN)
 	else:
 		AudioManager.play_sfx(AudioManager.SFX.KILL)
+		# DAY-340：擊破後播放金幣音效（增加爽感）
+		if reward > 0:
+			AudioManager.play_sfx(AudioManager.SFX.COIN_DROP)
 
 	# T105 金幣魚：金幣雨
 	if data.get("def_id", "") == "T105":
 		_spawn_coin_rain(node.position)
 
-	# 消失動畫
+	# 消失動畫（DAY-340 升級：更有爽感的爆炸消失）
 	var tween = node.create_tween()
-	tween.tween_property(node, "scale", Vector2(1.5, 1.5), 0.1)
-	tween.parallel().tween_property(node, "modulate:a", 0.0, 0.15)
+	if multiplier >= 50:
+		# 高倍率：先放大再消失（爆炸感）
+		tween.tween_property(node, "scale", Vector2(1.8, 1.8), 0.08).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(node, "modulate", Color(3.0, 3.0, 3.0, 1.0), 0.08)
+		tween.tween_property(node, "scale", Vector2(0.1, 0.1), 0.12).set_ease(Tween.EASE_IN)
+		tween.parallel().tween_property(node, "modulate:a", 0.0, 0.12)
+	elif multiplier >= 10:
+		# 中倍率：放大後消失
+		tween.tween_property(node, "scale", Vector2(1.5, 1.5), 0.1)
+		tween.parallel().tween_property(node, "modulate:a", 0.0, 0.15)
+	else:
+		# 低倍率：直接消失
+		tween.tween_property(node, "scale", Vector2(1.3, 1.3), 0.08)
+		tween.parallel().tween_property(node, "modulate:a", 0.0, 0.12)
 	tween.tween_callback(func(): if is_instance_valid(node): node.queue_free())
 
 func _spawn_coin_rain(pos: Vector2) -> void:

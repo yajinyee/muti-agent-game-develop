@@ -36,22 +36,34 @@ func spawn_hit(pos: Vector2, char_id: String) -> void:
 	_spawn_mini_particles(pos, color, 3)
 
 ## 擊破特效（爆炸粒子 + 閃光）
+## DAY-340 升級：加入金幣噴射 + 更強的視覺衝擊
 func spawn_kill(pos: Vector2, multiplier: float) -> void:
 	if not is_instance_valid(_scene_root):
 		return
 	var color = _mult_color(multiplier)
 
-	if multiplier >= 50:
+	if multiplier >= 100:
+		# 超高倍率：超級爆炸演出
+		_spawn_flash_ring(pos, Color.WHITE, 0.15)
+		_spawn_flash_ring(pos, color, 0.45)
+		_spawn_flash_ring(pos, Color.WHITE, 0.25)
+		_spawn_particles(pos, color, 16)
+		_spawn_ring_burst(pos, color)
+		_spawn_coin_burst(pos, 8)  # 金幣噴射
+		_spawn_shockwave(pos, color)  # 衝擊波
+	elif multiplier >= 50:
 		# 高倍率：大爆炸演出
 		_spawn_flash_ring(pos, color, 0.35)
 		_spawn_flash_ring(pos, Color.WHITE, 0.2)
 		_spawn_particles(pos, color, 12)
 		_spawn_ring_burst(pos, color)
+		_spawn_coin_burst(pos, 5)  # 金幣噴射
 	elif multiplier >= 20:
 		# 中高倍率：中等爆炸
 		_spawn_flash_ring(pos, color, 0.28)
 		_spawn_particles(pos, color, 8)
 		_spawn_ring_burst(pos, color)
+		_spawn_coin_burst(pos, 3)  # 少量金幣
 	elif multiplier >= 10:
 		# 中倍率：標準爆炸
 		_spawn_flash_ring(pos, color, 0.22)
@@ -207,6 +219,45 @@ func _spawn_ring_burst(pos: Vector2, color: Color) -> void:
 		tween.tween_property(ring, "scale", Vector2(end_scale, end_scale), 0.3)
 		tween.parallel().tween_property(ring, "modulate:a", 0.0, 0.3)
 		tween.tween_callback(func(): if is_instance_valid(ring): ring.queue_free())
+
+## DAY-340 新增：金幣噴射特效（擊破時金幣從目標物飛出）
+func _spawn_coin_burst(pos: Vector2, count: int) -> void:
+	if not is_instance_valid(_scene_root):
+		return
+	for i in count:
+		var coin = Label.new()
+		coin.text = "💰"
+		coin.position = pos + Vector2(-8, -8)
+		coin.add_theme_font_size_override("font_size", 16)
+		coin.z_index = 48
+		_scene_root.add_child(coin)
+		var angle = randf_range(-PI * 0.8, -PI * 0.2)  # 向上噴射
+		var dist = randf_range(50, 120)
+		var target = pos + Vector2(cos(angle), sin(angle)) * dist
+		var tween = coin.create_tween()
+		tween.tween_property(coin, "position", target, 0.4).set_ease(Tween.EASE_OUT)
+		tween.tween_property(coin, "position:y", target.y + 40, 0.25).set_ease(Tween.EASE_IN)
+		tween.parallel().tween_property(coin, "modulate:a", 0.0, 0.25)
+		tween.tween_callback(func(): if is_instance_valid(coin): coin.queue_free())
+
+## DAY-340 新增：衝擊波特效（超高倍率擊破時的震撼感）
+func _spawn_shockwave(pos: Vector2, color: Color) -> void:
+	if not is_instance_valid(_scene_root):
+		return
+	# 三層擴散環，間隔觸發
+	for i in 3:
+		var wave = ColorRect.new()
+		var size = 30.0
+		wave.size = Vector2(size, size)
+		wave.position = pos - wave.size / 2
+		wave.color = Color(color.r, color.g, color.b, 0.7 - i * 0.15)
+		wave.z_index = 35
+		_scene_root.add_child(wave)
+		var tween = wave.create_tween()
+		tween.tween_interval(i * 0.08)
+		tween.tween_property(wave, "scale", Vector2(6.0, 6.0), 0.4).set_ease(Tween.EASE_OUT)
+		tween.parallel().tween_property(wave, "modulate:a", 0.0, 0.4)
+		tween.tween_callback(func(): if is_instance_valid(wave): wave.queue_free())
 
 func _spawn_star_burst(pos: Vector2, color: Color) -> void:
 	# 星形爆炸（超高倍率用）
