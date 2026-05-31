@@ -321,6 +321,8 @@ type PlayerUpdatePayload struct {
 	// DAY-297 Combo 系統
 	ComboCount     int     `json:"combo_count"`
 	ComboMultBonus float64 `json:"combo_mult_bonus"`
+	// DAY-342 在線玩家數
+	OnlineCount    int     `json:"online_count"`
 }
 
 type AnnouncePayload struct {

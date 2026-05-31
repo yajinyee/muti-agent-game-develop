@@ -30,6 +30,8 @@ var _combo_label: Label = null
 var _last_combo: int = 0
 # DAY-336：HUDLuckySignals 模組（管理所有 148 個 Lucky 訊號）
 var _lucky_signals: Node = null
+# DAY-342 在線玩家數顯示
+var _online_label: Label = null
 
 func _ready() -> void:
 	GameManager.player_updated.connect(_on_player_updated)
@@ -50,6 +52,7 @@ func _ready() -> void:
 	_create_reward_popup()
 	_create_disconnect_overlay()
 	_create_combo_label()
+	_create_online_label()
 	_update_ui()
 	# 嘗試自動找 LuckyEventSystem（如果在同一場景樹中）
 	call_deferred("_find_lucky_event_system")
@@ -174,6 +177,8 @@ func _update_ui() -> void:
 
 	# Combo 顯示
 	_update_combo_display()
+	# DAY-342 在線玩家數顯示
+	_update_online_display()
 
 func _on_state_changed(new_state: String) -> void:
 	state_label.text = new_state.to_upper().replace("_", " ")
@@ -593,3 +598,32 @@ func _spawn_combo_milestone_effect(combo: int) -> void:
 # ── DAY-337 重構完成 ────────────────────────────────────────
 # 所有 Lucky 函數已移入 HUDLuckySignals.gd
 # HUD.gd 只保留核心 HUD 功能
+
+# ── DAY-342 在線玩家數顯示 ────────────────────────────────────
+
+func _create_online_label() -> void:
+	_online_label = Label.new()
+	_online_label.name = "OnlineLabel"
+	_online_label.position = Vector2(1050, 6)
+	_online_label.size = Vector2(180, 30)
+	_online_label.add_theme_font_size_override("font_size", 14)
+	_online_label.modulate = Color(0.6, 1.0, 0.6)
+	_online_label.text = "👥 1 在線"
+	_online_label.z_index = 55
+	add_child(_online_label)
+
+func _update_online_display() -> void:
+	if not is_instance_valid(_online_label):
+		return
+	var count = 1
+	if GameManager.has_method("get_online_count"):
+		count = GameManager.get_online_count()
+	if count <= 1:
+		_online_label.text = "👤 1 在線"
+		_online_label.modulate = Color(0.7, 0.7, 0.7)
+	elif count <= 3:
+		_online_label.text = "👥 %d 在線" % count
+		_online_label.modulate = Color(0.6, 1.0, 0.6)
+	else:
+		_online_label.text = "👥 %d 在線 🔥" % count
+		_online_label.modulate = Color(1.0, 0.85, 0.0)

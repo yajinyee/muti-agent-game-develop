@@ -5465,3 +5465,32 @@ if xxxMult > 1.0 {
 - **里程碑大文字：** 放在 Vector2(480, 200)（畫面中央偏上），確保玩家看得到
 - **教訓：** CanvasLayer 的座標系統和 Node2D 不同，要用螢幕座標
 
+
+## 200. Godot 4 像素藝術 Shader 資源（DAY-341 研究）
+- **Pixel Art Shaders by Nojoule：** https://nojoule.itch.io/pixel-art-shaders
+  - 支援 Godot 4.5，包含調色盤替換、輪廓、光暈等效果
+  - 使用方式：複製 addons/pixel-art-shaders 到專案，指定調色盤紋理
+- **Godot 4 Essential 2D Effects（免費）：** https://hollow-pixel.itch.io/godot-4-essential-2d-effects-free-shader-pack
+  - 6個 CanvasItem Shader，適合 2D 遊戲
+  - 包含：輪廓、光暈、像素化、色彩偏移等
+- **Fish Shader（魚類動畫）：** https://github.com/frankiezafe/Fish-shader
+  - 不需要骨架或 blend shapes 就能讓魚游泳
+  - 用 Shader 模擬魚身彎曲動畫
+- **Godot 4 像素化光暈問題：** 使用 viewport stretch mode 而非 canvas_items，確保光暈效果也是像素化的
+- **教訓：** 高倍率目標物需要更明顯的視覺區分，Shader 光暈是最有效的方式
+
+
+## 201. 在線玩家數廣播的最佳實踐（DAY-342）
+- **設計原則：** 在線玩家數應該包含在 player_update 訊息中，不需要獨立廣播
+- **原因：** player_update 每次攻擊後都會發送，玩家數量自然同步
+- **實作：** `OnlineCount: len(g.players)` 在 sendPlayerUpdateWithPlayer 中填入
+- **Client 讀取：** `player_data.get("online_count", 1)` 從 player_data 字典讀取
+- **教訓：** 不要為每個新欄位建立獨立的廣播機制，善用現有的訊息結構
+
+## 202. 高倍率擊破全服公告的設計原則（DAY-342）
+- **門檻設計：** 50x+ 觸發公告，100x+ 更強調，1000x+ 最高等級
+- **公告格式：** 「[玩家名] 擊破 [目標名]！獲得 [倍率] 獎勵！」
+- **顏色分層：** 50x=金色(#FFD700)，100x=橙紅(#FF4500)，1000x=洋紅(#FF00FF)
+- **注意：** 不要對每次擊破都公告（會刷屏），只對高倍率目標公告
+- **教訓：** 全服公告是增加多人感的有效方式，但要控制頻率
+

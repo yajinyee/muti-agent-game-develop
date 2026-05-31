@@ -4,6 +4,7 @@ package game
 
 import (
 	"encoding/json"
+	"fmt"
 	"log"
 	"math/rand"
 	"sync"
@@ -1747,6 +1748,28 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 			NewBalance: p.Coins,
 		})
 
+		// DAY-342 高倍率擊破全服公告（≥50x）
+		if t.Multiplier >= 50 {
+			playerName := p.GetDisplayName()
+			var announceMsg string
+			var announceColor string
+			if t.Multiplier >= 1000 {
+				announceMsg = "🌟 " + playerName + " 擊破 " + t.Def.Name + "！獲得 " + fmt.Sprintf("%.0fx", t.Multiplier) + " 超級大獎！"
+				announceColor = "#FF00FF"
+			} else if t.Multiplier >= 100 {
+				announceMsg = "💫 " + playerName + " 擊破 " + t.Def.Name + "！獲得 " + fmt.Sprintf("%.0fx", t.Multiplier) + " 大獎！"
+				announceColor = "#FF4500"
+			} else {
+				announceMsg = "✨ " + playerName + " 擊破 " + t.Def.Name + "！獲得 " + fmt.Sprintf("%.0fx", t.Multiplier) + " 獎勵！"
+				announceColor = "#FFD700"
+			}
+			g.hub.Broadcast(protocol.MsgAnnounce, protocol.AnnouncePayload{
+				Message:  announceMsg,
+				Priority: "high",
+				Color:    announceColor,
+			})
+		}
+
 		// 勞動值滿 → 觸發 Bonus
 		if laborFull && g.state == StateNormalPlay {
 			// DAY-338 修復死鎖：在 tick 的鎖保護下，使用不加鎖版本
@@ -2151,6 +2174,8 @@ func (g *Game) sendPlayerUpdateWithPlayer(playerID string, p *Player) {
 		FireRate:        bet.FireRate,
 		ComboCount:      p.ComboCount,
 		ComboMultBonus:  p.GetComboMultBonus(),
+		// DAY-342 在線玩家數
+		OnlineCount:     len(g.players),
 	})
 }
 

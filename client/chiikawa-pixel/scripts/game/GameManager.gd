@@ -611,3 +611,7 @@ func get_combo_mult_bonus() -> float:
 
 func get_player_id() -> String:
 	return NetworkManager.get_player_id()
+
+## DAY-342 在線玩家數
+func get_online_count() -> int:
+	return player_data.get("online_count", 1)

@@ -1,6 +1,49 @@
 ﻿# 開發進度追蹤
 
-## 最後更新：2026-05-31（DAY-341 Combo 里程碑音效 + Combo UI 升級 + QA 41/41 通過）
+## 最後更新：2026-05-31（DAY-342 在線玩家數顯示 + 高倍率全服公告 + QA 20/20 通過）
+
+## DAY-342 更新（2026-05-31）：在線玩家數顯示 + 高倍率全服公告 ✅
+- **Server 端：**
+  - `protocol/messages.go`：`PlayerUpdatePayload` 新增 `OnlineCount int` 欄位
+  - `game.go`：`sendPlayerUpdateWithPlayer` 填入 `OnlineCount: len(g.players)`
+  - `game.go`：高倍率擊破（≥50x）廣播全服公告
+    - 50x+：「✨ [玩家] 擊破 [目標]！獲得 [倍率] 獎勵！」（金色）
+    - 100x+：「💫 [玩家] 擊破 [目標]！獲得 [倍率] 大獎！」（橙紅）
+    - 1000x+：「🌟 [玩家] 擊破 [目標]！獲得 [倍率] 超級大獎！」（洋紅）
+  - `game.go`：加入 `fmt` import
+- **Client 端：**
+  - `GameManager.gd`：新增 `get_online_count()` 方法
+  - `HUD.gd`：新增 `_online_label` 變數
+  - `HUD.gd`：新增 `_create_online_label()` 函數（右上角在線計數）
+  - `HUD.gd`：新增 `_update_online_display()` 函數
+    - 1人：「👤 1 在線」（灰色）
+    - 2-3人：「👥 N 在線」（綠色）
+    - 4人+：「👥 N 在線 🔥」（金色）
+  - `HUD.gd`：`_update_ui()` 呼叫 `_update_online_display()`
+- **QA 腳本：** `tools/qa_check_day342.py`（20 項驗證，20/20 全部通過）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **知識庫更新：** knowhow-log 條目 201/202（DAY-342 兩個新知識點）
+
+## 自我評估（DAY-342）
+- **Server 目標物數量：** 160 種（T001-T006 + T101-T253 + B001）— 不再新增
+- **Lucky 系統數量：** 148 個（T106-T253）— 不再新增
+- **Client Lucky Panel 數量：** 159 個（含 BaseLuckyPanel + LuckyEventSystem + LuckyPanelRegistry + 156 個 Panel）
+- **Server 編譯狀態：** ✅ build OK + vet OK（零錯誤零警告）
+- **整合測試通過率：** 29/29（100%）
+- **射擊手感：** 8.5/10（維持）
+- **視覺清晰度：** 8.5/10（維持）
+- **核心循環流暢度：** 9/10（維持）
+- **多人感：** 8/10（在線計數 + 高倍率公告提升）
+- **最需要改善：** 在 Godot 實際遊玩一局，確認在線計數和公告效果
+- **下一步：** 在 Godot 實際遊玩驗證 + 考慮加入玩家名稱顯示
+
+## 下一步優先事項（DAY-343）
+1. 在 Godot 實際遊玩一局，確認在線計數和公告效果
+2. 考慮加入玩家名稱顯示（其他玩家的名字浮在砲台上方）
+3. 研究並實作更好的目標物生成節奏（讓遊戲節奏更有起伏）
+4. 考慮加入「連擊中斷」的視覺提示（Combo 歸零時的特效）
+
+
 
 ## DAY-341 更新（2026-05-31）：Combo 里程碑音效 + Combo UI 升級 ✅
 - **Combo 里程碑音效（4個新 WAV）：**
