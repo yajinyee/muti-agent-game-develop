@@ -228,6 +228,11 @@ const (
 	MsgShopPurchaseResult = "shop_purchase_result" // 購買結果
 	MsgShopEffectUpdate  = "shop_effect_update"  // 道具效果更新
 	MsgSeasonLeaderboard = "season_leaderboard"  // 賽季排行榜
+
+	// DAY-349 成就系統 + 好友排行榜
+	MsgAchievementUnlock  = "achievement_unlock"   // 成就解鎖通知
+	MsgAchievementList    = "achievement_list"     // 玩家成就列表
+	MsgRoomLeaderboard    = "room_leaderboard"     // 同場玩家排行榜
 )
 // ── Envelope ─────────────────────────────────────────────────
 
@@ -1452,7 +1457,60 @@ type LeaderboardEntryPayload struct {
 type SeasonLeaderboardRequest struct{}
 
 const (
-	MsgShopRequest           = "shop_request"            // Client → Server：請求商店資訊
-	MsgShopPurchase          = "shop_purchase"           // Client → Server：購買道具
+	MsgShopRequest              = "shop_request"               // Client → Server：請求商店資訊
+	MsgShopPurchase             = "shop_purchase"              // Client → Server：購買道具
 	MsgSeasonLeaderboardRequest = "season_leaderboard_request" // Client → Server：請求排行榜
+	// DAY-349 成就系統 + 好友排行榜
+	MsgAchievementListRequest  = "achievement_list_request"  // Client → Server：請求成就列表
+	MsgRoomLeaderboardRequest  = "room_leaderboard_request"  // Client → Server：請求同場排行榜
 )
+
+// ── DAY-349 成就系統 Payloads ─────────────────────────────────
+
+// AchievementUnlockPayload 成就解鎖通知（Server → Client）
+type AchievementUnlockPayload struct {
+	ID          string `json:"id"`          // 成就 ID
+	Name        string `json:"name"`        // 成就名稱
+	Description string `json:"description"` // 成就描述
+	Icon        string `json:"icon"`        // emoji 圖示
+	Rarity      string `json:"rarity"`      // common | rare | epic | legendary
+	Reward      int    `json:"reward"`      // 解鎖獎勵（金幣）
+}
+
+// AchievementEntryPayload 成就條目
+type AchievementEntryPayload struct {
+	ID          string `json:"id"`
+	Name        string `json:"name"`
+	Description string `json:"description"`
+	Icon        string `json:"icon"`
+	Rarity      string `json:"rarity"`
+	Reward      int    `json:"reward"`
+	Unlocked    bool   `json:"unlocked"`
+}
+
+// AchievementListPayload 成就列表（Server → Client）
+type AchievementListPayload struct {
+	Achievements []*AchievementEntryPayload `json:"achievements"`
+	TotalCount   int                        `json:"total_count"`
+	UnlockedCount int                       `json:"unlocked_count"`
+}
+
+// ── DAY-349 同場排行榜 Payloads ───────────────────────────────
+
+// RoomLeaderboardEntryPayload 同場排行榜條目
+type RoomLeaderboardEntryPayload struct {
+	Rank        int     `json:"rank"`
+	PlayerID    string  `json:"player_id"`
+	DisplayName string  `json:"display_name"`
+	SeasonXP    int     `json:"season_xp"`
+	TotalKills  int     `json:"total_kills"`
+	BestMult    float64 `json:"best_mult"`
+	IsOnline    bool    `json:"is_online"`
+}
+
+// RoomLeaderboardPayload 同場排行榜（Server → Client）
+type RoomLeaderboardPayload struct {
+	Entries     []*RoomLeaderboardEntryPayload `json:"entries"`
+	MyRank      int                            `json:"my_rank"`
+	OnlineCount int                            `json:"online_count"`
+}

@@ -216,6 +216,11 @@ signal shop_purchase_result(data: Dictionary)
 signal shop_effect_update(data: Dictionary)
 signal season_leaderboard_received(data: Dictionary)
 
+# DAY-349 成就系統 + 同場排行榜
+signal achievement_unlock(data: Dictionary)
+signal achievement_list(data: Dictionary)
+signal room_leaderboard(data: Dictionary)
+
 # ── 玩家資料快取 ──────────────────────────────────────────────
 var player_data: Dictionary = {}
 var current_state: String = "normal_play"
@@ -603,6 +608,13 @@ func _on_message(type: String, payload: Dictionary) -> void:
 			emit_signal("shop_effect_update", payload)
 		"season_leaderboard":
 			emit_signal("season_leaderboard_received", payload)
+		# DAY-349 成就系統 + 同場排行榜
+		"achievement_unlock":
+			emit_signal("achievement_unlock", payload)
+		"achievement_list":
+			emit_signal("achievement_list", payload)
+		"room_leaderboard":
+			emit_signal("room_leaderboard", payload)
 		"pong":
 			pass
 		"error":
@@ -642,6 +654,13 @@ func get_lock_target_id() -> String:
 func get_fire_rate() -> float:
 	return player_data.get("fire_rate", 2.0)
 
+
+# DAY-349 成就系統 + 同場排行榜
+func request_achievement_list() -> void:
+	NetworkManager.send("achievement_list_request", {})
+
+func request_room_leaderboard() -> void:
+	NetworkManager.send("room_leaderboard_request", {})
 func get_projectile_speed() -> float:
 	return player_data.get("projectile_speed", 700.0)
 

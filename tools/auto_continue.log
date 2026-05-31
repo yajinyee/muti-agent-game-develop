@@ -962,3 +962,8 @@
 [2026-06-01 02:07:33] 目前 session 總數：5（上限 5）
 [2026-06-01 02:07:33] Session 數量正常，不需要清理
 [2026-06-01 02:07:35] Sent message to Kiro chat
+[2026-06-01 05:07:33] === Kiro Auto Continue (MaxSessions=5) ===
+[2026-06-01 05:07:33] Found Kiro IDE (PID=10692)
+[2026-06-01 05:07:33] 目前 session 總數：5（上限 5）
+[2026-06-01 05:07:33] Session 數量正常，不需要清理
+[2026-06-01 05:07:35] Sent message to Kiro chat

@@ -67,6 +67,8 @@ func _ready() -> void:
 	_create_season_button()
 	_create_shop_button()
 	_create_leaderboard_button()
+	_create_achievement_button()
+	_create_room_leaderboard_button()
 	_update_ui()
 	# 嘗試自動找 LuckyEventSystem（如果在同一場景樹中）
 	call_deferred("_find_lucky_event_system")
@@ -770,4 +772,59 @@ func _create_leaderboard_button() -> void:
 				_leaderboard_panel.visible = false
 			else:
 				_leaderboard_panel.show_panel()
+	)
+
+# ── DAY-349 成就系統 + 同場排行榜按鈕 ────────────────────────
+
+var _achievement_btn: Button = null
+var _achievement_panel: Node = null
+var _room_leaderboard_btn: Button = null
+var _room_leaderboard_panel: Node = null
+
+func _create_achievement_button() -> void:
+	_achievement_btn = Button.new()
+	_achievement_btn.name = "AchievementBtn"
+	_achievement_btn.text = "🏅"
+	_achievement_btn.position = Vector2(810, 40)
+	_achievement_btn.size = Vector2(40, 30)
+	_achievement_btn.add_theme_font_size_override("font_size", 16)
+	_achievement_btn.z_index = 55
+	_achievement_btn.tooltip_text = "成就系統"
+	add_child(_achievement_btn)
+
+	# 建立成就面板
+	_achievement_panel = load("res://scripts/ui/AchievementPanel.gd").new()
+	_achievement_panel.name = "AchievementPanel"
+	add_child(_achievement_panel)
+
+	_achievement_btn.pressed.connect(func():
+		if is_instance_valid(_achievement_panel):
+			if _achievement_panel.visible:
+				_achievement_panel.visible = false
+			else:
+				_achievement_panel.show_panel()
+	)
+
+func _create_room_leaderboard_button() -> void:
+	_room_leaderboard_btn = Button.new()
+	_room_leaderboard_btn.name = "RoomLeaderboardBtn"
+	_room_leaderboard_btn.text = "👥"
+	_room_leaderboard_btn.position = Vector2(765, 40)
+	_room_leaderboard_btn.size = Vector2(40, 30)
+	_room_leaderboard_btn.add_theme_font_size_override("font_size", 16)
+	_room_leaderboard_btn.z_index = 55
+	_room_leaderboard_btn.tooltip_text = "同場排行榜"
+	add_child(_room_leaderboard_btn)
+
+	# 建立同場排行榜面板
+	_room_leaderboard_panel = load("res://scripts/ui/RoomLeaderboardPanel.gd").new()
+	_room_leaderboard_panel.name = "RoomLeaderboardPanel"
+	add_child(_room_leaderboard_panel)
+
+	_room_leaderboard_btn.pressed.connect(func():
+		if is_instance_valid(_room_leaderboard_panel):
+			if _room_leaderboard_panel.visible:
+				_room_leaderboard_panel.visible = false
+			else:
+				_room_leaderboard_panel.show_panel()
 	)

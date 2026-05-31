@@ -267,6 +267,10 @@ type Game struct {
 	// DAY-348 任務幣兌換商店 + 賽季排行榜
 	questShop         *QuestShop
 	seasonLeaderboard *SeasonLeaderboard
+
+	// DAY-349 成就系統 + 好友排行榜
+	achievementSystem *AchievementSystem
+	friendSystem      *FriendSystem
 }
 
 func NewGame(hub *ws.Hub) *Game {
@@ -497,6 +501,10 @@ func NewGame(hub *ws.Hub) *Game {
 		// DAY-348 任務幣兌換商店 + 賽季排行榜
 		questShop:         NewQuestShop(),
 		seasonLeaderboard: NewSeasonLeaderboard(time.Now().In(time.FixedZone("UTC+8", 8*60*60)).Format("2006-01")),
+
+		// DAY-349 成就系統 + 好友排行榜
+		achievementSystem: newAchievementSystem(),
+		friendSystem:      newFriendSystem(),
 	}
 	g.nextBossIn = 180 + rand.Float64()*120 // 3-5 分鐘
 	return g
@@ -536,6 +544,8 @@ func (g *Game) RemovePlayer(id string) {
 	g.mu.Lock()
 	delete(g.players, id)
 	g.mu.Unlock()
+	// DAY-349 好友系統：標記玩家離線
+	g.friendSystem.SetOffline(id)
 	log.Printf("[Game] Player left: %s", id)
 }
 
@@ -618,6 +628,11 @@ func (g *Game) HandleMessage(clientID string, msgType string, payload json.RawMe
 		g.handleShopPurchase(clientID, req.ItemID)
 	case protocol.MsgSeasonLeaderboardRequest:
 		g.handleSeasonLeaderboardRequest(clientID)
+	// DAY-349 成就系統 + 好友排行榜
+	case protocol.MsgAchievementListRequest:
+		g.handleAchievementListRequest(clientID)
+	case protocol.MsgRoomLeaderboardRequest:
+		g.handleRoomLeaderboardRequest(clientID)
 	}
 }
 
@@ -840,6 +855,9 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 		} else if comboVal == 10 {
 			go g.addSeasonXP(playerID, XPPerCombo10, "combo")
 		}
+
+		// DAY-349 成就系統：連擊觸發
+		go g.notifyAchievements(playerID, g.achievementSystem.OnCombo(playerID, comboVal))
 
 		// DAY-301 全服加成倍率疊加
 		jackpotBoost := g.luckyJackpotFish.getGrandBoostMult()
@@ -1861,6 +1879,13 @@ func (g *Game) handleAttackLocked(playerID string, req protocol.AttackRequest) {
 			xpSource = "boss"
 		}
 		go g.addSeasonXP(playerID, xpGain, xpSource)
+
+		// DAY-349 成就系統：擊破觸發
+		isFirstKill := g.achievementSystem.GetProgress(playerID).KillCount == 0
+		go g.notifyAchievements(playerID, g.achievementSystem.OnKill(playerID, effectiveMult, isFirstKill))
+
+		// DAY-349 好友系統：更新玩家資訊
+		go g.updateFriendEntry(playerID)
 	} else {
 		// 未擊破，更新 HP（視覺反饋）
 		t.HP = max(1, t.HP-bet.AttackPower/5)
@@ -1972,6 +1997,9 @@ func (g *Game) handleBossKill(playerID string, p *Player, boss *Target, reward i
 		Multiplier: mult,
 	})
 	log.Printf("[Game] Boss killed by %s! Reward: %d (%.0fx)", playerID, finalReward, mult)
+
+	// DAY-349 成就系統：BOSS 擊破觸發
+	go g.notifyAchievements(playerID, g.achievementSystem.OnBossKill(playerID))
 }
 
 func bossRewardMult(timeLeft float64) float64 {
@@ -2060,6 +2088,9 @@ func (g *Game) triggerBonusLocked(playerID string) {
 
 	// DAY-347 賽季通行證：完成 Bonus XP
 	go g.addSeasonXP(playerID, XPPerBonus, "bonus")
+
+	// DAY-349 成就系統：Bonus 完成觸發
+	go g.notifyAchievements(playerID, g.achievementSystem.OnBonusComplete(playerID))
 }
 
 func (g *Game) handleBonusClick(playerID string, req protocol.BonusClickRequest) {
@@ -2466,7 +2497,139 @@ func (g *Game) notifyQuestProgress(playerID string, eventType string, value int)
 		log.Printf("[DailyQuest] Player %s completed quest: %s (reward: %d)", playerID, questName, reward)
 		// 同步更新任務狀態
 		g.handleDailyQuestRequest(playerID)
+
+		// DAY-349 成就系統：每日任務完成觸發
+		go g.notifyAchievements(playerID, g.achievementSystem.OnQuestComplete(playerID))
 	}
+}
+
+// ── DAY-349 成就系統 Handler ──────────────────────────────────
+
+// notifyAchievements 通知玩家新解鎖的成就，並發放獎勵
+func (g *Game) notifyAchievements(playerID string, defs []*AchievementDef) {
+	if len(defs) == 0 {
+		return
+	}
+	g.mu.Lock()
+	p, ok := g.players[playerID]
+	if !ok {
+		g.mu.Unlock()
+		return
+	}
+	totalReward := 0
+	for _, def := range defs {
+		totalReward += def.Reward
+	}
+	if totalReward > 0 {
+		p.AddCoins(totalReward)
+	}
+	g.mu.Unlock()
+
+	for _, def := range defs {
+		g.hub.Send(playerID, protocol.MsgAchievementUnlock, protocol.AchievementUnlockPayload{
+			ID:          string(def.ID),
+			Name:        def.Name,
+			Description: def.Description,
+			Icon:        def.Icon,
+			Rarity:      def.Rarity,
+			Reward:      def.Reward,
+		})
+		log.Printf("[Achievement] Player %s unlocked: %s (%s) +%d coins", playerID, def.Name, def.Rarity, def.Reward)
+	}
+}
+
+// handleAchievementListRequest 處理玩家請求成就列表
+func (g *Game) handleAchievementListRequest(playerID string) {
+	unlocked := g.achievementSystem.GetAllUnlocked(playerID)
+	unlockedMap := make(map[AchievementType]bool)
+	for _, def := range unlocked {
+		unlockedMap[def.ID] = true
+	}
+
+	var entries []*protocol.AchievementEntryPayload
+	for _, def := range achievementDefs {
+		entries = append(entries, &protocol.AchievementEntryPayload{
+			ID:          string(def.ID),
+			Name:        def.Name,
+			Description: def.Description,
+			Icon:        def.Icon,
+			Rarity:      def.Rarity,
+			Reward:      def.Reward,
+			Unlocked:    unlockedMap[def.ID],
+		})
+	}
+
+	g.hub.Send(playerID, protocol.MsgAchievementList, protocol.AchievementListPayload{
+		Achievements:  entries,
+		TotalCount:    len(achievementDefs),
+		UnlockedCount: len(unlocked),
+	})
+}
+
+// handleRoomLeaderboardRequest 處理玩家請求同場排行榜
+func (g *Game) handleRoomLeaderboardRequest(playerID string) {
+	entries := g.friendSystem.GetRoomLeaderboard()
+	myRank := g.friendSystem.GetPlayerRank(playerID)
+
+	var payload []*protocol.RoomLeaderboardEntryPayload
+	for i, e := range entries {
+		payload = append(payload, &protocol.RoomLeaderboardEntryPayload{
+			Rank:        i + 1,
+			PlayerID:    e.PlayerID,
+			DisplayName: e.DisplayName,
+			SeasonXP:    e.SeasonXP,
+			TotalKills:  e.TotalKills,
+			BestMult:    e.BestMult,
+			IsOnline:    e.IsOnline,
+		})
+	}
+
+	g.hub.Send(playerID, protocol.MsgRoomLeaderboard, protocol.RoomLeaderboardPayload{
+		Entries:     payload,
+		MyRank:      myRank,
+		OnlineCount: g.friendSystem.GetOnlineCount(),
+	})
+}
+
+// updateFriendEntry 更新好友系統中的玩家資訊
+func (g *Game) updateFriendEntry(playerID string) {
+	g.mu.RLock()
+	p, ok := g.players[playerID]
+	if !ok {
+		g.mu.RUnlock()
+		return
+	}
+	displayName := p.GetDisplayName()
+	coins := p.Coins
+	g.mu.RUnlock()
+
+	// 取得賽季 XP
+	seasonXP := 0
+	if g.seasonPass != nil {
+		state := g.seasonPass.GetOrCreateState(playerID)
+		seasonXP = state.CurrentXP
+	}
+
+	// 取得累積擊破數（從成就進度）
+	prog := g.achievementSystem.GetProgress(playerID)
+	totalKills := prog.KillCount
+
+	// 取得最高倍率（從成就解鎖記錄推算）
+	bestMult := 0.0
+	if g.achievementSystem.isUnlocked(playerID, AchievTypeMult1000) {
+		bestMult = 1000.0
+	} else if g.achievementSystem.isUnlocked(playerID, AchievTypeMult500) {
+		bestMult = 500.0
+	} else if g.achievementSystem.isUnlocked(playerID, AchievTypeMult100) {
+		bestMult = 100.0
+	} else if g.achievementSystem.isUnlocked(playerID, AchievTypeMult50) {
+		bestMult = 50.0
+	}
+
+	g.friendSystem.UpdatePlayer(playerID, displayName, seasonXP, totalKills, bestMult)
+
+	// 金幣成就觸發
+	go g.notifyAchievements(playerID, g.achievementSystem.OnCoinsUpdate(playerID, coins))
 }
 
 // ── DAY-346 每週挑戰系統 Handler ─────────────────────────────
