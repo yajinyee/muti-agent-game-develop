@@ -930,6 +930,10 @@ func _on_target_killed(data: Dictionary) -> void:
 	if data.get("def_id", "") == "T105":
 		_spawn_coin_rain(node.position)
 
+	# DAY-340 T101 擬態型怪物：死亡變回原形特效
+	if data.get("def_id", "") == "T101":
+		_spawn_mimic_reveal(node.position, multiplier)
+
 	# 消失動畫（DAY-340 升級：更有爽感的爆炸消失）
 	var tween = node.create_tween()
 	if multiplier >= 50:
@@ -964,6 +968,53 @@ func _spawn_coin_rain(pos: Vector2) -> void:
 		tween.tween_property(coin, "position:y", target.y + 60, 0.3)
 		tween.parallel().tween_property(coin, "modulate:a", 0.0, 0.3)
 		tween.tween_callback(func(): if is_instance_valid(coin): coin.queue_free())
+
+## DAY-340 T101 擬態型怪物：死亡變回原形特效
+## 規格書：「死亡變回原形」— 擊破時顯示真實形態（骷髏/怪物）
+func _spawn_mimic_reveal(pos: Vector2, multiplier: float) -> void:
+	var parent = get_parent()
+	if not is_instance_valid(parent):
+		return
+
+	# 第一層：白色閃光（偽裝消失）
+	var flash = ColorRect.new()
+	flash.size = Vector2(80, 80)
+	flash.position = pos - flash.size / 2
+	flash.color = Color(1.0, 1.0, 1.0, 0.9)
+	flash.z_index = 50
+	parent.add_child(flash)
+	var flash_tween = flash.create_tween()
+	flash_tween.tween_property(flash, "scale", Vector2(2.0, 2.0), 0.1)
+	flash_tween.parallel().tween_property(flash, "modulate:a", 0.0, 0.1)
+	flash_tween.tween_callback(func(): if is_instance_valid(flash): flash.queue_free())
+
+	# 第二層：真實形態標籤（骷髏符號）
+	var reveal = Label.new()
+	reveal.text = "💀"
+	reveal.position = pos + Vector2(-16, -16)
+	reveal.add_theme_font_size_override("font_size", 32)
+	reveal.z_index = 55
+	parent.add_child(reveal)
+	var reveal_tween = reveal.create_tween()
+	reveal_tween.tween_interval(0.05)
+	reveal_tween.tween_property(reveal, "scale", Vector2(1.5, 1.5), 0.1).set_ease(Tween.EASE_OUT)
+	reveal_tween.tween_property(reveal, "scale", Vector2(1.0, 1.0), 0.08)
+	reveal_tween.tween_interval(0.3)
+	reveal_tween.tween_property(reveal, "modulate:a", 0.0, 0.3)
+	reveal_tween.tween_callback(func(): if is_instance_valid(reveal): reveal.queue_free())
+
+	# 第三層：倍率文字（顯示實際倍率）
+	var mult_label = Label.new()
+	mult_label.text = "x%.0f MIMIC!" % multiplier
+	mult_label.position = pos + Vector2(-40, -50)
+	mult_label.add_theme_font_size_override("font_size", 18)
+	mult_label.modulate = Color(0.6, 0.6, 0.6)
+	mult_label.z_index = 55
+	parent.add_child(mult_label)
+	var mult_tween = mult_label.create_tween()
+	mult_tween.tween_property(mult_label, "position:y", pos.y - 80, 0.6)
+	mult_tween.parallel().tween_property(mult_label, "modulate:a", 0.0, 0.6)
+	mult_tween.tween_callback(func(): if is_instance_valid(mult_label): mult_label.queue_free())
 
 # ── BOSS 事件 ─────────────────────────────────────────────────
 
