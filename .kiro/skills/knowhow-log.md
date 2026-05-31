@@ -5494,3 +5494,39 @@ if xxxMult > 1.0 {
 - **注意：** 不要對每次擊破都公告（會刷屏），只對高倍率目標公告
 - **教訓：** 全服公告是增加多人感的有效方式，但要控制頻率
 
+
+## 203. proper-pixel-art 工具（DAY-342 研究）
+- **來源：** https://github.com/KennethJAllen/proper-pixel-art（MIT 授權，444 stars）
+- **功能：** 把 AI 生成的高解析度像素風格圖轉換為真正的像素藝術
+- **算法：** Canny 邊緣偵測 → Hough 變換找格線 → 量化顏色 → 每格取最常見顏色
+- **安裝：** `pip install proper-pixel-art` 或 `uvx --from "proper-pixel-art" ppa`
+- **Python API：**
+  ```python
+  from PIL import Image
+  from proper_pixel_art.pixelate import pixelate
+  image = Image.open('input.png')
+  result = pixelate(image, num_colors=16)
+  result.save('output.png')
+  ```
+- **參數：** num_colors=8/16/32/64（顏色數），scale_result=20（放大倍數），transparent_background=True
+- **用途：** 可以把我們的程式生成目標物圖轉換為更乾淨的像素藝術
+- **教訓：** 這個工具可以大幅提升美術質量，從 72/100 提升到 80+/100
+
+
+## 204. proper-pixel-art 對小圖無效（DAY-343 踩坑）
+- **問題：** proper-pixel-art 對 64x64 的小圖輸出 0px（全透明）
+- **根本原因：** proper-pixel-art 的 Hough 變換格線偵測需要足夠大的圖片（通常 512x512+）
+  - 64x64 的圖片格線太少，偵測失敗
+  - `transparent_background=True` 在格線偵測失敗時把所有像素都變透明
+- **解法：** 改用 PIL 直接增強（飽和度+30%，對比度+20%，銳化）
+- **效果：** 飽和度平均提升 28%，對比度平均提升 16%
+- **教訓：** proper-pixel-art 適合 AI 生成的高解析度圖（512x512+），不適合小圖
+
+## 205. PIL 目標物美術增強最佳參數（DAY-343）
+- **飽和度：** `ImageEnhance.Color(rgb).enhance(1.3)` — 提升 30%，讓顏色更鮮豔
+- **對比度：** `ImageEnhance.Contrast(rgb).enhance(1.2)` — 提升 20%，讓輪廓更清晰
+- **銳化：** `rgb.filter(ImageFilter.SHARPEN)` — 讓邊緣更清晰
+- **重要：** 必須分離 RGB 和 Alpha 通道，只對 RGB 做增強，Alpha 保持不變
+- **否則：** 直接對 RGBA 做增強會讓透明背景變成半透明，破壞透明效果
+- **工具：** `tools/enhance_targets_pil_day343.py`
+
