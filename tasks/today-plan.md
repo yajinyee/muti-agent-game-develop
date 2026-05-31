@@ -47,9 +47,9 @@
 - [x] qa_check_day341.py（41 項驗證，41/41 全部通過）
 - [x] go build + vet 最終確認（零錯誤零警告）
 
-### ⏳ DAY-341 GitHub 同步
+### ✅ DAY-341 GitHub 同步
 
-- [ ] git add + commit + push
+- [x] git add + commit + push（ee6ded4）
 
 ---
 
